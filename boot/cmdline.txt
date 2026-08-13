@@ -1,0 +1,1 @@
+boot=UUID=0111-0454 disk=UUID=4c74a0fe-98a5-4395-9d8a-ca9a2997521d quiet console=tty0 video=HDMI-A-1:1920x1080@50D drm.edid_firmware=HDMI-A-1:edid/custom_edid.bin

@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+# Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
+################################################################################
+# Bootloader configuration
+# config.txt version v1 (do not remove or change this line!)
+################################################################################
+# For more options and information see
+# http://rpf.io/configtxt
+################################################################################
+
+# Default GPU memory split, 76MB are needed for H264 decoder
+gpu_mem=256
+
+[all]
+################################################################################
+# Use distroconfig-composite.txt instead of distroconfig.txt to enable
+# composite video output.
+# The composite video mode needs to be configured in cmdline.txt:
+# For PAL add: video=Composite-1:720x576@50ie
+# For NTSC add: video=Composite-1:720x480@60ie
+################################################################################
+include distroconfig.txt
+
+# Analog audio
+dtparam=audio=on
+
+# Overclock CPU 2GHz + GPU 750MHz
+over_voltage=6
+arm_freq=2000
+gpu_freq=750
+
+# TV Philips 42PFL7403H (1080p, HDMI 1.3, 2008)
+hdmi_force_hotplug=1
+hdmi_drive=2
+config_hdmi_boost=7
+disable_overscan=1
+
+# Custom EDID via initramfs (fix audio HDMI - VSDB HDMI requis)
+initramfs edid.cpio followkernel
+
+# Argon ONE Control: fan control, power button events, IR support for ONE V1/2/3
+dtparam=i2c=on
+enable_uart=1
+dtoverlay=gpio-ir,gpio_pin=23
