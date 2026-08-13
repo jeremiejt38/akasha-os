@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<shortcuts>
+    <shortcut>
+        <label>YouTube Music</label>
+        <label2>Custom Shortcut</label2>
+        <icon>DefaultAddonMusic.png</icon>
+        <thumb />
+        <action>ActivateWindow(Music,plugin://plugin.audio.ytmusic/,return)</action>
+    </shortcut>
+    <shortcut>
+        <label>Fichiers</label>
+        <label2>Custom Shortcut</label2>
+        <icon>DefaultMusicSongs.png</icon>
+        <thumb />
+        <action>ActivateWindow(Music,Files,return)</action>
+    </shortcut>
+    <shortcut>
+        <label>Add-ons Musique</label>
+        <label2>Custom Shortcut</label2>
+        <icon>DefaultAddonMusic.png</icon>
+        <thumb />
+        <action>ActivateWindow(Music,Addons,return)</action>
+    </shortcut>
+</shortcuts>

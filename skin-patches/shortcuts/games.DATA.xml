@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<shortcuts>
+    <shortcut>
+        <label>Steam Link</label>
+        <label2>Stream depuis votre PC (Steam)</label2>
+        <icon>DefaultAddonProgram.png</icon>
+        <thumb />
+        <action>RunAddon(plugin.program.steamlink)</action>
+    </shortcut>
+    <shortcut>
+        <label>Moonlight</label>
+        <label2>Stream depuis votre PC (NVIDIA)</label2>
+        <icon>DefaultAddonProgram.png</icon>
+        <thumb />
+        <action>RunAddon(plugin.program.moonlight-qt)</action>
+    </shortcut>
+    <shortcut>
+        <label>Cloud Gaming</label>
+        <label2>GeForce NOW / Xbox Cloud / Luna</label2>
+        <icon>DefaultAddonProgram.png</icon>
+        <thumb />
+        <action>RunAddon(script.cloud.gaming)</action>
+    </shortcut>
+</shortcuts>

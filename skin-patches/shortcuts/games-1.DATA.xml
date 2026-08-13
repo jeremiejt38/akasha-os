@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<shortcuts>
+    <shortcut>
+        <label>Steam Link</label>
+        <label2 />
+        <icon>DefaultAddonProgram.png</icon>
+        <thumb />
+        <action>ActivateWindow(Programs,plugin://plugin.program.steamlink/,return)</action>
+    </shortcut>
+    <shortcut>
+        <label>Moonlight</label>
+        <label2 />
+        <icon>DefaultAddonProgram.png</icon>
+        <thumb />
+        <action>ActivateWindow(Programs,plugin://plugin.program.moonlight-qt/,return)</action>
+    </shortcut>
+    <shortcut>
+        <label>Cloud Gaming</label>
+        <label2 />
+        <icon>DefaultAddonProgram.png</icon>
+        <thumb />
+        <action>RunAddon(script.cloud.gaming)</action>
+    </shortcut>
+</shortcuts>
