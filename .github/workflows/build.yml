@@ -164,6 +164,13 @@ jobs:
           find "$STORAGE/.config" -type f
           find "$STORAGE/.kodi/addons" -maxdepth 2 -type f | head -20
 
+      - name: Read Akasha OS version
+        id: akasha_version
+        run: |
+          AKASHA_VERSION=$(jq -r '.version' package.json)
+          echo "version=$AKASHA_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Akasha OS version: $AKASHA_VERSION"
+
       - name: Unmount and compress image
         run: |
           sudo umount /mnt/akasha-boot
@@ -174,8 +181,9 @@ jobs:
           fi
 
           IMG="${{ steps.mount.outputs.img }}"
-          VERSION="${{ steps.download.outputs.version }}"
-          OUTPUT="AkashaOS-RPi4-${VERSION}.img.gz"
+          AKASHA_VER="${{ steps.akasha_version.outputs.version }}"
+          LE_VER="${{ steps.download.outputs.version }}"
+          OUTPUT="AkashaOS-v${AKASHA_VER}-RPi4-LE${LE_VER}.img.gz"
 
           echo "Compressing image..."
           gzip -9 "$IMG"
@@ -188,8 +196,8 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v${{ steps.download.outputs.version }}-akasha.${{ github.run_number }}"
-          name: "Akasha OS v${{ steps.download.outputs.version }} (build ${{ github.run_number }})"
+          tag_name: "v${{ steps.akasha_version.outputs.version }}"
+          name: "Akasha OS v${{ steps.akasha_version.outputs.version }} (LibreELEC ${{ steps.download.outputs.version }})"
           body: |
             ## Akasha OS
 
