@@ -1,0 +1,217 @@
+name: Build Akasha OS Image
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
+  schedule:
+    # Check for new LibreELEC releases weekly (Monday 6am UTC)
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      libreelec_version:
+        description: 'LibreELEC version to use (leave empty for latest)'
+        required: false
+        default: ''
+
+env:
+  LIBREELEC_PROJECT: RPi
+  LIBREELEC_ARCH: arm
+  LIBREELEC_DEVICE: RPi4
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine LibreELEC version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.libreelec_version }}" ]; then
+            VERSION="${{ github.event.inputs.libreelec_version }}"
+          else
+            # Fetch latest release from LibreELEC GitHub
+            VERSION=$(curl -s https://api.github.com/repos/LibreELEC/LibreELEC.tv/releases/latest | \
+              jq -r '.tag_name' | sed 's/^v//')
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Using LibreELEC version: $VERSION"
+
+      - name: Download LibreELEC image
+        id: download
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # LibreELEC naming: LibreELEC-RPi4.arm-VERSION.img.gz
+          FILENAME="LibreELEC-RPi4.arm-${VERSION}.img.gz"
+          URL="https://releases.libreelec.tv/${FILENAME}"
+
+          echo "Downloading: $URL"
+          curl -L -o "$FILENAME" "$URL" || {
+            # Try alternate URL pattern
+            URL="https://github.com/LibreELEC/LibreELEC.tv/releases/download/v${VERSION}/${FILENAME}"
+            echo "Trying GitHub releases: $URL"
+            curl -L -o "$FILENAME" "$URL"
+          }
+
+          echo "filename=$FILENAME" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Extract and mount image
+        id: mount
+        run: |
+          FILENAME="${{ steps.download.outputs.filename }}"
+
+          # Decompress
+          gunzip "$FILENAME"
+          IMG="${FILENAME%.gz}"
+          echo "img=$IMG" >> "$GITHUB_OUTPUT"
+
+          # Find partition offsets
+          BOOT_OFFSET=$(fdisk -l "$IMG" | grep "W95 FAT" | awk '{print $2}')
+          # Storage partition (ext4) - second partition
+          STORAGE_OFFSET=$(fdisk -l "$IMG" | grep "Linux" | awk '{print $2}')
+
+          BOOT_OFFSET_BYTES=$((BOOT_OFFSET * 512))
+          STORAGE_OFFSET_BYTES=$((STORAGE_OFFSET * 512))
+
+          echo "Boot offset: $BOOT_OFFSET_BYTES bytes"
+          echo "Storage offset: $STORAGE_OFFSET_BYTES bytes"
+
+          # Mount boot partition
+          sudo mkdir -p /mnt/akasha-boot /mnt/akasha-storage
+          sudo mount -o loop,offset=$BOOT_OFFSET_BYTES "$IMG" /mnt/akasha-boot
+
+          # Storage partition needs resize first - expand image by 2GB for our additions
+          truncate -s +2G "$IMG"
+          LOOP_DEV=$(sudo losetup --find --show -P "$IMG")
+          echo "loop_dev=$LOOP_DEV" >> "$GITHUB_OUTPUT"
+
+          # Resize storage partition to fill available space
+          sudo growpart "$LOOP_DEV" 2 || true
+          sudo e2fsck -f -y "${LOOP_DEV}p2" || true
+          sudo resize2fs "${LOOP_DEV}p2" || true
+
+          sudo mount "${LOOP_DEV}p2" /mnt/akasha-storage
+
+          echo "Mounted partitions:"
+          ls /mnt/akasha-boot/
+          ls /mnt/akasha-storage/ 2>/dev/null || echo "(empty storage - first boot not done)"
+
+      - name: Patch boot partition
+        run: |
+          echo "Patching boot config..."
+          sudo cp boot/config.txt /mnt/akasha-boot/config.txt
+          sudo cp boot/cmdline.txt /mnt/akasha-boot/cmdline.txt
+          sudo cp boot/oemsplash.png /mnt/akasha-boot/oemsplash.png
+
+      - name: Patch storage partition
+        run: |
+          STORAGE="/mnt/akasha-storage"
+
+          # Create directory structure
+          sudo mkdir -p "$STORAGE/.config/system.d"
+          sudo mkdir -p "$STORAGE/.kodi/media"
+          sudo mkdir -p "$STORAGE/.kodi/addons/script.akasha.settings"
+          sudo mkdir -p "$STORAGE/.kodi/addons/script.cloud.gaming"
+          sudo mkdir -p "$STORAGE/.kodi/scripts/cloud-gaming"
+          sudo mkdir -p "$STORAGE/.kodi/addons/skin.arctic.horizon.2/shortcuts"
+          sudo mkdir -p "$STORAGE/.kodi/addons/skin.arctic.horizon.2/extras/icons"
+          sudo mkdir -p "$STORAGE/.cache"
+
+          # System config
+          sudo cp system/autostart.sh "$STORAGE/.config/autostart.sh"
+          sudo cp system/cec-standby.sh "$STORAGE/.config/cec-standby.sh"
+          sudo cp system/system.d/cec-tv.service "$STORAGE/.config/system.d/cec-tv.service"
+          sudo chmod +x "$STORAGE/.config/autostart.sh" "$STORAGE/.config/cec-standby.sh"
+
+          # Kodi splash
+          sudo cp kodi/media/splash.png "$STORAGE/.kodi/media/splash.png"
+
+          # Addons
+          sudo cp -r kodi/addons/script.akasha.settings/* "$STORAGE/.kodi/addons/script.akasha.settings/"
+          sudo cp -r kodi/addons/script.cloud.gaming/* "$STORAGE/.kodi/addons/script.cloud.gaming/"
+
+          # Cloud gaming scripts
+          sudo cp kodi/scripts/cloud-gaming/Dockerfile "$STORAGE/.kodi/scripts/cloud-gaming/"
+          sudo cp kodi/scripts/cloud-gaming/entrypoint.sh "$STORAGE/.kodi/scripts/cloud-gaming/"
+          sudo cp kodi/scripts/cloud-gaming/launch.sh "$STORAGE/.kodi/scripts/cloud-gaming/"
+          sudo cp kodi/scripts/cloud-gaming/guide_watchdog.py "$STORAGE/.kodi/scripts/cloud-gaming/"
+          sudo chmod +x "$STORAGE/.kodi/scripts/cloud-gaming/launch.sh"
+          sudo chmod +x "$STORAGE/.kodi/scripts/cloud-gaming/entrypoint.sh"
+          sudo chmod +x "$STORAGE/.kodi/scripts/cloud-gaming/guide_watchdog.py"
+
+          # Skin patches
+          sudo cp skin-patches/akasha-logo.png "$STORAGE/.kodi/addons/skin.arctic.horizon.2/extras/icons/"
+          sudo cp skin-patches/overrides.xml "$STORAGE/.kodi/addons/skin.arctic.horizon.2/shortcuts/"
+          sudo cp skin-patches/shortcuts/*.DATA.xml "$STORAGE/.kodi/addons/skin.arctic.horizon.2/shortcuts/"
+
+          # Controller buttonmap (if present)
+          if [ -d "kodi/userdata/addon_data/peripheral.joystick" ]; then
+            sudo cp -r kodi/userdata/addon_data "$STORAGE/.kodi/userdata/" 2>/dev/null || true
+          fi
+
+          # Set hostname
+          sudo sh -c 'echo "Akasha OS" > '"$STORAGE"'/.cache/hostname'
+
+          echo "Storage partition patched successfully"
+          find "$STORAGE/.config" -type f
+          find "$STORAGE/.kodi/addons" -maxdepth 2 -type f | head -20
+
+      - name: Unmount and compress image
+        run: |
+          sudo umount /mnt/akasha-boot
+          sudo umount /mnt/akasha-storage
+          LOOP_DEV="${{ steps.mount.outputs.loop_dev }}"
+          if [ -n "$LOOP_DEV" ]; then
+            sudo losetup -d "$LOOP_DEV"
+          fi
+
+          IMG="${{ steps.mount.outputs.img }}"
+          VERSION="${{ steps.download.outputs.version }}"
+          OUTPUT="AkashaOS-RPi4-${VERSION}.img.gz"
+
+          echo "Compressing image..."
+          gzip -9 "$IMG"
+          mv "${IMG}.gz" "$OUTPUT"
+
+          echo "output=$OUTPUT" >> "$GITHUB_ENV"
+          echo "Built: $OUTPUT ($(du -h "$OUTPUT" | cut -f1))"
+
+      - name: Create release
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.download.outputs.version }}-akasha.${{ github.run_number }}"
+          name: "Akasha OS v${{ steps.download.outputs.version }} (build ${{ github.run_number }})"
+          body: |
+            ## Akasha OS
+
+            Based on LibreELEC ${{ steps.download.outputs.version }} for Raspberry Pi 4.
+
+            ### Included customizations
+            - Akasha boot splash + custom config.txt
+            - CEC TV auto-off on shutdown
+            - WiFi retry on boot (connman race condition fix)
+            - Akasha Settings panel addon
+            - Cloud Gaming addon (GeForce NOW, Xbox Cloud, Luna, Boosteroid)
+            - Arctic Horizon 2 skin patches (menus, logo)
+            - Xbox Wireless Controller buttonmap fix
+
+            ### Installation
+            Flash `${{ env.output }}` to a microSD card using Raspberry Pi Imager or balenaEtcher.
+
+            After first boot, the Cloud Gaming Docker image needs to be built:
+            ```bash
+            ssh root@<pi-ip>
+            cd /storage/.kodi/scripts/cloud-gaming && docker build -t akasha-chromium .
+            ```
+          files: ${{ env.output }}
+          draft: false
+          prerelease: false
