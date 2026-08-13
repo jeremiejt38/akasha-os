@@ -28,14 +28,14 @@ if ! $SSH "echo connected" >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "[1/8] Deploying boot files..."
+echo "[1/9] Deploying boot files..."
 $SSH "mount -o remount,rw /flash"
 $SCP "$SCRIPT_DIR/boot/config.txt" "root@$PI_IP:/flash/config.txt"
 $SCP "$SCRIPT_DIR/boot/cmdline.txt" "root@$PI_IP:/flash/cmdline.txt"
 $SCP "$SCRIPT_DIR/boot/oemsplash.png" "root@$PI_IP:/flash/oemsplash.png"
 $SSH "mount -o remount,ro /flash"
 
-echo "[2/8] Deploying system config..."
+echo "[2/9] Deploying system config..."
 $SCP "$SCRIPT_DIR/system/autostart.sh" "root@$PI_IP:/storage/.config/autostart.sh"
 $SCP "$SCRIPT_DIR/system/cec-standby.sh" "root@$PI_IP:/storage/.config/cec-standby.sh"
 $SSH "chmod +x /storage/.config/autostart.sh /storage/.config/cec-standby.sh"
@@ -43,15 +43,17 @@ $SSH "mkdir -p /storage/.config/system.d"
 $SCP "$SCRIPT_DIR/system/system.d/cec-tv.service" "root@$PI_IP:/storage/.config/system.d/cec-tv.service"
 $SSH "systemctl daemon-reload && systemctl enable cec-tv.service"
 
-echo "[3/8] Deploying Kodi splash..."
+echo "[3/9] Deploying Kodi splash + boot intro video..."
 $SSH "mkdir -p /storage/.kodi/media"
 $SCP "$SCRIPT_DIR/kodi/media/splash.png" "root@$PI_IP:/storage/.kodi/media/splash.png"
+$SCP "$SCRIPT_DIR/kodi/media/splash-intro.mp4" "root@$PI_IP:/storage/.kodi/media/splash-intro.mp4"
+$SCP "$SCRIPT_DIR/kodi/userdata/autoexec.py" "root@$PI_IP:/storage/.kodi/userdata/autoexec.py"
 
-echo "[4/8] Deploying Akasha Settings addon..."
+echo "[4/9] Deploying Akasha Settings addon..."
 $SSH "mkdir -p /storage/.kodi/addons/script.akasha.settings"
 $SCP -r "$SCRIPT_DIR/kodi/addons/script.akasha.settings/" "root@$PI_IP:/storage/.kodi/addons/script.akasha.settings/"
 
-echo "[5/8] Deploying Cloud Gaming addon + scripts..."
+echo "[5/9] Deploying Cloud Gaming addon + scripts..."
 $SSH "mkdir -p /storage/.kodi/addons/script.cloud.gaming"
 $SCP -r "$SCRIPT_DIR/kodi/addons/script.cloud.gaming/" "root@$PI_IP:/storage/.kodi/addons/script.cloud.gaming/"
 $SSH "mkdir -p /storage/.kodi/scripts/cloud-gaming"
@@ -61,7 +63,7 @@ $SCP "$SCRIPT_DIR/kodi/scripts/cloud-gaming/launch.sh" "root@$PI_IP:/storage/.ko
 $SCP "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" "root@$PI_IP:/storage/.kodi/scripts/cloud-gaming/guide_watchdog.py"
 $SSH "chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh /storage/.kodi/scripts/cloud-gaming/entrypoint.sh /storage/.kodi/scripts/cloud-gaming/guide_watchdog.py"
 
-echo "[6/8] Deploying skin patches (Arctic Horizon 2)..."
+echo "[6/9] Deploying skin patches (Arctic Horizon 2)..."
 SKIN_DIR="/storage/.kodi/addons/skin.arctic.horizon.2"
 $SSH "mkdir -p $SKIN_DIR/shortcuts $SKIN_DIR/extras/icons"
 $SCP "$SCRIPT_DIR/skin-patches/akasha-logo.png" "root@$PI_IP:$SKIN_DIR/extras/icons/akasha-logo.png"
@@ -73,7 +75,7 @@ $SCP "$SCRIPT_DIR/skin-patches/shortcuts/music.DATA.xml" "root@$PI_IP:$SKIN_DIR/
 # Force skinshortcuts rebuild
 $SSH "rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash"
 
-echo "[7/8] Deploying controller buttonmap..."
+echo "[7/9] Deploying controller buttonmap..."
 BUTTONMAP_DIR="/storage/.kodi/userdata/addon_data/peripheral.joystick/resources/buttonmaps/xml/linux"
 if [ -f "$SCRIPT_DIR/kodi/userdata/addon_data/peripheral.joystick/resources/buttonmaps/xml/linux/Xbox_Wireless_Controller_15b_8a.xml" ]; then
     $SSH "mkdir -p $BUTTONMAP_DIR"
@@ -82,8 +84,12 @@ else
     echo "  (skipped — buttonmap file not present)"
 fi
 
-echo "[8/8] Building Cloud Gaming Docker image..."
+echo "[8/9] Building Cloud Gaming Docker image..."
 $SSH "cd /storage/.kodi/scripts/cloud-gaming && docker build -t akasha-chromium . 2>&1 | tail -5"
+
+echo "[9/9] Disabling Kodi built-in splash (replaced by intro video)..."
+$SSH "mkdir -p /storage/.kodi/userdata"
+$SSH "grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml 2>/dev/null || echo '<advancedsettings><splash>false</splash></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml"
 
 echo ""
 echo "=== Deployment complete! ==="
