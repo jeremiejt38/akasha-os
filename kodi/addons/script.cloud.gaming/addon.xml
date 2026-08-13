@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.cloud.gaming" name="Cloud Gaming" version="1.0.0" provider-name="Akasha">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.python.script" library="default.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="fr_FR">Cloud Gaming (GeForce NOW, Xbox Cloud, Luna)</summary>
+        <description lang="fr_FR">Lance les services de cloud gaming dans Chromium.</description>
+        <platform>all</platform>
+    </extension>
+</addon>
