@@ -1,0 +1,18 @@
+# Build artifacts
+*.img
+*.img.gz
+build/
+tmp/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
