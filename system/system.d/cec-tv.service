@@ -1,0 +1,15 @@
+[Unit]
+Description=CEC TV Power Management
+DefaultDependencies=no
+After=sysinit.target
+Conflicts=shutdown.target
+Before=shutdown.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c 'exec sleep infinity'
+ExecStop=/storage/.config/cec-standby.sh
+TimeoutStopSec=10
+
+[Install]
+WantedBy=sysinit.target
