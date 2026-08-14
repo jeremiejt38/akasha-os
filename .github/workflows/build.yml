@@ -18,7 +18,7 @@ on:
 
 env:
   LIBREELEC_PROJECT: RPi
-  LIBREELEC_ARCH: arm
+  LIBREELEC_ARCH: aarch64
   LIBREELEC_DEVICE: RPi4
 
 jobs:
@@ -48,17 +48,25 @@ jobs:
         id: download
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # LibreELEC naming: LibreELEC-RPi4.arm-VERSION.img.gz
-          FILENAME="LibreELEC-RPi4.arm-${VERSION}.img.gz"
+          # LibreELEC 11+ naming for RPi4 (64-bit): LibreELEC-RPi4.aarch64-VERSION.img.gz
+          FILENAME="LibreELEC-${LIBREELEC_DEVICE}.${LIBREELEC_ARCH}-${VERSION}.img.gz"
           URL="https://releases.libreelec.tv/${FILENAME}"
 
           echo "Downloading: $URL"
-          curl -L -o "$FILENAME" "$URL" || {
+          if ! curl -fL -o "$FILENAME" "$URL"; then
             # Try alternate URL pattern
+            rm -f "$FILENAME"
             URL="https://github.com/LibreELEC/LibreELEC.tv/releases/download/v${VERSION}/${FILENAME}"
             echo "Trying GitHub releases: $URL"
-            curl -L -o "$FILENAME" "$URL"
-          }
+            curl -fL -o "$FILENAME" "$URL"
+          fi
+
+          # Sanity check: make sure we actually got a gzip file, not an error page
+          if ! gzip -t "$FILENAME"; then
+            echo "::error::Downloaded file is not a valid gzip archive (bad URL or 404): $FILENAME"
+            cat "$FILENAME" || true
+            exit 1
+          fi
 
           echo "filename=$FILENAME" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -148,7 +156,6 @@ jobs:
           sudo chmod +x "$STORAGE/.kodi/scripts/cloud-gaming/guide_watchdog.py"
 
           # Skin patches
-          sudo cp skin-patches/akasha-logo.png "$STORAGE/.kodi/addons/skin.arctic.horizon.2/extras/icons/"
           sudo cp skin-patches/overrides.xml "$STORAGE/.kodi/addons/skin.arctic.horizon.2/shortcuts/"
           sudo cp skin-patches/shortcuts/*.DATA.xml "$STORAGE/.kodi/addons/skin.arctic.horizon.2/shortcuts/"
 
