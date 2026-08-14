@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.14](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.13...akasha-os-v0.10.14) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ui:** highlight the default update button in yesnocustom dialog ([4c112b4](https://github.com/jeremiejt38/akasha-os/commit/4c112b44a38be1d9c81e13962c231f96fbc2d000))
+
 ## [0.10.13](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.12...akasha-os-v0.10.13) (2026-08-14)
 
 
