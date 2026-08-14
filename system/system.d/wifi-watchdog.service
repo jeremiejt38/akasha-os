@@ -1,0 +1,13 @@
+[Unit]
+Description=Akasha OS WiFi Watchdog
+After=connman.service
+Wants=connman.service
+
+[Service]
+Type=simple
+ExecStart=/storage/.config/wifi-watchdog.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
