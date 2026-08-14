@@ -1,0 +1,14 @@
+[Unit]
+Description=Akasha OS silent connman Agent (prevents Kodi WiFi password popup)
+After=connman.service dbus.service
+Before=kodi.service
+Wants=connman.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /storage/.config/wifi-silent-agent.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
