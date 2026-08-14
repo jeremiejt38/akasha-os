@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.0...akasha-os-v0.10.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **updater:** parse semver in release-please tags with package prefix ([219c321](https://github.com/jeremiejt38/akasha-os/commit/219c321e13a376c8a785a3af949570134ef5e4ca))
+
 ## [0.10.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.9.1...akasha-os-v0.10.0) (2026-08-14)
 
 
