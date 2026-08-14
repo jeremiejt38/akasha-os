@@ -6,6 +6,22 @@ STANDBY="${2:-0}"
 FFMPEG=/storage/ffmpeg
 FB=/dev/fb0
 
+# Skip if this exact image was already shown in the last 15 seconds.
+# This prevents the systemd splash service from redrawing after the addon
+# already triggered the image before the reboot/shutdown sequence.
+BASENAME="$(basename "$IMAGE" 2>/dev/null || echo 'splash')"
+SKIP_FLAG="/tmp/.splash-shown-${BASENAME%.*}"
+if [ -f "$SKIP_FLAG" ]; then
+    NOW=$(date +%s 2>/dev/null || echo 0)
+    MARK=$(stat -c %Y "$SKIP_FLAG" 2>/dev/null || echo 0)
+    if [ -n "$NOW" ] && [ -n "$MARK" ] && [ "$((NOW - MARK))" -lt 15 ]; then
+        exit 0
+    fi
+fi
+
+# Mark as shown before any potentially long operation
+touch "$SKIP_FLAG"
+
 RAW=""
 if [ -f "$IMAGE" ]; then
     # Look for a pre-converted raw framebuffer dump next to the PNG

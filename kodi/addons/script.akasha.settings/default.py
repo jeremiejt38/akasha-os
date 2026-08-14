@@ -223,12 +223,16 @@ def main():
         elif choice == 11:
             ok = dialog.yesno('Akasha', 'Redemarrer le systeme ?')
             if ok:
-                # splash-reboot.service will display the image during reboot
+                # Show the reboot splash immediately before Kodi starts to tear down.
+                # The matching systemd service will skip if the same image was shown recently.
+                subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-reboot.png'])
                 subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
         elif choice == 12:
             ok = dialog.yesno('Akasha', 'Eteindre le systeme ?\n(La TV sera aussi eteinte via CEC)')
             if ok:
-                # splash-poweroff.service will display the image during shutdown
+                # Show the shutdown splash and turn the TV off via CEC before the system
+                # shuts down. The matching systemd service will skip if already shown.
+                subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-shutdown.png', '1'])
                 subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
 
 if __name__ == '__main__':
