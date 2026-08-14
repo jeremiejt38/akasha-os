@@ -137,8 +137,8 @@ def _apply_update(status):
 
     reboot_progress = xbmcgui.DialogProgress()
     reboot_progress.create('Akasha OS - Redemarrage', 'Redemarrage en cours, veuillez patienter...')
-    for i in range(3, 0, -1):
-        reboot_progress.update(int((4 - i) * 25), 'Redemarrage dans {}s...'.format(i))
+    for i in range(5, 0, -1):
+        reboot_progress.update(int((6 - i) * 20), 'Redemarrage dans {}s...'.format(i))
         xbmc.sleep(1000)
     reboot_progress.close()
 
