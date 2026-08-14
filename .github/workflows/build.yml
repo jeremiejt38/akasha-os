@@ -206,6 +206,8 @@ jobs:
         with:
           tag_name: "v${{ steps.akasha_version.outputs.version }}"
           name: "Akasha OS v${{ steps.akasha_version.outputs.version }} (LibreELEC ${{ steps.download.outputs.version }})"
+          make_latest: false
+          overwrite: true
           body: |
             ## Akasha OS
 

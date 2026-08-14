@@ -14,9 +14,9 @@ log() {
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" | tee -a /storage/.kodi/temp/akasha-install.log
 }
 
-# Persistent Akasha OS version marker
+# Persistent Akasha OS version marker (source of truth is package.json)
 mkdir -p /storage/.config/akasha-os
-cp "$SCRIPT_DIR/VERSION" /storage/.config/akasha-os/VERSION
+python3 -c "import json; print(json.load(open('$SCRIPT_DIR/package.json'))['version'])" > /storage/.config/akasha-os/VERSION
 
 log "=== Akasha OS local installer ==="
 log "Source: $SCRIPT_DIR"
