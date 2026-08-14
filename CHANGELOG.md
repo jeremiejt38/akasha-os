@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.2...akasha-os-v0.10.3) (2026-08-14)
+
+
+### Features
+
+* **ui:** add OTA marker to update dialogs and menu ([f18155a](https://github.com/jeremiejt38/akasha-os/commit/f18155a66a216fdf3f54f351bdef531a625cac6d))
+
 ## [0.10.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.1...akasha-os-v0.10.2) (2026-08-14)
 
 
