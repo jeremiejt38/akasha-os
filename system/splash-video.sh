@@ -1,9 +1,12 @@
 #!/bin/sh
-# Akasha OS — Boot splash video (video + audio + hold last frame)
+# Akasha OS — Boot splash video (pre-Kodi, on framebuffer)
+# Plays splash-intro.mp4 on the framebuffer and the matching
+# splash-intro.wav (pre-extracted during install) via aplay.
 VIDEO=/storage/.kodi/media/splash-intro.mp4
+WAV=/storage/.kodi/media/splash-intro.wav
 FFMPEG=/storage/ffmpeg
 FB=/dev/fb0
-AUDIO_DEV=hdmi:CARD=vc4hdmi0,DEV=0
+AUDIO_DEV=default:CARD=vc4hdmi0
 LAST_FRAME=/storage/.config/splash.jpg
 LOG=/storage/splash-video.log
 
@@ -44,20 +47,24 @@ sleep 2
 echo "Framebuffer info:"
 cat /sys/class/graphics/fb0/virtual_size /sys/class/graphics/fb0/bits_per_pixel 2>/dev/null || true
 
-# Play video on framebuffer + audio on HDMI
+# Start audio in the background if a pre-extracted WAV exists
+AUDIO_PID=""
+if [ -f "$WAV" ] && aplay -l 2>/dev/null | grep -q vc4hdmi0; then
+    aplay -D "$AUDIO_DEV" "$WAV" &
+    AUDIO_PID=$!
+    echo "Audio playback started (pid=$AUDIO_PID)"
+fi
+
+# Play video on framebuffer (no audio - that is handled by aplay)
 $FFMPEG -re -i "$VIDEO" \
     -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" \
     -pix_fmt rgb565le -f fbdev "$FB" \
-    -f alsa "$AUDIO_DEV" \
-    -loglevel warning
+    -an -loglevel warning
 
-# If audio failed, retry video-only
-if [ $? -ne 0 ]; then
-    echo "Audio path failed, retrying video-only"; sleep 1
-    $FFMPEG -re -i "$VIDEO" \
-        -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" \
-        -pix_fmt rgb565le -f fbdev "$FB" \
-        -an -loglevel warning
+# Stop audio once the video is finished
+if [ -n "$AUDIO_PID" ]; then
+    kill "$AUDIO_PID" 2>/dev/null || true
+    wait "$AUDIO_PID" 2>/dev/null || true
 fi
 
 # Display last frame (static image) and hold until Kodi takes over

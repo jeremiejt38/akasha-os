@@ -18,9 +18,9 @@ log() {
 mkdir -p /storage/.config/akasha-os
 python3 -c "import json; print(json.load(open('$SCRIPT_DIR/package.json'))['version'])" > /storage/.config/akasha-os/VERSION
 
-# Remove any stale update-status marker so the startup dialogs are not shown
-# for an update that happened in a previous boot.
-rm -f /storage/.config/akasha-os/update-status.json
+# Keep update-status.json if it exists; the startup service will show and
+# delete it after the reboot. Only remove a stale one during a manual fresh
+# install, which is rare and should not happen during an OTA update.
 
 log "=== Akasha OS local installer ==="
 log "Source: $SCRIPT_DIR"
@@ -87,6 +87,14 @@ mkdir -p /storage/.kodi/scripts
 cp "$SCRIPT_DIR/kodi/media/splash.png" /storage/.kodi/media/splash.png
 cp "$SCRIPT_DIR/kodi/media/splash-intro.mp4" /storage/.kodi/media/splash-intro.mp4
 cp "$SCRIPT_DIR/kodi/media/akasha-logo-circle.png" /storage/.kodi/media/akasha-logo-circle.png
+
+# Pre-extract audio so the pre-Kodi boot splash can play sound via aplay.
+# ffmpeg with direct ALSA output segfaults on LibreELEC, so we use aplay.
+FFMPEG=/storage/ffmpeg
+if [ -x "$FFMPEG" ] && [ -f /storage/.kodi/media/splash-intro.mp4 ]; then
+    "$FFMPEG" -y -i /storage/.kodi/media/splash-intro.mp4 \
+        -vn -ac 2 -ar 48000 /storage/.kodi/media/splash-intro.wav 2>/dev/null || true
+fi
 
 cp "$SCRIPT_DIR/kodi/scripts/show-splash.sh" /storage/.kodi/scripts/show-splash.sh
 cp "$SCRIPT_DIR/kodi/scripts/show-splash-if-restart.sh" /storage/.kodi/scripts/show-splash-if-restart.sh

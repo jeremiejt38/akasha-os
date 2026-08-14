@@ -136,16 +136,12 @@ def _apply_update(status):
     except Exception:
         pass
 
-    xbmcgui.Dialog().ok(
-        'Akasha OS - Mise a jour terminee',
-        'Mise a jour reussie.\n\n{} -> {}\n\n'
-        'Le systeme va redemarrer pour appliquer les changements.'.format(old_version, new_version)
-    )
-
+    # Brief "Reboot in progress" progress; the post-reboot success dialog
+    # will be shown by show_update_success() on the next boot.
     reboot_progress = xbmcgui.DialogProgress()
     reboot_progress.create('Akasha OS - Redemarrage', 'Redemarrage en cours, veuillez patienter...')
-    for i in range(5, 0, -1):
-        reboot_progress.update(int((6 - i) * 20), 'Redemarrage dans {}s...'.format(i))
+    for i in range(3, 0, -1):
+        reboot_progress.update(int((4 - i) * 33), 'Redemarrage en cours...')
         xbmc.sleep(1000)
     reboot_progress.close()
 
@@ -294,8 +290,8 @@ def play_intro():
     xbmc.log("Akasha Splash: intro finished", xbmc.LOGINFO)
 
 
-# Play the boot intro first so the video/audio are not delayed or
-# overlapped by the update check dialogs. Update prompts appear after.
-play_intro()
+# Show post-update success first (only if an update just happened), then
+# check for a new update once the system is online. The boot video is
+# handled separately by the pre-Kodi splash-video.service.
 show_update_success()
 check_for_updates_at_boot()
