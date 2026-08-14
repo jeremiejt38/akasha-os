@@ -1,8 +1,11 @@
-"""Akasha Splash — Boot intro video service.
+"""Akasha Splash — Boot intro video + OTA update check service.
 
 Plays the splash intro video once when Kodi starts, then lets the
 Home screen appear normally. The video can be skipped by pressing
 any button on the remote/controller.
+
+When the system is online, it also checks for an Akasha OS update and
+offers to install it, show the changelog, or ignore it.
 
 This is a Kodi service addon (replaces deprecated autoexec.py).
 """
@@ -11,13 +14,197 @@ import xbmcaddon
 import xbmcgui
 import os
 import json
+import subprocess
+import time
 
 INTRO_PATH = "/storage/.kodi/media/splash-intro.mp4"
 FLAG_FILE = "/tmp/.akasha-intro-played"
 UPDATE_STATUS_FILE = "/storage/.config/akasha-os/update-status.json"
+UPDATE_IGNORED_FILE = "/storage/.config/akasha-os/update-ignored.json"
+UPDATER = "/storage/.kodi/scripts/update-akasha-os.py"
 
 addon = xbmcaddon.Addon()
 monitor = xbmc.Monitor()
+
+
+def _wait_for_network(timeout=30):
+    """Wait until the device can reach GitHub, or timeout expires."""
+    start = time.time()
+    while time.time() - start < timeout and not monitor.abortRequested():
+        try:
+            result = subprocess.run(
+                ['python3', UPDATER, '--check'],
+                capture_output=True, text=True, timeout=20
+            )
+            for line in reversed(result.stdout.splitlines()):
+                if line.startswith('JSON '):
+                    return json.loads(line[5:])
+            # If we got a JSON line, the network is up enough to reach GitHub.
+            # If not (e.g. timeout), retry.
+        except Exception:
+            pass
+        monitor.waitForAbort(2)
+    return None
+
+
+def _is_ignored(version):
+    try:
+        if os.path.exists(UPDATE_IGNORED_FILE):
+            with open(UPDATE_IGNORED_FILE, 'r') as f:
+                ignored = json.load(f)
+            return ignored.get('version') == version
+    except Exception:
+        pass
+    return False
+
+
+def _set_ignored(version):
+    try:
+        os.makedirs('/storage/.config/akasha-os', exist_ok=True)
+        with open(UPDATE_IGNORED_FILE, 'w') as f:
+            json.dump({'version': version}, f)
+    except Exception:
+        pass
+
+
+def _apply_update(status):
+    """Run the OTA updater from the startup service with a progress dialog."""
+    progress = xbmcgui.DialogProgress()
+    progress.create('Akasha OS - Mise a jour', 'Preparation...')
+
+    proc = subprocess.Popen(
+        ['python3', UPDATER],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+
+    pct = 0
+    stage = 'Initialisation'
+    while proc.poll() is None:
+        line = proc.stdout.readline()
+        if not line:
+            xbmc.sleep(200)
+            continue
+
+        if line.startswith('### PROGRESS:'):
+            try:
+                pct = int(line.split(':', 1)[1].strip())
+            except Exception:
+                pass
+        elif line.startswith('### STAGE:'):
+            stage = line.split(':', 1)[1].strip()
+        elif line.startswith('### '):
+            pass
+        else:
+            if not line.startswith('[') and line.strip():
+                stage = line.strip()[:60]
+
+        progress.update(pct, 'Etape : {}'.format(stage))
+        xbmc.sleep(50)
+
+    # Drain remaining output
+    for line in proc.stdout:
+        pass
+
+    progress.close()
+
+    if proc.returncode != 0:
+        xbmcgui.Dialog().ok('Akasha OS - Erreur', 'La mise a jour a echoue.\nVoir le log.')
+        return
+
+    old_version = status.get('local_version', 'Inconnue')
+    new_version = status.get('remote_version', 'Inconnue')
+    changelog = status.get('changelog', '')
+
+    # Persist update info so the startup service can show it after reboot
+    try:
+        os.makedirs('/storage/.config/akasha-os', exist_ok=True)
+        with open(UPDATE_STATUS_FILE, 'w') as f:
+            json.dump({
+                'old_version': old_version,
+                'new_version': new_version,
+                'changelog': changelog
+            }, f)
+    except Exception:
+        pass
+
+    xbmcgui.Dialog().ok(
+        'Akasha OS - Mise a jour terminee',
+        'Mise a jour reussie.\n\n{} -> {}\n\n'
+        'Le systeme va redemarrer pour appliquer les changements.'.format(old_version, new_version)
+    )
+
+    reboot_progress = xbmcgui.DialogProgress()
+    reboot_progress.create('Akasha OS - Redemarrage', 'Redemarrage en cours, veuillez patienter...')
+    for i in range(3, 0, -1):
+        reboot_progress.update(int((4 - i) * 25), 'Redemarrage dans {}s...'.format(i))
+        xbmc.sleep(1000)
+    reboot_progress.close()
+
+    subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
+
+
+def check_for_updates_at_boot():
+    """Check for updates once online and prompt the user if one is available."""
+    xbmc.log("Akasha Splash: checking for updates at boot", xbmc.LOGINFO)
+
+    # Wait a moment for the network stack and Kodi to settle
+    monitor.waitForAbort(2)
+
+    status = _wait_for_network(timeout=30)
+    if not status:
+        xbmc.log("Akasha Splash: could not reach update server", xbmc.LOGINFO)
+        return
+
+    if status.get('status') != 'update':
+        xbmc.log("Akasha Splash: no update available ({})".format(status.get('status')), xbmc.LOGINFO)
+        return
+
+    new_version = status.get('remote_version', 'Inconnue')
+    if _is_ignored(new_version):
+        xbmc.log("Akasha Splash: update {} ignored by user".format(new_version), xbmc.LOGINFO)
+        return
+
+    dialog = xbmcgui.Dialog()
+    old_version = status.get('local_version', 'Inconnue')
+    changelog = status.get('changelog', '')
+
+    while True:
+        options = [
+            'Changelog',
+            'Ignorer cette version',
+            '[B][COLOR blue]Mettre a jour[/COLOR][/B]',
+        ]
+
+        choice = dialog.select(
+            'Akasha OS - Mise a jour disponible',
+            options,
+            preselect=2
+        )
+
+        if choice < 0:
+            # User pressed Back / escape -> treat as ignore for this boot
+            break
+
+        if choice == 0:
+            if changelog:
+                dialog.textviewer(
+                    'Akasha OS - Changelog v{}'.format(new_version),
+                    changelog
+                )
+            else:
+                dialog.ok('Akasha OS - Changelog', 'Aucun changelog disponible.')
+            continue
+
+        if choice == 1:
+            _set_ignored(new_version)
+            xbmc.log("Akasha Splash: update {} will be ignored".format(new_version), xbmc.LOGINFO)
+            break
+
+        if choice == 2:
+            _apply_update(status)
+            return
 
 
 def show_update_success():
@@ -101,4 +288,5 @@ def play_intro():
 
 
 show_update_success()
+check_for_updates_at_boot()
 play_intro()
