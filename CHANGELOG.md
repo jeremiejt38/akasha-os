@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.16](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.15...akasha-os-v0.10.16) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ui:** make A button close success and changelog dialogs ([aa73786](https://github.com/jeremiejt38/akasha-os/commit/aa737862ae05e942360513b7bf4f68cd98dddb76))
+
 ## [0.10.15](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.14...akasha-os-v0.10.15) (2026-08-14)
 
 
