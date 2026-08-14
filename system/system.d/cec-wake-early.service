@@ -1,0 +1,15 @@
+[Unit]
+Description=CEC TV Wake (early)
+DefaultDependencies=no
+After=local-fs.target systemd-modules-load.service
+Before=splash-video.service kodi.service
+
+[Service]
+Type=oneshot
+ExecStart=/storage/.config/cec-wakeup.sh
+StandardOutput=null
+StandardError=null
+TimeoutStartSec=20
+
+[Install]
+WantedBy=graphical.target

@@ -1,11 +1,12 @@
 [Unit]
 Description=CEC TV Wake Up
 After=kodi.service
+ConditionPathExists=/tmp/.kodi-restart
 
 [Service]
 Type=oneshot
 ExecStart=/storage/.config/cec-wakeup.sh
+TimeoutStartSec=20
 
 [Install]
-WantedBy=kodi.target
 WantedBy=kodi.service

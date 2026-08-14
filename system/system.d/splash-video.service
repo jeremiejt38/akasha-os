@@ -1,0 +1,16 @@
+[Unit]
+Description=Akasha OS Boot Splash Video
+DefaultDependencies=no
+After=local-fs.target sound.target systemd-modules-load.service cec-wake-early.service
+Before=kodi.service
+ConditionPathExists=/storage/.kodi/media/splash-intro.mp4
+
+[Service]
+Type=oneshot
+ExecStart=/storage/splash-video.sh
+StandardOutput=null
+StandardError=null
+TimeoutStartSec=45
+
+[Install]
+WantedBy=graphical.target
