@@ -11,7 +11,7 @@ SSID="Bbox-3AEEFA4E-5GHz"
 PASSPHRASE="k6Vr76JGnxPQZH7ZHc"
 CONNMAN_SVC_ID="wifi_dca632af47bf_42626f782d33414545464134452d3547487a_managed_psk"
 LOG="/storage/.config/wifi-watchdog.log"
-CHECK_INTERVAL=15  # seconds between checks
+CHECK_INTERVAL=10  # seconds between checks
 MAX_RETRIES=5
 
 log_event() {
@@ -38,40 +38,9 @@ is_connected() {
     [ "$state" = "ready" ] || [ "$state" = "online" ]
 }
 
-force_reconnect() {
-    log_event "DISCONNECT detected — starting reconnection"
-
-    local svc
-    svc=$(get_wifi_service)
-
-    # Remove existing profile if present
-    if [ -n "$svc" ]; then
-        log_event "Removing existing profile: $svc"
-        connmanctl disconnect "$svc" 2>/dev/null
-        # Remove stored config to force clean reconnect
-        local config_dir="/storage/.cache/connman/${CONNMAN_SVC_ID}"
-        if [ -d "$config_dir" ]; then
-            rm -rf "$config_dir"
-            log_event "Deleted config dir: $config_dir"
-        fi
-        connmanctl remove "$svc" 2>/dev/null
-        sleep 2
-    fi
-
-    # Enable WiFi and scan
-    connmanctl enable wifi 2>/dev/null
-    sleep 1
-    connmanctl scan wifi 2>/dev/null
-    sleep 3
-
-    # Find the service again after scan
-    svc=$(get_wifi_service)
-    if [ -z "$svc" ]; then
-        log_event "ERROR: SSID '$SSID' not found after scan"
-        return 1
-    fi
-
-    # Recreate connman config with passphrase
+write_connman_config() {
+    # Write connman config with passphrase — atomic, so connman can
+    # pick it up immediately when the service reappears after scan.
     local svc_dir="/storage/.cache/connman/${CONNMAN_SVC_ID}"
     mkdir -p "$svc_dir"
     cat > "${svc_dir}/settings" << EOF
@@ -87,15 +56,53 @@ IPv4.method=dhcp
 IPv6.method=off
 IPv6.privacy=prefered
 EOF
+}
 
-    log_event "Config recreated with passphrase, connecting to $svc"
-    sleep 1
+force_reconnect() {
+    log_event "DISCONNECT detected — starting reconnection"
 
-    # Try to connect
+    local svc
+    svc=$(get_wifi_service)
+
+    # Step 1: Write config FIRST (before removing anything), so the
+    # passphrase is ready as soon as connman re-discovers the network.
+    write_connman_config
+    log_event "Config pre-written with passphrase"
+
+    # Step 2: Remove broken profile and immediately reconnect
+    if [ -n "$svc" ]; then
+        log_event "Removing broken profile: $svc"
+        connmanctl disconnect "$svc" 2>/dev/null
+        connmanctl remove "$svc" 2>/dev/null
+        sleep 1
+    fi
+
+    # Step 3: Enable WiFi, scan, and reconnect fast
+    connmanctl enable wifi 2>/dev/null
+    connmanctl scan wifi 2>/dev/null
+    sleep 2
+
+    # Re-write config (remove may have cleaned it)
+    write_connman_config
+
+    # Find the service again after scan
+    svc=$(get_wifi_service)
+    if [ -z "$svc" ]; then
+        # Second scan attempt
+        connmanctl scan wifi 2>/dev/null
+        sleep 2
+        svc=$(get_wifi_service)
+    fi
+    if [ -z "$svc" ]; then
+        log_event "ERROR: SSID '$SSID' not found after scan"
+        return 1
+    fi
+
+    # Try to connect (fast retries)
     local retry=0
     while [ $retry -lt $MAX_RETRIES ]; do
         connmanctl connect "$svc" 2>/dev/null
-        sleep 5
+        sleep 3
 
         if is_connected; then
             local ip
@@ -106,7 +113,7 @@ EOF
 
         retry=$((retry + 1))
         log_event "Retry $retry/$MAX_RETRIES..."
-        sleep 2
+        sleep 1
     done
 
     log_event "ERROR: Failed to reconnect after $MAX_RETRIES attempts"
@@ -117,7 +124,7 @@ EOF
 log_event "WiFi watchdog started"
 
 # Initial wait for boot to settle
-sleep 10
+sleep 5
 
 while true; do
     if ! is_connected; then
