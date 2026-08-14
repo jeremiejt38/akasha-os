@@ -298,6 +298,8 @@ def play_intro():
     xbmc.log("Akasha Splash: intro finished", xbmc.LOGINFO)
 
 
+# Play the boot intro first so the video/audio are not delayed or
+# overlapped by the update check dialogs. Update prompts appear after.
+play_intro()
 show_update_success()
 check_for_updates_at_boot()
-play_intro()
