@@ -47,7 +47,12 @@ echo "[3/9] Deploying Kodi splash + boot intro video..."
 $SSH "mkdir -p /storage/.kodi/media"
 $SCP "$SCRIPT_DIR/kodi/media/splash.png" "root@$PI_IP:/storage/.kodi/media/splash.png"
 $SCP "$SCRIPT_DIR/kodi/media/splash-intro.mp4" "root@$PI_IP:/storage/.kodi/media/splash-intro.mp4"
-$SCP "$SCRIPT_DIR/kodi/userdata/autoexec.py" "root@$PI_IP:/storage/.kodi/userdata/autoexec.py"
+
+echo "[3b/9] Deploying Akasha Splash service addon..."
+$SSH "mkdir -p /storage/.kodi/addons/service.akasha.splash"
+$SCP -r "$SCRIPT_DIR/kodi/addons/service.akasha.splash/" "root@$PI_IP:/storage/.kodi/addons/service.akasha.splash/"
+# Enable the addon in Kodi's addon database
+$SSH "sqlite3 /storage/.kodi/userdata/Database/Addons33.db \"INSERT OR REPLACE INTO installed (addonID, enabled, installDate) VALUES ('service.akasha.splash', 1, datetime('now'));\" 2>/dev/null || true"
 
 echo "[4/9] Deploying Akasha Settings addon..."
 $SSH "mkdir -p /storage/.kodi/addons/script.akasha.settings"
@@ -89,7 +94,7 @@ $SSH "cd /storage/.kodi/scripts/cloud-gaming && docker build -t akasha-chromium 
 
 echo "[9/9] Disabling Kodi built-in splash (replaced by intro video)..."
 $SSH "mkdir -p /storage/.kodi/userdata"
-$SSH "grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml 2>/dev/null || echo '<advancedsettings><splash>false</splash></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml"
+$SSH "if [ ! -f /storage/.kodi/userdata/advancedsettings.xml ]; then echo '<advancedsettings><splash>false</splash></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml; elif ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml; then sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml; fi"
 
 echo ""
 echo "=== Deployment complete! ==="
