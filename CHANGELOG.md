@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.5...akasha-os-v0.10.6) (2026-08-14)
+
+
+### Features
+
+* **ota:** check for updates at boot and prompt the user ([d895945](https://github.com/jeremiejt38/akasha-os/commit/d89594544309d905682ab87268d0f484ae1270a7))
+
 ## [0.10.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.4...akasha-os-v0.10.5) (2026-08-14)
 
 
