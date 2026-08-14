@@ -1,0 +1,12 @@
+[Unit]
+Description=Akasha OS Sleep Timer
+After=kodi.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /storage/.config/sleep-timer.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=kodi.target

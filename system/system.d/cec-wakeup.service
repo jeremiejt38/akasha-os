@@ -1,0 +1,10 @@
+[Unit]
+Description=CEC TV Wake Up
+After=kodi.service
+
+[Service]
+Type=oneshot
+ExecStart=/storage/.config/cec-wakeup.sh
+
+[Install]
+WantedBy=kodi.target
