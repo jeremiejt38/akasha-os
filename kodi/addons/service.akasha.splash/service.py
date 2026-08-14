@@ -27,23 +27,30 @@ addon = xbmcaddon.Addon()
 monitor = xbmc.Monitor()
 
 
-def _wait_for_network(timeout=30):
+def _wait_for_network(timeout=90):
     """Wait until the device can reach GitHub, or timeout expires."""
+    xbmc.log("Akasha Splash: waiting for network / update server", xbmc.LOGINFO)
     start = time.time()
+    attempt = 0
     while time.time() - start < timeout and not monitor.abortRequested():
+        attempt += 1
+        xbmc.log("Akasha Splash: update check attempt {}".format(attempt), xbmc.LOGINFO)
         try:
             result = subprocess.run(
                 ['python3', UPDATER, '--check'],
-                capture_output=True, text=True, timeout=20
+                capture_output=True, text=True, timeout=15
             )
+            xbmc.log("Akasha Splash: updater returned code {}".format(result.returncode), xbmc.LOGINFO)
             for line in reversed(result.stdout.splitlines()):
                 if line.startswith('JSON '):
+                    xbmc.log("Akasha Splash: got update JSON", xbmc.LOGINFO)
                     return json.loads(line[5:])
             # If we got a JSON line, the network is up enough to reach GitHub.
             # If not (e.g. timeout), retry.
-        except Exception:
-            pass
-        monitor.waitForAbort(2)
+        except Exception as e:
+            xbmc.log("Akasha Splash: updater exception {}".format(str(e)), xbmc.LOGERROR)
+        xbmc.log("Akasha Splash: update check failed, retrying in 3s", xbmc.LOGINFO)
+        monitor.waitForAbort(3)
     return None
 
 
@@ -150,15 +157,19 @@ def check_for_updates_at_boot():
     xbmc.log("Akasha Splash: checking for updates at boot", xbmc.LOGINFO)
 
     # Wait a moment for the network stack and Kodi to settle
-    monitor.waitForAbort(2)
+    xbmc.log("Akasha Splash: waiting 3s for Kodi/network to settle", xbmc.LOGINFO)
+    monitor.waitForAbort(3)
 
-    status = _wait_for_network(timeout=30)
+    status = _wait_for_network(timeout=90)
     if not status:
-        xbmc.log("Akasha Splash: could not reach update server", xbmc.LOGINFO)
+        xbmc.log("Akasha Splash: could not reach update server (timeout)", xbmc.LOGWARNING)
         return
 
+    xbmc.log("Akasha Splash: status={}, local={}, remote={}".format(
+        status.get('status'), status.get('local_version'), status.get('remote_version')), xbmc.LOGINFO)
+
     if status.get('status') != 'update':
-        xbmc.log("Akasha Splash: no update available ({})".format(status.get('status')), xbmc.LOGINFO)
+        xbmc.log("Akasha Splash: no update available", xbmc.LOGINFO)
         return
 
     new_version = status.get('remote_version', 'Inconnue')
