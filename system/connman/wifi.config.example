@@ -1,0 +1,10 @@
+[global]
+Name=AkashaOS-WiFi
+Description=Pre-provisioned WiFi for Akasha OS
+
+[service_home_wifi]
+Type=wifi
+Name=YOUR_SSID_HERE
+Passphrase=YOUR_PASSPHRASE_HERE
+AutoConnect=true
+IPv4=dhcp

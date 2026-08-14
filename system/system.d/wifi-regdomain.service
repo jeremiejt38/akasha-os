@@ -1,0 +1,14 @@
+[Unit]
+Description=Set WiFi regulatory domain (FR) before connman
+DefaultDependencies=no
+After=sys-subsystem-net-devices-wlan0.device
+Before=connman.service
+Wants=sys-subsystem-net-devices-wlan0.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/iw reg set FR
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
