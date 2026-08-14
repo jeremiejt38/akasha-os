@@ -74,11 +74,23 @@ def add_text(image_path, text, output_path, font_size=None):
     # White text
     draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
 
-    # Convert to RGB for JPEG/PNG compatibility
+    # Convert to RGB for PNG compatibility
     rgb = Image.new("RGB", img.size, (0, 0, 0))
     rgb.paste(img, mask=img.split()[3])
     rgb.save(output_path, "PNG")
     print(f"Generated: {output_path}")
+
+    # Generate a pre-converted raw rgb565le framebuffer dump for instant display
+    raw_path = output_path.replace(".png", ".raw")
+    import subprocess
+    if os.path.exists("/storage/ffmpeg"):
+        subprocess.run([
+            "/storage/ffmpeg", "-hide_banner", "-loglevel", "error",
+            "-i", output_path,
+            "-vf", "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2",
+            "-pix_fmt", "rgb565le", "-f", "rawvideo", raw_path
+        ], check=True)
+        print(f"Generated raw framebuffer: {raw_path}")
 
 
 def main():

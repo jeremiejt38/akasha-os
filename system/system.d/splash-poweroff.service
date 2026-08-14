@@ -2,7 +2,7 @@
 Description=Akasha OS Poweroff Splash
 DefaultDependencies=no
 After=kodi.service
-Before=poweroff.target systemd-poweroff.service
+Before=kodi-poweroff.service poweroff.target systemd-poweroff.service
 
 [Service]
 Type=oneshot

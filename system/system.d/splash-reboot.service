@@ -2,12 +2,12 @@
 Description=Akasha OS Reboot Splash
 DefaultDependencies=no
 After=kodi.service
-Before=reboot.target systemd-reboot.service
+Before=kodi-reboot.service reboot.target systemd-reboot.service
 
 [Service]
 Type=oneshot
 ExecStart=/storage/.kodi/scripts/show-splash.sh /storage/.kodi/media/splash-reboot.png
-TimeoutStartSec=5
+TimeoutStartSec=10
 
 [Install]
 WantedBy=reboot.target
