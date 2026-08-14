@@ -71,6 +71,11 @@ $SSH "chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh /storage/.kodi/scri
 echo "[6/9] Deploying skin patches (Arctic Horizon 2)..."
 SKIN_DIR="/storage/.kodi/addons/skin.arctic.horizon.2"
 $SSH "mkdir -p $SKIN_DIR/shortcuts $SKIN_DIR/extras/icons"
+# Deploy Akasha OS startup logo
+$SCP "$SCRIPT_DIR/kodi/media/akasha-logo-circle.png" "root@$PI_IP:$SKIN_DIR/extras/icons/akasha-logo-circle.png"
+$SCP "$SCRIPT_DIR/skin-patches/patch_startup_logo.py" "root@$PI_IP:/tmp/patch_startup_logo.py"
+# Patch startup logo/texte in Includes_Objects.xml
+$SSH "python3 /tmp/patch_startup_logo.py"
 # Remove old Akasha logo overlay if present
 $SSH "rm -f $SKIN_DIR/extras/icons/akasha-logo.png"
 $SCP "$SCRIPT_DIR/skin-patches/overrides.xml" "root@$PI_IP:$SKIN_DIR/shortcuts/overrides.xml"
