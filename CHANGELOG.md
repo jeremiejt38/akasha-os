@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.13](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.12...akasha-os-v0.10.13) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ui:** use yesnocustom dialog for update prompts ([f339c72](https://github.com/jeremiejt38/akasha-os/commit/f339c72138c7ddd4a7c3497b760a28788f13f813))
+
 ## [0.10.12](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.11...akasha-os-v0.10.12) (2026-08-14)
 
 
