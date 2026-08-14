@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.3...akasha-os-v0.10.4) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ui:** warn user not to power off during OTA update ([d1eb472](https://github.com/jeremiejt38/akasha-os/commit/d1eb4728cb90c88a95adb8d8f821115ec16b64f9))
+
 ## [0.10.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.2...akasha-os-v0.10.3) (2026-08-14)
 
 
