@@ -1,0 +1,12 @@
+[Unit]
+Description=Akasha OS — Disable LibreELEC official updates
+Before=kodi.service
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/storage/.config/akasha-os/disable-official-updates.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

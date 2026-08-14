@@ -114,10 +114,122 @@ def test_cec_standby():
     if ok:
         subprocess.run(['/bin/bash', '/storage/.config/cec-standby.sh'], timeout=10)
 
+def check_for_update():
+    """Check for an Akasha OS update and return status dict or None."""
+    updater = '/storage/.kodi/scripts/update-akasha-os.py'
+    if not os.path.exists(updater):
+        return {'status': 'error', 'message': 'Updater script not found'}
+
+    dialog = xbmcgui.Dialog()
+    dialog.notification('Akasha', 'Recherche de mise a jour...', xbmcgui.NOTIFICATION_INFO, 2000)
+
+    result = subprocess.run(
+        ['python3', updater, '--check'],
+        capture_output=True,
+        text=True,
+        timeout=60
+    )
+
+    for line in reversed(result.stdout.splitlines()):
+        if line.startswith('JSON '):
+            try:
+                return json.loads(line[5:])
+            except:
+                pass
+    return {'status': 'error', 'message': 'Impossible de lire le resultat'}
+
+def show_update_dialog():
+    """Check, then optionally apply an Akasha OS update."""
+    status = check_for_update()
+    dialog = xbmcgui.Dialog()
+
+    if status.get('status') == 'up_to_date':
+        dialog.ok(
+            'Akasha OS - Mise a jour',
+            'Vous etes a jour.\nVersion actuelle : {}'.format(status.get('local_version', 'Inconnue'))
+        )
+        return
+
+    if status.get('status') != 'update':
+        dialog.ok('Akasha OS - Mise a jour', 'Erreur : {}'.format(status.get('message', 'Inconnue')))
+        return
+
+    changelog = status.get('changelog', '')[:800]
+    msg = (
+        'Nouvelle version disponible : {}\n'
+        'Version actuelle : {}\n\n'
+        'Changelog :\n{}\n\n'
+        'Lancer la mise a jour ?'
+    ).format(status.get('remote_version'), status.get('local_version'), changelog)
+
+    if not dialog.yesno('Akasha OS - Mise a jour', msg):
+        return
+
+    apply_update()
+
+def apply_update():
+    """Run the updater with a progress dialog."""
+    updater = '/storage/.kodi/scripts/update-akasha-os.py'
+    progress = xbmcgui.DialogProgress()
+    progress.create('Akasha OS - Mise a jour', 'Preparation...')
+
+    proc = subprocess.Popen(
+        ['python3', updater, '--reboot'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+
+    pct = 0
+    stage = 'Initialisation'
+    while proc.poll() is None:
+        line = proc.stdout.readline()
+        if not line:
+            xbmc.sleep(200)
+            continue
+
+        # Parse progress markers
+        if line.startswith('### PROGRESS:'):
+            try:
+                pct = int(line.split(':', 1)[1].strip())
+            except:
+                pass
+        elif line.startswith('### STAGE:'):
+            stage = line.split(':', 1)[1].strip()
+        elif line.startswith('### '):
+            pass
+        else:
+            # Real log line; show last meaningful one
+            if not line.startswith('[') and line.strip():
+                stage = line.strip()[:60]
+
+        progress.update(pct, 'Etape : {}'.format(stage))
+        xbmc.sleep(50)
+
+    # Drain remaining output
+    for line in proc.stdout:
+        pass
+
+    progress.close()
+
+    if proc.returncode != 0:
+        xbmcgui.Dialog().ok('Akasha OS - Erreur', 'La mise a jour a echoue.\nVoir le log.')
+    else:
+        # Reboot is handled by the script, but if not this dialog will appear briefly
+        xbmcgui.Dialog().ok('Akasha OS - Redemarrage', 'Mise a jour terminee.\nRedemarrage en cours...')
+
+def get_akasha_version():
+    try:
+        with open('/storage/.config/akasha-os/VERSION') as f:
+            return f.read().strip()
+    except:
+        return 'Inconnue'
+
 def show_system_info():
     temp = get_cpu_temp()
     fan = get_fan_status()
     wifi = get_wifi_status()
+    version = get_akasha_version()
     
     try:
         result = subprocess.run(['uptime', '-p'], capture_output=True, text=True, timeout=3)
@@ -150,14 +262,15 @@ def show_system_info():
         freq = 'Inconnu'
 
     msg = (
+        'Version Akasha OS : {}\n'
         'Temperature CPU : {}C\n'
         'Ventilateur : {}\n'
         'WiFi : {}\n'
         'Memoire : {}\n'
         'CPU : {} @ {}\n'
         'Uptime : {}'
-    ).format(temp, fan, wifi, mem_str, governor, freq, uptime_str)
-    
+    ).format(version, temp, fan, wifi, mem_str, governor, freq, uptime_str)
+
     xbmcgui.Dialog().textviewer('Akasha - Infos Systeme', msg)
 
 def main():
@@ -166,7 +279,11 @@ def main():
         shutdown_min = get_shutdown_time()
         screensaver_min = get_screensaver_time()
         
+        version = get_akasha_version()
+
         options = [
+            '[B]--- Mise a jour ---[/B]',
+            '  Verifier / Mettre a jour Akasha OS (v{})'.format(version),
             '[B]--- Infos Systeme ---[/B]',
             '  Voir les infos systeme (CPU {}C)'.format(temp),
             '[B]--- Veille & Extinction ---[/B]',
@@ -188,8 +305,10 @@ def main():
         if choice < 0:
             break
         elif choice == 1:
-            show_system_info()
+            show_update_dialog()
         elif choice == 3:
+            show_system_info()
+        elif choice == 5:
             # Changer délai extinction
             values = ['Desactive', '15 min', '30 min', '45 min', '60 min', '90 min', '120 min']
             int_values = [0, 15, 30, 45, 60, 90, 120]
@@ -198,7 +317,7 @@ def main():
                 set_shutdown_time(int_values[sel])
                 set_shutdown_state(0)
                 dialog.notification('Akasha', 'Extinction auto: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 4:
+        elif choice == 6:
             # Changer délai screensaver
             values = ['1 min', '3 min', '5 min', '10 min', '15 min', '20 min', '30 min']
             int_values = [1, 3, 5, 10, 15, 20, 30]
@@ -206,28 +325,28 @@ def main():
             if sel >= 0:
                 set_screensaver_time(int_values[sel])
                 dialog.notification('Akasha', 'Screensaver: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 5:
+        elif choice == 7:
             # Forcer shutdown state
             set_shutdown_state(0)
             dialog.notification('Akasha', 'Mode Shutdown + CEC active', xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 7:
+        elif choice == 9:
             test_fan()
-        elif choice == 8:
-            test_cec_standby()
         elif choice == 10:
+            test_cec_standby()
+        elif choice == 12:
             ok = dialog.yesno('Akasha', 'Redemarrer Kodi ?')
             if ok:
                 # Show reboot splash in ExecStartPre when Kodi restarts
                 open('/tmp/.kodi-restart', 'w').close()
                 subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
-        elif choice == 11:
+        elif choice == 13:
             ok = dialog.yesno('Akasha', 'Redemarrer le systeme ?')
             if ok:
                 # Show the reboot splash immediately before Kodi starts to tear down.
                 # The matching systemd service will skip if the same image was shown recently.
                 subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-reboot.png'])
                 subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
-        elif choice == 12:
+        elif choice == 14:
             ok = dialog.yesno('Akasha', 'Eteindre le systeme ?\n(La TV sera aussi eteinte via CEC)')
             if ok:
                 # Show the shutdown splash and turn the TV off via CEC before the system

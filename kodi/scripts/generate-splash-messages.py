@@ -85,7 +85,7 @@ def add_text(image_path, text, output_path, font_size=None):
     import subprocess
     if os.path.exists("/storage/ffmpeg"):
         subprocess.run([
-            "/storage/ffmpeg", "-hide_banner", "-loglevel", "error",
+            "/storage/ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
             "-i", output_path,
             "-vf", "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2",
             "-pix_fmt", "rgb565le", "-f", "rawvideo", raw_path
