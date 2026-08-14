@@ -41,6 +41,7 @@ $SCP "$SCRIPT_DIR/system/cec-standby.sh" "root@$PI_IP:/storage/.config/cec-stand
 $SSH "chmod +x /storage/.config/autostart.sh /storage/.config/cec-standby.sh"
 $SSH "mkdir -p /storage/.config/system.d"
 $SCP "$SCRIPT_DIR/system/system.d/cec-tv.service" "root@$PI_IP:/storage/.config/system.d/cec-tv.service"
+$SCP "$SCRIPT_DIR/system/system.d/cec-tv.service.d/override.conf" "root@$PI_IP:/storage/.config/system.d/cec-tv.service.d/override.conf"
 $SCP "$SCRIPT_DIR/system/system.d/cec-wakeup.service" "root@$PI_IP:/storage/.config/system.d/cec-wakeup.service"
 $SCP "$SCRIPT_DIR/system/system.d/splash-poweroff.service" "root@$PI_IP:/storage/.config/system.d/splash-poweroff.service"
 $SCP "$SCRIPT_DIR/system/system.d/splash-reboot.service" "root@$PI_IP:/storage/.config/system.d/splash-reboot.service"

@@ -6,8 +6,8 @@ Before=poweroff.target systemd-poweroff.service
 
 [Service]
 Type=oneshot
-ExecStart=/storage/.kodi/scripts/show-splash.sh /storage/.kodi/media/splash-shutdown.png
-TimeoutStartSec=5
+ExecStart=/storage/.kodi/scripts/show-splash.sh /storage/.kodi/media/splash-shutdown.png 1
+TimeoutStartSec=15
 
 [Install]
 WantedBy=poweroff.target
