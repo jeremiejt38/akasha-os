@@ -1,6 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <shortcuts>
     <shortcut>
+        <label>Akasha</label>
+        <label2>Custom Shortcut</label2>
+        <defaultID>akasha</defaultID>
+        <icon>special://home/addons/script.akasha.settings/icon.png</icon>
+        <action>RunAddon(script.akasha.settings)</action>
+    </shortcut>
+    <shortcut>
         <label>342</label>
         <label2>Common Shortcut</label2>
         <defaultID>movies</defaultID>
@@ -43,12 +50,5 @@
         <icon>special://skin/extras/icons/livetv.png</icon>
         <action>ActivateWindow(TVChannels)</action>
         <visible>PVR.HasTVChannels</visible>
-    </shortcut>
-    <shortcut>
-        <label>Akasha</label>
-        <label2>Custom Shortcut</label2>
-        <defaultID>akasha</defaultID>
-        <icon>special://home/addons/script.akasha.settings/icon.png</icon>
-        <action>RunAddon(script.akasha.settings)</action>
     </shortcut>
 </shortcuts>
