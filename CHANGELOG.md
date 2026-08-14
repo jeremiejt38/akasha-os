@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.10.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.9.1...akasha-os-v0.10.0) (2026-08-14)
+
+
+### Features
+
+* **cec:** wake TV as early as possible during boot ([0caf478](https://github.com/jeremiejt38/akasha-os/commit/0caf478e302efb9f1a98ca13f59b151a35632efc))
+* **skin:** Akasha OS branding on startup screen ([b7cf4c1](https://github.com/jeremiejt38/akasha-os/commit/b7cf4c1845a669c6902eab783ced32052003cdf7))
+* **splash:** display branded shutdown/reboot splash with message ([b93da90](https://github.com/jeremiejt38/akasha-os/commit/b93da90b2c84eee23b82a49142173d1a315acdbd))
+* **splash:** pre-convert shutdown/reboot images to raw framebuffer ([5455905](https://github.com/jeremiejt38/akasha-os/commit/54559059fe83de196b3f07a41dc9853f8b4f379e))
+* **update:** full Akasha OS self-update system with LibreELEC/Kodi lock ([07898a0](https://github.com/jeremiejt38/akasha-os/commit/07898a0a026e9a7d2ae16b296c49ef10678db1e3))
+
+
+### Bug Fixes
+
+* **cec:** ensure TV CEC standby works during poweroff ([fee6d45](https://github.com/jeremiejt38/akasha-os/commit/fee6d455109f9e8600fb4329643e3933046af651))
+* **splash:** show shutdown/reboot image before Kodi tears down ([2ba5aee](https://github.com/jeremiejt38/akasha-os/commit/2ba5aee464b35b0ef2a668d6227c91c79d566881))
+* **wifi:** allow WiFi autoconnect when ethernet is unplugged ([d146896](https://github.com/jeremiejt38/akasha-os/commit/d146896b095e7011a5e9969affd77125f695aebb))
+* **wifi:** resolve connectivity drops and conflicts ([2ddce09](https://github.com/jeremiejt38/akasha-os/commit/2ddce0926d022688e37d38f829ae59f7c6c5379f))
+
+
+### Miscellaneous Chores
+
+* force release 0.10.0 ([10a5627](https://github.com/jeremiejt38/akasha-os/commit/10a5627dcd422be84aa74aa706854d5157fe05d1))
+
 ## [0.9.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.9.0...akasha-os-v0.9.1) (2026-08-14)
 
 
