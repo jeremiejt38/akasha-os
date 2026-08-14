@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.1...akasha-os-v0.10.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ci:** do not mark image build releases as "latest" ([97dd63d](https://github.com/jeremiejt38/akasha-os/commit/97dd63d98b89c0438e3fa953cc9aa8d6d06d979a))
+* **install:** derive Akasha OS version from package.json ([97dd63d](https://github.com/jeremiejt38/akasha-os/commit/97dd63d98b89c0438e3fa953cc9aa8d6d06d979a))
+
 ## [0.10.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.0...akasha-os-v0.10.1) (2026-08-14)
 
 
