@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.6...akasha-os-v0.10.7) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ota:** extend post-update reboot countdown to 5 seconds ([122c63e](https://github.com/jeremiejt38/akasha-os/commit/122c63ea3718bb4e55558bf6fb10763413b62ed9))
+
 ## [0.10.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.5...akasha-os-v0.10.6) (2026-08-14)
 
 
