@@ -159,6 +159,7 @@ def show_update_dialog():
         'Nouvelle version disponible : {}\n'
         'Version actuelle : {}\n\n'
         'Changelog :\n{}\n\n'
+        'Attention : ne pas eteindre le systeme pendant la mise a jour.\n'
         'Lancer la mise a jour ?'
     ).format(status.get('remote_version'), status.get('local_version'), changelog)
 
