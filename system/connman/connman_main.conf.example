@@ -23,7 +23,7 @@ InputRequestTimeout = 1
 # When BackgroundScanning is false, ConnMan will not perform any scan
 # regardless of wifi is connected or not, unless it is requested by
 # the user through a D-Bus call.
-BackgroundScanning = true
+BackgroundScanning = false
 
 # Assume that service gateways also function as timeservers.
 UseGatewaysAsTimeservers = false
@@ -89,7 +89,7 @@ AllowHostnameUpdates = false
 # user will be used until going out of network coverage. With this
 # setting enabled applications will notice more network breaks than
 # normal. Default value is false.
-# SingleConnectedTechnology = false
+SingleConnectedTechnology = true
 
 # List of technologies for which tethering is allowed separated by ",".
 # The default value is wifi,bluetooth,gadget. Only those technologies

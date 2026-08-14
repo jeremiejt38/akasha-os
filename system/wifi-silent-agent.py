@@ -37,7 +37,7 @@ def log_event(message):
 
 
 def load_known_networks():
-    """Parse the connman provisioning file into {ssid_name: passphrase}."""
+    """Parse the connman provisioning file into {ssid_name: (passphrase, ssid_hex)}."""
     networks = {}
     parser = configparser.ConfigParser()
     try:
@@ -50,9 +50,25 @@ def load_known_networks():
             continue
         name = parser.get(section, "Name", fallback=None)
         passphrase = parser.get(section, "Passphrase", fallback=None)
+        ssid_hex = parser.get(section, "SSID", fallback=None)
+        if not ssid_hex and name:
+            # Derive hex from the displayed name; this matches how connman encodes simple SSIDs
+            ssid_hex = name.encode("utf-8").hex()
         if name and passphrase:
-            networks[name] = passphrase
+            networks[name] = (passphrase, ssid_hex.lower() if ssid_hex else None)
     return networks
+
+
+def extract_service_ssid_hex(service_path):
+    """Extract the hex SSID from a connman service object path.
+
+    Service paths look like:
+      /net/connman/service/wifi_<mac>_<ssidhex>_managed_psk
+    """
+    parts = service_path.rstrip("/").split("_")
+    if len(parts) >= 4 and parts[0].endswith("/service/wifi"):
+        return parts[2].lower()
+    return None
 
 
 @ravel.interface(ravel.INTERFACE.SERVER, name="net.connman.Agent")
@@ -75,12 +91,23 @@ class SilentAgent:
         networks = load_known_networks()
         response = {}
         wanted_name = None
-        for ssid_name in networks:
-            if ssid_name in service:
+        wanted_pass = None
+
+        # connman service paths contain the hex-encoded SSID, not the plain name.
+        # Match either by that hex value or by the human-readable name as a fallback.
+        service_ssid_hex = extract_service_ssid_hex(service)
+        for ssid_name, (passphrase, ssid_hex) in networks.items():
+            if service_ssid_hex and ssid_hex and service_ssid_hex == ssid_hex:
                 wanted_name = ssid_name
+                wanted_pass = passphrase
                 break
-        if wanted_name and "Passphrase" in fields:
-            response["Passphrase"] = ("s", networks[wanted_name])
+            if ssid_name and ssid_name in service:
+                wanted_name = ssid_name
+                wanted_pass = passphrase
+                break
+
+        if wanted_name and wanted_pass and "Passphrase" in fields:
+            response["Passphrase"] = ("s", wanted_pass)
             log_event("RequestInput(service=%s) — replied with known passphrase" % service)
         else:
             log_event(
