@@ -23,7 +23,7 @@ InputRequestTimeout = 1
 # When BackgroundScanning is false, ConnMan will not perform any scan
 # regardless of wifi is connected or not, unless it is requested by
 # the user through a D-Bus call.
-BackgroundScanning = false
+BackgroundScanning = true
 
 # Assume that service gateways also function as timeservers.
 UseGatewaysAsTimeservers = false
