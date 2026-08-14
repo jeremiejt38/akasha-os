@@ -18,6 +18,10 @@ log() {
 mkdir -p /storage/.config/akasha-os
 python3 -c "import json; print(json.load(open('$SCRIPT_DIR/package.json'))['version'])" > /storage/.config/akasha-os/VERSION
 
+# Remove any stale update-status marker so the startup dialogs are not shown
+# for an update that happened in a previous boot.
+rm -f /storage/.config/akasha-os/update-status.json
+
 log "=== Akasha OS local installer ==="
 log "Source: $SCRIPT_DIR"
 

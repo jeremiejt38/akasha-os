@@ -10,12 +10,55 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import os
+import json
 
 INTRO_PATH = "/storage/.kodi/media/splash-intro.mp4"
 FLAG_FILE = "/tmp/.akasha-intro-played"
+UPDATE_STATUS_FILE = "/storage/.config/akasha-os/update-status.json"
 
 addon = xbmcaddon.Addon()
 monitor = xbmc.Monitor()
+
+
+def show_update_success():
+    """If an OTA update just happened, show success + changelog dialogs."""
+    if not os.path.exists(UPDATE_STATUS_FILE):
+        return
+
+    try:
+        with open(UPDATE_STATUS_FILE, 'r') as f:
+            status = json.load(f)
+    except Exception:
+        os.remove(UPDATE_STATUS_FILE)
+        return
+
+    old_version = status.get('old_version', 'Inconnue')
+    new_version = status.get('new_version', 'Inconnue')
+    changelog = status.get('changelog', '')
+
+    # Wait a moment for Kodi to be fully ready
+    monitor.waitForAbort(1)
+
+    xbmc.log("Akasha Splash: showing update success dialog for {}".format(new_version), xbmc.LOGINFO)
+
+    dialog = xbmcgui.Dialog()
+    dialog.ok(
+        'Akasha OS - Mise a jour reussie',
+        'Le systeme a ete mis a jour avec succes.\n\n'
+        '{} -> {}'.format(old_version, new_version)
+    )
+
+    if changelog:
+        dialog.textviewer(
+            'Akasha OS - Changelog v{}'.format(new_version),
+            changelog
+        )
+
+    # Delete the status file so the dialogs are not shown again
+    try:
+        os.remove(UPDATE_STATUS_FILE)
+    except Exception:
+        pass
 
 
 def play_intro():
@@ -57,4 +100,5 @@ def play_intro():
     xbmc.log("Akasha Splash: intro finished", xbmc.LOGINFO)
 
 
+show_update_success()
 play_intro()

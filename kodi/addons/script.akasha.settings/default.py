@@ -145,37 +145,38 @@ def show_update_dialog():
 
     if status.get('status') == 'up_to_date':
         dialog.ok(
-            'Akasha OS - Mise a jour (OTA)',
+            'Akasha OS - Mise a jour',
             'Vous etes a jour.\nVersion actuelle : {}'.format(status.get('local_version', 'Inconnue'))
         )
         return
 
     if status.get('status') != 'update':
-        dialog.ok('Akasha OS - Mise a jour (OTA)', 'Erreur : {}'.format(status.get('message', 'Inconnue')))
+        dialog.ok('Akasha OS - Mise a jour', 'Erreur : {}'.format(status.get('message', 'Inconnue')))
         return
 
+    old_version = status.get('local_version', 'Inconnue')
+    new_version = status.get('remote_version', 'Inconnue')
     changelog = status.get('changelog', '')[:800]
     msg = (
-        'Nouvelle version disponible : {}\n'
-        'Version actuelle : {}\n\n'
+        'Mise a jour disponible : {} -> {}\n\n'
         'Changelog :\n{}\n\n'
         'Attention : ne pas eteindre le systeme pendant la mise a jour.\n'
         'Lancer la mise a jour ?'
-    ).format(status.get('remote_version'), status.get('local_version'), changelog)
+    ).format(old_version, new_version, changelog)
 
-    if not dialog.yesno('Akasha OS - Mise a jour (OTA)', msg):
+    if not dialog.yesno('Akasha OS - Mise a jour', msg):
         return
 
-    apply_update()
+    apply_update(status)
 
-def apply_update():
-    """Run the updater with a progress dialog."""
+def apply_update(status):
+    """Run the updater with a progress dialog, then reboot."""
     updater = '/storage/.kodi/scripts/update-akasha-os.py'
     progress = xbmcgui.DialogProgress()
-    progress.create('Akasha OS - Mise a jour (OTA)', 'Preparation...')
+    progress.create('Akasha OS - Mise a jour', 'Preparation...')
 
     proc = subprocess.Popen(
-        ['python3', updater, '--reboot'],
+        ['python3', updater],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True
@@ -215,9 +216,41 @@ def apply_update():
 
     if proc.returncode != 0:
         xbmcgui.Dialog().ok('Akasha OS - Erreur', 'La mise a jour a echoue.\nVoir le log.')
-    else:
-        # Reboot is handled by the script, but if not this dialog will appear briefly
-        xbmcgui.Dialog().ok('Akasha OS - Redemarrage', 'Mise a jour terminee.\nRedemarrage en cours...')
+        return
+
+    old_version = status.get('local_version', 'Inconnue')
+    new_version = status.get('remote_version', 'Inconnue')
+    changelog = status.get('changelog', '')
+
+    # Persist update info so the startup service can show it after reboot
+    try:
+        import json as _json
+        os.makedirs('/storage/.config/akasha-os', exist_ok=True)
+        with open('/storage/.config/akasha-os/update-status.json', 'w') as f:
+            _json.dump({
+                'old_version': old_version,
+                'new_version': new_version,
+                'changelog': changelog
+            }, f)
+    except Exception:
+        pass
+
+    xbmcgui.Dialog().ok(
+        'Akasha OS - Mise a jour terminee',
+        'Mise a jour reussie.\n\n{} -> {}\n\n'
+        'Le systeme va redemarrer pour appliquer les changements.'.format(old_version, new_version)
+    )
+
+    # Show a brief "Reboot in progress" progress so the message is visible
+    reboot_progress = xbmcgui.DialogProgress()
+    reboot_progress.create('Akasha OS - Redemarrage', 'Redemarrage en cours, veuillez patienter...')
+    for i in range(3, 0, -1):
+        reboot_progress.update(int((4 - i) * 25), 'Redemarrage dans {}s...'.format(i))
+        xbmc.sleep(1000)
+    reboot_progress.close()
+
+    # Trigger reboot from the UI so the user sees the whole sequence
+    subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
 
 def get_akasha_version():
     try:
@@ -283,7 +316,7 @@ def main():
         version = get_akasha_version()
 
         options = [
-            '[B]--- Mise a jour (OTA) ---[/B]',
+            '[B]--- Mise a jour ---[/B]',
             '  Verifier / Mettre a jour Akasha OS (v{})'.format(version),
             '[B]--- Infos Systeme ---[/B]',
             '  Voir les infos systeme (CPU {}C)'.format(temp),
