@@ -156,18 +156,36 @@ def show_update_dialog():
 
     old_version = status.get('local_version', 'Inconnue')
     new_version = status.get('remote_version', 'Inconnue')
-    changelog = status.get('changelog', '')[:800]
-    msg = (
-        'Mise a jour disponible : {} -> {}\n\n'
-        'Changelog :\n{}\n\n'
-        'Attention : ne pas eteindre le systeme pendant la mise a jour.\n'
-        'Lancer la mise a jour ?'
-    ).format(old_version, new_version, changelog)
+    changelog = status.get('changelog', '')
 
-    if not dialog.yesno('Akasha OS - Mise a jour', msg):
+    while True:
+        choice = dialog.yesnocustom(
+            'Akasha OS - Mise a jour',
+            'Une nouvelle version est disponible.\n\n'
+            '{} -> {}\n\n'
+            'Attention : ne pas eteindre le systeme pendant la mise a jour.'.format(old_version, new_version),
+            'Changelog',
+            nolabel='Ignorer',
+            yeslabel='Mettre a jour',
+            defaultbutton=xbmcgui.DLG_YESNO_YES_BTN
+        )
+
+        if choice == 2:
+            if changelog:
+                xbmcgui.Dialog().textviewer(
+                    'Akasha OS - Changelog v{}'.format(new_version),
+                    changelog[:2000]
+                )
+            else:
+                xbmcgui.Dialog().ok('Akasha OS - Changelog', 'Aucun changelog disponible.')
+            continue
+
+        if choice == 1:
+            apply_update(status)
+            return
+
+        # choice == 0 or -1 -> cancel
         return
-
-    apply_update(status)
 
 def apply_update(status):
     """Run the updater with a progress dialog, then reboot."""

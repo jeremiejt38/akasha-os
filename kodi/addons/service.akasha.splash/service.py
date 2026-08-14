@@ -181,25 +181,20 @@ def check_for_updates_at_boot():
     old_version = status.get('local_version', 'Inconnue')
     changelog = status.get('changelog', '')
 
+    heading = 'Akasha OS - Mise a jour'
     while True:
-        options = [
-            'Changelog',
-            'Ignorer cette version',
-            '[B][COLOR blue]Mettre a jour[/COLOR][/B]',
-        ]
-
-        heading = 'Akasha OS - Mise a jour : {} -> {}'.format(old_version, new_version)
-        choice = dialog.select(
+        choice = dialog.yesnocustom(
             heading,
-            options,
-            preselect=2
+            'Une nouvelle version est disponible.\n\n'
+            '{} -> {}\n\n'
+            'Que souhaitez-vous faire ?'.format(old_version, new_version),
+            'Changelog',
+            nolabel='Ignorer',
+            yeslabel='Mettre a jour',
+            defaultbutton=xbmcgui.DLG_YESNO_YES_BTN
         )
 
-        if choice < 0:
-            # User pressed Back / escape -> treat as ignore for this boot
-            break
-
-        if choice == 0:
+        if choice == 2:
             if changelog:
                 dialog.textviewer(
                     'Akasha OS - Changelog v{}'.format(new_version),
@@ -210,13 +205,13 @@ def check_for_updates_at_boot():
             continue
 
         if choice == 1:
-            _set_ignored(new_version)
-            xbmc.log("Akasha Splash: update {} will be ignored".format(new_version), xbmc.LOGINFO)
-            break
-
-        if choice == 2:
             _apply_update(status)
             return
+
+        # choice == 0 (No / Ignorer), -1 (Back / escape), or any other
+        _set_ignored(new_version)
+        xbmc.log("Akasha Splash: update {} will be ignored".format(new_version), xbmc.LOGINFO)
+        break
 
 
 def show_update_success():
