@@ -174,6 +174,10 @@ if [ -d "$SKIN_DIR" ]; then
     # Patch startup logo / text
     python3 "$SCRIPT_DIR/skin-patches/patch_startup_logo.py" "$SKIN_DIR"
 
+    # Patch DialogConfirm so the OK/Yes button is focused by default
+    # (makes the A button close Dialog.ok / yesnocustom dialogs)
+    python3 "$SCRIPT_DIR/skin-patches/patch_dialog_default_control.py" "$SKIN_DIR"
+
     # Force skinshortcuts rebuild
     rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash
 else

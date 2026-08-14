@@ -172,7 +172,7 @@ def show_update_dialog():
 
         if choice == 2:
             if changelog:
-                xbmcgui.Dialog().textviewer(
+                xbmcgui.Dialog().ok(
                     'Akasha OS - Changelog v{}'.format(new_version),
                     changelog[:2000]
                 )

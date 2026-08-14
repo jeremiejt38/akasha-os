@@ -239,7 +239,7 @@ def show_update_success():
     )
 
     if changelog:
-        dialog.textviewer(
+        dialog.ok(
             'Akasha OS - Changelog v{}'.format(new_version),
             changelog
         )
