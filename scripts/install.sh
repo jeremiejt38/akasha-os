@@ -122,6 +122,13 @@ mkdir -p /storage/.kodi/scripts/cloud-gaming
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/Dockerfile" /storage/.kodi/scripts/cloud-gaming/
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/entrypoint.sh" /storage/.kodi/scripts/cloud-gaming/
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/launch.sh" /storage/.kodi/scripts/cloud-gaming/
+
+# Enable Akasha addons in Kodi's database so services/programs start automatically
+sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
+    "INSERT OR REPLACE INTO installed (addonID, enabled, installDate) VALUES
+        ('service.akasha.splash', 1, datetime('now')),
+        ('script.akasha.settings', 1, datetime('now')),
+        ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
 chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh \
           /storage/.kodi/scripts/cloud-gaming/entrypoint.sh \
