@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.15](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.14...akasha-os-v0.10.15) (2026-08-14)
+
+
+### Bug Fixes
+
+* **splash:** pre-Kodi splash with audio and cleaner OTA dialogs ([256c3fc](https://github.com/jeremiejt38/akasha-os/commit/256c3fc29fd059e7470bc1e99cf00fd79e5c51c2))
+
 ## [0.10.14](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.13...akasha-os-v0.10.14) (2026-08-14)
 
 
