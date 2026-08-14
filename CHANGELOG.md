@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.11](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.10...akasha-os-v0.10.11) (2026-08-14)
+
+
+### Bug Fixes
+
+* **splash:** play intro video before update checks ([3086923](https://github.com/jeremiejt38/akasha-os/commit/3086923de823279f31af2eb6f788adad63de6c1a))
+
 ## [0.10.10](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.9...akasha-os-v0.10.10) (2026-08-14)
 
 
