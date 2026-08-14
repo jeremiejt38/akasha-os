@@ -81,10 +81,11 @@ jobs:
           IMG="${FILENAME%.gz}"
           echo "img=$IMG" >> "$GITHUB_OUTPUT"
 
-          # Find partition offsets
-          BOOT_OFFSET=$(fdisk -l "$IMG" | grep "W95 FAT" | awk '{print $2}')
+          # Find partition offsets (Device,Start,Type only - avoids the
+          # ambiguous "Boot" flag "*" column shifting awk field numbers)
+          BOOT_OFFSET=$(fdisk -l -o Device,Start,Type "$IMG" | grep "W95 FAT" | awk '{print $2}')
           # Storage partition (ext4) - second partition
-          STORAGE_OFFSET=$(fdisk -l "$IMG" | grep "Linux" | awk '{print $2}')
+          STORAGE_OFFSET=$(fdisk -l -o Device,Start,Type "$IMG" | grep "Linux" | awk '{print $2}')
 
           BOOT_OFFSET_BYTES=$((BOOT_OFFSET * 512))
           STORAGE_OFFSET_BYTES=$((STORAGE_OFFSET * 512))
