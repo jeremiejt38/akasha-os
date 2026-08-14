@@ -1,8 +1,8 @@
 [Unit]
-Description=Set WiFi regulatory domain (FR) before connman
+Description=Set WiFi regulatory domain (FR) before iwd/connman
 DefaultDependencies=no
-After=sys-subsystem-net-devices-wlan0.device
-Before=connman.service
+After=sys-subsystem-net-devices-wlan0.device dbus.service
+Before=connman.service iwd.service dbus-net.connman.iwd.service
 Wants=sys-subsystem-net-devices-wlan0.device
 
 [Service]
