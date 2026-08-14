@@ -60,9 +60,10 @@ def get_local_version():
 
 
 def parse_version(v):
-    """Convert a semver string like 'v0.9.0' or '0.9.0' to a tuple."""
-    v = v.lstrip("v")
-    m = re.match(r"(\d+)\.(\d+)\.(\d+)", v)
+    """Convert a semver string like 'akasha-os-v0.10.0' or '0.10.0' to a tuple."""
+    # Release-please tags can be 'v0.10.0' or 'akasha-os-v0.10.0';
+    # search for the first X.Y.Z pattern in the string.
+    m = re.search(r"(\d+)\.(\d+)\.(\d+)", v)
     if not m:
         return (0, 0, 0)
     return tuple(int(x) for x in m.groups())
@@ -89,7 +90,8 @@ def fetch_latest_release():
 
     # Prefer a release asset named akasha-os-<version>.tar.gz
     tarball_url = None
-    version = tag.lstrip("v")
+    version_match = re.search(r"(\d+\.\d+\.\d+)", tag)
+    version = version_match.group(1) if version_match else tag.lstrip("v")
     for asset in assets:
         if asset.get("name") == f"akasha-os-{version}.tar.gz":
             tarball_url = asset.get("browser_download_url")
