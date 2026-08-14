@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.8](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.7...akasha-os-v0.10.8) (2026-08-14)
+
+
+### Bug Fixes
+
+* **install:** enable Akasha addons in Kodi database ([611a2d7](https://github.com/jeremiejt38/akasha-os/commit/611a2d7769b9c026976dda10dae33b424531b1e6))
+
 ## [0.10.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.6...akasha-os-v0.10.7) (2026-08-14)
 
 
