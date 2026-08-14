@@ -178,7 +178,7 @@ def check_for_updates_at_boot():
         ]
 
         choice = dialog.select(
-            'Akasha OS - Mise a jour disponible',
+            'Akasha OS - Nouvelle version disponible',
             options,
             preselect=2
         )
