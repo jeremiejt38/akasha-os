@@ -1,6 +1,6 @@
 {
   "name": "akasha-os",
-  "version": "0.10.7",
+  "version": "0.10.8",
   "description": "Custom LibreELEC 12 distribution for Raspberry Pi 4 — HTPC, media streaming, and cloud gaming",
   "author": "Jeremie",
   "license": "MIT",
