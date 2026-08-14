@@ -188,8 +188,9 @@ def check_for_updates_at_boot():
             '[B][COLOR blue]Mettre a jour[/COLOR][/B]',
         ]
 
+        heading = 'Akasha OS - Mise a jour : {} -> {}'.format(old_version, new_version)
         choice = dialog.select(
-            'Akasha OS - Nouvelle version disponible',
+            heading,
             options,
             preselect=2
         )
