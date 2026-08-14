@@ -145,13 +145,13 @@ def show_update_dialog():
 
     if status.get('status') == 'up_to_date':
         dialog.ok(
-            'Akasha OS - Mise a jour',
+            'Akasha OS - Mise a jour (OTA)',
             'Vous etes a jour.\nVersion actuelle : {}'.format(status.get('local_version', 'Inconnue'))
         )
         return
 
     if status.get('status') != 'update':
-        dialog.ok('Akasha OS - Mise a jour', 'Erreur : {}'.format(status.get('message', 'Inconnue')))
+        dialog.ok('Akasha OS - Mise a jour (OTA)', 'Erreur : {}'.format(status.get('message', 'Inconnue')))
         return
 
     changelog = status.get('changelog', '')[:800]
@@ -162,7 +162,7 @@ def show_update_dialog():
         'Lancer la mise a jour ?'
     ).format(status.get('remote_version'), status.get('local_version'), changelog)
 
-    if not dialog.yesno('Akasha OS - Mise a jour', msg):
+    if not dialog.yesno('Akasha OS - Mise a jour (OTA)', msg):
         return
 
     apply_update()
@@ -171,7 +171,7 @@ def apply_update():
     """Run the updater with a progress dialog."""
     updater = '/storage/.kodi/scripts/update-akasha-os.py'
     progress = xbmcgui.DialogProgress()
-    progress.create('Akasha OS - Mise a jour', 'Preparation...')
+    progress.create('Akasha OS - Mise a jour (OTA)', 'Preparation...')
 
     proc = subprocess.Popen(
         ['python3', updater, '--reboot'],
@@ -282,7 +282,7 @@ def main():
         version = get_akasha_version()
 
         options = [
-            '[B]--- Mise a jour ---[/B]',
+            '[B]--- Mise a jour (OTA) ---[/B]',
             '  Verifier / Mettre a jour Akasha OS (v{})'.format(version),
             '[B]--- Infos Systeme ---[/B]',
             '  Voir les infos systeme (CPU {}C)'.format(temp),
