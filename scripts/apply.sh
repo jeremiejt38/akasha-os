@@ -41,7 +41,13 @@ $SCP "$SCRIPT_DIR/system/cec-standby.sh" "root@$PI_IP:/storage/.config/cec-stand
 $SSH "chmod +x /storage/.config/autostart.sh /storage/.config/cec-standby.sh"
 $SSH "mkdir -p /storage/.config/system.d"
 $SCP "$SCRIPT_DIR/system/system.d/cec-tv.service" "root@$PI_IP:/storage/.config/system.d/cec-tv.service"
-$SSH "systemctl daemon-reload && systemctl enable cec-tv.service"
+$SCP "$SCRIPT_DIR/system/system.d/cec-wakeup.service" "root@$PI_IP:/storage/.config/system.d/cec-wakeup.service"
+$SCP "$SCRIPT_DIR/system/system.d/splash-poweroff.service" "root@$PI_IP:/storage/.config/system.d/splash-poweroff.service"
+$SCP "$SCRIPT_DIR/system/system.d/splash-reboot.service" "root@$PI_IP:/storage/.config/system.d/splash-reboot.service"
+$SSH "systemctl daemon-reload && systemctl enable cec-tv.service cec-wakeup.service splash-poweroff.service splash-reboot.service"
+# Drop-in: show reboot splash on Kodi restart
+$SSH "mkdir -p /storage/.config/system.d/kodi.service.d"
+$SCP "$SCRIPT_DIR/system/system.d/kodi.service.d/splash-restart.conf" "root@$PI_IP:/storage/.config/system.d/kodi.service.d/splash-restart.conf"
 
 echo "[3/9] Deploying Kodi splash + boot intro video..."
 $SSH "mkdir -p /storage/.kodi/media"
@@ -53,6 +59,16 @@ $SSH "mkdir -p /storage/.kodi/addons/service.akasha.splash"
 $SCP -r "$SCRIPT_DIR/kodi/addons/service.akasha.splash/" "root@$PI_IP:/storage/.kodi/addons/service.akasha.splash/"
 # Enable the addon in Kodi's addon database
 $SSH "sqlite3 /storage/.kodi/userdata/Database/Addons33.db \"INSERT OR REPLACE INTO installed (addonID, enabled, installDate) VALUES ('service.akasha.splash', 1, datetime('now'));\" 2>/dev/null || true"
+
+echo "[3c/9] Deploying shutdown/reboot splash scripts & images..."
+$SSH "mkdir -p /storage/.kodi/scripts"
+$SCP "$SCRIPT_DIR/kodi/scripts/show-splash.sh" "root@$PI_IP:/storage/.kodi/scripts/show-splash.sh"
+$SCP "$SCRIPT_DIR/kodi/scripts/show-splash-if-restart.sh" "root@$PI_IP:/storage/.kodi/scripts/show-splash-if-restart.sh"
+$SCP "$SCRIPT_DIR/kodi/scripts/generate-splash-messages.py" "root@$PI_IP:/storage/.kodi/scripts/generate-splash-messages.py"
+$SSH "chmod +x /storage/.kodi/scripts/show-splash.sh /storage/.kodi/scripts/show-splash-if-restart.sh"
+$SSH "python3 /storage/.kodi/scripts/generate-splash-messages.py"
+
+$SSH "systemctl daemon-reload"
 
 echo "[4/9] Deploying Akasha Settings addon..."
 $SSH "mkdir -p /storage/.kodi/addons/script.akasha.settings"

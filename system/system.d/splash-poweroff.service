@@ -1,0 +1,13 @@
+[Unit]
+Description=Akasha OS Poweroff Splash
+DefaultDependencies=no
+After=kodi.service
+Before=poweroff.target systemd-poweroff.service
+
+[Service]
+Type=oneshot
+ExecStart=/storage/.kodi/scripts/show-splash.sh /storage/.kodi/media/splash-shutdown.png
+TimeoutStartSec=5
+
+[Install]
+WantedBy=poweroff.target

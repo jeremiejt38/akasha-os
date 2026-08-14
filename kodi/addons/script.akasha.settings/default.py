@@ -217,16 +217,19 @@ def main():
         elif choice == 10:
             ok = dialog.yesno('Akasha', 'Redemarrer Kodi ?')
             if ok:
-                xbmc.restart()
+                # Show reboot splash in ExecStartPre when Kodi restarts
+                open('/tmp/.kodi-restart', 'w').close()
+                subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
         elif choice == 11:
             ok = dialog.yesno('Akasha', 'Redemarrer le systeme ?')
             if ok:
-                xbmc.restart()
-                subprocess.Popen(['systemctl', 'reboot'])
+                # splash-reboot.service will display the image during reboot
+                subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
         elif choice == 12:
             ok = dialog.yesno('Akasha', 'Eteindre le systeme ?\n(La TV sera aussi eteinte via CEC)')
             if ok:
-                xbmc.shutdown()
+                # splash-poweroff.service will display the image during shutdown
+                subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
 
 if __name__ == '__main__':
     main()
