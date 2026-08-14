@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.10](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.9...akasha-os-v0.10.10) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ota:** increase update check timeout and add boot diagnostics ([1c79335](https://github.com/jeremiejt38/akasha-os/commit/1c7933539c2f4963d90a1b3b103db1386e2cf8cd))
+
 ## [0.10.9](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.8...akasha-os-v0.10.9) (2026-08-14)
 
 
