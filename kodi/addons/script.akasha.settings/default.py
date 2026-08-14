@@ -166,7 +166,7 @@ def show_update_dialog():
             'Attention : ne pas eteindre le systeme pendant la mise a jour.'.format(old_version, new_version),
             'Changelog',
             nolabel='Ignorer',
-            yeslabel='Mettre a jour',
+            yeslabel='[B][COLOR blue]Mettre a jour[/COLOR][/B]',
             defaultbutton=xbmcgui.DLG_YESNO_YES_BTN
         )
 

@@ -190,7 +190,7 @@ def check_for_updates_at_boot():
             'Que souhaitez-vous faire ?'.format(old_version, new_version),
             'Changelog',
             nolabel='Ignorer',
-            yeslabel='Mettre a jour',
+            yeslabel='[B][COLOR blue]Mettre a jour[/COLOR][/B]',
             defaultbutton=xbmcgui.DLG_YESNO_YES_BTN
         )
 
