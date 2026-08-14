@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.12](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.11...akasha-os-v0.10.12) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ui:** show version arrow in boot-time update dialog ([96da5bb](https://github.com/jeremiejt38/akasha-os/commit/96da5bb2f6f3a1d0592a70f81d7e8c8667bfad22))
+
 ## [0.10.11](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.10...akasha-os-v0.10.11) (2026-08-14)
 
 
