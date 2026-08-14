@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.9](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.8...akasha-os-v0.10.9) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ui:** clearer update-available dialog title ([a52c2f6](https://github.com/jeremiejt38/akasha-os/commit/a52c2f66486e2ed53e624f3ef2eaaeef258f6890))
+
 ## [0.10.8](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.7...akasha-os-v0.10.8) (2026-08-14)
 
 
