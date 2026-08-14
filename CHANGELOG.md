@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.4...akasha-os-v0.10.5) (2026-08-14)
+
+
+### Features
+
+* **ui:** improve OTA update UX with reboot countdown and post-reboot dialogs ([043b076](https://github.com/jeremiejt38/akasha-os/commit/043b07641660dc7e59701a3473ec71a5e7d179f2))
+
 ## [0.10.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.3...akasha-os-v0.10.4) (2026-08-14)
 
 
