@@ -36,10 +36,10 @@ def patch(path, version=''):
     header = '''                <control type="group">
                     <height>160</height>
                     <control type="image">
-                        <left>46</left>
-                        <top>46</top>
-                        <width>359</width>
-                        <height>68</height>
+                        <left>36</left>
+                        <top>36</top>
+                        <width>369</width>
+                        <height>70</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">akasha-title.png</texture>
                     </control>
