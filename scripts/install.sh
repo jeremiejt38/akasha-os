@@ -134,6 +134,11 @@ log "  Installing Akasha Guide addon..."
 rm -rf /storage/.kodi/addons/script.akasha.guide
 cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.guide" /storage/.kodi/addons/
 
+log "  Installing Akasha Ambient addon..."
+rm -rf /storage/.kodi/addons/screensaver.akasha.ambient
+cp -r "$SCRIPT_DIR/kodi/addons/screensaver.akasha.ambient" /storage/.kodi/addons/
+mkdir -p /storage/ambient/photos
+
 # ---------------------------------------------------------------------------
 # 8. Cloud Gaming addon + scripts
 # ---------------------------------------------------------------------------
@@ -153,6 +158,7 @@ sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
         ('service.akasha.overlay', 1, datetime('now')),
         ('script.akasha.settings', 1, datetime('now')),
         ('script.akasha.guide', 1, datetime('now')),
+        ('screensaver.akasha.ambient', 1, datetime('now')),
         ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
 chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh \
@@ -276,6 +282,29 @@ for sid, val in [("general.addonupdates", "1"), ("addons.updatemode", "2"), ("au
 with open(path, "w", encoding="utf-8") as f:
     f.write(data)
 PY
+
+# Enable the Akasha Ambient screensaver by default, but only on the deploy
+# that introduces it: never override a choice the user made afterwards
+# (e.g. switching back to the stock black screensaver from Akasha Settings).
+if [ ! -f /storage/.config/akasha-os/.ambient-bootstrapped ]; then
+    python3 - <<'PY'
+import re
+path = "/storage/.kodi/userdata/guisettings.xml"
+try:
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+except FileNotFoundError:
+    exit(0)
+sid, val = "screensaver.mode", "screensaver.akasha.ambient"
+if 'id="{}"'.format(sid) not in data:
+    data = data.replace("</settings>", '    <setting id="{}">{}</setting>\n</settings>'.format(sid, val))
+else:
+    data = re.sub(r'id="{}"[^>]*>[^<]*<'.format(sid), 'id="{}" default="true">{}<'.format(sid, val), data)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+    touch /storage/.config/akasha-os/.ambient-bootstrapped
+fi
 
 # Disable LibreELEC auto updates
 cat > /storage/.config/akasha-os/libreelec-update-policy.txt <<'EOF'
