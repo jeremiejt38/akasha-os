@@ -13,3 +13,4 @@
 - Keep one authoritative project version (`package.json`, the Node.js SSOT). Keep detailed release history in `CHANGELOG.md` and GitHub Releases, not as a growing README section.
 - Never commit secrets, private data (Pi IP/password, Wi-Fi credentials, etc.) or generated production artifacts (e.g. `splash-reboot.png`/`splash-shutdown.png` are generated at install time, not versioned).
 - The Raspberry Pi (`root@192.168.1.88`, LibreELEC/Kodi) is a real living-room device: restart/shutdown/CEC actions are destructive to test — confirm with the maintainer before triggering a poweroff, or use the less disruptive "Redemarrer Akasha" (Kodi-only restart) path when possible.
+- Talos is enabled for isolated, non-`xbmc*`, non-skin-regex jobs (see `docs/talos-strategy.md` and `docs/talos-instructions.md`). Log every use in `docs/talos-reports.md`.
