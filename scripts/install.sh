@@ -195,6 +195,10 @@ if [ -d "$SKIN_DIR" ]; then
     # (makes the A button close Dialog.ok / yesnocustom dialogs)
     python3 "$SCRIPT_DIR/skin-patches/patch_dialog_default_control.py" "$SKIN_DIR"
 
+    # Patch font13 (native context menus, incl. Akasha Guide) to Montserrat
+    # for visual coherence with the Akasha OS wordmark
+    python3 "$SCRIPT_DIR/skin-patches/patch_font13.py" "$SKIN_DIR"
+
     # Force skinshortcuts rebuild
     rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash
 
