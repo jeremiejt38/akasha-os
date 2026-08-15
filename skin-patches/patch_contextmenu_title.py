@@ -36,7 +36,7 @@ def patch(path, version=''):
     header = '''                <control type="group">
                     <height>160</height>
                     <control type="image">
-                        <left>10</left>
+                        <left>0</left>
                         <top>5</top>
                         <width>400</width>
                         <height>140</height>
