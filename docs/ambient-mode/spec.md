@@ -28,10 +28,8 @@ Le Mode Ambiant est donc livré en deux addons :
 - **`service.akasha.ambient`** : un service qui surveille l'inactivité
   (`xbmc.getGlobalIdleTime()`) et déclenche `script.akasha.ambient` au bout du délai configuré,
   jouant le rôle que jouerait un screensaver natif, sans passer par le mécanisme Kodi concerné par
-  le bug. **Limite connue** : sur l'appareil actuel, l'inactivité n'est jamais détectée
-  (`getGlobalIdleTime()` reste à 0), donc le déclenchement automatique ne fonctionne pas encore en
-  pratique — voir `decisions.md` et `roadmap.md`. L'activation manuelle (menu Guide) fonctionne
-  pleinement.
+  le bug. Validé en conditions réelles (déclenchement automatique après le délai configuré, fenêtre
+  restée stable plus de 10 minutes) — voir `decisions.md` pour le détail du test.
 
 Voir `decisions.md` pour le détail des choix techniques et leurs alternatives écartées.
 
@@ -40,7 +38,7 @@ Voir `decisions.md` pour le détail des choix techniques et leurs alternatives �
 | État de la spec | Portage Kodi |
 |---|---|
 | `ACTIVE` | Interface Kodi normale ; `script.akasha.ambient` fermé. |
-| `COUNTDOWN` | Géré par `service.akasha.ambient` (`xbmc.getGlobalIdleTime()`) — voir limite connue ci-dessus. |
+| `COUNTDOWN` | Géré par `service.akasha.ambient` (`xbmc.getGlobalIdleTime()`), poll toutes les 5s. |
 | `TRANSITION_IN` | `onInit()` de la fenêtre Ambient : fondu d'entrée (animation skin `WindowOpen`). |
 | `AMBIENT_ACTIVE` | Threads d'arrière-plan de la fenêtre : diaporama, horloge, météo, anti-marquage. |
 | `DIMMED` | Overlay noir semi-transparent dont l'opacité augmente après `dim_after_seconds`. |
@@ -51,8 +49,8 @@ Voir `decisions.md` pour le détail des choix techniques et leurs alternatives �
 ## 4. Déclenchement (portée v0.12)
 
 - **Inactivité** : réglage propre `inactivity_timeout_minutes` (`script.akasha.ambient`, défaut 5
-  minutes), surveillé par `service.akasha.ambient`. Actuellement non fonctionnel sur ce device
-  (voir limite connue en section 2).
+  minutes), surveillé par `service.akasha.ambient` — fonctionnel et testé (déclenchement automatique
+  confirmé après le délai configuré, en conditions réelles sans interaction).
 - **Manuel** : nouvelle entrée dans le menu Akasha Guide ("Mode Ambiant") qui appelle
   `RunScript(script.akasha.ambient)` — fonctionnel et testé.
 - Reportés à une version ultérieure : activation programmée par plage horaire, déclenchements liés

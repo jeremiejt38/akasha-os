@@ -7,7 +7,7 @@ Custom LibreELEC 12 (Omega) distribution for Raspberry Pi 4, focused on HTPC, me
 - **Media**: Plex, Jellyfin, YouTube Music integration
 - **Cloud Gaming**: Steam Link, Moonlight (NVIDIA GameStream/Sunshine), GeForce NOW, Xbox Cloud Gaming, Amazon Luna, Boosteroid via Chromium Docker
 - **Smart Power Management**: CEC TV control (auto-off on shutdown), 30min inactivity shutdown, screensaver
-- **Ambient Mode**: photo slideshow, clock and live weather (Open-Meteo) shown while idle, with progressive dimming, anti burn-in and a handoff into CEC standby (manual activation from the Guide menu; automatic inactivity trigger in progress, see `docs/ambient-mode/`)
+- **Ambient Mode**: photo slideshow, clock and live weather (Open-Meteo) shown after inactivity or manually from the Guide menu, with progressive dimming, anti burn-in and a handoff into CEC standby (see `docs/ambient-mode/`)
 - **Custom Skin**: Arctic Horizon 2 with Akasha branding, reorganized menus (Films / Series / Music / Games / Akasha Settings)
 - **Controller Support**: Xbox Wireless Controller with corrected axis mapping
 - **Akasha Settings Panel**: System info, fan test, CEC test, sleep timers, reboot/shutdown from Kodi UI

@@ -31,24 +31,32 @@ addons :
 Testé en conditions réelles : la fenêtre déclenchée manuellement reste active sans limite de temps,
 répond immédiatement à toute entrée, et le transfert vers `akasha-sleep.py` (veille CEC) fonctionne.
 
-## Limite découverte : l'inactivité n'est jamais détectée sur ce device
+## Fausse alerte initiale : "l'inactivité n'est jamais détectée"
 
-En testant le déclenchement automatique de `service.akasha.ambient`, `xbmc.getGlobalIdleTime()`
-est resté bloqué à `0` en continu, y compris après un reboot complet de l'appareil et plusieurs
-minutes sans aucune interaction (vérifié aussi via l'API JSON-RPC indépendante
-`System.IdleTime(N)`, qui confirme `false` en permanence). Aucun processus, service ou interruption
-CEC identifiable n'explique ce comportement (vérifié : `/proc/interrupts` pour le trafic CEC stable,
-aucun processus Python suspect, aucune requête `kodi-send` en cours pendant le test).
+Pendant les tests initiaux, `xbmc.getGlobalIdleTime()` semblait rester bloqué à `0` en continu
+(vérifié y compris après un reboot complet, via `xbmc.getGlobalIdleTime()` et l'API JSON-RPC
+indépendante `System.IdleTime(N)`). Investigation matérielle (moniteur `evdev` sur les 6
+périphériques d'entrée, moniteur du bus CEC via `cec-ctl --monitor`) : **aucun** trafic d'entrée
+réel pendant ces fenêtres de test, donc ce n'était pas un flux d'entrée physique parasite.
 
-**Conséquence** : l'activation automatique par inactivité (section 4.1 de la spec, le déclenchement
-principal) ne fonctionne pas de façon fiable sur ce Raspberry Pi tant que la cause de ce blocage
-d'`getGlobalIdleTime()` n'est pas identifiée (suspicion : flux d'entrée continu depuis la manette
-sans fil ou un pilote HID, à investiguer séparément — voir `roadmap.md`). Ce problème affecterait
-également le screensaver natif de Kodi (`screensaver.time`), donc ce n'est pas spécifique à notre
-implémentation : c'est une limite de l'environnement, pas du code du Mode Ambiant.
+**Root cause réelle : méthodologie de test, pas un bug.** Le rythme des tests (redémarrages
+`systemctl restart kodi` très rapprochés, appels `kodi-send`/JSON-RPC en continu pour observer
+l'état via PixelCamera) ne laissait jamais un intervalle réellement calme de plusieurs minutes.
+Chaque redémarrage de Kodi relance aussi une resynchronisation Jellyfin (websocket, scan
+bibliothèque), visible dans les logs pendant 1-2 minutes après chaque démarrage. En laissant
+l'appareil réellement inactif (aucun test en cours) pendant la durée complète du délai configuré
+(5 minutes par défaut), `service.akasha.ambient` a déclenché `script.akasha.ambient` correctement :
 
-**Ce qui reste pleinement fonctionnel en attendant** : activation manuelle depuis le menu Akasha
-Guide ("Mode Ambiant"), qui couvre le cas d'usage immédiat même sans le déclenchement automatique.
+```
+Akasha Ambient Trigger: idle for 302s, activating Ambient Mode
+```
+
+La fenêtre est ensuite restée active et stable plus de 10 minutes (fichier de verrou rafraîchi en
+continu, aucune erreur), confirmant que le déclenchement automatique par inactivité fonctionne
+comme prévu. Leçon retenue : pour tester une fonctionnalité liée à l'inactivité, laisser
+l'appareil réellement tranquille pendant toute la durée du délai, sans requêtes JSON-RPC/`kodi-send`
+qui pourraient elles-mêmes fausser l'observation (même si elles ne réinitialisent pas le
+compteur, elles empêchent de distinguer un vrai calme d'un calme interrompu par le test lui-même).
 
 ## Rotation d'images via le contrôle natif `multiimage`
 
