@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.akasha.guide" name="Akasha Guide" version="1.0.0" provider-name="Akasha">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.python.script" library="default.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_GB">Akasha Guide quick-access menu.</summary>
+        <summary lang="fr_FR">Menu rapide Akasha Guide.</summary>
+        <description lang="en_GB">A global overlay menu opened with the controller Guide button, with theme switching.</description>
+        <description lang="fr_FR">Un menu global accessible avec le bouton Guide de la manette, avec changement de theme.</description>
+        <platform>all</platform>
+        <license>MIT</license>
+    </extension>
+</addon>

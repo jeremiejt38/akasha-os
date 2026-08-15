@@ -100,6 +100,8 @@ cp "$SCRIPT_DIR/kodi/scripts/show-splash.sh" /storage/.kodi/scripts/show-splash.
 cp "$SCRIPT_DIR/kodi/scripts/show-splash-if-restart.sh" /storage/.kodi/scripts/show-splash-if-restart.sh
 cp "$SCRIPT_DIR/kodi/scripts/generate-splash-messages.py" /storage/.kodi/scripts/generate-splash-messages.py
 cp "$SCRIPT_DIR/scripts/update-akasha-os.py" /storage/.kodi/scripts/update-akasha-os.py
+cp "$SCRIPT_DIR/kodi/scripts/akasha-guide.py" /storage/.kodi/scripts/akasha-guide.py
+chmod +x /storage/.kodi/scripts/akasha-guide.py
 
 chmod +x /storage/.kodi/scripts/show-splash.sh \
           /storage/.kodi/scripts/show-splash-if-restart.sh \
@@ -126,6 +128,10 @@ log "[7/13] Installing Akasha Overlay addon..."
 rm -rf /storage/.kodi/addons/service.akasha.overlay
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.overlay" /storage/.kodi/addons/
 
+log "  Installing Akasha Guide addon..."
+rm -rf /storage/.kodi/addons/script.akasha.guide
+cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.guide" /storage/.kodi/addons/
+
 # ---------------------------------------------------------------------------
 # 8. Cloud Gaming addon + scripts
 # ---------------------------------------------------------------------------
@@ -144,6 +150,7 @@ sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
         ('service.akasha.splash', 1, datetime('now')),
         ('service.akasha.overlay', 1, datetime('now')),
         ('script.akasha.settings', 1, datetime('now')),
+        ('script.akasha.guide', 1, datetime('now')),
         ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
 chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh \
@@ -193,6 +200,11 @@ if [ -d "$SKIN_DIR" ]; then
     if [ -f "$SCRIPT_DIR/skin-patches/overlay/Custom_1199_Overlay.xml" ]; then
         cp "$SCRIPT_DIR/skin-patches/overlay/Custom_1199_Overlay.xml" "$SKIN_DIR/1080i/Custom_1199_Overlay.xml"
     fi
+    # Remove obsolete guide skin files (guide is now a Python script addon)
+    rm -f "$SKIN_DIR/1080i/Custom_1193_Guide.xml" "$SKIN_DIR/1080i/Custom_1197_Guide.xml"
+
+    # Make native context-menu header say "Menu" instead of "Menu contextuel"
+    python3 "$SCRIPT_DIR/skin-patches/patch_contextmenu_title.py" "$SKIN_DIR"
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi

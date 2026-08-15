@@ -2,6 +2,7 @@
 <keymap>
   <global>
     <joystick profile="game.controller.default">
+      <guide>RunScript(/storage/.kodi/scripts/akasha-guide.py)</guide>
       <leftbumper>RunScript(/storage/.kodi/scripts/volume.py,down)</leftbumper>
       <leftbumper holdtime="300">VolumeDown</leftbumper>
       <rightbumper>RunScript(/storage/.kodi/scripts/volume.py,up)</rightbumper>
