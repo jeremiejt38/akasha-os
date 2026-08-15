@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.11.0...akasha-os-v0.11.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **guide:** rename "Redemarrer Kodi" to "Redemarrer Akasha" ([bb7a5c3](https://github.com/jeremiejt38/akasha-os/commit/bb7a5c31091573f8263ca98c2c27f914f690a681))
+* **guide:** restore splash screen on restart/shutdown from Guide menu ([30701e4](https://github.com/jeremiejt38/akasha-os/commit/30701e452c478f4d4c957cb0e7df4bc35d890a1d))
+
 ## [0.11.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.16...akasha-os-v0.11.0) (2026-08-15)
 
 
