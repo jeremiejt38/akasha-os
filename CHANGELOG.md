@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.11.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.16...akasha-os-v0.11.0) (2026-08-15)
+
+
+### Features
+
+* contrôle du volume à la manette et overlay système ([305b97e](https://github.com/jeremiejt38/akasha-os/commit/305b97e3ba02fcdfc46db9aee8624e9972f2336a))
+* guide Akasha — logo centre avec espacements egaux ([dd81f62](https://github.com/jeremiejt38/akasha-os/commit/dd81f627f6115b1b26382a9ae506033fdcd6062d))
+* guide Akasha — logo plus grand et collé à droite ([52d7faa](https://github.com/jeremiejt38/akasha-os/commit/52d7faa559d375862b31ede676fc1e1c26feee9d))
+* guide Akasha — option Mise en veille (CEC standby + wake-on-input) ([edefa8e](https://github.com/jeremiejt38/akasha-os/commit/edefa8eb0154b0d99138e7c81f2c38efa318dbb1))
+* guide Akasha — padding uniforme autour du titre ([7524f12](https://github.com/jeremiejt38/akasha-os/commit/7524f1249b86722d8a4b859ba02632b117d15e7a))
+* guide Akasha — recentrage du titre et du logo ([371f304](https://github.com/jeremiejt38/akasha-os/commit/371f304be4a64869b6f09797bb6cd46e508c35a4))
+* guide Akasha — réduction de l'espace à gauche du titre ([4d80c68](https://github.com/jeremiejt38/akasha-os/commit/4d80c68c4f575d5f60206eebfeb6c7c81bac3601))
+* guide Akasha — titre Akasha OS rogne et colle au bord gauche ([088bf22](https://github.com/jeremiejt38/akasha-os/commit/088bf224905f6f38d106b603e06950d070371230))
+* guide Akasha — titre centre avec padding uniforme ([93afaf2](https://github.com/jeremiejt38/akasha-os/commit/93afaf235d19fa09ea8ace16ea1e2aa833f8b7ae))
+* guide Akasha — titre collé à gauche ([0b2ff7a](https://github.com/jeremiejt38/akasha-os/commit/0b2ff7a56e9e329aab65f5c994672fe7a63e18a5))
+* guide Akasha — titre decale plus a gauche ([ffeceb2](https://github.com/jeremiejt38/akasha-os/commit/ffeceb2a7ab02abfca6ac4f692f499dfa5dce6d6))
+* guide Akasha — titre splash Akasha OS noir et agrandi ([09b4c9d](https://github.com/jeremiejt38/akasha-os/commit/09b4c9d8b5c3bd36a54248c9a8ce4b2867f84851))
+* guide Akasha — titre, logo et version dans le menu contextuel ([14f04f5](https://github.com/jeremiejt38/akasha-os/commit/14f04f5581ffaaa3ad2fd01c5d295f72186f4c7d))
+* menu Guide global sur le bouton Guide manette ([433e18e](https://github.com/jeremiejt38/akasha-os/commit/433e18e5ec62a7772ce573e5ed2966f7359407dc))
+* **skin:** utiliser Montserrat pour les menus contextuels natifs ([9fcea4e](https://github.com/jeremiejt38/akasha-os/commit/9fcea4e7948690c668a0bcbfaea343712afa0242))
+
+
+### Bug Fixes
+
+* guide Akasha — centrage vertical dans la zone visible du header ([16d2d54](https://github.com/jeremiejt38/akasha-os/commit/16d2d545c544ba6bda3ffb14ebf3d64d2b09b7d8))
+* guide Akasha — layout equilibre titre + logo ([f1124de](https://github.com/jeremiejt38/akasha-os/commit/f1124deea8e9894c9708248f67d2de11d94c466a))
+* guide Akasha — titre aligne a gauche sans marge centree ([954254f](https://github.com/jeremiejt38/akasha-os/commit/954254f0cff88fbfb41188d2a336a7136988c618))
+* **release:** stop demoting feat commits to patch bumps pre-1.0 ([9f0805b](https://github.com/jeremiejt38/akasha-os/commit/9f0805b3d250547bbfcc674d14bec2901f2a2781))
+
+
+### Reverts
+
+* **skin:** annule le changement de font13, corrige la hauteur du menu contextuel ([ec4c605](https://github.com/jeremiejt38/akasha-os/commit/ec4c605258ae483ebd9aa6ac183ede6ceb2693d5))
+
 ## [0.10.16](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.10.15...akasha-os-v0.10.16) (2026-08-14)
 
 
