@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog">
+    <controls>
+        <!-- Background slideshow. Kodi's native multiimage control handles
+             rotation, randomization and crossfade on its own; the Python
+             side only decides which path it points at (see
+             content_manager.resolve_slideshow_path). -->
+        <control type="multiimage">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <imagepath background="true">$INFO[Window.Property(content_path)]</imagepath>
+            <timeperimage>60000</timeperimage>
+            <fadetime>3000</fadetime>
+            <randomize>true</randomize>
+            <aspectratio aligny="center" alignx="center">crop</aspectratio>
+            <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+            <animation effect="fade" start="100" end="0" time="400">WindowClose</animation>
+        </control>
+
+        <!-- Progressive dimming overlay (energy.dim_overlay_color). No local
+             backlight to control on a TV driven over HDMI, so this simulates
+             "brightness reduction" ahead of the CEC sleep handoff. -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="$INFO[Window.Property(dim_color)]">white.png</texture>
+        </control>
+
+        <!-- Clock + weather widget, cycled through 4 corner presets every
+             10 minutes (energy.widget_preset_for_elapsed) as a simple anti
+             burn-in measure, mirroring the preset pattern already used in
+             script.akasha.guide/.../Guide.xml. The widget content itself is
+             duplicated per corner (rather than a shared <include>) to avoid
+             any ambiguity around include resolution inside a screensaver
+             window skin. -->
+        <control type="group" id="9500">
+            <!-- Preset 0: top-left -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(widget_preset),0)</visible>
+                <left>60</left>
+                <top>60</top>
+                <width>360</width>
+                <height>132</height>
+                <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>360</width>
+                    <height>70</height>
+                    <font>font14</font>
+                    <label>$INFO[System.Time]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>72</top>
+                    <width>360</width>
+                    <height>30</height>
+                    <font>font12</font>
+                    <label>$INFO[System.Date]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <visible>!String.IsEmpty(Window.Property(weather_available))</visible>
+                    <left>0</left>
+                    <top>104</top>
+                    <width>360</width>
+                    <height>28</height>
+                    <font>font12</font>
+                    <label>$INFO[Window.Property(weather_temp)] - $INFO[Window.Property(weather_condition)]</label>
+                    <textcolor>CCFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+            </control>
+
+            <!-- Preset 1: top-right -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(widget_preset),1)</visible>
+                <left>1500</left>
+                <top>60</top>
+                <width>360</width>
+                <height>132</height>
+                <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>360</width>
+                    <height>70</height>
+                    <font>font14</font>
+                    <label>$INFO[System.Time]</label>
+                    <align>right</align>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>72</top>
+                    <width>360</width>
+                    <height>30</height>
+                    <font>font12</font>
+                    <label>$INFO[System.Date]</label>
+                    <align>right</align>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <visible>!String.IsEmpty(Window.Property(weather_available))</visible>
+                    <left>0</left>
+                    <top>104</top>
+                    <width>360</width>
+                    <height>28</height>
+                    <font>font12</font>
+                    <label>$INFO[Window.Property(weather_temp)] - $INFO[Window.Property(weather_condition)]</label>
+                    <align>right</align>
+                    <textcolor>CCFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+            </control>
+
+            <!-- Preset 2: bottom-right -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(widget_preset),2)</visible>
+                <left>1500</left>
+                <top>888</top>
+                <width>360</width>
+                <height>132</height>
+                <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>360</width>
+                    <height>70</height>
+                    <font>font14</font>
+                    <label>$INFO[System.Time]</label>
+                    <align>right</align>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>72</top>
+                    <width>360</width>
+                    <height>30</height>
+                    <font>font12</font>
+                    <label>$INFO[System.Date]</label>
+                    <align>right</align>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <visible>!String.IsEmpty(Window.Property(weather_available))</visible>
+                    <left>0</left>
+                    <top>104</top>
+                    <width>360</width>
+                    <height>28</height>
+                    <font>font12</font>
+                    <label>$INFO[Window.Property(weather_temp)] - $INFO[Window.Property(weather_condition)]</label>
+                    <align>right</align>
+                    <textcolor>CCFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+            </control>
+
+            <!-- Preset 3: bottom-left -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(widget_preset),3)</visible>
+                <left>60</left>
+                <top>888</top>
+                <width>360</width>
+                <height>132</height>
+                <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>360</width>
+                    <height>70</height>
+                    <font>font14</font>
+                    <label>$INFO[System.Time]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>72</top>
+                    <width>360</width>
+                    <height>30</height>
+                    <font>font12</font>
+                    <label>$INFO[System.Date]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+                <control type="label">
+                    <visible>!String.IsEmpty(Window.Property(weather_available))</visible>
+                    <left>0</left>
+                    <top>104</top>
+                    <width>360</width>
+                    <height>28</height>
+                    <font>font12</font>
+                    <label>$INFO[Window.Property(weather_temp)] - $INFO[Window.Property(weather_condition)]</label>
+                    <textcolor>CCFFFFFF</textcolor>
+                    <shadowcolor>AA000000</shadowcolor>
+                </control>
+            </control>
+        </control>
+    </controls>
+</window>

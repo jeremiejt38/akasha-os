@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="General">
+        <setting id="content_path" type="folder" label="Dossier de contenu (photos)" default="/storage/ambient/photos"/>
+        <setting id="dim_after_minutes" type="number" label="Delai avant assombrissement (minutes)" default="2"/>
+        <setting id="sleep_after_minutes" type="number" label="Delai avant veille complete (minutes)" default="30"/>
+        <setting id="weather_enabled" type="bool" label="Activer la meteo" default="true"/>
+        <setting id="weather_city" type="text" label="Ville (affichage)" default="Paris"/>
+        <setting id="weather_latitude" type="text" label="Latitude" default="48.8566"/>
+        <setting id="weather_longitude" type="text" label="Longitude" default="2.3522"/>
+    </category>
+</settings>
