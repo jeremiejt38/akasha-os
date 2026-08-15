@@ -102,6 +102,8 @@ cp "$SCRIPT_DIR/kodi/scripts/generate-splash-messages.py" /storage/.kodi/scripts
 cp "$SCRIPT_DIR/scripts/update-akasha-os.py" /storage/.kodi/scripts/update-akasha-os.py
 cp "$SCRIPT_DIR/kodi/scripts/akasha-guide.py" /storage/.kodi/scripts/akasha-guide.py
 chmod +x /storage/.kodi/scripts/akasha-guide.py
+cp "$SCRIPT_DIR/kodi/scripts/akasha-sleep.py" /storage/.kodi/scripts/akasha-sleep.py
+chmod +x /storage/.kodi/scripts/akasha-sleep.py
 
 chmod +x /storage/.kodi/scripts/show-splash.sh \
           /storage/.kodi/scripts/show-splash-if-restart.sh \

@@ -8,6 +8,7 @@ A second press on Guide closes an already-open menu.
 """
 import json
 import os
+import subprocess
 import sys
 import time
 import threading
@@ -30,6 +31,7 @@ OPTIONS = [
     ('Akasha Settings', 'RunAddon(script.akasha.settings)', False),
     ('Activer / desactiver overlay systeme', '__overlay__', False),
     ('Redemarrer Kodi', 'RestartApp', True),
+    ('Mise en veille', '__sleep__', True),
     ('Eteindre le systeme', 'Shutdown', True),
 ]
 LABELS = [opt[0] for opt in OPTIONS]
@@ -70,6 +72,17 @@ def _is_open():
     return False
 
 
+def _sleep():
+    """Put the system/TV to sleep and wake on input."""
+    if not xbmcgui.Dialog().yesno('Akasha Guide', 'Mettre l\'appareil et le televiseur en veille ?'):
+        return
+    script = '/storage/.kodi/scripts/akasha-sleep.py'
+    try:
+        subprocess.Popen([sys.executable, script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:
+        xbmc.log('Akasha Guide: sleep launch error: {}'.format(e), xbmc.LOGERROR)
+
+
 def _toggle_overlay():
     try:
         addon = xbmcaddon.Addon('script.akasha.settings')
@@ -95,6 +108,9 @@ def _toggle_overlay():
 def _run_builtin(action):
     if action == '__overlay__':
         _toggle_overlay()
+        return
+    if action == '__sleep__':
+        _sleep()
         return
     if action in ('RestartApp', 'Shutdown'):
         messages = {
