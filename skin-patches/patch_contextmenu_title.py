@@ -34,20 +34,20 @@ def patch(path, version=''):
 
     # Header group: splash title image on the left, Akasha logo on the right.
     header = '''                <control type="group">
-                    <height>150</height>
+                    <height>160</height>
                     <control type="image">
-                        <left>40</left>
-                        <centertop>50%</centertop>
+                        <left>20</left>
+                        <top>5</top>
                         <width>400</width>
-                        <height>150</height>
+                        <height>140</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">akasha-title.png</texture>
                     </control>
                     <control type="image">
-                        <right>30</right>
+                        <right>20</right>
                         <centertop>50%</centertop>
-                        <width>64</width>
-                        <height>64</height>
+                        <width>80</width>
+                        <height>80</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">special://skin/extras/icons/akasha-logo-circle.png</texture>
                     </control>
