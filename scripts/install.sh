@@ -204,6 +204,7 @@ if [ -d "$SKIN_DIR" ]; then
     rm -f "$SKIN_DIR/1080i/Custom_1193_Guide.xml" "$SKIN_DIR/1080i/Custom_1197_Guide.xml"
 
     # Make native context-menu header say "Akasha", show the Akasha logo, and version label
+    cp "$SCRIPT_DIR/kodi/media/akasha-title.png" "$SKIN_DIR/media/akasha-title.png"
     AKASHA_VERSION=$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.release-please-manifest.json'))['.'])" 2>/dev/null || echo '')
     python3 "$SCRIPT_DIR/skin-patches/patch_contextmenu_title.py" "$SKIN_DIR" "$AKASHA_VERSION"
 else

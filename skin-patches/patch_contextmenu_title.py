@@ -1,7 +1,24 @@
 #!/usr/bin/env python3
+import json
 import os
 import re
+import shutil
 import sys
+
+
+def _copy_title_image(path):
+    """Copy the Akasha title image (from splash.png crop) into the skin media folder."""
+    src = os.path.join(os.path.dirname(os.path.dirname(sys.argv[0])), 'kodi', 'media', 'akasha-title.png')
+    if not os.path.isfile(src):
+        # Fallback when run from a temp path: infer repo root from skin path
+        # /storage/.kodi/addons/skin.arctic.horizon.2 -> repo root has no fixed relation,
+        # but the install.sh copies the file first.
+        src = os.path.join(path, 'media', 'akasha-title.png')
+    dst = os.path.join(path, 'media', 'akasha-title.png')
+    if os.path.isfile(src) and src != dst:
+        shutil.copy(src, dst)
+        return True
+    return os.path.isfile(dst)
 
 
 def patch(path, version=''):
@@ -10,21 +27,21 @@ def patch(path, version=''):
         print('DialogContextMenu.xml not found at {}'.format(xml_path))
         return 1
 
+    _copy_title_image(path)
+
     with open(xml_path, 'r', encoding='utf-8') as f:
         data = f.read()
 
-    # Header group: title on the left, Akasha logo on the right.
+    # Header group: splash title image on the left, Akasha logo on the right.
     header = '''                <control type="group">
-                    <height>120</height>
-                    <control type="label">
+                    <height>150</height>
+                    <control type="image">
                         <left>40</left>
-                        <top>0</top>
-                        <width>300</width>
-                        <height>120</height>
-                        <font>font_main_bold</font>
-                        <label>Akasha</label>
-                        <aligny>center</aligny>
-                        <textcolor>dialog_fg_70</textcolor>
+                        <centertop>50%</centertop>
+                        <width>400</width>
+                        <height>150</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture colordiffuse="FFFFFFFF">akasha-title.png</texture>
                     </control>
                     <control type="image">
                         <right>30</right>
@@ -43,27 +60,10 @@ def patch(path, version=''):
                     </control>
                 </control>'''
 
-    # Replace any existing custom header group (Akasha + any logo/image).
+    # Replace any existing custom header group (title image or text label + logo/image).
     old_header = r'''                <control type="group">
-                    <height>120</height>
-                    <control type="label">
-                        <left>40</left>
-                        <top>0</top>
-                        <width>300</width>
-                        <height>120</height>
-                        <font>font_main_bold</font>
-                        <label>Akasha</label>
-                        <aligny>center</aligny>
-                        <textcolor>dialog_fg_70</textcolor>
-                    </control>
-                    <control type="image">
-                        <right>30</right>
-                        <centertop>50%</centertop>
-                        <width>.*?</width>
-                        <height>.*?</height>
-                        <aspectratio>keep</aspectratio>
-                        <texture colordiffuse="FFFFFFFF">.*?</texture>
-                    </control>
+                    <height>\d+</height>
+                    (?:<control type="label">.*?</control>|\s*<control type="image">.*?</control>\s*)+
                     <control type="image">
                         <bottom>20</bottom>
                         <height>1</height>
@@ -80,8 +80,8 @@ def patch(path, version=''):
         new_data, count = re.subn(old_inc, header, data, count=1, flags=re.DOTALL)
 
     if count != 1:
-        if '<label>Akasha</label>' in data and 'special://skin/extras/icons/akasha-logo-circle.png' in data:
-            print('Already patched with correct logo.')
+        if 'akasha-title.png' in data and 'akasha-logo-circle.png' in data:
+            print('Already patched with title image.')
             new_data = data
         else:
             print('Header block not found, aborting.')
@@ -131,7 +131,7 @@ def patch(path, version=''):
 
     with open(xml_path, 'w', encoding='utf-8') as f:
         f.write(new_data)
-    print('Patched DialogContextMenu.xml header -> "Akasha" + Akasha logo, version label: {}'.format(version))
+    print('Patched DialogContextMenu.xml header -> Akasha OS title + Akasha logo, version: {}'.format(version))
     return 0
 
 
