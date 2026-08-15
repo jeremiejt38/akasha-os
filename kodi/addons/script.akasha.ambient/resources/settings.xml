@@ -2,6 +2,7 @@
 <settings>
     <category label="General">
         <setting id="content_path" type="folder" label="Dossier de contenu (photos)" default="/storage/ambient/photos"/>
+        <setting id="inactivity_timeout_minutes" type="number" label="Delai avant activation (minutes)" default="5"/>
         <setting id="dim_after_minutes" type="number" label="Delai avant assombrissement (minutes)" default="2"/>
         <setting id="sleep_after_minutes" type="number" label="Delai avant veille complete (minutes)" default="30"/>
         <setting id="weather_enabled" type="bool" label="Activer la meteo" default="true"/>

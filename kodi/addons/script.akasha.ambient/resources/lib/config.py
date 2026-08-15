@@ -1,16 +1,21 @@
 """Akasha Ambient — pure configuration handling.
 
 No dependency on xbmc/xbmcaddon/xbmcgui, so this module can be unit-tested
-without a Kodi runtime. `ambient_window.py` adapts Kodi's addon settings into
-the plain dict expected by `load_config()`.
+without a Kodi runtime. `ambient_window.py` and `service.akasha.ambient`
+adapt Kodi's addon settings into the plain dict expected by `load_config()`.
 """
 
 DEFAULT_CONTENT_PATH = '/storage/ambient/photos'
-DEFAULT_FALLBACK_IMAGE = '/storage/.kodi/media/splash.png'
+# Kodi's multiimage skin control requires a *folder*, not a single file. This
+# folder is bundled with the addon itself (see resources/media/fallback/) so
+# there is always at least one valid image to show, even before the user
+# adds any photo to DEFAULT_CONTENT_PATH.
+DEFAULT_FALLBACK_FOLDER = '/storage/.kodi/addons/script.akasha.ambient/resources/media/fallback'
 DEFAULT_WEATHER_CACHE_PATH = '/storage/.config/akasha-os/ambient-weather-cache.json'
 
 DEFAULTS = {
     'content_path': DEFAULT_CONTENT_PATH,
+    'inactivity_timeout_minutes': 5,
     'dim_after_minutes': 2,
     'sleep_after_minutes': 30,
     'weather_enabled': True,
@@ -21,6 +26,8 @@ DEFAULTS = {
 
 # Bounds used to reject nonsensical settings values (e.g. corrupted addon
 # settings) instead of crashing the screensaver window.
+_MIN_INACTIVITY_MINUTES = 1
+_MAX_INACTIVITY_MINUTES = 120
 _MIN_DIM_MINUTES = 1
 _MAX_DIM_MINUTES = 120
 _MIN_SLEEP_MINUTES = 1
@@ -31,16 +38,18 @@ class AmbientConfig:
     """Validated, immutable snapshot of the Ambient Mode configuration."""
 
     __slots__ = (
-        'content_path', 'fallback_image', 'dim_after_minutes',
-        'sleep_after_minutes', 'weather_enabled', 'weather_city',
-        'weather_latitude', 'weather_longitude', 'weather_cache_path',
+        'content_path', 'fallback_folder', 'inactivity_timeout_minutes',
+        'dim_after_minutes', 'sleep_after_minutes', 'weather_enabled',
+        'weather_city', 'weather_latitude', 'weather_longitude',
+        'weather_cache_path',
     )
 
-    def __init__(self, content_path, fallback_image, dim_after_minutes,
-                 sleep_after_minutes, weather_enabled, weather_city,
+    def __init__(self, content_path, fallback_folder, inactivity_timeout_minutes,
+                 dim_after_minutes, sleep_after_minutes, weather_enabled, weather_city,
                  weather_latitude, weather_longitude, weather_cache_path):
         self.content_path = content_path
-        self.fallback_image = fallback_image
+        self.fallback_folder = fallback_folder
+        self.inactivity_timeout_minutes = inactivity_timeout_minutes
         self.dim_after_minutes = dim_after_minutes
         self.sleep_after_minutes = sleep_after_minutes
         self.weather_enabled = weather_enabled
@@ -48,6 +57,10 @@ class AmbientConfig:
         self.weather_latitude = weather_latitude
         self.weather_longitude = weather_longitude
         self.weather_cache_path = weather_cache_path
+
+    @property
+    def inactivity_timeout_seconds(self):
+        return self.inactivity_timeout_minutes * 60
 
     @property
     def dim_after_seconds(self):
@@ -85,7 +98,7 @@ def load_config(settings):
     """Build an `AmbientConfig` from a plain dict of raw setting values.
 
     Unknown or invalid values fall back to `DEFAULTS` rather than raising,
-    since a screensaver must never crash Kodi's GUI over a bad setting.
+    since Ambient Mode must never crash Kodi's GUI over a bad setting.
     """
     settings = settings or {}
 
@@ -95,7 +108,11 @@ def load_config(settings):
 
     return AmbientConfig(
         content_path=content_path,
-        fallback_image=DEFAULT_FALLBACK_IMAGE,
+        fallback_folder=DEFAULT_FALLBACK_FOLDER,
+        inactivity_timeout_minutes=_as_int(
+            settings.get('inactivity_timeout_minutes'), DEFAULTS['inactivity_timeout_minutes'],
+            _MIN_INACTIVITY_MINUTES, _MAX_INACTIVITY_MINUTES,
+        ),
         dim_after_minutes=_as_int(
             settings.get('dim_after_minutes'), DEFAULTS['dim_after_minutes'],
             _MIN_DIM_MINUTES, _MAX_DIM_MINUTES,

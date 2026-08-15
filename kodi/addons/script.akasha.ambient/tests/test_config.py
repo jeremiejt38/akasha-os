@@ -11,7 +11,8 @@ class LoadConfigTests(unittest.TestCase):
     def test_defaults_when_settings_empty(self):
         cfg = config.load_config({})
         self.assertEqual(cfg.content_path, config.DEFAULT_CONTENT_PATH)
-        self.assertEqual(cfg.fallback_image, config.DEFAULT_FALLBACK_IMAGE)
+        self.assertEqual(cfg.fallback_folder, config.DEFAULT_FALLBACK_FOLDER)
+        self.assertEqual(cfg.inactivity_timeout_minutes, config.DEFAULTS['inactivity_timeout_minutes'])
         self.assertEqual(cfg.dim_after_minutes, config.DEFAULTS['dim_after_minutes'])
         self.assertEqual(cfg.sleep_after_minutes, config.DEFAULTS['sleep_after_minutes'])
         self.assertTrue(cfg.weather_enabled)
@@ -24,6 +25,7 @@ class LoadConfigTests(unittest.TestCase):
     def test_valid_overrides_are_applied(self):
         cfg = config.load_config({
             'content_path': '/storage/ambient/photos-perso',
+            'inactivity_timeout_minutes': '10',
             'dim_after_minutes': '5',
             'sleep_after_minutes': '45',
             'weather_enabled': 'false',
@@ -32,6 +34,7 @@ class LoadConfigTests(unittest.TestCase):
             'weather_longitude': '4.85',
         })
         self.assertEqual(cfg.content_path, '/storage/ambient/photos-perso')
+        self.assertEqual(cfg.inactivity_timeout_minutes, 10)
         self.assertEqual(cfg.dim_after_minutes, 5)
         self.assertEqual(cfg.sleep_after_minutes, 45)
         self.assertFalse(cfg.weather_enabled)
@@ -60,7 +63,10 @@ class LoadConfigTests(unittest.TestCase):
         self.assertEqual(cfg.content_path, config.DEFAULT_CONTENT_PATH)
 
     def test_seconds_properties_are_derived_from_minutes(self):
-        cfg = config.load_config({'dim_after_minutes': '2', 'sleep_after_minutes': '30'})
+        cfg = config.load_config({
+            'inactivity_timeout_minutes': '5', 'dim_after_minutes': '2', 'sleep_after_minutes': '30',
+        })
+        self.assertEqual(cfg.inactivity_timeout_seconds, 300)
         self.assertEqual(cfg.dim_after_seconds, 120)
         self.assertEqual(cfg.sleep_after_seconds, 1800)
 

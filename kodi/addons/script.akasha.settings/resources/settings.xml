@@ -3,5 +3,6 @@
     <category label="General">
         <setting id="overlay.enabled" type="bool" label="Activer l'overlay systeme" default="false"/>
         <setting id="guide.style" type="enum" label="Style du menu Guide" default="0" values="Contextuel (natif)|Select (titre custom)|Custom"/>
+        <setting id="ambient.enabled" type="bool" label="Activer le Mode Ambiant" default="true"/>
     </category>
 </settings>

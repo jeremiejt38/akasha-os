@@ -49,21 +49,21 @@ class ResolveSlideshowPathTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             open(os.path.join(tmp, 'a.jpg'), 'w').close()
             self.assertEqual(
-                content_manager.resolve_slideshow_path(tmp, '/fallback.png'),
+                content_manager.resolve_slideshow_path(tmp, '/fallback/folder'),
                 tmp,
             )
 
     def test_falls_back_when_configured_path_is_empty(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(
-                content_manager.resolve_slideshow_path(tmp, '/fallback.png'),
-                '/fallback.png',
+                content_manager.resolve_slideshow_path(tmp, '/fallback/folder'),
+                '/fallback/folder',
             )
 
     def test_falls_back_when_configured_path_missing(self):
         self.assertEqual(
-            content_manager.resolve_slideshow_path('/nonexistent/xyz', '/fallback.png'),
-            '/fallback.png',
+            content_manager.resolve_slideshow_path('/nonexistent/xyz', '/fallback/folder'),
+            '/fallback/folder',
         )
 
 

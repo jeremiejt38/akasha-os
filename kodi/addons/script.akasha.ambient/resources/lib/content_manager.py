@@ -35,14 +35,17 @@ def has_content(folder):
     return len(list_images(folder)) > 0
 
 
-def resolve_slideshow_path(configured_path, fallback_image):
-    """Return the path the `multiimage` skin control should use.
+def resolve_slideshow_path(configured_path, fallback_folder):
+    """Return the folder the `multiimage` skin control should use.
 
     - `configured_path` is used as-is when it contains at least one image.
-    - Otherwise, fall back to a single known-good image so the screensaver
-      never renders a blank/black screen. `multiimage` can point at a single
-      file just as well as a directory of files.
+    - Otherwise, fall back to another folder (bundled with the addon) so the
+      screensaver never renders a blank screen. Kodi's `multiimage` control
+      requires a *folder*, not a single file — passing it a plain file path
+      makes it spin forever trying to enumerate a "directory" that doesn't
+      behave like one, which was observed to also hang the controlling
+      Python script (see docs/ambient-mode/decisions.md).
     """
     if has_content(configured_path):
         return configured_path
-    return fallback_image
+    return fallback_folder

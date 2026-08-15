@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="service.akasha.ambient" name="Akasha Ambient Trigger" version="1.0.0" provider-name="Akasha">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.service" library="service.py" start="startup">
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="fr_FR">Declencheur du Mode Ambiant Akasha OS</summary>
+        <summary lang="en_GB">Akasha OS Ambient Mode trigger</summary>
+        <description lang="fr_FR">Surveille l'inactivite (xbmc.getGlobalIdleTime) et declenche script.akasha.ambient au bout du delai configure, tant qu'aucune lecture video/audio n'est en cours.</description>
+        <description lang="en_GB">Watches idle time (xbmc.getGlobalIdleTime) and triggers script.akasha.ambient after the configured delay, as long as no video/audio is playing.</description>
+        <platform>all</platform>
+        <license>MIT</license>
+    </extension>
+</addon>

@@ -100,28 +100,16 @@ def set_screensaver_time(minutes):
     except:
         pass
 
-AMBIENT_ADDON_ID = 'screensaver.akasha.ambient'
-AMBIENT_DEFAULT_MODE = 'screensaver.xbmc.builtin.black'
+AMBIENT_ADDON_ID = 'script.akasha.ambient'
 
 def get_ambient_enabled():
     try:
-        result = subprocess.run(['grep', 'screensaver.mode', '/storage/.kodi/userdata/guisettings.xml'],
-                               capture_output=True, text=True)
-        return AMBIENT_ADDON_ID in result.stdout
+        return ADDON.getSetting('ambient.enabled').lower() == 'true'
     except:
-        return False
+        return True
 
 def set_ambient_enabled(enabled):
-    try:
-        mode = AMBIENT_ADDON_ID if enabled else AMBIENT_DEFAULT_MODE
-        xbmc.executeJSONRPC(json.dumps({
-            'jsonrpc': '2.0',
-            'method': 'Settings.SetSettingValue',
-            'params': {'setting': 'screensaver.mode', 'value': mode},
-            'id': 1
-        }))
-    except:
-        pass
+    ADDON.setSetting('ambient.enabled', 'true' if enabled else 'false')
 
 def open_ambient_settings():
     xbmc.executebuiltin('Addon.OpenSettings({})'.format(AMBIENT_ADDON_ID))
