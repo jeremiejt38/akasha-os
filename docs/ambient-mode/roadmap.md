@@ -22,6 +22,11 @@
 
 ## Après v0.12 (non planifié dans ce chantier)
 
+- **Investiguer pourquoi `xbmc.getGlobalIdleTime()` reste bloqué à 0** sur le Raspberry Pi actuel
+  (vérifié après reboot complet, sans interaction). Pistes à explorer : pilote HID de la manette
+  Xbox sans fil (rapports "heartbeat" périodiques via le récepteur USB), configuration CEC, ou un
+  service tiers qui interroge Kodi en continu. Tant que ce n'est pas résolu, seule l'activation
+  manuelle du Mode Ambiant fonctionne (voir `decisions.md`).
 - Pack de paysages par défaut correctement sourcé (licence vérifiée), téléchargé à l'installation
   plutôt que commité dans le repo.
 - Vidéos d'ambiance en boucle (`videowindow`), une fois le socle image validé en conditions réelles.

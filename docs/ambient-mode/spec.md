@@ -15,19 +15,23 @@ intrusif, personnalisable, économe, compatible anti-marquage, fonctionnel hors-
 ## 2. Choix d'architecture
 
 Akasha OS est un ensemble d'addons Kodi (scripts Python + skins XML) déployés sur LibreELEC, pas un
-système avec un moteur de rendu propre. Le Mode Ambiant est donc implémenté comme un **addon
-screensaver Kodi natif** (`extension point="xbmc.ui.screensaver"`), et non comme un service
-qui réinventerait la détection d'inactivité :
+système avec un moteur de rendu propre. Une première version s'appuyait sur un addon screensaver
+Kodi natif (`xbmc.ui.screensaver`), mais un test réel sur le device a révélé un bug Kodi
+long-connu qui tue les screensavers Python ~20 secondes après activation (voir `decisions.md`).
+Le Mode Ambiant est donc livré en deux addons :
 
-- Kodi gère nativement l'inactivité (`screensaver.time`, déjà exposé dans Akasha Settings) et
-  l'activation/désactivation du screensaver — pas besoin d'un `InactivityMonitor` maison.
-- Le rendu passe par une fenêtre `xbmcgui.WindowXMLDialog` définie en skin XML
-  (`resources/skins/Default/1080i/Ambient.xml`), sur le même modèle que `Guide.xml`.
-- Le retour à l'usage normal ("réveil immédiat", recommandé par la spec pour une TV) est géré par
-  Kodi lui-même : toute entrée utilisateur ferme le screensaver — l'addon écoute juste
-  `xbmc.Monitor.onScreensaverDeactivated()` pour se fermer proprement.
-- La mise en veille complète (état `SLEEP` de la spec) réutilise directement
-  `akasha-sleep.py` (CEC standby + réveil sur interaction), sans dupliquer cette logique.
+- **`script.akasha.ambient`** : la fenêtre elle-même (`xbmcgui.WindowXMLDialog`, skin
+  `resources/skins/Default/1080i/Ambient.xml`), ouverte via `RunScript`, sur le même modèle que
+  `Guide.xml`. Elle se ferme sur n'importe quelle entrée utilisateur ("réveil immédiat", recommandé
+  par la spec pour une TV) et gère elle-même la transition vers la veille CEC
+  (`akasha-sleep.py`) une fois le délai configuré atteint.
+- **`service.akasha.ambient`** : un service qui surveille l'inactivité
+  (`xbmc.getGlobalIdleTime()`) et déclenche `script.akasha.ambient` au bout du délai configuré,
+  jouant le rôle que jouerait un screensaver natif, sans passer par le mécanisme Kodi concerné par
+  le bug. **Limite connue** : sur l'appareil actuel, l'inactivité n'est jamais détectée
+  (`getGlobalIdleTime()` reste à 0), donc le déclenchement automatique ne fonctionne pas encore en
+  pratique — voir `decisions.md` et `roadmap.md`. L'activation manuelle (menu Guide) fonctionne
+  pleinement.
 
 Voir `decisions.md` pour le détail des choix techniques et leurs alternatives écartées.
 
@@ -35,21 +39,22 @@ Voir `decisions.md` pour le détail des choix techniques et leurs alternatives �
 
 | État de la spec | Portage Kodi |
 |---|---|
-| `ACTIVE` | Interface Kodi normale ; hors screensaver. |
-| `COUNTDOWN` | Géré par Kodi (`screensaver.time`) — pas de logique addon. |
+| `ACTIVE` | Interface Kodi normale ; `script.akasha.ambient` fermé. |
+| `COUNTDOWN` | Géré par `service.akasha.ambient` (`xbmc.getGlobalIdleTime()`) — voir limite connue ci-dessus. |
 | `TRANSITION_IN` | `onInit()` de la fenêtre Ambient : fondu d'entrée (animation skin `WindowOpen`). |
-| `AMBIENT_ACTIVE` | Boucle principale de la fenêtre : diaporama, horloge, météo, anti-marquage. |
+| `AMBIENT_ACTIVE` | Threads d'arrière-plan de la fenêtre : diaporama, horloge, météo, anti-marquage. |
 | `DIMMED` | Overlay noir semi-transparent dont l'opacité augmente après `dim_after_seconds`. |
 | `SLEEP_PENDING` / `SLEEP` | Après `sleep_after_seconds`, déclenche `akasha-sleep.py` puis ferme la fenêtre. |
-| `TRANSITION_OUT` | Géré par Kodi (fermeture du screensaver sur interaction) + animation `WindowClose`. |
-| `Réveil` | Natif Kodi (réveil immédiat) + réveil CEC déjà géré par `akasha-sleep.py`. |
+| `TRANSITION_OUT` | `onAction()` de la fenêtre Ambient : fermeture sur toute entrée + animation `WindowClose`. |
+| `Réveil` | Réveil immédiat (n'importe quelle entrée) + réveil CEC déjà géré par `akasha-sleep.py`. |
 
 ## 4. Déclenchement (portée v0.12)
 
-- **Inactivité** : `screensaver.time` (Kodi natif), configurable depuis Akasha Settings (déjà
-  existant).
+- **Inactivité** : réglage propre `inactivity_timeout_minutes` (`script.akasha.ambient`, défaut 5
+  minutes), surveillé par `service.akasha.ambient`. Actuellement non fonctionnel sur ce device
+  (voir limite connue en section 2).
 - **Manuel** : nouvelle entrée dans le menu Akasha Guide ("Mode Ambiant") qui appelle
-  `ActivateScreensaver`.
+  `RunScript(script.akasha.ambient)` — fonctionnel et testé.
 - Reportés à une version ultérieure : activation programmée par plage horaire, déclenchements liés
   à des événements applicatifs (fin de film, appel...), détection de présence (caméra/capteur).
 
@@ -64,9 +69,10 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
 - Rotation et fondu enchaîné gérés par le contrôle natif Kodi `multiimage` (aléatoire, anti-répétition
   native, pas de logique Python nécessaire pour la rotation elle-même).
 - Dossier par défaut : `/storage/ambient/photos`, configurable depuis les réglages de l'addon.
-- **Contenu de secours** : si le dossier est vide, repli sur `/storage/.kodi/media/splash.png`
-  (déjà déployé par `install.sh` pour le splash de démarrage, licence propre) — jamais d'écran vide,
-  sans avoir à embarquer un pack externe de photos dont la licence devrait être vérifiée. Un pack de
+- **Contenu de secours** : si le dossier est vide, repli sur un dossier dédié livré avec l'addon
+  (`resources/media/fallback/`, contenant une copie de `splash.png`) — jamais d'écran vide, sans
+  avoir à embarquer un pack externe de photos dont la licence devrait être vérifiée. Le contrôle
+  `multiimage` de Kodi exige un dossier, pas un fichier isolé (voir `decisions.md`). Un pack de
   paysages par défaut est noté comme amélioration future dans `roadmap.md`.
 - Vidéos d'ambiance en boucle : reportées (nécessitent un contrôle `videowindow` dédié et plus de
   validation sur le Pi 4 2 Go ; voir `decisions.md`).
@@ -94,7 +100,8 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
 Dans les réglages natifs de l'addon (`Addon.OpenSettings(screensaver.akasha.ambient)`, accessible
 aussi depuis Akasha Settings) :
 
-- Activer/désactiver le Mode Ambiant (bascule `screensaver.mode`).
+- Activer/désactiver le Mode Ambiant (réglage `ambient.enabled`, lu par `service.akasha.ambient`).
+- Délai d'inactivité avant activation automatique (minutes).
 - Dossier de contenu (photos).
 - Délai avant assombrissement (minutes).
 - Délai avant veille complète (minutes).

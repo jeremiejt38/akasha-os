@@ -1,17 +1,54 @@
 # Mode Ambiant — Décisions techniques
 
-## Screensaver addon natif plutôt qu'un service custom
+## Historique : screensaver natif abandonné après test réel (bug Kodi)
 
-**Choix** : `screensaver.akasha.ambient`, extension `xbmc.ui.screensaver`.
+**Choix initial** : `screensaver.akasha.ambient`, extension `xbmc.ui.screensaver`, en s'appuyant
+sur la détection d'inactivité native de Kodi (`screensaver.time`).
 
-**Alternative écartée** : un service (`service.akasha.ambient`) qui surveillerait lui-même
-`xbmc.getGlobalIdleTime()` et ouvrirait une fenêtre custom.
+**Constat en conditions réelles** : quel que soit le contenu du script (boucle directe dans
+`onInit()`, thread séparé, `xbmc.sleep()` ou `Monitor.waitForAbort()`, avec ou sans `multiimage`),
+Kodi tuait systématiquement le script Python ~20 secondes après son activation :
 
-**Raison** : Kodi gère déjà nativement l'inactivité, la temporisation (`screensaver.time`,
-déjà utilisé par Akasha Settings), la désactivation sur interaction, et l'exclusion pendant la
-lecture vidéo/audio. Réimplémenter cette détection dans un service dupliquerait une fonctionnalité
-déjà fournie et fiable. Le patron `xbmcgui.WindowXMLDialog` + `xbmc.Monitor` est le même que celui
-déjà utilisé pour `Guide.xml`, donc cohérent avec le reste du code.
+```
+CPythonInvoker(N, .../screensaver.akasha.ambient/default.py): script didn't stop in 5 seconds - let's kill it
+```
+
+Ce comportement est documenté de longue date dans la communauté Kodi (voir un fil du forum Kodi sur
+`screensaver.xbmc.slideshow` décrivant exactement le même symptôme dès XBMC v12) : les screensavers
+Python peuvent devenir des fenêtres "zombies" — gelées à l'écran, ne répondant plus à aucune entrée
+— après avoir été tués par ce watchdog. Ce n'est pas un bug introduit par ce code.
+
+**Pivot retenu** : abandon de l'extension `xbmc.ui.screensaver`. Le Mode Ambiant est désormais deux
+addons :
+- `script.akasha.ambient` : une fenêtre `xbmcgui.WindowXMLDialog` ouverte via `RunScript`, exactement
+  le même patron que `GuideWindow` (`kodi/scripts/akasha-guide.py`), qui fonctionne de façon fiable
+  en production sur ce projet. Elle se ferme sur n'importe quelle entrée (`onAction`).
+- `service.akasha.ambient` : un service (`xbmc.service`) qui surveille lui-même
+  `xbmc.getGlobalIdleTime()` et déclenche `RunScript(script.akasha.ambient)` une fois le délai
+  configuré atteint — le rôle que jouerait normalement le screensaver natif de Kodi, mais sans
+  passer par son mécanisme interne (donc sans le watchdog qui pose problème).
+
+Testé en conditions réelles : la fenêtre déclenchée manuellement reste active sans limite de temps,
+répond immédiatement à toute entrée, et le transfert vers `akasha-sleep.py` (veille CEC) fonctionne.
+
+## Limite découverte : l'inactivité n'est jamais détectée sur ce device
+
+En testant le déclenchement automatique de `service.akasha.ambient`, `xbmc.getGlobalIdleTime()`
+est resté bloqué à `0` en continu, y compris après un reboot complet de l'appareil et plusieurs
+minutes sans aucune interaction (vérifié aussi via l'API JSON-RPC indépendante
+`System.IdleTime(N)`, qui confirme `false` en permanence). Aucun processus, service ou interruption
+CEC identifiable n'explique ce comportement (vérifié : `/proc/interrupts` pour le trafic CEC stable,
+aucun processus Python suspect, aucune requête `kodi-send` en cours pendant le test).
+
+**Conséquence** : l'activation automatique par inactivité (section 4.1 de la spec, le déclenchement
+principal) ne fonctionne pas de façon fiable sur ce Raspberry Pi tant que la cause de ce blocage
+d'`getGlobalIdleTime()` n'est pas identifiée (suspicion : flux d'entrée continu depuis la manette
+sans fil ou un pilote HID, à investiguer séparément — voir `roadmap.md`). Ce problème affecterait
+également le screensaver natif de Kodi (`screensaver.time`), donc ce n'est pas spécifique à notre
+implémentation : c'est une limite de l'environnement, pas du code du Mode Ambiant.
+
+**Ce qui reste pleinement fonctionnel en attendant** : activation manuelle depuis le menu Akasha
+Guide ("Mode Ambiant"), qui couvre le cas d'usage immédiat même sans le déclenchement automatique.
 
 ## Rotation d'images via le contrôle natif `multiimage`
 
@@ -28,8 +65,12 @@ continu. Un `ContentManager` Python reste utile pour la logique testable indépe
 
 ## Pas de pack de photos par défaut embarqué
 
-**Choix** : si le dossier de contenu est vide, repli sur `/storage/.kodi/media/splash.png`, déjà
-déployé sur le Pi par `install.sh` pour le splash de démarrage.
+**Choix initial, corrigé après test réel** : le contrôle `multiimage` de Kodi exige un **dossier**,
+pas un fichier unique — pointer `imagepath` vers `/storage/.kodi/media/splash.png` directement a
+fait tourner l'indicateur de chargement indéfiniment et a fini par geler le script Python jusqu'à
+ce que Kodi le tue de force ("script didn't stop in 5 seconds"). Le repli est donc un **dossier**
+dédié livré avec l'addon (`resources/media/fallback/`, contenant une copie de `splash.png`), jamais
+un chemin de fichier isolé.
 
 **Alternative écartée** : télécharger/embarquer un pack de paysages "libres de droits" par défaut.
 
