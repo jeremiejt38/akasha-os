@@ -28,8 +28,8 @@ continu. Un `ContentManager` Python reste utile pour la logique testable indépe
 
 ## Pas de pack de photos par défaut embarqué
 
-**Choix** : si le dossier de contenu est vide, repli sur `akasha-os-splash-screen.png` déjà présent
-dans le repo.
+**Choix** : si le dossier de contenu est vide, repli sur `/storage/.kodi/media/splash.png`, déjà
+déployé sur le Pi par `install.sh` pour le splash de démarrage.
 
 **Alternative écartée** : télécharger/embarquer un pack de paysages "libres de droits" par défaut.
 

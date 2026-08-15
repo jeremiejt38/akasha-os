@@ -64,10 +64,10 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
 - Rotation et fondu enchaîné gérés par le contrôle natif Kodi `multiimage` (aléatoire, anti-répétition
   native, pas de logique Python nécessaire pour la rotation elle-même).
 - Dossier par défaut : `/storage/ambient/photos`, configurable depuis les réglages de l'addon.
-- **Contenu de secours** : si le dossier est vide, repli sur `akasha-os-splash-screen.png` (déjà
-  présent dans le repo, licence propre) — jamais d'écran vide, sans avoir à embarquer un pack
-  externe de photos dont la licence devrait être vérifiée. Un pack de paysages par défaut est noté
-  comme amélioration future dans `roadmap.md`.
+- **Contenu de secours** : si le dossier est vide, repli sur `/storage/.kodi/media/splash.png`
+  (déjà déployé par `install.sh` pour le splash de démarrage, licence propre) — jamais d'écran vide,
+  sans avoir à embarquer un pack externe de photos dont la licence devrait être vérifiée. Un pack de
+  paysages par défaut est noté comme amélioration future dans `roadmap.md`.
 - Vidéos d'ambiance en boucle : reportées (nécessitent un contrôle `videowindow` dédié et plus de
   validation sur le Pi 4 2 Go ; voir `decisions.md`).
 
