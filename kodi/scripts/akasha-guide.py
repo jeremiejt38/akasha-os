@@ -30,6 +30,7 @@ OPTIONS = [
     ('Accueil', 'ActivateWindow(Home)', False),
     ('Akasha Settings', 'RunAddon(script.akasha.settings)', False),
     ('Activer / desactiver overlay systeme', '__overlay__', False),
+    ('Mode Ambiant', 'ActivateScreensaver', False),
     ('Redemarrer Akasha', 'RestartApp', True),
     ('Mise en veille', '__sleep__', True),
     ('Eteindre le systeme', 'Shutdown', True),
