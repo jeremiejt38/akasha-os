@@ -33,21 +33,23 @@ def patch(path, version=''):
         data = f.read()
 
     # Header group: splash title image on the left, Akasha logo on the right.
+    # Title is centered in the left part of the header; logo is vertically
+    # aligned with the title and spaced from the right edge.
     header = '''                <control type="group">
                     <height>160</height>
                     <control type="image">
-                        <left>36</left>
-                        <top>36</top>
-                        <width>369</width>
-                        <height>70</height>
+                        <left>72</left>
+                        <top>45</top>
+                        <width>260</width>
+                        <height>49</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">akasha-title.png</texture>
                     </control>
                     <control type="image">
-                        <right>10</right>
-                        <centertop>50%</centertop>
-                        <width>100</width>
-                        <height>100</height>
+                        <right>30</right>
+                        <centertop>70</centertop>
+                        <width>64</width>
+                        <height>64</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">special://skin/extras/icons/akasha-logo-circle.png</texture>
                     </control>
