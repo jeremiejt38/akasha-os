@@ -30,7 +30,7 @@ OPTIONS = [
     ('Accueil', 'ActivateWindow(Home)', False),
     ('Akasha Settings', 'RunAddon(script.akasha.settings)', False),
     ('Activer / desactiver overlay systeme', '__overlay__', False),
-    ('Redemarrer Kodi', 'RestartApp', True),
+    ('Redemarrer Akasha', 'RestartApp', True),
     ('Mise en veille', '__sleep__', True),
     ('Eteindre le systeme', 'Shutdown', True),
 ]
@@ -106,7 +106,7 @@ def _toggle_overlay():
 
 
 def _restart_kodi():
-    if not xbmcgui.Dialog().yesno('Akasha Guide', 'Redemarrer Kodi maintenant ?'):
+    if not xbmcgui.Dialog().yesno('Akasha Guide', 'Redemarrer Akasha maintenant ?'):
         return
     # Show reboot splash in ExecStartPre when Kodi restarts (same flag as
     # script.akasha.settings, checked by show-splash-if-restart.sh).
