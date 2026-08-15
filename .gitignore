@@ -16,3 +16,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# KSP (Kit Standards Projet) — synced locally for Devin/Cascade guidance only,
+# not part of this project's own source of truth (KSP repo is private).
+.devin/templates/
+.devin/workflows/
