@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1199">
+    <zorder>20</zorder>
+    <visible>Skin.HasSetting(DebugInfo) | Skin.HasSetting(akasha_overlay)</visible>
+    <controls>
+        <include content="Object_Control" condition="Skin.HasSetting(DebugInfo)">
+            <param name="control">group</param>
+            <control type="grouplist">
+                <align>top</align>
+                <orientation>vertical</orientation>
+                <include content="Overlay_InfoLabel">
+                    <label> --system.currentcontrolid: $INFO[System.CurrentControlID,, | ]$INFO[System.CurrentControl,, | ]$INFO[System.CurrentWindow]</label>
+                    <textcolor>yellowgreen</textcolor>
+                </include>
+                <include content="Overlay_InfoLabel">
+                    <label>    --recommendations.prev: $INFO[Window(Home).Property(TMDBHelper.Recommendations.HideRecs),ANI: , ]$INFO[Window(Home).Property(TMDBHelper.Recommendations.HideInfo),HID: , ]$INFO[Window(Home).Property(TMDBHelper.Recommendations.IsActive),POS: , ]</label>
+                    <textcolor>yellowgreen</textcolor>
+                </include>
+                <include content="Overlay_InfoLabel">
+                    <label>   --tmdbhelper.isupdating: $INFO[Window(Home).Property(TMDBHelper.WidgetContainer),widget: , ]$INFO[Window(Home).Property(TMDBHelper.CurrentWindow),window: , ]$INFO[Window(Home).Property(TMDBHelper.IsUpdating),details: , ]$INFO[Window(Home).Property(TMDBHelper.IsUpdatingRatings),ratings: , ]</label>
+                    <textcolor>yellowgreen</textcolor>
+                </include>
+                <include content="Overlay_InfoLabel">
+                    <label>         --slide.container: $INFO[Window(Home).Property(Slide.WidgetInfoStyle),style: , ]$INFO[Window(Home).Property(Slide.WidgetContainer),container: , ]</label>
+                    <textcolor>yellowgreen</textcolor>
+                </include>
+            </control>
+            <control type="grouplist">
+                <align>bottom</align>
+                <orientation>vertical</orientation>
+                <include content="Overlay_InfoLabel">
+                    <label>       --content.dbtype:$INFO[Container.Content, container: , |]$INFO[ListItem.DBType, listitem: ,]$INFO[ListItem.Property(tmdb_type), (,)]$INFO[Container(99950).ListItem.DBType, | TMDbHelper: , ]$INFO[Container(99950).ListItem.Property(TMDb_Type),(,)]</label>
+                    <textcolor>cyan</textcolor>
+                </include>
+                <include content="Overlay_InfoLabel">
+                    <label> --container.folderpath: $INFO[Container.FolderPath] </label>
+                    <textcolor>magenta</textcolor>
+                </include>
+                <include content="Overlay_InfoLabel">
+                    <label>  --listitem.folderpath: $INFO[ListItem.FolderPath] </label>
+                    <textcolor>blueviolet</textcolor>
+                </include>
+            </control>
+        </include>
+
+        <!-- Akasha system overlay (enabled via Skin.HasSetting(akasha_overlay)) -->
+        <control type="group" condition="Skin.HasSetting(akasha_overlay)">
+            <left>40</left>
+            <bottom>60</bottom>
+            <width>520</width>
+            <height>330</height>
+            <control type="image">
+                <width>520</width>
+                <height>330</height>
+                <texture colordiffuse="22000000">common/white.png</texture>
+            </control>
+            <control type="grouplist">
+                <left>10</left>
+                <top>10</top>
+                <width>500</width>
+                <height>310</height>
+                <orientation>vertical</orientation>
+                <align>left</align>
+                <itemgap>6</itemgap>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>CPU: $INFO[System.CpuUsage] | Load: $INFO[Skin.String(akasha_overlay_load)]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>Freq: $INFO[Skin.String(akasha_overlay_freq)] MHz | Gov: $INFO[Skin.String(akasha_overlay_governor)]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>RAM: $INFO[System.Memory(used)]/$INFO[System.TotalMemory] | Temp: $INFO[System.CPUTemperature]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>Fan: $INFO[Skin.String(akasha_overlay_fan)] | Uptime: $INFO[Skin.String(akasha_overlay_uptime)]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>Vid: $INFO[VideoPlayer.VideoCodec] $INFO[VideoPlayer.VideoResolution] | Dec: $INFO[Player.Process(VideoDecoder)]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>$INFO[Player.Process(VideoWidth)]x$INFO[Player.Process(VideoHeight)] @ $INFO[Player.Process(VideoFPS)]fps | HDR: $INFO[Player.Process(VideoHDRType)]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>Audio: $INFO[VideoPlayer.AudioCodec] $INFO[VideoPlayer.AudioChannels]ch @ $INFO[VideoPlayer.AudioBitrate]</label>
+                </control>
+                <control type="label">
+                    <width>500</width>
+                    <height>24</height>
+                    <font>font10</font>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <shadowcolor>FF000000</shadowcolor>
+                    <label>Screen: $INFO[System.ScreenResolution] | GUI FPS: $INFO[System.FPS]</label>
+                </control>
+            </control>
+        </control>
+    </controls>
+</window>

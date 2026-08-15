@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="General">
+        <setting id="overlay.enabled" type="bool" label="Activer l'overlay systeme" default="false"/>
+    </category>
+</settings>

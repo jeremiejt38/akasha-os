@@ -328,11 +328,14 @@ def main():
         
         version = get_akasha_version()
 
+        overlay_enabled = ADDON.getSetting('overlay.enabled').lower() == 'true'
+        overlay_label = 'Active' if overlay_enabled else 'Desactive'
         options = [
             '[B]--- Mise a jour ---[/B]',
             '  Verifier / Mettre a jour Akasha OS (v{})'.format(version),
             '[B]--- Infos Systeme ---[/B]',
             '  Voir les infos systeme (CPU {}C)'.format(temp),
+            '  Overlay systeme : {}'.format(overlay_label),
             '[B]--- Veille & Extinction ---[/B]',
             '  Delai extinction auto : {} min'.format(shutdown_min),
             '  Delai ecran de veille : {} min'.format(screensaver_min),
@@ -355,7 +358,16 @@ def main():
             show_update_dialog()
         elif choice == 3:
             show_system_info()
-        elif choice == 5:
+        elif choice == 4:
+            new_state = 'false' if overlay_enabled else 'true'
+            ADDON.setSetting('overlay.enabled', new_state)
+            if new_state == 'true':
+                xbmc.executebuiltin('Skin.SetBool(akasha_overlay)')
+                dialog.notification('Akasha', 'Overlay systeme active', xbmcgui.NOTIFICATION_INFO, 2000)
+            else:
+                xbmc.executebuiltin('Skin.Reset(akasha_overlay)')
+                dialog.notification('Akasha', 'Overlay systeme desactive', xbmcgui.NOTIFICATION_INFO, 2000)
+        elif choice == 6:
             # Changer délai extinction
             values = ['Desactive', '15 min', '30 min', '45 min', '60 min', '90 min', '120 min']
             int_values = [0, 15, 30, 45, 60, 90, 120]
@@ -364,7 +376,7 @@ def main():
                 set_shutdown_time(int_values[sel])
                 set_shutdown_state(0)
                 dialog.notification('Akasha', 'Extinction auto: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 6:
+        elif choice == 7:
             # Changer délai screensaver
             values = ['1 min', '3 min', '5 min', '10 min', '15 min', '20 min', '30 min']
             int_values = [1, 3, 5, 10, 15, 20, 30]
@@ -372,28 +384,28 @@ def main():
             if sel >= 0:
                 set_screensaver_time(int_values[sel])
                 dialog.notification('Akasha', 'Screensaver: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 7:
+        elif choice == 8:
             # Forcer shutdown state
             set_shutdown_state(0)
             dialog.notification('Akasha', 'Mode Shutdown + CEC active', xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 9:
-            test_fan()
         elif choice == 10:
+            test_fan()
+        elif choice == 11:
             test_cec_standby()
-        elif choice == 12:
+        elif choice == 13:
             ok = dialog.yesno('Akasha', 'Redemarrer Kodi ?')
             if ok:
                 # Show reboot splash in ExecStartPre when Kodi restarts
                 open('/tmp/.kodi-restart', 'w').close()
                 subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
-        elif choice == 13:
+        elif choice == 14:
             ok = dialog.yesno('Akasha', 'Redemarrer le systeme ?')
             if ok:
                 # Show the reboot splash immediately before Kodi starts to tear down.
                 # The matching systemd service will skip if the same image was shown recently.
                 subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-reboot.png'])
                 subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
-        elif choice == 14:
+        elif choice == 15:
             ok = dialog.yesno('Akasha', 'Eteindre le systeme ?\n(La TV sera aussi eteinte via CEC)')
             if ok:
                 # Show the shutdown splash and turn the TV off via CEC before the system

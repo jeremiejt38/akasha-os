@@ -28,7 +28,7 @@ log "Source: $SCRIPT_DIR"
 # ---------------------------------------------------------------------------
 # 1. Boot files
 # ---------------------------------------------------------------------------
-log "[1/11] Installing boot files..."
+log "[1/13] Installing boot files..."
 if [ -f "$SCRIPT_DIR/boot/config.txt" ]; then
     mount -o remount,rw /flash
     cp "$SCRIPT_DIR/boot/config.txt" /flash/config.txt
@@ -40,7 +40,7 @@ fi
 # ---------------------------------------------------------------------------
 # 2. System config / systemd
 # ---------------------------------------------------------------------------
-log "[2/11] Installing system config..."
+log "[2/13] Installing system config..."
 mkdir -p /storage/.config/system.d
 mkdir -p /storage/.config/system.d/cec-tv.service.d
 mkdir -p /storage/.config/system.d/kodi.service.d
@@ -73,14 +73,14 @@ chmod +x /storage/.config/autostart.sh \
 # ---------------------------------------------------------------------------
 # 3. Docker alias cleanup (prevent double start after LibreELEC update)
 # ---------------------------------------------------------------------------
-log "[3/11] Cleaning Docker alias..."
+log "[3/13] Cleaning Docker alias..."
 rm -f /storage/.config/system.d/docker.service
 rm -f /storage/.config/system.d/kodi.target.wants/docker.service
 
 # ---------------------------------------------------------------------------
 # 4. Kodi media + intro + splash scripts
 # ---------------------------------------------------------------------------
-log "[4/11] Installing Kodi media and splash scripts..."
+log "[4/13] Installing Kodi media and splash scripts..."
 mkdir -p /storage/.kodi/media
 mkdir -p /storage/.kodi/scripts
 
@@ -108,21 +108,28 @@ chmod +x /storage/.kodi/scripts/show-splash.sh \
 # ---------------------------------------------------------------------------
 # 5. Splash addon (service.akasha.splash)
 # ---------------------------------------------------------------------------
-log "[5/11] Installing Akasha Splash addon..."
+log "[5/13] Installing Akasha Splash addon..."
 rm -rf /storage/.kodi/addons/service.akasha.splash
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.splash" /storage/.kodi/addons/
 
 # ---------------------------------------------------------------------------
 # 6. Akasha Settings addon
 # ---------------------------------------------------------------------------
-log "[6/11] Installing Akasha Settings addon..."
+log "[6/13] Installing Akasha Settings addon..."
 rm -rf /storage/.kodi/addons/script.akasha.settings
 cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.settings" /storage/.kodi/addons/
 
 # ---------------------------------------------------------------------------
-# 7. Cloud Gaming addon + scripts
+# 7. Akasha Overlay service
 # ---------------------------------------------------------------------------
-log "[7/11] Installing Cloud Gaming addon..."
+log "[7/13] Installing Akasha Overlay addon..."
+rm -rf /storage/.kodi/addons/service.akasha.overlay
+cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.overlay" /storage/.kodi/addons/
+
+# ---------------------------------------------------------------------------
+# 8. Cloud Gaming addon + scripts
+# ---------------------------------------------------------------------------
+log "[8/13] Installing Cloud Gaming addon..."
 rm -rf /storage/.kodi/addons/script.cloud.gaming
 cp -r "$SCRIPT_DIR/kodi/addons/script.cloud.gaming" /storage/.kodi/addons/
 
@@ -135,6 +142,7 @@ cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/launch.sh" /storage/.kodi/scripts/clou
 sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
     "INSERT OR REPLACE INTO installed (addonID, enabled, installDate) VALUES
         ('service.akasha.splash', 1, datetime('now')),
+        ('service.akasha.overlay', 1, datetime('now')),
         ('script.akasha.settings', 1, datetime('now')),
         ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
@@ -153,13 +161,13 @@ fi
 # ---------------------------------------------------------------------------
 # 8. Generate shutdown/reboot splash raw images
 # ---------------------------------------------------------------------------
-log "[8/11] Generating splash images..."
+log "[9/13] Generating splash images..."
 python3 /storage/.kodi/scripts/generate-splash-messages.py
 
 # ---------------------------------------------------------------------------
 # 9. Skin patches (Arctic Horizon 2)
 # ---------------------------------------------------------------------------
-log "[9/11] Applying Arctic Horizon 2 skin patches..."
+log "[10/13] Applying Arctic Horizon 2 skin patches..."
 SKIN_DIR="/storage/.kodi/addons/skin.arctic.horizon.2"
 mkdir -p "$SKIN_DIR/shortcuts" "$SKIN_DIR/extras/icons"
 
@@ -180,6 +188,11 @@ if [ -d "$SKIN_DIR" ]; then
 
     # Force skinshortcuts rebuild
     rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash
+
+    # Add Akasha system overlay (toggle from Akasha Settings)
+    if [ -f "$SCRIPT_DIR/skin-patches/overlay/Custom_1199_Overlay.xml" ]; then
+        cp "$SCRIPT_DIR/skin-patches/overlay/Custom_1199_Overlay.xml" "$SKIN_DIR/1080i/Custom_1199_Overlay.xml"
+    fi
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi
@@ -187,7 +200,7 @@ fi
 # ---------------------------------------------------------------------------
 # 10. Controller buttonmap
 # ---------------------------------------------------------------------------
-log "[10/11] Installing controller buttonmap..."
+log "[11/13] Installing controller buttonmap..."
 BUTTONMAP_DIR="/storage/.kodi/userdata/addon_data/peripheral.joystick/resources/buttonmaps/xml/linux"
 if [ -f "$SCRIPT_DIR/kodi/userdata/addon_data/peripheral.joystick/resources/buttonmaps/xml/linux/Xbox_Wireless_Controller_15b_8a.xml" ]; then
     mkdir -p "$BUTTONMAP_DIR"
@@ -195,9 +208,23 @@ if [ -f "$SCRIPT_DIR/kodi/userdata/addon_data/peripheral.joystick/resources/butt
 fi
 
 # ---------------------------------------------------------------------------
-# 11. System tweaks
+# 11. Gamepad volume keymap
 # ---------------------------------------------------------------------------
-log "[11/11] Finalizing system tweaks..."
+log "[12/13] Installing gamepad volume keymap..."
+mkdir -p /storage/.kodi/userdata/keymaps
+rm -f /storage/.kodi/userdata/keymaps/joystick.xml
+if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/keymap.xml" ]; then
+    cp "$SCRIPT_DIR/kodi/userdata/keymaps/keymap.xml" /storage/.kodi/userdata/keymaps/keymap.xml
+fi
+if [ -f "$SCRIPT_DIR/scripts/volume.py" ]; then
+    cp "$SCRIPT_DIR/scripts/volume.py" /storage/.kodi/scripts/volume.py
+    chmod +x /storage/.kodi/scripts/volume.py
+fi
+
+# ---------------------------------------------------------------------------
+# 12. System tweaks
+# ---------------------------------------------------------------------------
+log "[13/13] Finalizing system tweaks..."
 
 # Run the LibreELEC update blocker once right now, and enable the service
 # so it also runs on every boot after a LibreELEC / Kodi update.
@@ -221,7 +248,7 @@ except FileNotFoundError:
     exit(0)
 # general.addonupdates: 0=auto, 1=notify, 2=never
 # addons.updatemode: 0=official, 1=any, 2=none
-for sid, val in [("general.addonupdates", "1"), ("addons.updatemode", "2")]:
+for sid, val in [("general.addonupdates", "1"), ("addons.updatemode", "2"), ("audiooutput.volumesteps", "90")]:
     if 'id="{}"'.format(sid) not in data:
         data = data.replace("</settings>", '    <setting id="{}">{}</setting>\n</settings>'.format(sid, val))
     else:
