@@ -44,10 +44,10 @@ def patch(path, version=''):
                         <texture colordiffuse="FFFFFFFF">akasha-title.png</texture>
                     </control>
                     <control type="image">
-                        <right>20</right>
+                        <right>10</right>
                         <centertop>50%</centertop>
-                        <width>80</width>
-                        <height>80</height>
+                        <width>100</width>
+                        <height>100</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">special://skin/extras/icons/akasha-logo-circle.png</texture>
                     </control>
