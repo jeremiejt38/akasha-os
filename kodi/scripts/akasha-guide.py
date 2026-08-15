@@ -105,6 +105,24 @@ def _toggle_overlay():
         xbmc.log('Akasha Guide: overlay toggle error: {}'.format(e), xbmc.LOGERROR)
 
 
+def _restart_kodi():
+    if not xbmcgui.Dialog().yesno('Akasha Guide', 'Redemarrer Kodi maintenant ?'):
+        return
+    # Show reboot splash in ExecStartPre when Kodi restarts (same flag as
+    # script.akasha.settings, checked by show-splash-if-restart.sh).
+    _touch('/tmp/.kodi-restart')
+    subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
+
+
+def _shutdown_system():
+    if not xbmcgui.Dialog().yesno('Akasha Guide', 'Eteindre le systeme maintenant ?\n(La TV sera aussi eteinte via CEC)'):
+        return
+    # Show the shutdown splash and turn the TV off via CEC before the system
+    # shuts down. The matching systemd service will skip if already shown.
+    subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-shutdown.png', '1'])
+    subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
+
+
 def _run_builtin(action):
     if action == '__overlay__':
         _toggle_overlay()
@@ -112,13 +130,12 @@ def _run_builtin(action):
     if action == '__sleep__':
         _sleep()
         return
-    if action in ('RestartApp', 'Shutdown'):
-        messages = {
-            'RestartApp': 'Redemarrer Kodi maintenant ?',
-            'Shutdown': 'Eteindre le systeme maintenant ?',
-        }
-        if not xbmcgui.Dialog().yesno('Akasha Guide', messages.get(action, 'Continuer ?')):
-            return
+    if action == 'RestartApp':
+        _restart_kodi()
+        return
+    if action == 'Shutdown':
+        _shutdown_system()
+        return
     xbmc.executebuiltin(action)
 
 
