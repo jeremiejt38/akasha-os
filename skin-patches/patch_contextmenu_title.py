@@ -38,8 +38,8 @@ def patch(path, version=''):
                     <control type="image">
                         <left>0</left>
                         <top>5</top>
-                        <width>400</width>
-                        <height>140</height>
+                        <width>260</width>
+                        <height>150</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">akasha-title.png</texture>
                     </control>
