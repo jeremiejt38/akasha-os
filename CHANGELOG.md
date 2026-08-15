@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.11.1...akasha-os-v0.12.0) (2026-08-15)
+
+
+### Features
+
+* **ambient:** add pure logic modules for Akasha Ambient (config, content, weather, energy) ([c3877c0](https://github.com/jeremiejt38/akasha-os/commit/c3877c0c1f8fd20d6ab7456d48fd7cc746cc195c))
+* **ambient:** implement the Ambient Mode screensaver window and skin ([b5f0c0e](https://github.com/jeremiejt38/akasha-os/commit/b5f0c0e17e8e03dda330bdf3cc5d5d67100ad32b))
+* **guide:** add manual "Mode Ambiant" activation entry ([b361e08](https://github.com/jeremiejt38/akasha-os/commit/b361e08098d4c14aa01765616b7e20d1a9b921f8))
+* **install:** deploy screensaver.akasha.ambient and enable it once ([9cbb4af](https://github.com/jeremiejt38/akasha-os/commit/9cbb4af9f2325e32b85f1df27aecc074af899221))
+* **settings:** add Mode Ambiant section to Akasha Settings ([5ad25d2](https://github.com/jeremiejt38/akasha-os/commit/5ad25d24527f4dcc798be6a691e405e728208856))
+
 ## [0.11.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.11.0...akasha-os-v0.11.1) (2026-08-15)
 
 
