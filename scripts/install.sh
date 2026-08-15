@@ -203,8 +203,9 @@ if [ -d "$SKIN_DIR" ]; then
     # Remove obsolete guide skin files (guide is now a Python script addon)
     rm -f "$SKIN_DIR/1080i/Custom_1193_Guide.xml" "$SKIN_DIR/1080i/Custom_1197_Guide.xml"
 
-    # Make native context-menu header say "Menu" instead of "Menu contextuel"
-    python3 "$SCRIPT_DIR/skin-patches/patch_contextmenu_title.py" "$SKIN_DIR"
+    # Make native context-menu header say "Akasha", show the Akasha logo, and version label
+    AKASHA_VERSION=$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.release-please-manifest.json'))['.'])" 2>/dev/null || echo '')
+    python3 "$SCRIPT_DIR/skin-patches/patch_contextmenu_title.py" "$SKIN_DIR" "$AKASHA_VERSION"
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi
