@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.1...akasha-os-v0.14.2) (2026-08-16)
+
+
+### Bug Fixes
+
+* **ambient:** move videowindow to top of render stack and bind after visibility ([c6f123e](https://github.com/jeremiejt38/akasha-os/commit/c6f123ec7ece20502ac37a2d4c71e306167b8c34))
+
 ## [0.14.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.0...akasha-os-v0.14.1) (2026-08-16)
 
 
