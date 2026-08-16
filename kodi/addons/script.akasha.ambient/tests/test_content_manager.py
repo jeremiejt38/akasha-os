@@ -67,5 +67,54 @@ class ResolveSlideshowPathTests(unittest.TestCase):
         )
 
 
+class ListVideosTests(unittest.TestCase):
+    def test_missing_folder_returns_empty_list(self):
+        self.assertEqual(content_manager.list_videos('/nonexistent/path/xyz'), [])
+
+    def test_lists_only_video_extensions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ('a.mp4', 'b.MOV', 'c.txt', 'd.jpg', 'e.webm'):
+                open(os.path.join(tmp, name), 'w').close()
+            self.assertEqual(
+                content_manager.list_videos(tmp),
+                ['a.mp4', 'b.MOV', 'e.webm'],
+            )
+
+    def test_empty_folder_returns_empty_list(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(content_manager.list_videos(tmp), [])
+
+
+class ResolveMediaTests(unittest.TestCase):
+    def test_prefers_videos_in_configured_path(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            open(os.path.join(content, 'clip.mp4'), 'w').close()
+            open(os.path.join(content, 'photo.jpg'), 'w').close()
+            media_type, content_out = content_manager.resolve_media(content, fallback)
+            self.assertEqual(media_type, 'videos')
+            self.assertEqual(content_out, [os.path.join(content, 'clip.mp4')])
+
+    def test_falls_back_to_images_when_no_videos(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            open(os.path.join(content, 'photo.jpg'), 'w').close()
+            media_type, content_out = content_manager.resolve_media(content, fallback)
+            self.assertEqual(media_type, 'images')
+            self.assertEqual(content_out, content)
+
+    def test_falls_back_to_videos_in_fallback(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            open(os.path.join(fallback, 'fallback.mp4'), 'w').close()
+            media_type, content_out = content_manager.resolve_media(content, fallback)
+            self.assertEqual(media_type, 'videos')
+            self.assertEqual(content_out, [os.path.join(fallback, 'fallback.mp4')])
+
+    def test_falls_back_to_images_in_fallback(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            open(os.path.join(fallback, 'fallback.png'), 'w').close()
+            media_type, content_out = content_manager.resolve_media(content, fallback)
+            self.assertEqual(media_type, 'images')
+            self.assertEqual(content_out, fallback)
+
+
 if __name__ == '__main__':
     unittest.main()

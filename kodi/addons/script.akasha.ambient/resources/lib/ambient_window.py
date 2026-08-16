@@ -13,11 +13,6 @@ CPythonInvoker watchdog was observed to kill screensaver-type scripts
 long-standing Kodi issue (see docs/ambient-mode/decisions.md). The
 inactivity trigger is handled by service.akasha.ambient instead of
 Kodi's native screensaver mechanism.
-
-This module intentionally keeps as little logic as possible: anything that
-can be expressed without xbmc*/xbmcgui*/xbmcaddon* lives in the sibling
-pure modules (config.py, content_manager.py, weather_client.py, energy.py)
-and is covered by tests/. This file is only exercised on the real device.
 """
 import json
 import os
@@ -79,6 +74,15 @@ def _load_raw_settings():
     }
 
 
+def _build_video_playlist(video_paths):
+    """Build a Kodi video playlist from an ordered list of file paths."""
+    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    playlist.clear()
+    for path in video_paths:
+        playlist.add(path)
+    return playlist
+
+
 class AmbientWindow(xbmcgui.WindowXMLDialog):
     """Fullscreen ambient dialog. onInit() only sets up initial state and
     starts background threads (weather refresh, dim/preset/sleep ticker);
@@ -90,11 +94,12 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._active = False
+        self._player = None
         try:
             self.cfg = config.load_config(_load_raw_settings())
         except Exception as e:
             xbmc.log('Akasha Ambient: failed to load settings, using defaults: {}'.format(e),
-                      xbmc.LOGERROR)
+                     xbmc.LOGERROR)
             self.cfg = config.load_config({})
 
     def onInit(self):
@@ -117,8 +122,25 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
         self.exit()
 
     def _setup_background(self):
-        path = content_manager.resolve_slideshow_path(self.cfg.content_path, self.cfg.fallback_folder)
-        self.setProperty('content_path', path)
+        media_type, content = content_manager.resolve_media(
+            self.cfg.content_path, self.cfg.fallback_folder,
+        )
+        if media_type == 'videos':
+            self.setProperty('has_videos', '1')
+            try:
+                playlist = _build_video_playlist(content)
+                self._player = xbmc.Player()
+                self._player.play(playlist, windowed=True)
+                xbmc.log('Akasha Ambient: playing {} video(s)'.format(len(content)), xbmc.LOGINFO)
+            except Exception as e:
+                xbmc.log('Akasha Ambient: video playback failed, falling back to images: {}'.format(e),
+                         xbmc.LOGERROR)
+                # Fall back to the multiimage path if video playback fails.
+                self._player = None
+                self.setProperty('has_videos', '')
+                self.setProperty('content_path', self.cfg.fallback_folder)
+        else:
+            self.setProperty('content_path', content)
 
     def _start_weather_thread(self):
         if not self.cfg.weather_enabled:
@@ -175,6 +197,12 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
         if not self._active:
             return
         self._active = False
+        if self._player is not None:
+            try:
+                self._player.stop()
+            except Exception:
+                pass
+            self._player = None
         _remove_lock()
         try:
             self.close()
