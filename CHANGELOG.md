@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.4...akasha-os-v0.15.0) (2026-08-16)
+
+
+### Features
+
+* **ambient:** switch default pack to Wikimedia Commons landscape videos ([bd3d74e](https://github.com/jeremiejt38/akasha-os/commit/bd3d74e493a4db4c0832a01d8c7a9c8340762710))
+
 ## [0.14.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.3...akasha-os-v0.14.4) (2026-08-16)
 
 
