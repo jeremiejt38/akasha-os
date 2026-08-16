@@ -140,10 +140,14 @@ def _run_builtin(action):
     xbmc.executebuiltin(action)
 
 
+PRESET_COUNT = 3
+
+
 class GuideWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         self.list = None
         self._closing = False
+        self.preset = 0
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -153,8 +157,13 @@ class GuideWindow(xbmcgui.WindowXMLDialog):
             for label, action, confirm in OPTIONS:
                 self.list.addItem(xbmcgui.ListItem(label=label))
             self.setFocus(self.list)
+            self._set_preset(self.preset)
         except Exception as e:
             xbmc.log('Akasha Guide: custom window init error: {}'.format(e), xbmc.LOGERROR)
+
+    def _set_preset(self, preset):
+        self.preset = preset % PRESET_COUNT
+        self.setProperty('AkashaGuidePreset', str(self.preset))
 
     def onAction(self, action):
         aid = action.getId()
@@ -163,6 +172,12 @@ class GuideWindow(xbmcgui.WindowXMLDialog):
             return
         if aid == ACTION_SELECT_ITEM:
             self._select_current()
+            return
+        if aid == ACTION_MOVE_LEFT:
+            self._set_preset(self.preset - 1)
+            return
+        if aid == ACTION_MOVE_RIGHT:
+            self._set_preset(self.preset + 1)
             return
         # Let Kodi handle up/down for the list
         super().onAction(action)
