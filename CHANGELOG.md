@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.12.0...akasha-os-v0.13.0) (2026-08-16)
+
+
+### Features
+
+* **guide:** brand the custom Guide header with logo, title and Montserrat font ([2757796](https://github.com/jeremiejt38/akasha-os/commit/275779627c45de20e5ac01e214318d2fd7f974c8))
+
 ## [0.12.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.11.1...akasha-os-v0.12.0) (2026-08-15)
 
 
