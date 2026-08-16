@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.0...akasha-os-v0.14.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **ambient:** close busydialog before starting windowed video playback ([7c47992](https://github.com/jeremiejt38/akasha-os/commit/7c4799285503741ff3c4a1bb2dc1c0d4dfd67173))
+* **ambient:** loop ambient videos and build proper playlist items ([0aa5937](https://github.com/jeremiejt38/akasha-os/commit/0aa593752bcb987f5a3c9238ed2d9bc1c0d1469c))
+* **ambient:** make ambient window background transparent for windowed video ([d2dba82](https://github.com/jeremiejt38/akasha-os/commit/d2dba82c2e699923f885a5e1c613d3c90a0f11b8))
+
 ## [0.14.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.13.1...akasha-os-v0.14.0) (2026-08-16)
 
 
