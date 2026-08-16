@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.13.1...akasha-os-v0.14.0) (2026-08-16)
+
+
+### Features
+
+* **ambient:** download a default NASA EPIC Earth photo pack at install ([02cea6b](https://github.com/jeremiejt38/akasha-os/commit/02cea6b18b09a7057b598301dcad61c4d844f057))
+* **ambient:** support ambient video packs with xbmc Player + videowindow ([6cf841c](https://github.com/jeremiejt38/akasha-os/commit/6cf841c09022dd53640ee5f725c0521c126b12f0))
+
 ## [0.13.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.13.0...akasha-os-v0.13.1) (2026-08-16)
 
 
