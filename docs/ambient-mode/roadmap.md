@@ -20,24 +20,26 @@
    activation manuelle, rotation, horloge, météo, assombrissement, veille, réveil.
 9. **Release** : commits Conventional Commits, Release Please → v0.12.0.
 
-## v0.13.2 (ce chantier)
+## v0.14.x (ce chantier)
 
-1. **Pack de paysages par défaut** : téléchargement depuis NASA EPIC (domaine public) par
-   `install.sh`, via `kodi/scripts/ambient-download-photos.py`.
+1. **Pack de paysages par défaut** : téléchargement depuis Wikimedia Commons (vidéos librement
+   licenciées) par `install.sh`, via `kodi/scripts/ambient-download-videos.py`. Pack initialement
+   NASA EPIC, remplacé par des vidéos de paysages à la demande.
 2. **Support des vidéos d'ambiance en boucle** : `content_manager.resolve_media()` détecte les
    vidéos, `AmbientWindow` démarre un `xbmc.Player` en plein écran (`windowed=False`) avec un thread
-   `isPlaying()` pour fermer le Mode Ambiant sur `Back`/`Stop`. L'horloge/météo ne s'affiche pas
-   pendant une vidéo.
-3. **Tests unitaires** : `list_videos`, `resolve_media`, fallback vidéo/image.
-4. **Release + déploiement** : commits Conventional Commits, Release Please, validation sur le Pi
+   `isPlaying()` pour fermer le Mode Ambiant sur `Back`/`Stop`. Keymap `akasha-ambient.xml` renforce
+   `Back`/`Escape`/`B` -> `Stop` en `FullscreenVideo`. L'horloge/météo ne s'affiche pas pendant une
+   vidéo.
+3. **Correction `multiimage` aspectratio** : `crop` n'est pas une valeur valide pour Kodi ; passage
+   à `scale` pour conserver le ratio et remplir l'écran.
+4. **Tests unitaires** : `list_videos`, `resolve_media`, fallback vidéo/image.
+5. **Release + déploiement** : commits Conventional Commits, Release Please, validation sur le Pi
    (PixelCamera + `kodi-send`).
 
-## Après v0.13.2 (non planifié dans ce chantier)
+## Après v0.14.x (non planifié dans ce chantier)
 
 - Effet Ken Burns (zoom/pan lents) sur les images fixes, si le rendu `multiimage` seul s'avère trop
   statique à l'usage.
-
-## Après v0.13.2 (non planifié dans ce chantier)
 
 - Effet Ken Burns (zoom/pan lents) sur les images fixes, si le rendu `multiimage` seul s'avère trop
   statique à l'usage.

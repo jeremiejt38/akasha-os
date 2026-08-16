@@ -141,13 +141,13 @@ rm -rf /storage/.kodi/addons/service.akasha.ambient
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.ambient" /storage/.kodi/addons/
 mkdir -p /storage/ambient/photos
 
-# Download a default pack of public-domain Earth images from NASA EPIC if the
-# ambient photos folder is still empty (or incomplete). Non-fatal: the addon's
-# bundled fallback folder keeps the screensaver from ever showing a blank screen.
+# Download a default pack of freely licensed landscape videos from Wikimedia
+# Commons into the ambient content folder. Non-fatal: the addon's bundled
+# fallback folder keeps the screensaver from ever showing a blank screen.
 if command -v python3 >/dev/null 2>&1; then
-    python3 "$SCRIPT_DIR/kodi/scripts/ambient-download-photos.py" /storage/ambient/photos -n 12 || true
+    python3 "$SCRIPT_DIR/kodi/scripts/ambient-download-videos.py" /storage/ambient/photos || true
 else
-    log "WARNING: python3 not available; skipping default ambient photo download."
+    log "WARNING: python3 not available; skipping default ambient video download."
 fi
 
 # ---------------------------------------------------------------------------
@@ -259,6 +259,10 @@ rm -f /storage/.kodi/userdata/keymaps/joystick.xml
 if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/keymap.xml" ]; then
     cp "$SCRIPT_DIR/kodi/userdata/keymaps/keymap.xml" /storage/.kodi/userdata/keymaps/keymap.xml
 fi
+if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-ambient.xml" ]; then
+    cp "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-ambient.xml" /storage/.kodi/userdata/keymaps/akasha-ambient.xml
+fi
+
 if [ -f "$SCRIPT_DIR/scripts/volume.py" ]; then
     cp "$SCRIPT_DIR/scripts/volume.py" /storage/.kodi/scripts/volume.py
     chmod +x /storage/.kodi/scripts/volume.py

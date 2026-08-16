@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha OS ambient-mode keymap.
+
+When a video is playing in fullscreen (the ambient background is actually a
+Kodi player launched from script.akasha.ambient), the standard Back/ESC key on
+remotes/keyboards can be interpreted as "previous chapter" or be swallowed by
+the player. Mapping it to Stop ensures that pressing Back always exits the
+ambient screensaver and returns to the Kodi home screen.
+-->
+<keymap>
+  <FullscreenVideo>
+    <keyboard>
+      <back>Stop</back>
+      <escape>Stop</escape>
+    </keyboard>
+    <remote>
+      <back>Stop</back>
+    </remote>
+    <gamepad>
+      <back>Stop</back>
+      <b>Stop</b>
+    </gamepad>
+  </FullscreenVideo>
+</keymap>

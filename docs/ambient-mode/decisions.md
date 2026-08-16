@@ -147,8 +147,17 @@ recouvre le player.
 sans réécrire de lecteur. L'utilisateur peut placer soit un dossier de photos, soit un dossier de
 vidéos dans `/storage/ambient/photos` ; le Mode Ambiant choisit automatiquement le mode adapté.
 
-**Précaution** : la fermeture de la fenêtre (`exit()`) arrête explicitement le player pour libérer
-les ressources vidéo avant le transfert vers `akasha-sleep.py`.
+**Pack de vidéos par défaut** : `install.sh` appelle `kodi/scripts/ambient-download-videos.py`,
+qui télécharge depuis Wikimedia Commons un petit pack de vidéos de paysages librement licenciées
+(CC-BY / CC0 / domaine public). Le script utilise l'API MediaWiki pour résoudre les titres en URLs
+de téléchargement direct et filtre les formats paysage >= 1280x720. Aucune clé API n'est requise.
+
+**Fermeture sur `Back`** : en plein écran, Kodi n'associe pas toujours `Back`/`Escape` à `Stop`
+lorsque le player est lancé depuis un script. Le keymap
+`kodi/userdata/keymaps/akasha-ambient.xml` mappe donc `Back`/`Escape`/`B` à `Stop` dans
+`FullscreenVideo`. `AmbientWindow._video_monitor_loop()` détecte `isPlaying() == False` et ferme
+la fenêtre immédiatement. La fermeture (`exit()`) arrête explicitement le player pour libérer les
+ressources vidéo avant le transfert vers `akasha-sleep.py`.
 
 ## Réutilisation de `akasha-sleep.py` pour l'état SLEEP
 
