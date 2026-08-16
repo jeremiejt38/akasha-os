@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog">
+    <!-- Don't clear the background to black: the multiimage or videowindow
+         provides the ambient background, and a black clear would paint over
+         a windowed video player on some Kodi builds. -->
+    <backgroundcolor>0</backgroundcolor>
     <controls>
         <!-- Background slideshow. Kodi's native multiimage control handles
              rotation, randomization and crossfade on its own; the Python
