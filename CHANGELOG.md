@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.15.0...akasha-os-v0.16.0) (2026-08-16)
+
+
+### Features
+
+* **ambient:** switch to static-camera looping landscape videos from Commons ([7129cc8](https://github.com/jeremiejt38/akasha-os/commit/7129cc8092f600e737d245b88f2450bf8d9afa1c))
+
 ## [0.15.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.4...akasha-os-v0.15.0) (2026-08-16)
 
 
