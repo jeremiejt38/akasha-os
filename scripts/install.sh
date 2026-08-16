@@ -208,6 +208,11 @@ if [ -d "$SKIN_DIR" ]; then
     # without overlapping the version label or getting clipped
     python3 "$SCRIPT_DIR/skin-patches/patch_context_height.py" "$SKIN_DIR"
 
+    # Register the Montserrat font used by the Akasha Guide custom XML
+    # window (guide.style=2) in the skin's own Font.xml (Kodi 21 does not
+    # support addon-scoped fonts yet).
+    python3 "$SCRIPT_DIR/skin-patches/patch_akasha_fonts.py" "$SKIN_DIR"
+
     # Force skinshortcuts rebuild
     rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash
 

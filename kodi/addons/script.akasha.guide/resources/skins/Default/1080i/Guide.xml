@@ -41,6 +41,22 @@
                     <height>6</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
                 </control>
+                <control type="image">
+                    <left>30</left>
+                    <top>26</top>
+                    <width>170</width>
+                    <height>33</height>
+                    <aspectratio aligny="center" alignx="left">keep</aspectratio>
+                    <texture>akasha-title.png</texture>
+                </control>
+                <control type="image">
+                    <right>30</right>
+                    <top>16</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture>akasha-logo-circle.png</texture>
+                </control>
             </control>
 
             <!-- Preset 1 : Compact context menu style -->
@@ -96,7 +112,7 @@
                         <top>0</top>
                         <width>480</width>
                         <height>60</height>
-                        <font>font12</font>
+                        <font>font_akasha_guide</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>BBFFFFFF</textcolor>
                         <aligny>center</aligny>
@@ -113,25 +129,12 @@
                         <top>0</top>
                         <width>480</width>
                         <height>60</height>
-                        <font>font12</font>
+                        <font>font_akasha_guide</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <aligny>center</aligny>
                     </control>
                 </focusedlayout>
-            </control>
-
-            <!-- Preset 0 title -->
-            <control type="label">
-                <visible>String.IsEqual(Window.Property(AkashaGuidePreset),0)</visible>
-                <left>40</left>
-                <top>35</top>
-                <width>560</width>
-                <height>50</height>
-                <font>font14</font>
-                <label>Akasha Guide</label>
-                <align>center</align>
-                <textcolor>FFFFFFFF</textcolor>
             </control>
 
             <!-- Preset 2 title -->
