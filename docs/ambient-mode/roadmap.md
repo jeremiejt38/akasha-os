@@ -25,9 +25,9 @@
 1. **Pack de paysages par défaut** : téléchargement depuis NASA EPIC (domaine public) par
    `install.sh`, via `kodi/scripts/ambient-download-photos.py`.
 2. **Support des vidéos d'ambiance en boucle** : `content_manager.resolve_media()` détecte les
-   vidéos, `AmbientWindow` démarre un `xbmc.Player` windowed dans un `videowindow` plein écran.
-   La fenêtre est passée de `WindowXMLDialog` à `WindowXML` avec un `defaultcontrol` invisible pour
-   que le player s'affiche et que `Back` ferme correctement.
+   vidéos, `AmbientWindow` démarre un `xbmc.Player` en plein écran (`windowed=False`) avec un thread
+   `isPlaying()` pour fermer le Mode Ambiant sur `Back`/`Stop`. L'horloge/météo ne s'affiche pas
+   pendant une vidéo.
 3. **Tests unitaires** : `list_videos`, `resolve_media`, fallback vidéo/image.
 4. **Release + déploiement** : commits Conventional Commits, Release Please, validation sur le Pi
    (PixelCamera + `kodi-send`).

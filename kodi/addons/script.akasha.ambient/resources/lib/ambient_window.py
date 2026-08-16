@@ -137,13 +137,14 @@ class AmbientWindow(xbmcgui.WindowXML):
             xbmc.sleep(300)
             try:
                 playlist = _build_video_playlist(content)
-                # Make sure any active busy dialog is closed before playing,
-                # otherwise Kodi may render the video behind the window.
-                xbmc.executebuiltin('Dialog.Close(busydialog,true)', wait=False)
                 self._player = xbmc.Player()
-                self._player.play(playlist, windowed=True)
+                # Play fullscreen so the native player handles Back/Stop and
+                # releases focus cleanly. We monitor isPlaying() to close the
+                # ambient window once the user exits the player.
+                self._player.play(playlist, windowed=False)
                 # Repeat the whole playlist so the ambient background never stops.
                 xbmc.executebuiltin('PlayerControl(RepeatAll)', wait=False)
+                threading.Thread(target=self._video_monitor_loop, daemon=True).start()
                 xbmc.log('Akasha Ambient: playing {} video(s)'.format(len(content)), xbmc.LOGINFO)
             except Exception as e:
                 xbmc.log('Akasha Ambient: video playback failed, falling back to images: {}'.format(e),
@@ -154,6 +155,22 @@ class AmbientWindow(xbmcgui.WindowXML):
                 self.setProperty('content_path', self.cfg.fallback_folder)
         else:
             self.setProperty('content_path', content)
+
+    def _video_monitor_loop(self):
+        """For fullscreen video mode, exit the ambient window once the user
+        stops the player (Back/Stop). Allow a short startup delay so the
+        first isPlaying() check does not race with player initialization.
+        """
+        time.sleep(1)
+        while self._active and self._player is not None:
+            try:
+                if not self._player.isPlaying():
+                    xbmc.log('Akasha Ambient: player stopped, exiting', xbmc.LOGINFO)
+                    self.exit()
+                    return
+            except Exception:
+                pass
+            time.sleep(0.5)
 
     def _start_weather_thread(self):
         if not self.cfg.weather_enabled:

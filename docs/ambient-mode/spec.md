@@ -66,10 +66,9 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
 - **Images et vidéos locales**. Le module `content_manager.resolve_media()` détecte
   automatiquement le type de contenu du dossier configuré :
   - **Photos** : affichage par le contrôle natif Kodi `multiimage` (rotation, fondu, aléatoire).
-  - **Vidéos** : lecture en boucle via `xbmc.Player().play(..., windowed=True)` dans un contrôle
-    `videowindow` plein écran. La fenêtre utilise `xbmcgui.WindowXML` (pas `WindowXMLDialog`) pour
-    que le player windowed s'affiche correctement, avec un `defaultcontrol` invisible qui garde
-    le focus afin que `Back`/toute touche ferme immédiatement le Mode Ambiant.
+  - **Vidéos** : lecture en boucle via `xbmc.Player().play(..., windowed=False)` (plein écran).
+    Un thread surveille `isPlaying()` et ferme le Mode Ambiant quand l'utilisateur appuie sur `Back`
+    ou `Stop`. L'horloge/météo ne s'affiche pas pendant la lecture vidéo.
 - **Pack de paysages par défaut** : lors du premier déploiement, `install.sh` télécharge un petit
   pack d'images de la Terre (public domain, NASA EPIC) dans `/storage/ambient/photos` si le dossier
   est vide. Ce pack n'est pas commité dans le dépôt.

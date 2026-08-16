@@ -23,18 +23,6 @@
             <ondown>9000</ondown>
         </control>
 
-        <!-- Background video window. Placed first so it renders behind the
-             multiimage and the clock/weather widget. Used when the content
-             folder contains videos; xbmc.Player().play(..., windowed=True)
-             renders here. -->
-        <control type="videowindow" id="2">
-            <visible>!String.IsEmpty(Window.Property(has_videos))</visible>
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
-        </control>
-
         <!-- Background slideshow. Kodi's native multiimage control handles
              rotation, randomization and crossfade on its own; the Python
              side only decides which path it points at (see

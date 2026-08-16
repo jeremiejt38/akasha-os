@@ -126,22 +126,22 @@ Python et injectées dans les coordonnées du skin.
 info-labels numériques dynamiques à chaque frame ; un système de presets discrets, déjà utilisé et
 validé dans ce projet, est plus robuste et suffisant pour l'objectif anti-marquage.
 
-## Vidéos d'ambiance en boucle : `videowindow` + `xbmc.Player`
+## Vidéos d'ambiance en boucle : `xbmc.Player` plein écran
 
 **Choix** : quand le dossier de contenu contient des vidéos, `content_manager.resolve_media()`
 retourne `media_type='videos'` et une liste de chemins. `AmbientWindow` démarre un `xbmc.PlayList`
-et appelle `xbmc.Player().play(..., windowed=True)`. La fenêtre `Ambient.xml` inclut un contrôle
-`<control type="videowindow">` plein écran, visible uniquement quand la propriété `has_videos` est
-positionnée. Le `multiimage` est masqué dans ce cas.
+et appelle `xbmc.Player().play(..., windowed=False)`. Un thread surveille `isPlaying()` et ferme
+la fenêtre dès que l'utilisateur appuie sur `Back`/`Stop` (ce qui arrête le player plein écran).
 
-**Pourquoi `xbmcgui.WindowXML` (et non `WindowXMLDialog`)** : `WindowXMLDialog` masquait le
-`videowindow` (fond noir) dans nos tests réels sur LibreELEC/Kodi 21 ; `WindowXML` permet au player
-windowed de s'afficher correctement derrière les overlays horloge/météo.
+**Pourquoi le plein écran et non un `videowindow` intégré** : dans nos tests réels sur
+LibreELEC/Kodi 21, `xbmc.Player().play(..., windowed=True)` n'affichait pas correctement la vidéo
+soit derrière le dialog (`WindowXMLDialog`), soit sans jamais relâcher le focus, ce qui empêchait
+`Back` de fermer le Mode Ambiant. Le player plein écran natif est stable et permet la boucle / le
+`RepeatAll` fiable.
 
-**Pourquoi un `<defaultcontrol>` invisible** : avec un `videowindow` actif, le focus risque d'être
-accaparé par le player et `onAction()` (en particulier `Back`) n'est plus reçu. Un bouton
-transparent focalisé par défaut, avec `setFocusId()` rafraîchi dans la boucle principale, garantit
-que n'importe quelle entrée utilisateur ferme immédiatement le Mode Ambiant.
+**Limitation connue** : pendant une vidéo, l'horloge et la météo ne sont pas affichées (ce n'est pas
+un `videowindow` intégré). Le `multiimage` est simplement masqué pour éviter qu'une image ne
+recouvre le player.
 
 **Raison** : cela réutilise le player vidéo natif de Kodi (décodage matériel, boucle de playlist)
 sans réécrire de lecteur. L'utilisateur peut placer soit un dossier de photos, soit un dossier de
