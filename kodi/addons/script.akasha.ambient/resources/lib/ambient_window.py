@@ -131,6 +131,9 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
         )
         if media_type == 'videos':
             self.setProperty('has_videos', '1')
+            # Give the skin a moment to make the videowindow visible before
+            # binding the player to it; otherwise Kodi may render behind it.
+            xbmc.sleep(300)
             try:
                 playlist = _build_video_playlist(content)
                 # Make sure any active busy dialog is closed before playing,
