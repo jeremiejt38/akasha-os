@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.3...akasha-os-v0.14.4) (2026-08-16)
+
+
+### Bug Fixes
+
+* **ambient:** switch video mode to fullscreen with isPlaying monitor ([0fdce74](https://github.com/jeremiejt38/akasha-os/commit/0fdce7455f487ced151dd7cf82369b2467897259))
+
 ## [0.14.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.2...akasha-os-v0.14.3) (2026-08-16)
 
 
