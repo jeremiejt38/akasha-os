@@ -17,16 +17,21 @@ import urllib.parse
 import urllib.request
 
 COMMONS_API = 'https://commons.wikimedia.org/w/api.php'
-USER_AGENT = 'AkashaOS/0.14 (+https://github.com/jeremiejt38/akasha-os)'
+USER_AGENT = 'AkashaOS/0.15 (+https://github.com/jeremiejt38/akasha-os)'
+MANIFEST_NAME = '.akasha-ambient-videos'
 
-# Curated landscape videos available on Wikimedia Commons in 1920x1080 (or
-# close). All are freely licensed. Titles may change; if an item is missing
-# the API simply skips it.
+# Curated static-camera landscape videos available on Wikimedia Commons in
+# 1920x1080. All are freely licensed (CC-BY / CC0 / public domain). The scenes
+# are chosen for subtle, looping natural motion (waves, flowing water) rather
+# than camera movement, similar to Google TV / Apple TV ambient modes.
 DEFAULT_TITLES = [
-    'File:Vihorlat video 001.webm',
-    'File:Fish Lake (28789846297).webm',
-    'File:Lost Forest Research Natural Area (44359678475).webm',
-    'File:Sunset over the Narmada River at Narmadapuram.webm',
+    'File:Ocean waves at Lækjavik beach, Iceland.webm',
+    'File:Waves-1013354, Dingle Peninsula, Co. Kerry, Ireland.webm',
+    'File:Yudaki - tochigi - 2021 Oct 29.webm',
+    'File:Triberger Wasserfälle (Triberg im Schwarzwald).webm',
+    'File:Godachinmalki waterfalls video.webm',
+    'File:Partnachklamm.ogv',
+    'File:River flowing.webm',
 ]
 
 
@@ -75,7 +80,7 @@ def _is_landscape_ii(ii, min_width=1280, min_height=720):
         return False
     if width < height:
         return False  # skip portrait
-    if not mime.startswith('video/'):
+    if not (mime.startswith('video/') or mime in ('application/ogg', 'application/octet-stream')):
         return False
     return True
 
@@ -98,11 +103,37 @@ def _safe_filename(title, url):
     return urllib.parse.unquote(name)
 
 
+def _load_manifest(out_dir):
+    """Return the set of filenames previously downloaded by this script."""
+    path = os.path.join(out_dir, MANIFEST_NAME)
+    if not os.path.exists(path):
+        return set()
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return {line.strip() for line in f if line.strip()}
+    except OSError:
+        return set()
+
+
+def _save_manifest(out_dir, filenames):
+    """Write the manifest of filenames downloaded by this run."""
+    path = os.path.join(out_dir, MANIFEST_NAME)
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            for name in sorted(filenames):
+                f.write('{0}\n'.format(name))
+    except OSError as e:
+        print('ambient-download-videos: failed to write manifest: {}'.format(e),
+              file=sys.stderr)
+
+
 def fetch_landscape_videos(out_dir, titles=DEFAULT_TITLES, timeout=120):
     """Download the configured videos into `out_dir`.
 
     Returns the number of videos actually downloaded. Files already present are
-    skipped so re-runs are fast.
+    skipped so re-runs are fast. Videos from a previous default pack are
+    removed so the default content can be updated between releases without
+    leaving stale files.
     """
     if not titles:
         return 0
@@ -116,7 +147,33 @@ def fetch_landscape_videos(out_dir, titles=DEFAULT_TITLES, timeout=120):
               file=sys.stderr)
         return 0
 
+    # Determine the target filenames first so we only remove stale default
+    # videos while preserving user-added content and avoiding unnecessary
+    # re-downloads.
+    target_filenames = set()
+    for title in titles:
+        ii = infos.get(title)
+        if not ii or not _is_landscape_ii(ii):
+            continue
+        url = ii.get('url')
+        if not url:
+            continue
+        target_filenames.add(_safe_filename(title, url))
+
+    previous = _load_manifest(out_dir)
+    for name in previous:
+        if name in target_filenames:
+            continue
+        full = os.path.join(out_dir, name)
+        if os.path.exists(full):
+            print('Removing stale default video: {}'.format(full))
+            try:
+                os.remove(full)
+            except OSError:
+                pass
+
     downloaded = 0
+    current_filenames = set()
     for title in titles:
         ii = infos.get(title)
         if not ii:
@@ -134,6 +191,7 @@ def fetch_landscape_videos(out_dir, titles=DEFAULT_TITLES, timeout=120):
             continue
 
         dest = os.path.join(out_dir, _safe_filename(title, url))
+        current_filenames.add(os.path.basename(dest))
         if os.path.exists(dest):
             size = os.path.getsize(dest)
             if size == ii.get('size'):
@@ -151,12 +209,14 @@ def fetch_landscape_videos(out_dir, titles=DEFAULT_TITLES, timeout=120):
         except (OSError, urllib.error.URLError) as e:
             print('ambient-download-videos: failed to download {}: {}'.format(url, e),
                   file=sys.stderr)
+            current_filenames.discard(os.path.basename(dest))
             if os.path.exists(dest):
                 try:
                     os.remove(dest)
                 except OSError:
                     pass
 
+    _save_manifest(out_dir, current_filenames)
     return downloaded
 
 

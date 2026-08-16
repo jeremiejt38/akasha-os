@@ -71,8 +71,9 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
     ou `Stop` (renforcé par un keymap `FullscreenVideo` qui mappe `Back`/`Escape`/`B` à `Stop`).
     L'horloge/météo ne s'affiche pas pendant la lecture vidéo.
 - **Pack de paysages par défaut** : lors du premier déploiement, `install.sh` télécharge un petit
-  pack de vidéos de paysages depuis Wikimedia Commons (licences libres) dans `/storage/ambient/photos`
-  si le dossier est vide. Ce pack n'est pas commité dans le dépôt.
+  pack de vidéos de paysages depuis Wikimedia Commons (scènes fixes : vagues, cascades, rivières —
+  pas de caméra en mouvement, mouvements naturels bouclables) dans `/storage/ambient/photos`. Le
+  téléchargeur maintient un manifeste pour remplacer les anciennes vidéos par défaut entre releases.
 - Dossier par défaut : `/storage/ambient/photos`, configurable depuis les réglages de l'addon (label
   "Dossier de contenu (photos ou videos)").
 - **Contenu de secours** : si le dossier est vide et le téléchargement a échoué, repli sur un dossier

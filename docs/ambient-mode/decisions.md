@@ -150,7 +150,9 @@ vidéos dans `/storage/ambient/photos` ; le Mode Ambiant choisit automatiquement
 **Pack de vidéos par défaut** : `install.sh` appelle `kodi/scripts/ambient-download-videos.py`,
 qui télécharge depuis Wikimedia Commons un petit pack de vidéos de paysages librement licenciées
 (CC-BY / CC0 / domaine public). Le script utilise l'API MediaWiki pour résoudre les titres en URLs
-de téléchargement direct et filtre les formats paysage >= 1280x720. Aucune clé API n'est requise.
+de téléchargement direct, filtre les formats paysage >= 1280x720 et maintient un manifeste
+(`.akasha-ambient-videos`) afin de remplacer les anciennes vidéos par défaut sans toucher aux
+contenus ajoutés par l'utilisateur. Aucune clé API n'est requise.
 
 **Fermeture sur `Back`** : en plein écran, Kodi n'associe pas toujours `Back`/`Escape` à `Stop`
 lorsque le player est lancé depuis un script. Le keymap
