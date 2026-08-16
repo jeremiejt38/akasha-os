@@ -78,8 +78,12 @@ def _build_video_playlist(video_paths):
     """Build a Kodi video playlist from an ordered list of file paths."""
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
+    # Give Kodi a moment to process the clear, known timing issue on some versions.
+    xbmc.sleep(100)
     for path in video_paths:
-        playlist.add(path)
+        listitem = xbmcgui.ListItem(path=path)
+        playlist.add(path, listitem)
+    playlist.shuffle()
     return playlist
 
 
@@ -131,6 +135,8 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
                 playlist = _build_video_playlist(content)
                 self._player = xbmc.Player()
                 self._player.play(playlist, windowed=True)
+                # Repeat the whole playlist so the ambient background never stops.
+                xbmc.executebuiltin('PlayerControl(RepeatAll)', wait=False)
                 xbmc.log('Akasha Ambient: playing {} video(s)'.format(len(content)), xbmc.LOGINFO)
             except Exception as e:
                 xbmc.log('Akasha Ambient: video playback failed, falling back to images: {}'.format(e),
