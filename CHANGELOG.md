@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.2...akasha-os-v0.14.3) (2026-08-16)
+
+
+### Bug Fixes
+
+* **ambient:** use WindowXML and hidden default control for video playback ([f8b6532](https://github.com/jeremiejt38/akasha-os/commit/f8b653221b685a3eb2c0ca5520ec612949540960))
+
 ## [0.14.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.14.1...akasha-os-v0.14.2) (2026-08-16)
 
 
