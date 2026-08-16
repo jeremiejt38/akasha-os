@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.13.0...akasha-os-v0.13.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **guide:** wire up the AkashaGuidePreset property and Left/Right cycling ([6c5a249](https://github.com/jeremiejt38/akasha-os/commit/6c5a2491c228e0f3ec8e31743b72a0a50760adcc))
+
 ## [0.13.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.12.0...akasha-os-v0.13.0) (2026-08-16)
 
 
