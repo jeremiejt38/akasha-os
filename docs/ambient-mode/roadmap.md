@@ -20,11 +20,18 @@
    activation manuelle, rotation, horloge, météo, assombrissement, veille, réveil.
 9. **Release** : commits Conventional Commits, Release Please → v0.12.0.
 
-## Après v0.12 (non planifié dans ce chantier)
+## v0.13.2 (ce chantier)
 
-- Pack de paysages par défaut correctement sourcé (licence vérifiée), téléchargé à l'installation
-  plutôt que commité dans le repo.
-- Vidéos d'ambiance en boucle (`videowindow`), une fois le socle image validé en conditions réelles.
+1. **Pack de paysages par défaut** : téléchargement depuis NASA EPIC (domaine public) par
+   `install.sh`, via `kodi/scripts/ambient-download-photos.py`.
+2. **Support des vidéos d'ambiance en boucle** : `content_manager.resolve_media()` détecte les
+   vidéos, `AmbientWindow` démarre un `xbmc.Player` windowed dans un `videowindow` plein écran.
+3. **Tests unitaires** : `list_videos`, `resolve_media`, fallback vidéo/image.
+4. **Release + déploiement** : commits Conventional Commits, Release Please, validation sur le Pi
+   (PixelCamera + `kodi-send`).
+
+## Après v0.13.2 (non planifié dans ce chantier)
+
 - Effet Ken Burns (zoom/pan lents) sur les images fixes, si le rendu `multiimage` seul s'avère trop
   statique à l'usage.
 - Activation programmée par plage horaire (thème jour/nuit).

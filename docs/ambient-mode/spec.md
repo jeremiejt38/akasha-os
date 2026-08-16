@@ -61,19 +61,22 @@ Voir `decisions.md` pour le détail des choix techniques et leurs alternatives �
 Géré nativement par Kodi (`screensaver.disableforaudio`, pas d'activation pendant la lecture vidéo
 sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
 
-## 6. Contenu affiché (portée v0.12)
+## 6. Contenu affiché (portée v0.12.1)
 
-- **Images locales uniquement** pour le MVP (pas de vidéo en boucle ni de sources cloud).
-- Rotation et fondu enchaîné gérés par le contrôle natif Kodi `multiimage` (aléatoire, anti-répétition
-  native, pas de logique Python nécessaire pour la rotation elle-même).
-- Dossier par défaut : `/storage/ambient/photos`, configurable depuis les réglages de l'addon.
-- **Contenu de secours** : si le dossier est vide, repli sur un dossier dédié livré avec l'addon
-  (`resources/media/fallback/`, contenant une copie de `splash.png`) — jamais d'écran vide, sans
-  avoir à embarquer un pack externe de photos dont la licence devrait être vérifiée. Le contrôle
-  `multiimage` de Kodi exige un dossier, pas un fichier isolé (voir `decisions.md`). Un pack de
-  paysages par défaut est noté comme amélioration future dans `roadmap.md`.
-- Vidéos d'ambiance en boucle : reportées (nécessitent un contrôle `videowindow` dédié et plus de
-  validation sur le Pi 4 2 Go ; voir `decisions.md`).
+- **Images et vidéos locales**. Le module `content_manager.resolve_media()` détecte
+  automatiquement le type de contenu du dossier configuré :
+  - **Photos** : affichage par le contrôle natif Kodi `multiimage` (rotation, fondu, aléatoire).
+  - **Vidéos** : lecture en boucle via `xbmc.Player().play(..., windowed=True)` dans un contrôle
+    `videowindow` plein écran. Si le dossier contient au moins une vidéo, le Mode Ambiant bascule
+    automatiquement en mode vidéo.
+- **Pack de paysages par défaut** : lors du premier déploiement, `install.sh` télécharge un petit
+  pack d'images de la Terre (public domain, NASA EPIC) dans `/storage/ambient/photos` si le dossier
+  est vide. Ce pack n'est pas commité dans le dépôt.
+- Dossier par défaut : `/storage/ambient/photos`, configurable depuis les réglages de l'addon (label
+  "Dossier de contenu (photos ou videos)").
+- **Contenu de secours** : si le dossier est vide et le téléchargement a échoué, repli sur un dossier
+  dédié livré avec l'addon (`resources/media/fallback/`, contenant une copie de `splash.png`) —
+  jamais d'écran vide. Le contrôle `multiimage` de Kodi exige un dossier, pas un fichier isolé.
 
 ## 7. Horloge et météo
 

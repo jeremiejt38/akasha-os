@@ -141,6 +141,15 @@ rm -rf /storage/.kodi/addons/service.akasha.ambient
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.ambient" /storage/.kodi/addons/
 mkdir -p /storage/ambient/photos
 
+# Download a default pack of public-domain Earth images from NASA EPIC if the
+# ambient photos folder is still empty (or incomplete). Non-fatal: the addon's
+# bundled fallback folder keeps the screensaver from ever showing a blank screen.
+if command -v python3 >/dev/null 2>&1; then
+    python3 "$SCRIPT_DIR/kodi/scripts/ambient-download-photos.py" /storage/ambient/photos -n 12 || true
+else
+    log "WARNING: python3 not available; skipping default ambient photo download."
+fi
+
 # ---------------------------------------------------------------------------
 # 8. Cloud Gaming addon + scripts
 # ---------------------------------------------------------------------------

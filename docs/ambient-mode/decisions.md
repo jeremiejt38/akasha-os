@@ -71,22 +71,22 @@ immédiate, fondu) sans code Python, ce qui réduit la surface de bug sur un com
 continu. Un `ContentManager` Python reste utile pour la logique testable indépendamment du skin
 (validation de dossier, repli sur le contenu de secours) : voir `resources/lib/content_manager.py`.
 
-## Pas de pack de photos par défaut embarqué
+## Pack de photos par défaut téléchargé (NASA EPIC)
 
-**Choix initial, corrigé après test réel** : le contrôle `multiimage` de Kodi exige un **dossier**,
-pas un fichier unique — pointer `imagepath` vers `/storage/.kodi/media/splash.png` directement a
-fait tourner l'indicateur de chargement indéfiniment et a fini par geler le script Python jusqu'à
-ce que Kodi le tue de force ("script didn't stop in 5 seconds"). Le repli est donc un **dossier**
-dédié livré avec l'addon (`resources/media/fallback/`, contenant une copie de `splash.png`), jamais
-un chemin de fichier isolé.
+**Choix** : `install.sh` appelle `kodi/scripts/ambient-download-photos.py` qui récupère un pack
+public d'images de la Terre depuis l'API [NASA EPIC](https://epic.gsfc.nasa.gov/) et les stocke dans
+`/storage/ambient/photos`. Les images EPIC sont produites par la NASA/NOAA et sont dans le domaine
+public.
 
-**Alternative écartée** : télécharger/embarquer un pack de paysages "libres de droits" par défaut.
+**Raison** : cela donne au Mode Ambiant un contenu par défaut immédiatement utilisable (paysages
+terrestres vus de l'espace) sans pour autant embarquer d'assets binaires tiers dans le dépôt Git.
+Le téléchargement n'est pas fatal : si le réseau est indisponible, l'addon retombe sur son dossier
+`resources/media/fallback/`.
 
-**Raison** : embarquer des assets binaires tiers dans le repo sans vérification de licence au cas
-par cas serait risqué, et gonflerait le dépôt Git (pas de Git LFS configuré). Le repli sur un asset
-déjà possédé par le projet est immédiat, sans risque de licence, et suffit à éviter un écran vide.
-Un pack par défaut correctement sourcé est noté dans `roadmap.md` comme amélioration future,
-téléchargée à l'installation plutôt que commitée.
+**Alternative écartée** : pack CC0/Wikimedia/placeholders. Écartée parce que les API sans clé sont
+souvent à URLs dynamiques ou rate-limitées, et que Wikimedia exige une vérification de licence
+image par image. NASA EPIC fournit des URLs stables, des métadonnées JSON propres et un statut de
+domaine public clair.
 
 ## Horloge sans code Python
 
@@ -126,11 +126,20 @@ Python et injectées dans les coordonnées du skin.
 info-labels numériques dynamiques à chaque frame ; un système de presets discrets, déjà utilisé et
 validé dans ce projet, est plus robuste et suffisant pour l'objectif anti-marquage.
 
-## Vidéos d'ambiance en boucle : reportées
+## Vidéos d'ambiance en boucle : `videowindow` + `xbmc.Player`
 
-**Raison** : nécessitent un contrôle `videowindow` dédié, un pipeline de lecture différent du
-`multiimage`, et plus de validation sur un Raspberry Pi 4 2 Go (décodage vidéo simultané avec le
-reste du système). Reporté à une version ultérieure une fois le socle image validé sur le device.
+**Choix** : quand le dossier de contenu contient des vidéos, `content_manager.resolve_media()`
+retourne `media_type='videos'` et une liste de chemins. `AmbientWindow` démarre un `xbmc.PlayList`
+et appelle `xbmc.Player().play(..., windowed=True)`. La fenêtre `Ambient.xml` inclut un contrôle
+`<control type="videowindow">` plein écran, visible uniquement quand la propriété `has_videos` est
+positionnée. Le `multiimage` est masqué dans ce cas.
+
+**Raison** : cela réutilise le player vidéo natif de Kodi (décodage matériel, boucle de playlist)
+sans réécrire de lecteur. L'utilisateur peut placer soit un dossier de photos, soit un dossier de
+vidéos dans `/storage/ambient/photos` ; le Mode Ambiant choisit automatiquement le mode adapté.
+
+**Précaution** : la fermeture de la fenêtre (`exit()`) arrête explicitement le player pour libérer
+les ressources vidéo avant le transfert vers `akasha-sleep.py`.
 
 ## Réutilisation de `akasha-sleep.py` pour l'état SLEEP
 
