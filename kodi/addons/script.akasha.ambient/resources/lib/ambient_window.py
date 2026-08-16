@@ -133,6 +133,9 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
             self.setProperty('has_videos', '1')
             try:
                 playlist = _build_video_playlist(content)
+                # Make sure any active busy dialog is closed before playing,
+                # otherwise Kodi may render the video behind the window.
+                xbmc.executebuiltin('Dialog.Close(busydialog,true)', wait=False)
                 self._player = xbmc.Player()
                 self._player.play(playlist, windowed=True)
                 # Repeat the whole playlist so the ambient background never stops.
