@@ -26,9 +26,16 @@
    `install.sh`, via `kodi/scripts/ambient-download-photos.py`.
 2. **Support des vidéos d'ambiance en boucle** : `content_manager.resolve_media()` détecte les
    vidéos, `AmbientWindow` démarre un `xbmc.Player` windowed dans un `videowindow` plein écran.
+   La fenêtre est passée de `WindowXMLDialog` à `WindowXML` avec un `defaultcontrol` invisible pour
+   que le player s'affiche et que `Back` ferme correctement.
 3. **Tests unitaires** : `list_videos`, `resolve_media`, fallback vidéo/image.
 4. **Release + déploiement** : commits Conventional Commits, Release Please, validation sur le Pi
    (PixelCamera + `kodi-send`).
+
+## Après v0.13.2 (non planifié dans ce chantier)
+
+- Effet Ken Burns (zoom/pan lents) sur les images fixes, si le rendu `multiimage` seul s'avère trop
+  statique à l'usage.
 
 ## Après v0.13.2 (non planifié dans ce chantier)
 

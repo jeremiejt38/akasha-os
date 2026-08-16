@@ -87,7 +87,7 @@ def _build_video_playlist(video_paths):
     return playlist
 
 
-class AmbientWindow(xbmcgui.WindowXMLDialog):
+class AmbientWindow(xbmcgui.WindowXML):
     """Fullscreen ambient dialog. onInit() only sets up initial state and
     starts background threads (weather refresh, dim/preset/sleep ticker);
     doModal() (called from default.py) provides the actual blocking wait.
@@ -120,6 +120,7 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
     def onAction(self, action):
         # Any input dismisses Ambient Mode immediately (spec section 17:
         # "reveil immediat", the recommended default for a TV).
+        xbmc.log('Akasha Ambient: onAction id={}'.format(action.getId()), xbmc.LOGDEBUG)
         self.exit()
 
     def onClick(self, controlID):
@@ -188,6 +189,12 @@ class AmbientWindow(xbmcgui.WindowXMLDialog):
         while self._active:
             elapsed = time.time() - started_at
             _touch_lock()
+            # Keep focus on the hidden button so window actions (Back) are
+            # delivered to onAction instead of being swallowed by the player.
+            try:
+                self.setFocusId(9000)
+            except Exception:
+                pass
 
             self.setProperty('widget_preset', str(energy.widget_preset_for_elapsed(elapsed)))
             self.setProperty('dim_color', energy.dim_overlay_color(

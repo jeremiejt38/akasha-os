@@ -134,6 +134,15 @@ et appelle `xbmc.Player().play(..., windowed=True)`. La fenêtre `Ambient.xml` i
 `<control type="videowindow">` plein écran, visible uniquement quand la propriété `has_videos` est
 positionnée. Le `multiimage` est masqué dans ce cas.
 
+**Pourquoi `xbmcgui.WindowXML` (et non `WindowXMLDialog`)** : `WindowXMLDialog` masquait le
+`videowindow` (fond noir) dans nos tests réels sur LibreELEC/Kodi 21 ; `WindowXML` permet au player
+windowed de s'afficher correctement derrière les overlays horloge/météo.
+
+**Pourquoi un `<defaultcontrol>` invisible** : avec un `videowindow` actif, le focus risque d'être
+accaparé par le player et `onAction()` (en particulier `Back`) n'est plus reçu. Un bouton
+transparent focalisé par défaut, avec `setFocusId()` rafraîchi dans la boucle principale, garantit
+que n'importe quelle entrée utilisateur ferme immédiatement le Mode Ambiant.
+
 **Raison** : cela réutilise le player vidéo natif de Kodi (décodage matériel, boucle de playlist)
 sans réécrire de lecteur. L'utilisateur peut placer soit un dossier de photos, soit un dossier de
 vidéos dans `/storage/ambient/photos` ; le Mode Ambiant choisit automatiquement le mode adapté.

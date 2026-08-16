@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<window type="dialog">
+<window type="window">
     <!-- Don't clear the background to black: the multiimage or videowindow
          provides the ambient background, and a black clear would paint over
          a windowed video player on some Kodi builds. -->
     <backgroundcolor>0</backgroundcolor>
+    <!-- Keep an invisible focused control so the window reliably receives
+         actions (Back, OK, etc.) even when only non-focusable controls such
+         as labels and the videowindow are visible. -->
+    <defaultcontrol always="true">9000</defaultcontrol>
     <controls>
+        <!-- Invisible focused control used by <defaultcontrol>. -->
+        <control type="button" id="9000">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texturefocus colordiffuse="00000000">white.png</texturefocus>
+            <texturenofocus colordiffuse="00000000">white.png</texturenofocus>
+            <onleft>9000</onleft>
+            <onright>9000</onright>
+            <onup>9000</onup>
+            <ondown>9000</ondown>
+        </control>
+
+        <!-- Background video window. Placed first so it renders behind the
+             multiimage and the clock/weather widget. Used when the content
+             folder contains videos; xbmc.Player().play(..., windowed=True)
+             renders here. -->
+        <control type="videowindow" id="2">
+            <visible>!String.IsEmpty(Window.Property(has_videos))</visible>
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+        </control>
+
         <!-- Background slideshow. Kodi's native multiimage control handles
              rotation, randomization and crossfade on its own; the Python
              side only decides which path it points at (see
@@ -213,17 +243,6 @@
                     <shadowcolor>AA000000</shadowcolor>
                 </control>
             </control>
-        </control>
-
-        <!-- Background video window. Placed last so it renders on top. Used when
-             the content folder contains videos; xbmc.Player().play(...,
-             windowed=True) renders here. -->
-        <control type="videowindow" id="2">
-            <visible>!String.IsEmpty(Window.Property(has_videos))</visible>
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
         </control>
     </controls>
 </window>
