@@ -100,7 +100,7 @@
             <top>250</top>
             <width>1800</width>
             <height>770</height>
-            <onup>4010</onup>
+            <onup>4003</onup>
             <ondown>4010</ondown>
             <onleft>4030</onleft>
             <itemlayout width="1800" height="50">
