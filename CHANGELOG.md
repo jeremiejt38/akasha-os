@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.18.0...akasha-os-v0.18.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **aura:** remove radiobutton/texturenofocus artifacts from tab bar ([5f81fc4](https://github.com/jeremiejt38/akasha-os/commit/5f81fc421529a799bb2450d3a224ff2df807c51a))
+
 ## [0.18.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.17.0...akasha-os-v0.18.0) (2026-08-17)
 
 
