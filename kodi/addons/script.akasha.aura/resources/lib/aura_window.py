@@ -1,16 +1,17 @@
 """Akasha Aura — main WindowXML orchestration.
 
 Milestone 1 (socle, see docs/aura/roadmap.md): navigable 3-tab shell with
-placeholder content. Later milestones fill each tab with real data
-(Plex rows via plex_client.py, games tiles, installed-addons inventory via
-addons_inventory.py, Akasha Store via store_manifest.py) without changing
-this navigation skeleton.
+placeholder content. Milestone 2 adds Plex entertainment rows via
+plex_client.py. Later milestones fill the Games and App tabs
+(addons_inventory.py, store_manifest.py) without changing this navigation
+skeleton.
 """
 import xbmc
 import xbmcaddon
 import xbmcgui
 
 import config
+import plex_client
 
 TAB_BUTTON_IDS = (2001, 2002, 2003)
 
@@ -20,19 +21,55 @@ ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
+ROW_LABEL_PAIRS = ((3010, 3020), (3011, 3021), (3012, 3022), (3013, 3023))
+
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         addon = xbmcaddon.Addon('script.akasha.aura')
         self.active_tab = config.default_tab_index(addon.getSetting('tab.default'))
+        self.addon = addon
+        self._rows = []
 
     def onInit(self):
         try:
             self._show_tab(self.active_tab)
+            self._load_plex_rows()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
+
+    def _load_plex_rows(self):
+        server_url = self.addon.getSetting('plex.server_url')
+        token = self.addon.getSetting('plex.token')
+        if not config.is_plex_configured(server_url, token):
+            xbmc.log('Akasha Aura: Plex not configured, skipping rows', xbmc.LOGINFO)
+            return
+
+        try:
+            client = plex_client.PlexClient(server_url, token, timeout=15)
+            self._rows = client.entertainment_rows()
+            self._render_divertissement_rows()
+        except Exception as e:
+            xbmc.log('Akasha Aura: Plex row load failed: {}'.format(e), xbmc.LOGERROR)
+
+    def _render_divertissement_rows(self):
+        for i, (title_id, content_id) in enumerate(ROW_LABEL_PAIRS):
+            try:
+                title_ctl = self.getControl(title_id)
+                content_ctl = self.getControl(content_id)
+            except RuntimeError:
+                continue
+
+            if i < len(self._rows):
+                row = self._rows[i]
+                title_ctl.setLabel(row['label'])
+                titles = ' / '.join(item['title'] for item in row['items'][:8])
+                content_ctl.setLabel(titles)
+            else:
+                title_ctl.setLabel('')
+                content_ctl.setLabel('')
 
     def _show_tab(self, index):
         index = index % len(config.TABS)

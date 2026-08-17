@@ -70,26 +70,98 @@
             </control>
         </control>
 
-        <!-- Divertissement placeholder content (milestone 2/3 fill this in) -->
+        <!-- Divertissement content (milestone 2 fills row labels) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
-            <control type="label">
+
+            <control type="label" id="3000">
+                <left>60</left>
+                <top>140</top>
+                <width>1800</width>
+                <height>40</height>
+                <font>font14</font>
+                <label>Divertissement</label>
+                <textcolor>FF6C8CFF</textcolor>
+            </control>
+
+            <control type="label" id="3010">
                 <left>60</left>
                 <top>200</top>
                 <width>1800</width>
-                <height>60</height>
-                <font>font16</font>
-                <label>Divertissement</label>
+                <height>36</height>
+                <font>font12</font>
+                <label>-</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
-            <control type="label">
+            <control type="label" id="3020">
                 <left>60</left>
-                <top>260</top>
+                <top>240</top>
                 <width>1800</width>
-                <height>40</height>
+                <height>60</height>
                 <font>font12</font>
-                <label>Rangees Plex (Continuer, Ajoutes recemment, Sortis recemment, Genres) — a venir</label>
+                <label></label>
                 <textcolor>77FFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+            </control>
+
+            <control type="label" id="3011">
+                <left>60</left>
+                <top>320</top>
+                <width>1800</width>
+                <height>36</height>
+                <font>font12</font>
+                <label>-</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="3021">
+                <left>60</left>
+                <top>360</top>
+                <width>1800</width>
+                <height>60</height>
+                <font>font12</font>
+                <label></label>
+                <textcolor>77FFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+            </control>
+
+            <control type="label" id="3012">
+                <left>60</left>
+                <top>440</top>
+                <width>1800</width>
+                <height>36</height>
+                <font>font12</font>
+                <label>-</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="3022">
+                <left>60</left>
+                <top>480</top>
+                <width>1800</width>
+                <height>60</height>
+                <font>font12</font>
+                <label></label>
+                <textcolor>77FFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+            </control>
+
+            <control type="label" id="3013">
+                <left>60</left>
+                <top>560</top>
+                <width>1800</width>
+                <height>36</height>
+                <font>font12</font>
+                <label>-</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="3023">
+                <left>60</left>
+                <top>600</top>
+                <width>1800</width>
+                <height>60</height>
+                <font>font12</font>
+                <label></label>
+                <textcolor>77FFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
             </control>
         </control>
 
