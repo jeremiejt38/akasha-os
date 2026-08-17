@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.20.1...akasha-os-v0.21.0) (2026-08-17)
+
+
+### Features
+
+* **aura:** add full library view with search, sort and genre filter ([d74e0ff](https://github.com/jeremiejt38/akasha-os/commit/d74e0ffc2c72dfbb72385446c2f1fd2324474eba))
+
 ## [0.20.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.20.0...akasha-os-v0.20.1) (2026-08-17)
 
 
