@@ -160,6 +160,22 @@ if [ -f /storage/ambient/photos/.akasha-ambient-videos ]; then
     done < /storage/ambient/photos/.akasha-ambient-videos
     rm -f /storage/ambient/photos/.akasha-ambient-videos
 fi
+# Older installs (pre-v0.20.0) copied the pre-transcoded video pack without
+# writing a manifest, so the check above misses them. Remove those known
+# filenames explicitly (matches ambient-download-videos.py's DEFAULT_TITLES).
+for legacy in \
+    "Ocean_waves_at_Lkjavik_beach_Iceland.mp4" \
+    "Waves-1013354_Dingle_Peninsula_Co._Kerry_Ireland.mp4" \
+    "Yudaki_-_tochigi_-_2021_Oct_29.mp4" \
+    "Triberger_Wasserfalle_(Triberg_im_Schwarzwald).mp4" \
+    "Godachinmalki_waterfalls_video.mp4" \
+    "Partnachklamm.mp4" \
+    "River_flowing.mp4"; do
+    if [ -f "/storage/ambient/photos/$legacy" ]; then
+        log "  Removing legacy default ambient video: $legacy"
+        rm -f "/storage/ambient/photos/$legacy"
+    fi
+done
 
 # Deploy the pre-downscaled ambient photo pack when bundled by
 # scripts/apply.sh (kept under 1920x1080 so the Pi doesn't have to decode
