@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.17.0...akasha-os-v0.18.0) (2026-08-17)
+
+
+### Features
+
+* add Akasha Aura home screen (milestone 1: navigable shell) ([e1735f9](https://github.com/jeremiejt38/akasha-os/commit/e1735f93297cb237eb25b6520b00077e5ae8fcd0))
+
 ## [0.17.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.16.0...akasha-os-v0.17.0) (2026-08-17)
 
 
