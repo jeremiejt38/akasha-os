@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.20.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.19.0...akasha-os-v0.20.0) (2026-08-17)
+
+
+### Features
+
+* **settings:** expose all Mode Ambiant settings in Akasha Settings ([e38456c](https://github.com/jeremiejt38/akasha-os/commit/e38456c8157014b108cbe78c61d50f65f84eb187))
+
+
+### Bug Fixes
+
+* **ambient:** default to a curated landscape photo pack instead of videos ([d21ab3d](https://github.com/jeremiejt38/akasha-os/commit/d21ab3dcb76c136a37a304aef5d76d0299e522c0))
+
 ## [0.19.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.18.1...akasha-os-v0.19.0) (2026-08-17)
 
 
