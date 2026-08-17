@@ -141,10 +141,22 @@ rm -rf /storage/.kodi/addons/service.akasha.ambient
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.ambient" /storage/.kodi/addons/
 mkdir -p /storage/ambient/photos
 
-# Download a default pack of freely licensed landscape videos from Wikimedia
-# Commons into the ambient content folder. Non-fatal: the addon's bundled
-# fallback folder keeps the screensaver from ever showing a blank screen.
-if command -v python3 >/dev/null 2>&1; then
+# Deploy the pre-transcoded H.264 ambient video pack when bundled by
+# scripts/apply.sh. If it is missing (e.g. manual install without apply.sh),
+# fall back to the raw Wikimedia Commons downloader.
+if [ -d "$SCRIPT_DIR/kodi/media/ambient" ] && [ "$(ls -A "$SCRIPT_DIR/kodi/media/ambient"/*.mp4 2>/dev/null)" ]; then
+    log "  Copying pre-transcoded ambient videos..."
+    cp -f "$SCRIPT_DIR"/kodi/media/ambient/*.mp4 /storage/ambient/photos/
+    # Clean up stale MP4s that may have been copied from an older pack.
+    for f in /storage/ambient/photos/*.mp4; do
+        [ -e "$f" ] || continue
+        name=$(basename "$f")
+        if [ ! -f "$SCRIPT_DIR/kodi/media/ambient/$name" ]; then
+            rm -f "$f"
+        fi
+    done
+elif command -v python3 >/dev/null 2>&1; then
+    log "WARNING: no pre-transcoded ambient videos found; trying raw Commons download."
     python3 "$SCRIPT_DIR/kodi/scripts/ambient-download-videos.py" /storage/ambient/photos || true
 else
     log "WARNING: python3 not available; skipping default ambient video download."

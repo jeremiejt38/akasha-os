@@ -99,12 +99,17 @@ class AmbientWindow(xbmcgui.WindowXML):
         super().__init__(*args, **kwargs)
         self._active = False
         self._player = None
+        self._is_video_mode = False
         try:
             self.cfg = config.load_config(_load_raw_settings())
         except Exception as e:
             xbmc.log('Akasha Ambient: failed to load settings, using defaults: {}'.format(e),
                      xbmc.LOGERROR)
             self.cfg = config.load_config({})
+
+    def is_active(self):
+        """Return True until exit() has been called."""
+        return self._active
 
     def onInit(self):
         self._active = True
@@ -131,26 +136,31 @@ class AmbientWindow(xbmcgui.WindowXML):
             self.cfg.content_path, self.cfg.fallback_folder,
         )
         if media_type == 'videos':
-            self.setProperty('has_videos', '1')
-            # Give the skin a moment to make the videowindow visible before
-            # binding the player to it; otherwise Kodi may render behind it.
-            xbmc.sleep(300)
+            self._is_video_mode = True
             try:
                 playlist = _build_video_playlist(content)
                 self._player = xbmc.Player()
-                # Play fullscreen so the native player handles Back/Stop and
-                # releases focus cleanly. We monitor isPlaying() to close the
-                # ambient window once the user exits the player.
+                # Play fullscreen so the native player handles Back/Stop. We
+                # monitor isPlaying() to close the ambient script once the user
+                # exits the player. The WindowXML is closed immediately so the
+                # video is not rendered behind it.
                 self._player.play(playlist, windowed=False)
                 # Repeat the whole playlist so the ambient background never stops.
                 xbmc.executebuiltin('PlayerControl(RepeatAll)', wait=False)
                 threading.Thread(target=self._video_monitor_loop, daemon=True).start()
                 xbmc.log('Akasha Ambient: playing {} video(s)'.format(len(content)), xbmc.LOGINFO)
+                # Close the XML window; the fullscreen player now owns the screen
+                # and default.py keeps the script alive while playback runs.
+                try:
+                    self.close()
+                except Exception:
+                    pass
             except Exception as e:
                 xbmc.log('Akasha Ambient: video playback failed, falling back to images: {}'.format(e),
                          xbmc.LOGERROR)
                 # Fall back to the multiimage path if video playback fails.
                 self._player = None
+                self._is_video_mode = False
                 self.setProperty('has_videos', '')
                 self.setProperty('content_path', self.cfg.fallback_folder)
         else:
@@ -194,29 +204,38 @@ class AmbientWindow(xbmcgui.WindowXML):
                 time.sleep(1)
 
     def _apply_weather(self, reading):
-        if not reading:
-            self.setProperty('weather_available', '')
-            return
-        self.setProperty('weather_available', '1')
-        self.setProperty('weather_temp', '{}°'.format(reading.get('temperature', '?')))
-        self.setProperty('weather_condition', reading.get('condition_label', ''))
+        try:
+            if not reading:
+                self.setProperty('weather_available', '')
+                return
+            self.setProperty('weather_available', '1')
+            self.setProperty('weather_temp', '{}°'.format(reading.get('temperature', '?')))
+            self.setProperty('weather_condition', reading.get('condition_label', ''))
+        except Exception:
+            # Window may already be closed in fullscreen video mode.
+            pass
 
     def _ticker_loop(self):
         started_at = time.time()
         while self._active:
             elapsed = time.time() - started_at
             _touch_lock()
-            # Keep focus on the hidden button so window actions (Back) are
-            # delivered to onAction instead of being swallowed by the player.
-            try:
-                self.setFocusId(9000)
-            except Exception:
-                pass
 
-            self.setProperty('widget_preset', str(energy.widget_preset_for_elapsed(elapsed)))
-            self.setProperty('dim_color', energy.dim_overlay_color(
-                elapsed, self.cfg.dim_after_seconds, self.cfg.sleep_after_seconds,
-            ))
+            if not self._is_video_mode:
+                # Keep focus on the hidden button so window actions (Back) are
+                # delivered to onAction instead of being swallowed by the player.
+                try:
+                    self.setFocusId(9000)
+                except Exception:
+                    pass
+
+                try:
+                    self.setProperty('widget_preset', str(energy.widget_preset_for_elapsed(elapsed)))
+                    self.setProperty('dim_color', energy.dim_overlay_color(
+                        elapsed, self.cfg.dim_after_seconds, self.cfg.sleep_after_seconds,
+                    ))
+                except Exception:
+                    pass
 
             if energy.should_sleep(elapsed, self.cfg.sleep_after_seconds):
                 self._trigger_sleep()
@@ -240,7 +259,8 @@ class AmbientWindow(xbmcgui.WindowXML):
                 pass
             self._player = None
         _remove_lock()
-        try:
-            self.close()
-        except Exception:
-            pass
+        if not self._is_video_mode:
+            try:
+                self.close()
+            except Exception:
+                pass

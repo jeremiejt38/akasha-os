@@ -3,6 +3,10 @@
 *.img.gz
 build/
 tmp/
+.cache/
+
+# Generated ambient video pack (H.264 MP4s built by scripts/prepare-ambient-videos.py)
+kodi/media/ambient/
 
 # Python
 __pycache__/

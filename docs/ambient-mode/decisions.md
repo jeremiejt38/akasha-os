@@ -136,8 +136,9 @@ la fenêtre dès que l'utilisateur appuie sur `Back`/`Stop` (ce qui arrête le p
 **Pourquoi le plein écran et non un `videowindow` intégré** : dans nos tests réels sur
 LibreELEC/Kodi 21, `xbmc.Player().play(..., windowed=True)` n'affichait pas correctement la vidéo
 soit derrière le dialog (`WindowXMLDialog`), soit sans jamais relâcher le focus, ce qui empêchait
-`Back` de fermer le Mode Ambiant. Le player plein écran natif est stable et permet la boucle / le
-`RepeatAll` fiable.
+`Back` de fermer le Mode Ambiant. `xbmc.Player().play(..., windowed=False)` donne un affichage plein
+écran fiable. L'`AmbientWindow` (`WindowXML`) est fermée dès que la lecture démarre, car sinon elle
+reste au-dessus de la vidéo et cache le contenu.
 
 **Limitation connue** : pendant une vidéo, l'horloge et la météo ne sont pas affichées (ce n'est pas
 un `videowindow` intégré). Le `multiimage` est simplement masqué pour éviter qu'une image ne
@@ -147,12 +148,13 @@ recouvre le player.
 sans réécrire de lecteur. L'utilisateur peut placer soit un dossier de photos, soit un dossier de
 vidéos dans `/storage/ambient/photos` ; le Mode Ambiant choisit automatiquement le mode adapté.
 
-**Pack de vidéos par défaut** : `install.sh` appelle `kodi/scripts/ambient-download-videos.py`,
-qui télécharge depuis Wikimedia Commons un petit pack de vidéos de paysages librement licenciées
-(CC-BY / CC0 / domaine public). Le script utilise l'API MediaWiki pour résoudre les titres en URLs
-de téléchargement direct, filtre les formats paysage >= 1280x720 et maintient un manifeste
-(`.akasha-ambient-videos`) afin de remplacer les anciennes vidéos par défaut sans toucher aux
-contenus ajoutés par l'utilisateur. Aucune clé API n'est requise.
+**Pack de vidéos par défaut** : `scripts/apply.sh` appelle `scripts/prepare-ambient-videos.py`
+sur la machine de build, qui télécharge depuis Wikimedia Commons un petit pack de vidéos de
+paysages librement licenciées (CC-BY / CC0 / domaine public) et les re-encode en H.264/AAC `.mp4`.
+Le re-encodage est nécessaire car LibreELEC/Kodi sur Raspberry Pi 4 n'a pas réussi à décoder les
+originaux `.webm`/`.ogv` (VP8/VP9). `install.sh` copie ensuite les `.mp4` préparés dans
+`/storage/ambient/photos`. `kodi/scripts/ambient-download-videos.py` reste le téléchargeur brut
+(LibreELEC-compatible uniquement si le codec source est supporté). Aucune clé API n'est requise.
 
 **Fermeture sur `Back`** : en plein écran, Kodi n'associe pas toujours `Back`/`Escape` à `Stop`
 lorsque le player est lancé depuis un script. Le keymap

@@ -11,6 +11,7 @@ this thin entry point.
 import os
 import sys
 
+import xbmc
 import xbmcaddon
 
 ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
@@ -21,4 +22,9 @@ from ambient_window import AmbientWindow  # noqa: E402
 if __name__ == '__main__':
     window = AmbientWindow('Ambient.xml', ADDON_PATH, 'Default', '1080i')
     window.doModal()
+    # In fullscreen video mode doModal returns immediately after the window is
+    # closed, but the script must stay alive while the video plays and the
+    # sleep timer runs.
+    while window.is_active():
+        xbmc.sleep(100)
     del window
