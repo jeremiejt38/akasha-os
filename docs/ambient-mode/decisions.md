@@ -71,22 +71,35 @@ immédiate, fondu) sans code Python, ce qui réduit la surface de bug sur un com
 continu. Un `ContentManager` Python reste utile pour la logique testable indépendamment du skin
 (validation de dossier, repli sur le contenu de secours) : voir `resources/lib/content_manager.py`.
 
-## Pack de photos par défaut téléchargé (NASA EPIC)
+## Pack de photos par défaut téléchargé (Wikimedia Commons "Featured pictures")
 
-**Choix** : `install.sh` appelle `kodi/scripts/ambient-download-photos.py` qui récupère un pack
-public d'images de la Terre depuis l'API [NASA EPIC](https://epic.gsfc.nasa.gov/) et les stocke dans
-`/storage/ambient/photos`. Les images EPIC sont produites par la NASA/NOAA et sont dans le domaine
-public.
+**Choix actuel (depuis v0.20.x)** : `kodi/scripts/ambient-download-photos.py` télécharge une liste
+organisée (`DEFAULT_TITLES`) de photos de paysages issues de la catégorie Wikimedia Commons "Featured
+pictures" (relues pour la qualité, licence libre CC-BY/CC-BY-SA/domaine public, format paysage).
+Certains originaux dépassent 30 Mpx / 30 Mo, trop lourds pour que le `multiimage` du Pi 4 les décode
+confortablement en diaporama : `scripts/prepare-ambient-photos.py`, appelé par `scripts/apply.sh` sur
+la machine de build (même patron que `prepare-ambient-videos.py`), télécharge puis redimensionne
+chaque photo à 1920x1080 maximum via `ffmpeg` (binaire local ou image Docker
+`jrottenberg/ffmpeg:4.4-ubuntu` en repli), ramenant le pack complet à quelques Mo. `install.sh` copie
+ensuite ce pack pré-redimensionné dans `/storage/ambient/photos` ; s'il est absent (installation
+manuelle sans passer par `apply.sh`), `install.sh` retombe sur `ambient-download-photos.py` exécuté
+directement sur le Pi (photos non redimensionnées). Chaque titre est résolu via l'API MediaWiki
+(`action=query&prop=imageinfo`) pour obtenir une URL de téléchargement stable ; un fichier manifeste
+(`.akasha-ambient-photos`) permet de retirer les anciennes photos du pack par défaut quand la liste
+change sans toucher aux photos ajoutées manuellement par l'utilisateur. Le téléchargement n'est pas
+fatal : si le réseau est indisponible, l'addon retombe sur son dossier `resources/media/fallback/`.
 
-**Raison** : cela donne au Mode Ambiant un contenu par défaut immédiatement utilisable (paysages
-terrestres vus de l'espace) sans pour autant embarquer d'assets binaires tiers dans le dépôt Git.
-Le téléchargement n'est pas fatal : si le réseau est indisponible, l'addon retombe sur son dossier
-`resources/media/fallback/`.
+**Historique** : pack initial NASA EPIC (images de la Terre depuis l'espace, domaine public),
+remplacé temporairement par un pack de vidéos de paysages (voir section suivante), puis restauré en
+pack de photos suite à un retour utilisateur : le mode vidéo masque l'horloge et la météo (limitation
+du plein écran vidéo décrite ci-dessous), ce qui rendait le Mode Ambiant perçu comme "juste une vidéo
+qui tourne" plutôt que l'écran de veille horloge/météo/photos demandé. Le pack de photos permet à
+l'overlay horloge/météo (`Ambient.xml`) de s'afficher normalement, comme prévu par la spec.
 
-**Alternative écartée** : pack CC0/Wikimedia/placeholders. Écartée parce que les API sans clé sont
-souvent à URLs dynamiques ou rate-limitées, et que Wikimedia exige une vérification de licence
-image par image. NASA EPIC fournit des URLs stables, des métadonnées JSON propres et un statut de
-domaine public clair.
+**Alternative écartée** : rester sur NASA EPIC. Écartée parce que les images EPIC (vues de la Terre
+depuis l'espace, angle fixe) sont moins "immersives" pour un écran de veille domestique que des
+paysages terrestres variés (montagnes, aurores, canyons, cascades), qui est le rendu visé (comparable
+aux packs Ambient de Google TV / Apple TV).
 
 ## Horloge sans code Python
 
@@ -148,13 +161,20 @@ recouvre le player.
 sans réécrire de lecteur. L'utilisateur peut placer soit un dossier de photos, soit un dossier de
 vidéos dans `/storage/ambient/photos` ; le Mode Ambiant choisit automatiquement le mode adapté.
 
-**Pack de vidéos par défaut** : `scripts/apply.sh` appelle `scripts/prepare-ambient-videos.py`
-sur la machine de build, qui télécharge depuis Wikimedia Commons un petit pack de vidéos de
-paysages librement licenciées (CC-BY / CC0 / domaine public) et les re-encode en H.264/AAC `.mp4`.
-Le re-encodage est nécessaire car LibreELEC/Kodi sur Raspberry Pi 4 n'a pas réussi à décoder les
-originaux `.webm`/`.ogv` (VP8/VP9). `install.sh` copie ensuite les `.mp4` préparés dans
-`/storage/ambient/photos`. `kodi/scripts/ambient-download-videos.py` reste le téléchargeur brut
-(LibreELEC-compatible uniquement si le codec source est supporté). Aucune clé API n'est requise.
+**Vidéos par défaut, puis retour en option manuelle (v0.20.x)** : `scripts/apply.sh` appelait
+`scripts/prepare-ambient-videos.py` sur la machine de build, qui téléchargeait depuis Wikimedia
+Commons un petit pack de vidéos de paysages librement licenciées (CC-BY / CC0 / domaine public) et
+les re-encodait en H.264/AAC `.mp4` (nécessaire car LibreELEC/Kodi sur Raspberry Pi 4 n'a pas réussi
+à décoder les originaux `.webm`/`.ogv`, VP8/VP9), puis `install.sh` copiait les `.mp4` préparés dans
+`/storage/ambient/photos`. Comme `content_manager.resolve_media()` préfère les vidéos aux photos
+dès qu'il en trouve dans le dossier configuré, ce pack vidéo était systématiquement choisi au
+détriment du pack de photos — et donc l'horloge/météo (masquées en mode vidéo, voir la limitation
+ci-dessous) ne s'affichaient jamais avec les réglages par défaut. Suite à ce retour, le pack vidéo
+par défaut a été retiré : `install.sh` nettoie désormais tout pack vidéo par défaut installé par une
+version antérieure (via son manifeste `.akasha-ambient-videos`) et télécharge le pack de photos à la
+place (voir section précédente). `scripts/prepare-ambient-videos.py` et
+`kodi/scripts/ambient-download-videos.py` restent disponibles pour qui veut reconstituer un pack
+vidéo manuellement, mais ne sont plus appelés automatiquement par `apply.sh`/`install.sh`.
 
 **Fermeture sur `Back`** : en plein écran, Kodi n'associe pas toujours `Back`/`Escape` à `Stop`
 lorsque le player est lancé depuis un script. Le keymap
@@ -162,6 +182,24 @@ lorsque le player est lancé depuis un script. Le keymap
 `FullscreenVideo`. `AmbientWindow._video_monitor_loop()` détecte `isPlaying() == False` et ferme
 la fenêtre immédiatement. La fermeture (`exit()`) arrête explicitement le player pour libérer les
 ressources vidéo avant le transfert vers `akasha-sleep.py`.
+
+## Tous les réglages centralisés dans Akasha Settings (v0.20.x)
+
+**Choix** : `script.akasha.settings` (le menu "Akasha Settings" natif de la télécommande) expose
+désormais chaque réglage du Mode Ambiant directement dans ses propres écrans (`Dialog.select`,
+`Dialog.browse`, `Dialog.input`, `Dialog.numeric`) : activation, délai avant activation, dossier de
+contenu, délai avant assombrissement, délai avant veille complète, météo activée/désactivée, ville,
+coordonnées. Ces fonctions lisent/écrivent directement les réglages de `script.akasha.ambient` via
+`xbmcaddon.Addon('script.akasha.ambient').getSetting()/setSetting()`.
+
+**Alternative écartée (précédente)** : un unique item de menu "Configurer le Mode Ambiant..." qui
+appelait `Addon.OpenSettings(script.akasha.ambient)`, renvoyant l'utilisateur vers l'écran de
+réglages natif — distinct visuellement d'Akasha Settings.
+
+**Raison** : le mainteneur veut que "tous les settings" du Mode Ambiant soient accessibles depuis
+Akasha Settings, sans changer d'écran. `script.akasha.ambient/resources/settings.xml` reste la
+source de vérité (stockage des valeurs, et écran de secours si l'addon est ouvert directement), mais
+n'est plus le point d'entrée attendu pour l'utilisateur final.
 
 ## Réutilisation de `akasha-sleep.py` pour l'état SLEEP
 

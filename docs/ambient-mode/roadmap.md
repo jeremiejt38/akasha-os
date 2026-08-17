@@ -37,7 +37,27 @@
 5. **Release + déploiement** : commits Conventional Commits, Release Please, validation sur le Pi
    (PixelCamera + `kodi-send`).
 
-## Après v0.17.x (non planifié dans ce chantier)
+## v0.20.x (ce chantier)
+
+1. **Retour à un pack de photos par défaut** : le pack vidéo par défaut (`prepare-ambient-videos.py`
+   / `ambient-download-videos.py`, appelés depuis `scripts/apply.sh`/`install.sh`) masquait l'horloge
+   et la météo (limitation connue du mode vidéo, voir `decisions.md`) — l'expérience perçue était
+   "juste une vidéo qui tourne", pas l'écran de veille horloge/météo/photos demandé. `install.sh`
+   déploie désormais par défaut un pack de photos de paysages (Wikimedia Commons "Featured
+   pictures", licence libre, format paysage), pré-redimensionné à 1920x1080 max par
+   `scripts/prepare-ambient-photos.py` (build host, `ffmpeg`) pour rester léger à décoder sur le Pi,
+   avec repli sur un téléchargement brut (`kodi/scripts/ambient-download-photos.py`) si le pack
+   pré-redimensionné est absent. Le pack vidéo par défaut installé par une version antérieure est
+   supprimé. Le mode vidéo reste disponible mais devient un choix manuel de l'utilisateur (déposer
+   ses propres `.mp4` dans le dossier de contenu) plutôt que le comportement par défaut.
+2. **Tous les réglages dans Akasha Settings** : `script.akasha.settings` expose désormais chaque
+   réglage du Mode Ambiant directement dans son menu (délai d'activation, dossier de contenu, délai
+   d'assombrissement, délai de veille, météo activée/désactivée, ville, coordonnées) au lieu de
+   renvoyer vers l'écran de réglages natif de l'addon (`Addon.OpenSettings`). Les valeurs restent
+   stockées dans les réglages de `script.akasha.ambient` (source de vérité unique) ; Akasha Settings
+   les lit/écrit via `xbmcaddon.Addon('script.akasha.ambient')`.
+
+## Après v0.20.x (non planifié dans ce chantier)
 
 - Effet Ken Burns (zoom/pan lents) sur les images fixes, si le rendu `multiimage` seul s'avère trop
   statique à l'usage.

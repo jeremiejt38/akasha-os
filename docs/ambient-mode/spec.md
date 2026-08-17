@@ -70,11 +70,14 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
     Un thread surveille `isPlaying()` et ferme le Mode Ambiant quand l'utilisateur appuie sur `Back`
     ou `Stop` (renforcé par un keymap `FullscreenVideo` qui mappe `Back`/`Escape`/`B` à `Stop`).
     L'horloge/météo ne s'affiche pas pendant la lecture vidéo.
-- **Pack de paysages par défaut** : avant chaque déploiement, `scripts/apply.sh` appelle
-  `scripts/prepare-ambient-videos.py` qui télécharge un petit pack de vidéos de paysages depuis
-  Wikimedia Commons (scènes fixes : vagues, cascades, rivières — pas de caméra en mouvement,
-  mouvements naturels bouclables) et les re-encode en H.264/AAC `.mp4` pour la compatibilité du
-  Raspberry Pi 4. `install.sh` copie les `.mp4` dans `/storage/ambient/photos`.
+- **Pack de paysages par défaut** : à chaque déploiement, `scripts/apply.sh` appelle
+  `scripts/prepare-ambient-photos.py` qui télécharge un pack de photos de paysages depuis la
+  catégorie Wikimedia Commons "Featured pictures" (format paysage, licence libre) et les
+  redimensionne à 1920x1080 maximum ; `install.sh` copie ce pack dans `/storage/ambient/photos` (ou
+  télécharge directement sur le Pi, non redimensionné, si le pack pré-construit est absent). Un pack
+  de vidéos de paysages (scènes fixes bouclables) reste disponible en option manuelle (voir
+  `decisions.md`) mais n'est plus installé par défaut, car l'horloge/météo ne s'affichent pas en
+  mode vidéo (limitation ci-dessous).
 - Dossier par défaut : `/storage/ambient/photos`, configurable depuis les réglages de l'addon (label
   "Dossier de contenu (photos ou videos)").
 - **Contenu de secours** : si le dossier est vide et le téléchargement a échoué, repli sur un dossier
@@ -99,18 +102,22 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
   (`Window.Property`).
 - **Veille complète** après `sleep_after_seconds` : délègue à `akasha-sleep.py`.
 
-## 9. Réglages exposés (v0.12)
+## 9. Réglages exposés
 
-Dans les réglages natifs de l'addon (`Addon.OpenSettings(screensaver.akasha.ambient)`, accessible
-aussi depuis Akasha Settings) :
+Depuis v0.20.x, tous les réglages sont accessibles directement dans le menu **Akasha Settings**
+(`script.akasha.settings`), sans changer d'écran :
 
 - Activer/désactiver le Mode Ambiant (réglage `ambient.enabled`, lu par `service.akasha.ambient`).
 - Délai d'inactivité avant activation automatique (minutes).
-- Dossier de contenu (photos).
+- Dossier de contenu (photos ou vidéos).
 - Délai avant assombrissement (minutes).
 - Délai avant veille complète (minutes).
-- Ville pour la météo.
 - Afficher/masquer la météo.
+- Ville pour la météo + coordonnées (latitude/longitude).
+
+Les valeurs restent stockées dans les réglages de `script.akasha.ambient`
+(`resources/settings.xml`), qui reste accessible directement (`Addon.OpenSettings`) mais n'est plus
+le point d'entrée attendu.
 
 ## 10. Hors périmètre v0.12
 
