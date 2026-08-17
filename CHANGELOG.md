@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.18.1...akasha-os-v0.19.0) (2026-08-17)
+
+
+### Features
+
+* **aura:** load Plex entertainment rows via direct API ([eefd18f](https://github.com/jeremiejt38/akasha-os/commit/eefd18fbca6589267102804db6f061b3cdac469f))
+
 ## [0.18.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.18.0...akasha-os-v0.18.1) (2026-08-17)
 
 
