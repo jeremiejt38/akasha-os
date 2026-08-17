@@ -111,8 +111,74 @@ def get_ambient_enabled():
 def set_ambient_enabled(enabled):
     ADDON.setSetting('ambient.enabled', 'true' if enabled else 'false')
 
-def open_ambient_settings():
-    xbmc.executebuiltin('Addon.OpenSettings({})'.format(AMBIENT_ADDON_ID))
+def _ambient_addon():
+    return xbmcaddon.Addon(AMBIENT_ADDON_ID)
+
+def get_ambient_setting(setting_id, default=''):
+    try:
+        value = _ambient_addon().getSetting(setting_id)
+        return value if value != '' else default
+    except:
+        return default
+
+def set_ambient_setting(setting_id, value):
+    try:
+        _ambient_addon().setSetting(setting_id, str(value))
+    except:
+        pass
+
+def get_ambient_content_path():
+    return get_ambient_setting('content_path', '/storage/ambient/photos')
+
+def set_ambient_content_path():
+    current = get_ambient_content_path()
+    new_path = xbmcgui.Dialog().browse(0, 'Dossier de contenu du Mode Ambiant', 'files', '', False, False, current)
+    if new_path:
+        set_ambient_setting('content_path', new_path)
+        xbmcgui.Dialog().notification('Akasha', 'Dossier Mode Ambiant mis a jour', xbmcgui.NOTIFICATION_INFO, 2000)
+
+def get_ambient_minutes(setting_id, default):
+    try:
+        return int(get_ambient_setting(setting_id, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+def pick_ambient_minutes(title, setting_id, default, values):
+    current = get_ambient_minutes(setting_id, default)
+    labels = ['{} min'.format(v) for v in values]
+    sel = xbmcgui.Dialog().select(title, labels, preselect=values.index(current) if current in values else 0)
+    if sel >= 0:
+        set_ambient_setting(setting_id, values[sel])
+        xbmcgui.Dialog().notification('Akasha', '{}: {} min'.format(title, values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
+
+def get_ambient_weather_enabled():
+    return get_ambient_setting('weather_enabled', 'true').lower() == 'true'
+
+def toggle_ambient_weather():
+    new_state = not get_ambient_weather_enabled()
+    set_ambient_setting('weather_enabled', 'true' if new_state else 'false')
+    label = 'Activee' if new_state else 'Desactivee'
+    xbmcgui.Dialog().notification('Akasha', 'Meteo Mode Ambiant: {}'.format(label), xbmcgui.NOTIFICATION_INFO, 2000)
+
+def set_ambient_weather_city():
+    current_city = get_ambient_setting('weather_city', 'Paris')
+    new_city = xbmcgui.Dialog().input('Ville pour la meteo du Mode Ambiant', current_city, type=xbmcgui.INPUT_ALPHANUM)
+    if new_city:
+        set_ambient_setting('weather_city', new_city)
+        xbmcgui.Dialog().notification('Akasha', 'Ville meteo: {}'.format(new_city), xbmcgui.NOTIFICATION_INFO, 2000)
+
+def set_ambient_weather_coords():
+    current_lat = get_ambient_setting('weather_latitude', '48.8566')
+    current_lon = get_ambient_setting('weather_longitude', '2.3522')
+    new_lat = xbmcgui.Dialog().numeric(0, 'Latitude (ville meteo)', str(current_lat))
+    if new_lat == '':
+        return
+    new_lon = xbmcgui.Dialog().numeric(0, 'Longitude (ville meteo)', str(current_lon))
+    if new_lon == '':
+        return
+    set_ambient_setting('weather_latitude', new_lat)
+    set_ambient_setting('weather_longitude', new_lon)
+    xbmcgui.Dialog().notification('Akasha', 'Coordonnees meteo mises a jour', xbmcgui.NOTIFICATION_INFO, 2000)
 
 def test_fan():
     dialog = xbmcgui.Dialog()
@@ -334,110 +400,119 @@ def show_system_info():
 
     xbmcgui.Dialog().textviewer('Akasha - Infos Systeme', msg)
 
+def _toggle_overlay():
+    overlay_enabled = ADDON.getSetting('overlay.enabled').lower() == 'true'
+    new_state = 'false' if overlay_enabled else 'true'
+    ADDON.setSetting('overlay.enabled', new_state)
+    if new_state == 'true':
+        xbmc.executebuiltin('Skin.SetBool(akasha_overlay)')
+        xbmcgui.Dialog().notification('Akasha', 'Overlay systeme active', xbmcgui.NOTIFICATION_INFO, 2000)
+    else:
+        xbmc.executebuiltin('Skin.Reset(akasha_overlay)')
+        xbmcgui.Dialog().notification('Akasha', 'Overlay systeme desactive', xbmcgui.NOTIFICATION_INFO, 2000)
+
+def _toggle_ambient_enabled():
+    ambient_enabled = get_ambient_enabled()
+    set_ambient_enabled(not ambient_enabled)
+    new_label = 'Active' if not ambient_enabled else 'Desactive'
+    xbmcgui.Dialog().notification('Akasha', 'Mode Ambiant: {}'.format(new_label), xbmcgui.NOTIFICATION_INFO, 2000)
+
+def _pick_shutdown_time():
+    values = ['Desactive', '15 min', '30 min', '45 min', '60 min', '90 min', '120 min']
+    int_values = [0, 15, 30, 45, 60, 90, 120]
+    sel = xbmcgui.Dialog().select('Delai extinction automatique', values)
+    if sel >= 0:
+        set_shutdown_time(int_values[sel])
+        set_shutdown_state(0)
+        xbmcgui.Dialog().notification('Akasha', 'Extinction auto: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
+
+def _pick_screensaver_time():
+    values = ['1 min', '3 min', '5 min', '10 min', '15 min', '20 min', '30 min']
+    int_values = [1, 3, 5, 10, 15, 20, 30]
+    sel = xbmcgui.Dialog().select('Delai ecran de veille', values)
+    if sel >= 0:
+        set_screensaver_time(int_values[sel])
+        xbmcgui.Dialog().notification('Akasha', 'Screensaver: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
+
+def _force_shutdown_state():
+    set_shutdown_state(0)
+    xbmcgui.Dialog().notification('Akasha', 'Mode Shutdown + CEC active', xbmcgui.NOTIFICATION_INFO, 2000)
+
+def _restart_kodi():
+    ok = xbmcgui.Dialog().yesno('Akasha', 'Redemarrer Kodi ?')
+    if ok:
+        # Show reboot splash in ExecStartPre when Kodi restarts
+        open('/tmp/.kodi-restart', 'w').close()
+        subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
+
+def _restart_system():
+    ok = xbmcgui.Dialog().yesno('Akasha', 'Redemarrer le systeme ?')
+    if ok:
+        # Show the reboot splash immediately before Kodi starts to tear down.
+        # The matching systemd service will skip if the same image was shown recently.
+        subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-reboot.png'])
+        subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
+
+def _shutdown_system():
+    ok = xbmcgui.Dialog().yesno('Akasha', 'Eteindre le systeme ?\n(La TV sera aussi eteinte via CEC)')
+    if ok:
+        # Show the shutdown splash and turn the TV off via CEC before the system
+        # shuts down. The matching systemd service will skip if already shown.
+        subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-shutdown.png', '1'])
+        subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
+
 def main():
     while True:
         temp = get_cpu_temp()
         shutdown_min = get_shutdown_time()
         screensaver_min = get_screensaver_time()
-        
         version = get_akasha_version()
 
-        overlay_enabled = ADDON.getSetting('overlay.enabled').lower() == 'true'
-        overlay_label = 'Active' if overlay_enabled else 'Desactive'
-        ambient_enabled = get_ambient_enabled()
-        ambient_label = 'Active' if ambient_enabled else 'Desactive'
-        options = [
-            '[B]--- Mise a jour ---[/B]',
-            '  Verifier / Mettre a jour Akasha OS (v{})'.format(version),
-            '[B]--- Infos Systeme ---[/B]',
-            '  Voir les infos systeme (CPU {}C)'.format(temp),
-            '  Overlay systeme : {}'.format(overlay_label),
-            '[B]--- Mode Ambiant ---[/B]',
-            '  Mode Ambiant (ecran de veille) : {}'.format(ambient_label),
-            '  Configurer le Mode Ambiant...',
-            '[B]--- Veille & Extinction ---[/B]',
-            '  Delai extinction auto : {} min'.format(shutdown_min),
-            '  Delai ecran de veille : {} min'.format(screensaver_min),
-            '  Mode extinction : Shutdown + CEC (eteint la TV)',
-            '[B]--- Materiel ---[/B]',
-            '  Tester le ventilateur',
-            '  Tester CEC (eteindre la TV)',
-            '[B]--- Actions ---[/B]',
-            '  Redemarrer Kodi',
-            '  Redemarrer le systeme',
-            '  Eteindre (shutdown + TV off)',
+        overlay_label = 'Active' if ADDON.getSetting('overlay.enabled').lower() == 'true' else 'Desactive'
+        ambient_label = 'Active' if get_ambient_enabled() else 'Desactive'
+        weather_label = 'Activee' if get_ambient_weather_enabled() else 'Desactivee'
+
+        # (label, action) pairs; entries with action=None are section headers
+        # and cannot be selected as a valid handler (guarded below).
+        entries = [
+            ('[B]--- Mise a jour ---[/B]', None),
+            ('  Verifier / Mettre a jour Akasha OS (v{})'.format(version), show_update_dialog),
+            ('[B]--- Infos Systeme ---[/B]', None),
+            ('  Voir les infos systeme (CPU {}C)'.format(temp), show_system_info),
+            ('  Overlay systeme : {}'.format(overlay_label), _toggle_overlay),
+            ('[B]--- Mode Ambiant ---[/B]', None),
+            ('  Mode Ambiant (ecran de veille) : {}'.format(ambient_label), _toggle_ambient_enabled),
+            ('  Delai avant activation : {} min'.format(get_ambient_minutes('inactivity_timeout_minutes', 5)),
+             lambda: pick_ambient_minutes('Delai avant activation', 'inactivity_timeout_minutes', 5, [1, 2, 3, 5, 10, 15, 30])),
+            ('  Dossier de contenu : {}'.format(get_ambient_content_path()), set_ambient_content_path),
+            ('  Delai avant assombrissement : {} min'.format(get_ambient_minutes('dim_after_minutes', 2)),
+             lambda: pick_ambient_minutes('Delai avant assombrissement', 'dim_after_minutes', 2, [1, 2, 3, 5, 10])),
+            ('  Delai avant veille complete : {} min'.format(get_ambient_minutes('sleep_after_minutes', 30)),
+             lambda: pick_ambient_minutes('Delai avant veille complete', 'sleep_after_minutes', 30, [5, 10, 15, 30, 45, 60, 90])),
+            ('  Meteo (Mode Ambiant) : {}'.format(weather_label), toggle_ambient_weather),
+            ('  Ville (meteo Mode Ambiant) : {}'.format(get_ambient_setting('weather_city', 'Paris')), set_ambient_weather_city),
+            ('  Coordonnees (meteo Mode Ambiant)...', set_ambient_weather_coords),
+            ('[B]--- Veille & Extinction ---[/B]', None),
+            ('  Delai extinction auto : {} min'.format(shutdown_min), _pick_shutdown_time),
+            ('  Delai ecran de veille : {} min'.format(screensaver_min), _pick_screensaver_time),
+            ('  Mode extinction : Shutdown + CEC (eteint la TV)', _force_shutdown_state),
+            ('[B]--- Materiel ---[/B]', None),
+            ('  Tester le ventilateur', test_fan),
+            ('  Tester CEC (eteindre la TV)', test_cec_standby),
+            ('[B]--- Actions ---[/B]', None),
+            ('  Redemarrer Kodi', _restart_kodi),
+            ('  Redemarrer le systeme', _restart_system),
+            ('  Eteindre (shutdown + TV off)', _shutdown_system),
         ]
-        
-        dialog = xbmcgui.Dialog()
-        choice = dialog.select('Akasha Settings', options, useDetails=False)
-        
+
+        options = [label for label, _ in entries]
+        choice = xbmcgui.Dialog().select('Akasha Settings', options, useDetails=False)
+
         if choice < 0:
             break
-        elif choice == 1:
-            show_update_dialog()
-        elif choice == 3:
-            show_system_info()
-        elif choice == 4:
-            new_state = 'false' if overlay_enabled else 'true'
-            ADDON.setSetting('overlay.enabled', new_state)
-            if new_state == 'true':
-                xbmc.executebuiltin('Skin.SetBool(akasha_overlay)')
-                dialog.notification('Akasha', 'Overlay systeme active', xbmcgui.NOTIFICATION_INFO, 2000)
-            else:
-                xbmc.executebuiltin('Skin.Reset(akasha_overlay)')
-                dialog.notification('Akasha', 'Overlay systeme desactive', xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 6:
-            # Basculer le Mode Ambiant on/off
-            set_ambient_enabled(not ambient_enabled)
-            new_label = 'Active' if not ambient_enabled else 'Desactive'
-            dialog.notification('Akasha', 'Mode Ambiant: {}'.format(new_label), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 7:
-            open_ambient_settings()
-        elif choice == 9:
-            # Changer délai extinction
-            values = ['Desactive', '15 min', '30 min', '45 min', '60 min', '90 min', '120 min']
-            int_values = [0, 15, 30, 45, 60, 90, 120]
-            sel = dialog.select('Delai extinction automatique', values)
-            if sel >= 0:
-                set_shutdown_time(int_values[sel])
-                set_shutdown_state(0)
-                dialog.notification('Akasha', 'Extinction auto: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 10:
-            # Changer délai screensaver
-            values = ['1 min', '3 min', '5 min', '10 min', '15 min', '20 min', '30 min']
-            int_values = [1, 3, 5, 10, 15, 20, 30]
-            sel = dialog.select('Delai ecran de veille', values)
-            if sel >= 0:
-                set_screensaver_time(int_values[sel])
-                dialog.notification('Akasha', 'Screensaver: {}'.format(values[sel]), xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 11:
-            # Forcer shutdown state
-            set_shutdown_state(0)
-            dialog.notification('Akasha', 'Mode Shutdown + CEC active', xbmcgui.NOTIFICATION_INFO, 2000)
-        elif choice == 13:
-            test_fan()
-        elif choice == 14:
-            test_cec_standby()
-        elif choice == 16:
-            ok = dialog.yesno('Akasha', 'Redemarrer Kodi ?')
-            if ok:
-                # Show reboot splash in ExecStartPre when Kodi restarts
-                open('/tmp/.kodi-restart', 'w').close()
-                subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
-        elif choice == 17:
-            ok = dialog.yesno('Akasha', 'Redemarrer le systeme ?')
-            if ok:
-                # Show the reboot splash immediately before Kodi starts to tear down.
-                # The matching systemd service will skip if the same image was shown recently.
-                subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-reboot.png'])
-                subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
-        elif choice == 18:
-            ok = dialog.yesno('Akasha', 'Eteindre le systeme ?\n(La TV sera aussi eteinte via CEC)')
-            if ok:
-                # Show the shutdown splash and turn the TV off via CEC before the system
-                # shuts down. The matching systemd service will skip if already shown.
-                subprocess.run(['/storage/.kodi/scripts/show-splash.sh', '/storage/.kodi/media/splash-shutdown.png', '1'])
-                subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
+        action = entries[choice][1]
+        if action is not None:
+            action()
 
 if __name__ == '__main__':
     main()
