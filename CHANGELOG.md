@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.16.0...akasha-os-v0.17.0) (2026-08-17)
+
+
+### Features
+
+* **ambient:** transcode default landscape pack to H.264 and fix fullscreen playback ([8eb9718](https://github.com/jeremiejt38/akasha-os/commit/8eb971846b11ed02d49281d2a21d6e248229d29b))
+
 ## [0.16.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.15.0...akasha-os-v0.16.0) (2026-08-16)
 
 
