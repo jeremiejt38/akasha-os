@@ -18,7 +18,7 @@
             <width>1920</width>
             <height>120</height>
 
-            <control type="radiobutton" id="2001">
+            <control type="button" id="2001">
                 <left>60</left>
                 <top>30</top>
                 <width>360</width>
@@ -33,10 +33,9 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <texturenofocus colordiffuse="00000000">white.png</texturenofocus>
             </control>
 
-            <control type="radiobutton" id="2002">
+            <control type="button" id="2002">
                 <left>440</left>
                 <top>30</top>
                 <width>360</width>
@@ -51,10 +50,9 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <texturenofocus colordiffuse="00000000">white.png</texturenofocus>
             </control>
 
-            <control type="radiobutton" id="2003">
+            <control type="button" id="2003">
                 <left>820</left>
                 <top>30</top>
                 <width>360</width>
@@ -69,7 +67,6 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <texturenofocus colordiffuse="00000000">white.png</texturenofocus>
             </control>
         </control>
 
@@ -142,16 +139,16 @@
             </control>
         </control>
 
-        <!-- Placeholder focusable control so ondown from the tab bar has a target -->
+        <!-- Placeholder focusable control so ondown from the tab bar has a target.
+             Kept off-screen: milestone 2+ will replace it with real row/tile
+             controls per tab (see docs/aura/roadmap.md). -->
         <control type="button" id="9000">
-            <left>60</left>
-            <top>340</top>
-            <width>10</width>
-            <height>10</height>
+            <left>-100</left>
+            <top>-100</top>
+            <width>1</width>
+            <height>1</height>
             <onup>2001</onup>
             <label></label>
-            <texturefocus colordiffuse="00000000">white.png</texturefocus>
-            <texturenofocus colordiffuse="00000000">white.png</texturenofocus>
         </control>
     </controls>
 </window>
