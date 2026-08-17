@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.20.0...akasha-os-v0.20.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **ambient:** remove pre-v0.20.0 default videos without a manifest ([424d212](https://github.com/jeremiejt38/akasha-os/commit/424d212e319fada761fe9867d312405a7a727042))
+
 ## [0.20.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.19.0...akasha-os-v0.20.0) (2026-08-17)
 
 
