@@ -160,6 +160,44 @@ class TestPlexClient(unittest.TestCase):
         self.assertIn('Films — Sortis recemment', labels)
         self.assertIn('Films — Drame', labels)
 
+    @patch('urllib.request.urlopen')
+    def test_video_sections_includes_movies_and_shows(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'Directory': [
+                    {'key': '1', 'title': 'Films', 'type': 'movie'},
+                    {'key': '2', 'title': 'Séries', 'type': 'show'},
+                    {'key': '3', 'title': 'Musique', 'type': 'artist'},
+                ]
+            }
+        })
+        sections = self.client.video_sections()
+        self.assertEqual(len(sections), 2)
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_uses_sort_param(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.section_items('1', sort='titleSort')
+        self.assertIn('sort=titleSort', captured['url'])
+
+    @patch('urllib.request.urlopen')
+    def test_search_uses_query_param(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.search('1', 'inception')
+        self.assertIn('search=inception', captured['url'])
+
     def test_missing_config_raises(self):
         client = plex_client.PlexClient('', '')
         with self.assertRaises(plex_client.PlexAPIError):

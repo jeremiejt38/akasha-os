@@ -62,6 +62,23 @@
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>2002</onleft>
+                <onright>3100</onright>
+                <ondown>9000</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+
+            <control type="button" id="3100">
+                <left>1200</left>
+                <top>30</top>
+                <width>300</width>
+                <height>60</height>
+                <label>Bibliotheque</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>2003</onleft>
                 <onright>2001</onright>
                 <ondown>9000</ondown>
                 <textcolor>BBFFFFFF</textcolor>

@@ -137,6 +137,40 @@ class PlexClient:
         })
         return self._metadata_list(data)
 
+    def video_sections(self):
+        """Return all library sections that contain video content."""
+        data = self._request('/library/sections')
+        mc = self._media_container(data)
+        return [
+            {
+                'key': str(item.get('key')),
+                'title': item.get('title') or 'Section',
+                'type': item.get('type'),
+            }
+            for item in mc.get('Directory', [])
+            if item.get('type') in ('movie', 'show')
+        ]
+
+    def section_items(self, section_key, sort='titleSort', limit=200):
+        """Return all items of a section, sorted.
+
+        sort examples: titleSort, titleSort:desc, originallyAvailableAt:desc,
+        addedAt:desc, rating:desc.
+        """
+        data = self._request('/library/sections/{}/all'.format(section_key), {
+            'sort': sort,
+            'X-Plex-Container-Size': limit,
+        })
+        return self._metadata_list(data)
+
+    def search(self, section_key, query, limit=50):
+        """Search items in a section by title (client-side filter)."""
+        data = self._request('/library/sections/{}/all'.format(section_key), {
+            'search': query,
+            'X-Plex-Container-Size': limit,
+        })
+        return self._metadata_list(data)
+
     def entertainment_rows(self, limits=None):
         """Build the default Divertissement rows for the UI.
 
