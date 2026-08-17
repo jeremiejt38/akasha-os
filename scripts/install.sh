@@ -147,25 +147,42 @@ cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.aura" /storage/.kodi/addons/
 rm -rf /storage/.kodi/addons/service.akasha.aura
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.aura" /storage/.kodi/addons/
 
-# Deploy the pre-transcoded H.264 ambient video pack when bundled by
-# scripts/apply.sh. If it is missing (e.g. manual install without apply.sh),
-# fall back to the raw Wikimedia Commons downloader.
-if [ -d "$SCRIPT_DIR/kodi/media/ambient" ] && [ "$(ls -A "$SCRIPT_DIR/kodi/media/ambient"/*.mp4 2>/dev/null)" ]; then
-    log "  Copying pre-transcoded ambient videos..."
-    cp -f "$SCRIPT_DIR"/kodi/media/ambient/*.mp4 /storage/ambient/photos/
-    # Clean up stale MP4s that may have been copied from an older pack.
-    for f in /storage/ambient/photos/*.mp4; do
+# Remove any default video pack left over from an older install: the
+# default Ambient content is photos (see decisions.md), videos are opt-in
+# only (user drops their own files in /storage/ambient/photos). Manifests
+# from ambient-download-videos.py / prepare-ambient-videos.py identify which
+# .mp4 files were part of the bundled default pack, so user-added videos are
+# left untouched.
+if [ -f /storage/ambient/photos/.akasha-ambient-videos ]; then
+    log "  Removing legacy default ambient video pack..."
+    while IFS= read -r name; do
+        [ -n "$name" ] && rm -f "/storage/ambient/photos/$name"
+    done < /storage/ambient/photos/.akasha-ambient-videos
+    rm -f /storage/ambient/photos/.akasha-ambient-videos
+fi
+
+# Deploy the pre-downscaled ambient photo pack when bundled by
+# scripts/apply.sh (kept under 1920x1080 so the Pi doesn't have to decode
+# full-resolution "Featured pictures" originals). If it is missing (e.g.
+# manual install without apply.sh), fall back to downloading the raw
+# Wikimedia Commons photos directly onto the device.
+if [ -d "$SCRIPT_DIR/kodi/media/ambient-photos" ] && [ "$(ls -A "$SCRIPT_DIR/kodi/media/ambient-photos"/*.jpg 2>/dev/null)" ]; then
+    log "  Copying pre-downscaled ambient photos..."
+    cp -f "$SCRIPT_DIR"/kodi/media/ambient-photos/*.jpg /storage/ambient/photos/
+    cp -f "$SCRIPT_DIR/kodi/media/ambient-photos/.akasha-ambient-photos" /storage/ambient/photos/ 2>/dev/null || true
+    # Clean up stale photos that may have been copied from an older pack.
+    for f in /storage/ambient/photos/*.jpg; do
         [ -e "$f" ] || continue
         name=$(basename "$f")
-        if [ ! -f "$SCRIPT_DIR/kodi/media/ambient/$name" ]; then
+        if [ ! -f "$SCRIPT_DIR/kodi/media/ambient-photos/$name" ]; then
             rm -f "$f"
         fi
     done
 elif command -v python3 >/dev/null 2>&1; then
-    log "WARNING: no pre-transcoded ambient videos found; trying raw Commons download."
-    python3 "$SCRIPT_DIR/kodi/scripts/ambient-download-videos.py" /storage/ambient/photos || true
+    log "WARNING: no pre-downscaled ambient photos found; trying raw Commons download."
+    python3 "$SCRIPT_DIR/kodi/scripts/ambient-download-photos.py" /storage/ambient/photos || true
 else
-    log "WARNING: python3 not available; skipping default ambient video download."
+    log "WARNING: python3 not available; skipping default ambient photo download."
 fi
 
 # ---------------------------------------------------------------------------

@@ -31,8 +31,8 @@ if ! $SSH "echo connected" >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "[0/4] Preparing ambient video pack..."
-python3 "$SCRIPT_DIR/scripts/prepare-ambient-videos.py" --out "$SCRIPT_DIR/kodi/media/ambient" --cache "$SCRIPT_DIR/.cache/ambient-raw" || true
+echo "[0/4] Preparing ambient photo pack..."
+python3 "$SCRIPT_DIR/scripts/prepare-ambient-photos.py" --out "$SCRIPT_DIR/kodi/media/ambient-photos" --cache "$SCRIPT_DIR/.cache/ambient-photos-raw" || true
 
 echo "[1/4] Packing repo..."
 rm -f "$TAR_PATH"

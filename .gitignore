@@ -5,8 +5,11 @@ build/
 tmp/
 .cache/
 
-# Generated ambient video pack (H.264 MP4s built by scripts/prepare-ambient-videos.py)
+# Generated ambient video pack (H.264 MP4s built by scripts/prepare-ambient-videos.py, opt-in only)
 kodi/media/ambient/
+
+# Generated ambient photo pack (downscaled JPEGs built by scripts/prepare-ambient-photos.py)
+kodi/media/ambient-photos/
 
 # Python
 __pycache__/
