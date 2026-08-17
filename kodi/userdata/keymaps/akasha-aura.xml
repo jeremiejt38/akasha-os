@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha OS Aura keymap.
+
+Redirects the standard Home action (keyboard/remote "Home" key, CEC remote
+home button) to Akasha Aura instead of the native Kodi Home window, so Aura
+stays the permanent entry point even after navigating deep into native Kodi
+windows. The native Home window remains reachable via Back from within Aura
+(see docs/aura/decisions.md) so this is not a one-way door.
+-->
+<keymap>
+  <global>
+    <keyboard>
+      <home>RunScript(script.akasha.aura)</home>
+    </keyboard>
+    <remote>
+      <home>RunScript(script.akasha.aura)</home>
+    </remote>
+  </global>
+</keymap>

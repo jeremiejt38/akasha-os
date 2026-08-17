@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.akasha.aura" name="Akasha Aura" version="0.1.0" provider-name="Akasha">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.python.script" library="default.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="fr_FR">Ecran d'accueil Akasha Aura</summary>
+        <summary lang="en_GB">Akasha Aura home screen</summary>
+        <description lang="fr_FR">Ecran d'accueil personnalise (style Fire TV) avec 3 onglets : Divertissement (bibliotheque Plex en direct via l'API Plex), Jeux, et App (addons installes + Akasha Store). Remplace l'accueil Kodi natif, declenche automatiquement par service.akasha.aura au demarrage ou via le bouton Home.</description>
+        <description lang="en_GB">Custom Fire TV-style home screen with 3 tabs: Entertainment (live Plex library via the Plex API), Games, and Apps (installed addons + Akasha Store). Replaces the native Kodi home screen, launched automatically by service.akasha.aura at startup or via the Home button.</description>
+        <platform>all</platform>
+        <license>MIT</license>
+    </extension>
+</addon>

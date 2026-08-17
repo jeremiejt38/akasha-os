@@ -141,6 +141,12 @@ rm -rf /storage/.kodi/addons/service.akasha.ambient
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.ambient" /storage/.kodi/addons/
 mkdir -p /storage/ambient/photos
 
+log "  Installing Akasha Aura addon..."
+rm -rf /storage/.kodi/addons/script.akasha.aura
+cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.aura" /storage/.kodi/addons/
+rm -rf /storage/.kodi/addons/service.akasha.aura
+cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.aura" /storage/.kodi/addons/
+
 # Deploy the pre-transcoded H.264 ambient video pack when bundled by
 # scripts/apply.sh. If it is missing (e.g. manual install without apply.sh),
 # fall back to the raw Wikimedia Commons downloader.
@@ -183,6 +189,8 @@ sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
         ('script.akasha.guide', 1, datetime('now')),
         ('script.akasha.ambient', 1, datetime('now')),
         ('service.akasha.ambient', 1, datetime('now')),
+        ('script.akasha.aura', 1, datetime('now')),
+        ('service.akasha.aura', 1, datetime('now')),
         ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
 chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh \
@@ -273,6 +281,9 @@ if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/keymap.xml" ]; then
 fi
 if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-ambient.xml" ]; then
     cp "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-ambient.xml" /storage/.kodi/userdata/keymaps/akasha-ambient.xml
+fi
+if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-aura.xml" ]; then
+    cp "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-aura.xml" /storage/.kodi/userdata/keymaps/akasha-aura.xml
 fi
 
 if [ -f "$SCRIPT_DIR/scripts/volume.py" ]; then

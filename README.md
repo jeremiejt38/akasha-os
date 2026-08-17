@@ -5,6 +5,7 @@ Custom LibreELEC 12 (Omega) distribution for Raspberry Pi 4, focused on HTPC, me
 ## Features
 
 - **Media**: Plex, Jellyfin, YouTube Music integration
+- **Akasha Aura**: Fire TV-style home screen (Entertainment / Games / Apps tabs) that replaces the native Kodi home screen, backed directly by the Plex API (see `docs/aura/`)
 - **Cloud Gaming**: Steam Link, Moonlight (NVIDIA GameStream/Sunshine), GeForce NOW, Xbox Cloud Gaming, Amazon Luna, Boosteroid via Chromium Docker
 - **Smart Power Management**: CEC TV control (auto-off on shutdown), 30min inactivity shutdown, screensaver
 - **Ambient Mode**: photo slideshow, clock and live weather (Open-Meteo) shown after inactivity or manually from the Guide menu, with progressive dimming, anti burn-in and a handoff into CEC standby (see `docs/ambient-mode/`)

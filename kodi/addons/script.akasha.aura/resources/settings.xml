@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="Plex">
+        <setting id="plex.server_url" type="text" label="URL du serveur Plex" default="http://192.168.100.133:32400"/>
+        <setting id="plex.token" type="text" label="Token Plex (X-Plex-Token)" default=""/>
+    </category>
+    <category label="Onglets">
+        <setting id="tab.default" type="enum" label="Onglet par defaut" default="0" values="Divertissement|Jeux|App"/>
+    </category>
+</settings>
