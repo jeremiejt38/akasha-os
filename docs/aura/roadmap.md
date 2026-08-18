@@ -173,6 +173,14 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
     confirmant un seul appel `GET /api/plex/on-deck?limit=30&offset=30` après navigation, comptage
     passant de 30 à 60), et un seul élément mis en surbrillance à la fois.
 
+- **Bibliothèque en grille d'affiches, alignée sur la référence Plex (2026-08-18, v0.34.0)** :
+  remplace la liste texte par une vraie grille d'affiches qui s'enroule automatiquement (`panel`),
+  même style de tuile que Divertissement/Recommandé (affiche + titre + année en 2 lignes),
+  déclenchement du chargement incrémental sur Bas ET Droite (grille qui s'enroule, la fin du
+  chargé peut être atteinte dans les deux sens). Validé par PixelCamera : grille de 30 affiches
+  réelles (101 Dalmatiens, Aladdin, Alvin et les Chipmunks...) correctement rendues avec titre et
+  année, correspondant fidèlement à la capture de référence fournie par l'utilisateur.
+
 ## Notes de suivi
 
 - Chaque jalon correspond à un ou plusieurs commits atomiques (`feat:`/`fix:`/`test:`), sur `main`
