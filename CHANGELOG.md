@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.34.0...akasha-os-v0.35.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** show the real total item count immediately (plan a3f9c2e1) ([ad9642f](https://github.com/jeremiejt38/akasha-os/commit/ad9642f9cd1de2497f1c0a6db2797602ccef77c2))
+
 ## [0.34.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.33.2...akasha-os-v0.34.0) (2026-08-18)
 
 
