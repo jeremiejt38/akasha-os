@@ -46,7 +46,7 @@
                 <aligny>center</aligny>
                 <onleft>2001</onleft>
                 <onright>2003</onright>
-                <ondown>9000</ondown>
+                <ondown>2010</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
@@ -63,7 +63,7 @@
                 <aligny>center</aligny>
                 <onleft>2002</onleft>
                 <onright>3100</onright>
-                <ondown>9000</ondown>
+                <ondown>2030</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
