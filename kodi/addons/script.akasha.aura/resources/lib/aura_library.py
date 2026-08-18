@@ -87,10 +87,18 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         return self.client.video_sections()
 
     def _section_items(self, **kwargs):
+        """Return (items, total) for the current section/filters.
+
+        `total` is the real total item count from the source's own
+        pagination metadata (Plex `totalSize`), shown immediately instead of
+        only "however many are loaded so far" -- see plan a3f9c2e1 in
+        docs/aura/decisions.md.
+        """
         if self.connector:
             try:
                 raw = self.connector.section_items(self.section['key'], **kwargs)
-                return divert_source.parse_metadata_list(raw, self.connector.image_url)
+                items = divert_source.parse_metadata_list(raw, self.connector.image_url)
+                return items, divert_source.parse_total_size(raw)
             except connector_client.ConnectorAPIError as e:
                 xbmc.log('Akasha Aura Library: connector section_items failed, falling back '
                          'to Plex direct: {}'.format(e), xbmc.LOGWARNING)
@@ -99,10 +107,10 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         genre = kwargs.pop('genre', None)
         search = kwargs.pop('search', None)
         if search:
-            return self.client.search(self.section['key'], search, **kwargs)
+            return self.client.search_with_total(self.section['key'], search, **kwargs)
         if genre:
-            return self.client.by_genre(self.section['key'], genre, **kwargs)
-        return self.client.section_items(self.section['key'], **kwargs)
+            return self.client.by_genre_with_total(self.section['key'], genre, **kwargs)
+        return self.client.section_items_with_total(self.section['key'], **kwargs)
 
     def _section_genres(self):
         if self.connector:
@@ -169,7 +177,9 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
     def _render_status(self):
         try:
             status = self.getControl(4020)
-            label = '{} resultat(s)'.format(len(self.items))
+            count = self._paged.total if self._paged and self._paged.total is not None \
+                else len(self.items)
+            label = '{} resultat(s)'.format(count)
             if self.query:
                 label += ' pour "{}"'.format(self.query)
             if self.filter_genre:

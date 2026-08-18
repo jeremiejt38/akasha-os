@@ -17,6 +17,18 @@ def make_fetcher(total_items, calls_log=None):
     return fetch_page
 
 
+def make_fetcher_with_total(total_items, fake_total, calls_log=None):
+    """Return a fetch_page(offset, limit) callable that returns (page, fake_total) tuples."""
+    dataset = ['item-{}'.format(i) for i in range(total_items)]
+
+    def fetch_page(offset, limit):
+        if calls_log is not None:
+            calls_log.append((offset, limit))
+        return dataset[offset:offset + limit], fake_total
+
+    return fetch_page
+
+
 class TestPagedList(unittest.TestCase):
     def test_load_initial_fetches_one_page(self):
         calls = []
@@ -69,6 +81,37 @@ class TestPagedList(unittest.TestCase):
         loaded = pl.load_initial()
         self.assertEqual(loaded, [])
         self.assertTrue(pl.exhausted)
+
+
+class TestPagedListTotal(unittest.TestCase):
+    def test_total_is_none_before_any_load(self):
+        pl = PagedList(make_fetcher(100), page_size=30, prefetch_margin=15)
+        self.assertIsNone(pl.total)
+
+    def test_total_populated_from_tuple_on_first_page(self):
+        pl = PagedList(make_fetcher_with_total(100, 437), page_size=30, prefetch_margin=15)
+        pl.load_initial()
+        self.assertEqual(pl.total, 437)
+        self.assertEqual(len(pl.items), 30)
+
+    def test_total_updated_on_subsequent_pages(self):
+        pl = PagedList(make_fetcher_with_total(100, 437), page_size=30, prefetch_margin=15)
+        pl.load_initial()
+        pl.maybe_load_more(15)
+        self.assertEqual(pl.total, 437)
+        self.assertEqual(len(pl.items), 60)
+
+    def test_total_falls_back_to_loaded_count_when_never_provided(self):
+        pl = PagedList(make_fetcher(10), page_size=30, prefetch_margin=15)
+        pl.load_initial()
+        self.assertTrue(pl.exhausted)
+        self.assertEqual(pl.total, 10)
+
+    def test_total_none_while_not_exhausted_and_never_provided(self):
+        pl = PagedList(make_fetcher(100), page_size=30, prefetch_margin=15)
+        pl.load_initial()
+        self.assertFalse(pl.exhausted)
+        self.assertIsNone(pl.total)
 
 
 if __name__ == '__main__':

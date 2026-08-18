@@ -42,6 +42,19 @@ def parse_genres(raw_json):
     return [str(item.get('title')) for item in mc.get('Directory', []) if item.get('title')]
 
 
+def parse_total_size(raw_json):
+    """Return the total item count of a paginated Plex payload, or None.
+
+    Plex includes `totalSize` (falling back to `size` for non-paginated
+    responses) in every `MediaContainer`, at no extra request cost -- so the
+    real total can be shown immediately alongside the first page, without a
+    separate "count" round-trip (see docs/aura/decisions.md, plan a3f9c2e1).
+    """
+    mc = _media_container(raw_json)
+    total = mc.get('totalSize', mc.get('size'))
+    return int(total) if total is not None else None
+
+
 def item_subtitle(item):
     """Return a short second line for a video item (episode tag, or year).
 

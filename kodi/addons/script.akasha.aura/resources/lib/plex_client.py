@@ -93,6 +93,21 @@ class PlexClient:
         return [self._video_dict(item, self.server_url, self.token)
                 for item in mc.get('Metadata', [])]
 
+    def _metadata_list_with_total(self, data):
+        """Like `_metadata_list`, but also returns the real total item count.
+
+        Plex includes this in every MediaContainer response (`totalSize`,
+        falling back to `size` for non-paginated responses) at no extra
+        request cost -- see plan a3f9c2e1 in docs/aura/decisions.md: the UI
+        should show the real total immediately, not just how many items are
+        loaded so far.
+        """
+        mc = self._media_container(data)
+        items = [self._video_dict(item, self.server_url, self.token)
+                 for item in mc.get('Metadata', [])]
+        total = mc.get('totalSize', mc.get('size'))
+        return items, total
+
     def on_deck(self, limit=20, offset=0):
         data = self._request('/library/onDeck', {
             'X-Plex-Container-Size': limit,
@@ -106,6 +121,20 @@ class PlexClient:
             'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
+
+    def on_deck_with_total(self, limit=20, offset=0):
+        data = self._request('/library/onDeck', {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
+
+    def recently_added_with_total(self, limit=20, offset=0):
+        data = self._request('/library/recentlyAdded', {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
 
     def movie_sections(self):
         data = self._request('/library/sections')
@@ -151,6 +180,14 @@ class PlexClient:
         })
         return self._metadata_list(data)
 
+    def by_genre_with_total(self, section_key, genre, limit=10, offset=0):
+        data = self._request('/library/sections/{}/all'.format(section_key), {
+            'genre': genre,
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
+
     def video_sections(self):
         """Return all library sections that contain video content."""
         data = self._request('/library/sections')
@@ -178,6 +215,14 @@ class PlexClient:
         })
         return self._metadata_list(data)
 
+    def section_items_with_total(self, section_key, sort='titleSort', limit=200, offset=0):
+        data = self._request('/library/sections/{}/all'.format(section_key), {
+            'sort': sort,
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
+
     def search(self, section_key, query, limit=50, offset=0):
         """Search items in a section by title (client-side filter)."""
         data = self._request('/library/sections/{}/all'.format(section_key), {
@@ -186,6 +231,14 @@ class PlexClient:
             'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
+
+    def search_with_total(self, section_key, query, limit=50, offset=0):
+        data = self._request('/library/sections/{}/all'.format(section_key), {
+            'search': query,
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
 
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""

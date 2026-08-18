@@ -56,6 +56,18 @@ class TestDivertSource(unittest.TestCase):
         self.assertEqual(items[0]['art_url'], '')
         self.assertEqual(calls, [])
 
+    def test_parse_total_size_prefers_total_size_field(self):
+        raw = {'MediaContainer': {'size': 30, 'totalSize': 771}}
+        self.assertEqual(divert_source.parse_total_size(raw), 771)
+
+    def test_parse_total_size_falls_back_to_size(self):
+        raw = {'MediaContainer': {'size': 12}}
+        self.assertEqual(divert_source.parse_total_size(raw), 12)
+
+    def test_parse_total_size_missing_returns_none(self):
+        self.assertIsNone(divert_source.parse_total_size({'MediaContainer': {}}))
+        self.assertIsNone(divert_source.parse_total_size('not a dict'))
+
     def test_item_subtitle_episode(self):
         item = {'season': 16, 'index': 6}
         self.assertEqual(divert_source.item_subtitle(item), 'S16 - E6')

@@ -117,3 +117,41 @@ le connector) écrit directement plutôt que délégué à Talos, par souci d'ef
 session — c'est le type de module qui aurait dû passer par Talos selon `docs/talos-strategy.md`.
 Pas de bug à signaler puisqu'il n'a pas été généré par Talos ; noté ici pour la traçabilité de
 l'usage réel de Talos sur ce projet.
+
+## 2026-08-18 (soir) — Jobs Talos pour le plan a3f9c2e1 (total réel immédiat en pagination)
+
+Deux jobs soumis pour compléter `paged_list.PagedList` (attribut `total`) et `plex_client.py`
+(méthodes `_with_total`), tâches pures/testables adaptées à Talos selon `docs/talos-strategy.md`.
+
+### Job 1 — `cfd05f21` : tests pour `PagedList.total`
+- **Prompt** : ajouter une classe `TestPagedListTotal` dans `tests/test_paged_list.py` couvrant 5
+  cas (total absent avant chargement, peuplé depuis un tuple `(items, total)`, mis à jour sur les
+  pages suivantes, retombant sur `len(items)` quand jamais fourni et liste épuisée, restant `None`
+  quand jamais fourni et liste non épuisée).
+- **Résultat** : échec en sandbox (validation KO, non appliqué au repo). Le modèle a correctement
+  ajouté 3 des 5 tests demandés, mais a aussi **redéfini la fonction `make_fetcher` existante**
+  avec une signature incompatible au lieu de créer la nouvelle fonction `make_fetcher_with_total`
+  demandée explicitement dans le prompt — cassant les 5 tests déjà existants du fichier.
+- **Correction** : implémenté manuellement (les 5 cas demandés + la fonction `make_fetcher_with_total`
+  séparée), 10/10 tests passent.
+- **Apprentissage** : même quand le prompt demande explicitement de *créer une nouvelle fonction*
+  plutôt que de modifier l'existante, le modèle peut réutiliser/redéfinir un nom déjà présent dans
+  le fichier. Envisager de fournir le contenu exact du fichier cible dans le prompt (pas seulement
+  une description) pour réduire ce risque, ou de scinder en un job dédié uniquement à l'ajout de
+  la nouvelle fonction avant le job qui l'utilise.
+
+### Job 2 — `ddb125e6` : méthodes `_with_total` dans `plex_client.py`
+- **Prompt** : ajouter 5 méthodes miroir (`on_deck_with_total`, `recently_added_with_total`,
+  `section_items_with_total`, `by_genre_with_total`, `search_with_total`) retournant `(items, total)`
+  au lieu d'une liste, plus leurs tests dans `tests/test_plex_client.py`.
+- **Résultat** : **timeout après 5 minutes**, tué en cours d'exécution. Le modèle est resté bloqué
+  dans une boucle d'édition SEARCH/REPLACE (format Aider) qui ne parvenait pas à faire correspondre
+  un bloc existant, tout en construisant des tests utilisant `MockHTTPResponse` avec une chaîne JSON
+  brute en argument au lieu du dict attendu par le helper réel du fichier de tests — signe qu'il
+  n'avait pas une vue fidèle du helper `MockHTTPResponse` existant. Rien n'a été appliqué au repo
+  (`applied_files: []`).
+- **Correction** : implémenté manuellement (5 méthodes + tests), tous les tests passent.
+- **Apprentissage** : pour un job qui doit imiter le style d'un helper de test existant
+  (`MockHTTPResponse`), inclure sa définition exacte dans le prompt plutôt que de la décrire — le
+  modèle local (qwen2.5-coder:14b) ne semble pas fiable pour inférer la bonne signature d'un helper
+  non fourni explicitement, même en lui demandant de "regarder le style existant".

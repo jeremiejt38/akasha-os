@@ -201,8 +201,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if self._connector_client:
             raw = self._connector_client.section_items(
                 section['key'], sort='addedAt:desc', limit=limit, offset=offset)
-            return divert_source.parse_metadata_list(raw, self._connector_client.image_url)
-        return self._plex_client.section_items(
+            items = divert_source.parse_metadata_list(raw, self._connector_client.image_url)
+            return items, divert_source.parse_total_size(raw)
+        return self._plex_client.section_items_with_total(
             section['key'], sort='addedAt:desc', limit=limit, offset=offset)
 
     def _select_divert_section(self, index):
@@ -237,8 +238,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if error:
                 status.setLabel('{} — erreur de chargement'.format(section['title']))
             else:
-                status.setLabel('{} — {} element(s)'.format(
-                    section['title'], len(self._divert_items)))
+                count = self._divert_paged.total if self._divert_paged.total is not None \
+                    else len(self._divert_items)
+                status.setLabel('{} — {} element(s)'.format(section['title'], count))
         except RuntimeError:
             pass
 

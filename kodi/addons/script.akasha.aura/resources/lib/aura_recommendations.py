@@ -98,10 +98,11 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
     def _fetch_on_deck_page_uncached(self, offset, limit):
         if self._connector:
             raw = self._connector.on_deck(limit=limit, offset=offset)
-            return divert_source.parse_metadata_list(raw, self._connector.image_url)
+            items = divert_source.parse_metadata_list(raw, self._connector.image_url)
+            return items, divert_source.parse_total_size(raw)
         if self._plex:
-            return self._plex.on_deck(limit=limit, offset=offset)
-        return []
+            return self._plex.on_deck_with_total(limit=limit, offset=offset)
+        return [], None
 
     def _fetch_recently_added_page(self, offset, limit):
         key = local_cache.page_cache_key('recently-added', offset, limit)
@@ -112,10 +113,11 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
     def _fetch_recently_added_page_uncached(self, offset, limit):
         if self._connector:
             raw = self._connector.recently_added(limit=limit, offset=offset)
-            return divert_source.parse_metadata_list(raw, self._connector.image_url)
+            items = divert_source.parse_metadata_list(raw, self._connector.image_url)
+            return items, divert_source.parse_total_size(raw)
         if self._plex:
-            return self._plex.recently_added(limit=limit, offset=offset)
-        return []
+            return self._plex.recently_added_with_total(limit=limit, offset=offset)
+        return [], None
 
     def _get_first_video_section(self):
         if self._first_section is not None:
@@ -141,11 +143,12 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         if self._connector:
             raw = self._connector.section_items(
                 section['key'], sort='addedAt:desc', limit=limit, offset=offset)
-            return divert_source.parse_metadata_list(raw, self._connector.image_url)
+            items = divert_source.parse_metadata_list(raw, self._connector.image_url)
+            return items, divert_source.parse_total_size(raw)
         if self._plex:
-            return self._plex.section_items(
+            return self._plex.section_items_with_total(
                 section['key'], sort='addedAt:desc', limit=limit, offset=offset)
-        return []
+        return [], None
 
     def _init_row(self, label_control_id, list_control_id, title, fetch_page_fn):
         paged = paged_list.PagedList(fetch_page_fn)
@@ -179,7 +182,7 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         try:
             self.getControl(label_control_id).setLabel(
                 '{} — erreur de chargement'.format(title) if error else
-                '{} ({} element(s))'.format(title, len(paged.items)))
+                '{} ({})'.format(title, _format_count(paged)))
         except RuntimeError:
             pass
 
@@ -224,6 +227,16 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID == 5030:
             self.close()
+
+
+def _format_count(paged):
+    """Show the real total immediately (plan a3f9c2e1), not just what's loaded.
+
+    Plex returns the total alongside the very first page (no extra request),
+    so `paged.total` is normally already known right after `load_initial()`.
+    """
+    count = paged.total if paged.total is not None else len(paged.items)
+    return '{} element(s)'.format(count)
 
 
 def _build_list_item(item):

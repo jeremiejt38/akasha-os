@@ -237,5 +237,84 @@ class TestPlexClient(unittest.TestCase):
             client.on_deck()
 
 
+class TestPlexClientWithTotal(unittest.TestCase):
+    """_with_total variants: same items as the originals, plus a real total
+    count (plan a3f9c2e1) taken from totalSize (falling back to size)."""
+
+    def setUp(self):
+        self.client = plex_client.PlexClient(
+            'http://192.168.100.133:32400', 'tok123')
+
+    @patch('urllib.request.urlopen')
+    def test_on_deck_with_total_uses_total_size(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'size': 20, 'totalSize': 200,
+                'Metadata': [{'title': 'Inception', 'type': 'movie', 'ratingKey': '1'}],
+            }
+        })
+        items, total = self.client.on_deck_with_total(limit=20, offset=0)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['title'], 'Inception')
+        self.assertEqual(total, 200)
+
+    @patch('urllib.request.urlopen')
+    def test_recently_added_with_total_falls_back_to_size(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'size': 7,
+                'Metadata': [{'title': 'New Show', 'type': 'show', 'ratingKey': '2'}],
+            }
+        })
+        items, total = self.client.recently_added_with_total()
+        self.assertEqual(len(items), 1)
+        self.assertEqual(total, 7)
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_total(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'size': 30, 'totalSize': 437,
+                'Metadata': [{'title': 'Movie A', 'type': 'movie', 'ratingKey': '3'}],
+            }
+        })
+        items, total = self.client.section_items_with_total('7', sort='addedAt:desc', limit=30)
+        self.assertEqual(items[0]['title'], 'Movie A')
+        self.assertEqual(total, 437)
+
+    @patch('urllib.request.urlopen')
+    def test_by_genre_with_total(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'size': 6, 'totalSize': 42,
+                'Metadata': [{'title': 'Action Movie', 'type': 'movie', 'ratingKey': '4'}],
+            }
+        })
+        items, total = self.client.by_genre_with_total('7', 'Action', limit=10)
+        self.assertEqual(items[0]['title'], 'Action Movie')
+        self.assertEqual(total, 42)
+
+    @patch('urllib.request.urlopen')
+    def test_search_with_total(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'size': 1, 'totalSize': 1,
+                'Metadata': [{'title': 'Dragon Movie', 'type': 'movie', 'ratingKey': '5'}],
+            }
+        })
+        items, total = self.client.search_with_total('7', 'dragon')
+        self.assertEqual(items[0]['title'], 'Dragon Movie')
+        self.assertEqual(total, 1)
+
+    @patch('urllib.request.urlopen')
+    def test_with_total_returns_none_when_no_size_field(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [{'title': 'No Size', 'type': 'movie', 'ratingKey': '6'}]}
+        })
+        items, total = self.client.section_items_with_total('7')
+        self.assertEqual(items[0]['title'], 'No Size')
+        self.assertIsNone(total)
+
+
 if __name__ == '__main__':
     unittest.main()
