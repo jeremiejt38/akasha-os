@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.23.1...akasha-os-v0.23.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** repair App inventory JSON-RPC request and filter system addons ([54905da](https://github.com/jeremiejt38/akasha-os/commit/54905dabe948e09e947a9407e8e9409bde320ce5))
+
 ## [0.23.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.23.0...akasha-os-v0.23.1) (2026-08-18)
 
 
