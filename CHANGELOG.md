@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.24.1...akasha-os-v0.25.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add poster tiles and horizontal rows to Divertissement tab ([d1a7f63](https://github.com/jeremiejt38/akasha-os/commit/d1a7f632e399bb95640db456fc97f9f0859e7d43))
+
 ## [0.24.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.24.0...akasha-os-v0.24.1) (2026-08-18)
 
 
