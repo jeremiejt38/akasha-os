@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<window type="dialog" id="1196">
-    <defaultcontrol>5010</defaultcontrol>
-    <zorder>2</zorder>
+<window type="dialog" id="1197">
+    <defaultcontrol>6010</defaultcontrol>
+    <zorder>3</zorder>
     <controls>
         <!-- Fullscreen background -->
         <control type="image">
@@ -13,18 +13,18 @@
         </control>
 
         <!-- Header -->
-        <control type="label" id="5000">
+        <control type="label" id="6000">
             <left>60</left>
             <top>40</top>
             <width>1200</width>
             <height>60</height>
             <font>font16</font>
-            <label>Applications</label>
+            <label>Akasha Store</label>
             <textcolor>FF6C8CFF</textcolor>
         </control>
 
         <!-- Back button -->
-        <control type="button" id="5030">
+        <control type="button" id="6030">
             <left>1700</left>
             <top>40</top>
             <width>160</width>
@@ -34,72 +34,27 @@
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            <ondown>5010</ondown>
-            <onleft>5004</onleft>
+            <ondown>6010</ondown>
+            <onleft>6001</onleft>
         </control>
 
         <!-- Toolbar -->
-        <control type="button" id="5001">
+        <control type="button" id="6001">
             <left>60</left>
             <top>120</top>
-            <width>260</width>
+            <width>320</width>
             <height>50</height>
             <font>font12</font>
-            <label>Lancer</label>
+            <label>Installer / Deja installe</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            <onright>5002</onright>
-            <ondown>5010</ondown>
-        </control>
-
-        <control type="button" id="5002">
-            <left>340</left>
-            <top>120</top>
-            <width>260</width>
-            <height>50</height>
-            <font>font12</font>
-            <label>Epingler / Desepingler</label>
-            <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            <onleft>5001</onleft>
-            <onright>5003</onright>
-            <ondown>5010</ondown>
-        </control>
-
-        <control type="button" id="5003">
-            <left>620</left>
-            <top>120</top>
-            <width>260</width>
-            <height>50</height>
-            <font>font12</font>
-            <label>Desinstaller</label>
-            <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            <onleft>5002</onleft>
-            <onright>5004</onright>
-            <ondown>5010</ondown>
-        </control>
-
-        <control type="button" id="5004">
-            <left>900</left>
-            <top>120</top>
-            <width>260</width>
-            <height>50</height>
-            <font>font12</font>
-            <label>Akasha Store</label>
-            <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            <onleft>5003</onleft>
-            <onright>5030</onright>
-            <ondown>5010</ondown>
+            <onright>6030</onright>
+            <ondown>6010</ondown>
         </control>
 
         <!-- Status line -->
-        <control type="label" id="5020">
+        <control type="label" id="6020">
             <left>60</left>
             <top>190</top>
             <width>1800</width>
@@ -110,34 +65,52 @@
         </control>
 
         <!-- Main list -->
-        <control type="list" id="5010">
+        <control type="list" id="6010">
             <left>60</left>
             <top>250</top>
             <width>1800</width>
             <height>770</height>
-            <onup>5001</onup>
-            <ondown>5010</ondown>
-            <onleft>5030</onleft>
-            <itemlayout width="1800" height="50">
+            <onup>6001</onup>
+            <ondown>6010</ondown>
+            <onleft>6030</onleft>
+            <itemlayout width="1800" height="60">
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
                     <width>1800</width>
-                    <height>50</height>
+                    <height>36</height>
                     <font>font12</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>77FFFFFF</textcolor>
                 </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>32</top>
+                    <width>1800</width>
+                    <height>28</height>
+                    <font>font10</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>55FFFFFF</textcolor>
+                </control>
             </itemlayout>
-            <focusedlayout width="1800" height="50">
+            <focusedlayout width="1800" height="60">
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
                     <width>1800</width>
-                    <height>50</height>
+                    <height>36</height>
                     <font>font12</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>32</top>
+                    <width>1800</width>
+                    <height>28</height>
+                    <font>font10</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
                 </control>
             </focusedlayout>
         </control>

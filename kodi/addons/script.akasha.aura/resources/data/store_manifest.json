@@ -1,0 +1,40 @@
+{
+    "version": 1,
+    "entries": [
+        {
+            "addonid": "plugin.video.francetv",
+            "name": "france.tv",
+            "summary": "Replay et direct des chaines France Televisions."
+        },
+        {
+            "addonid": "plugin.video.arteplussept",
+            "name": "Arte +7",
+            "summary": "Replay Arte (7 derniers jours)."
+        },
+        {
+            "addonid": "plugin.video.artemediathek",
+            "name": "Arte Mediathek",
+            "summary": "Mediatheque Arte (catalogue etendu)."
+        },
+        {
+            "addonid": "plugin.audio.radiofrance",
+            "name": "RadioFrance",
+            "summary": "Directs et podcasts des radios France Inter, France Culture, France Musique, etc."
+        },
+        {
+            "addonid": "plugin.video.twitch",
+            "name": "Twitch",
+            "summary": "Streaming en direct et VOD Twitch."
+        },
+        {
+            "addonid": "plugin.video.vimeo",
+            "name": "Vimeo",
+            "summary": "Videos Vimeo."
+        },
+        {
+            "addonid": "plugin.audio.soundcloud",
+            "name": "SoundCloud",
+            "summary": "Musique et podcasts SoundCloud."
+        }
+    ]
+}

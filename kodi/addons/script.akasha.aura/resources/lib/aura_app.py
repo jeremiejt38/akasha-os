@@ -12,6 +12,7 @@ import xbmcaddon
 import xbmcgui
 
 import addons_inventory
+import aura_store
 
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
@@ -94,6 +95,13 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             addon = self._selected_addon()
             if addon:
                 xbmc.log('Akasha Aura App: selected {}'.format(addon['name']), xbmc.LOGINFO)
+
+        elif controlID == 5004:
+            store = aura_store.AuraStoreWindow(
+                'AuraStore.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
+            store.doModal()
+            del store
+            self._reload()
 
     def onAction(self, action):
         aid = action.getId()
