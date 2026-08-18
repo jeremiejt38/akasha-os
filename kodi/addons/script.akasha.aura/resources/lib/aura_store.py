@@ -84,6 +84,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         return None
 
     def _install(self, entry):
+        xbmc.log('Akasha Aura Store: install requested for {}'.format(entry['addonid']), xbmc.LOGINFO)
         if entry['installed']:
             xbmcgui.Dialog().notification(
                 'Akasha Store', '{} est deja installe'.format(entry['name']),
@@ -97,8 +98,10 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             xbmcgui.NOTIFICATION_INFO, 3000)
 
     def onClick(self, controlID):
+        xbmc.log('Akasha Aura Store: onClick {}'.format(controlID), xbmc.LOGINFO)
         if controlID in (6001, 6010):
             entry = self._selected_entry()
+            xbmc.log('Akasha Aura Store: selected entry = {}'.format(entry), xbmc.LOGINFO)
             if entry:
                 self._install(entry)
 

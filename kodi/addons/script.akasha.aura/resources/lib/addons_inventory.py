@@ -24,6 +24,7 @@ EXCLUDED_ADDON_IDS = (
     'script.akasha.settings',
     'script.skinvariables',
     'script.texturemaker',
+    'script.module.inputstreamhelper',
     'service.akasha.aura',
     'service.akasha.ambient',
     'service.akasha.overlay',
