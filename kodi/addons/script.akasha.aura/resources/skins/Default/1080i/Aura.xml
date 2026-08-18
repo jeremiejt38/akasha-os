@@ -79,6 +79,23 @@
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>2003</onleft>
+                <onright>3200</onright>
+                <ondown>9000</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+
+            <control type="button" id="3200">
+                <left>1520</left>
+                <top>30</top>
+                <width>260</width>
+                <height>60</height>
+                <label>Parametres</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>3100</onleft>
                 <onright>2001</onright>
                 <ondown>9000</ondown>
                 <textcolor>BBFFFFFF</textcolor>
@@ -182,26 +199,65 @@
             </control>
         </control>
 
-        <!-- Jeux placeholder content (milestone 4 fills this in) -->
+        <!-- Jeux content (milestone 4: game tiles from shortcuts) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
-            <control type="label">
+
+            <control type="label" id="2009">
                 <left>60</left>
-                <top>200</top>
-                <width>1800</width>
-                <height>60</height>
-                <font>font16</font>
-                <label>Jeux</label>
-                <textcolor>FFFFFFFF</textcolor>
-            </control>
-            <control type="label">
-                <left>60</left>
-                <top>260</top>
+                <top>140</top>
                 <width>1800</width>
                 <height>40</height>
-                <font>font12</font>
-                <label>Tuiles Steam Link / Moonlight / Cloud Gaming — a venir</label>
-                <textcolor>77FFFFFF</textcolor>
+                <font>font14</font>
+                <label>Jeux</label>
+                <textcolor>FF6C8CFF</textcolor>
+            </control>
+
+            <control type="button" id="2010">
+                <left>60</left>
+                <top>200</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2002</onup>
+                <onright>2011</onright>
+                <ondown>2010</ondown>
+            </control>
+
+            <control type="button" id="2011">
+                <left>480</left>
+                <top>200</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2002</onup>
+                <onleft>2010</onleft>
+                <onright>2012</onright>
+                <ondown>2011</ondown>
+            </control>
+
+            <control type="button" id="2012">
+                <left>900</left>
+                <top>200</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2002</onup>
+                <onleft>2011</onleft>
+                <onright>2012</onright>
+                <ondown>2012</ondown>
             </control>
         </control>
 

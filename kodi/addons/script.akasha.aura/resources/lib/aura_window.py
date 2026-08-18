@@ -12,6 +12,7 @@ import xbmcgui
 
 import aura_library
 import config
+import games_shortcuts
 import plex_client
 
 TAB_BUTTON_IDS = (2001, 2002, 2003)
@@ -25,18 +26,24 @@ ACTION_NAV_BACK = 92
 ROW_LABEL_PAIRS = ((3010, 3020), (3011, 3021), (3012, 3022), (3013, 3023))
 
 
+GAME_BUTTON_IDS = (2010, 2011, 2012)
+
+
 class AuraWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         addon = xbmcaddon.Addon('script.akasha.aura')
         self.active_tab = config.default_tab_index(addon.getSetting('tab.default'))
         self.addon = addon
+        self.addon_path = addon.getAddonInfo('path')
         self._rows = []
+        self._games = games_shortcuts.load_shortcuts(self.addon_path)
 
     def onInit(self):
         try:
             self._show_tab(self.active_tab)
             self._load_plex_rows()
+            self._load_games()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
@@ -54,6 +61,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._render_divertissement_rows()
         except Exception as e:
             xbmc.log('Akasha Aura: Plex row load failed: {}'.format(e), xbmc.LOGERROR)
+
+    def _load_games(self):
+        for i, control_id in enumerate(GAME_BUTTON_IDS):
+            try:
+                btn = self.getControl(control_id)
+            except RuntimeError:
+                continue
+            if i < len(self._games):
+                game = self._games[i]
+                btn.setLabel(game['label'])
+            else:
+                btn.setLabel('')
 
     def _render_divertissement_rows(self):
         for i, (title_id, content_id) in enumerate(ROW_LABEL_PAIRS):
@@ -100,3 +119,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'AuraLibrary.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
             library.doModal()
             del library
+        elif controlID == 3200:
+            xbmc.executebuiltin('ActivateWindow(Settings)')
+        elif controlID in GAME_BUTTON_IDS:
+            idx = GAME_BUTTON_IDS.index(controlID)
+            if idx < len(self._games):
+                action = self._games[idx]['action']
+                if action:
+                    xbmc.executebuiltin(action)
