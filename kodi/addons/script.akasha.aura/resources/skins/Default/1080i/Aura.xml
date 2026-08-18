@@ -79,9 +79,9 @@
             </control>
 
             <control type="button" id="3050">
-                <left>1200</left>
+                <left>900</left>
                 <top>30</top>
-                <width>180</width>
+                <width>255</width>
                 <height>60</height>
                 <label>Recommande</label>
                 <font>font12</font>
@@ -96,9 +96,9 @@
             </control>
 
             <control type="button" id="3100">
-                <left>1380</left>
+                <left>1155</left>
                 <top>30</top>
-                <width>180</width>
+                <width>255</width>
                 <height>60</height>
                 <label>Bibliotheque</label>
                 <font>font12</font>
@@ -113,9 +113,9 @@
             </control>
 
             <control type="button" id="3060">
-                <left>1560</left>
+                <left>1410</left>
                 <top>30</top>
-                <width>180</width>
+                <width>255</width>
                 <height>60</height>
                 <label>Categories</label>
                 <font>font12</font>
@@ -130,9 +130,9 @@
             </control>
 
             <control type="button" id="3200">
-                <left>1740</left>
+                <left>1665</left>
                 <top>30</top>
-                <width>180</width>
+                <width>255</width>
                 <height>60</height>
                 <label>Parametres</label>
                 <font>font12</font>
