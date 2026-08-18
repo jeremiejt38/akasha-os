@@ -88,8 +88,24 @@ class TestConnectorClient(unittest.TestCase):
 
         sent_request = mock_urlopen.call_args[0][0]
         self.assertIn('/api/plex/sections/1/all', sent_request.full_url)
-        self.assertIn('sort=addedAt:desc', sent_request.full_url)
+        self.assertIn('sort=addedAt%3Adesc', sent_request.full_url)
         self.assertIn('limit=50', sent_request.full_url)
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_genre(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+        self.client.token = 'abc123'
+
+        self.client.section_items('1', genre='Action')
+        self.assertIn('genre=Action', mock_urlopen.call_args[0][0].full_url)
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_search(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+        self.client.token = 'abc123'
+
+        self.client.section_items('1', search='dragon')
+        self.assertIn('search=dragon', mock_urlopen.call_args[0][0].full_url)
 
     @patch('urllib.request.urlopen')
     def test_section_genres(self, mock_urlopen):
