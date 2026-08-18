@@ -97,10 +97,30 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
   ailleurs dans le projet, `X-Plex-Container-Size` en query string n'est pas honoré par
   `/library/sections/{key}/all` sur ce serveur Plex (vérifié en direct, pas un bug introduit par le
   connector). Cohérent avec l'affichage déjà existant du compteur de la grille Divertissement.
-  - Pas encore fait : "Suggestions par genre" par bibliothèque (comme
-    `plex_client.entertainment_rows()` le fait déjà côté Plex direct), sous-onglet "Genres" dédié,
-    hero banner en haut de la fenêtre. Le socle (connector + repli + rendu des rangées) est en
-    place et prêt à les accueillir.
+- **Alignement sur la référence Plex fournie par l'utilisateur (2026-08-18, v0.30.0 → v0.31.3)** :
+  - Barre du haut : 4 boutons **Recommandé / Bibliothèque / Catégories / Paramètres** (élargis à
+    255px après un premier essai trop étroit qui tronquait les libellés).
+  - **Nouvelle vue Catégories** (`AuraGenres.xml`/`aura_genres.py`) : grille de genres (`panel`,
+    vraie grille avec retour à la ligne, 30 catégories affichées pour Dessins Animées), sélection
+    d'un genre → ouvre Bibliothèque pré-filtrée sur ce genre + cette section
+    (`AuraLibraryWindow.initial_section`/`initial_genre`).
+  - Libellés 2 lignes (titre + `S{saison} - E{episode}` ou année) dans la grille Divertissement et
+    les rangées "Recommandé", via `divert_source.item_subtitle()` (pur, testé).
+  - Bibliothèque (`aura_library.py`) câblée sur le connector (recherche/tri/genre) avec repli Plex
+    direct, complétant l'intégration sur les 3 vues (Divertissement, Recommandé, Bibliothèque).
+  - **3 bugs réels trouvés et corrigés en conditions réelles sur le Pi** :
+    1. `section_genres` lisait le champ `tag` au lieu de `title` dans la réponse Plex — bug latent
+       depuis les tout premiers milestones (v0.19.0/v0.21.1), jamais remarqué car le filtre Genre
+       de Bibliothèque n'avait jamais été testé avec un genre réellement sélectionné jusqu'à la
+       nouvelle vue Catégories qui l'a rendu évident (0 catégorie affichée alors que la section en
+       a 30, confirmé par un appel API direct).
+    2. `connector_client.section_items()` (Aura) n'avait jamais été mis à jour pour transmettre
+       `genre`/`search` au connector, malgré leur ajout côté serveur — plantage immédiat au premier
+       usage réel du filtre Genre via Catégories.
+    3. Les valeurs de `sort`/`genre`/`search` n'étaient pas URL-encodées dans les query strings du
+       connector.
+  - Validé de bout en bout : Catégories → sélection "Action" → Bibliothèque affiche
+    "264 resultat(s) (Action)" avec la vraie liste filtrée.
 
 ## Notes de suivi
 
