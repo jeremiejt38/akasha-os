@@ -14,17 +14,25 @@ import json
 # infrastructure addons are excluded on purpose.
 INCLUDED_TYPES = ('xbmc.python.script', 'xbmc.python.pluginsource')
 
-# Never show Akasha's own addons in its own App inventory.
+# Never show Akasha's own addons, or system/infrastructure scripts that
+# aren't user-facing "apps", in the App inventory.
 EXCLUDED_ADDON_IDS = (
     'script.akasha.aura',
     'script.akasha.ambient',
     'script.akasha.guide',
+    'script.akasha.launcher',
     'script.akasha.settings',
+    'script.skinvariables',
+    'script.texturemaker',
     'service.akasha.aura',
     'service.akasha.ambient',
     'service.akasha.overlay',
     'service.akasha.splash',
 )
+
+# service.* and virtual.* addons are LibreELEC/Kodi system integrations
+# (Argon ONE control, RPi/system tools, etc), never user-launchable apps.
+EXCLUDED_ADDON_ID_PREFIXES = ('service.', 'virtual.')
 
 
 def build_get_addons_request():
@@ -36,7 +44,9 @@ def build_get_addons_request():
         'params': {
             'installed': True,
             'enabled': True,
-            'properties': ['name', 'version', 'summary', 'icon', 'type'],
+            # 'addonid' and 'type' are always returned and are not valid
+            # entries for 'properties' (Kodi rejects the request otherwise).
+            'properties': ['name', 'version', 'summary', 'icon'],
         },
     }
 
@@ -51,9 +61,12 @@ def parse_get_addons_response(raw_response):
     addons = data.get('result', {}).get('addons', [])
     result = []
     for addon in addons:
+        addonid = addon.get('addonid') or ''
         if addon.get('type') not in INCLUDED_TYPES:
             continue
-        if addon.get('addonid') in EXCLUDED_ADDON_IDS:
+        if addonid in EXCLUDED_ADDON_IDS:
+            continue
+        if addonid.startswith(EXCLUDED_ADDON_ID_PREFIXES):
             continue
         result.append({
             'addonid': addon.get('addonid'),

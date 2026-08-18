@@ -38,6 +38,23 @@ class TestParseGetAddonsResponse(unittest.TestCase):
         addons = addons_inventory.parse_get_addons_response(raw)
         self.assertEqual(addons, [])
 
+    def test_excludes_service_and_virtual_prefixes(self):
+        raw = json.dumps({
+            'result': {
+                'addons': [
+                    {'addonid': 'service.argononecontrol', 'name': 'Argon ONE',
+                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                    {'addonid': 'virtual.rpi-tools', 'name': 'RPi Tools',
+                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                    {'addonid': 'script.plexmod', 'name': 'Plex for Kodi',
+                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                ]
+            }
+        })
+        addons = addons_inventory.parse_get_addons_response(raw)
+        ids = [a['addonid'] for a in addons]
+        self.assertEqual(ids, ['script.plexmod'])
+
     def test_malformed_json_returns_empty(self):
         self.assertEqual(addons_inventory.parse_get_addons_response('not json'), [])
 
