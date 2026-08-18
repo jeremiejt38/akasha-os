@@ -124,6 +124,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -138,6 +140,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -153,6 +157,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -168,6 +174,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -183,6 +191,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -198,6 +208,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -213,6 +225,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -228,6 +242,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -243,6 +259,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -330,6 +348,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>SteamLink</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -344,6 +364,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>Moonlight</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -359,6 +381,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>Autres</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -502,6 +526,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>Mes Apps</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -516,6 +542,8 @@
                 <width>195</width>
                 <height>40</height>
                 <font>font11</font>
+                <align>center</align>
+                <aligny>center</aligny>
                 <label>Store</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
