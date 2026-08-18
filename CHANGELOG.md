@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.21.1...akasha-os-v0.22.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add Settings button and Games tiles from shortcuts ([0cf4436](https://github.com/jeremiejt38/akasha-os/commit/0cf4436871d40f612975a76b6f6c3625bf5039d9))
+
 ## [0.21.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.21.0...akasha-os-v0.21.1) (2026-08-18)
 
 
