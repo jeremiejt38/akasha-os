@@ -79,8 +79,20 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
     `HEAD` avant chaque `GET /api/plex/image` ; la route ne définit que `GET`, donc chaque `HEAD`
     reçoit `405` (sans impact — Kodi retente en `GET` juste après, qui réussit). À nettoyer un jour
     en ajoutant `@app.head` sur la route image si le volume de requêtes superflues devient notable.
-- **Reste à faire** : sous-onglets "Recommandations"/"Genres" (hero banner, rangées Continuer à
-  regarder/Ajoutés récemment/Suggestions), gérées par le connector avec repli JSON-RPC/Plex local.
+- **"Pour vous" livré et validé sur le device réel (v0.28.0/v0.28.1)** : nouvelle fenêtre
+  `AuraRecommendations.xml` (même patron que `AuraLibrary.xml`/`AuraShow.xml`), ouverte via un
+  nouveau bouton de la barre du haut (à côté de Bibliothèque/Paramètres). Deux rangées horizontales
+  de posters : "Continuer à regarder" (69 éléments constatés) et "Ajoutés récemment" (50 éléments),
+  alimentées par le connector avec repli sur Plex direct. Validé par PixelCamera + logs du
+  conteneur connector (tous les appels `/api/plex/on-deck`, `/api/plex/recently-added`,
+  `/api/plex/image` bien reçus côté serveur).
+  - Bug cosmétique trouvé et corrigé en conditions réelles : le libellé "Recommandations" (16
+    caractères) était trop long pour le bouton de 230px et déclenchait le défilement de texte
+    natif de Kodi (rendu tronqué/illisible sur capture). Raccourci en "Pour vous" (v0.28.1).
+  - Pas encore fait : rangées "Sorties récentes"/"Suggestions par genre" par bibliothèque (comme
+    `plex_client.entertainment_rows()` le fait déjà côté Plex direct), sous-onglet "Genres" dédié,
+    hero banner en haut de la fenêtre. Le socle (connector + repli + rendu des rangées) est en
+    place et prêt à les accueillir.
 
 ## Notes de suivi
 
