@@ -177,7 +177,7 @@
                     <top>10</top>
                     <width>420</width>
                     <height>840</height>
-                    <onright>3220</onright>
+                    <onright>3230</onright>
                     <itemlayout width="420" height="70">
                         <control type="image">
                             <left>25</left>
