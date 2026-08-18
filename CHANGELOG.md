@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.33.0...akasha-os-v0.33.1) (2026-08-18)
+
+
+### Performance Improvements
+
+* **aura:** lazy-load rows/grids incrementally + on-device page cache ([c9b17ac](https://github.com/jeremiejt38/akasha-os/commit/c9b17ac7ceea30e663b461d2ccfa028141800208))
+
 ## [0.33.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.32.1...akasha-os-v0.33.0) (2026-08-18)
 
 
