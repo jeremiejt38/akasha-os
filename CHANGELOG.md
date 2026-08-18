@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.2...akasha-os-v0.35.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** stale search/genre/sort state leaking into reused Bibliotheque window ([ac39a60](https://github.com/jeremiejt38/akasha-os/commit/ac39a60f47c5abf930b0b5d37423a035f6e31dc4))
+
 ## [0.35.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.1...akasha-os-v0.35.2) (2026-08-18)
 
 
