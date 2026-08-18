@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.23.0...akasha-os-v0.23.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** wire tab bar Down navigation to Games/App tiles ([1ff9d9a](https://github.com/jeremiejt38/akasha-os/commit/1ff9d9ade7ba0ce3cfa2b633c271fb9a99d15e50))
+
 ## [0.23.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.22.1...akasha-os-v0.23.0) (2026-08-18)
 
 
