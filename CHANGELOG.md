@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.33.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.33.1...akasha-os-v0.33.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** focus the first Recommandations row on open instead of the back button ([ce4f5ce](https://github.com/jeremiejt38/akasha-os/commit/ce4f5ce5aae46f2871c64875368e0ec7430eec49))
+* **aura:** only highlight the actually-focused item, not every list's last selection ([ea1532b](https://github.com/jeremiejt38/akasha-os/commit/ea1532bc2119d60e73ec7d16660d9568135e82be))
+
 ## [0.33.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.33.0...akasha-os-v0.33.1) (2026-08-18)
 
 
