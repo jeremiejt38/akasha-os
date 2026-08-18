@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.32.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.3...akasha-os-v0.32.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** retractable left sidebar for Divertissement library navigation ([538ff74](https://github.com/jeremiejt38/akasha-os/commit/538ff742b8b475919c58db99962d66eac7343343))
+
 ## [0.31.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.2...akasha-os-v0.31.3) (2026-08-18)
 
 
