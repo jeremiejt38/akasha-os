@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.22.1...akasha-os-v0.23.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add App tab with pinned tiles and full addon inventory ([f69507d](https://github.com/jeremiejt38/akasha-os/commit/f69507d859351c085d92d19594cb8d479b3576a1))
+
 ## [0.22.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.22.0...akasha-os-v0.22.1) (2026-08-18)
 
 
