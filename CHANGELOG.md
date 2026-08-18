@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.24.0...akasha-os-v0.24.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** exclude inputstreamhelper dependency from App inventory ([40ea1dd](https://github.com/jeremiejt38/akasha-os/commit/40ea1dd45f3a6b66e8f5b95cacda192cee8a6cd0))
+
 ## [0.24.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.23.3...akasha-os-v0.24.0) (2026-08-18)
 
 
