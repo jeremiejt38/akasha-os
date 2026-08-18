@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.5...akasha-os-v0.35.6) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** retry Divertissement load if a transient failure left it empty ([b776025](https://github.com/jeremiejt38/akasha-os/commit/b7760254bbd55fbb2847dc181b53c020d3b53894))
+
 ## [0.35.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.4...akasha-os-v0.35.5) (2026-08-18)
 
 
