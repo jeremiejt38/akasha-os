@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.21.0...akasha-os-v0.21.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** allow navigation from list to toolbar in library view ([966ced0](https://github.com/jeremiejt38/akasha-os/commit/966ced0855df6ec5b1252f329a9c73999e0fd5f9))
+
 ## [0.21.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.20.1...akasha-os-v0.21.0) (2026-08-17)
 
 
