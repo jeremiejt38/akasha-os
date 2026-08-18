@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.6...akasha-os-v0.35.7) (2026-08-18)
+
+
+### Bug Fixes
+
+* unblock release pipeline after a commit message parsing failure ([e7af361](https://github.com/jeremiejt38/akasha-os/commit/e7af361df5afa134107b397ca292e9ea49e62ac9))
+
 ## [0.35.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.5...akasha-os-v0.35.6) (2026-08-18)
 
 
