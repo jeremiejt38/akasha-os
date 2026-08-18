@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.0...akasha-os-v0.31.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** widen top-bar buttons (255px) to stop truncating Recommande/Bibliotheque/Categories/Parametres ([5e40e5e](https://github.com/jeremiejt38/akasha-os/commit/5e40e5e9c342ceab2ea6f07cb1291f0f77d93635))
+
 ## [0.31.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.30.0...akasha-os-v0.31.0) (2026-08-18)
 
 
