@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.32.1...akasha-os-v0.33.0) (2026-08-18)
+
+
+### Features
+
+* **remote:** add keymap for Amazon Fire TV Bluetooth remote ([409ba24](https://github.com/jeremiejt38/akasha-os/commit/409ba24f2f62ea15e94b7b6828246004b752e742))
+
 ## [0.32.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.32.0...akasha-os-v0.32.1) (2026-08-18)
 
 
