@@ -147,3 +147,47 @@ immédiatement plutôt que d'attendre l'expiration.
 (cache miss puis cache hit) affichent toutes les deux "771 resultat(s)" correctement, aucune
 erreur dans les logs, plus de "maximum number of windows reached" après un cycle de test répété
 (6× Bibliothèque/Catégories/Recommandé) grâce au correctif de réutilisation des fenêtres.
+
+## Checkup complet (2026-08-19) : 5 bugs supplémentaires trouvés et corrigés
+
+En auditant systématiquement le projet (logs Kodi, tests, revue de code) après les correctifs
+ci-dessus :
+
+1. **`<defaultcontrol>` pointant vers une liste vide au premier chargement** (`AuraLibrary.xml`,
+   `AuraGenres.xml`, `AuraShow.xml`, `AuraApp.xml`, `AuraStore.xml`) : Kodi tente de focaliser le
+   `defaultcontrol` avant même que `onInit()` ait peuplé la liste, produisant
+   `Control XXXX in window YYYY has been asked to focus, but it can't` en log (cosmétique, sans
+   impact fonctionnel grâce au `setFocus()` explicite déjà en place). Corrigé en alignant le
+   `defaultcontrol` sur le bouton "Retour" de chaque fenêtre (même pattern que
+   `AuraRecommendations.xml`), avec ajout du `setFocus()` manquant dans `aura_genres.py`.
+2. **Fuite d'état dans `AuraLibraryWindow` réutilisée** : `self.query`/`self.filter_genre`/
+   `self.sort` n'étaient jamais réinitialisés dans `onInit()`, donc une recherche ou un filtre
+   laissé actif restait collé à la prochaine ouverture de "Bibliothèque" depuis la barre du haut.
+3. **Site manqué du bug de réutilisation de fenêtres** : `aura_app.py` (bouton "Store") recréait
+   encore une `AuraStoreWindow` à chaque clic au lieu de réutiliser l'instance mise en cache.
+4. **Bug le plus impactant en usage réel** : le raccourci clavier/télécommande "Home"
+   (`kodi/userdata/keymaps/akasha-aura.xml`, liaison `<global>`) déclenche
+   `RunScript(script.akasha.aura)` à **chaque appui**, sans aucune garde contre un double lancement
+   — la touche la plus pressée d'une télécommande salon aurait épuisé le pool de fenêtres bien plus
+   vite que tout le reste. Corrigé avec un verrou basé sur le PID (`/tmp/akasha-aura.lock`,
+   `os.kill(pid, 0)` pour vérifier la vivacité du process précédent) dans `default.py`. Même
+   traitement pour l'entrée manuelle "Mode Ambiant" du menu Guide (`script.akasha.ambient`), qui
+   contourne le verrou déjà existant du service de déclenchement par inactivité.
+5. **Cache local sans auto-réparation** : `LocalCache.get()`/`set()` propageaient une
+   `sqlite3.OperationalError` ("no such table: cache") si le fichier sqlite se retrouvait sans sa
+   table (trouvé en conditions réelles après une suppression manuelle du fichier de cache pendant
+   qu'Aura tournait), cassant tout le chargement de Divertissement. Corrigé pour recréer le schéma
+   et traiter l'erreur comme un cache miss plutôt que de la laisser remonter.
+6. **CI sans tests** : seuls "Build Akasha OS Image" et "Release Please" tournaient en CI — les
+   nombreuses suites de tests unitaires du projet n'étaient jamais exécutées automatiquement.
+   Ajout de `.github/workflows/test.yml` (matrice sur `script.akasha.aura`/`script.akasha.ambient`).
+7. **Régression subtile introduite par le correctif de réutilisation de fenêtres** :
+   `AuraWindow` étant désormais une instance unique pour toute la session Kodi, `onInit()` — et
+   donc `_load_divertissement()` — ne s'exécute plus qu'une seule fois. Un échec transitoire au
+   tout premier chargement (coupure réseau, connector momentanément injoignable — observé en
+   conditions réelles pendant ce checkup) laissait la sidebar vide pour le reste de la session,
+   sans aucun moyen de réessayer. Corrigé : `_show_tab()` retente `_load_divertissement()` si
+   l'utilisateur (re)sélectionne l'onglet Divertissement et que la sidebar est toujours vide.
+
+102/102 tests unitaires passent après ces 7 correctifs. Validé sur le Pi réel (v0.35.5 puis
+correctif final non encore déployé au moment de la rédaction).

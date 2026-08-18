@@ -94,11 +94,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # instance -- onInit() re-runs each time (Kodi reloads the skin XML
         # on every activation), so state/data refresh exactly like before.
         self._sub_windows = {}
+        self._divert_load_attempted = False
 
     def onInit(self):
         try:
             self._show_tab(self.active_tab)
             self._load_divertissement()
+            self._divert_load_attempted = True
             self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK)
             self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
@@ -471,6 +473,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         index = index % len(config.TABS)
         self.active_tab = index
         self.setProperty('AuraActiveTab', str(index))
+        # AuraWindow is now a single long-lived instance for the whole Kodi
+        # session (see the note in __init__): onInit() -- and so
+        # _load_divertissement() -- only ever runs once. If that one
+        # attempt hit a transient failure (network hiccup, connector
+        # briefly unreachable), the sidebar stays empty for the rest of the
+        # session with no way to recover -- retry it whenever the user
+        # (re)selects the Divertissement tab and it's still empty, so
+        # navigating away and back is enough to pick back up once the
+        # network/connector recovers.
+        if index == 0 and self._divert_load_attempted and not self._divert_sections:
+            self._load_divertissement()
 
     def onAction(self, action):
         aid = action.getId()
