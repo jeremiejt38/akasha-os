@@ -9,6 +9,11 @@ import xml.etree.ElementTree as ET
 
 
 def _data_xml_path(addon_path):
+    # Installer places the file in resources/data/ during deployment; for tests
+    # or older installs, fall back to the original skin-patches location.
+    primary = os.path.join(addon_path, 'resources', 'data', 'games.DATA.xml')
+    if os.path.exists(primary):
+        return primary
     return os.path.join(addon_path, 'skin-patches', 'shortcuts', 'games.DATA.xml')
 
 

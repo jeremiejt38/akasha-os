@@ -144,6 +144,8 @@ mkdir -p /storage/ambient/photos
 log "  Installing Akasha Aura addon..."
 rm -rf /storage/.kodi/addons/script.akasha.aura
 cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.aura" /storage/.kodi/addons/
+mkdir -p /storage/.kodi/addons/script.akasha.aura/resources/data
+cp "$SCRIPT_DIR/skin-patches/shortcuts/games.DATA.xml" /storage/.kodi/addons/script.akasha.aura/resources/data/
 rm -rf /storage/.kodi/addons/service.akasha.aura
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.aura" /storage/.kodi/addons/
 
