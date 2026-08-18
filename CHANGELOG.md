@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.2...akasha-os-v0.31.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** connector_client.section_items() forward genre/search + URL-encode sort ([d655ab8](https://github.com/jeremiejt38/akasha-os/commit/d655ab839c3ba6e47201e92b30f7298b08530b54))
+
 ## [0.31.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.1...akasha-os-v0.31.2) (2026-08-18)
 
 
