@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1197">
-    <defaultcontrol>6010</defaultcontrol>
+    <defaultcontrol>6030</defaultcontrol>
     <zorder>3</zorder>
     <controls>
         <!-- Fullscreen background -->

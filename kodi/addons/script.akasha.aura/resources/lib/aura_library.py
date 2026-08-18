@@ -57,12 +57,21 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         try:
+            # This window instance is reused across opens (see the note in
+            # aura_window.py about why), so search/genre/sort state from a
+            # previous visit must never leak into the next one -- otherwise
+            # reopening "Bibliotheque" after a search would silently keep
+            # showing those stale search results instead of the full list.
+            self.query = ''
+
             if self.initial_section:
                 self.section = self.initial_section
                 self.filter_genre = self.initial_genre
                 self._load_items()
                 return
 
+            self.filter_genre = None
+            self.sort = SORT_OPTIONS[0][0]
             sections = self._video_sections()
             for s in sections:
                 if s['type'] == 'movie':

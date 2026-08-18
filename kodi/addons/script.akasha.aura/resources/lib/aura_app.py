@@ -26,6 +26,9 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         self.addon = xbmcaddon.Addon('script.akasha.aura')
         self.addons = []
         self.pinned_ids = []
+        # Reused across opens rather than a fresh instance each time -- see
+        # the note in aura_window.py's AuraWindow.__init__ about why.
+        self._store_window = None
 
     def onInit(self):
         try:
@@ -97,10 +100,10 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura App: selected {}'.format(addon['name']), xbmc.LOGINFO)
 
         elif controlID == 5004:
-            store = aura_store.AuraStoreWindow(
-                'AuraStore.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
-            store.doModal()
-            del store
+            if self._store_window is None:
+                self._store_window = aura_store.AuraStoreWindow(
+                    'AuraStore.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
+            self._store_window.doModal()
             self._reload()
 
     def onAction(self, action):

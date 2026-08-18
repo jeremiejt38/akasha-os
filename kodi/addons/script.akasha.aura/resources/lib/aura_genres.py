@@ -50,6 +50,8 @@ class AuraGenresWindow(xbmcgui.WindowXMLDialog):
             panel.reset()
             for genre in self.genres:
                 panel.addItem(xbmcgui.ListItem(genre))
+            if self.genres:
+                self.setFocus(panel)
         except Exception as e:
             xbmc.log('Akasha Aura Genres: init error: {}'.format(e), xbmc.LOGERROR)
 
