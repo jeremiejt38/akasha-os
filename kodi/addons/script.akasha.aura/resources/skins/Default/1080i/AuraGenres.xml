@@ -81,7 +81,15 @@
                     <top>0</top>
                     <width>270</width>
                     <height>70</height>
+                    <texture colordiffuse="FF262B3D">white.png</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>270</width>
+                    <height>70</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
+                    <visible>Control.HasFocus(6010)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>

@@ -103,6 +103,7 @@
                     <width>168</width>
                     <height>228</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
+                    <visible>Control.HasFocus(5110)</visible>
                 </control>
                 <control type="image">
                     <left>5</left>
@@ -190,6 +191,7 @@
                     <width>168</width>
                     <height>228</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
+                    <visible>Control.HasFocus(5210)</visible>
                 </control>
                 <control type="image">
                     <left>5</left>
@@ -277,6 +279,7 @@
                     <width>168</width>
                     <height>228</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
+                    <visible>Control.HasFocus(5310)</visible>
                 </control>
                 <control type="image">
                     <left>5</left>
