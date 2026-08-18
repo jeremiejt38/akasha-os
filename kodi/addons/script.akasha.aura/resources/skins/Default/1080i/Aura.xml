@@ -20,53 +20,62 @@
 
             <control type="button" id="2001">
                 <left>60</left>
-                <top>30</top>
-                <width>360</width>
-                <height>60</height>
-                <label>Divertissement</label>
-                <font>font16</font>
-                <align>center</align>
-                <aligny>center</aligny>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <label></label>
                 <onleft>2003</onleft>
                 <onright>2002</onright>
-                <ondown>3030</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
+                <ondown>3210</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+            <control type="image">
+                <left>60</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <aspectratio>keep</aspectratio>
+                <texture>tab-divertissement.png</texture>
             </control>
 
             <control type="button" id="2002">
-                <left>440</left>
-                <top>30</top>
-                <width>360</width>
-                <height>60</height>
-                <label>Jeux</label>
-                <font>font16</font>
-                <align>center</align>
-                <aligny>center</aligny>
+                <left>190</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <label></label>
                 <onleft>2001</onleft>
                 <onright>2003</onright>
-                <ondown>2010</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
+                <ondown>2050</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+            <control type="image">
+                <left>190</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <aspectratio>keep</aspectratio>
+                <texture>tab-jeux.png</texture>
             </control>
 
             <control type="button" id="2003">
-                <left>820</left>
-                <top>30</top>
-                <width>360</width>
-                <height>60</height>
-                <label>App</label>
-                <font>font16</font>
-                <align>center</align>
-                <aligny>center</aligny>
+                <left>320</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <label></label>
                 <onleft>2002</onleft>
                 <onright>3100</onright>
-                <ondown>2030</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
+                <ondown>2041</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+            <control type="image">
+                <left>320</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <aspectratio>keep</aspectratio>
+                <texture>tab-app.png</texture>
             </control>
 
             <control type="button" id="3100">
@@ -104,182 +113,176 @@
             </control>
         </control>
 
-        <!-- Divertissement content (milestone 2: Plex rows, milestone 7: poster tiles) -->
+        <!-- Divertissement content (milestone 7: one sub-tab per Plex library + poster grid) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
 
-            <control type="label" id="3000">
+            <!-- Sub-tab bar: up to 9 slots, one per Plex library section, filled dynamically -->
+            <control type="button" id="3210">
                 <left>60</left>
-                <top>140</top>
-                <width>1800</width>
-                <height>34</height>
-                <font>font14</font>
-                <label>Divertissement</label>
-                <textcolor>FF6C8CFF</textcolor>
-            </control>
-
-            <control type="label" id="3010">
-                <left>60</left>
-                <top>185</top>
-                <width>1800</width>
-                <height>30</height>
-                <font>font12</font>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
                 <label>-</label>
-                <textcolor>FFFFFFFF</textcolor>
-            </control>
-            <control type="list" id="3030">
-                <left>60</left>
-                <top>220</top>
-                <width>1800</width>
-                <height>200</height>
-                <orientation>horizontal</orientation>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
                 <onup>2001</onup>
-                <ondown>3031</ondown>
-                <itemlayout width="150" height="200">
-                    <control type="image">
-                        <left>5</left>
-                        <top>0</top>
-                        <width>125</width>
-                        <height>170</height>
-                        <aspectratio>scale</aspectratio>
-                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
-                    </control>
-                    <control type="label">
-                        <left>5</left>
-                        <top>172</top>
-                        <width>140</width>
-                        <height>26</height>
-                        <font>font10</font>
-                        <label>$INFO[ListItem.Label]</label>
-                        <textcolor>77FFFFFF</textcolor>
-                        <wrapmultiline>false</wrapmultiline>
-                    </control>
-                </itemlayout>
-                <focusedlayout width="150" height="200">
-                    <control type="image">
-                        <left>1</left>
-                        <top>-4</top>
-                        <width>133</width>
-                        <height>178</height>
-                        <texture colordiffuse="FF6C8CFF">white.png</texture>
-                    </control>
-                    <control type="image">
-                        <left>5</left>
-                        <top>0</top>
-                        <width>125</width>
-                        <height>170</height>
-                        <aspectratio>scale</aspectratio>
-                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
-                    </control>
-                    <control type="label">
-                        <left>5</left>
-                        <top>172</top>
-                        <width>140</width>
-                        <height>26</height>
-                        <font>font10</font>
-                        <label>$INFO[ListItem.Label]</label>
-                        <textcolor>FFFFFFFF</textcolor>
-                        <wrapmultiline>false</wrapmultiline>
-                    </control>
-                </focusedlayout>
+                <onright>3211</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3211">
+                <left>255</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3210</onleft>
+                <onright>3212</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3212">
+                <left>450</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3211</onleft>
+                <onright>3213</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3213">
+                <left>645</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3212</onleft>
+                <onright>3214</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3214">
+                <left>840</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3213</onleft>
+                <onright>3215</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3215">
+                <left>1035</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3214</onleft>
+                <onright>3216</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3216">
+                <left>1230</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3215</onleft>
+                <onright>3217</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3217">
+                <left>1425</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3216</onleft>
+                <onright>3218</onright>
+                <ondown>3230</ondown>
+            </control>
+            <control type="button" id="3218">
+                <left>1620</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2001</onup>
+                <onleft>3217</onleft>
+                <ondown>3230</ondown>
             </control>
 
-            <control type="label" id="3011">
+            <control type="label" id="3220">
                 <left>60</left>
-                <top>435</top>
+                <top>195</top>
                 <width>1800</width>
                 <height>30</height>
                 <font>font12</font>
                 <label>-</label>
-                <textcolor>FFFFFFFF</textcolor>
-            </control>
-            <control type="list" id="3031">
-                <left>60</left>
-                <top>470</top>
-                <width>1800</width>
-                <height>200</height>
-                <orientation>horizontal</orientation>
-                <onup>3030</onup>
-                <ondown>3032</ondown>
-                <itemlayout width="150" height="200">
-                    <control type="image">
-                        <left>5</left>
-                        <top>0</top>
-                        <width>125</width>
-                        <height>170</height>
-                        <aspectratio>scale</aspectratio>
-                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
-                    </control>
-                    <control type="label">
-                        <left>5</left>
-                        <top>172</top>
-                        <width>140</width>
-                        <height>26</height>
-                        <font>font10</font>
-                        <label>$INFO[ListItem.Label]</label>
-                        <textcolor>77FFFFFF</textcolor>
-                        <wrapmultiline>false</wrapmultiline>
-                    </control>
-                </itemlayout>
-                <focusedlayout width="150" height="200">
-                    <control type="image">
-                        <left>1</left>
-                        <top>-4</top>
-                        <width>133</width>
-                        <height>178</height>
-                        <texture colordiffuse="FF6C8CFF">white.png</texture>
-                    </control>
-                    <control type="image">
-                        <left>5</left>
-                        <top>0</top>
-                        <width>125</width>
-                        <height>170</height>
-                        <aspectratio>scale</aspectratio>
-                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
-                    </control>
-                    <control type="label">
-                        <left>5</left>
-                        <top>172</top>
-                        <width>140</width>
-                        <height>26</height>
-                        <font>font10</font>
-                        <label>$INFO[ListItem.Label]</label>
-                        <textcolor>FFFFFFFF</textcolor>
-                        <wrapmultiline>false</wrapmultiline>
-                    </control>
-                </focusedlayout>
+                <textcolor>77FFFFFF</textcolor>
             </control>
 
-            <control type="label" id="3012">
+            <control type="list" id="3230">
                 <left>60</left>
-                <top>685</top>
+                <top>235</top>
                 <width>1800</width>
-                <height>30</height>
-                <font>font12</font>
-                <label>-</label>
-                <textcolor>FFFFFFFF</textcolor>
-            </control>
-            <control type="list" id="3032">
-                <left>60</left>
-                <top>720</top>
-                <width>1800</width>
-                <height>200</height>
+                <height>360</height>
                 <orientation>horizontal</orientation>
-                <onup>3031</onup>
-                <ondown>3032</ondown>
-                <itemlayout width="150" height="200">
+                <onup>3210</onup>
+                <ondown>3230</ondown>
+                <itemlayout width="220" height="330">
                     <control type="image">
                         <left>5</left>
                         <top>0</top>
-                        <width>125</width>
-                        <height>170</height>
+                        <width>190</width>
+                        <height>280</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="label">
                         <left>5</left>
-                        <top>172</top>
-                        <width>140</width>
+                        <top>284</top>
+                        <width>210</width>
                         <height>26</height>
                         <font>font10</font>
                         <label>$INFO[ListItem.Label]</label>
@@ -287,26 +290,26 @@
                         <wrapmultiline>false</wrapmultiline>
                     </control>
                 </itemlayout>
-                <focusedlayout width="150" height="200">
+                <focusedlayout width="220" height="330">
                     <control type="image">
                         <left>1</left>
                         <top>-4</top>
-                        <width>133</width>
-                        <height>178</height>
+                        <width>198</width>
+                        <height>288</height>
                         <texture colordiffuse="FF6C8CFF">white.png</texture>
                     </control>
                     <control type="image">
                         <left>5</left>
                         <top>0</top>
-                        <width>125</width>
-                        <height>170</height>
+                        <width>190</width>
+                        <height>280</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="label">
                         <left>5</left>
-                        <top>172</top>
-                        <width>140</width>
+                        <top>284</top>
+                        <width>210</width>
                         <height>26</height>
                         <font>font10</font>
                         <label>$INFO[ListItem.Label]</label>
@@ -317,85 +320,214 @@
             </control>
         </control>
 
-        <!-- Jeux content (milestone 4: game tiles from shortcuts) -->
+        <!-- Jeux content (milestone 7: SteamLink / Moonlight libraries + Autres tiles) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
 
-            <control type="label" id="2009">
+            <control type="button" id="2050">
                 <left>60</left>
-                <top>140</top>
-                <width>1800</width>
+                <top>145</top>
+                <width>195</width>
                 <height>40</height>
-                <font>font14</font>
-                <label>Jeux</label>
-                <textcolor>FF6C8CFF</textcolor>
-            </control>
-
-            <control type="button" id="2010">
-                <left>60</left>
-                <top>200</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>-</label>
+                <font>font11</font>
+                <label>SteamLink</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
                 <onup>2002</onup>
-                <onright>2011</onright>
+                <onright>2051</onright>
+                <ondown>2060</ondown>
+            </control>
+            <control type="button" id="2051">
+                <left>255</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>Moonlight</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2002</onup>
+                <onleft>2050</onleft>
+                <onright>2052</onright>
+                <ondown>2060</ondown>
+            </control>
+            <control type="button" id="2052">
+                <left>450</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>Autres</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2002</onup>
+                <onleft>2051</onleft>
                 <ondown>2010</ondown>
             </control>
 
-            <control type="button" id="2011">
-                <left>480</left>
-                <top>200</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
+            <control type="label" id="2055">
+                <left>60</left>
+                <top>195</top>
+                <width>1800</width>
+                <height>30</height>
+                <font>font12</font>
                 <label>-</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2002</onup>
-                <onleft>2010</onleft>
-                <onright>2012</onright>
-                <ondown>2011</ondown>
+                <textcolor>77FFFFFF</textcolor>
             </control>
 
-            <control type="button" id="2012">
-                <left>900</left>
-                <top>200</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>-</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2002</onup>
-                <onleft>2011</onleft>
-                <onright>2012</onright>
-                <ondown>2012</ondown>
+            <!-- SteamLink / Moonlight: poster library -->
+            <control type="group">
+                <visible>!String.IsEqual(Window.Property(JeuxActiveSubtab),2)</visible>
+                <control type="list" id="2060">
+                    <left>60</left>
+                    <top>235</top>
+                    <width>1800</width>
+                    <height>360</height>
+                    <orientation>horizontal</orientation>
+                    <onup>2050</onup>
+                    <ondown>2060</ondown>
+                    <itemlayout width="220" height="330">
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>190</width>
+                            <height>280</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>284</top>
+                            <width>210</width>
+                            <height>26</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>77FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="220" height="330">
+                        <control type="image">
+                            <left>1</left>
+                            <top>-4</top>
+                            <width>198</width>
+                            <height>288</height>
+                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>190</width>
+                            <height>280</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>284</top>
+                            <width>210</width>
+                            <height>26</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </focusedlayout>
+                </control>
+            </control>
+
+            <!-- Autres: tiles (Cloud Gaming, etc — excludes SteamLink/Moonlight) -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),2)</visible>
+
+                <control type="button" id="2010">
+                    <left>60</left>
+                    <top>235</top>
+                    <width>400</width>
+                    <height>120</height>
+                    <font>font14</font>
+                    <label>-</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <onup>2052</onup>
+                    <onright>2011</onright>
+                    <ondown>2010</ondown>
+                </control>
+
+                <control type="button" id="2011">
+                    <left>480</left>
+                    <top>235</top>
+                    <width>400</width>
+                    <height>120</height>
+                    <font>font14</font>
+                    <label>-</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <onup>2052</onup>
+                    <onleft>2010</onleft>
+                    <onright>2012</onright>
+                    <ondown>2011</ondown>
+                </control>
+
+                <control type="button" id="2012">
+                    <left>900</left>
+                    <top>235</top>
+                    <width>400</width>
+                    <height>120</height>
+                    <font>font14</font>
+                    <label>-</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <onup>2052</onup>
+                    <onleft>2011</onleft>
+                    <onright>2012</onright>
+                    <ondown>2012</ondown>
+                </control>
             </control>
         </control>
 
-        <!-- App content (milestone 5: pinned addon tiles + full inventory) -->
+        <!-- App content (milestone 7: Mes Apps / Store sub-tabs + pinned tiles) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
 
-            <control type="label" id="2019">
+            <control type="button" id="2041">
                 <left>60</left>
-                <top>140</top>
-                <width>1800</width>
+                <top>145</top>
+                <width>195</width>
                 <height>40</height>
-                <font>font14</font>
-                <label>App</label>
-                <textcolor>FF6C8CFF</textcolor>
+                <font>font11</font>
+                <label>Mes Apps</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2003</onup>
+                <onright>2042</onright>
+                <ondown>2030</ondown>
+            </control>
+            <control type="button" id="2042">
+                <left>255</left>
+                <top>145</top>
+                <width>195</width>
+                <height>40</height>
+                <font>font11</font>
+                <label>Store</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2003</onup>
+                <onleft>2041</onleft>
+                <ondown>2030</ondown>
             </control>
 
             <control type="label" id="2029">
                 <left>60</left>
-                <top>190</top>
+                <top>195</top>
                 <width>1800</width>
                 <height>36</height>
                 <font>font12</font>
@@ -413,9 +545,9 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2003</onup>
+                <onup>2041</onup>
                 <onright>2031</onright>
-                <ondown>2040</ondown>
+                <ondown>2030</ondown>
             </control>
 
             <control type="button" id="2031">
@@ -428,10 +560,10 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2003</onup>
+                <onup>2041</onup>
                 <onleft>2030</onleft>
                 <onright>2032</onright>
-                <ondown>2040</ondown>
+                <ondown>2031</ondown>
             </control>
 
             <control type="button" id="2032">
@@ -444,10 +576,10 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2003</onup>
+                <onup>2041</onup>
                 <onleft>2031</onleft>
                 <onright>2033</onright>
-                <ondown>2040</ondown>
+                <ondown>2032</ondown>
             </control>
 
             <control type="button" id="2033">
@@ -460,25 +592,9 @@
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2003</onup>
+                <onup>2041</onup>
                 <onleft>2032</onleft>
-                <ondown>2040</ondown>
-            </control>
-
-            <control type="button" id="2040">
-                <left>60</left>
-                <top>400</top>
-                <width>500</width>
-                <height>60</height>
-                <font>font12</font>
-                <label>Gerer les applications</label>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2030</onup>
-                <ondown>2040</ondown>
+                <ondown>2033</ondown>
             </control>
         </control>
 

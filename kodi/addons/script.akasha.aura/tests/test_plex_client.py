@@ -198,6 +198,39 @@ class TestPlexClient(unittest.TestCase):
         self.client.search('1', 'inception')
         self.assertIn('search=inception', captured['url'])
 
+    @patch('urllib.request.urlopen')
+    def test_show_seasons_uses_children_endpoint(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': [
+                {'title': 'Saison 1', 'type': 'season', 'ratingKey': '20', 'index': 1},
+            ]}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        seasons = self.client.show_seasons('10')
+        self.assertIn('/library/metadata/10/children', captured['url'])
+        self.assertEqual(seasons[0]['title'], 'Saison 1')
+        self.assertEqual(seasons[0]['index'], 1)
+
+    @patch('urllib.request.urlopen')
+    def test_season_episodes_uses_children_endpoint(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': [
+                {'title': 'Pilote', 'type': 'episode', 'ratingKey': '30',
+                 'index': 1, 'parentRatingKey': '20'},
+            ]}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        episodes = self.client.season_episodes('20')
+        self.assertIn('/library/metadata/20/children', captured['url'])
+        self.assertEqual(episodes[0]['title'], 'Pilote')
+        self.assertEqual(episodes[0]['parent_rating_key'], '20')
+
     def test_missing_config_raises(self):
         client = plex_client.PlexClient('', '')
         with self.assertRaises(plex_client.PlexAPIError):

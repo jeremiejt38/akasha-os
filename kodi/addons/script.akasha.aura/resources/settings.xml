@@ -10,4 +10,13 @@
     <category label="App">
         <setting id="app.pinned" type="text" label="Applications epinglees (interne)" default=""/>
     </category>
+    <category label="Steam">
+        <setting id="steam.api_key" type="text" label="Cle API Steam (Web API)" default=""/>
+        <setting id="steam.steam_id" type="text" label="SteamID64" default=""/>
+    </category>
+    <category label="Sunshine (Moonlight)">
+        <setting id="sunshine.server_url" type="text" label="URL du serveur Sunshine (ex: https://192.168.1.x:47990)" default=""/>
+        <setting id="sunshine.username" type="text" label="Nom d'utilisateur Sunshine" default=""/>
+        <setting id="sunshine.password" type="text" label="Mot de passe Sunshine" default=""/>
+    </category>
 </settings>

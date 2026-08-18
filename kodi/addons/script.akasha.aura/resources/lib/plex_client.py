@@ -77,6 +77,8 @@ class PlexClient:
             'title': item.get('title') or 'Sans titre',
             'type': item.get('type') or 'video',
             'rating_key': item.get('ratingKey'),
+            'parent_rating_key': item.get('parentRatingKey'),
+            'index': item.get('index'),
             'year': item.get('year'),
             'originally_available_at': item.get('originallyAvailableAt'),
             'summary': item.get('summary') or '',
@@ -169,6 +171,16 @@ class PlexClient:
             'search': query,
             'X-Plex-Container-Size': limit,
         })
+        return self._metadata_list(data)
+
+    def show_seasons(self, show_rating_key):
+        """Return the seasons of a TV show, ordered by Plex's default index."""
+        data = self._request('/library/metadata/{}/children'.format(show_rating_key))
+        return self._metadata_list(data)
+
+    def season_episodes(self, season_rating_key):
+        """Return the episodes of a season, ordered by Plex's default index."""
+        data = self._request('/library/metadata/{}/children'.format(season_rating_key))
         return self._metadata_list(data)
 
     def entertainment_rows(self, limits=None):
