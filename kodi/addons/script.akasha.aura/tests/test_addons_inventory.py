@@ -12,11 +12,11 @@ class TestParseGetAddonsResponse(unittest.TestCase):
             'result': {
                 'addons': [
                     {'addonid': 'script.cloud.gaming', 'name': 'Cloud Gaming',
-                     'version': '1.0', 'summary': 'x', 'icon': '', 'type': 'xbmc.python.script'},
+                     'version': '1.0', 'summary': 'x', 'thumbnail': '', 'type': 'xbmc.python.script'},
                     {'addonid': 'skin.arctic.horizon.two', 'name': 'Arctic Horizon 2',
-                     'version': '2.0', 'summary': 'x', 'icon': '', 'type': 'xbmc.gui.skin'},
+                     'version': '2.0', 'summary': 'x', 'thumbnail': '', 'type': 'xbmc.gui.skin'},
                     {'addonid': 'plugin.program.steamlink', 'name': 'Steam Link',
-                     'version': '1.1', 'summary': 'x', 'icon': '', 'type': 'xbmc.python.pluginsource'},
+                     'version': '1.1', 'summary': 'x', 'thumbnail': '', 'type': 'xbmc.python.pluginsource'},
                 ]
             }
         })
@@ -31,7 +31,7 @@ class TestParseGetAddonsResponse(unittest.TestCase):
             'result': {
                 'addons': [
                     {'addonid': 'script.akasha.aura', 'name': 'Akasha Aura',
-                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                     'version': '1.0', 'summary': '', 'thumbnail': '', 'type': 'xbmc.python.script'},
                 ]
             }
         })
@@ -43,11 +43,11 @@ class TestParseGetAddonsResponse(unittest.TestCase):
             'result': {
                 'addons': [
                     {'addonid': 'service.argononecontrol', 'name': 'Argon ONE',
-                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                     'version': '1.0', 'summary': '', 'thumbnail': '', 'type': 'xbmc.python.script'},
                     {'addonid': 'virtual.rpi-tools', 'name': 'RPi Tools',
-                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                     'version': '1.0', 'summary': '', 'thumbnail': '', 'type': 'xbmc.python.script'},
                     {'addonid': 'script.plexmod', 'name': 'Plex for Kodi',
-                     'version': '1.0', 'summary': '', 'icon': '', 'type': 'xbmc.python.script'},
+                     'version': '1.0', 'summary': '', 'thumbnail': '', 'type': 'xbmc.python.script'},
                 ]
             }
         })

@@ -45,8 +45,10 @@ def build_get_addons_request():
             'installed': True,
             'enabled': True,
             # 'addonid' and 'type' are always returned and are not valid
-            # entries for 'properties' (Kodi rejects the request otherwise).
-            'properties': ['name', 'version', 'summary', 'icon'],
+            # entries for 'properties'; the icon field is called
+            # 'thumbnail' in the JSON-RPC API, not 'icon' (Kodi rejects the
+            # whole request otherwise).
+            'properties': ['name', 'version', 'summary', 'thumbnail'],
         },
     }
 
@@ -73,7 +75,7 @@ def parse_get_addons_response(raw_response):
             'name': addon.get('name') or addon.get('addonid'),
             'version': addon.get('version', ''),
             'summary': addon.get('summary', ''),
-            'icon': addon.get('icon', ''),
+            'icon': addon.get('thumbnail', ''),
             'type': addon.get('type'),
         })
     return result
