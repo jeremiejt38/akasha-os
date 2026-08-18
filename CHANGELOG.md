@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.23.2...akasha-os-v0.23.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** use the correct 'thumbnail' JSON-RPC field for addon icons ([ecc7483](https://github.com/jeremiejt38/akasha-os/commit/ecc7483cd6811604f3577089fd3a9f5e086af5fd))
+
 ## [0.23.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.23.1...akasha-os-v0.23.2) (2026-08-18)
 
 
