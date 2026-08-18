@@ -15,9 +15,9 @@
         <!-- Header -->
         <control type="label" id="5000">
             <left>60</left>
-            <top>40</top>
+            <top>30</top>
             <width>1200</width>
-            <height>60</height>
+            <height>50</height>
             <font>font16</font>
             <label>Recommandations</label>
             <textcolor>FF6C8CFF</textcolor>
@@ -26,7 +26,7 @@
         <!-- Back button -->
         <control type="button" id="5030">
             <left>1700</left>
-            <top>40</top>
+            <top>30</top>
             <width>160</width>
             <height>50</height>
             <font>font12</font>
@@ -40,10 +40,10 @@
         <!-- Status line -->
         <control type="label" id="5020">
             <left>60</left>
-            <top>120</top>
+            <top>90</top>
             <width>1800</width>
-            <height>30</height>
-            <font>font12</font>
+            <height>25</height>
+            <font>font11</font>
             <label>-</label>
             <textcolor>77FFFFFF</textcolor>
         </control>
@@ -51,62 +51,62 @@
         <!-- Row 1: Continuer a regarder -->
         <control type="label" id="5100">
             <left>60</left>
-            <top>170</top>
+            <top>125</top>
             <width>1000</width>
-            <height>30</height>
+            <height>25</height>
             <font>font12</font>
             <label>Continuer a regarder</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
         <control type="list" id="5110">
             <left>60</left>
-            <top>205</top>
+            <top>155</top>
             <width>1800</width>
-            <height>360</height>
+            <height>260</height>
             <orientation>horizontal</orientation>
             <onup>5030</onup>
             <ondown>5210</ondown>
-            <itemlayout width="220" height="330">
+            <itemlayout width="170" height="250">
                 <control type="image">
                     <left>5</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>280</height>
+                    <width>160</width>
+                    <height>220</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="label">
                     <left>5</left>
-                    <top>284</top>
-                    <width>210</width>
-                    <height>26</height>
+                    <top>224</top>
+                    <width>160</width>
+                    <height>22</height>
                     <font>font10</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="220" height="330">
+            <focusedlayout width="170" height="250">
                 <control type="image">
                     <left>1</left>
                     <top>-4</top>
-                    <width>198</width>
-                    <height>288</height>
+                    <width>168</width>
+                    <height>228</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
                 </control>
                 <control type="image">
                     <left>5</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>280</height>
+                    <width>160</width>
+                    <height>220</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="label">
                     <left>5</left>
-                    <top>284</top>
-                    <width>210</width>
-                    <height>26</height>
+                    <top>224</top>
+                    <width>160</width>
+                    <height>22</height>
                     <font>font10</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
@@ -118,62 +118,129 @@
         <!-- Row 2: Ajoutes recemment -->
         <control type="label" id="5200">
             <left>60</left>
-            <top>590</top>
+            <top>425</top>
             <width>1000</width>
-            <height>30</height>
+            <height>25</height>
             <font>font12</font>
             <label>Ajoutes recemment</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
         <control type="list" id="5210">
             <left>60</left>
-            <top>625</top>
+            <top>455</top>
             <width>1800</width>
-            <height>360</height>
+            <height>260</height>
             <orientation>horizontal</orientation>
             <onup>5110</onup>
-            <ondown>5210</ondown>
-            <itemlayout width="220" height="330">
+            <ondown>5310</ondown>
+            <itemlayout width="170" height="250">
                 <control type="image">
                     <left>5</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>280</height>
+                    <width>160</width>
+                    <height>220</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="label">
                     <left>5</left>
-                    <top>284</top>
-                    <width>210</width>
-                    <height>26</height>
+                    <top>224</top>
+                    <width>160</width>
+                    <height>22</height>
                     <font>font10</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="220" height="330">
+            <focusedlayout width="170" height="250">
                 <control type="image">
                     <left>1</left>
                     <top>-4</top>
-                    <width>198</width>
-                    <height>288</height>
+                    <width>168</width>
+                    <height>228</height>
                     <texture colordiffuse="FF6C8CFF">white.png</texture>
                 </control>
                 <control type="image">
                     <left>5</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>280</height>
+                    <width>160</width>
+                    <height>220</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="label">
                     <left>5</left>
-                    <top>284</top>
-                    <width>210</width>
-                    <height>26</height>
+                    <top>224</top>
+                    <width>160</width>
+                    <height>22</height>
+                    <font>font10</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Row 3: Sorties recentes (premiere section video trouvee) -->
+        <control type="label" id="5300">
+            <left>60</left>
+            <top>725</top>
+            <width>1000</width>
+            <height>25</height>
+            <font>font12</font>
+            <label>Sorties recentes</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+        <control type="list" id="5310">
+            <left>60</left>
+            <top>755</top>
+            <width>1800</width>
+            <height>260</height>
+            <orientation>horizontal</orientation>
+            <onup>5210</onup>
+            <ondown>5310</ondown>
+            <itemlayout width="170" height="250">
+                <control type="image">
+                    <left>5</left>
+                    <top>0</top>
+                    <width>160</width>
+                    <height>220</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="label">
+                    <left>5</left>
+                    <top>224</top>
+                    <width>160</width>
+                    <height>22</height>
+                    <font>font10</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="170" height="250">
+                <control type="image">
+                    <left>1</left>
+                    <top>-4</top>
+                    <width>168</width>
+                    <height>228</height>
+                    <texture colordiffuse="FF6C8CFF">white.png</texture>
+                </control>
+                <control type="image">
+                    <left>5</left>
+                    <top>0</top>
+                    <width>160</width>
+                    <height>220</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="label">
+                    <left>5</left>
+                    <top>224</top>
+                    <width>160</width>
+                    <height>22</height>
                     <font>font10</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>

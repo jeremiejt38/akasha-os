@@ -23,6 +23,8 @@ ROW_ON_DECK_LABEL_ID = 5100
 ROW_ON_DECK_LIST_ID = 5110
 ROW_RECENT_LABEL_ID = 5200
 ROW_RECENT_LIST_ID = 5210
+ROW_RELEASES_LABEL_ID = 5300
+ROW_RELEASES_LIST_ID = 5310
 STATUS_LABEL_ID = 5020
 
 
@@ -32,6 +34,7 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         self.addon = xbmcaddon.Addon('script.akasha.aura')
         self._connector = None
         self._plex = None
+        self._first_section = None
 
     def onInit(self):
         try:
@@ -40,6 +43,12 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
                             'Continuer a regarder', self._fetch_on_deck)
             self._load_row(ROW_RECENT_LABEL_ID, ROW_RECENT_LIST_ID,
                             'Ajoutes recemment', self._fetch_recently_added)
+            releases_title = 'Sorties recentes'
+            section = self._get_first_video_section()
+            if section:
+                releases_title = 'Sorties recentes — {}'.format(section['title'])
+            self._load_row(ROW_RELEASES_LABEL_ID, ROW_RELEASES_LIST_ID,
+                            releases_title, self._fetch_recent_releases)
         except Exception as e:
             xbmc.log('Akasha Aura Recommendations: init error: {}'.format(e), xbmc.LOGERROR)
 
@@ -71,6 +80,30 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
             return divert_source.parse_metadata_list(raw, self._connector.image_url)
         if self._plex:
             return self._plex.recently_added()
+        return []
+
+    def _get_first_video_section(self):
+        if self._first_section is not None:
+            return self._first_section
+        sections = []
+        if self._connector:
+            sections = divert_source.parse_sections(self._connector.sections())
+        elif self._plex:
+            sections = self._plex.video_sections()
+        self._first_section = sections[0] if sections else False
+        return self._first_section or None
+
+    def _fetch_recent_releases(self):
+        section = self._get_first_video_section()
+        if not section:
+            return []
+        if self._connector:
+            raw = self._connector.section_items(
+                section['key'], sort='originallyAvailableAt:desc', limit=20)
+            return divert_source.parse_metadata_list(raw, self._connector.image_url)
+        if self._plex:
+            return self._plex.section_items(
+                section['key'], sort='originallyAvailableAt:desc', limit=20)
         return []
 
     def _load_row(self, label_control_id, list_control_id, title, fetch_fn):
