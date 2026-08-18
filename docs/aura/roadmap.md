@@ -181,6 +181,20 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
   réelles (101 Dalmatiens, Aladdin, Alvin et les Chipmunks...) correctement rendues avec titre et
   année, correspondant fidèlement à la capture de référence fournie par l'utilisateur.
 
+- **Total réel affiché immédiatement — plan a3f9c2e1 (2026-08-18, v0.35.0)** : demande explicite de
+  l'utilisateur (fichier `a3f9c2e1-plan-pagination-akasha-os.md`) pour éviter que l'interface
+  n'affiche que le nombre d'éléments chargés au lieu du total réel. Plex renvoie déjà `totalSize`
+  (repli sur `size`) dans le `MediaContainer` de **chaque** réponse paginée, sans coût réseau
+  supplémentaire — pas besoin d'une requête de comptage séparée comme envisagé dans le plan :
+  `PagedList` (générique, réutilisé par les 3 vues) capture ce total dès la première page et
+  l'affiche immédiatement, même si seuls 30 éléments sont physiquement chargés.
+  - 2 jobs Talos tentés pour les parties pures/testables (tests `PagedList.total`, méthodes
+    `plex_client._with_total`) — les deux ont échoué (un job a cassé un helper de test existant en
+    sandbox, l'autre a expiré en boucle SEARCH/REPLACE) ; implémenté manuellement conformément à la
+    politique de reprise après 3 échecs. Détail dans `docs/talos-reports.md`.
+  - Validé sur le Pi réel : Bibliothèque affiche "771 resultat(s)" dès l'ouverture (Dessins
+    Animées), alors que seuls 30 éléments sont chargés en mémoire à cet instant.
+
 ## Notes de suivi
 
 - Chaque jalon correspond à un ou plusieurs commits atomiques (`feat:`/`fix:`/`test:`), sur `main`
