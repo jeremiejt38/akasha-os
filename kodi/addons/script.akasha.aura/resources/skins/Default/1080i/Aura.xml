@@ -65,7 +65,7 @@
                 <height>80</height>
                 <label></label>
                 <onleft>2002</onleft>
-                <onright>3100</onright>
+                <onright>3050</onright>
                 <ondown>2041</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
@@ -78,16 +78,33 @@
                 <texture>tab-app.png</texture>
             </control>
 
-            <control type="button" id="3100">
+            <control type="button" id="3050">
                 <left>1200</left>
                 <top>30</top>
-                <width>300</width>
+                <width>230</width>
+                <height>60</height>
+                <label>Recommandations</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>2003</onleft>
+                <onright>3100</onright>
+                <ondown>9000</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+
+            <control type="button" id="3100">
+                <left>1440</left>
+                <top>30</top>
+                <width>230</width>
                 <height>60</height>
                 <label>Bibliotheque</label>
                 <font>font12</font>
                 <align>center</align>
                 <aligny>center</aligny>
-                <onleft>2003</onleft>
+                <onleft>3050</onleft>
                 <onright>3200</onright>
                 <ondown>9000</ondown>
                 <textcolor>BBFFFFFF</textcolor>
@@ -96,9 +113,9 @@
             </control>
 
             <control type="button" id="3200">
-                <left>1520</left>
+                <left>1680</left>
                 <top>30</top>
-                <width>260</width>
+                <width>230</width>
                 <height>60</height>
                 <label>Parametres</label>
                 <font>font12</font>

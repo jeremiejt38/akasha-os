@@ -15,6 +15,7 @@ import xbmcgui
 import addons_inventory
 import aura_app
 import aura_library
+import aura_recommendations
 import aura_show
 import aura_store
 import config
@@ -404,6 +405,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID in TAB_BUTTON_IDS:
             self._show_tab(TAB_BUTTON_IDS.index(controlID))
+        elif controlID == 3050:
+            recommendations = aura_recommendations.AuraRecommendationsWindow(
+                'AuraRecommendations.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
+            recommendations.doModal()
+            del recommendations
         elif controlID == 3100:
             library = aura_library.AuraLibraryWindow(
                 'AuraLibrary.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
