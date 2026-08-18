@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.27.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.26.1...akasha-os-v0.27.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add connector settings + section_items/genres/children client methods ([c3821fd](https://github.com/jeremiejt38/akasha-os/commit/c3821fd55bc0f75d2a3efcac084721b6abc98383))
+* **aura:** add connector_client.image_url() using the connector's image proxy ([c1a4d93](https://github.com/jeremiejt38/akasha-os/commit/c1a4d935db2ed2437e0a0aebac3a2de46367445f))
+* **aura:** add connector_client.py for akasha-os-connector integration ([e3375cd](https://github.com/jeremiejt38/akasha-os/commit/e3375cdb77b6ee0da1a7510afd0d12425f24970f))
+* **aura:** wire connector as primary Divertissement data source with Plex fallback ([0ed836a](https://github.com/jeremiejt38/akasha-os/commit/0ed836ab7e06c9f63f8b7ce6ebdeec7c2225390e))
+
 ## [0.26.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.26.0...akasha-os-v0.26.1) (2026-08-18)
 
 
