@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.22.0...akasha-os-v0.22.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** install games.DATA.xml into addon resources/data ([e87b07c](https://github.com/jeremiejt38/akasha-os/commit/e87b07c54ce1fc2e74e542d6de68c0e96a01fec7))
+
 ## [0.22.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.21.1...akasha-os-v0.22.0) (2026-08-18)
 
 
