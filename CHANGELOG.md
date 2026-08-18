@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.27.1...akasha-os-v0.28.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add Recommandations view (Continuer a regarder / Ajoutes recemment) ([b7cb64f](https://github.com/jeremiejt38/akasha-os/commit/b7cb64f7515628f383000b93faa3732d74ef7971))
+
 ## [0.27.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.27.0...akasha-os-v0.27.1) (2026-08-18)
 
 
