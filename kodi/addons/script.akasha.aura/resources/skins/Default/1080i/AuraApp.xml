@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1196">
+    <defaultcontrol>5010</defaultcontrol>
+    <zorder>2</zorder>
+    <controls>
+        <!-- Fullscreen background -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="FF10131A">white.png</texture>
+        </control>
+
+        <!-- Header -->
+        <control type="label" id="5000">
+            <left>60</left>
+            <top>40</top>
+            <width>1200</width>
+            <height>60</height>
+            <font>font16</font>
+            <label>Applications</label>
+            <textcolor>FF6C8CFF</textcolor>
+        </control>
+
+        <!-- Back button -->
+        <control type="button" id="5030">
+            <left>1700</left>
+            <top>40</top>
+            <width>160</width>
+            <height>50</height>
+            <font>font12</font>
+            <label>Retour</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <ondown>5010</ondown>
+            <onleft>5003</onleft>
+        </control>
+
+        <!-- Toolbar -->
+        <control type="button" id="5001">
+            <left>60</left>
+            <top>120</top>
+            <width>260</width>
+            <height>50</height>
+            <font>font12</font>
+            <label>Lancer</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <onright>5002</onright>
+            <ondown>5010</ondown>
+        </control>
+
+        <control type="button" id="5002">
+            <left>340</left>
+            <top>120</top>
+            <width>260</width>
+            <height>50</height>
+            <font>font12</font>
+            <label>Epingler / Desepingler</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <onleft>5001</onleft>
+            <onright>5003</onright>
+            <ondown>5010</ondown>
+        </control>
+
+        <control type="button" id="5003">
+            <left>620</left>
+            <top>120</top>
+            <width>260</width>
+            <height>50</height>
+            <font>font12</font>
+            <label>Desinstaller</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <onleft>5002</onleft>
+            <onright>5030</onright>
+            <ondown>5010</ondown>
+        </control>
+
+        <!-- Status line -->
+        <control type="label" id="5020">
+            <left>60</left>
+            <top>190</top>
+            <width>1800</width>
+            <height>40</height>
+            <font>font12</font>
+            <label>-</label>
+            <textcolor>77FFFFFF</textcolor>
+        </control>
+
+        <!-- Main list -->
+        <control type="list" id="5010">
+            <left>60</left>
+            <top>250</top>
+            <width>1800</width>
+            <height>770</height>
+            <onup>5001</onup>
+            <ondown>5010</ondown>
+            <onleft>5030</onleft>
+            <itemlayout width="1800" height="50">
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>1800</width>
+                    <height>50</height>
+                    <font>font12</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                </control>
+            </itemlayout>
+            <focusedlayout width="1800" height="50">
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>1800</width>
+                    <height>50</height>
+                    <font>font12</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+            </focusedlayout>
+        </control>
+    </controls>
+</window>

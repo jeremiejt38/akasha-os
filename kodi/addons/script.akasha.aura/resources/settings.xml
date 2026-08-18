@@ -7,4 +7,7 @@
     <category label="Onglets">
         <setting id="tab.default" type="enum" label="Onglet par defaut" default="0" values="Divertissement|Jeux|App"/>
     </category>
+    <category label="App">
+        <setting id="app.pinned" type="text" label="Applications epinglees (interne)" default=""/>
+    </category>
 </settings>

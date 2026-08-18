@@ -261,26 +261,106 @@
             </control>
         </control>
 
-        <!-- App placeholder content (milestone 5/6 fill this in) -->
+        <!-- App content (milestone 5: pinned addon tiles + full inventory) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
-            <control type="label">
+
+            <control type="label" id="2019">
                 <left>60</left>
-                <top>200</top>
-                <width>1800</width>
-                <height>60</height>
-                <font>font16</font>
-                <label>App</label>
-                <textcolor>FFFFFFFF</textcolor>
-            </control>
-            <control type="label">
-                <left>60</left>
-                <top>260</top>
+                <top>140</top>
                 <width>1800</width>
                 <height>40</height>
+                <font>font14</font>
+                <label>App</label>
+                <textcolor>FF6C8CFF</textcolor>
+            </control>
+
+            <control type="label" id="2029">
+                <left>60</left>
+                <top>190</top>
+                <width>1800</width>
+                <height>36</height>
                 <font>font12</font>
-                <label>Addons installes + Akasha Store — a venir</label>
+                <label>-</label>
                 <textcolor>77FFFFFF</textcolor>
+            </control>
+
+            <control type="button" id="2030">
+                <left>60</left>
+                <top>240</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2003</onup>
+                <onright>2031</onright>
+                <ondown>2040</ondown>
+            </control>
+
+            <control type="button" id="2031">
+                <left>480</left>
+                <top>240</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2003</onup>
+                <onleft>2030</onleft>
+                <onright>2032</onright>
+                <ondown>2040</ondown>
+            </control>
+
+            <control type="button" id="2032">
+                <left>900</left>
+                <top>240</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2003</onup>
+                <onleft>2031</onleft>
+                <onright>2033</onright>
+                <ondown>2040</ondown>
+            </control>
+
+            <control type="button" id="2033">
+                <left>1320</left>
+                <top>240</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2003</onup>
+                <onleft>2032</onleft>
+                <ondown>2040</ondown>
+            </control>
+
+            <control type="button" id="2040">
+                <left>60</left>
+                <top>400</top>
+                <width>500</width>
+                <height>60</height>
+                <font>font12</font>
+                <label>Gerer les applications</label>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2030</onup>
+                <ondown>2040</ondown>
             </control>
         </control>
 

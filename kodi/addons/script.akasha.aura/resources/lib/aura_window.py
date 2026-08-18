@@ -6,10 +6,14 @@ plex_client.py. Later milestones fill the Games and App tabs
 (addons_inventory.py, store_manifest.py) without changing this navigation
 skeleton.
 """
+import json
+
 import xbmc
 import xbmcaddon
 import xbmcgui
 
+import addons_inventory
+import aura_app
 import aura_library
 import config
 import games_shortcuts
@@ -27,6 +31,7 @@ ROW_LABEL_PAIRS = ((3010, 3020), (3011, 3021), (3012, 3022), (3013, 3023))
 
 
 GAME_BUTTON_IDS = (2010, 2011, 2012)
+APP_TILE_IDS = (2030, 2031, 2032, 2033)
 
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
@@ -38,12 +43,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon_path = addon.getAddonInfo('path')
         self._rows = []
         self._games = games_shortcuts.load_shortcuts(self.addon_path)
+        self._pinned_apps = []
 
     def onInit(self):
         try:
             self._show_tab(self.active_tab)
             self._load_plex_rows()
             self._load_games()
+            self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
@@ -71,6 +78,49 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if i < len(self._games):
                 game = self._games[i]
                 btn.setLabel(game['label'])
+            else:
+                btn.setLabel('')
+
+    def _load_pinned_apps(self):
+        pinned_ids = addons_inventory.parse_pinned(self.addon.getSetting('app.pinned'))
+        self._pinned_apps = []
+
+        try:
+            status = self.getControl(2029)
+        except RuntimeError:
+            status = None
+
+        if not pinned_ids:
+            if status:
+                status.setLabel('Aucune application epinglee — utilisez "Gerer les applications"')
+            for control_id in APP_TILE_IDS:
+                try:
+                    self.getControl(control_id).setLabel('')
+                except RuntimeError:
+                    continue
+            return
+
+        try:
+            request = addons_inventory.build_get_addons_request()
+            raw_response = xbmc.executeJSONRPC(json.dumps(request))
+            all_addons = addons_inventory.parse_get_addons_response(raw_response)
+        except Exception as e:
+            xbmc.log('Akasha Aura: App inventory load failed: {}'.format(e), xbmc.LOGERROR)
+            all_addons = []
+
+        by_id = {a['addonid']: a for a in all_addons}
+        self._pinned_apps = [by_id[aid] for aid in pinned_ids if aid in by_id]
+
+        if status:
+            status.setLabel('Applications epinglees')
+
+        for i, control_id in enumerate(APP_TILE_IDS):
+            try:
+                btn = self.getControl(control_id)
+            except RuntimeError:
+                continue
+            if i < len(self._pinned_apps):
+                btn.setLabel(self._pinned_apps[i]['name'])
             else:
                 btn.setLabel('')
 
@@ -127,3 +177,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 action = self._games[idx]['action']
                 if action:
                     xbmc.executebuiltin(action)
+        elif controlID == 2040:
+            app_window = aura_app.AuraAppWindow(
+                'AuraApp.xml', self.addon_path, 'Default', '1080i')
+            app_window.doModal()
+            del app_window
+            self._load_pinned_apps()
+        elif controlID in APP_TILE_IDS:
+            idx = APP_TILE_IDS.index(controlID)
+            if idx < len(self._pinned_apps):
+                xbmc.executebuiltin('RunAddon({})'.format(self._pinned_apps[idx]['addonid']))
