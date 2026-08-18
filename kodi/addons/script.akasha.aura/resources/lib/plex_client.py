@@ -79,6 +79,8 @@ class PlexClient:
             'rating_key': item.get('ratingKey'),
             'parent_rating_key': item.get('parentRatingKey'),
             'index': item.get('index'),
+            'season': item.get('parentIndex'),
+            'show_title': item.get('grandparentTitle') or '',
             'year': item.get('year'),
             'originally_available_at': item.get('originallyAvailableAt'),
             'summary': item.get('summary') or '',

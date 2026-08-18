@@ -205,7 +205,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel = self.getControl(DIVERT_PANEL_ID)
             panel.reset()
             for item in self._divert_items:
-                li = xbmcgui.ListItem(item['title'])
+                li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
                 if item.get('thumb_url'):
                     li.setArt({'thumb': item['thumb_url']})
                 panel.addItem(li)

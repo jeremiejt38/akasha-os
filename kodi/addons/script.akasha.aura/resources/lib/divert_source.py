@@ -36,6 +36,23 @@ def parse_genres(raw_json):
     return [str(item.get('tag')) for item in mc.get('Directory', []) if item.get('tag')]
 
 
+def item_subtitle(item):
+    """Return a short second line for a video item (episode tag, or year).
+
+    Mirrors the Plex web/app pattern: "S{season} - E{episode}" for TV
+    episodes, the release year for movies/shows, or nothing if neither is
+    available.
+    """
+    season = item.get('season')
+    index = item.get('index')
+    if season is not None and index is not None:
+        return 'S{} - E{}'.format(season, index)
+    year = item.get('year')
+    if year:
+        return str(year)
+    return ''
+
+
 def parse_metadata_list(raw_json, image_resolver):
     """Return normalised video dicts from a raw Metadata-bearing payload.
 
@@ -53,6 +70,8 @@ def parse_metadata_list(raw_json, image_resolver):
             'rating_key': item.get('ratingKey'),
             'parent_rating_key': item.get('parentRatingKey'),
             'index': item.get('index'),
+            'season': item.get('parentIndex'),
+            'show_title': item.get('grandparentTitle') or '',
             'year': item.get('year'),
             'originally_available_at': item.get('originallyAvailableAt'),
             'summary': item.get('summary') or '',

@@ -42,11 +42,11 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
             self._load_row(ROW_ON_DECK_LABEL_ID, ROW_ON_DECK_LIST_ID,
                             'Continuer a regarder', self._fetch_on_deck)
             self._load_row(ROW_RECENT_LABEL_ID, ROW_RECENT_LIST_ID,
-                            'Ajoutes recemment', self._fetch_recently_added)
-            releases_title = 'Sorties recentes'
+                            'Episodes sortis recemment', self._fetch_recently_added)
+            releases_title = 'Recemment ajoute'
             section = self._get_first_video_section()
             if section:
-                releases_title = 'Sorties recentes — {}'.format(section['title'])
+                releases_title = 'Recemment ajoute dans {}'.format(section['title'])
             self._load_row(ROW_RELEASES_LABEL_ID, ROW_RELEASES_LIST_ID,
                             releases_title, self._fetch_recent_releases)
         except Exception as e:
@@ -98,12 +98,10 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         if not section:
             return []
         if self._connector:
-            raw = self._connector.section_items(
-                section['key'], sort='originallyAvailableAt:desc', limit=20)
+            raw = self._connector.section_items(section['key'], sort='addedAt:desc', limit=20)
             return divert_source.parse_metadata_list(raw, self._connector.image_url)
         if self._plex:
-            return self._plex.section_items(
-                section['key'], sort='originallyAvailableAt:desc', limit=20)
+            return self._plex.section_items(section['key'], sort='addedAt:desc', limit=20)
         return []
 
     def _load_row(self, label_control_id, list_control_id, title, fetch_fn):
@@ -131,7 +129,7 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
             lst = self.getControl(list_control_id)
             lst.reset()
             for item in items:
-                li = xbmcgui.ListItem(item['title'])
+                li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
                 if item.get('thumb_url'):
                     li.setArt({'thumb': item['thumb_url']})
                 lst.addItem(li)

@@ -56,6 +56,34 @@ class TestDivertSource(unittest.TestCase):
         self.assertEqual(items[0]['art_url'], '')
         self.assertEqual(calls, [])
 
+    def test_item_subtitle_episode(self):
+        item = {'season': 16, 'index': 6}
+        self.assertEqual(divert_source.item_subtitle(item), 'S16 - E6')
+
+    def test_item_subtitle_movie_falls_back_to_year(self):
+        item = {'season': None, 'index': None, 'year': 2010}
+        self.assertEqual(divert_source.item_subtitle(item), '2010')
+
+    def test_item_subtitle_missing_data_returns_empty(self):
+        self.assertEqual(divert_source.item_subtitle({}), '')
+
+    def test_parse_metadata_list_captures_episode_fields(self):
+        raw = {
+            'MediaContainer': {
+                'Metadata': [
+                    {
+                        'title': 'Une vie revee',
+                        'parentIndex': 9,
+                        'index': 10,
+                        'grandparentTitle': 'Rick et Morty',
+                    }
+                ]
+            }
+        }
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertEqual(items[0]['season'], 9)
+        self.assertEqual(items[0]['show_title'], 'Rick et Morty')
+
     def test_parse_sections_handles_non_dict_input(self):
         self.assertEqual(divert_source.parse_sections('not a dict'), [])
         self.assertEqual(divert_source.parse_genres(None), [])

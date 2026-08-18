@@ -310,17 +310,27 @@
                         <left>5</left>
                         <top>0</top>
                         <width>190</width>
-                        <height>280</height>
+                        <height>250</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="label">
                         <left>5</left>
-                        <top>284</top>
+                        <top>254</top>
                         <width>210</width>
-                        <height>26</height>
+                        <height>22</height>
                         <font>font10</font>
                         <label>$INFO[ListItem.Label]</label>
+                        <textcolor>CCFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                    <control type="label">
+                        <left>5</left>
+                        <top>276</top>
+                        <width>210</width>
+                        <height>20</height>
+                        <font>font9</font>
+                        <label>$INFO[ListItem.Label2]</label>
                         <textcolor>77FFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
                     </control>
@@ -337,18 +347,28 @@
                         <left>5</left>
                         <top>0</top>
                         <width>190</width>
-                        <height>280</height>
+                        <height>250</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="label">
                         <left>5</left>
-                        <top>284</top>
+                        <top>254</top>
                         <width>210</width>
-                        <height>26</height>
+                        <height>22</height>
                         <font>font10</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                    <control type="label">
+                        <left>5</left>
+                        <top>276</top>
+                        <width>210</width>
+                        <height>20</height>
+                        <font>font9</font>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>99FFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
                     </control>
                 </focusedlayout>
