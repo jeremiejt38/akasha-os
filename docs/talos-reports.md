@@ -155,3 +155,42 @@ Deux jobs soumis pour compléter `paged_list.PagedList` (attribut `total`) et `p
   (`MockHTTPResponse`), inclure sa définition exacte dans le prompt plutôt que de la décrire — le
   modèle local (qwen2.5-coder:14b) ne semble pas fiable pour inférer la bonne signature d'un helper
   non fourni explicitement, même en lui demandant de "regarder le style existant".
+
+### Cause racine trouvée et corrigée dans Talos lui-même
+
+En creusant pourquoi ces deux jobs échouaient de façon aussi caractéristique (signatures
+inventées, helper existant écrasé), inspection du code source de Talos
+(`~/workspace/talos/talos/mcp_server.py`) : l'outil MCP `talos_add` (job unique, celui utilisé ici)
+**n'exposait jamais de paramètre `files`**, contrairement à `talos_add_batch` qui l'a. Or
+`queue="ollama"` (la valeur par défaut, utilisée par ces deux jobs) route vers `_run_aider_job()`
+dans `talos/core/daemon.py`, qui lit `job["files"]` pour savoir quels fichiers Aider doit
+lire/éditer. Sans ce paramètre, Aider travaillait sans accès garanti au contenu réel des fichiers
+existants — d'où les deux échecs typiques d'hallucination de contenu.
+
+- **Corrigé** dans le repo `talos` (commit `beeec5a`, poussé sur `main`) : `talos_add` accepte
+  désormais `files` (chaîne de chemins séparés par des virgules, même convention que
+  `talos_estimate_complexity`), transmis à `_client.add()`. 2 tests de régression ajoutés dans
+  `tests/test_mcp_server.py` (171 passed, 1 skipped).
+- **Process MCP redémarré** : le serveur `talos.mcp_server` tournant pour cette session utilisait
+  encore l'ancien code (même schéma que le bug de daemons dupliqués trouvé le même jour dans
+  `projects/talos_assistant.md` d'Atlas — un correctif source ne suffit pas si le process vivant
+  n'est pas relancé). Tué manuellement, la connexion MCP s'est reconnectée automatiquement avec un
+  nouveau PID chargeant le code corrigé.
+- **Validé en rejouant les deux jobs échoués avec `files` renseigné** :
+  1. Job `5e19b69b` (tests `PagedList.total`) : Aider a lu le fichier réel, préservé
+     intégralement les tests existants et `make_fetcher`, et reproduit fidèlement le contenu déjà
+     correct (`diff: 0 chars`, `Modified: []` — le fichier avait déjà été corrigé manuellement
+     entre-temps, mais surtout **aucune régression introduite** cette fois).
+  2. Job `77973f95` (revue `plex_client._with_total`) : consigne explicite de ne rien modifier si
+     tout était déjà correct — resultat conforme (`diff: 0 chars`, `Modified: []`), sans tentative
+     de redéfinir un helper existant.
+  Les deux `validate_cmd` de ces essais ont échoué pour une raison indépendante (le sandbox Talos
+  est "à plat" — les fichiers passés via `files` sont placés à la racine du sandbox, pas dans leur
+  arborescence d'origine — donc un `validate_cmd` supposant `tests/test_x.py` ou `cd chemin/`
+  échoue ; à corriger dans un futur prompt en adaptant le `validate_cmd` à cette structure plate,
+  ou en informant l'utilisateur/CLI Talos de ce comportement).
+- **Apprentissage principal** : **toujours renseigner `files`** sur `talos_add` dès qu'un job doit
+  lire ou éditer un fichier existant — sans ça, le modèle travaille à l'aveugle sur son contenu
+  réel, quelle que soit la qualité de la description dans le prompt. Après toute modification du
+  code source de Talos lui-même, vérifier qu'aucun process MCP/daemon obsolète ne tourne encore
+  avant de considérer le correctif actif.
