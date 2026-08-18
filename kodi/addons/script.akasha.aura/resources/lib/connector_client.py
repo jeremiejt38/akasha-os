@@ -69,18 +69,21 @@ class ConnectorClient:
     def is_authenticated(self):
         return self.token is not None
 
-    def on_deck(self, limit=20):
-        return self._request('GET', '/api/plex/on-deck')
+    def on_deck(self, limit=20, offset=0):
+        path = '/api/plex/on-deck?limit={}&offset={}'.format(limit, offset)
+        return self._request('GET', path)
 
-    def recently_added(self, limit=20):
-        return self._request('GET', '/api/plex/recently-added')
+    def recently_added(self, limit=20, offset=0):
+        path = '/api/plex/recently-added?limit={}&offset={}'.format(limit, offset)
+        return self._request('GET', path)
 
     def sections(self):
         return self._request('GET', '/api/plex/sections')
 
-    def section_items(self, section_key, sort='titleSort', limit=200, genre=None, search=None):
-        path = '/api/plex/sections/{}/all?sort={}&limit={}'.format(
-            section_key, urllib.parse.quote(sort, safe=''), limit)
+    def section_items(self, section_key, sort='titleSort', limit=200, offset=0,
+                       genre=None, search=None):
+        path = '/api/plex/sections/{}/all?sort={}&limit={}&offset={}'.format(
+            section_key, urllib.parse.quote(sort, safe=''), limit, offset)
         if genre:
             path += '&genre={}'.format(urllib.parse.quote(genre, safe=''))
         if search:

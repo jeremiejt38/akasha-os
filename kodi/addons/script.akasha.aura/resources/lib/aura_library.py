@@ -10,10 +10,15 @@ import xbmcgui
 
 import connector_client
 import divert_source
+import local_cache
+import paged_list
 import plex_client
 
+ACTION_MOVE_DOWN = 4
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
+
+CACHE_TTL_SECONDS = 300
 
 SORT_OPTIONS = [
     ('titleSort', 'Titre'),
@@ -41,6 +46,8 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         self.sort = SORT_OPTIONS[0][0]
         self.filter_genre = None
         self.query = ''
+        self._paged = None
+        self._cache = local_cache.open_addon_cache(addon)
         # Optional: set by a caller (e.g. AuraGenresWindow) before doModal()
         # to open the library pre-scoped to a specific section/genre instead
         # of auto-detecting the first movie section.
@@ -87,6 +94,13 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura Library: connector section_items failed, falling back '
                          'to Plex direct: {}'.format(e), xbmc.LOGWARNING)
                 self.connector = None
+        # Direct Plex fallback: search/genre use their own dedicated endpoints.
+        genre = kwargs.pop('genre', None)
+        search = kwargs.pop('search', None)
+        if search:
+            return self.client.search(self.section['key'], search, **kwargs)
+        if genre:
+            return self.client.by_genre(self.section['key'], genre, **kwargs)
         return self.client.section_items(self.section['key'], **kwargs)
 
     def _section_genres(self):
@@ -99,28 +113,59 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
                 self.connector = None
         return self.client.section_genres(self.section['key'])
 
-    def _load_items(self):
+    def _current_mode_key(self):
         if self.query:
-            if self.connector:
-                self.items = self._section_items(search=self.query)
-            else:
-                self.items = self.client.search(self.section['key'], self.query)
-        elif self.filter_genre:
-            if self.connector:
-                self.items = self._section_items(genre=self.filter_genre, limit=200)
-            else:
-                self.items = self.client.by_genre(self.section['key'], self.filter_genre, limit=200)
-        else:
-            self.items = self._section_items(sort=self.sort)
-        self._render()
+            return ('search', self.query)
+        if self.filter_genre:
+            return ('genre', self.filter_genre)
+        return ('sort', self.sort)
 
-    def _render(self):
+    def _fetch_page(self, offset, limit):
+        mode, value = self._current_mode_key()
+        cache_key = local_cache.page_cache_key(
+            'library', self.section['key'], mode, value, offset, limit)
+        return self._cache.get_or_set(
+            cache_key, CACHE_TTL_SECONDS,
+            lambda: self._fetch_page_uncached(mode, value, offset, limit))
+
+    def _fetch_page_uncached(self, mode, value, offset, limit):
+        kwargs = {'offset': offset, 'limit': limit, mode: value}
+        return self._section_items(**kwargs)
+
+    def _load_items(self):
+        self._paged = paged_list.PagedList(self._fetch_page)
+        error = None
         try:
-            header = self.getControl(4000)
-            header.setLabel('Bibliotheque — {}'.format(self.section['title']))
-        except RuntimeError:
-            pass
+            self._paged.load_initial()
+        except Exception as e:
+            xbmc.log('Akasha Aura Library: items load failed: {}'.format(e), xbmc.LOGERROR)
+            error = e
+        self.items = self._paged.items
+        self._render(error)
 
+    def _maybe_load_more(self):
+        if not self._paged:
+            return
+        try:
+            position = self.getControl(4010).getSelectedPosition()
+        except RuntimeError:
+            return
+        try:
+            new_items = self._paged.maybe_load_more(position)
+        except Exception as e:
+            xbmc.log('Akasha Aura Library: pagination fetch failed: {}'.format(e), xbmc.LOGWARNING)
+            return
+        if not new_items:
+            return
+        self.items = self._paged.items
+        try:
+            lst = self.getControl(4010)
+            lst.addItems([xbmcgui.ListItem(item['title']) for item in new_items])
+        except Exception as e:
+            xbmc.log('Akasha Aura Library: append render error: {}'.format(e), xbmc.LOGERROR)
+        self._render_status()
+
+    def _render_status(self):
         try:
             status = self.getControl(4020)
             label = '{} resultat(s)'.format(len(self.items))
@@ -131,6 +176,21 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
             status.setLabel(label)
         except RuntimeError:
             pass
+
+    def _render(self, error=None):
+        try:
+            header = self.getControl(4000)
+            header.setLabel('Bibliotheque — {}'.format(self.section['title']))
+        except RuntimeError:
+            pass
+
+        if error:
+            try:
+                self.getControl(4020).setLabel('Erreur de chargement')
+            except RuntimeError:
+                pass
+            return
+        self._render_status()
 
         try:
             lst = self.getControl(4010)
@@ -188,3 +248,5 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         super().onAction(action)
+        if aid == ACTION_MOVE_DOWN and self.getFocusId() == 4010:
+            self._maybe_load_more()

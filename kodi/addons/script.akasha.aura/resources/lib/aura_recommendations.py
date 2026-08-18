@@ -7,6 +7,11 @@ aura_window.py::_get_connector_client), falls back to direct Plex API access
 the stored session is invalid. No login prompt here: a user reaching this
 window is expected to already be authenticated (or intentionally not using
 the connector), keeping this window's flow simple.
+
+Milestone 9: each row loads incrementally (paged_list.PagedList) instead of
+fetching everything upfront -- a first page eagerly, then more as the user
+scrolls right -- and pages are cached on-device (local_cache.LocalCache) so
+revisiting this window doesn't refetch over the network every time.
 """
 import xbmc
 import xbmcaddon
@@ -14,8 +19,12 @@ import xbmcgui
 
 import connector_client
 import divert_source
+import local_cache
+import paged_list
 import plex_client
 
+ACTION_MOVE_LEFT = 1
+ACTION_MOVE_RIGHT = 2
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
@@ -27,6 +36,8 @@ ROW_RELEASES_LABEL_ID = 5300
 ROW_RELEASES_LIST_ID = 5310
 STATUS_LABEL_ID = 5020
 
+ROW_CACHE_TTL_SECONDS = 120
+
 
 class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
@@ -35,20 +46,24 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         self._connector = None
         self._plex = None
         self._first_section = None
+        self._cache = local_cache.open_addon_cache(self.addon)
+        # {list_control_id: (row_title, PagedList)}
+        self._rows = {}
 
     def onInit(self):
         try:
             self._connect()
-            self._load_row(ROW_ON_DECK_LABEL_ID, ROW_ON_DECK_LIST_ID,
-                            'Continuer a regarder', self._fetch_on_deck)
-            self._load_row(ROW_RECENT_LABEL_ID, ROW_RECENT_LIST_ID,
-                            'Episodes sortis recemment', self._fetch_recently_added)
+            self._init_row(ROW_ON_DECK_LABEL_ID, ROW_ON_DECK_LIST_ID,
+                            'Continuer a regarder', self._fetch_on_deck_page)
+            self._init_row(ROW_RECENT_LABEL_ID, ROW_RECENT_LIST_ID,
+                            'Episodes sortis recemment', self._fetch_recently_added_page)
+
             releases_title = 'Recemment ajoute'
             section = self._get_first_video_section()
             if section:
                 releases_title = 'Recemment ajoute dans {}'.format(section['title'])
-            self._load_row(ROW_RELEASES_LABEL_ID, ROW_RELEASES_LIST_ID,
-                            releases_title, self._fetch_recent_releases)
+            self._init_row(ROW_RELEASES_LABEL_ID, ROW_RELEASES_LIST_ID,
+                            releases_title, self._fetch_recent_releases_page)
         except Exception as e:
             xbmc.log('Akasha Aura Recommendations: init error: {}'.format(e), xbmc.LOGERROR)
 
@@ -66,20 +81,31 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         if plex_url and plex_token:
             self._plex = plex_client.PlexClient(plex_url, plex_token, timeout=15)
 
-    def _fetch_on_deck(self):
+    def _fetch_on_deck_page(self, offset, limit):
+        key = local_cache.page_cache_key('on-deck', offset, limit)
+        return self._cache.get_or_set(
+            key, ROW_CACHE_TTL_SECONDS, lambda: self._fetch_on_deck_page_uncached(offset, limit))
+
+    def _fetch_on_deck_page_uncached(self, offset, limit):
         if self._connector:
-            raw = self._connector.on_deck()
+            raw = self._connector.on_deck(limit=limit, offset=offset)
             return divert_source.parse_metadata_list(raw, self._connector.image_url)
         if self._plex:
-            return self._plex.on_deck()
+            return self._plex.on_deck(limit=limit, offset=offset)
         return []
 
-    def _fetch_recently_added(self):
+    def _fetch_recently_added_page(self, offset, limit):
+        key = local_cache.page_cache_key('recently-added', offset, limit)
+        return self._cache.get_or_set(
+            key, ROW_CACHE_TTL_SECONDS,
+            lambda: self._fetch_recently_added_page_uncached(offset, limit))
+
+    def _fetch_recently_added_page_uncached(self, offset, limit):
         if self._connector:
-            raw = self._connector.recently_added()
+            raw = self._connector.recently_added(limit=limit, offset=offset)
             return divert_source.parse_metadata_list(raw, self._connector.image_url)
         if self._plex:
-            return self._plex.recently_added()
+            return self._plex.recently_added(limit=limit, offset=offset)
         return []
 
     def _get_first_video_section(self):
@@ -93,49 +119,87 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         self._first_section = sections[0] if sections else False
         return self._first_section or None
 
-    def _fetch_recent_releases(self):
+    def _fetch_recent_releases_page(self, offset, limit):
         section = self._get_first_video_section()
         if not section:
             return []
+        key = local_cache.page_cache_key('recent-releases', section['key'], offset, limit)
+        return self._cache.get_or_set(
+            key, ROW_CACHE_TTL_SECONDS,
+            lambda: self._fetch_recent_releases_page_uncached(section, offset, limit))
+
+    def _fetch_recent_releases_page_uncached(self, section, offset, limit):
         if self._connector:
-            raw = self._connector.section_items(section['key'], sort='addedAt:desc', limit=20)
+            raw = self._connector.section_items(
+                section['key'], sort='addedAt:desc', limit=limit, offset=offset)
             return divert_source.parse_metadata_list(raw, self._connector.image_url)
         if self._plex:
-            return self._plex.section_items(section['key'], sort='addedAt:desc', limit=20)
+            return self._plex.section_items(
+                section['key'], sort='addedAt:desc', limit=limit, offset=offset)
         return []
 
-    def _load_row(self, label_control_id, list_control_id, title, fetch_fn):
-        items = []
+    def _init_row(self, label_control_id, list_control_id, title, fetch_page_fn):
+        paged = paged_list.PagedList(fetch_page_fn)
         error = None
         try:
-            items = fetch_fn()
+            paged.load_initial()
         except (connector_client.ConnectorAPIError, plex_client.PlexAPIError) as e:
             error = e
         except Exception as e:  # defensive: never crash the window on a row failure
             error = e
 
-        try:
-            self.getControl(label_control_id).setLabel(
-                '{} ({} element(s))'.format(title, len(items)) if not error else
-                '{} — erreur de chargement'.format(title))
-        except RuntimeError:
-            pass
+        self._rows[list_control_id] = (label_control_id, title, paged)
+        self._render_row_label(list_control_id, error)
 
         if error:
             xbmc.log('Akasha Aura Recommendations: {} failed: {}'.format(title, error),
                      xbmc.LOGWARNING)
+            return
 
         try:
             lst = self.getControl(list_control_id)
             lst.reset()
-            for item in items:
-                li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
-                if item.get('thumb_url'):
-                    li.setArt({'thumb': item['thumb_url']})
-                lst.addItem(li)
+            for item in paged.items:
+                lst.addItem(_build_list_item(item))
         except Exception as e:
             xbmc.log('Akasha Aura Recommendations: render error for {}: {}'.format(title, e),
                      xbmc.LOGERROR)
+
+    def _render_row_label(self, list_control_id, error=None):
+        label_control_id, title, paged = self._rows[list_control_id]
+        try:
+            self.getControl(label_control_id).setLabel(
+                '{} — erreur de chargement'.format(title) if error else
+                '{} ({} element(s))'.format(title, len(paged.items)))
+        except RuntimeError:
+            pass
+
+    def _maybe_load_more(self, list_control_id):
+        row = self._rows.get(list_control_id)
+        if not row:
+            return
+        label_control_id, title, paged = row
+        try:
+            position = self.getControl(list_control_id).getSelectedPosition()
+        except RuntimeError:
+            return
+
+        try:
+            new_items = paged.maybe_load_more(position)
+        except Exception as e:
+            xbmc.log('Akasha Aura Recommendations: pagination fetch failed for {}: {}'
+                     .format(title, e), xbmc.LOGWARNING)
+            return
+        if not new_items:
+            return
+
+        try:
+            lst = self.getControl(list_control_id)
+            lst.addItems([_build_list_item(item) for item in new_items])
+        except Exception as e:
+            xbmc.log('Akasha Aura Recommendations: append render error for {}: {}'
+                     .format(title, e), xbmc.LOGERROR)
+        self._render_row_label(list_control_id)
 
     def onAction(self, action):
         aid = action.getId()
@@ -143,7 +207,18 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         super().onAction(action)
+        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
+            focus_id = self.getFocusId()
+            if focus_id in self._rows:
+                self._maybe_load_more(focus_id)
 
     def onClick(self, controlID):
         if controlID == 5030:
             self.close()
+
+
+def _build_list_item(item):
+    li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
+    if item.get('thumb_url'):
+        li.setArt({'thumb': item['thumb_url']})
+    return li

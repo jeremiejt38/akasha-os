@@ -23,6 +23,8 @@ import config
 import connector_client
 import divert_source
 import games_shortcuts
+import local_cache
+import paged_list
 import plex_client
 import steam_client
 import sunshine_client
@@ -38,8 +40,8 @@ ACTION_NAV_BACK = 92
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
-DIVERT_ITEMS_LIMIT = 100
 DIVERT_SIDEBAR_HOME_INDEX = 0
+DIVERT_CACHE_TTL_SECONDS = 300
 
 GAME_BUTTON_IDS = (2010, 2011, 2012)
 APP_TILE_IDS = (2030, 2031, 2032, 2033)
@@ -66,6 +68,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_sections = []
         self._divert_active_section = 0
         self._divert_items = []
+        self._divert_paged = None
+        self._cache = local_cache.open_addon_cache(addon)
         self._games = games_shortcuts.load_shortcuts(self.addon_path)
         self._other_games = [
             g for g in self._games
@@ -187,41 +191,81 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             li.setArt({'icon': icon})
             sidebar.addItem(li)
 
+    def _divert_section_page(self, section, offset, limit):
+        key = local_cache.page_cache_key('divert', section['key'], offset, limit)
+        return self._cache.get_or_set(
+            key, DIVERT_CACHE_TTL_SECONDS,
+            lambda: self._divert_section_page_uncached(section, offset, limit))
+
+    def _divert_section_page_uncached(self, section, offset, limit):
+        if self._connector_client:
+            raw = self._connector_client.section_items(
+                section['key'], sort='addedAt:desc', limit=limit, offset=offset)
+            return divert_source.parse_metadata_list(raw, self._connector_client.image_url)
+        return self._plex_client.section_items(
+            section['key'], sort='addedAt:desc', limit=limit, offset=offset)
+
     def _select_divert_section(self, index):
         if index >= len(self._divert_sections):
             return
         self._divert_active_section = index
         section = self._divert_sections[index]
 
+        self._divert_paged = paged_list.PagedList(
+            lambda offset, limit: self._divert_section_page(section, offset, limit))
+        error = None
         try:
-            if self._connector_client:
-                raw = self._connector_client.section_items(
-                    section['key'], sort='addedAt:desc', limit=DIVERT_ITEMS_LIMIT)
-                self._divert_items = divert_source.parse_metadata_list(
-                    raw, self._connector_client.image_url)
-            else:
-                self._divert_items = self._plex_client.section_items(
-                    section['key'], sort='addedAt:desc', limit=DIVERT_ITEMS_LIMIT)
+            self._divert_paged.load_initial()
         except Exception as e:
             xbmc.log('Akasha Aura: section items load failed: {}'.format(e), xbmc.LOGERROR)
-            self._divert_items = []
+            error = e
+        self._divert_items = self._divert_paged.items
 
-        try:
-            status = self.getControl(DIVERT_STATUS_ID)
-            status.setLabel('{} — {} element(s)'.format(section['title'], len(self._divert_items)))
-        except RuntimeError:
-            pass
+        self._render_divert_status(section, error)
 
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             panel.reset()
             for item in self._divert_items:
-                li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
-                if item.get('thumb_url'):
-                    li.setArt({'thumb': item['thumb_url']})
-                panel.addItem(li)
+                panel.addItem(_build_divert_list_item(item))
         except Exception as e:
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
+
+    def _render_divert_status(self, section, error=None):
+        try:
+            status = self.getControl(DIVERT_STATUS_ID)
+            if error:
+                status.setLabel('{} — erreur de chargement'.format(section['title']))
+            else:
+                status.setLabel('{} — {} element(s)'.format(
+                    section['title'], len(self._divert_items)))
+        except RuntimeError:
+            pass
+
+    def _maybe_load_more_divert(self):
+        if not self._divert_paged or not self._divert_sections:
+            return
+        try:
+            position = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        try:
+            new_items = self._divert_paged.maybe_load_more(position)
+        except Exception as e:
+            xbmc.log('Akasha Aura: Divertissement pagination fetch failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            return
+        if not new_items:
+            return
+        self._divert_items = self._divert_paged.items
+        try:
+            panel = self.getControl(DIVERT_PANEL_ID)
+            panel.addItems([_build_divert_list_item(item) for item in new_items])
+        except Exception as e:
+            xbmc.log('Akasha Aura: Divertissement append render error: {}'.format(e),
+                     xbmc.LOGERROR)
+        section = self._divert_sections[self._divert_active_section]
+        self._render_divert_status(section)
 
     def _load_other_games(self):
         for i, control_id in enumerate(GAME_BUTTON_IDS):
@@ -412,6 +456,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             return
         super().onAction(action)
+        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT) and self.getFocusId() == DIVERT_PANEL_ID:
+            self._maybe_load_more_divert()
 
     def onClick(self, controlID):
         if controlID in TAB_BUTTON_IDS:
@@ -521,3 +567,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # for now just surface the title so selection feels responsive.
             xbmcgui.Dialog().notification(
                 'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+
+
+def _build_divert_list_item(item):
+    li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
+    if item.get('thumb_url'):
+        li.setArt({'thumb': item['thumb_url']})
+    return li

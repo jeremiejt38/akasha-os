@@ -93,15 +93,17 @@ class PlexClient:
         return [self._video_dict(item, self.server_url, self.token)
                 for item in mc.get('Metadata', [])]
 
-    def on_deck(self, limit=20):
+    def on_deck(self, limit=20, offset=0):
         data = self._request('/library/onDeck', {
             'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
 
-    def recently_added(self, limit=20):
+    def recently_added(self, limit=20, offset=0):
         data = self._request('/library/recentlyAdded', {
             'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
 
@@ -141,10 +143,11 @@ class PlexClient:
             if item.get('title')
         ]
 
-    def by_genre(self, section_key, genre, limit=10):
+    def by_genre(self, section_key, genre, limit=10, offset=0):
         data = self._request('/library/sections/{}/all'.format(section_key), {
             'genre': genre,
             'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
 
@@ -162,7 +165,7 @@ class PlexClient:
             if item.get('type') in ('movie', 'show')
         ]
 
-    def section_items(self, section_key, sort='titleSort', limit=200):
+    def section_items(self, section_key, sort='titleSort', limit=200, offset=0):
         """Return all items of a section, sorted.
 
         sort examples: titleSort, titleSort:desc, originallyAvailableAt:desc,
@@ -171,14 +174,16 @@ class PlexClient:
         data = self._request('/library/sections/{}/all'.format(section_key), {
             'sort': sort,
             'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
 
-    def search(self, section_key, query, limit=50):
+    def search(self, section_key, query, limit=50, offset=0):
         """Search items in a section by title (client-side filter)."""
         data = self._request('/library/sections/{}/all'.format(section_key), {
             'search': query,
             'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
         })
         return self._metadata_list(data)
 
