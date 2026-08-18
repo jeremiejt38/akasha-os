@@ -71,6 +71,42 @@ class AmbientConfig:
         return self.sleep_after_minutes * 60
 
 
+# Windows that are safe to interrupt with Ambient Mode purely based on
+# Kodi's own global idle timer (native Home, and every one of Akasha Aura's
+# own screens -- browsing Aura idly for the configured timeout should still
+# trigger Ambient, exactly like sitting on the native Home screen would).
+# Any *other* active window means some third-party addon (e.g. a script-type
+# addon with its own custom browse/playback UI, like a Plex client that
+# isn't going through xbmc.Player) is genuinely being used in the
+# foreground -- Ambient must never interrupt that, even once the idle timer
+# alone would otherwise justify it, since such addons don't necessarily
+# reset Kodi's global idle timer or register with xbmc.Player() the way
+# native video playback does. See docs/ambient-mode/decisions.md (bug found
+# on the real device: Ambient/sleep triggered while the user was actively
+# watching content through such an addon).
+IDLE_SAFE_WINDOW_NAMES = (
+    'home',
+    '1194',  # script.akasha.aura: Aura.xml
+    '1195',  # script.akasha.aura: AuraLibrary.xml
+    '1196',  # script.akasha.aura: AuraApp.xml
+    '1197',  # script.akasha.aura: AuraStore.xml
+    '1198',  # script.akasha.aura: AuraShow.xml
+    '1199',  # script.akasha.aura: AuraRecommendations.xml
+    '1200',  # script.akasha.aura: AuraGenres.xml
+)
+
+
+def is_foreground_app_active(is_window_active_fn):
+    """True if the active window is something other than the native Home
+    screen or one of Akasha Aura's own screens.
+
+    `is_window_active_fn` is a callable(window_name_or_id) -> bool, normally
+    `lambda w: xbmc.getCondVisibility('Window.IsActive({})'.format(w))`
+    (kept injectable so this stays testable without a Kodi runtime).
+    """
+    return not any(is_window_active_fn(w) for w in IDLE_SAFE_WINDOW_NAMES)
+
+
 def _as_int(value, default, minimum, maximum):
     try:
         parsed = int(value)

@@ -212,3 +212,33 @@ implémentée et validée. Utilisation du builtin `RunScript` plutôt que
 `subprocess.Popen([sys.executable, ...])`, suite au bug découvert sur
 `script.akasha.guide/default.py` où `sys.executable` ne pointait pas vers un interpréteur Python
 utilisable depuis le runtime Kodi embarqué.
+
+## Ambient/sleep triggering while the user was actively watching content (2026-08-19)
+
+**Constat utilisateur** : Akasha OS s'est mis en veille alors que l'utilisateur regardait du
+contenu. Rappel du comportement voulu : la veille ne se déclenche que manuellement ou après une
+inactivité *dans le mode Ambiant lui-même* ; le mode Ambiant, lui, ne doit s'activer que si (a)
+aucune activité n'est détectée dans l'interface (`xbmc.getGlobalIdleTime()`) **et** (b) aucune
+application/addon/extension n'est actuellement utilisée au premier plan.
+
+**Cause** : `service.akasha.ambient/service.py::_should_trigger()` ne vérifiait que l'idle time et
+`xbmc.Player().isPlaying()` — ce qui protège bien la lecture native Kodi (bibliothèque locale,
+Jellyfin, la plupart des lectures Plex), mais pas un addon tiers avec sa propre fenêtre
+personnalisée (ex. un client Plex qui ne passe pas systématiquement par `xbmc.Player()`, ou qui ne
+réinitialise pas le minuteur d'inactivité global de Kodi pendant qu'il capture lui-même les
+entrées). Dans ce cas, `idle_time` continue de grimper et `isPlaying()` peut rester `False` alors
+que l'utilisateur regarde activement du contenu — Ambient se déclenche, puis, sans aucune
+interaction pour l'arrêter (l'utilisateur suit son contenu, ne touche pas la télécommande), le
+minuteur de veille interne d'Ambient (`ambient_window.py::_ticker_loop`) finit par déclencher la
+mise en veille réelle.
+
+**Corrigé** : nouvelle fonction pure et testée `config.is_foreground_app_active(is_window_active_fn)`
+— retourne `True` si la fenêtre active n'est ni l'écran d'accueil natif (`home`) ni l'un des écrans
+d'Akasha Aura lui-même (IDs `1194`-`1200`, parcourir Aura sans interaction reste couvert par le
+seul idle time, comme avant). Toute autre fenêtre active (un addon tiers avec sa propre UI) bloque
+désormais le déclenchement d'Ambient, quelle que soit la durée d'inactivité mesurée par Kodi.
+Câblé dans `_should_trigger()` via `xbmc.getCondVisibility('Window.IsActive(...)')`.
+
+Ce correctif ne couvre que le déclenchement *initial* d'Ambient (`service.akasha.ambient`) ; une
+fois Ambient réellement actif, l'utilisateur reprend la main dès la moindre entrée
+(`AmbientWindow.onAction` ferme immédiatement Ambient — spec section 17, "réveil immédiat").

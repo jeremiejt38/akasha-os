@@ -73,6 +73,15 @@ def _should_trigger(idle_time, threshold_seconds):
     if _lock_file_fresh():
         # Ambient window already open; avoid stacking a second RunScript.
         return False
+    if config.is_foreground_app_active(
+            lambda w: xbmc.getCondVisibility('Window.IsActive({})'.format(w))):
+        # Some other addon/app (not the native Home screen or one of
+        # Akasha Aura's own screens) is the active window -- e.g. a
+        # third-party Plex/media client with its own custom UI that
+        # doesn't necessarily use xbmc.Player() or reset Kodi's global
+        # idle timer. Never interrupt that with Ambient Mode, no matter
+        # how long xbmc.getGlobalIdleTime() has been climbing.
+        return False
     return True
 
 

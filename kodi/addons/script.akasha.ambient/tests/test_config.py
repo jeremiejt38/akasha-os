@@ -71,5 +71,29 @@ class LoadConfigTests(unittest.TestCase):
         self.assertEqual(cfg.sleep_after_seconds, 1800)
 
 
+class IsForegroundAppActiveTests(unittest.TestCase):
+    """Regression tests: found on a real device where Ambient Mode (and,
+    downstream, sleep) triggered while the user was actively watching
+    content through a third-party addon that doesn't use xbmc.Player() or
+    reset Kodi's global idle timer the way native playback does."""
+
+    def test_false_when_native_home_is_active(self):
+        self.assertFalse(config.is_foreground_app_active(lambda w: w == 'home'))
+
+    def test_false_when_any_aura_window_is_active(self):
+        for window_id in ('1194', '1195', '1199', '1200'):
+            with self.subTest(window_id=window_id):
+                self.assertFalse(
+                    config.is_foreground_app_active(lambda w, wid=window_id: w == wid))
+
+    def test_true_when_a_foreign_addon_window_is_active(self):
+        # e.g. a third-party Plex/media client's own custom window -- not
+        # home, not one of Akasha Aura's windows.
+        self.assertTrue(config.is_foreground_app_active(lambda w: False))
+
+    def test_false_takes_priority_when_multiple_checks_would_match(self):
+        self.assertFalse(config.is_foreground_app_active(lambda w: True))
+
+
 if __name__ == '__main__':
     unittest.main()
