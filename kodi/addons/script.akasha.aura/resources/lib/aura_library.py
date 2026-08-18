@@ -8,6 +8,8 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
+import connector_client
+import divert_source
 import plex_client
 
 ACTION_PREVIOUS_MENU = 10
@@ -28,6 +30,12 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         self.server_url = addon.getSetting('plex.server_url')
         self.token = addon.getSetting('plex.token')
         self.client = plex_client.PlexClient(self.server_url, self.token)
+        self.connector = None
+        connector_url = addon.getSetting('connector.server_url')
+        connector_token = addon.getSetting('connector.session_token')
+        if connector_url and connector_token:
+            self.connector = connector_client.ConnectorClient(connector_url, timeout=15)
+            self.connector.token = connector_token
         self.section = None
         self.items = []
         self.sort = SORT_OPTIONS[0][0]
@@ -36,7 +44,7 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         try:
-            sections = self.client.video_sections()
+            sections = self._video_sections()
             for s in sections:
                 if s['type'] == 'movie':
                     self.section = s
@@ -49,13 +57,50 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura Library: init error: {}'.format(e), xbmc.LOGERROR)
 
+    def _video_sections(self):
+        if self.connector:
+            try:
+                return divert_source.parse_sections(self.connector.sections())
+            except connector_client.ConnectorAPIError as e:
+                xbmc.log('Akasha Aura Library: connector sections failed, falling back to '
+                         'Plex direct: {}'.format(e), xbmc.LOGWARNING)
+                self.connector = None
+        return self.client.video_sections()
+
+    def _section_items(self, **kwargs):
+        if self.connector:
+            try:
+                raw = self.connector.section_items(self.section['key'], **kwargs)
+                return divert_source.parse_metadata_list(raw, self.connector.image_url)
+            except connector_client.ConnectorAPIError as e:
+                xbmc.log('Akasha Aura Library: connector section_items failed, falling back '
+                         'to Plex direct: {}'.format(e), xbmc.LOGWARNING)
+                self.connector = None
+        return self.client.section_items(self.section['key'], **kwargs)
+
+    def _section_genres(self):
+        if self.connector:
+            try:
+                return divert_source.parse_genres(self.connector.section_genres(self.section['key']))
+            except connector_client.ConnectorAPIError as e:
+                xbmc.log('Akasha Aura Library: connector genres failed, falling back to Plex '
+                         'direct: {}'.format(e), xbmc.LOGWARNING)
+                self.connector = None
+        return self.client.section_genres(self.section['key'])
+
     def _load_items(self):
         if self.query:
-            self.items = self.client.search(self.section['key'], self.query)
+            if self.connector:
+                self.items = self._section_items(search=self.query)
+            else:
+                self.items = self.client.search(self.section['key'], self.query)
         elif self.filter_genre:
-            self.items = self.client.by_genre(self.section['key'], self.filter_genre, limit=200)
+            if self.connector:
+                self.items = self._section_items(genre=self.filter_genre, limit=200)
+            else:
+                self.items = self.client.by_genre(self.section['key'], self.filter_genre, limit=200)
         else:
-            self.items = self.client.section_items(self.section['key'], sort=self.sort)
+            self.items = self._section_items(sort=self.sort)
         self._render()
 
     def _render(self):
@@ -107,7 +152,7 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
 
         elif controlID == 4003:
             try:
-                genres = self.client.section_genres(self.section['key'])
+                genres = self._section_genres()
             except Exception as e:
                 xbmc.log('Akasha Aura Library: genre load failed: {}'.format(e), xbmc.LOGERROR)
                 genres = []
