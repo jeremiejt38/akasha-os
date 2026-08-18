@@ -27,7 +27,8 @@ ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
-ROW_LABEL_PAIRS = ((3010, 3020), (3011, 3021), (3012, 3022), (3013, 3023))
+ROW_IDS = ((3010, 3030), (3011, 3031), (3012, 3032))
+ROW_LIST_IDS = tuple(list_id for _, list_id in ROW_IDS)
 
 
 GAME_BUTTON_IDS = (2010, 2011, 2012)
@@ -125,21 +126,25 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 btn.setLabel('')
 
     def _render_divertissement_rows(self):
-        for i, (title_id, content_id) in enumerate(ROW_LABEL_PAIRS):
+        for i, (title_id, list_id) in enumerate(ROW_IDS):
             try:
                 title_ctl = self.getControl(title_id)
-                content_ctl = self.getControl(content_id)
+                list_ctl = self.getControl(list_id)
             except RuntimeError:
                 continue
 
             if i < len(self._rows):
                 row = self._rows[i]
                 title_ctl.setLabel(row['label'])
-                titles = ' / '.join(item['title'] for item in row['items'][:8])
-                content_ctl.setLabel(titles)
+                list_ctl.reset()
+                for item in row['items'][:20]:
+                    li = xbmcgui.ListItem(item['title'])
+                    if item.get('thumb_url'):
+                        li.setArt({'thumb': item['thumb_url']})
+                    list_ctl.addItem(li)
             else:
                 title_ctl.setLabel('')
-                content_ctl.setLabel('')
+                list_ctl.reset()
 
     def _show_tab(self, index):
         index = index % len(config.TABS)
@@ -187,3 +192,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             idx = APP_TILE_IDS.index(controlID)
             if idx < len(self._pinned_apps):
                 xbmc.executebuiltin('RunAddon({})'.format(self._pinned_apps[idx]['addonid']))
+        elif controlID in ROW_LIST_IDS:
+            self._on_row_item_selected(controlID)
+
+    def _on_row_item_selected(self, controlID):
+        row_index = ROW_LIST_IDS.index(controlID)
+        if row_index >= len(self._rows):
+            return
+        try:
+            pos = self.getControl(controlID).getSelectedPosition()
+        except RuntimeError:
+            return
+        items = self._rows[row_index]['items']
+        if 0 <= pos < len(items):
+            # Playback delegation is not decided yet (see docs/aura/decisions.md);
+            # for now just surface the title so selection feels responsive.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', items[pos]['title'], xbmcgui.NOTIFICATION_INFO, 2000)
