@@ -64,6 +64,15 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
                 releases_title = 'Recemment ajoute dans {}'.format(section['title'])
             self._init_row(ROW_RELEASES_LABEL_ID, ROW_RELEASES_LIST_ID,
                             releases_title, self._fetch_recent_releases_page)
+
+            # The XML's <defaultcontrol> is the back button (safe fallback if a
+            # row fails to load); once rows are populated, focus the first
+            # non-empty one so Left/Right immediately scrolls content.
+            for list_control_id in (ROW_ON_DECK_LIST_ID, ROW_RECENT_LIST_ID, ROW_RELEASES_LIST_ID):
+                row = self._rows.get(list_control_id)
+                if row and row[2].items:
+                    self.setFocus(self.getControl(list_control_id))
+                    break
         except Exception as e:
             xbmc.log('Akasha Aura Recommendations: init error: {}'.format(e), xbmc.LOGERROR)
 
