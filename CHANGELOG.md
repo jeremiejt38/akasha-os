@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.27.0...akasha-os-v0.27.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** set explicit User-Agent on connector requests (Cloudflare 403) ([b659d83](https://github.com/jeremiejt38/akasha-os/commit/b659d835971c2ff5b04cf2ef035ec033b5ad8d07))
+
 ## [0.27.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.26.1...akasha-os-v0.27.0) (2026-08-18)
 
 
