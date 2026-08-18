@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.32.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.32.0...akasha-os-v0.32.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** sidebar onright pointed to a non-focusable label, breaking navigation ([4f64920](https://github.com/jeremiejt38/akasha-os/commit/4f649201aeffa7c1a5efda56fae6c657681855e8))
+
 ## [0.32.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.3...akasha-os-v0.32.0) (2026-08-18)
 
 
