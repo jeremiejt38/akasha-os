@@ -55,6 +55,18 @@ class TestConnectorClient(unittest.TestCase):
             self.client.login('user', 'wrong')
 
     @patch('urllib.request.urlopen')
+    def test_request_sets_explicit_user_agent(self, mock_urlopen):
+        # Cloudflare (fronting connector.akasha.ing) blocks the default
+        # Python-urllib User-Agent as a bot signature (HTTP 403) -- regression
+        # test for the explicit override.
+        mock_urlopen.return_value = MockHTTPResponse({'token': 'abc123'})
+
+        self.client.login('user', 'pass')
+
+        sent_request = mock_urlopen.call_args[0][0]
+        self.assertNotIn('python-urllib', sent_request.get_header('User-agent').lower())
+
+    @patch('urllib.request.urlopen')
     def test_sections_sends_bearer_token(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse(
             {'MediaContainer': {'Directory': [{'title': 'Films'}]}})

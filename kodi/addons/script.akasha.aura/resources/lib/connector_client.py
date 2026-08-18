@@ -27,7 +27,11 @@ class ConnectorClient:
         if auth and self.token is None:
             raise ConnectorAPIError('Not authenticated')
 
-        headers = {'Accept': 'application/json'}
+        # Cloudflare (which fronts connector.akasha.ing) blocks the default
+        # Python-urllib User-Agent as a bot signature (HTTP 403, error 1010)
+        # -- always send an explicit one, both here and in image_url()'s
+        # Kodi texture request (see below).
+        headers = {'Accept': 'application/json', 'User-Agent': 'AkashaOSAura/1.0'}
         if auth:
             headers['Authorization'] = 'Bearer {}'.format(self.token)
 
