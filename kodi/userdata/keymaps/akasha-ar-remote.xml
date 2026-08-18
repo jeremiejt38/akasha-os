@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha OS keymap for the Amazon Fire TV Bluetooth remote ("AR" / "AR Keyboard").
+
+The remote exposes itself as a Bluetooth HID keyboard. This keymap binds the
+standard media/navigation keys to Kodi actions so the remote works out of the
+box with Akasha Aura and the rest of the interface.
+-->
+<keymap>
+  <global>
+    <keyboard>
+      <home>RunScript(script.akasha.aura)</home>
+      <menu>ContextMenu</menu>
+      <escape>Back</escape>
+      <back>Back</back>
+      <play>PlayPause</play>
+      <playpause>PlayPause</playpause>
+      <stop>Stop</stop>
+      <rewind>Rewind</rewind>
+      <fastforward>FastForward</fastforward>
+      <volumeup>VolumeUp</volumeup>
+      <volumedown>VolumeDown</volumedown>
+      <mute>Mute</mute>
+    </keyboard>
+  </global>
+  <FullscreenVideo>
+    <keyboard>
+      <back>Stop</back>
+      <escape>Stop</escape>
+    </keyboard>
+  </FullscreenVideo>
+</keymap>

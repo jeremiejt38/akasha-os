@@ -320,6 +320,9 @@ fi
 if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-aura.xml" ]; then
     cp "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-aura.xml" /storage/.kodi/userdata/keymaps/akasha-aura.xml
 fi
+if [ -f "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-ar-remote.xml" ]; then
+    cp "$SCRIPT_DIR/kodi/userdata/keymaps/akasha-ar-remote.xml" /storage/.kodi/userdata/keymaps/akasha-ar-remote.xml
+fi
 
 if [ -f "$SCRIPT_DIR/scripts/volume.py" ]; then
     cp "$SCRIPT_DIR/scripts/volume.py" /storage/.kodi/scripts/volume.py
