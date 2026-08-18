@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.28.1...akasha-os-v0.29.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add Sorties recentes row to Pour vous view ([e1264eb](https://github.com/jeremiejt38/akasha-os/commit/e1264eb48705a79e8a984862beae8c53838ca088))
+
 ## [0.28.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.28.0...akasha-os-v0.28.1) (2026-08-18)
 
 
