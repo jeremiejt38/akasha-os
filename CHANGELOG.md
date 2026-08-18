@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.1...akasha-os-v0.31.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** section_genres reads title field, not tag (Plex API response shape) ([d4ab825](https://github.com/jeremiejt38/akasha-os/commit/d4ab8257e5282cf775a26cd630d6b4b314a1b55a))
+
 ## [0.31.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.31.0...akasha-os-v0.31.1) (2026-08-18)
 
 
