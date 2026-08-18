@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.25.0...akasha-os-v0.26.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** icon tabs, per-library sub-tabs, Steam/Sunshine game libraries ([a6b17f7](https://github.com/jeremiejt38/akasha-os/commit/a6b17f774d4b671f365b7b14b52e71a6d1f50076))
+
 ## [0.25.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.24.1...akasha-os-v0.25.0) (2026-08-18)
 
 
