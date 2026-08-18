@@ -95,6 +95,25 @@ class TestConnectorClient(unittest.TestCase):
         self.client.metadata_children('42')
         self.assertIn('/api/plex/metadata/42/children', mock_urlopen.call_args[0][0].full_url)
 
+    def test_image_url_includes_encoded_path_and_auth_header(self):
+        self.client.token = 'abc123'
+
+        url = self.client.image_url('/library/metadata/98481/thumb/1784765860')
+
+        self.assertIn('/api/plex/image?path=', url)
+        self.assertIn('thumb%2F1784765860', url)
+        self.assertIn('|Authorization=Bearer%20abc123', url)
+
+    def test_image_url_without_token_omits_auth_header(self):
+        url = self.client.image_url('/library/metadata/1/thumb/1')
+
+        self.assertNotIn('Authorization', url)
+
+    def test_image_url_empty_path_returns_empty_string(self):
+        self.client.token = 'abc123'
+
+        self.assertEqual(self.client.image_url(''), '')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,6 +7,7 @@ docs/talos-strategy.md). Mirrors the style of plex_client.py.
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 
 
@@ -82,3 +83,23 @@ class ConnectorClient:
 
     def metadata_children(self, rating_key):
         return self._request('GET', '/api/plex/metadata/{}/children'.format(rating_key))
+
+    def image_url(self, plex_path):
+        """Build a Kodi-playable URL for a Plex image via the connector's proxy.
+
+        The admin Plex token never reaches the client: the connector resolves
+        it server-side (see docs/api.md of akasha-os-connector). The session
+        token is attached as a custom HTTP header using Kodi's URL option
+        syntax (`url|Header=Value`), which Kodi's texture downloader honours
+        for `ListItem.setArt()` sources — see akasha-os-connector's decision
+        to keep session tokens opaque/revocable rather than embedding them in
+        the URL query string itself.
+        """
+        if not plex_path:
+            return ''
+        encoded_path = urllib.parse.quote(plex_path, safe='')
+        base = '{}/api/plex/image?path={}'.format(self.server_url, encoded_path)
+        if not self.token:
+            return base
+        header_value = urllib.parse.quote('Bearer {}'.format(self.token), safe='')
+        return '{}|Authorization={}'.format(base, header_value)
