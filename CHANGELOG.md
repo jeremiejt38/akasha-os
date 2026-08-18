@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.31.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.30.0...akasha-os-v0.31.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** add Categories view (genre browser) matching Plex UI reference ([a6546e4](https://github.com/jeremiejt38/akasha-os/commit/a6546e4f33c39169ecd0ad8f540052f8f5cf6f70))
+* **aura:** show 2-line item labels (title + S/E or year) matching Plex UI reference ([c2f8a9e](https://github.com/jeremiejt38/akasha-os/commit/c2f8a9e8e3ffd291f8502cddadbff39c901e4448))
+
 ## [0.30.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.29.0...akasha-os-v0.30.0) (2026-08-18)
 
 
