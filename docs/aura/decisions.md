@@ -112,3 +112,27 @@ Même traitement dans `aura_genres.py` pour la `AuraLibraryWindow` qu'il ouvre l
 Défense complémentaire dans `script.akasha.ambient/default.py` : si la construction de la fenêtre
 échoue malgré tout (`RuntimeError`), log un warning unique et abandonne ce cycle de déclenchement
 plutôt que de laisser l'exception se répéter en boucle toutes les 5 secondes.
+
+## Bug distinct trouvé en validant le correctif ci-dessus : le cache local corrompt les tuples `(items, total)`
+
+En revalidant sur le device réel après le correctif de réutilisation des fenêtres, la Bibliothèque
+s'est mise à afficher "2 resultat(s)" au lieu du vrai total, avec en log `Akasha Aura Library:
+render error: list indices must be integers or slices, not str`.
+
+**Cause** : `local_cache.LocalCache.set()` sérialise les valeurs en JSON, qui ne distingue pas les
+tuples des listes — `(items, total)` redevient `[items, total]` après un aller-retour JSON. Or
+`PagedList._load_next_page()` teste `isinstance(result, tuple)` pour savoir si `fetch_page` a
+fourni un total : au premier appel (cache miss), le tuple réel passe ce test correctement : mais
+dès le second appel sur la même page (cache hit, dans la fenêtre de TTL), le résultat mis en cache
+redevient une liste `[items, total]`, qui échoue le test `isinstance(..., tuple)` et se retrouve
+traitée comme LA page elle-même — `self.items.extend([items_list, total_int])` ajoute alors deux
+entrées à `self.items` : la liste d'items entière comme un seul élément, et l'entier `total` comme
+second élément. D'où `len(self.items) == 2` ("2 resultat(s)") et l'erreur d'indexation dès qu'un
+appelant essaie de faire `item['title']` sur ces deux pseudo-éléments.
+
+**Corrigé** : `local_cache.get_or_set_page(cache, key, ttl, compute_fn)` — variante de
+`get_or_set` qui stocke/restitue toujours explicitement `{'items': ..., 'total': ...}` (une forme
+JSON-safe) et reconstruit systématiquement un vrai tuple `(items, total)` à la lecture, que ce
+soit un cache hit ou miss. Utilisé à la place de `get_or_set` dans les 3 points d'appel concernés
+(`aura_recommendations.py` ×3, `aura_window.py`, `aura_library.py`). Tests de régression ajoutés
+dans `test_local_cache.py` (aller-retour cache hit avec tuple, cas sans total).

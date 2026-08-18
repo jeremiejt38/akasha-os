@@ -209,8 +209,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _divert_section_page(self, section, offset, limit):
         key = local_cache.page_cache_key('divert', section['key'], offset, limit)
-        return self._cache.get_or_set(
-            key, DIVERT_CACHE_TTL_SECONDS,
+        return local_cache.get_or_set_page(
+            self._cache, key, DIVERT_CACHE_TTL_SECONDS,
             lambda: self._divert_section_page_uncached(section, offset, limit))
 
     def _divert_section_page_uncached(self, section, offset, limit):

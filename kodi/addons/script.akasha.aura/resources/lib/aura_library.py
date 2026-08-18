@@ -133,8 +133,8 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         mode, value = self._current_mode_key()
         cache_key = local_cache.page_cache_key(
             'library', self.section['key'], mode, value, offset, limit)
-        return self._cache.get_or_set(
-            cache_key, CACHE_TTL_SECONDS,
+        return local_cache.get_or_set_page(
+            self._cache, cache_key, CACHE_TTL_SECONDS,
             lambda: self._fetch_page_uncached(mode, value, offset, limit))
 
     def _fetch_page_uncached(self, mode, value, offset, limit):

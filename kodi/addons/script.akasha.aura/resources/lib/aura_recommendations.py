@@ -92,8 +92,9 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
 
     def _fetch_on_deck_page(self, offset, limit):
         key = local_cache.page_cache_key('on-deck', offset, limit)
-        return self._cache.get_or_set(
-            key, ROW_CACHE_TTL_SECONDS, lambda: self._fetch_on_deck_page_uncached(offset, limit))
+        return local_cache.get_or_set_page(
+            self._cache, key, ROW_CACHE_TTL_SECONDS,
+            lambda: self._fetch_on_deck_page_uncached(offset, limit))
 
     def _fetch_on_deck_page_uncached(self, offset, limit):
         if self._connector:
@@ -106,8 +107,8 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
 
     def _fetch_recently_added_page(self, offset, limit):
         key = local_cache.page_cache_key('recently-added', offset, limit)
-        return self._cache.get_or_set(
-            key, ROW_CACHE_TTL_SECONDS,
+        return local_cache.get_or_set_page(
+            self._cache, key, ROW_CACHE_TTL_SECONDS,
             lambda: self._fetch_recently_added_page_uncached(offset, limit))
 
     def _fetch_recently_added_page_uncached(self, offset, limit):
@@ -135,8 +136,8 @@ class AuraRecommendationsWindow(xbmcgui.WindowXMLDialog):
         if not section:
             return []
         key = local_cache.page_cache_key('recent-releases', section['key'], offset, limit)
-        return self._cache.get_or_set(
-            key, ROW_CACHE_TTL_SECONDS,
+        return local_cache.get_or_set_page(
+            self._cache, key, ROW_CACHE_TTL_SECONDS,
             lambda: self._fetch_recent_releases_page_uncached(section, offset, limit))
 
     def _fetch_recent_releases_page_uncached(self, section, offset, limit):

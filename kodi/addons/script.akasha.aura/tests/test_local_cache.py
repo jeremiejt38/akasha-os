@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from local_cache import LocalCache, page_cache_key
+from local_cache import LocalCache, get_or_set_page, page_cache_key
 
 
 class TestLocalCache(unittest.TestCase):
@@ -51,6 +51,38 @@ class TestLocalCache(unittest.TestCase):
 
     def test_page_cache_key_skips_none_and_empty(self):
         self.assertEqual(page_cache_key('a', None, '', 'b'), 'a:b')
+
+    def test_get_or_set_page_preserves_tuple_across_a_cache_hit(self):
+        """Regression test: a JSON cache round-trips a tuple as a list, which
+        would otherwise make PagedList treat a whole (items, total) result
+        as a single page on the second (cached) call -- found on a real
+        device where every paginated view silently became '2 element(s)'."""
+        calls = []
+
+        def compute():
+            calls.append(1)
+            return ([{'title': 'A'}, {'title': 'B'}], 437)
+
+        items1, total1 = get_or_set_page(self.cache, 'key1', 60, compute)
+        items2, total2 = get_or_set_page(self.cache, 'key1', 60, compute)
+
+        self.assertEqual(items1, [{'title': 'A'}, {'title': 'B'}])
+        self.assertEqual(total1, 437)
+        self.assertEqual(items1, items2)
+        self.assertEqual(total1, total2)
+        self.assertEqual(len(calls), 1)  # second call was a cache hit
+
+    def test_get_or_set_page_handles_plain_list_without_total(self):
+        def compute():
+            return [{'title': 'A'}]
+
+        items1, total1 = get_or_set_page(self.cache, 'key2', 60, compute)
+        items2, total2 = get_or_set_page(self.cache, 'key2', 60, compute)
+
+        self.assertEqual(items1, [{'title': 'A'}])
+        self.assertIsNone(total1)
+        self.assertEqual(items1, items2)
+        self.assertIsNone(total2)
 
 
 if __name__ == '__main__':

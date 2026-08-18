@@ -81,6 +81,36 @@ def page_cache_key(*parts):
     return ':'.join(str(p) for p in parts if p is not None and p != '')
 
 
+def get_or_set_page(cache, key, ttl_seconds, compute_fn):
+    """Like `LocalCache.get_or_set`, but safe for `(items, total)` tuples.
+
+    `compute_fn` may return either a plain list or a `(items, total)` tuple
+    (see paged_list.PagedList). `LocalCache.set` stores values as JSON,
+    which round-trips a tuple as a list -- so a cache HIT would otherwise
+    return `[items, total]` instead of `(items, total)`, and
+    `PagedList._load_next_page`'s `isinstance(result, tuple)` check would
+    then treat that 2-element list itself as the page (bug found on a real
+    device 2026-08-18: repeated cache hits silently corrupted every
+    paginated view into "2 element(s)").
+
+    Always returns a `(items, total)` tuple, regardless of what `compute_fn`
+    returned or how the cache backend serialised it.
+    """
+    cached = cache.get(key)
+    if cached is not None:
+        if isinstance(cached, dict) and 'items' in cached:
+            return cached['items'], cached.get('total')
+        return cached, None
+
+    result = compute_fn()
+    if isinstance(result, tuple):
+        items, total = result
+    else:
+        items, total = result, None
+    cache.set(key, {'items': items, 'total': total}, ttl_seconds)
+    return items, total
+
+
 def open_addon_cache(addon, filename='page_cache.db'):
     """Return a LocalCache backed by a file in the addon's profile directory.
 
