@@ -97,8 +97,8 @@ class TestPlexClient(unittest.TestCase):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {
                 'Directory': [
-                    {'tag': 'Action'},
-                    {'tag': 'Comédie'},
+                    {'title': 'Action'},
+                    {'title': 'Comédie'},
                 ]
             }
         })
@@ -135,7 +135,7 @@ class TestPlexClient(unittest.TestCase):
             ]}},
             # section_genres
             {'MediaContainer': {'Directory': [
-                {'tag': 'Drame'},
+                {'title': 'Drame'},
             ]}},
             # by_genre
             {'MediaContainer': {'Metadata': [

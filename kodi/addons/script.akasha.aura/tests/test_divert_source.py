@@ -22,7 +22,7 @@ class TestDivertSource(unittest.TestCase):
         self.assertEqual(sections[1]['title'], 'Series')
 
     def test_parse_genres(self):
-        raw = {'MediaContainer': {'Directory': [{'tag': 'Action'}, {'tag': 'Comedie'}, {}]}}
+        raw = {'MediaContainer': {'Directory': [{'title': 'Action'}, {'title': 'Comedie'}, {}]}}
         self.assertEqual(divert_source.parse_genres(raw), ['Action', 'Comedie'])
 
     def test_parse_metadata_list_resolves_images(self):

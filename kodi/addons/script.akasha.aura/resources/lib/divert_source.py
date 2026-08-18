@@ -31,9 +31,15 @@ def parse_sections(raw_json, section_types=('movie', 'show')):
 
 
 def parse_genres(raw_json):
-    """Return genre tags from a raw `/library/sections/{key}/genre` payload."""
+    """Return genre names from a raw `/library/sections/{key}/genre` payload.
+
+    Plex's `/library/sections/{key}/genre` endpoint returns each genre as a
+    `Directory` entry with a `title` field (not `tag`, which is used for
+    per-item genre tags on movies/shows themselves, a different response
+    shape) -- confirmed against a real server on 2026-08-18.
+    """
     mc = _media_container(raw_json)
-    return [str(item.get('tag')) for item in mc.get('Directory', []) if item.get('tag')]
+    return [str(item.get('title')) for item in mc.get('Directory', []) if item.get('title')]
 
 
 def item_subtitle(item):

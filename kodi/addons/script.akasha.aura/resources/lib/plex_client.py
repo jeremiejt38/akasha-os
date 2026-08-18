@@ -126,12 +126,19 @@ class PlexClient:
         return self._metadata_list(data)
 
     def section_genres(self, section_key):
+        """Return genre names for a section.
+
+        Plex's `/library/sections/{key}/genre` returns each genre as a
+        `Directory` entry with a `title` field (not `tag`, used for
+        per-item genre tags on movies/shows -- a different response shape),
+        confirmed against a real server on 2026-08-18.
+        """
         data = self._request('/library/sections/{}/genre'.format(section_key))
         mc = self._media_container(data)
         return [
-            str(item.get('tag'))
+            str(item.get('title'))
             for item in mc.get('Directory', [])
-            if item.get('tag')
+            if item.get('title')
         ]
 
     def by_genre(self, section_key, genre, limit=10):
