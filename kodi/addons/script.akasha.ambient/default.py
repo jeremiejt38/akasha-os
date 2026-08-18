@@ -20,11 +20,23 @@ sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 from ambient_window import AmbientWindow  # noqa: E402
 
 if __name__ == '__main__':
-    window = AmbientWindow('Ambient.xml', ADDON_PATH, 'Default', '1080i')
-    window.doModal()
-    # In fullscreen video mode doModal returns immediately after the window is
-    # closed, but the script must stay alive while the video plays and the
-    # sleep timer runs.
-    while window.is_active():
-        xbmc.sleep(100)
-    del window
+    try:
+        window = AmbientWindow('Ambient.xml', ADDON_PATH, 'Default', '1080i')
+    except RuntimeError as e:
+        # Kodi caps the number of dynamically-created script windows (~100)
+        # for the whole session; each RunScript invocation of this addon
+        # normally exits and lets Kodi reclaim its slot, but if some other
+        # addon is leaking window IDs this call can fail outright. Fail
+        # quietly instead of retrying every 5s (service.akasha.ambient's
+        # idle trigger) and flooding the log with the same traceback --
+        # this is a same-session, Kodi-restart-only condition either way.
+        xbmc.log('Akasha Ambient: could not open window ({}); giving up for '
+                 'this trigger cycle'.format(e), xbmc.LOGWARNING)
+    else:
+        window.doModal()
+        # In fullscreen video mode doModal returns immediately after the
+        # window is closed, but the script must stay alive while the video
+        # plays and the sleep timer runs.
+        while window.is_active():
+            xbmc.sleep(100)
+        del window

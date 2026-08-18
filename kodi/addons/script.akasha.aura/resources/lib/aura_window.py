@@ -78,6 +78,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._jeux_active_subtab = JEUX_SUBTAB_STEAMLINK
         self._jeux_items = []
         self._pinned_apps = []
+        # Sub-windows (Recommandations/Bibliotheque/Categories/App/Store/Show)
+        # are constructed once and reused for every subsequent open instead
+        # of a fresh instance per click: each xbmcgui.WindowXMLDialog
+        # subclass permanently consumes one of Kodi's ~100 dynamic
+        # script-window IDs when constructed, and that slot is never freed
+        # within the same Kodi session even after the window closes and the
+        # Python object is deleted -- repeatedly re-instantiating these
+        # (normal daily use: Recommande/Bibliotheque/Categories are each a
+        # few clicks away) eventually exhausts the pool and every *other*
+        # addon that tries to open a window next starts failing with
+        # "RuntimeError: maximum number of windows reached" (observed in
+        # production against script.akasha.ambient, see docs/aura/decisions.md).
+        # doModal() can safely be called again on the same already-built
+        # instance -- onInit() re-runs each time (Kodi reloads the skin XML
+        # on every activation), so state/data refresh exactly like before.
+        self._sub_windows = {}
 
     def onInit(self):
         try:
@@ -439,6 +455,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 btn.setLabel('')
 
+    def _get_sub_window(self, key, cls, xml_file):
+        """Return a cached sub-window instance, constructing it only once.
+
+        See the note in __init__ about why re-instantiating these on every
+        open exhausts Kodi's dynamic window ID pool.
+        """
+        window = self._sub_windows.get(key)
+        if window is None:
+            window = cls(xml_file, self.addon.getAddonInfo('path'), 'Default', '1080i')
+            self._sub_windows[key] = window
+        return window
+
     def _show_tab(self, index):
         index = index % len(config.TABS)
         self.active_tab = index
@@ -465,20 +493,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if controlID in TAB_BUTTON_IDS:
             self._show_tab(TAB_BUTTON_IDS.index(controlID))
         elif controlID == 3050:
-            recommendations = aura_recommendations.AuraRecommendationsWindow(
-                'AuraRecommendations.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
-            recommendations.doModal()
-            del recommendations
+            self._get_sub_window(
+                'recommendations', aura_recommendations.AuraRecommendationsWindow,
+                'AuraRecommendations.xml').doModal()
         elif controlID == 3100:
-            library = aura_library.AuraLibraryWindow(
-                'AuraLibrary.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
-            library.doModal()
-            del library
+            self._get_sub_window(
+                'library', aura_library.AuraLibraryWindow, 'AuraLibrary.xml').doModal()
         elif controlID == 3060:
-            genres = aura_genres.AuraGenresWindow(
-                'AuraGenres.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
-            genres.doModal()
-            del genres
+            self._get_sub_window(
+                'genres', aura_genres.AuraGenresWindow, 'AuraGenres.xml').doModal()
         elif controlID == 3200:
             xbmc.executebuiltin('ActivateWindow(Settings)')
         elif controlID in GAME_BUTTON_IDS:
@@ -492,16 +515,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         elif controlID == JEUX_PANEL_ID:
             self._on_jeux_item_selected()
         elif controlID == 2041:
-            app_window = aura_app.AuraAppWindow(
-                'AuraApp.xml', self.addon_path, 'Default', '1080i')
-            app_window.doModal()
-            del app_window
+            self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml').doModal()
             self._load_pinned_apps()
         elif controlID == 2042:
-            store_window = aura_store.AuraStoreWindow(
-                'AuraStore.xml', self.addon_path, 'Default', '1080i')
-            store_window.doModal()
-            del store_window
+            self._get_sub_window('store', aura_store.AuraStoreWindow, 'AuraStore.xml').doModal()
             self._load_pinned_apps()
         elif controlID in APP_TILE_IDS:
             idx = APP_TILE_IDS.index(controlID)
@@ -537,10 +554,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             return
         if pos == DIVERT_SIDEBAR_HOME_INDEX:
-            recommendations = aura_recommendations.AuraRecommendationsWindow(
-                'AuraRecommendations.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
-            recommendations.doModal()
-            del recommendations
+            self._get_sub_window(
+                'recommendations', aura_recommendations.AuraRecommendationsWindow,
+                'AuraRecommendations.xml').doModal()
             return
         section_index = pos - 1
         if 0 <= section_index < len(self._divert_sections):
@@ -557,13 +573,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section = self._divert_sections[self._divert_active_section]
 
         if section['type'] == 'show':
-            show_window = aura_show.AuraShowWindow(
-                'AuraShow.xml', self.addon_path, 'Default', '1080i')
+            show_window = self._get_sub_window(
+                'show', aura_show.AuraShowWindow, 'AuraShow.xml')
             show_window.client = self._plex_client
             show_window.show_title = item['title']
             show_window.show_rating_key = item['rating_key']
             show_window.doModal()
-            del show_window
         else:
             # Playback delegation is not decided yet (see docs/aura/decisions.md);
             # for now just surface the title so selection feels responsive.

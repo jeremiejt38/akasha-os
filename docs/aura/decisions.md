@@ -86,3 +86,29 @@ d'image nécessitant le token Plex admin) avant de brancher réellement le conne
 natif "Désinstaller", plutôt que de manipuler directement le système de fichiers des addons
 (`rm -rf` sur un dossier d'addon en cours d'exécution potentielle) — à valider en conditions
 réelles au jalon 5.
+
+## Réutiliser les sous-fenêtres d'Aura au lieu d'en recréer une à chaque ouverture (2026-08-18)
+
+**Bug trouvé en conditions réelles** : `script.akasha.ambient` s'est mis à échouer en boucle
+(`RuntimeError: maximum number of windows reached`, ~1900 occurrences en quelques minutes dans
+`kodi.log`) alors qu'aucun changement ne lui avait été apporté. Kodi limite à environ 100 le
+nombre d'IDs de fenêtres dynamiques (`xbmcgui.WindowXMLDialog`/`WindowXML`) qu'un addon Python peut
+créer au cours d'une même session — chaque construction consomme un slot qui **n'est jamais libéré
+avant un redémarrage complet de Kodi**, même une fois la fenêtre fermée et l'objet Python supprimé
+(`del`). Or `aura_window.py` (et `aura_genres.py`) instanciaient une **nouvelle** fenêtre
+(`AuraRecommendationsWindow`, `AuraLibraryWindow`, `AuraGenresWindow`, `AuraAppWindow`,
+`AuraStoreWindow`, `AuraShowWindow`) à **chaque** clic sur "Pour vous"/"Bibliothèque"/"Catégories"/
+etc., au lieu de réutiliser une instance existante — un usage normal et répété de ces menus
+(attendu au quotidien, pas seulement en test intensif) épuise donc le pool au bout d'un moment, et
+c'est alors n'importe quel **autre** addon qui tente d'ouvrir une fenêtre (ici Ambient, via son
+déclencheur d'inactivité qui retente toutes les 5s) qui échoue — pas forcément Aura lui-même.
+
+**Corrigé** : `AuraWindow._get_sub_window(key, cls, xml_file)` construit chaque sous-fenêtre une
+seule fois (mémorisée dans `self._sub_windows`) et appelle `doModal()` sur l'instance existante
+pour toutes les ouvertures suivantes — `onInit()` se ré-exécute à chaque activation (Kodi recharge
+le XML du skin à chaque fois, confirmé par les logs `Loading skin file: ..., load type:
+LOAD_ON_GUI_INIT` répétés), donc le contenu se rafraîchit normalement sans reconstruire l'objet.
+Même traitement dans `aura_genres.py` pour la `AuraLibraryWindow` qu'il ouvre lui-même en interne.
+Défense complémentaire dans `script.akasha.ambient/default.py` : si la construction de la fenêtre
+échoue malgré tout (`RuntimeError`), log un warning unique et abandonne ce cycle de déclenchement
+plutôt que de laisser l'exception se répéter en boucle toutes les 5 secondes.

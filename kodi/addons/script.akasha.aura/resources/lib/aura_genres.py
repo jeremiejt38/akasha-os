@@ -29,6 +29,11 @@ class AuraGenresWindow(xbmcgui.WindowXMLDialog):
         self._plex = None
         self.section = None
         self.genres = []
+        # Reused across opens rather than a fresh instance each time -- see
+        # the note in aura_window.py's AuraWindow.__init__ about why: each
+        # WindowXMLDialog construction permanently consumes one of Kodi's
+        # ~100 dynamic script-window IDs for the rest of the Kodi session.
+        self._library_window = None
 
     def onInit(self):
         try:
@@ -99,9 +104,9 @@ class AuraGenresWindow(xbmcgui.WindowXMLDialog):
         elif controlID == GENRE_PANEL_ID:
             pos = self.getControl(GENRE_PANEL_ID).getSelectedPosition()
             if 0 <= pos < len(self.genres):
-                library = aura_library.AuraLibraryWindow(
-                    'AuraLibrary.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
-                library.initial_section = self.section
-                library.initial_genre = self.genres[pos]
-                library.doModal()
-                del library
+                if self._library_window is None:
+                    self._library_window = aura_library.AuraLibraryWindow(
+                        'AuraLibrary.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
+                self._library_window.initial_section = self.section
+                self._library_window.initial_genre = self.genres[pos]
+                self._library_window.doModal()
