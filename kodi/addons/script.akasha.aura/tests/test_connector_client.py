@@ -67,6 +67,34 @@ class TestConnectorClient(unittest.TestCase):
         self.assertEqual(
             result['MediaContainer']['Directory'][0]['title'], 'Films')
 
+    @patch('urllib.request.urlopen')
+    def test_section_items_builds_query_string(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+        self.client.token = 'abc123'
+
+        self.client.section_items('1', sort='addedAt:desc', limit=50)
+
+        sent_request = mock_urlopen.call_args[0][0]
+        self.assertIn('/api/plex/sections/1/all', sent_request.full_url)
+        self.assertIn('sort=addedAt:desc', sent_request.full_url)
+        self.assertIn('limit=50', sent_request.full_url)
+
+    @patch('urllib.request.urlopen')
+    def test_section_genres(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {}})
+        self.client.token = 'abc123'
+
+        self.client.section_genres('1')
+        self.assertIn('/api/plex/sections/1/genres', mock_urlopen.call_args[0][0].full_url)
+
+    @patch('urllib.request.urlopen')
+    def test_metadata_children(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {}})
+        self.client.token = 'abc123'
+
+        self.client.metadata_children('42')
+        self.assertIn('/api/plex/metadata/42/children', mock_urlopen.call_args[0][0].full_url)
+
 
 if __name__ == '__main__':
     unittest.main()

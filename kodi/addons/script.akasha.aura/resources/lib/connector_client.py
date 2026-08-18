@@ -72,3 +72,13 @@ class ConnectorClient:
 
     def sections(self):
         return self._request('GET', '/api/plex/sections')
+
+    def section_items(self, section_key, sort='titleSort', limit=200):
+        path = '/api/plex/sections/{}/all?sort={}&limit={}'.format(section_key, sort, limit)
+        return self._request('GET', path)
+
+    def section_genres(self, section_key):
+        return self._request('GET', '/api/plex/sections/{}/genres'.format(section_key))
+
+    def metadata_children(self, rating_key):
+        return self._request('GET', '/api/plex/metadata/{}/children'.format(rating_key))

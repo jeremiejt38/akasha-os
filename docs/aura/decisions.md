@@ -58,6 +58,25 @@ visibilité des groupes de contenu — même mécanisme que les presets de `Guid
 complexe comme `tabcontrol`, dont le comportement dans les dialogues plein écran custom est moins
 prévisible sur Kodi 21/Arctic Horizon 2).
 
+## Intégration `akasha-os-connector` : pas de patch de `Home.xml`/skin natif (jalon 6)
+
+**Contexte** : le cahier des charges "interface-plex-akasha" fourni par l'utilisateur décrit une
+refonte en modifiant directement le skin natif (`Home.xml` control 9000, `MyVideoNav.xml`,
+`DialogVideoInfo.xml`). Ceci contredit la décision déjà prise ci-dessus ("Remplacement de
+l'accueil") d'éviter les patchs de skin par regex pour un composant central.
+
+**Choix confirmé par l'utilisateur (2026-08-18)** : adapter le cahier des charges à l'architecture
+Aura existante plutôt que l'inverse. Les concepts du CDC (sidebar par bibliothèque, onglets
+Recommandations/Bibliothèque/Genres, fiche détail) se traduisent en éléments internes à
+`Aura.xml`/`aura_window.py` (sous-onglets, groupes de contrôles, `Window.Property`) plutôt qu'en
+modifications de `Home.xml` ou `MyVideoNav.xml`.
+
+**Point ouvert non résolu** : le CDC suppose une source de métadonnées Kodi native
+(`VideoLibrary.*` JSON-RPC, base `MyVideos*.db`) pour le contenu, alors qu'Aura utilise déjà l'API
+Plex directe (`plex_client.py`, voir décision "Source de données" ci-dessus). Le connector expose
+pour l'instant du JSON Plex brut — voir `roadmap.md` (jalon 6) pour le blocage identifié (URLs
+d'image nécessitant le token Plex admin) avant de brancher réellement le connector dans l'UI.
+
 ## Désinstallation d'un addon depuis App : délégation à la fenêtre native (jalon 5, à confirmer)
 
 **Constat** : il n'existe pas de méthode JSON-RPC publique de désinstallation d'addon dans Kodi.

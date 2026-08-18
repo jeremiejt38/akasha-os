@@ -37,6 +37,40 @@
    par défaut depuis le jalon 1, donc pas de "bascule" supplémentaire à ce stade — seulement une
    confirmation que l'expérience est jugée satisfaisante par l'utilisateur).
 
+## Jalon 6 (en cours) — intégration `akasha-os-connector` (cache + auth multi-utilisateurs)
+
+Suite au cahier des charges "interface-plex-akasha" (voir `atlas/projects/akasha-os.md`), adapté à
+l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — voir `decisions.md`).
+
+- **Livré** : `connector_client.py` (module pur, testé, même style que `plex_client.py`) —
+  `login`/`is_authenticated`/`on_deck`/`recently_added`/`sections`/`section_items`/
+  `section_genres`/`metadata_children`, parlant à l'API REST d'`akasha-os-connector`
+  (`docs/api.md` du repo connector). Réglages `connector.server_url`/`connector.username` ajoutés à
+  `settings.xml`.
+- **Bloquant identifié avant d'aller plus loin** : le connector renvoie actuellement le **JSON Plex
+  brut** (passthrough en cache), qui contient des chemins d'image relatifs
+  (`/library/metadata/123/thumb/1`) nécessitant le token Plex admin pour être résolus en URL
+  affichable (`plex_client._video_dict` fait ce travail avec `self.token`). Or le but même du
+  connector est que les clients akasha-os n'aient **jamais** ce token admin. Câbler
+  `connector_client` directement dans `aura_window.py` sans résoudre ce point casserait
+  silencieusement l'affichage des posters/fanarts en production.
+- **Ce qu'il faut trancher avant d'intégrer réellement le connector dans l'UI Aura** (décision
+  d'architecture, pas déléguée à Talos) :
+  1. Le connector expose un endpoint proxy d'images (ex. `GET /api/plex/image?path=...`) qui
+     injecte le token admin côté serveur et sert les octets de l'image — le client n'a jamais le
+     token. C'est l'option la plus propre pour l'objectif multi-utilisateurs, mais demande un
+     endpoint supplémentaire + tests + cache d'images.
+  2. Le connector réécrit lui-même les champs `thumb`/`art` dans les réponses JSON pour pointer
+     vers son propre domaine (`connector.akasha.ing/images/...`), plus transparent côté client.
+  3. Repli temporaire : ne pas encore utiliser le connector pour les données Divertissement
+     (garder l'appel direct à `plex_client.py`, déjà en production et fiable), et limiter l'usage
+     du connector à l'authentification multi-utilisateurs pour l'instant (le connector reste
+     fonctionnel et testé de bout en bout côté serveur, prêt à être branché une fois ce point
+     tranché).
+- **Non commencé** : sous-onglets "Recommandations" (hero banner + rangées Continuer à
+  regarder/Ajoutés récemment/Suggestions) et "Genres" au sein de Divertissement, flux de login
+  (prompt clavier + bouton profil dans la sidebar), tout ce qui dépend du point ci-dessus.
+
 ## Notes de suivi
 
 - Chaque jalon correspond à un ou plusieurs commits atomiques (`feat:`/`fix:`/`test:`), sur `main`
