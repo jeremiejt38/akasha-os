@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.0...akasha-os-v0.35.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** reuse sub-windows instead of re-instantiating them on every open ([b458bc1](https://github.com/jeremiejt38/akasha-os/commit/b458bc165fc22e68b5c059f5e74b8ebfb655cc1f))
+
 ## [0.35.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.34.0...akasha-os-v0.35.0) (2026-08-18)
 
 
