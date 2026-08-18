@@ -14,6 +14,7 @@ import local_cache
 import paged_list
 import plex_client
 
+ACTION_MOVE_RIGHT = 2
 ACTION_MOVE_DOWN = 4
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
@@ -160,7 +161,7 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         self.items = self._paged.items
         try:
             lst = self.getControl(4010)
-            lst.addItems([xbmcgui.ListItem(item['title']) for item in new_items])
+            lst.addItems([_build_list_item(item) for item in new_items])
         except Exception as e:
             xbmc.log('Akasha Aura Library: append render error: {}'.format(e), xbmc.LOGERROR)
         self._render_status()
@@ -196,8 +197,7 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
             lst = self.getControl(4010)
             lst.reset()
             for item in self.items:
-                li = xbmcgui.ListItem(item['title'])
-                lst.addItem(li)
+                lst.addItem(_build_list_item(item))
             if self.items:
                 self.setFocus(lst)
         except Exception as e:
@@ -248,5 +248,14 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         super().onAction(action)
-        if aid == ACTION_MOVE_DOWN and self.getFocusId() == 4010:
+        # 4010 is a wrapping grid (panel): reaching the loaded end can happen
+        # by moving down a row or right along the last row, so check both.
+        if aid in (ACTION_MOVE_DOWN, ACTION_MOVE_RIGHT) and self.getFocusId() == 4010:
             self._maybe_load_more()
+
+
+def _build_list_item(item):
+    li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
+    if item.get('thumb_url'):
+        li.setArt({'thumb': item['thumb_url']})
+    return li

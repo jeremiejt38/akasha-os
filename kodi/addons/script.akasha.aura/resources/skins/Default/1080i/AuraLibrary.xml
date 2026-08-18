@@ -94,35 +94,80 @@
             <textcolor>77FFFFFF</textcolor>
         </control>
 
-        <!-- Main list -->
-        <control type="list" id="4010">
+        <!-- Main grid: poster wall (wrapping grid), 9 tiles per row -->
+        <control type="panel" id="4010">
             <left>60</left>
             <top>250</top>
             <width>1800</width>
             <height>770</height>
             <onup>4003</onup>
-            <ondown>4010</ondown>
             <onleft>4030</onleft>
-            <itemlayout width="1800" height="50">
-                <control type="label">
-                    <left>0</left>
+            <itemlayout width="200" height="260">
+                <control type="image">
+                    <left>5</left>
                     <top>0</top>
-                    <width>1800</width>
-                    <height>50</height>
-                    <font>font12</font>
+                    <width>180</width>
+                    <height>200</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="label">
+                    <left>5</left>
+                    <top>204</top>
+                    <width>190</width>
+                    <height>22</height>
+                    <font>font10</font>
                     <label>$INFO[ListItem.Label]</label>
+                    <textcolor>CCFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>5</left>
+                    <top>226</top>
+                    <width>190</width>
+                    <height>18</height>
+                    <font>font9</font>
+                    <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="1800" height="50">
-                <control type="label">
-                    <left>0</left>
+            <focusedlayout width="200" height="260">
+                <control type="image">
+                    <left>1</left>
+                    <top>-4</top>
+                    <width>188</width>
+                    <height>208</height>
+                    <texture colordiffuse="FF6C8CFF">white.png</texture>
+                    <visible>Control.HasFocus(4010)</visible>
+                </control>
+                <control type="image">
+                    <left>5</left>
                     <top>0</top>
-                    <width>1800</width>
-                    <height>50</height>
-                    <font>font12</font>
+                    <width>180</width>
+                    <height>200</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="label">
+                    <left>5</left>
+                    <top>204</top>
+                    <width>190</width>
+                    <height>22</height>
+                    <font>font10</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>5</left>
+                    <top>226</top>
+                    <width>190</width>
+                    <height>18</height>
+                    <font>font9</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
         </control>
