@@ -109,3 +109,11 @@ REST du connector (`akasha-os-connector`), plus les tests unitaires correspondan
 - Pour un test d'erreur HTTP, insister dans le prompt sur l'usage d'une vraie exception du bon
   type (`urllib.error.HTTPError`) plutôt qu'une `Exception` générique, qui ne validerait pas le
   chemin de gestion d'erreur réel.
+
+## 2026-08-18 — divert_source.py écrit directement (déviation ponctuelle de la stratégie Talos)
+
+Module pur (`resources/lib/divert_source.py`, parsers JSON Plex bruts pour les données servies par
+le connector) écrit directement plutôt que délégué à Talos, par souci d'efficacité en fin de longue
+session — c'est le type de module qui aurait dû passer par Talos selon `docs/talos-strategy.md`.
+Pas de bug à signaler puisqu'il n'a pas été généré par Talos ; noté ici pour la traçabilité de
+l'usage réel de Talos sur ce projet.

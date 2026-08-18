@@ -7,6 +7,7 @@
     <category label="Akasha OS Connector">
         <setting id="connector.server_url" type="text" label="URL du connector (ex: https://connector.akasha.ing)" default=""/>
         <setting id="connector.username" type="text" label="Nom d'utilisateur (interne)" default=""/>
+        <setting id="connector.session_token" type="text" label="Token de session (interne)" default=""/>
     </category>
     <category label="Onglets">
         <setting id="tab.default" type="enum" label="Onglet par defaut" default="0" values="Divertissement|Jeux|App"/>

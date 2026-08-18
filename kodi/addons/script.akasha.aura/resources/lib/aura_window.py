@@ -18,6 +18,8 @@ import aura_library
 import aura_show
 import aura_store
 import config
+import connector_client
+import divert_source
 import games_shortcuts
 import plex_client
 import steam_client
@@ -57,6 +59,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon = addon
         self.addon_path = addon.getAddonInfo('path')
         self._plex_client = None
+        self._connector_client = None
         self._divert_sections = []
         self._divert_active_section = 0
         self._divert_items = []
@@ -79,24 +82,85 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
 
-    def _load_divertissement(self):
-        server_url = self.addon.getSetting('plex.server_url')
-        token = self.addon.getSetting('plex.token')
-        if not config.is_plex_configured(server_url, token):
-            xbmc.log('Akasha Aura: Plex not configured, skipping Divertissement', xbmc.LOGINFO)
-            try:
-                self.getControl(DIVERT_STATUS_ID).setLabel(
-                    'Plex non configure — renseignez plex.server_url et plex.token')
-            except RuntimeError:
-                pass
-            return
+    def _get_connector_client(self, prompt_if_missing=False):
+        """Return an authenticated ConnectorClient, or None if unavailable.
+
+        The connector is optional: if not configured (or unreachable/session
+        expired), callers fall back to direct Plex API access. Only the
+        session token is persisted (`connector.session_token`), never the
+        password.
+        """
+        server_url = self.addon.getSetting('connector.server_url')
+        if not server_url:
+            return None
+
+        client = connector_client.ConnectorClient(server_url, timeout=15)
+        stored_token = self.addon.getSetting('connector.session_token')
+        if stored_token:
+            client.token = stored_token
+            return client
+
+        if not prompt_if_missing:
+            return None
+
+        username = self.addon.getSetting('connector.username')
+        if not username:
+            kb = xbmc.Keyboard('', "Nom d'utilisateur (Akasha OS Connector)")
+            kb.doModal()
+            if not kb.isConfirmed():
+                return None
+            username = kb.getText().strip()
+            self.addon.setSetting('connector.username', username)
+        if not username:
+            return None
+
+        kb = xbmc.Keyboard('', 'Mot de passe (Akasha OS Connector)')
+        kb.setHiddenInput(True)
+        kb.doModal()
+        if not kb.isConfirmed():
+            return None
+        password = kb.getText().strip()
+        if not password:
+            return None
 
         try:
-            self._plex_client = plex_client.PlexClient(server_url, token, timeout=15)
-            self._divert_sections = self._plex_client.video_sections()
-        except Exception as e:
-            xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
-            self._divert_sections = []
+            client.login(username, password)
+        except connector_client.ConnectorAPIError as e:
+            xbmc.log('Akasha Aura: connector login failed: {}'.format(e), xbmc.LOGERROR)
+            return None
+        self.addon.setSetting('connector.session_token', client.token)
+        return client
+
+    def _load_divertissement(self):
+        connector = self._get_connector_client(prompt_if_missing=True)
+        if connector:
+            try:
+                self._divert_sections = divert_source.parse_sections(connector.sections())
+                self._connector_client = connector
+                self._plex_client = None
+            except connector_client.ConnectorAPIError as e:
+                xbmc.log('Akasha Aura: connector sections load failed, falling back to Plex '
+                         'direct: {}'.format(e), xbmc.LOGWARNING)
+                self.addon.setSetting('connector.session_token', '')
+                self._connector_client = None
+
+        if not self._connector_client:
+            server_url = self.addon.getSetting('plex.server_url')
+            token = self.addon.getSetting('plex.token')
+            if not config.is_plex_configured(server_url, token):
+                xbmc.log('Akasha Aura: Plex not configured, skipping Divertissement', xbmc.LOGINFO)
+                try:
+                    self.getControl(DIVERT_STATUS_ID).setLabel(
+                        'Plex non configure — renseignez plex.server_url et plex.token')
+                except RuntimeError:
+                    pass
+                return
+            try:
+                self._plex_client = plex_client.PlexClient(server_url, token, timeout=15)
+                self._divert_sections = self._plex_client.video_sections()
+            except Exception as e:
+                xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
+                self._divert_sections = []
 
         for i, control_id in enumerate(DIVERT_SUBTAB_IDS):
             try:
@@ -118,8 +182,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section = self._divert_sections[index]
 
         try:
-            self._divert_items = self._plex_client.section_items(
-                section['key'], sort='addedAt:desc', limit=DIVERT_ITEMS_LIMIT)
+            if self._connector_client:
+                raw = self._connector_client.section_items(
+                    section['key'], sort='addedAt:desc', limit=DIVERT_ITEMS_LIMIT)
+                self._divert_items = divert_source.parse_metadata_list(
+                    raw, self._connector_client.image_url)
+            else:
+                self._divert_items = self._plex_client.section_items(
+                    section['key'], sort='addedAt:desc', limit=DIVERT_ITEMS_LIMIT)
         except Exception as e:
             xbmc.log('Akasha Aura: section items load failed: {}'.format(e), xbmc.LOGERROR)
             self._divert_items = []

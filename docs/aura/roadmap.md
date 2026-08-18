@@ -47,29 +47,23 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
   `section_genres`/`metadata_children`, parlant à l'API REST d'`akasha-os-connector`
   (`docs/api.md` du repo connector). Réglages `connector.server_url`/`connector.username` ajoutés à
   `settings.xml`.
-- **Bloquant identifié avant d'aller plus loin** : le connector renvoie actuellement le **JSON Plex
-  brut** (passthrough en cache), qui contient des chemins d'image relatifs
-  (`/library/metadata/123/thumb/1`) nécessitant le token Plex admin pour être résolus en URL
-  affichable (`plex_client._video_dict` fait ce travail avec `self.token`). Or le but même du
-  connector est que les clients akasha-os n'aient **jamais** ce token admin. Câbler
-  `connector_client` directement dans `aura_window.py` sans résoudre ce point casserait
-  silencieusement l'affichage des posters/fanarts en production.
-- **Ce qu'il faut trancher avant d'intégrer réellement le connector dans l'UI Aura** (décision
-  d'architecture, pas déléguée à Talos) :
-  1. Le connector expose un endpoint proxy d'images (ex. `GET /api/plex/image?path=...`) qui
-     injecte le token admin côté serveur et sert les octets de l'image — le client n'a jamais le
-     token. C'est l'option la plus propre pour l'objectif multi-utilisateurs, mais demande un
-     endpoint supplémentaire + tests + cache d'images.
-  2. Le connector réécrit lui-même les champs `thumb`/`art` dans les réponses JSON pour pointer
-     vers son propre domaine (`connector.akasha.ing/images/...`), plus transparent côté client.
-  3. Repli temporaire : ne pas encore utiliser le connector pour les données Divertissement
-     (garder l'appel direct à `plex_client.py`, déjà en production et fiable), et limiter l'usage
-     du connector à l'authentification multi-utilisateurs pour l'instant (le connector reste
-     fonctionnel et testé de bout en bout côté serveur, prêt à être branché une fois ce point
-     tranché).
-- **Non commencé** : sous-onglets "Recommandations" (hero banner + rangées Continuer à
-  regarder/Ajoutés récemment/Suggestions) et "Genres" au sein de Divertissement, flux de login
-  (prompt clavier + bouton profil dans la sidebar), tout ce qui dépend du point ci-dessus.
+- **Bloquant résolu (2026-08-18)** : option 1 retenue par l'utilisateur — le connector expose
+  désormais `GET /api/plex/image?path=...` (voir `docs/api.md` du repo connector), qui injecte le
+  token admin **côté serveur** et retourne les octets de l'image (validation anti-SSRF : le chemin
+  doit commencer par `/library/`, aucun schéma protocolaire explicite accepté). Validé en
+  conditions réelles : un vrai poster Plex (713 Ko, JPEG 2000x3000) récupéré via
+  `https://connector.akasha.ing/api/plex/image?path=...` avec un token de session, sans jamais
+  transmettre le token Plex admin au client.
+  - `connector_client.image_url(plex_path)` (Aura) construit l'URL Kodi-compatible, avec le token
+    de session attaché en header `Authorization` via la syntaxe d'options d'URL de Kodi
+    (`url|Authorization=Bearer%20...`, voir `kodi.wiki/view/HTTP` — supportée nativement par le
+    téléchargeur de textures de Kodi pour `ListItem.setArt()`), plutôt qu'en query string.
+  - Le connector ne cache pas les images côté serveur (trop volumineuses pour le cache JSON
+    existant) — le cache de texture natif de Kodi (`Textures13.db`) prend le relais côté client,
+    cohérent avec la note de `decisions.md`/Phase 4 sur la réutilisation des mécanismes natifs.
+- **Reste à faire** : câbler `connector_client` dans `aura_window.py` (repli sur `plex_client.py`
+  si le connector n'est pas configuré/authentifié), flux de login (prompt clavier, même pattern que
+  Steam/Sunshine), sous-onglets "Recommandations"/"Genres", validation sur le device réel.
 
 ## Notes de suivi
 
