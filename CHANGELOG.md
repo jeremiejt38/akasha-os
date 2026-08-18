@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.33.2...akasha-os-v0.34.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** Bibliotheque as a poster grid instead of a plain text list ([e1b0669](https://github.com/jeremiejt38/akasha-os/commit/e1b06699d12e71ef606a8469330f0ddbcc11297d))
+
 ## [0.33.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.33.1...akasha-os-v0.33.2) (2026-08-18)
 
 
