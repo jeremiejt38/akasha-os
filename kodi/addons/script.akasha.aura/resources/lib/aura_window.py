@@ -14,6 +14,7 @@ import xbmcgui
 
 import addons_inventory
 import aura_app
+import aura_genres
 import aura_library
 import aura_recommendations
 import aura_show
@@ -415,6 +416,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'AuraLibrary.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
             library.doModal()
             del library
+        elif controlID == 3060:
+            genres = aura_genres.AuraGenresWindow(
+                'AuraGenres.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
+            genres.doModal()
+            del genres
         elif controlID == 3200:
             xbmc.executebuiltin('ActivateWindow(Settings)')
         elif controlID in GAME_BUTTON_IDS:

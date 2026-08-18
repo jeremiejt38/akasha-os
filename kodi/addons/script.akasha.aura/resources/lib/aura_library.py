@@ -41,9 +41,20 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
         self.sort = SORT_OPTIONS[0][0]
         self.filter_genre = None
         self.query = ''
+        # Optional: set by a caller (e.g. AuraGenresWindow) before doModal()
+        # to open the library pre-scoped to a specific section/genre instead
+        # of auto-detecting the first movie section.
+        self.initial_section = None
+        self.initial_genre = None
 
     def onInit(self):
         try:
+            if self.initial_section:
+                self.section = self.initial_section
+                self.filter_genre = self.initial_genre
+                self._load_items()
+                return
+
             sections = self._video_sections()
             for s in sections:
                 if s['type'] == 'movie':
