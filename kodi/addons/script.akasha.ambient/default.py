@@ -10,6 +10,7 @@ this thin entry point.
 """
 import os
 import sys
+import time
 
 import xbmc
 import xbmcaddon
@@ -17,9 +18,29 @@ import xbmcaddon
 ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
 sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 
-from ambient_window import AmbientWindow  # noqa: E402
+from ambient_window import AmbientWindow, LOCK_FILE  # noqa: E402
+
+# service.akasha.ambient already guards its own idle-trigger polling loop
+# against stacking a second window (see its _lock_file_fresh()), but the
+# manual "Mode Ambiant" entry in the Akasha Guide menu calls
+# RunScript(script.akasha.ambient) directly, bypassing that check --
+# reuse the same lock file/TTL here so a double press (or a manual trigger
+# racing the idle trigger) can't construct a second AmbientWindow.
+LOCK_TTL_SECONDS = 10
+
+
+def _already_running():
+    try:
+        return os.path.exists(LOCK_FILE) and (
+            time.time() - os.path.getmtime(LOCK_FILE)) < LOCK_TTL_SECONDS
+    except OSError:
+        return False
+
 
 if __name__ == '__main__':
+    if _already_running():
+        xbmc.log('Akasha Ambient: already running, ignoring duplicate launch', xbmc.LOGINFO)
+        sys.exit(0)
     try:
         window = AmbientWindow('Ambient.xml', ADDON_PATH, 'Default', '1080i')
     except RuntimeError as e:
