@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.4...akasha-os-v0.35.5) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** local cache self-heals if its sqlite table ever goes missing ([4c750c7](https://github.com/jeremiejt38/akasha-os/commit/4c750c7f67a5df264157dbaffb1155736689f69f))
+
 ## [0.35.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.3...akasha-os-v0.35.4) (2026-08-18)
 
 
