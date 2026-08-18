@@ -1,6 +1,7 @@
 """Unit tests for local_cache.py — no xbmc dependency."""
 
 import os
+import sqlite3
 import tempfile
 import unittest
 
@@ -45,6 +46,29 @@ class TestLocalCache(unittest.TestCase):
         self.assertEqual(result1, {'computed': True})
         self.assertEqual(result2, {'computed': True})
         self.assertEqual(len(calls), 1)
+
+    def test_get_self_heals_when_table_is_missing(self):
+        """Regression test: found on a real device where the sqlite file
+        ended up without its table ('no such table: cache') after an
+        external process interfered with it while Kodi still held the
+        LocalCache instance -- get()/set() must never propagate this as a
+        hard failure since the cache is a pure optimisation layer."""
+        conn = sqlite3.connect(self.db_path)
+        conn.execute('DROP TABLE cache')
+        conn.commit()
+        conn.close()
+
+        self.assertIsNone(self.cache.get('key1'))  # self-heals, treated as a miss
+
+    def test_set_self_heals_when_table_is_missing(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.execute('DROP TABLE cache')
+        conn.commit()
+        conn.close()
+
+        self.cache.set('key1', {'v': 1}, ttl_seconds=60)
+
+        self.assertEqual(self.cache.get('key1'), {'v': 1})
 
     def test_page_cache_key_joins_parts(self):
         self.assertEqual(page_cache_key('sections', '7', 'all', 0, 30), 'sections:7:all:0:30')

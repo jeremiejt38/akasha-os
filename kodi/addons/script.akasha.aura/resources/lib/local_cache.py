@@ -25,6 +25,12 @@ class LocalCache:
 
     def __init__(self, db_path):
         self.db_path = db_path
+        self._ensure_schema()
+
+    def _connect(self):
+        return sqlite3.connect(self.db_path)
+
+    def _ensure_schema(self):
         conn = self._connect()
         try:
             conn.execute(
@@ -35,16 +41,26 @@ class LocalCache:
         finally:
             conn.close()
 
-    def _connect(self):
-        return sqlite3.connect(self.db_path)
-
     def get(self, key):
-        """Return the cached value for `key`, or None if missing/expired."""
+        """Return the cached value for `key`, or None if missing/expired.
+
+        The cache is a pure optimisation layer and must never break a
+        feature that happens to hit it: if the underlying sqlite file is
+        ever missing its table (found on a real device after an external
+        process removed/truncated the db file while Kodi still held it
+        open -- "no such table: cache"), self-heal by recreating the schema
+        and treat this call as a cache miss rather than propagating the
+        error up to the caller.
+        """
         conn = self._connect()
         try:
             row = conn.execute(
                 'SELECT value, expires_at FROM cache WHERE key = ?', (key,)
             ).fetchone()
+        except sqlite3.OperationalError:
+            conn.close()
+            self._ensure_schema()
+            return None
         finally:
             conn.close()
         if row is None:
@@ -58,11 +74,21 @@ class LocalCache:
         expires_at = time.time() + ttl_seconds
         conn = self._connect()
         try:
-            conn.execute(
-                'INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)',
-                (key, json.dumps(value), expires_at),
-            )
-            conn.commit()
+            try:
+                conn.execute(
+                    'INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)',
+                    (key, json.dumps(value), expires_at),
+                )
+                conn.commit()
+            except sqlite3.OperationalError:
+                conn.close()
+                self._ensure_schema()
+                conn = self._connect()
+                conn.execute(
+                    'INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)',
+                    (key, json.dumps(value), expires_at),
+                )
+                conn.commit()
         finally:
             conn.close()
 
