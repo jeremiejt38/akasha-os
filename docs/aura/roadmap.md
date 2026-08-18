@@ -138,6 +138,41 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
     type film/TV correctement associé à chaque bibliothèque), rétraction propre en sortant vers la
     grille.
 
+- **Chargement incrémental (lazy loading) + cache local sur le Pi, livré et validé (2026-08-18,
+  v0.33.1/v0.33.2)** : demande explicite de l'utilisateur pour éviter de charger des centaines
+  d'éléments d'un coup.
+  - `paged_list.PagedList` (pur, testé) : charge une première page (30 éléments par défaut), puis
+    charge la page suivante uniquement quand la sélection de l'utilisateur approche à moins de 15
+    éléments de la fin du contenu déjà chargé — reproduit exactement le comportement demandé
+    ("si l'utilisateur avance au 15ème sur 30 chargés, on charge les 15 suivants").
+  - `local_cache.LocalCache` (pur, testé) : cache TTL sqlite sous le dossier de profil de l'addon,
+    pour que revisiter une rangée/section dans la fenêtre de TTL soit instantané. Les affiches
+    restent gérées par le cache de texture natif de Kodi (`Textures13.db`), déjà persistant entre
+    sessions — pas de duplication de cache d'images côté addon.
+  - Câblé dans les 3 vues qui chargent des données Plex : `aura_recommendations.py` (3 rangées),
+    `aura_window.py` (grille Divertissement), `aura_library.py` (liste Bibliothèque, y compris
+    recherche/genre).
+  - Connector (`akasha-os-connector` v0.4.0) : ajout du paramètre `offset` (`X-Plex-Container-Start`)
+    sur `on-deck`/`recently-added`/`section_items`, indispensable à la pagination. Découverte
+    utile en testant : Plex ignore `X-Plex-Container-Size` seul sur `/library/sections/{key}/all`
+    (renvoie toute la bibliothèque) mais respecte la pagination dès que `X-Plex-Container-Start`
+    est aussi fourni — corrige au passage le compteur "771 éléments" cosmétique du jalon précédent.
+  - **2 bugs trouvés et corrigés en conditions réelles sur le Pi** :
+    1. Le focus initial de la fenêtre "Recommandations" restait sur le bouton "Retour"
+       (`<defaultcontrol>`) plutôt que sur la première rangée, empêchant Gauche/Droite d'atteindre
+       les rangées et donc le déclenchement du chargement incrémental. Corrigé en focalisant
+       explicitement la première rangée non vide une fois les rangées peuplées.
+    2. Chaque liste/grille Kodi affiche sa position sélectionnée avec le style "focus" (bordure
+       colorée) même quand elle n'a pas réellement le focus de la fenêtre (comportement natif
+       Kodi : la sélection est "mémorisée" par conteneur) — ce qui donnait l'impression que
+       plusieurs éléments étaient sélectionnés en même temps (chaque rangée + le bouton Retour).
+       Corrigé en conditionnant les éléments de surbrillance (bordure, fond, barre d'accent) à
+       `Control.HasFocus(id)` dans `Recommandations`, la grille Divertissement, la sidebar, le
+       panel Jeux et la grille Catégories.
+  - Validé sur le Pi réel : chargement initial limité à 30 éléments par rangée (logs du connector
+    confirmant un seul appel `GET /api/plex/on-deck?limit=30&offset=30` après navigation, comptage
+    passant de 30 à 60), et un seul élément mis en surbrillance à la fois.
+
 ## Notes de suivi
 
 - Chaque jalon correspond à un ou plusieurs commits atomiques (`feat:`/`fix:`/`test:`), sur `main`
