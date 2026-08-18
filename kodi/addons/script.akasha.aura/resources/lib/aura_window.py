@@ -35,10 +35,11 @@ ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
-DIVERT_SUBTAB_IDS = (3210, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218)
+DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
 DIVERT_ITEMS_LIMIT = 100
+DIVERT_SIDEBAR_HOME_INDEX = 0
 
 GAME_BUTTON_IDS = (2010, 2011, 2012)
 APP_TILE_IDS = (2030, 2031, 2032, 2033)
@@ -164,18 +165,27 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
                 self._divert_sections = []
 
-        for i, control_id in enumerate(DIVERT_SUBTAB_IDS):
-            try:
-                btn = self.getControl(control_id)
-            except RuntimeError:
-                continue
-            if i < len(self._divert_sections):
-                btn.setLabel(self._divert_sections[i]['title'])
-            else:
-                btn.setLabel('')
+        self._populate_sidebar()
 
         if self._divert_sections:
             self._select_divert_section(0)
+
+    def _populate_sidebar(self):
+        try:
+            sidebar = self.getControl(DIVERT_SIDEBAR_ID)
+        except RuntimeError:
+            return
+        sidebar.reset()
+
+        home_item = xbmcgui.ListItem('Accueil')
+        home_item.setArt({'icon': 'icon-home.png'})
+        sidebar.addItem(home_item)
+
+        for section in self._divert_sections:
+            icon = 'icon-tv.png' if section.get('type') == 'show' else 'icon-film.png'
+            li = xbmcgui.ListItem(section['title'])
+            li.setArt({'icon': icon})
+            sidebar.addItem(li)
 
     def _select_divert_section(self, index):
         if index >= len(self._divert_sections):
@@ -449,10 +459,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             idx = APP_TILE_IDS.index(controlID)
             if idx < len(self._pinned_apps):
                 xbmc.executebuiltin('RunAddon({})'.format(self._pinned_apps[idx]['addonid']))
-        elif controlID in DIVERT_SUBTAB_IDS:
-            idx = DIVERT_SUBTAB_IDS.index(controlID)
-            if idx < len(self._divert_sections):
-                self._select_divert_section(idx)
+        elif controlID == DIVERT_SIDEBAR_ID:
+            self._on_sidebar_item_selected()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
 
@@ -474,6 +482,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         else:
             xbmc.executebuiltin('RunAddon(plugin.program.moonlight-qt)')
         xbmcgui.Dialog().notification('Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+
+    def _on_sidebar_item_selected(self):
+        try:
+            pos = self.getControl(DIVERT_SIDEBAR_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if pos == DIVERT_SIDEBAR_HOME_INDEX:
+            recommendations = aura_recommendations.AuraRecommendationsWindow(
+                'AuraRecommendations.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
+            recommendations.doModal()
+            del recommendations
+            return
+        section_index = pos - 1
+        if 0 <= section_index < len(self._divert_sections):
+            self._select_divert_section(section_index)
 
     def _on_divert_item_selected(self):
         try:
