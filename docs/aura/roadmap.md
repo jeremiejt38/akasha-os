@@ -89,7 +89,15 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
   - Bug cosmétique trouvé et corrigé en conditions réelles : le libellé "Recommandations" (16
     caractères) était trop long pour le bouton de 230px et déclenchait le défilement de texte
     natif de Kodi (rendu tronqué/illisible sur capture). Raccourci en "Pour vous" (v0.28.1).
-  - Pas encore fait : rangées "Sorties récentes"/"Suggestions par genre" par bibliothèque (comme
+- **Rangée "Sorties récentes" ajoutée et validée (v0.29.0)** : 3ème rangée dans "Pour vous",
+  premiere section vidéo trouvée, triée par date de sortie (`sort=originallyAvailableAt:desc`).
+  Tuiles réduites (170x250) pour que les 3 rangées tiennent sur l'écran. Validé par PixelCamera
+  (Minions, Toy Story 5... bien affichés, triés par date). Note : le compteur affiche la taille
+  totale de la section (771) et non un sous-ensemble limité — comportement Plex déjà connu
+  ailleurs dans le projet, `X-Plex-Container-Size` en query string n'est pas honoré par
+  `/library/sections/{key}/all` sur ce serveur Plex (vérifié en direct, pas un bug introduit par le
+  connector). Cohérent avec l'affichage déjà existant du compteur de la grille Divertissement.
+  - Pas encore fait : "Suggestions par genre" par bibliothèque (comme
     `plex_client.entertainment_rows()` le fait déjà côté Plex direct), sous-onglet "Genres" dédié,
     hero banner en haut de la fenêtre. Le socle (connector + repli + rendu des rangées) est en
     place et prêt à les accueillir.
