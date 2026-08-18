@@ -61,9 +61,26 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
   - Le connector ne cache pas les images côté serveur (trop volumineuses pour le cache JSON
     existant) — le cache de texture natif de Kodi (`Textures13.db`) prend le relais côté client,
     cohérent avec la note de `decisions.md`/Phase 4 sur la réutilisation des mécanismes natifs.
-- **Reste à faire** : câbler `connector_client` dans `aura_window.py` (repli sur `plex_client.py`
-  si le connector n'est pas configuré/authentifié), flux de login (prompt clavier, même pattern que
-  Steam/Sunshine), sous-onglets "Recommandations"/"Genres", validation sur le device réel.
+- **Câblé et validé sur le device réel (2026-08-18, v0.27.0/v0.27.1)** : `_get_connector_client`
+  (login via prompt clavier, token de session persisté dans `connector.session_token`, mot de passe
+  jamais stocké — même pattern que Steam/Sunshine) ; `_load_divertissement`/
+  `_select_divert_section` essaient le connector en premier, replient sur `plex_client.py` si le
+  connector n'est pas configuré ou si la session est invalide.
+  - **Bug trouvé et corrigé en conditions réelles** : Cloudflare (qui expose
+    `connector.akasha.ing`) bloquait le User-Agent par défaut de `urllib` de Python
+    (`Python-urllib/3.x`, détecté comme signature de bot, HTTP 403 error 1010) — d'où un repli
+    silencieux sur Plex direct au premier essai. Fix : User-Agent explicite dans
+    `connector_client.py` (v0.27.1).
+  - Validé par PixelCamera + logs Kodi (aucun warning de repli) + logs du conteneur connector sur
+    Unraid (`docker logs akasha-os-connector`) confirmant les appels réels `/api/auth/login`,
+    `/api/plex/sections`, `/api/plex/sections/{key}/all`, `/api/plex/image` — mêmes posters
+    affichés qu'en accès Plex direct, cette fois sans jamais exposer le token Plex admin au Pi.
+  - **Point mineur non bloquant relevé** : le téléchargeur de textures de Kodi envoie une requête
+    `HEAD` avant chaque `GET /api/plex/image` ; la route ne définit que `GET`, donc chaque `HEAD`
+    reçoit `405` (sans impact — Kodi retente en `GET` juste après, qui réussit). À nettoyer un jour
+    en ajoutant `@app.head` sur la route image si le volume de requêtes superflues devient notable.
+- **Reste à faire** : sous-onglets "Recommandations"/"Genres" (hero banner, rangées Continuer à
+  regarder/Ajoutés récemment/Suggestions), gérées par le connector avec repli JSON-RPC/Plex local.
 
 ## Notes de suivi
 
