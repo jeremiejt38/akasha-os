@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.28.0...akasha-os-v0.28.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** shorten Recommandations top-bar button label to avoid text scroll ([5bc3cf5](https://github.com/jeremiejt38/akasha-os/commit/5bc3cf576b939e9681e436b3066bb0ecee4c84b0))
+
 ## [0.28.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.27.1...akasha-os-v0.28.0) (2026-08-18)
 
 
