@@ -136,3 +136,14 @@ JSON-safe) et reconstruit systématiquement un vrai tuple `(items, total)` à la
 soit un cache hit ou miss. Utilisé à la place de `get_or_set` dans les 3 points d'appel concernés
 (`aura_recommendations.py` ×3, `aura_window.py`, `aura_library.py`). Tests de régression ajoutés
 dans `test_local_cache.py` (aller-retour cache hit avec tuple, cas sans total).
+
+**Piège au déploiement** : le cache local SQLite persiste sur le disque du Pi entre les
+redéploiements — les entrées déjà écrites avant ce correctif restent au format corrompu
+(`[items, total]` brut) jusqu'à expiration de leur TTL (jusqu'à 300s). Le fichier
+`page_cache.db` (`addon_data/script.akasha.aura/`) a dû être supprimé manuellement pour valider
+immédiatement plutôt que d'attendre l'expiration.
+
+**Validé sur le Pi réel** (v0.35.2, cache purgé) : deux ouvertures consécutives de Bibliothèque
+(cache miss puis cache hit) affichent toutes les deux "771 resultat(s)" correctement, aucune
+erreur dans les logs, plus de "maximum number of windows reached" après un cycle de test répété
+(6× Bibliothèque/Catégories/Recommandé) grâce au correctif de réutilisation des fenêtres.
