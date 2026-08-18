@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.3...akasha-os-v0.35.4) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura,ambient:** guard against stacking a duplicate window on repeat RunScript triggers ([8ef80e5](https://github.com/jeremiejt38/akasha-os/commit/8ef80e5f70c52e3ef2978cda715f38fa46b200b6))
+
 ## [0.35.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.2...akasha-os-v0.35.3) (2026-08-18)
 
 
