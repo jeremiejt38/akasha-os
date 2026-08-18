@@ -122,6 +122,22 @@ l'architecture Aura existante (WindowXMLDialog, pas de patch de `Home.xml` — v
   - Validé de bout en bout : Catégories → sélection "Action" → Bibliothèque affiche
     "264 resultat(s) (Action)" avec la vraie liste filtrée.
 
+- **Sidebar rétractable pour Divertissement, alignée sur la référence Plex fournie par
+  l'utilisateur (2026-08-18, v0.32.0/v0.32.1)** : remplace les 9 boutons horizontaux (déjà à leur
+  limite de troncature) par une sidebar verticale — repliée par défaut (~100px, icônes seules),
+  se déplie entièrement (420px, icône + libellé) quand elle prend le focus
+  (`Control.HasFocus(3310)` + animation `slide`), se rétracte automatiquement dès que le focus
+  repart vers le contenu. "Accueil" (icône maison) en premier (ouvre "Recommandé"), une entrée par
+  bibliothèque Plex ensuite (icône film ou TV selon `type`). Icônes générées via PIL
+  (`icon-home.png`/`icon-film.png`/`icon-tv.png`).
+  - **Bug de navigation trouvé et corrigé en conditions réelles** : le `onright` de la sidebar
+    pointait vers un `<label>` (non focalisable en Kodi), ce qui faisait sauter la navigation
+    "Droite" jusqu'à l'onglet Jeux au lieu d'atteindre la grille de posters. Corrigé pour pointer
+    vers le panel de posters (focalisable).
+  - Validé par PixelCamera : repli par défaut, dépli complet au focus (icônes+libellés lisibles,
+    type film/TV correctement associé à chaque bibliothèque), rétraction propre en sortant vers la
+    grille.
+
 ## Notes de suivi
 
 - Chaque jalon correspond à un ou plusieurs commits atomiques (`feat:`/`fix:`/`test:`), sur `main`
