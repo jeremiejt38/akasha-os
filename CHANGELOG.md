@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.29.0...akasha-os-v0.30.0) (2026-08-18)
+
+
+### Features
+
+* **aura:** wire Bibliotheque view (search/sort/genre) to the connector with Plex fallback ([d825a9b](https://github.com/jeremiejt38/akasha-os/commit/d825a9b8e0faecb3eacba079ff69698e9687da0f))
+
 ## [0.29.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.28.1...akasha-os-v0.29.0) (2026-08-18)
 
 
