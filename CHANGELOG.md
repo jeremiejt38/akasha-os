@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.1...akasha-os-v0.35.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* **aura:** local page cache corrupted (items, total) tuples into [items, total] lists ([76618ef](https://github.com/jeremiejt38/akasha-os/commit/76618efe1cf9c32fb678861c01a8be0425e6b7c8))
+
 ## [0.35.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.0...akasha-os-v0.35.1) (2026-08-18)
 
 
