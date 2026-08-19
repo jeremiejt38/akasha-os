@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.40.0...akasha-os-v0.40.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **aura:** define missing ACTION_MOVE_UP constant ([#83](https://github.com/jeremiejt38/akasha-os/issues/83)) ([8bca52a](https://github.com/jeremiejt38/akasha-os/commit/8bca52a78a3ab3f9a94a69ff2457b4abc2a3ea26))
+
 ## [0.40.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.39.0...akasha-os-v0.40.0) (2026-08-19)
 
 
