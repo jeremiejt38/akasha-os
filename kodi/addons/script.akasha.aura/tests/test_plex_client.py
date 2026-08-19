@@ -52,6 +52,17 @@ class TestPlexClient(unittest.TestCase):
         self.assertEqual(items[0]['rating_key'], '123')
         self.assertEqual(items[0]['year'], 2010)
         self.assertIn('tok123', items[0]['thumb_url'])
+        self.assertIsNone(items[0]['section_id'])
+
+    @patch('urllib.request.urlopen')
+    def test_video_dict_captures_section_id(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'Metadata': [{'title': 'Inception', 'librarySectionID': 1}]
+            }
+        })
+        items = self.client.on_deck(limit=1)
+        self.assertEqual(items[0]['section_id'], '1')
 
     @patch('urllib.request.urlopen')
     def test_recently_added_endpoint(self, mock_urlopen):

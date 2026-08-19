@@ -67,6 +67,7 @@ class PlexClient:
     def _video_dict(item, server_url, token):
         thumb = item.get('thumb') or ''
         art = item.get('art') or ''
+        section_id = item.get('librarySectionID')
 
         def image_url(path):
             if not path:
@@ -86,6 +87,7 @@ class PlexClient:
             'summary': item.get('summary') or '',
             'thumb_url': image_url(thumb),
             'art_url': image_url(art),
+            'section_id': str(section_id) if section_id is not None else None,
         }
 
     def _metadata_list(self, data):

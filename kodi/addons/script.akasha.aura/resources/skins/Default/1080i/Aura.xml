@@ -42,7 +42,7 @@
                 <label></label>
                 <onleft>2004</onleft>
                 <onright>2002</onright>
-                <ondown>3050</ondown>
+                <ondown>3310</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
             <control type="image">
@@ -112,62 +112,6 @@
                 <height>80</height>
                 <aspectratio>keep</aspectratio>
                 <texture>tab-settings.png</texture>
-            </control>
-
-            <!-- Divertissement sub-tabs: Recommande / Bibliotheques / Categories -->
-            <control type="group">
-                <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
-
-                <control type="button" id="3050">
-                    <left>900</left>
-                    <top>30</top>
-                    <width>255</width>
-                    <height>60</height>
-                    <label>Recommande</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>2001</onleft>
-                    <onright>3100</onright>
-                    <ondown>9000</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
-
-                <control type="button" id="3100">
-                    <left>1155</left>
-                    <top>30</top>
-                    <width>255</width>
-                    <height>60</height>
-                    <label>Bibliotheques</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>3050</onleft>
-                    <onright>3060</onright>
-                    <ondown>3310</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
-
-                <control type="button" id="3060">
-                    <left>1410</left>
-                    <top>30</top>
-                    <width>255</width>
-                    <height>60</height>
-                    <label>Categories</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>3100</onleft>
-                    <onright>2001</onright>
-                    <ondown>9000</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
             </control>
 
             <!-- Jeux sub-tabs: SteamLink / Moonlight / Autres -->
@@ -266,13 +210,15 @@
             </control>
         </control>
 
-        <!-- Divertissement content (milestone 8: retractable left sidebar + poster grid) -->
+        <!-- Divertissement content: permanent sidebar + contextual header/tabs per library
+             (plan 780ecf80 phase 1-3: sidebar no longer gated by a sub-tab, it is the single
+             navigation entry point for Accueil vs a given library; Recommande/Bibliotheque/
+             Categories only appear, contextually, once a library is selected). -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
 
-            <!-- Sidebar: only visible in the "Bibliotheques" sub-tab. -->
+            <!-- Sidebar: always visible while browsing Divertissement (Accueil or a library). -->
             <control type="group" id="3300">
-                <visible>String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
                 <left>-320</left>
                 <top>140</top>
                 <width>420</width>
@@ -294,7 +240,8 @@
                     <top>10</top>
                     <width>420</width>
                     <height>840</height>
-                    <onright>3230</onright>
+                    <onup>2001</onup>
+                    <onright>3050</onright>
                     <itemlayout width="420" height="70">
                         <control type="image">
                             <left>25</left>
@@ -356,10 +303,111 @@
                 </control>
             </control>
 
+            <!-- Library header + contextual tabs: only shown once a library is selected
+                 in the sidebar (Window.Property(DivertView)=="library"); Accueil has no
+                 title/tab row, matching the Plex reference (section 2.2 of the cahier des
+                 charges). -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
+
+                <control type="label" id="3400">
+                    <left>160</left>
+                    <top>145</top>
+                    <width>1500</width>
+                    <height>44</height>
+                    <font>font16</font>
+                    <label>-</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+                <control type="label" id="3401">
+                    <left>162</left>
+                    <top>190</top>
+                    <width>600</width>
+                    <height>24</height>
+                    <font>font12</font>
+                    <label>Akasha</label>
+                    <textcolor>77FFFFFF</textcolor>
+                </control>
+                <!-- Options button ("..."): no dedicated per-library options menu specified
+                     in the reference captures (cahier 2.2), so this reuses the existing
+                     "Gerer les bibliotheques" dialog (pin/reorder) as the most reasonable
+                     placeholder action, see docs/aura/decisions.md. -->
+                <control type="button" id="3402">
+                    <left>1830</left>
+                    <top>150</top>
+                    <width>60</width>
+                    <height>44</height>
+                    <label>...</label>
+                    <font>font14</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3060</onleft>
+                    <onup>2001</onup>
+                    <ondown>9000</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3050">
+                    <left>160</left>
+                    <top>228</top>
+                    <width>200</width>
+                    <height>50</height>
+                    <label>Recommande</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3310</onleft>
+                    <onright>3100</onright>
+                    <onup>2001</onup>
+                    <ondown>9000</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3100">
+                    <left>370</left>
+                    <top>228</top>
+                    <width>200</width>
+                    <height>50</height>
+                    <label>Bibliotheque</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3050</onleft>
+                    <onright>3060</onright>
+                    <onup>2001</onup>
+                    <ondown>3310</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3060">
+                    <left>580</left>
+                    <top>228</top>
+                    <width>200</width>
+                    <height>50</height>
+                    <label>Categories</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3100</onleft>
+                    <onright>3402</onright>
+                    <onup>2001</onup>
+                    <ondown>9000</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+            </control>
+
             <control type="label" id="3220">
-                <visible>String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
+                <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
                 <left>160</left>
-                <top>150</top>
+                <top>298</top>
                 <width>1700</width>
                 <height>30</height>
                 <font>font12</font>
@@ -370,13 +418,13 @@
             </control>
 
             <control type="list" id="3230">
-                <visible>String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
+                <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
                 <left>160</left>
-                <top>190</top>
+                <top>338</top>
                 <width>1700</width>
                 <height>360</height>
                 <orientation>horizontal</orientation>
-                <onup>3220</onup>
+                <onup>3100</onup>
                 <onleft>3310</onleft>
                 <ondown>3230</ondown>
                 <itemlayout width="220" height="330">
@@ -449,14 +497,17 @@
                 </focusedlayout>
             </control>
 
+            <!-- Accueil placeholder: shown only while the "Recommande" dialog (opened
+                 automatically when Accueil is selected, see AuraWindow._activate_home) is
+                 not covering it, e.g. right after coming back from it with Back. -->
             <control type="label" id="3235">
-                <visible>!String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
+                <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
                 <left>160</left>
                 <top>150</top>
                 <width>1700</width>
                 <height>30</height>
                 <font>font12</font>
-                <label>Selectionnez Recommande, Bibliotheques ou Categories</label>
+                <label>Accueil</label>
                 <textcolor>77FFFFFF</textcolor>
             </control>
         </control>

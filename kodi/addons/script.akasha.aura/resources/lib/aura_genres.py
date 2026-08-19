@@ -29,6 +29,11 @@ class AuraGenresWindow(xbmcgui.WindowXMLDialog):
         self._plex = None
         self.section = None
         self.genres = []
+        # Optional: set by the caller (AuraWindow) before doModal() to scope
+        # Categories to the library currently selected in the sidebar,
+        # instead of always defaulting to the first video section (plan
+        # 780ecf80: tabs are now contextual to the selected library).
+        self.initial_section = None
         # Reused across opens rather than a fresh instance each time -- see
         # the note in aura_window.py's AuraWindow.__init__ about why: each
         # WindowXMLDialog construction permanently consumes one of Kodi's
@@ -38,7 +43,7 @@ class AuraGenresWindow(xbmcgui.WindowXMLDialog):
     def onInit(self):
         try:
             self._connect()
-            self.section = self._first_video_section()
+            self.section = self.initial_section or self._first_video_section()
             if not self.section:
                 self.getControl(STATUS_LABEL_ID).setLabel(
                     'Aucune bibliotheque video disponible')
