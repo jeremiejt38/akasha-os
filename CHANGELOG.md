@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.39.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.38.1...akasha-os-v0.39.0) (2026-08-19)
+
+
+### Features
+
+* **aura:** add dedicated library icons (anime, documentary, music, more) placeholders ([a57e41d](https://github.com/jeremiejt38/akasha-os/commit/a57e41d164b3dd4e0cd65ab8f955aa9379fb92ec))
+* **aura:** restructure Divertissement menu with tabs, sub-tabs, persistence and library pinning ([59854de](https://github.com/jeremiejt38/akasha-os/commit/59854ded30f34f03aa19386edebf0333016bffee))
+* **aura:** restructure menu with Divertissement/Jeux/App/Parametres tabs, sub-tabs, persistence and library pinning ([7748e6e](https://github.com/jeremiejt38/akasha-os/commit/7748e6eac645a9ce7176066b3c8f15a6454b76a6))
+
 ## [0.38.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.38.0...akasha-os-v0.38.1) (2026-08-19)
 
 
