@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.36.0...akasha-os-v0.36.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **remote:** use browser_home key for Fire TV remote Home button ([ececbad](https://github.com/jeremiejt38/akasha-os/commit/ececbad1390fb5c65dcfc029d8dc1d5adf5d4f5e))
+
 ## [0.36.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.7...akasha-os-v0.36.0) (2026-08-19)
 
 
