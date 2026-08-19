@@ -26,6 +26,7 @@ import xbmcaddon
 ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
 sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 
+import home_press_handler  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
 
 LOCK_FILE = '/tmp/akasha-aura.lock'
@@ -44,7 +45,13 @@ def _already_running():
 
 if __name__ == '__main__':
     if _already_running():
-        xbmc.log('Akasha Aura: already running, ignoring duplicate launch', xbmc.LOGINFO)
+        # Aura is already open. The user pressed Home again while inside Aura.
+        # Record the press so the running AuraWindow instance can distinguish a
+        # simple press (return to Divertissement tab) from a double press (open
+        # app switcher). See home_press_handler.py and docs/remote/decisions.md.
+        xbmc.log('Akasha Aura: duplicate Home press while running, routing to active window',
+                 xbmc.LOGINFO)
+        home_press_handler.record_home_press()
     else:
         try:
             with open(LOCK_FILE, 'w') as f:

@@ -23,6 +23,7 @@ import config
 import connector_client
 import divert_source
 import games_shortcuts
+import home_press_monitor
 import local_cache
 import paged_list
 import plex_client
@@ -95,6 +96,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # on every activation), so state/data refresh exactly like before.
         self._sub_windows = {}
         self._divert_load_attempted = False
+        # Listen for repeated Home presses while Aura is already open so we can
+        # distinguish simple press (return to Divertissement tab) from double
+        # press (open app switcher). See docs/remote/decisions.md.
+        self._home_press_monitor = home_press_monitor.HomePressMonitor(
+            self._on_home_press_action)
 
     def onInit(self):
         try:
@@ -598,9 +604,79 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmcgui.Dialog().notification(
                 'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
 
+    def _on_home_press_action(self, action):
+        """React to a repeated Home press while Aura is already open.
+
+        'single' -> return to the main Divertissement tab (close any sub-window).
+        'double' -> open the minimal app switcher.
+        """
+        xbmc.log('Akasha Aura: home press action: {}'.format(action), xbmc.LOGINFO)
+        if action == 'single':
+            self._close_sub_windows()
+            self._show_tab(0)
+            try:
+                self.setFocus(self.getControl(TAB_BUTTON_IDS[0]))
+            except RuntimeError:
+                pass
+        elif action == 'double':
+            _HomePressAppSwitcher(self).show()
+
+    def _close_sub_windows(self):
+        """Close any currently open sub-windows so we land back on Aura shell."""
+        for key in list(self._sub_windows.keys()):
+            window = self._sub_windows[key]
+            try:
+                window.close()
+            except Exception:
+                pass
+
 
 def _build_divert_list_item(item):
     li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
     if item.get('thumb_url'):
         li.setArt({'thumb': item['thumb_url']})
     return li
+
+
+class _HomePressAppSwitcher:
+    """Minimal app switcher invoked by a double Home press inside Aura.
+
+    Shows a native Kodi select dialog listing pinned apps and a few
+    system/utility options. A skinned, full WindowXML-based switcher can
+    replace this in a later milestone without changing the press-detection
+    plumbing.
+    """
+
+    def __init__(self, aura_window):
+        self._window = aura_window
+
+    def show(self):
+        try:
+            panel = self._window.getControl(DIVERT_PANEL_ID)
+            last_item = panel.getSelectedItem()
+            last_title = last_item.getLabel() if last_item else ''
+        except RuntimeError:
+            last_title = ''
+
+        items = []
+        actions = []
+        for app in self._window._pinned_apps:
+            items.append(app['name'])
+            actions.append(('runaddon', app['addonid']))
+        items.append('Parametres Akasha')
+        actions.append(('exec', 'RunAddon(script.akasha.settings)'))
+        items.append('Guide Akasha')
+        actions.append(('exec', 'RunScript(script.akasha.guide)'))
+        items.append('Mode Ambiant')
+        actions.append(('exec', 'RunScript(script.akasha.ambient)'))
+
+        dialog = xbmcgui.Dialog()
+        idx = dialog.select('Applications', items)
+        if idx < 0:
+            return
+        kind, value = actions[idx]
+        if kind == 'runaddon':
+            xbmc.executebuiltin('RunAddon({})'.format(value))
+        else:
+            xbmc.executebuiltin(value)
+

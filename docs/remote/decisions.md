@@ -91,14 +91,16 @@ existante jugé trop élevé.
   séparé, pas de risque sur le grab existant :
   - **Long press** : géré nativement par Kodi via le modificateur de keymap `mod="longpress"`
     (fonctionne sur les keymaps clavier, seuil ~250ms, `KEY_HOLD_TRESHOLD` côté C++ Kodi) — aucun
-    code custom nécessaire. `<home mod="longpress">RunScript(script.akasha.guide)</home>` dans
-    `akasha-ar-remote.xml`.
-  - **Double press** : Kodi n'a pas de modificateur "double press" natif ; chaque appui simple
-    déclenche son action immédiatement, donc distinguer un appui simple isolé du premier appui
-    d'un double nécessite un minuteur. Logique pure testée dans
-    `service.akasha.remote/resources/lib/press_timing.py` (`classify_press`) — **pas encore
-    câblée** côté `script.akasha.aura/default.py` (prochaine étape, nécessite un pont IPC vers
-    l'instance `AuraWindow` déjà active, via `NotifyAll`/`onNotification` ou fichier de signal).
+    code custom nécessaire. La télécommande envoie la touche `browser_home` (scancode 0xac), pas
+    `home`, donc le keymap utilise `<browser_home mod="longpress">RunScript(script.akasha.guide)`.
+  - **Double press** : Kodi n'a pas de modificateur "double press" natif. Pont IPC mis en place :
+    quand Aura est déjà ouvert, un nouvel appui sur Home écrit un timestamp dans
+    `/tmp/akasha-aura-home-press` et envoie `NotifyAll("akasha.aura", "HomePress", ...)` ;
+    l'instance `AuraWindow` active écoute via un thread `xbmc.Monitor` (`home_press_monitor.py`) et
+    applique la logique pure `classify_press` (`press_timing.py`) :
+    - simple appui -> retour à l'onglet "Divertissement" d'Aura + fermeture des sous-fenêtres ;
+    - double appui -> switcher d'applications minimal (dialogue natif listant les apps épinglées
+      plus raccourcis système, en attendant un switcher skinné complet).
 
 ### Pas de librairie BLE Python disponible
 
@@ -116,12 +118,12 @@ direct (`dbus-python` — à vérifier si disponible).
   spam — `battery_alert.BatteryAlertTracker`), état persisté dans
   `/storage/.akasha/remote_state.json`. Réglages dans les settings de l'addon (adresse MAC,
   intervalle de sondage, seuil d'alerte).
-- Keymap : long-press Home → Guide Akasha (`mod="longpress"`, natif Kodi).
+- Keymap : appui court Home → Aura, appui long Home → Guide (`browser_home` + `mod="longpress"`).
+- Double-appui Home → app switcher minimal (pont IPC NotifyAll + `home_press_monitor.py`).
 
 ## Reste à faire (prochaines itérations)
 
-- Double-press Home → app switcher : logique pure prête (`press_timing.py`), reste le pont IPC vers
-  `AuraWindow` et l'UI de l'app switcher elle-même (§8 du plan).
+- App switcher skinné complet (remplacer le dialogue natif par une fenêtre Akasha dédiée).
 - Bouton roue crantée → Akasha Settings (§9, keymap trivial une fois le keycode confirmé
   empiriquement sur le device).
 - Touches services de streaming → no-op (§10) : keycodes non confirmés sur ce modèle de
