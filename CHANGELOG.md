@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.40.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.39.0...akasha-os-v0.40.0) (2026-08-19)
+
+
+### Features
+
+* **aura:** add Pluto TV and Amazon Prime Video to Akasha Store manifest ([e3bd46b](https://github.com/jeremiejt38/akasha-os/commit/e3bd46b5bfb010efcce3e93c85f9c6c178406650))
+* **aura:** add Pluto TV and Amazon Prime Video to Akasha Store manifest ([2d3b944](https://github.com/jeremiejt38/akasha-os/commit/2d3b944c3c038e6a488a949fc80e143187d54410))
+
 ## [0.39.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.38.1...akasha-os-v0.39.0) (2026-08-19)
 
 
