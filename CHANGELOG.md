@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.37.0...akasha-os-v0.38.0) (2026-08-19)
+
+
+### Features
+
+* **remote:** volume routing (Akasha/CEC) + Power button sleep ([c8bbfa2](https://github.com/jeremiejt38/akasha-os/commit/c8bbfa226b27bb29f4251cef80a61794baa0910c))
+
 ## [0.37.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.36.1...akasha-os-v0.37.0) (2026-08-19)
 
 
