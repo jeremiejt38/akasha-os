@@ -18,7 +18,7 @@ import volume_router  # noqa: E402
 
 def _handle_volume(action):
     addon = xbmcaddon.Addon()
-    mode = addon.getSetting('remote.volume_mode') or 'akasha'
+    mode = volume_router.mode_from_setting(addon.getSetting('remote.volume_mode'))
     if mode == 'akasha':
         volume_router.route(action, mode, kodi_executebuiltin=xbmc.executebuiltin)
     elif mode == 'cec':

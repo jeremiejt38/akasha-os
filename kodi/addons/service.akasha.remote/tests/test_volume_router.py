@@ -6,7 +6,8 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
 
 from volume_router import (  # noqa: E402
-    ACTIONS, VOLUME_DOWN, VOLUME_MUTE, VOLUME_UP, cec_volume_command, route,
+    ACTIONS, VOLUME_DOWN, VOLUME_MUTE, VOLUME_UP, cec_volume_command,
+    mode_from_setting, route,
 )
 
 
@@ -38,6 +39,23 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(cmd[0], 'cec-ctl')
         self.assertIn('--user-control-pressed', cmd)
         self.assertIn('ui-cmd=volume-up', cmd)
+
+
+class VolumeModeSettingTests(unittest.TestCase):
+    def test_default_mode_is_akasha(self):
+        # The enum setting returns an index; 0 must map to 'akasha'.
+        self.assertEqual(mode_from_setting('0'), 'akasha')
+
+    def test_cec_mode_index(self):
+        self.assertEqual(mode_from_setting('1'), 'cec')
+
+    def test_ir_mode_index(self):
+        self.assertEqual(mode_from_setting('2'), 'ir')
+
+    def test_invalid_setting_falls_back_to_akasha(self):
+        self.assertEqual(mode_from_setting(''), 'akasha')
+        self.assertEqual(mode_from_setting('unknown'), 'akasha')
+        self.assertEqual(mode_from_setting('99'), 'akasha')
 
 
 if __name__ == '__main__':

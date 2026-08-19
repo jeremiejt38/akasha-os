@@ -21,9 +21,9 @@ box with Akasha Aura and the rest of the interface.
       <stop>Stop</stop>
       <rewind>Rewind</rewind>
       <fastforward>FastForward</fastforward>
-      <volumeup>RunScript(service.akasha.remote,volume_up)</volumeup>
-      <volumedown>RunScript(service.akasha.remote,volume_down)</volumedown>
-      <mute>RunScript(service.akasha.remote,mute)</mute>
+      <volume_up>RunScript(service.akasha.remote,volume_up)</volume_up>
+      <volume_down>RunScript(service.akasha.remote,volume_down)</volume_down>
+      <volume_mute>RunScript(service.akasha.remote,mute)</volume_mute>
       <!-- Fire TV remote power button: trigger Akasha sleep (CEC standby + wake-on-input). -->
       <power>RunScript(service.akasha.remote,power)</power>
       <sleep>RunScript(service.akasha.remote,power)</sleep>

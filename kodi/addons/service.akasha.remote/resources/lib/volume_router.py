@@ -15,6 +15,19 @@ VOLUME_MUTE = 'mute'
 
 ACTIONS = (VOLUME_UP, VOLUME_DOWN, VOLUME_MUTE)
 
+VOLUME_MODES = ('akasha', 'cec', 'ir')
+
+
+def mode_from_setting(raw):
+    """Convert the enum setting index to a mode string."""
+    try:
+        index = int(raw)
+    except (TypeError, ValueError):
+        return 'akasha'
+    if 0 <= index < len(VOLUME_MODES):
+        return VOLUME_MODES[index]
+    return 'akasha'
+
 KODI_BUILTINS = {
     VOLUME_UP: 'VolumeUp',
     VOLUME_DOWN: 'VolumeDown',
