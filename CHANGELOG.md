@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.38.0...akasha-os-v0.38.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **remote:** correct volume key names and enum setting parsing ([cdfbacf](https://github.com/jeremiejt38/akasha-os/commit/cdfbacf27c65c43e70e9e52ba70e24f3a764855e))
+
 ## [0.38.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.37.0...akasha-os-v0.38.0) (2026-08-19)
 
 
