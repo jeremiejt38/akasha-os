@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.7...akasha-os-v0.36.0) (2026-08-19)
+
+
+### Features
+
+* **remote:** Phase 1 of remote compatibility plan (dd440e2e) - battery monitoring + Home longpress ([3c56f0d](https://github.com/jeremiejt38/akasha-os/commit/3c56f0d787b7e1d899be96090c66222dd4a4fe6c))
+
 ## [0.35.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.35.6...akasha-os-v0.35.7) (2026-08-18)
 
 
