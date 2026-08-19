@@ -53,5 +53,68 @@ class DefaultTabIndexTests(unittest.TestCase):
         self.assertEqual(config.default_tab_index(None), 0)
 
 
+class DefaultSubtabIndexTests(unittest.TestCase):
+    def test_valid_index(self):
+        self.assertEqual(config.default_subtab_index('2'), 2)
+
+    def test_out_of_range_falls_back_to_zero(self):
+        self.assertEqual(config.default_subtab_index('5'), 0)
+        self.assertEqual(config.default_subtab_index('-1'), 0)
+
+    def test_invalid_value_falls_back_to_zero(self):
+        self.assertEqual(config.default_subtab_index('abc'), 0)
+        self.assertEqual(config.default_subtab_index(None), 0)
+
+
+class ParsePinnedTests(unittest.TestCase):
+    def test_empty_returns_empty(self):
+        self.assertEqual(config.parse_pinned(''), [])
+        self.assertEqual(config.parse_pinned(None), [])
+
+    def test_splits_and_strips(self):
+        self.assertEqual(config.parse_pinned('1, 2,3'), ['1', '2', '3'])
+
+
+class SerializePinnedTests(unittest.TestCase):
+    def test_joins_keys(self):
+        self.assertEqual(config.serialize_pinned(['1', '2', '3']), '1,2,3')
+
+    def test_empty_returns_empty(self):
+        self.assertEqual(config.serialize_pinned([]), '')
+
+
+class OrderedItemsTests(unittest.TestCase):
+    def test_order_by_pinned(self):
+        available = [
+            {'key': 'a', 'title': 'Alpha'},
+            {'key': 'b', 'title': 'Beta'},
+            {'key': 'c', 'title': 'Charlie'},
+        ]
+        self.assertEqual(
+            config.ordered_items(available, ['c', 'a']),
+            [available[2], available[0], available[1]],
+        )
+
+    def test_unpinned_sorted_alphabetically(self):
+        available = [
+            {'key': 'c', 'title': 'Charlie'},
+            {'key': 'a', 'title': 'Alpha'},
+        ]
+        self.assertEqual(
+            config.ordered_items(available, []),
+            [available[1], available[0]],
+        )
+
+    def test_default_first_moves_to_front(self):
+        available = [
+            {'key': 'a', 'title': 'Alpha'},
+            {'key': 'b', 'title': 'Beta'},
+        ]
+        self.assertEqual(
+            config.ordered_items(available, ['a'], default_first='b'),
+            [available[1], available[0]],
+        )
+
+
 if __name__ == '__main__':
     unittest.main()

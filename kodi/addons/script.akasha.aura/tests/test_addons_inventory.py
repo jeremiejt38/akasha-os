@@ -1,9 +1,13 @@
 """Unit tests for addons_inventory.py — no xbmc dependency."""
 
 import json
+import os
+import sys
 import unittest
 
-import addons_inventory
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
+
+import addons_inventory  # noqa: E402
 
 
 class TestParseGetAddonsResponse(unittest.TestCase):

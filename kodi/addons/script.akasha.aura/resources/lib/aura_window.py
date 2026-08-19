@@ -30,10 +30,17 @@ import plex_client
 import steam_client
 import sunshine_client
 
-TAB_BUTTON_IDS = (2001, 2002, 2003)
+TAB_BUTTON_IDS = (2001, 2002, 2003, 2004)
+
+# Main-tab IDs in the same order as config.TABS.
+TAB_DIVERTISSEMENT = 0
+TAB_JEUX = 1
+TAB_APP = 2
+TAB_PARAMETRES = 3
 
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
+ACTION_MOVE_DOWN = 4
 ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
@@ -42,10 +49,16 @@ DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
 DIVERT_SIDEBAR_HOME_INDEX = 0
+DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 
 GAME_BUTTON_IDS = (2010, 2011, 2012)
 APP_TILE_IDS = (2030, 2031, 2032, 2033)
+
+DIVERT_SUBTAB_IDS = (3050, 3100, 3060)
+DIVERT_SUBTAB_RECOMMANDE = 0
+DIVERT_SUBTAB_BIBLIOTHEQUES = 1
+DIVERT_SUBTAB_CATEGORIES = 2
 
 JEUX_SUBTAB_IDS = (2050, 2051, 2052)
 JEUX_STATUS_ID = 2055
@@ -55,6 +68,14 @@ JEUX_SUBTAB_MOONLIGHT = 1
 JEUX_SUBTAB_OTHERS = 2
 # Shortcuts launched from their own dedicated sub-tab, excluded from "Autres".
 JEUX_DEDICATED_ACTIONS = ('steamlink', 'moonlight')
+
+APP_SUBTAB_IDS = (2041, 2042)
+APP_SUBTAB_MES_APPS = 0
+APP_SUBTAB_STORE = 1
+
+SETTINGS_BUTTON_IDS = (2100, 2101)
+
+BAR_CONTROL_IDS = set(TAB_BUTTON_IDS + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS)
 
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
@@ -67,9 +88,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._plex_client = None
         self._connector_client = None
         self._divert_sections = []
+        self._all_divert_sections = []
         self._divert_active_section = 0
         self._divert_items = []
         self._divert_paged = None
+        self._divert_subtab = config.default_subtab_index(
+            addon.getSetting('divert.last_subtab'))
+        self._divert_pinned_libraries = config.parse_pinned(
+            addon.getSetting('divert.pinned_libraries'))
+        self._divert_library_order = config.parse_pinned(
+            addon.getSetting('divert.library_order'))
+        self._divert_last_library_key = addon.getSetting('divert.last_library') or ''
         self._cache = local_cache.open_addon_cache(addon)
         self._games = games_shortcuts.load_shortcuts(self.addon_path)
         self._other_games = [
@@ -78,6 +107,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         ]
         self._jeux_active_subtab = JEUX_SUBTAB_STEAMLINK
         self._jeux_items = []
+        self._app_subtab = APP_SUBTAB_MES_APPS
         self._pinned_apps = []
         # Sub-windows (Recommandations/Bibliotheque/Categories/App/Store/Show)
         # are constructed once and reused for every subsequent open instead
@@ -107,9 +137,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._show_tab(self.active_tab)
             self._load_divertissement()
             self._divert_load_attempted = True
+            self._select_divert_subtab(self._divert_subtab, focus=False)
             self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK)
             self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._update_bar_focused()
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
 
@@ -162,6 +194,46 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon.setSetting('connector.session_token', client.token)
         return client
 
+    def _select_divert_subtab(self, index, focus=True):
+        self._divert_subtab = index
+        self.setProperty('DivertActiveSubtab', str(index))
+        self.addon.setSetting('divert.last_subtab', str(index))
+
+        if index == DIVERT_SUBTAB_RECOMMANDE:
+            self._get_sub_window(
+                'recommendations', aura_recommendations.AuraRecommendationsWindow,
+                'AuraRecommendations.xml').doModal()
+            return
+
+        if index == DIVERT_SUBTAB_CATEGORIES:
+            self._get_sub_window(
+                'genres', aura_genres.AuraGenresWindow, 'AuraGenres.xml').doModal()
+            return
+
+        # Bibliotheques: focus sidebar and select the last-used library.
+        if self._divert_sections:
+            section_index = 0
+            if self._divert_last_library_key:
+                for i, section in enumerate(self._divert_sections):
+                    if section['key'] == self._divert_last_library_key:
+                        section_index = i
+                        break
+            self._select_divert_section(section_index)
+            self._set_sidebar_selection(section_index + 1)
+        if focus:
+            try:
+                self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
+            except RuntimeError:
+                pass
+
+    def _set_sidebar_selection(self, index):
+        try:
+            sidebar = self.getControl(DIVERT_SIDEBAR_ID)
+            if 0 <= index < sidebar.size():
+                sidebar.selectItem(index)
+        except RuntimeError:
+            pass
+
     def _load_divertissement(self):
         connector = self._get_connector_client(prompt_if_missing=True)
         if connector:
@@ -193,6 +265,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
                 self._divert_sections = []
 
+        self._all_divert_sections = config.ordered_items(
+            self._divert_sections, self._divert_library_order)
+        pinned_set = set(self._divert_pinned_libraries)
+        if pinned_set:
+            self._divert_sections = [
+                s for s in self._all_divert_sections if s['key'] in pinned_set]
+            if not self._divert_sections:
+                # All libraries were unpinned; fall back to showing everything
+                # so the sidebar never stays empty.
+                self._divert_sections = list(self._all_divert_sections)
+        else:
+            self._divert_sections = list(self._all_divert_sections)
         self._populate_sidebar()
 
         if self._divert_sections:
@@ -210,10 +294,28 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         sidebar.addItem(home_item)
 
         for section in self._divert_sections:
-            icon = 'icon-tv.png' if section.get('type') == 'show' else 'icon-film.png'
             li = xbmcgui.ListItem(section['title'])
-            li.setArt({'icon': icon})
+            li.setArt({'icon': self._divert_section_icon(section)})
             sidebar.addItem(li)
+
+        more_item = xbmcgui.ListItem('Plus')
+        more_item.setArt({'icon': 'icon-home.png'})
+        sidebar.addItem(more_item)
+
+    def _divert_section_icon(self, section):
+        """Return a distinct icon name for a library section.
+
+        Falls back to the generic TV/movie icons when no dedicated icon is
+        available yet; new textures can be added without touching this code.
+        """
+        title = (section.get('title') or '').lower()
+        if 'anime' in title:
+            return 'icon-tv.png'
+        if 'documentaire' in title or 'documentary' in title:
+            return 'icon-film.png'
+        if section.get('type') == 'show':
+            return 'icon-tv.png'
+        return 'icon-film.png'
 
     def _divert_section_page(self, section, offset, limit):
         key = local_cache.page_cache_key('divert', section['key'], offset, limit)
@@ -235,6 +337,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         self._divert_active_section = index
         section = self._divert_sections[index]
+        self._divert_last_library_key = section['key']
+        self.addon.setSetting('divert.last_library', section['key'])
 
         self._divert_paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit))
@@ -350,6 +454,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 for a in apps
             ]
             self._set_jeux_panel(self._jeux_items, '{} application(s) Sunshine'.format(len(apps)))
+
+    def _select_app_subtab(self, index):
+        self._app_subtab = index
+        self.setProperty('AppActiveSubtab', str(index))
+        if index == APP_SUBTAB_MES_APPS:
+            self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml').doModal()
+            self._load_pinned_apps()
+        elif index == APP_SUBTAB_STORE:
+            self._get_sub_window('store', aura_store.AuraStoreWindow, 'AuraStore.xml').doModal()
+            self._load_pinned_apps()
 
     def _set_jeux_panel(self, items, status_text):
         try:
@@ -479,6 +593,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         index = index % len(config.TABS)
         self.active_tab = index
         self.setProperty('AuraActiveTab', str(index))
+        self.addon.setSetting('tab.default', str(index))
+
+        if index == TAB_DIVERTISSEMENT:
+            self._select_divert_subtab(self._divert_subtab, focus=False)
+        elif index == TAB_JEUX:
+            self.setProperty('JeuxActiveSubtab', str(self._jeux_active_subtab))
+        elif index == TAB_APP:
+            self.setProperty('AppActiveSubtab', str(self._app_subtab))
+
         # AuraWindow is now a single long-lived instance for the whole Kodi
         # session (see the note in __init__): onInit() -- and so
         # _load_divertissement() -- only ever runs once. If that one
@@ -488,57 +611,70 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # (re)selects the Divertissement tab and it's still empty, so
         # navigating away and back is enough to pick back up once the
         # network/connector recovers.
-        if index == 0 and self._divert_load_attempted and not self._divert_sections:
+        if index == TAB_DIVERTISSEMENT and self._divert_load_attempted and not self._divert_sections:
             self._load_divertissement()
+
+    def _update_bar_focused(self):
+        """Update the top-bar focused property used by the retract animation."""
+        focused = self.getFocusId()
+        is_bar_focused = focused in BAR_CONTROL_IDS or focused in SETTINGS_BUTTON_IDS
+        self.setProperty('AuraBarFocused', 'true' if is_bar_focused else 'false')
 
     def onAction(self, action):
         aid = action.getId()
         if aid in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
             self.close()
             return
-        if aid == ACTION_MOVE_LEFT and self.getFocusId() in TAB_BUTTON_IDS:
+        focused = self.getFocusId()
+        if aid == ACTION_MOVE_LEFT and focused in TAB_BUTTON_IDS:
             self._show_tab(self.active_tab - 1)
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._update_bar_focused()
             return
-        if aid == ACTION_MOVE_RIGHT and self.getFocusId() in TAB_BUTTON_IDS:
+        if aid == ACTION_MOVE_RIGHT and focused in TAB_BUTTON_IDS:
             self._show_tab(self.active_tab + 1)
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._update_bar_focused()
+            return
+        if aid == ACTION_MOVE_DOWN and focused in TAB_BUTTON_IDS:
+            self._focus_first_subtab()
+            self._update_bar_focused()
+            return
+        if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS):
+            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._update_bar_focused()
             return
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT) and self.getFocusId() == DIVERT_PANEL_ID:
             self._maybe_load_more_divert()
+        self._update_bar_focused()
+
+    def _focus_first_subtab(self):
+        """Move focus from the main tab to the first sub-tab of the active tab."""
+        if self.active_tab == TAB_DIVERTISSEMENT:
+            self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_subtab]))
+        elif self.active_tab == TAB_JEUX:
+            self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
+        elif self.active_tab == TAB_APP:
+            self.setFocus(self.getControl(APP_SUBTAB_IDS[self._app_subtab]))
 
     def onClick(self, controlID):
         if controlID in TAB_BUTTON_IDS:
             self._show_tab(TAB_BUTTON_IDS.index(controlID))
-        elif controlID == 3050:
-            self._get_sub_window(
-                'recommendations', aura_recommendations.AuraRecommendationsWindow,
-                'AuraRecommendations.xml').doModal()
-        elif controlID == 3100:
-            self._get_sub_window(
-                'library', aura_library.AuraLibraryWindow, 'AuraLibrary.xml').doModal()
-        elif controlID == 3060:
-            self._get_sub_window(
-                'genres', aura_genres.AuraGenresWindow, 'AuraGenres.xml').doModal()
-        elif controlID == 3200:
-            xbmc.executebuiltin('ActivateWindow(Settings)')
+        elif controlID in DIVERT_SUBTAB_IDS:
+            self._select_divert_subtab(DIVERT_SUBTAB_IDS.index(controlID))
+        elif controlID in JEUX_SUBTAB_IDS:
+            self._select_jeux_subtab(JEUX_SUBTAB_IDS.index(controlID))
+        elif controlID in APP_SUBTAB_IDS:
+            self._select_app_subtab(APP_SUBTAB_IDS.index(controlID))
         elif controlID in GAME_BUTTON_IDS:
             idx = GAME_BUTTON_IDS.index(controlID)
             if idx < len(self._other_games):
                 action = self._other_games[idx]['action']
                 if action:
                     xbmc.executebuiltin(action)
-        elif controlID in JEUX_SUBTAB_IDS:
-            self._select_jeux_subtab(JEUX_SUBTAB_IDS.index(controlID))
         elif controlID == JEUX_PANEL_ID:
             self._on_jeux_item_selected()
-        elif controlID == 2041:
-            self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml').doModal()
-            self._load_pinned_apps()
-        elif controlID == 2042:
-            self._get_sub_window('store', aura_store.AuraStoreWindow, 'AuraStore.xml').doModal()
-            self._load_pinned_apps()
         elif controlID in APP_TILE_IDS:
             idx = APP_TILE_IDS.index(controlID)
             if idx < len(self._pinned_apps):
@@ -547,6 +683,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._on_sidebar_item_selected()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
+        elif controlID == 2100:
+            xbmc.executebuiltin('RunAddon(script.akasha.settings)')
+        elif controlID == 2101:
+            xbmc.executebuiltin('ActivateWindow(Settings)')
 
     def _on_jeux_item_selected(self):
         try:
@@ -573,13 +713,68 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             return
         if pos == DIVERT_SIDEBAR_HOME_INDEX:
-            self._get_sub_window(
-                'recommendations', aura_recommendations.AuraRecommendationsWindow,
-                'AuraRecommendations.xml').doModal()
+            self._select_divert_subtab(DIVERT_SUBTAB_RECOMMANDE)
+            return
+        more_index = len(self._divert_sections) + 1
+        if pos == more_index:
+            self._manage_libraries()
             return
         section_index = pos - 1
         if 0 <= section_index < len(self._divert_sections):
             self._select_divert_section(section_index)
+
+    def _manage_libraries(self):
+        """Show a dialog to pin/unpin and reorder every library section."""
+        if not self._all_divert_sections:
+            return
+
+        all_sections = list(self._all_divert_sections)
+        pinned_set = set(self._divert_pinned_libraries)
+
+        options = []
+        actions = []
+        for section in all_sections:
+            key = section['key']
+            pinned = key in pinned_set
+            options.append(
+                '{} {}'.format('Desepingler' if pinned else 'Epingler', section['title']))
+            actions.append(('toggle', key))
+            idx = all_sections.index(section)
+            if idx > 0:
+                options.append('Monter {}'.format(section['title']))
+                actions.append(('up', key))
+            if idx < len(all_sections) - 1:
+                options.append('Descendre {}'.format(section['title']))
+                actions.append(('down', key))
+
+        dialog = xbmcgui.Dialog()
+        idx = dialog.select('Gerer les bibliotheques', options)
+        if idx < 0:
+            return
+
+        action, key = actions[idx]
+        if action == 'toggle':
+            if key in pinned_set:
+                pinned_set.remove(key)
+            else:
+                pinned_set.add(key)
+            self._divert_pinned_libraries = list(pinned_set)
+            self.addon.setSetting(
+                'divert.pinned_libraries',
+                config.serialize_pinned(self._divert_pinned_libraries))
+        elif action in ('up', 'down'):
+            order = [s['key'] for s in all_sections]
+            i = order.index(key)
+            if action == 'up' and i > 0:
+                order[i - 1], order[i] = order[i], order[i - 1]
+            elif action == 'down' and i < len(order) - 1:
+                order[i], order[i + 1] = order[i + 1], order[i]
+            self._divert_library_order = order
+            self.addon.setSetting(
+                'divert.library_order', config.serialize_pinned(order))
+
+        self._load_divertissement()
+        self._select_divert_subtab(DIVERT_SUBTAB_BIBLIOTHEQUES)
 
     def _on_divert_item_selected(self):
         try:
