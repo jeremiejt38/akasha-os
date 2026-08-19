@@ -11,22 +11,38 @@
             <texture colordiffuse="FF10131A">white.png</texture>
         </control>
 
-        <!-- Top tab bar -->
-        <control type="group">
+        <!-- Top tab bar: main tabs + context-aware sub-tabs.
+             Retracts to a ~20px strip when focus leaves the bar so the
+             content area stays visible while the active tab remains
+             identifiable. -->
+        <control type="group" id="100">
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
+                <effect type="slide" start="0,0" end="0,-100" time="200" tween="quadratic" easing="inout"/>
+            </animation>
+
             <left>0</left>
             <top>0</top>
             <width>1920</width>
             <height>120</height>
 
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>120</height>
+                <texture colordiffuse="E610131A">white.png</texture>
+            </control>
+
+            <!-- Main tabs: Divertissement, Jeux, App, Parametres -->
             <control type="button" id="2001">
                 <left>60</left>
                 <top>20</top>
                 <width>120</width>
                 <height>80</height>
                 <label></label>
-                <onleft>2003</onleft>
+                <onleft>2004</onleft>
                 <onright>2002</onright>
-                <ondown>3310</ondown>
+                <ondown>3050</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
             <control type="image">
@@ -65,7 +81,7 @@
                 <height>80</height>
                 <label></label>
                 <onleft>2002</onleft>
-                <onright>3050</onright>
+                <onright>2004</onright>
                 <ondown>2041</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
@@ -78,72 +94,175 @@
                 <texture>tab-app.png</texture>
             </control>
 
-            <control type="button" id="3050">
-                <left>900</left>
-                <top>30</top>
-                <width>255</width>
-                <height>60</height>
-                <label>Recommande</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
+            <control type="button" id="2004">
+                <left>450</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <label></label>
                 <onleft>2003</onleft>
-                <onright>3100</onright>
-                <ondown>9000</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            </control>
-
-            <control type="button" id="3100">
-                <left>1155</left>
-                <top>30</top>
-                <width>255</width>
-                <height>60</height>
-                <label>Bibliotheque</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <onleft>3050</onleft>
-                <onright>3060</onright>
-                <ondown>9000</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            </control>
-
-            <control type="button" id="3060">
-                <left>1410</left>
-                <top>30</top>
-                <width>255</width>
-                <height>60</height>
-                <label>Categories</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <onleft>3100</onleft>
-                <onright>3200</onright>
-                <ondown>9000</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            </control>
-
-            <control type="button" id="3200">
-                <left>1665</left>
-                <top>30</top>
-                <width>255</width>
-                <height>60</height>
-                <label>Parametres</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <onleft>3060</onleft>
                 <onright>2001</onright>
                 <ondown>9000</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+            <control type="image">
+                <left>450</left>
+                <top>20</top>
+                <width>120</width>
+                <height>80</height>
+                <aspectratio>keep</aspectratio>
+                <texture>tab-settings.png</texture>
+            </control>
+
+            <!-- Divertissement sub-tabs: Recommande / Bibliotheques / Categories -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
+
+                <control type="button" id="3050">
+                    <left>900</left>
+                    <top>30</top>
+                    <width>255</width>
+                    <height>60</height>
+                    <label>Recommande</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>2001</onleft>
+                    <onright>3100</onright>
+                    <ondown>9000</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3100">
+                    <left>1155</left>
+                    <top>30</top>
+                    <width>255</width>
+                    <height>60</height>
+                    <label>Bibliotheques</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3050</onleft>
+                    <onright>3060</onright>
+                    <ondown>3310</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3060">
+                    <left>1410</left>
+                    <top>30</top>
+                    <width>255</width>
+                    <height>60</height>
+                    <label>Categories</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3100</onleft>
+                    <onright>2001</onright>
+                    <ondown>9000</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+            </control>
+
+            <!-- Jeux sub-tabs: SteamLink / Moonlight / Autres -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
+
+                <control type="button" id="2050">
+                    <left>900</left>
+                    <top>30</top>
+                    <width>195</width>
+                    <height>60</height>
+                    <label>SteamLink</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>2002</onleft>
+                    <onright>2051</onright>
+                    <ondown>2060</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="2051">
+                    <left>1110</left>
+                    <top>30</top>
+                    <width>195</width>
+                    <height>60</height>
+                    <label>Moonlight</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>2050</onleft>
+                    <onright>2052</onright>
+                    <ondown>2060</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="2052">
+                    <left>1320</left>
+                    <top>30</top>
+                    <width>195</width>
+                    <height>60</height>
+                    <label>Autres</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>2051</onleft>
+                    <onright>2002</onright>
+                    <ondown>2010</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+            </control>
+
+            <!-- App sub-tabs: Mes Apps / Store -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
+
+                <control type="button" id="2041">
+                    <left>900</left>
+                    <top>30</top>
+                    <width>195</width>
+                    <height>60</height>
+                    <label>Mes Apps</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>2003</onleft>
+                    <onright>2042</onright>
+                    <ondown>2030</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="2042">
+                    <left>1110</left>
+                    <top>30</top>
+                    <width>195</width>
+                    <height>60</height>
+                    <label>Store</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>2041</onleft>
+                    <onright>2003</onright>
+                    <ondown>2030</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
             </control>
         </control>
 
@@ -151,11 +270,9 @@
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
 
-            <!-- Sidebar: collapsed to a ~100px icon strip by default, slides fully into
-                 view when it has focus (Control.HasFocus(3310)), retracts once focus
-                 leaves it. Item 0 is always "Accueil" (opens Recommandations), items
-                 1-9 are the Plex library sections, filled dynamically. -->
+            <!-- Sidebar: only visible in the "Bibliotheques" sub-tab. -->
             <control type="group" id="3300">
+                <visible>String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
                 <left>-320</left>
                 <top>140</top>
                 <width>420</width>
@@ -240,6 +357,7 @@
             </control>
 
             <control type="label" id="3220">
+                <visible>String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
                 <left>160</left>
                 <top>150</top>
                 <width>1700</width>
@@ -252,6 +370,7 @@
             </control>
 
             <control type="list" id="3230">
+                <visible>String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
                 <left>160</left>
                 <top>190</top>
                 <width>1700</width>
@@ -329,61 +448,22 @@
                     </control>
                 </focusedlayout>
             </control>
+
+            <control type="label" id="3235">
+                <visible>!String.IsEqual(Window.Property(DivertActiveSubtab),1)</visible>
+                <left>160</left>
+                <top>150</top>
+                <width>1700</width>
+                <height>30</height>
+                <font>font12</font>
+                <label>Selectionnez Recommande, Bibliotheques ou Categories</label>
+                <textcolor>77FFFFFF</textcolor>
+            </control>
         </control>
 
         <!-- Jeux content (milestone 7: SteamLink / Moonlight libraries + Autres tiles) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
-
-            <control type="button" id="2050">
-                <left>60</left>
-                <top>145</top>
-                <width>195</width>
-                <height>40</height>
-                <font>font11</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <label>SteamLink</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2002</onup>
-                <onright>2051</onright>
-                <ondown>2060</ondown>
-            </control>
-            <control type="button" id="2051">
-                <left>255</left>
-                <top>145</top>
-                <width>195</width>
-                <height>40</height>
-                <font>font11</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <label>Moonlight</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2002</onup>
-                <onleft>2050</onleft>
-                <onright>2052</onright>
-                <ondown>2060</ondown>
-            </control>
-            <control type="button" id="2052">
-                <left>450</left>
-                <top>145</top>
-                <width>195</width>
-                <height>40</height>
-                <font>font11</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <label>Autres</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2002</onup>
-                <onleft>2051</onleft>
-                <ondown>2010</ondown>
-            </control>
 
             <control type="label" id="2055">
                 <left>60</left>
@@ -510,42 +590,9 @@
             </control>
         </control>
 
-        <!-- App content (milestone 7: Mes Apps / Store sub-tabs + pinned tiles) -->
+        <!-- App content (milestone 7: pinned tiles) -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
-
-            <control type="button" id="2041">
-                <left>60</left>
-                <top>145</top>
-                <width>195</width>
-                <height>40</height>
-                <font>font11</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <label>Mes Apps</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2003</onup>
-                <onright>2042</onright>
-                <ondown>2030</ondown>
-            </control>
-            <control type="button" id="2042">
-                <left>255</left>
-                <top>145</top>
-                <width>195</width>
-                <height>40</height>
-                <font>font11</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <label>Store</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2003</onup>
-                <onleft>2041</onleft>
-                <ondown>2030</ondown>
-            </control>
 
             <control type="label" id="2029">
                 <left>60</left>
@@ -617,6 +664,41 @@
                 <onup>2041</onup>
                 <onleft>2032</onleft>
                 <ondown>2033</ondown>
+            </control>
+        </control>
+
+        <!-- Parametres content -->
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(AuraActiveTab),3)</visible>
+
+            <control type="button" id="2100">
+                <left>60</left>
+                <top>145</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>Parametres Akasha</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2004</onup>
+                <onright>2101</onright>
+                <ondown>2100</ondown>
+            </control>
+
+            <control type="button" id="2101">
+                <left>480</left>
+                <top>145</top>
+                <width>400</width>
+                <height>120</height>
+                <font>font14</font>
+                <label>Parametres Kodi</label>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <onup>2004</onup>
+                <onleft>2100</onleft>
+                <ondown>2101</ondown>
             </control>
         </control>
 
