@@ -35,6 +35,16 @@
             "addonid": "plugin.audio.soundcloud",
             "name": "SoundCloud",
             "summary": "Musique et podcasts SoundCloud."
+        },
+        {
+            "addonid": "plugin.video.plutotv",
+            "name": "Pluto TV",
+            "summary": "Chaines TV et films gratuits en direct et VOD."
+        },
+        {
+            "addonid": "plugin.video.amazon-test",
+            "name": "Amazon Prime Video",
+            "summary": "Amazon Prime Video (addon tiers Sandmann79, necessite un compte Amazon Prime et InputStream/Widevine)."
         }
     ]
 }
