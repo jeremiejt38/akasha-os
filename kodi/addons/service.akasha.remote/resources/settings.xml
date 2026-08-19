@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="General">
+        <setting id="remote.mac_address" type="text" label="Adresse MAC de la telecommande" default="10:BF:67:30:D8:09"/>
+        <setting id="remote.poll_interval_seconds" type="number" label="Intervalle de verification de la batterie (secondes)" default="300"/>
+        <setting id="remote.low_battery_threshold" type="number" label="Seuil d'alerte batterie faible (%)" default="15"/>
+    </category>
+</settings>

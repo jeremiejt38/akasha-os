@@ -149,6 +149,10 @@ cp "$SCRIPT_DIR/skin-patches/shortcuts/games.DATA.xml" /storage/.kodi/addons/scr
 rm -rf /storage/.kodi/addons/service.akasha.aura
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.aura" /storage/.kodi/addons/
 
+log "  Installing Akasha Remote addon..."
+rm -rf /storage/.kodi/addons/service.akasha.remote
+cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.remote" /storage/.kodi/addons/
+
 # Remove any default video pack left over from an older install: the
 # default Ambient content is photos (see decisions.md), videos are opt-in
 # only (user drops their own files in /storage/ambient/photos). Manifests
@@ -226,6 +230,7 @@ sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
         ('service.akasha.ambient', 1, datetime('now')),
         ('script.akasha.aura', 1, datetime('now')),
         ('service.akasha.aura', 1, datetime('now')),
+        ('service.akasha.remote', 1, datetime('now')),
         ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
 chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh \
