@@ -5,6 +5,9 @@
     </requires>
     <extension point="xbmc.service" library="service.py" start="startup">
     </extension>
+    <extension point="xbmc.python.script" library="default.py">
+        <provides>executable</provides>
+    </extension>
     <extension point="xbmc.addon.metadata">
         <summary lang="fr_FR">Compatibilite telecommande Akasha OS</summary>
         <summary lang="en_GB">Akasha OS remote control compatibility</summary>

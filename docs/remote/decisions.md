@@ -120,6 +120,10 @@ direct (`dbus-python` — à vérifier si disponible).
   intervalle de sondage, seuil d'alerte).
 - Keymap : appui court Home → Aura, appui long Home → Guide (`browser_home` + `mod="longpress"`).
 - Double-appui Home → app switcher minimal (pont IPC NotifyAll + `home_press_monitor.py`).
+- Volume : routage configurable vers Kodi local (`VolumeUp`/`VolumeDown`/`Mute`) ou TV via CEC
+  (`cec-ctl --user-control-pressed ui-cmd=volume-up/down/mute`). Mode IR prévu mais non
+  implémenté faute de matériel dédié.
+- Bouton Power : déclenche `akasha-sleep.py` (CEC standby + HDMI off + wake-on-input).
 
 ## Reste à faire (prochaines itérations)
 
@@ -129,8 +133,9 @@ direct (`dbus-python` — à vérifier si disponible).
 - Touches services de streaming → no-op (§10) : keycodes non confirmés sur ce modèle de
   télécommande (peut ne pas avoir de boutons dédiés Netflix/Prime/Amazon — à vérifier avec
   l'utilisateur).
-- Volume Akasha/CEC/IR (§6), bouton Power (§11) : dépendent de l'intégration CEC déjà existante
-  (`kodi/scripts/akasha-sleep.py`), à router mais pas encore fait.
+- Volume : implémenté (routage Akasha/CEC). Mode IR nécessite un blaster dédié.
+- Bouton Power : implémenté (appelle `akasha-sleep.py`).
+- App switcher skinné complet (remplacer le dialogue natif par une fenêtre Akasha dédiée).
 - Affichage de la batterie et du sélecteur de mode volume dans Akasha Settings > Télécommande
   (nouvelle catégorie UI, pas encore ajoutée à `script.akasha.settings`).
 - Buzzer/IR via la télécommande : bloqué par le protocole propriétaire, non retenté sauf décision

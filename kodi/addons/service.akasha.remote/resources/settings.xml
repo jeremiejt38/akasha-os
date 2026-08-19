@@ -4,5 +4,6 @@
         <setting id="remote.mac_address" type="text" label="Adresse MAC de la telecommande" default="10:BF:67:30:D8:09"/>
         <setting id="remote.poll_interval_seconds" type="number" label="Intervalle de verification de la batterie (secondes)" default="300"/>
         <setting id="remote.low_battery_threshold" type="number" label="Seuil d'alerte batterie faible (%)" default="15"/>
+        <setting id="remote.volume_mode" type="enum" label="Destination des touches volume" default="0" values="Akasha (Kodi)|TV/CEC|IR (non implemente)"/>
     </category>
 </settings>
