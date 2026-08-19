@@ -299,20 +299,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             sidebar.addItem(li)
 
         more_item = xbmcgui.ListItem('Plus')
-        more_item.setArt({'icon': 'icon-home.png'})
+        more_item.setArt({'icon': 'icon-more.png'})
         sidebar.addItem(more_item)
 
     def _divert_section_icon(self, section):
         """Return a distinct icon name for a library section.
 
-        Falls back to the generic TV/movie icons when no dedicated icon is
-        available yet; new textures can be added without touching this code.
+        Maps common library titles to dedicated textures; new textures can be
+        added without touching this code as long as the file name matches the
+        convention `icon-<slug>.png`.
         """
         title = (section.get('title') or '').lower()
         if 'anime' in title:
-            return 'icon-tv.png'
+            return 'icon-anime.png'
         if 'documentaire' in title or 'documentary' in title:
-            return 'icon-film.png'
+            return 'icon-documentary.png'
+        if 'concert' in title or 'musique' in title or 'music' in title:
+            return 'icon-music.png'
         if section.get('type') == 'show':
             return 'icon-tv.png'
         return 'icon-film.png'
