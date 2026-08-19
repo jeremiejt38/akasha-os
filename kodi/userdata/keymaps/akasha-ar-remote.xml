@@ -8,12 +8,11 @@ box with Akasha Aura and the rest of the interface.
 <keymap>
   <global>
     <keyboard>
-      <home>RunScript(script.akasha.aura)</home>
-      <!-- Long-press Home opens the Guide directly, handled natively by
-           Kodi's own longpress keymap modifier (~250ms hold threshold),
-           no custom press-timing code needed. Double-press (app switcher)
-           is not yet implemented, see docs/remote/decisions.md. -->
-      <home mod="longpress">RunScript(script.akasha.guide)</home>
+      <!-- The Fire TV remote's Home button sends the HID 'browser_home' key
+           (scancode 0xac), not the generic 'home' key. Long-press is detected
+           by Kodi's own mod="longpress" keymap modifier (~250ms hold). -->
+      <browser_home>RunScript(script.akasha.aura)</browser_home>
+      <browser_home mod="longpress">RunScript(script.akasha.guide)</browser_home>
       <menu>ContextMenu</menu>
       <escape>Back</escape>
       <back>Back</back>
