@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.36.1...akasha-os-v0.37.0) (2026-08-19)
+
+
+### Features
+
+* **aura:** double Home press -&gt; app switcher, fix Home key mapping ([b4cedea](https://github.com/jeremiejt38/akasha-os/commit/b4cedea35e6e722c47088541e724f6cdb8cffb22))
+
 ## [0.36.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.36.0...akasha-os-v0.36.1) (2026-08-19)
 
 
