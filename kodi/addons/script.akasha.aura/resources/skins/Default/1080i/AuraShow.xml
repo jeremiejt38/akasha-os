@@ -33,7 +33,7 @@
             <label>Retour</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <ondown>7010</ondown>
         </control>
 
@@ -83,7 +83,7 @@
                     <top>-4</top>
                     <width>198</width>
                     <height>288</height>
-                    <texture colordiffuse="FF6C8CFF">white.png</texture>
+                    <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                 </control>
                 <control type="image">
                     <left>5</left>

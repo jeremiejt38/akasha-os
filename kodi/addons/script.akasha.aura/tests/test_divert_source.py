@@ -118,6 +118,17 @@ class TestDivertSource(unittest.TestCase):
         items = [{'title': 'A', 'section_id': '1'}]
         self.assertEqual(divert_source.filter_by_section(items, None), items)
 
+    def test_translate_genre_fr_known(self):
+        self.assertEqual(divert_source.translate_genre_fr('Horror'), 'Horreur')
+        self.assertEqual(divert_source.translate_genre_fr('Science Fiction'), 'Science-fiction')
+        self.assertEqual(divert_source.translate_genre_fr('Comedy'), 'Comedie')
+        self.assertEqual(divert_source.translate_genre_fr('Children'), 'Enfants')
+        self.assertEqual(divert_source.translate_genre_fr('Martial Arts'), 'Arts martiaux')
+        self.assertEqual(divert_source.translate_genre_fr('Mini-Series'), 'Mini-serie')
+
+    def test_translate_genre_fr_unknown_passthrough(self):
+        self.assertEqual(divert_source.translate_genre_fr('Zorblax'), 'Zorblax')
+
     def test_filter_by_section_no_match_returns_empty(self):
         items = [{'title': 'A', 'section_id': '1'}]
         self.assertEqual(divert_source.filter_by_section(items, '99'), [])
