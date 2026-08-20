@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
 
@@ -31,6 +32,42 @@ class MarkerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             marker = os.path.join(tmp, 'never-created')
             state.reset_completed(marker)  # must not raise
+
+
+class StepProgressTests(unittest.TestCase):
+    def test_get_last_step_defaults_to_welcome_when_unset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = os.path.join(tmp, 'sub', 'last-step')
+            self.assertEqual(state.get_last_step(marker), state.STEP_WELCOME)
+
+    def test_save_and_get_last_step(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = os.path.join(tmp, 'last-step')
+            state.save_step(state.STEP_NETWORK, marker)
+            self.assertEqual(state.get_last_step(marker), state.STEP_NETWORK)
+
+    def test_get_last_step_corrupt_file_defaults_to_welcome(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = os.path.join(tmp, 'last-step')
+            with open(marker, 'w') as f:
+                f.write('not-a-number')
+            self.assertEqual(state.get_last_step(marker), state.STEP_WELCOME)
+
+    def test_get_last_step_clamps_out_of_range(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = os.path.join(tmp, 'last-step')
+            with open(marker, 'w') as f:
+                f.write('999')
+            self.assertEqual(state.get_last_step(marker), len(state.STEPS) - 1)
+
+    def test_mark_completed_resets_step_progress(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            done_marker = os.path.join(tmp, 'completed')
+            step_marker = os.path.join(tmp, 'last-step')
+            state.save_step(state.STEP_DISPLAY, step_marker)
+            with unittest.mock.patch.object(state, 'STEP_MARKER_PATH', step_marker):
+                state.mark_completed(done_marker)
+            self.assertEqual(state.get_last_step(step_marker), state.STEP_WELCOME)
 
 
 class StepMetadataTests(unittest.TestCase):

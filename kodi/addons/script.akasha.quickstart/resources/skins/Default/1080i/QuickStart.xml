@@ -73,13 +73,56 @@
             <visible>String.IsEqual(Window.Property(QSStep),1)</visible>
             <control type="label" id="200">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Langue et region</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="button" id="210">
+                <left>160</left>
+                <top>380</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Langue de l'interface</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>210</onup>
+                <ondown>211</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="label" id="212">
+                <left>1100</left>
+                <top>380</top>
+                <width>660</width>
+                <height>70</height>
+                <font>font12</font>
+                <aligny>center</aligny>
+                <label>-</label>
+                <textcolor>99FFFFFF</textcolor>
+            </control>
+            <control type="button" id="211">
+                <left>160</left>
+                <top>470</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Region, fuseau et format date/heure (Kodi)</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>210</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
             </control>
         </control>
 
@@ -87,13 +130,55 @@
             <visible>String.IsEqual(Window.Property(QSStep),2)</visible>
             <control type="label" id="300">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Connexion reseau</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="301">
+                <left>160</left>
+                <top>340</top>
+                <width>1600</width>
+                <height>50</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
+            <control type="button" id="310">
+                <left>160</left>
+                <top>420</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Tester la connexion a nouveau</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>310</onup>
+                <ondown>311</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="311">
+                <left>160</left>
+                <top>510</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Configurer le Wi-Fi</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>310</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
             </control>
         </control>
 
@@ -101,13 +186,73 @@
             <visible>String.IsEqual(Window.Property(QSStep),3)</visible>
             <control type="label" id="400">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Affichage et son</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="button" id="410">
+                <left>160</left>
+                <top>360</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Resolution et taux de rafraichissement</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>410</onup>
+                <ondown>411</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="411">
+                <left>160</left>
+                <top>450</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Peripherique de sortie audio</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>410</onup>
+                <ondown>412</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="412">
+                <left>160</left>
+                <top>540</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Synchroniser la veille avec la TV (HDMI-CEC)</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>411</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="label" id="401">
+                <left>1100</left>
+                <top>360</top>
+                <width>660</width>
+                <height>250</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>99FFFFFF</textcolor>
+                <wrapmultiline>true</wrapmultiline>
             </control>
         </control>
 
@@ -115,13 +260,47 @@
             <visible>String.IsEqual(Window.Property(QSStep),4)</visible>
             <control type="label" id="500">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Manette et telecommande</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="button" id="510">
+                <left>160</left>
+                <top>360</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Appairer une manette Bluetooth (LibreELEC)</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>510</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="label" id="501">
+                <left>160</left>
+                <top>460</top>
+                <width>1600</width>
+                <height>30</height>
+                <font>font12</font>
+                <label>Testez votre telecommande : Haut/Bas/Gauche/Droite/OK</label>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
+            <control type="label" id="502">
+                <left>160</left>
+                <top>500</top>
+                <width>1600</width>
+                <height>40</height>
+                <font>font14</font>
+                <label>-</label>
+                <textcolor>FF6C8CFF</textcolor>
             </control>
         </control>
 
@@ -129,13 +308,63 @@
             <visible>String.IsEqual(Window.Property(QSStep),5)</visible>
             <control type="label" id="600">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Comptes de contenu</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="button" id="610">
+                <left>160</left>
+                <top>360</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Plex</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>610</onup>
+                <ondown>611</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="611">
+                <left>160</left>
+                <top>450</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Jellyfin</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>610</onup>
+                <ondown>612</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="612">
+                <left>160</left>
+                <top>540</top>
+                <width>900</width>
+                <height>70</height>
+                <label>YouTube Music</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>611</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
             </control>
         </control>
 
@@ -143,13 +372,48 @@
             <visible>String.IsEqual(Window.Property(QSStep),6)</visible>
             <control type="label" id="700">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Cloud gaming</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="702">
+                <left>160</left>
+                <top>340</top>
+                <width>1600</width>
+                <height>30</height>
+                <font>font12</font>
+                <label>Cochez les services que vous comptez utiliser (connexion au premier lancement).</label>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
+            <control type="button" id="710">
+                <left>160</left>
+                <top>400</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Choisir les services a activer</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>710</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="label" id="701">
+                <left>160</left>
+                <top>490</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font12</font>
+                <label>-</label>
+                <textcolor>99FFFFFF</textcolor>
+                <wrapmultiline>true</wrapmultiline>
             </control>
         </control>
 
@@ -157,13 +421,56 @@
             <visible>String.IsEqual(Window.Property(QSStep),7)</visible>
             <control type="label" id="800">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Preferences energie</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="button" id="810">
+                <left>160</left>
+                <top>360</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Delai avant mise en veille de l'ecran</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>810</onup>
+                <ondown>811</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="811">
+                <left>160</left>
+                <top>450</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Delai avant extinction automatique</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>810</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="label" id="801">
+                <left>1100</left>
+                <top>360</top>
+                <width>660</width>
+                <height>160</height>
+                <font>font11</font>
+                <label>-</label>
+                <textcolor>99FFFFFF</textcolor>
+                <wrapmultiline>true</wrapmultiline>
             </control>
         </control>
 
@@ -171,13 +478,38 @@
             <visible>String.IsEqual(Window.Property(QSStep),8)</visible>
             <control type="label" id="900">
                 <left>160</left>
-                <top>300</top>
+                <top>280</top>
                 <width>1600</width>
-                <height>60</height>
+                <height>50</height>
                 <font>font16</font>
-                <align>center</align>
                 <label>Profil utilisateur</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="button" id="910">
+                <left>160</left>
+                <top>360</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Gerer les profils (Kodi)</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>910</onup>
+                <ondown>101</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="label" id="901">
+                <left>160</left>
+                <top>460</top>
+                <width>1600</width>
+                <height>40</height>
+                <font>font12</font>
+                <label>Vous pourrez ajouter d'autres profils plus tard.</label>
+                <textcolor>77FFFFFF</textcolor>
             </control>
         </control>
 
@@ -207,6 +539,7 @@
 
         <!-- Footer: Precedent / Passer / Suivant, plus progress dots. -->
         <control type="button" id="100">
+            <visible>!String.IsEqual(Window.Property(QSStep),0)</visible>
             <left>160</left>
             <top>960</top>
             <width>220</width>
@@ -219,10 +552,11 @@
             <onup>100</onup>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
         </control>
 
         <control type="button" id="102">
+            <visible>!String.IsEqual(Window.Property(QSStep),0) + !String.IsEqual(Window.Property(QSStep),2) + !String.IsEqual(Window.Property(QSStep),9)</visible>
             <left>1300</left>
             <top>960</top>
             <width>220</width>
@@ -236,7 +570,7 @@
             <onup>102</onup>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
         </control>
 
         <control type="button" id="101">
@@ -252,7 +586,7 @@
             <onup>101</onup>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
         </control>
     </controls>
 </window>
