@@ -455,3 +455,40 @@ Back-vers-natif/réouverture.
 - La recherche ne couvre pas le catalogue Steam/Sunshine complet ni les épisodes individuellement
   (seulement Films/Séries au niveau bibliothèque, Jeux au niveau raccourcis statiques) — périmètre
   raisonnable pour une première version, à élargir si Jérémie le juge utile après usage réel.
+
+### Correctif de fidélité visuelle (suite à retour direct de Jérémie)
+
+Le premier rendu de la Phase 1/3 (pilule et bouton engrenage générés à la main) ne correspondait
+pas d'assez près à l'apparence réelle du menu Arctic Horizon 2. Corrigé en allant lire directement
+les fichiers du skin sur le Pi plutôt qu'en réapproximant :
+
+- **Pilule** : `Includes_Objects.xml` (`Object_MenuBar_Item`/`_Object_MenuBar_Item`) donne la
+  vraie structure (icône 60px avec un léger inset, texte à `textoffsetx=80`, fond en texture
+  9-slice `border=80`). Le fond lui-même n'est pas un asset statique du skin mais généré à
+  l'exécution par `script.texturemaker` d'après les couleurs choisies par l'utilisateur — récupéré
+  directement depuis
+  `/storage/.kodi/userdata/addon_data/script.texturemaker/ArcticHorizon/menumain_h.png` sur
+  l'appareil (dégradé bleu `#0095E3` → turquoise `#00BCAA`, forme pilule avec ombre douce intégrée)
+  et copié tel quel dans `resources/skins/Default/media/pill-gradient.png`, plutôt que régénéré
+  par script. Conséquence acceptée : ne suit plus dynamiquement un changement de couleur d'accent
+  Kodi côté utilisateur (comme le reste de la palette Aura, déjà fixe ailleurs).
+- **Bouton Paramètres** : `Object_MenuButton` (même fichier) donne la vraie construction —
+  ombre douce (`shadows/circle_shadow.png`, décalage -24, `border=54`) + cercle de fond teinté
+  (`common/circle.png`, `border=30`) + léger surlignage (même cercle, teinte plus claire) + icône
+  centrée. Les deux assets `circle.png`/`circle-shadow.png` copiés directement depuis
+  `skin.arctic.horizon.2/media/` (formes géométriques génériques, pas de contenu créatif
+  spécifique au skin). L'icône engrenage elle-même reste celle générée par PIL dans cette session
+  (le vrai bouton du skin utilise une variable d'icône différente, potentiellement pas un
+  engrenage littéral, moins clair pour "Paramètres" que le glyphe dessiné à la main).
+- **Menu contextuel du bouton Paramètres** : déjà, avant ce correctif, rendu via
+  `xbmcgui.Dialog().contextmenu()`, qui utilise `DialogContextMenu.xml` du skin — déjà patché avec
+  le branding "Akasha OS" (logo œil, version) lors d'un chantier précédent, et dont l'item
+  sélectionné reprend maintenant le même dégradé bleu→turquoise que les pilules. Positionnement
+  centré à l'écran plutôt qu'ancré au bouton engrenage (comme le popup natif de la Home réelle,
+  qui utilise un mécanisme différent — `Object_Options_Menu_Popup`, ancré via `right`/`top`
+  seulement pour la Home elle-même, non réutilisable tel quel par un addon générique) — écart de
+  positionnement accepté, la demande portait sur l'apparence (branding/couleurs), pas la position
+  exacte.
+- Validé en direct : les 3 pilules (Divertissement/Jeux/App) rendues avec le vrai dégradé et les
+  bonnes proportions, bouton engrenage avec ombre+cercle+icône, menu contextuel avec le dégradé
+  assorti sur l'item sélectionné.
