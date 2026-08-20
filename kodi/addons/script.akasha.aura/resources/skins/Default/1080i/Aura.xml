@@ -34,12 +34,13 @@
             </control>
 
             <!-- Module 0: unified search. Icon-only, never expands, plan
-                 04bda1b4 phase 2. -->
+                 04bda1b4 phase 2. Same plain-icon treatment (no circle/pill
+                 behind it) as the native Arctic Horizon 2 search icon. -->
             <control type="button" id="2000">
                 <left>60</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <label></label>
                 <onleft>2004</onleft>
                 <onright>2001</onright>
@@ -47,25 +48,32 @@
             </control>
             <control type="image">
                 <left>60</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <aspectratio>keep</aspectratio>
+                <bordersize>6</bordersize>
                 <texture>icon-search.png</texture>
             </control>
 
             <!-- Modules 1-3: Divertissement/Jeux/App. Each reserves a fixed
-                 280px slot (icon left-aligned within it); on focus, a
-                 gradient pill fades in behind icon+label (plan 04bda1b4
-                 phase 1). Neighbouring icons stay at their fixed slot
-                 position rather than sliding to close the gap when a
-                 sibling expands, a deliberate simplification given
-                 Kodi's static layout engine, see docs/aura/decisions.md. -->
+                 slot (icon left-aligned within it); on focus, a gradient
+                 pill fades in behind icon+label. Pill texture
+                 (pill-gradient.png) and proportions (icon inset/size,
+                 label offset) copied directly from Arctic Horizon 2's own
+                 main menu item (Includes_Objects.xml "_Object_MenuBar_Item"
+                 + the actual generated menumain_h.png asset,
+                 addon_data/script.texturemaker/ArcticHorizon/) rather than
+                 an approximation, per explicit request. Neighbouring icons
+                 stay at their fixed slot position rather than sliding to
+                 close the gap when a sibling expands, a deliberate
+                 simplification given Kodi's static layout engine, see
+                 docs/aura/decisions.md. -->
             <control type="button" id="2001">
                 <left>160</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <label></label>
                 <onleft>2000</onleft>
                 <onright>2002</onright>
@@ -74,20 +82,20 @@
             </control>
             <control type="group">
                 <left>160</left>
-                <top>28</top>
-                <width>320</width>
-                <height>64</height>
+                <top>20</top>
+                <width>340</width>
+                <height>80</height>
                 <visible>Control.HasFocus(2001)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>320</width>
-                    <height>64</height>
-                    <texture border="32,0,32,0">pill-gradient.png</texture>
+                    <width>340</width>
+                    <height>80</height>
+                    <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>76</left>
-                    <width>234</width>
-                    <height>64</height>
+                    <left>84</left>
+                    <width>240</width>
+                    <height>80</height>
                     <aligny>center</aligny>
                     <font>font12</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -96,18 +104,19 @@
             </control>
             <control type="image">
                 <left>160</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <aspectratio>keep</aspectratio>
+                <bordersize>4</bordersize>
                 <texture>tab-divertissement.png</texture>
             </control>
 
             <control type="button" id="2002">
-                <left>520</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <left>540</left>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <label></label>
                 <onleft>2001</onleft>
                 <onright>2003</onright>
@@ -115,21 +124,21 @@
                 <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
             </control>
             <control type="group">
-                <left>520</left>
-                <top>28</top>
-                <width>320</width>
-                <height>64</height>
+                <left>540</left>
+                <top>20</top>
+                <width>340</width>
+                <height>80</height>
                 <visible>Control.HasFocus(2002)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>320</width>
-                    <height>64</height>
-                    <texture border="32,0,32,0">pill-gradient.png</texture>
+                    <width>340</width>
+                    <height>80</height>
+                    <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>76</left>
-                    <width>234</width>
-                    <height>64</height>
+                    <left>84</left>
+                    <width>240</width>
+                    <height>80</height>
                     <aligny>center</aligny>
                     <font>font12</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -137,19 +146,20 @@
                 </control>
             </control>
             <control type="image">
-                <left>520</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <left>540</left>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <aspectratio>keep</aspectratio>
+                <bordersize>4</bordersize>
                 <texture>tab-jeux.png</texture>
             </control>
 
             <control type="button" id="2003">
-                <left>880</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <left>920</left>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <label></label>
                 <onleft>2002</onleft>
                 <onright>2004</onright>
@@ -157,21 +167,21 @@
                 <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
             </control>
             <control type="group">
-                <left>880</left>
-                <top>28</top>
-                <width>320</width>
-                <height>64</height>
+                <left>920</left>
+                <top>20</top>
+                <width>340</width>
+                <height>80</height>
                 <visible>Control.HasFocus(2003)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>320</width>
-                    <height>64</height>
-                    <texture border="32,0,32,0">pill-gradient.png</texture>
+                    <width>340</width>
+                    <height>80</height>
+                    <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>76</left>
-                    <width>234</width>
-                    <height>64</height>
+                    <left>84</left>
+                    <width>240</width>
+                    <height>80</height>
                     <aligny>center</aligny>
                     <font>font12</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -179,11 +189,12 @@
                 </control>
             </control>
             <control type="image">
-                <left>880</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
+                <left>920</left>
+                <top>32</top>
+                <width>56</width>
+                <height>56</height>
                 <aspectratio>keep</aspectratio>
+                <bordersize>4</bordersize>
                 <texture>tab-app.png</texture>
             </control>
 
@@ -212,24 +223,48 @@
                 <textcolor>99FFFFFF</textcolor>
             </control>
 
-            <control type="button" id="2004">
-                <left>1810</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
-                <label></label>
-                <onleft>2003</onleft>
-                <onright>2000</onright>
-                <ondown>9000</ondown>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-            </control>
-            <control type="image">
-                <left>1810</left>
-                <top>28</top>
-                <width>64</width>
-                <height>64</height>
-                <aspectratio>keep</aspectratio>
-                <texture>icon-gear.png</texture>
+            <!-- Settings gear: same circle-button construction as Arctic
+                 Horizon 2's own top-right menu button (Includes_Objects.xml
+                 "Object_MenuButton": drop shadow + tinted circle + soft
+                 overlay highlight + centered icon), assets copied directly
+                 (circle.png / circle-shadow.png) rather than approximated. -->
+            <control type="group">
+                <left>1804</left>
+                <top>22</top>
+                <width>72</width>
+                <height>72</height>
+                <control type="image">
+                    <width>72</width>
+                    <height>72</height>
+                    <texture colordiffuse="80000000">circle-shadow.png</texture>
+                </control>
+                <control type="button" id="2004">
+                    <left>6</left>
+                    <top>6</top>
+                    <width>60</width>
+                    <height>60</height>
+                    <label></label>
+                    <onleft>2003</onleft>
+                    <onright>2000</onright>
+                    <ondown>9000</ondown>
+                    <texturenofocus colordiffuse="CC262B3D">circle.png</texturenofocus>
+                    <texturefocus colordiffuse="FF6C8CFF">circle.png</texturefocus>
+                </control>
+                <control type="image">
+                    <left>6</left>
+                    <top>6</top>
+                    <width>60</width>
+                    <height>60</height>
+                    <texture colordiffuse="1AFFFFFF">circle.png</texture>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture>icon-gear.png</texture>
+                </control>
             </control>
         </control>
 
