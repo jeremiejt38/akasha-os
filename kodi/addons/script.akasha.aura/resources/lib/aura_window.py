@@ -18,6 +18,7 @@ import xbmcgui
 
 import addons_inventory
 import aura_app
+import aura_settings_panel
 import aura_show
 import aura_store
 import config
@@ -1436,12 +1437,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         return results
 
     def _settings_menu_options(self):
-        """The 6 entries from plan 04bda1b4 section 4, shared between the
-        gear's context menu and the search's "Parametres" category."""
+        """The gear's context menu entries. Originally 3 separate "Parametres
+        Kodi/LibreELEC/Akasha" entries (plan 04bda1b4 section 4); plan
+        a5a87f03 explicitly asks for these to be merged into a single
+        "Parametres" entry opening the unified settings panel instead
+        (see docs/settings/decisions.md) -- the action items below stay
+        unchanged, they are not "settings" per that plan's own wording."""
         return [
-            ('Parametres Kodi', self._settings_open_kodi),
-            ('Parametres LibreELEC', self._settings_open_libreelec),
-            ('Parametres Akasha', self._settings_open_akasha),
+            ('Parametres', self._open_settings_panel),
             ('Mise en veille', self._settings_sleep),
             ('Redemarrer', self._settings_restart_menu),
             ('Arret du systeme', self._settings_shutdown),
@@ -1459,14 +1462,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         options[choice][1]()
 
-    def _settings_open_kodi(self):
-        xbmc.executebuiltin('ActivateWindow(Settings)')
-
-    def _settings_open_libreelec(self):
-        xbmc.executebuiltin('RunAddon(service.libreelec.settings)')
-
-    def _settings_open_akasha(self):
-        xbmc.executebuiltin('RunAddon(script.akasha.settings)')
+    def _open_settings_panel(self):
+        """Unified settings panel (plan a5a87f03): categories list + curated
+        actions, replacing the old direct Kodi/LibreELEC/Akasha shortcuts."""
+        win = self._get_sub_window(
+            'settings_panel', aura_settings_panel.AuraSettingsPanelWindow,
+            'AuraSettingsPanel.xml')
+        # Aura itself is a type="dialog" window (see docs/aura/decisions.md
+        # on why -- it needs to sit on top of native Kodi Home as a safety
+        # net), which means it keeps rendering on top of any *base* window
+        # a row's action might activate (Kodi's own Settings, System,
+        # Profiles... windows are base windows, not dialogs) -- addon
+        # dialogs (LibreELEC settings, Plex, Jellyfin...) stack fine on
+        # their own since they are dialogs too, but base windows would
+        # silently open invisibly behind Aura otherwise. The panel is told
+        # to close Aura first for every row, uniformly, rather than trying
+        # to special-case which actions need it.
+        win.parent_window = self
+        win.doModal()
 
     def _settings_sleep(self):
         # Reuses the exact same standby+wake-on-input script already used

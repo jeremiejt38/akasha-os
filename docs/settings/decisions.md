@@ -131,9 +131,91 @@ le premier jet")** :
   keymap déjà installés par `scripts/install.sh`), pas un écran de réglage utilisateur à proprement
   parler aujourd'hui — à re-examiner si un vrai besoin de reconfiguration en direct émerge.
 
-### Prochaine étape
+## Phases 1 à 4 : panneau unifié implémenté
 
-Cet audit (Phase 0) est terminé et soumis pour validation avant de commencer la Phase 1
-(socle technique du panneau), conformément à la section 5 du cahier a5a87f03
-("ne pas commencer l'implémentation avant d'avoir terminé l'audit").
+Sur demande explicite de Jérémie ("termine toutes les phases manquantes"), les Phases 1 à 4 ont
+été implémentées en une passe (le panneau à 2 volets couvre naturellement l'intégralité des
+catégories d'un coup, contrairement au Quick Start qui a de vraies étapes séquentielles
+indépendantes).
+
+### Architecture (Phase 1)
+
+Nouvelle fenêtre `AuraSettingsPanelWindow` (`resources/lib/aura_settings_panel.py` +
+`AuraSettingsPanel.xml`) dans `script.akasha.aura` :
+- Panneau ancré à droite (`left=420`, largeur 1500/1920), glisse depuis la droite à l'ouverture
+  (`WindowOpen` animation), recouvre un voile semi-transparent sur ce qu'il y a derrière.
+- Colonne de gauche : liste des 11 catégories. Colonne de droite : actions de la catégorie
+  sélectionnée, mise à jour dynamiquement à la sélection (master-detail, pas besoin de valider).
+- Remontée logique sur "Retour" : si le focus est dans le détail, revient d'abord à la liste des
+  catégories ; sinon ferme le panneau.
+- Remplace les 3 entrées séparées "Paramètres Kodi/LibreELEC/Akasha" du menu contextuel
+  (`04bda1b4`) par une seule entrée "Paramètres" qui ouvre ce panneau — les entrées d'action
+  (Mise en veille/Redémarrer/Arrêt) restent inchangées, conformément à la note d'ajustement en
+  tête du cahier `a5a87f03`.
+
+### Bug découvert et corrigé : fenêtres natives invisibles derrière Aura
+
+Aura (`script.akasha.aura`) est elle-même une fenêtre `type="dialog"`, ce qui la fait toujours
+s'afficher au-dessus de tout le reste — y compris des fenêtres natives Kodi de type "base window"
+(Paramètres, Système, Profils...) qui ne sont pas des dialogues. Résultat : lancer
+`ActivateWindow(...)` vers l'une de ces fenêtres natives depuis une action du panneau changeait
+bien la fenêtre de base en arrière-plan, mais Aura restait affichée par-dessus, rendant le
+changement invisible à l'utilisateur (déjà probablement le cas, non détecté, pour les anciennes
+entrées "Paramètres Kodi" du menu contextuel `04bda1b4`). Corrigé en fermant explicitement le
+panneau **et** la fenêtre Aura elle-même avant de déclencher l'action de chaque ligne — les
+fenêtres/dialogues d'autres addons (LibreELEC Settings, Plex, Jellyfin...) s'empilent
+normalement par-dessus sans avoir besoin de cette fermeture, mais la fermeture systématique reste
+sûre pour ces cas aussi (leur propre dialogue devient alors la fenêtre du dessus, sans changement
+visible). Conséquence acceptée : revenir en arrière depuis un écran natif ramène sur le Kodi natif
+plutôt que directement dans Aura — cohérent avec le comportement déjà établi d'Aura (Bouton Retour
+depuis Aura révèle déjà le Kodi natif comme filet de sécurité), pas une régression.
+
+### Bug moteur Kodi découvert (hors périmètre de correction) : crash sur `peripheralsettings`
+
+En testant en conditions réelles sur le Pi, `ActivateWindow(peripheralsettings)` (entrée native
+Kodi pour configurer manettes/périphériques) fait **planter Kodi** de façon reproductible
+(`SIGSEGV` dans `CVariant::CVariant`, cf. `/storage/.kodi/temp/kodi_crashlog_*.log`) — reproduit
+deux fois de suite, y compris via un appel JSON-RPC direct sans passer par le code Akasha,
+confirmant qu'il s'agit d'un bug du moteur Kodi/LibreELEC sur ce matériel, indépendant de ce
+chantier. **Retiré de la catégorie "Manettes & Télécommandes"** (qui ne propose donc que
+l'appairage Bluetooth LibreELEC, déjà confirmé sûr) plutôt que d'exposer un point d'entrée qui
+plante l'OS. Toutes les autres cibles `ActivateWindow` utilisées dans le panneau
+(`settings`, `systemsettings`, `profilesettings`, `skinsettings`, `servicesettings`,
+`playersettings`, `interfacesettings`, `filemanager`, `mediasettings`) ont été testées
+individuellement en direct sur le Pi et ne provoquent aucun plantage.
+**À signaler à Jérémie** : la configuration manette/périphérique native Kodi est actuellement
+inutilisable sur ce Raspberry Pi (plante systématiquement), indépendamment de tout ce qui a été
+livré dans ce chantier — un ticket LibreELEC/Kodi amont serait probablement justifié si ce point
+devient bloquant un jour.
+
+### Contenu des 11 catégories (Phases 2 et 3)
+
+Chaque catégorie propose 1 à 4 actions réelles (pas de placeholder cosmétique), soit vers un écran
+natif Kodi/LibreELEC/addon existant, soit vers `script.akasha.settings` pour ce qu'Akasha gère déjà
+lui-même :
+
+| Catégorie | Actions |
+|---|---|
+| Réseau & Connectivité | Wi-Fi/Ethernet/VPN (LibreELEC) · Proxy/bande passante (Kodi) |
+| Comptes & Services | Plex · Jellyfin · YouTube Music · Cloud gaming (settings `script.akasha.aura`) |
+| Affichage & Son | Résolution/HDR/CEC/audio (Kodi, `systemsettings`) |
+| Manettes & Télécommandes | Bluetooth (LibreELEC) — voir bug moteur ci-dessus |
+| Bibliothèque & Lecture | Langue/sous-titres par défaut (Kodi) · réglages bibliothèque/lecture (Kodi) |
+| Apparence & Interface | Langue interface/région/veille (Kodi) · Habillage skin (Kodi) · Overlay/Mode Ambiant (Akasha) |
+| Stockage | Sources et gestionnaire de fichiers (Kodi) |
+| Énergie | Veille écran/extinction auto (Kodi) · Délai veille/ventilateur (Akasha) |
+| Système & Mises à jour | Nom système/sauvegarde/MAJ LibreELEC · Vérifier MAJ Akasha OS · MAJ extensions (Kodi) |
+| Profils & Utilisateurs | Gérer les profils (Kodi, `profilesettings`) |
+| Avancé | Tous les paramètres Kodi · Tous les paramètres LibreELEC |
+
+### Polish visuel et tests (Phase 5)
+
+Charte graphique Akasha reprise à l'identique du reste de l'OS (fond `FF10131A`, accent
+`FF6C8CFF`, dégradé pilule, coins arrondis via `rounded-solid.png`, cf.
+`docs/aura/decisions.md`), pas d'apparence Kodi générique. Validé en direct sur le Pi : ouverture
+du panneau depuis le menu contextuel (une seule entrée "Paramètres" désormais), navigation entre
+les 11 catégories avec mise à jour du détail, ouverture réussie de LibreELEC Settings/Kodi
+Paramètres/Profils avec fermeture propre d'Aura, remontée logique sur Retour, relance d'Aura
+propre après une action. Test manette Xbox Wireless/télécommande IR physiques non fait dans cette
+session (accès distant uniquement, comme pour les chantiers précédents).
 </content>
