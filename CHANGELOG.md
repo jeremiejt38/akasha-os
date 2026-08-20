@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.44.0...akasha-os-v0.44.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **aura:** rounded corners, Recommande limits/posters, Bibliotheque grid, FR genres ([#98](https://github.com/jeremiejt38/akasha-os/issues/98)) ([508bfae](https://github.com/jeremiejt38/akasha-os/commit/508bfae0d58937a60c2eeda0f137ed7f5ed6c8f5))
+
 ## [0.44.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.43.2...akasha-os-v0.44.0) (2026-08-20)
 
 
