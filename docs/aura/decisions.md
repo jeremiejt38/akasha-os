@@ -191,3 +191,40 @@ ci-dessus :
 
 102/102 tests unitaires passent après ces 7 correctifs. Validé sur le Pi réel (v0.35.5 puis
 correctif final non encore déployé au moment de la rédaction).
+
+## Refonte Divertissement (plan 780ecf80) : sidebar permanente + onglets contextuels par bibliothèque
+
+Suite au cahier des charges fourni (`780ecf80-cahier-des-charges-divertissement-akasha-os.md`) et à
+la décision explicite de l'utilisateur ("option A [refonte complète] mais on oublie Collection") :
+la sidebar (`3300`/`3310`) est désormais **toujours visible** en Divertissement (plus gérée par un
+sous-onglet global) ; les onglets Recommandé/Bibliothèque/Catégories (`3050`/`3100`/`3060`), déjà
+existants, sont déplacés sous un header (titre `3400` + sous-titre `3401` + bouton "..." `3402`) qui
+n'apparaît que quand une bibliothèque est sélectionnée dans la sidebar (`Window.Property(DivertView)
+== "library"`, sinon `"home"`). Nouveau state machine dans `aura_window.py` :
+`_activate_home()`/`_activate_library()`/`_select_library_tab()` remplacent l'ancien
+`_select_divert_subtab()`. `aura_recommendations.py` et `aura_genres.py` acceptent désormais un
+scope optionnel (`.section`/`.initial_section`) pour refléter la bibliothèque sélectionnée au lieu
+de toujours retomber sur la première section vidéo trouvée. Pas d'endpoint Plex dédié pour un
+"on-deck" scopé à une bibliothèque : `on-deck` est over-fetché puis filtré côté client par
+`section_id` (`divert_source.filter_by_section`, nouveau champ `section_id` sur les items parsés,
+depuis `librarySectionID`). Collections explicitement écarté par l'utilisateur — seulement
+Recommandé/Bibliothèque/Catégories.
+
+**Bug de course Kodi trouvé et laissé documenté (non bloquant)** : depuis la grille "Bibliotheque"
+(`3230`), appuyer sur Haut atterrit sur la barre d'onglets principale (`2001`) au lieu du bouton
+d'onglet "Bibliotheque" (`3100`), malgré `<onup>3100</onup>` déclaré sur la liste et malgré `3100`
+confirmé visible/focalisable au même instant (vérifié en direct avec un label de debug
+`System.CurrentControlID` + `Control.IsVisible(3100)`). Ni l'interception explicite côté Python
+(`focused == DIVERT_PANEL_ID`), ni la duplication de la condition `<visible>` sur chaque contrôle
+individuel (au lieu du groupe parent seul) n'ont changé ce comportement — tout indique que la
+navigation native de Kodi résout "Haut" géométriquement pour cette liste horizontale plutôt que de
+respecter l'`onup` explicite. Pas d'impasse (2001 reste un état parfaitement navigable), donc non
+bloquant pour cette release ; laissé en `super().onAction()` natif avec ce commentaire, plutôt que
+du code mort qui prétendrait le corriger. À reprendre si une piste plus solide émerge (ex. tester
+un `<panel>` au lieu d'un `<list>`, ou repositionner `3100` pour qu'il soit géométriquement le plus
+proche candidat).
+
+Validé en conditions réelles sur le Pi (v0.40.1+) : Accueil (rangées globales), Films → Recommandé
+(scopé), Films → Bibliothèque (grille + navigation Gauche/Droite/Bas), Films → Catégories (33
+vraies catégories Plex de la bibliothèque Films, pas celles de la première section par défaut),
+bouton Paramètres inchangé (`ActivateWindow(Settings)`).

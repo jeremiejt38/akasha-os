@@ -277,11 +277,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
 
         # Bibliotheque: inline grid, already populated by _select_divert_section.
-        if focus:
-            try:
-                self.setFocus(self.getControl(DIVERT_PANEL_ID))
-            except RuntimeError:
-                pass
+        # Deliberately NOT auto-focusing the grid here: setFocus() on a
+        # control gated by a <visible> condition toggled via setProperty()
+        # a moment earlier, in the same onClick handler, is unreliable --
+        # it can report success (getFocusId() briefly matches) yet silently
+        # revert once Kodi's engine re-validates it on a later frame (seen
+        # in practice: a subsequent Up press behaved as if focus had never
+        # left the tab button). Leaving focus on the tab button and relying
+        # on its <ondown> to reach the grid avoids the race entirely, since
+        # that next input is a separate, later action -- see
+        # docs/aura/decisions.md.
 
     def _set_sidebar_selection(self, index):
         try:
@@ -708,6 +713,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._update_bar_focused()
             return
+        # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
+        # DIVERT_PANEL_ID's grid lands on the main tab bar (2001) instead of
+        # the Bibliotheque tab button (3100), even though the grid's XML
+        # declares <onup>3100</onup> and 3100 is confirmed visible/enabled
+        # at that moment (verified on-device with a System.CurrentControlID
+        # debug label). Neither an explicit Python-side focused==
+        # DIVERT_PANEL_ID interception nor per-control <visible> duplication
+        # changed this -- Kodi's native navigation appears to resolve Up
+        # geometrically for this horizontal list rather than honouring the
+        # explicit onup. Not a dead end (2001 is a perfectly navigable
+        # state), so left as a documented quirk rather than blocking this
+        # release.
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT) and self.getFocusId() == DIVERT_PANEL_ID:
             self._maybe_load_more_divert()

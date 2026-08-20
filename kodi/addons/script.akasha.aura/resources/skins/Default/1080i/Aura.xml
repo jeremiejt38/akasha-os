@@ -311,6 +311,7 @@
                 <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
 
                 <control type="label" id="3400">
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>160</left>
                     <top>145</top>
                     <width>1500</width>
@@ -320,6 +321,7 @@
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="label" id="3401">
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>162</left>
                     <top>190</top>
                     <width>600</width>
@@ -333,6 +335,7 @@
                      "Gerer les bibliotheques" dialog (pin/reorder) as the most reasonable
                      placeholder action, see docs/aura/decisions.md. -->
                 <control type="button" id="3402">
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>1830</left>
                     <top>150</top>
                     <width>60</width>
@@ -350,9 +353,10 @@
                 </control>
 
                 <control type="button" id="3050">
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>160</left>
                     <top>228</top>
-                    <width>200</width>
+                    <width>255</width>
                     <height>50</height>
                     <label>Recommande</label>
                     <font>font12</font>
@@ -368,9 +372,10 @@
                 </control>
 
                 <control type="button" id="3100">
-                    <left>370</left>
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
+                    <left>415</left>
                     <top>228</top>
-                    <width>200</width>
+                    <width>255</width>
                     <height>50</height>
                     <label>Bibliotheque</label>
                     <font>font12</font>
@@ -379,16 +384,17 @@
                     <onleft>3050</onleft>
                     <onright>3060</onright>
                     <onup>2001</onup>
-                    <ondown>3310</ondown>
+                    <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
                 </control>
 
                 <control type="button" id="3060">
-                    <left>580</left>
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
+                    <left>670</left>
                     <top>228</top>
-                    <width>200</width>
+                    <width>255</width>
                     <height>50</height>
                     <label>Categories</label>
                     <font>font12</font>
