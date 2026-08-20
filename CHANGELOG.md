@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.44.1...akasha-os-v0.45.0) (2026-08-20)
+
+
+### Features
+
+* **aura:** unified settings panel (plan a5a87f03 phases 1-4) ([#100](https://github.com/jeremiejt38/akasha-os/issues/100)) ([44368de](https://github.com/jeremiejt38/akasha-os/commit/44368de6f98d7efaa32041907e91cbc04b78be9d))
+
 ## [0.44.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.44.0...akasha-os-v0.44.1) (2026-08-20)
 
 
