@@ -93,7 +93,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_active_section = 0
         self._divert_items = []
         self._divert_paged = None
-        self._divert_subtab = config.default_subtab_index(
+        # 'home' (Accueil, no library selected) or 'library' (a sidebar library is
+        # active and the contextual Recommande/Bibliotheque/Categories tabs apply).
+        self._divert_view = addon.getSetting('divert.last_view') or 'home'
+        self._divert_library_tab = config.default_subtab_index(
             addon.getSetting('divert.last_subtab'))
         self._divert_pinned_libraries = config.parse_pinned(
             addon.getSetting('divert.pinned_libraries'))
@@ -138,7 +141,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._show_tab(self.active_tab)
             self._load_divertissement()
             self._divert_load_attempted = True
-            self._select_divert_subtab(self._divert_subtab, focus=False)
+            self._restore_divert_view(focus=False)
             self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK)
             self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
@@ -195,37 +198,95 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon.setSetting('connector.session_token', client.token)
         return client
 
-    def _select_divert_subtab(self, index, focus=True):
-        self._divert_subtab = index
-        self.setProperty('DivertActiveSubtab', str(index))
+    def _restore_divert_view(self, focus=True):
+        """Re-select whatever Accueil/library state was last persisted.
+
+        Falls back to Accueil if the persisted library key no longer exists
+        (unpinned, removed source...) or no sections loaded at all.
+        """
+        if self._divert_view == 'library' and self._divert_last_library_key:
+            index = next(
+                (i for i, s in enumerate(self._divert_sections)
+                 if s['key'] == self._divert_last_library_key), None)
+            if index is not None:
+                self._activate_library(index, tab=self._divert_library_tab, focus=focus)
+                return
+        self._activate_home(focus=focus)
+
+    def _activate_home(self, focus=True):
+        """Select Accueil in the sidebar: no library header/tabs, global rows.
+
+        Mirrors the Plex reference (cahier des charges 780ecf80, section 2.2):
+        Accueil has no per-library tab row, just "Continuer a regarder" across
+        every library -- reuses the existing Recommandations window unscoped
+        (its `section` stays None).
+        """
+        self._divert_view = 'home'
+        self.setProperty('DivertView', 'home')
+        self.addon.setSetting('divert.last_view', 'home')
+        self._set_sidebar_selection(DIVERT_SIDEBAR_HOME_INDEX)
+        win = self._get_sub_window(
+            'recommendations', aura_recommendations.AuraRecommendationsWindow,
+            'AuraRecommendations.xml')
+        win.section = None
+        if focus:
+            win.doModal()
+
+    def _activate_library(self, section_index, tab=None, focus=True):
+        """Select a library in the sidebar: shows its header + contextual tabs."""
+        if not (0 <= section_index < len(self._divert_sections)):
+            return
+        self._divert_view = 'library'
+        self.setProperty('DivertView', 'library')
+        self.addon.setSetting('divert.last_view', 'library')
+        self._select_divert_section(section_index)
+        self._set_sidebar_selection(section_index + 1)
+        section = self._divert_sections[section_index]
+        try:
+            self.getControl(3400).setLabel(section['title'])
+        except RuntimeError:
+            pass
+        self._select_library_tab(
+            self._divert_library_tab if tab is None else tab, focus=focus)
+
+    def _select_library_tab(self, index, focus=True):
+        """Switch the contextual tab (Recommande/Bibliotheque/Categories) of the
+        currently selected library. No-op if no library is selected."""
+        if not self._divert_sections:
+            return
+        section = self._divert_sections[self._divert_active_section]
+        self._divert_library_tab = index
+        self.setProperty('DivertLibraryTab', str(index))
         self.addon.setSetting('divert.last_subtab', str(index))
 
         if index == DIVERT_SUBTAB_RECOMMANDE:
-            self._get_sub_window(
+            win = self._get_sub_window(
                 'recommendations', aura_recommendations.AuraRecommendationsWindow,
-                'AuraRecommendations.xml').doModal()
+                'AuraRecommendations.xml')
+            win.section = section
+            if focus:
+                win.doModal()
             return
 
         if index == DIVERT_SUBTAB_CATEGORIES:
-            self._get_sub_window(
-                'genres', aura_genres.AuraGenresWindow, 'AuraGenres.xml').doModal()
+            win = self._get_sub_window(
+                'genres', aura_genres.AuraGenresWindow, 'AuraGenres.xml')
+            win.initial_section = section
+            if focus:
+                win.doModal()
             return
 
-        # Bibliotheques: focus sidebar and select the last-used library.
-        if self._divert_sections:
-            section_index = 0
-            if self._divert_last_library_key:
-                for i, section in enumerate(self._divert_sections):
-                    if section['key'] == self._divert_last_library_key:
-                        section_index = i
-                        break
-            self._select_divert_section(section_index)
-            self._set_sidebar_selection(section_index + 1)
-        if focus:
-            try:
-                self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
-            except RuntimeError:
-                pass
+        # Bibliotheque: inline grid, already populated by _select_divert_section.
+        # Deliberately NOT auto-focusing the grid here: setFocus() on a
+        # control gated by a <visible> condition toggled via setProperty()
+        # a moment earlier, in the same onClick handler, is unreliable --
+        # it can report success (getFocusId() briefly matches) yet silently
+        # revert once Kodi's engine re-validates it on a later frame (seen
+        # in practice: a subsequent Up press behaved as if focus had never
+        # left the tab button). Leaving focus on the tab button and relying
+        # on its <ondown> to reach the grid avoids the race entirely, since
+        # that next input is a separate, later action -- see
+        # docs/aura/decisions.md.
 
     def _set_sidebar_selection(self, index):
         try:
@@ -280,8 +341,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_sections = list(self._all_divert_sections)
         self._populate_sidebar()
 
-        if self._divert_sections:
-            self._select_divert_section(0)
+        # Which library (if any) becomes active is decided by the caller
+        # (onInit restores the persisted Accueil/library state, _show_tab's
+        # empty-sections retry re-activates Accueil) -- this only loads and
+        # orders the sidebar's data, it never picks a view on its own.
 
     def _populate_sidebar(self):
         try:
@@ -600,7 +663,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon.setSetting('tab.default', str(index))
 
         if index == TAB_DIVERTISSEMENT:
-            self._select_divert_subtab(self._divert_subtab, focus=False)
+            self.setProperty('DivertView', self._divert_view)
+            self.setProperty('DivertLibraryTab', str(self._divert_library_tab))
         elif index == TAB_JEUX:
             self.setProperty('JeuxActiveSubtab', str(self._jeux_active_subtab))
         elif index == TAB_APP:
@@ -617,6 +681,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # network/connector recovers.
         if index == TAB_DIVERTISSEMENT and self._divert_load_attempted and not self._divert_sections:
             self._load_divertissement()
+            self._restore_divert_view(focus=False)
 
     def _update_bar_focused(self):
         """Update the top-bar focused property used by the retract animation."""
@@ -648,6 +713,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._update_bar_focused()
             return
+        # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
+        # DIVERT_PANEL_ID's grid lands on the main tab bar (2001) instead of
+        # the Bibliotheque tab button (3100), even though the grid's XML
+        # declares <onup>3100</onup> and 3100 is confirmed visible/enabled
+        # at that moment (verified on-device with a System.CurrentControlID
+        # debug label). Neither an explicit Python-side focused==
+        # DIVERT_PANEL_ID interception nor per-control <visible> duplication
+        # changed this -- Kodi's native navigation appears to resolve Up
+        # geometrically for this horizontal list rather than honouring the
+        # explicit onup. Not a dead end (2001 is a perfectly navigable
+        # state), so left as a documented quirk rather than blocking this
+        # release.
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT) and self.getFocusId() == DIVERT_PANEL_ID:
             self._maybe_load_more_divert()
@@ -656,7 +733,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _focus_first_subtab(self):
         """Move focus from the main tab to the first sub-tab of the active tab."""
         if self.active_tab == TAB_DIVERTISSEMENT:
-            self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_subtab]))
+            # The sidebar is the permanent entry point (Accueil or a library);
+            # the Recommande/Bibliotheque/Categories tabs are only reachable
+            # once a library is selected there.
+            self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
         elif self.active_tab == TAB_JEUX:
             self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
         elif self.active_tab == TAB_APP:
@@ -666,7 +746,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if controlID in TAB_BUTTON_IDS:
             self._show_tab(TAB_BUTTON_IDS.index(controlID))
         elif controlID in DIVERT_SUBTAB_IDS:
-            self._select_divert_subtab(DIVERT_SUBTAB_IDS.index(controlID))
+            self._select_library_tab(DIVERT_SUBTAB_IDS.index(controlID))
         elif controlID in JEUX_SUBTAB_IDS:
             self._select_jeux_subtab(JEUX_SUBTAB_IDS.index(controlID))
         elif controlID in APP_SUBTAB_IDS:
@@ -685,6 +765,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmc.executebuiltin('RunAddon({})'.format(self._pinned_apps[idx]['addonid']))
         elif controlID == DIVERT_SIDEBAR_ID:
             self._on_sidebar_item_selected()
+        elif controlID == 3402:
+            self._manage_libraries()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
         elif controlID == 2100:
@@ -717,7 +799,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             return
         if pos == DIVERT_SIDEBAR_HOME_INDEX:
-            self._select_divert_subtab(DIVERT_SUBTAB_RECOMMANDE)
+            self._activate_home()
             return
         more_index = len(self._divert_sections) + 1
         if pos == more_index:
@@ -725,7 +807,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         section_index = pos - 1
         if 0 <= section_index < len(self._divert_sections):
-            self._select_divert_section(section_index)
+            self._activate_library(section_index)
 
     def _manage_libraries(self):
         """Show a dialog to pin/unpin and reorder every library section."""
@@ -778,7 +860,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'divert.library_order', config.serialize_pinned(order))
 
         self._load_divertissement()
-        self._select_divert_subtab(DIVERT_SUBTAB_BIBLIOTHEQUES)
+        # Pin/reorder can change section indices, so returning to a
+        # specific library by stale index would be unsafe -- go back to
+        # Accueil, the same safe default as an empty/first load.
+        self._activate_home()
 
     def _on_divert_item_selected(self):
         try:

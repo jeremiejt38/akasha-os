@@ -100,6 +100,28 @@ class TestDivertSource(unittest.TestCase):
         self.assertEqual(divert_source.parse_sections('not a dict'), [])
         self.assertEqual(divert_source.parse_genres(None), [])
 
+    def test_parse_metadata_list_captures_section_id(self):
+        raw = {'MediaContainer': {'Metadata': [{'title': 'Inception', 'librarySectionID': 1}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertEqual(items[0]['section_id'], '1')
+
+    def test_parse_metadata_list_missing_section_id_is_none(self):
+        raw = {'MediaContainer': {'Metadata': [{'title': 'No Section'}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertIsNone(items[0]['section_id'])
+
+    def test_filter_by_section_keeps_matching_items(self):
+        items = [{'title': 'A', 'section_id': '1'}, {'title': 'B', 'section_id': '2'}]
+        self.assertEqual(divert_source.filter_by_section(items, '1'), [items[0]])
+
+    def test_filter_by_section_none_key_returns_all(self):
+        items = [{'title': 'A', 'section_id': '1'}]
+        self.assertEqual(divert_source.filter_by_section(items, None), items)
+
+    def test_filter_by_section_no_match_returns_empty(self):
+        items = [{'title': 'A', 'section_id': '1'}]
+        self.assertEqual(divert_source.filter_by_section(items, '99'), [])
+
 
 if __name__ == '__main__':
     unittest.main()

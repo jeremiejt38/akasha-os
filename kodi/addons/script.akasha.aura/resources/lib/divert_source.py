@@ -83,6 +83,7 @@ def parse_metadata_list(raw_json, image_resolver):
     for item in mc.get('Metadata', []):
         thumb = item.get('thumb') or ''
         art = item.get('art') or ''
+        section_id = item.get('librarySectionID')
         items.append({
             'title': item.get('title') or 'Sans titre',
             'type': item.get('type') or 'video',
@@ -96,5 +97,19 @@ def parse_metadata_list(raw_json, image_resolver):
             'summary': item.get('summary') or '',
             'thumb_url': image_resolver(thumb) if thumb else '',
             'art_url': image_resolver(art) if art else '',
+            'section_id': str(section_id) if section_id is not None else None,
         })
     return items
+
+
+def filter_by_section(items, section_key):
+    """Return only the items whose section_id matches section_key.
+
+    Used to scope an otherwise global list (e.g. /library/onDeck, which has
+    no per-section endpoint) to a single library on the client side. Returns
+    `items` unchanged if `section_key` is falsy.
+    """
+    if not section_key:
+        return items
+    section_key = str(section_key)
+    return [item for item in items if item.get('section_id') == section_key]
