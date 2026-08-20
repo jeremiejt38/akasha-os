@@ -42,6 +42,9 @@ STEPS = (
 NON_SKIPPABLE_STEPS = (STEP_WELCOME, STEP_NETWORK, STEP_SUMMARY)
 
 
+STEP_MARKER_PATH = '/storage/.config/akasha-os/quickstart-last-step'
+
+
 def is_completed(marker_path=MARKER_PATH):
     return os.path.exists(marker_path)
 
@@ -53,6 +56,27 @@ def mark_completed(marker_path=MARKER_PATH):
     os.makedirs(os.path.dirname(marker_path), exist_ok=True)
     with open(marker_path, 'w') as f:
         f.write('1')
+    # A completed run has nothing left to resume.
+    reset_completed(STEP_MARKER_PATH)
+
+
+def save_step(step_id, marker_path=STEP_MARKER_PATH):
+    """Section 1: "sauvegarde progressive" -- persisted every time the
+    wizard actually advances past a step, so an interrupted run resumes
+    where it left off instead of restarting from Bienvenue."""
+    os.makedirs(os.path.dirname(marker_path), exist_ok=True)
+    with open(marker_path, 'w') as f:
+        f.write(str(step_id))
+
+
+def get_last_step(marker_path=STEP_MARKER_PATH):
+    """Returns the last saved step, or STEP_WELCOME if none was ever
+    saved (first run, or a previous run completed and was reset)."""
+    try:
+        with open(marker_path) as f:
+            return clamp_step(int(f.read().strip()))
+    except (OSError, ValueError):
+        return STEP_WELCOME
 
 
 def reset_completed(marker_path=MARKER_PATH):
