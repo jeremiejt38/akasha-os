@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.43.0...akasha-os-v0.43.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **aura:** match Arctic Horizon 2's actual pill/gear button appearance ([#91](https://github.com/jeremiejt38/akasha-os/issues/91)) ([6a462ce](https://github.com/jeremiejt38/akasha-os/commit/6a462ce65a75ecb421fdf0142218d14541820340))
+
 ## [0.43.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.42.0...akasha-os-v0.43.0) (2026-08-20)
 
 
