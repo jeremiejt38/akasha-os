@@ -33,180 +33,303 @@
                 <texture colordiffuse="E610131A">white.png</texture>
             </control>
 
-            <!-- Main tabs: Divertissement, Jeux, App, Parametres -->
-            <control type="button" id="2001">
+            <!-- Module 0: unified search. Icon-only, never expands, plan
+                 04bda1b4 phase 2. -->
+            <control type="button" id="2000">
                 <left>60</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <label></label>
                 <onleft>2004</onleft>
-                <onright>2002</onright>
-                <ondown>3310</ondown>
+                <onright>2001</onright>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
             <control type="image">
                 <left>60</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
+                <aspectratio>keep</aspectratio>
+                <texture>icon-search.png</texture>
+            </control>
+
+            <!-- Modules 1-3: Divertissement/Jeux/App. Each reserves a fixed
+                 280px slot (icon left-aligned within it); on focus, a
+                 gradient pill fades in behind icon+label (plan 04bda1b4
+                 phase 1). Neighbouring icons stay at their fixed slot
+                 position rather than sliding to close the gap when a
+                 sibling expands, a deliberate simplification given
+                 Kodi's static layout engine, see docs/aura/decisions.md. -->
+            <control type="button" id="2001">
+                <left>160</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
+                <label></label>
+                <onleft>2000</onleft>
+                <onright>2002</onright>
+                <ondown>3310</ondown>
+                <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
+            </control>
+            <control type="group">
+                <left>160</left>
+                <top>28</top>
+                <width>320</width>
+                <height>64</height>
+                <visible>Control.HasFocus(2001)</visible>
+                <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
+                <control type="image">
+                    <width>320</width>
+                    <height>64</height>
+                    <texture border="32,0,32,0">pill-gradient.png</texture>
+                </control>
+                <control type="label">
+                    <left>76</left>
+                    <width>234</width>
+                    <height>64</height>
+                    <aligny>center</aligny>
+                    <font>font12</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <label>Divertissement</label>
+                </control>
+            </control>
+            <control type="image">
+                <left>160</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <aspectratio>keep</aspectratio>
                 <texture>tab-divertissement.png</texture>
             </control>
 
             <control type="button" id="2002">
-                <left>190</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <left>520</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <label></label>
                 <onleft>2001</onleft>
                 <onright>2003</onright>
                 <ondown>2050</ondown>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
+            </control>
+            <control type="group">
+                <left>520</left>
+                <top>28</top>
+                <width>320</width>
+                <height>64</height>
+                <visible>Control.HasFocus(2002)</visible>
+                <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
+                <control type="image">
+                    <width>320</width>
+                    <height>64</height>
+                    <texture border="32,0,32,0">pill-gradient.png</texture>
+                </control>
+                <control type="label">
+                    <left>76</left>
+                    <width>234</width>
+                    <height>64</height>
+                    <aligny>center</aligny>
+                    <font>font12</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <label>Jeux</label>
+                </control>
             </control>
             <control type="image">
-                <left>190</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <left>520</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <aspectratio>keep</aspectratio>
                 <texture>tab-jeux.png</texture>
             </control>
 
             <control type="button" id="2003">
-                <left>320</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <left>880</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <label></label>
                 <onleft>2002</onleft>
                 <onright>2004</onright>
                 <ondown>2041</ondown>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
+            </control>
+            <control type="group">
+                <left>880</left>
+                <top>28</top>
+                <width>320</width>
+                <height>64</height>
+                <visible>Control.HasFocus(2003)</visible>
+                <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
+                <control type="image">
+                    <width>320</width>
+                    <height>64</height>
+                    <texture border="32,0,32,0">pill-gradient.png</texture>
+                </control>
+                <control type="label">
+                    <left>76</left>
+                    <width>234</width>
+                    <height>64</height>
+                    <aligny>center</aligny>
+                    <font>font12</font>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <label>App</label>
+                </control>
             </control>
             <control type="image">
-                <left>320</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <left>880</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <aspectratio>keep</aspectratio>
                 <texture>tab-app.png</texture>
             </control>
 
+            <!-- Right side: time + date (always visible, unaffected by
+                 module focus), then the settings gear, icon-only, opens
+                 the context menu from plan 04bda1b4 phase 3 instead of
+                 activating native Settings directly. -->
+            <control type="label" id="2005">
+                <left>1420</left>
+                <top>24</top>
+                <width>350</width>
+                <height>34</height>
+                <align>right</align>
+                <font>font14</font>
+                <label>$INFO[System.Time(hh:mm)]</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="2006">
+                <left>1420</left>
+                <top>58</top>
+                <width>350</width>
+                <height>28</height>
+                <align>right</align>
+                <font>font10</font>
+                <label>$INFO[System.Date(ddd d mmm)]</label>
+                <textcolor>99FFFFFF</textcolor>
+            </control>
+
             <control type="button" id="2004">
-                <left>450</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <left>1810</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <label></label>
                 <onleft>2003</onleft>
-                <onright>2001</onright>
+                <onright>2000</onright>
                 <ondown>9000</ondown>
                 <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
             <control type="image">
-                <left>450</left>
-                <top>20</top>
-                <width>120</width>
-                <height>80</height>
+                <left>1810</left>
+                <top>28</top>
+                <width>64</width>
+                <height>64</height>
                 <aspectratio>keep</aspectratio>
-                <texture>tab-settings.png</texture>
+                <texture>icon-gear.png</texture>
+            </control>
+        </control>
+
+        <!-- Jeux sub-tabs: SteamLink / Moonlight / Autres. Moved out of the
+             retracting top bar (group 100) into the content area, same
+             pattern as Divertissement's own contextual tabs, since their
+             old position (left=900) now collides with the wider module
+             pills above, plan 04bda1b4 phase 1. -->
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
+
+            <control type="button" id="2050">
+                <left>60</left>
+                <top>145</top>
+                <width>195</width>
+                <height>60</height>
+                <label>SteamLink</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onright>2051</onright>
+                <onup>2002</onup>
+                <ondown>2060</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
 
-            <!-- Jeux sub-tabs: SteamLink / Moonlight / Autres -->
-            <control type="group">
-                <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
-
-                <control type="button" id="2050">
-                    <left>900</left>
-                    <top>30</top>
-                    <width>195</width>
-                    <height>60</height>
-                    <label>SteamLink</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>2002</onleft>
-                    <onright>2051</onright>
-                    <ondown>2060</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
-
-                <control type="button" id="2051">
-                    <left>1110</left>
-                    <top>30</top>
-                    <width>195</width>
-                    <height>60</height>
-                    <label>Moonlight</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>2050</onleft>
-                    <onright>2052</onright>
-                    <ondown>2060</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
-
-                <control type="button" id="2052">
-                    <left>1320</left>
-                    <top>30</top>
-                    <width>195</width>
-                    <height>60</height>
-                    <label>Autres</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>2051</onleft>
-                    <onright>2002</onright>
-                    <ondown>2010</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
+            <control type="button" id="2051">
+                <left>270</left>
+                <top>145</top>
+                <width>195</width>
+                <height>60</height>
+                <label>Moonlight</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>2050</onleft>
+                <onright>2052</onright>
+                <onup>2002</onup>
+                <ondown>2060</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
 
-            <!-- App sub-tabs: Mes Apps / Store -->
-            <control type="group">
-                <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
+            <control type="button" id="2052">
+                <left>480</left>
+                <top>145</top>
+                <width>195</width>
+                <height>60</height>
+                <label>Autres</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>2051</onleft>
+                <onup>2002</onup>
+                <ondown>2010</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+        </control>
 
-                <control type="button" id="2041">
-                    <left>900</left>
-                    <top>30</top>
-                    <width>195</width>
-                    <height>60</height>
-                    <label>Mes Apps</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>2003</onleft>
-                    <onright>2042</onright>
-                    <ondown>2030</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
+        <!-- App sub-tabs: Mes Apps / Store. Same relocation as Jeux's above. -->
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
 
-                <control type="button" id="2042">
-                    <left>1110</left>
-                    <top>30</top>
-                    <width>195</width>
-                    <height>60</height>
-                    <label>Store</label>
-                    <font>font12</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>2041</onleft>
-                    <onright>2003</onright>
-                    <ondown>2030</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
+            <control type="button" id="2041">
+                <left>60</left>
+                <top>145</top>
+                <width>195</width>
+                <height>60</height>
+                <label>Mes Apps</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onright>2042</onright>
+                <onup>2003</onup>
+                <ondown>2030</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            </control>
+
+            <control type="button" id="2042">
+                <left>270</left>
+                <top>145</top>
+                <width>195</width>
+                <height>60</height>
+                <label>Store</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>2041</onleft>
+                <onup>2003</onup>
+                <ondown>2030</ondown>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
             </control>
         </control>
 
@@ -886,41 +1009,6 @@
                 <onup>2041</onup>
                 <onleft>2032</onleft>
                 <ondown>2033</ondown>
-            </control>
-        </control>
-
-        <!-- Parametres content -->
-        <control type="group">
-            <visible>String.IsEqual(Window.Property(AuraActiveTab),3)</visible>
-
-            <control type="button" id="2100">
-                <left>60</left>
-                <top>145</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>Parametres Akasha</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2004</onup>
-                <onright>2101</onright>
-                <ondown>2100</ondown>
-            </control>
-
-            <control type="button" id="2101">
-                <left>480</left>
-                <top>145</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>Parametres Kodi</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                <onup>2004</onup>
-                <onleft>2100</onleft>
-                <ondown>2101</ondown>
             </control>
         </control>
 

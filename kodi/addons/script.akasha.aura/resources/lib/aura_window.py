@@ -7,7 +7,10 @@ plex_client.py. Later milestones fill the Games and App tabs
 skeleton.
 """
 import json
+import os
 import random
+import subprocess
+import sys
 
 import xbmc
 import xbmcaddon
@@ -29,15 +32,20 @@ import local_cache
 import paged_list
 import plex_client
 import steam_client
+import store_manifest
 import sunshine_client
 
-TAB_BUTTON_IDS = (2001, 2002, 2003, 2004)
+TAB_BUTTON_IDS = (2001, 2002, 2003)
 
 # Main-tab IDs in the same order as config.TABS.
 TAB_DIVERTISSEMENT = 0
 TAB_JEUX = 1
 TAB_APP = 2
-TAB_PARAMETRES = 3
+
+# Module 0 (search) and the settings gear are part of the same top bar but
+# are not "tabs" -- neither switches active_tab/content, see plan 04bda1b4.
+MODULE_SEARCH_ID = 2000
+GEAR_BUTTON_ID = 2004
 
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
@@ -118,16 +126,21 @@ APP_SUBTAB_IDS = (2041, 2042)
 APP_SUBTAB_MES_APPS = 0
 APP_SUBTAB_STORE = 1
 
-SETTINGS_BUTTON_IDS = (2100, 2101)
-
-BAR_CONTROL_IDS = set(TAB_BUTTON_IDS + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS)
+BAR_CONTROL_IDS = set(
+    (MODULE_SEARCH_ID, GEAR_BUTTON_ID) + TAB_BUTTON_IDS
+    + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS)
 
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         addon = xbmcaddon.Addon('script.akasha.aura')
-        self.active_tab = config.default_tab_index(addon.getSetting('tab.default'))
+        # Always Divertissement by default -- plan 04bda1b4 section 5
+        # explicitly requires this on every arrival at the global menu, not
+        # just cold boot, so unlike the Divertissement-internal state
+        # (library/filters, still persisted), the active top-level tab is
+        # deliberately not remembered across visits.
+        self.active_tab = TAB_DIVERTISSEMENT
         self.addon = addon
         self.addon_path = addon.getAddonInfo('path')
         self._plex_client = None
@@ -858,7 +871,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         index = index % len(config.TABS)
         self.active_tab = index
         self.setProperty('AuraActiveTab', str(index))
-        self.addon.setSetting('tab.default', str(index))
 
         if index == TAB_DIVERTISSEMENT:
             self.setProperty('DivertView', self._divert_view)
@@ -884,7 +896,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _update_bar_focused(self):
         """Update the top-bar focused property used by the retract animation."""
         focused = self.getFocusId()
-        is_bar_focused = focused in BAR_CONTROL_IDS or focused in SETTINGS_BUTTON_IDS
+        is_bar_focused = focused in BAR_CONTROL_IDS
         self.setProperty('AuraBarFocused', 'true' if is_bar_focused else 'false')
 
     def onAction(self, action):
@@ -893,16 +905,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         focused = self.getFocusId()
-        if aid == ACTION_MOVE_LEFT and focused in TAB_BUTTON_IDS:
-            self._show_tab(self.active_tab - 1)
-            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+        # Left/Right across the whole top bar (search, the 3 modules, gear)
+        # is a single native <onleft>/<onright> loop declared directly in
+        # Aura.xml; no Python override needed there. Found on-device (plan
+        # 04bda1b4): a bare button with no <texturefocus> at all appears to
+        # get silently skipped by Kodi's own focus resolution -- an earlier
+        # attempt to also redirect focus from Python compounded on top of
+        # that native skip instead of replacing it, causing a double hop.
+        # Adding a (barely visible) texturefocus to 2001/2002/2003 fixed
+        # the native loop on its own; this handler now only keeps
+        # AuraActiveTab/content in sync with whichever module ends up
+        # focused, without moving focus itself.
+        if focused in TAB_BUTTON_IDS and TAB_BUTTON_IDS.index(focused) != self.active_tab:
+            self._show_tab(TAB_BUTTON_IDS.index(focused))
             self._update_bar_focused()
-            return
-        if aid == ACTION_MOVE_RIGHT and focused in TAB_BUTTON_IDS:
-            self._show_tab(self.active_tab + 1)
-            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
-            self._update_bar_focused()
-            return
         if aid == ACTION_MOVE_DOWN and focused in TAB_BUTTON_IDS:
             self._focus_first_subtab()
             self._update_bar_focused()
@@ -983,10 +999,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_add_to_playlist()
         elif controlID == DIVERT_RESET_BUTTON_ID:
             self._divert_reset_filters()
-        elif controlID == 2100:
-            xbmc.executebuiltin('RunAddon(script.akasha.settings)')
-        elif controlID == 2101:
-            xbmc.executebuiltin('ActivateWindow(Settings)')
+        elif controlID == MODULE_SEARCH_ID:
+            self._open_search()
+        elif controlID == GEAR_BUTTON_ID:
+            self._open_settings_menu()
 
     def _on_jeux_item_selected(self):
         try:
@@ -1022,6 +1038,246 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section_index = pos - 1
         if 0 <= section_index < len(self._divert_sections):
             self._activate_library(section_index)
+
+    def _open_search(self):
+        """Module 0: unified search (plan 04bda1b4 phase 2)."""
+        kb = xbmc.Keyboard('', 'Rechercher')
+        kb.doModal()
+        if not kb.isConfirmed():
+            return
+        query = kb.getText().strip()
+        if not query:
+            return
+        self._run_unified_search(query)
+
+    def _run_unified_search(self, query):
+        groups = []  # list of (category_label, [(result_label, callback), ...])
+
+        groups.append(('Films et series', self._search_divert(query)))
+        groups.append(('Jeux', self._search_games(query)))
+        groups.append(('Applications', self._search_apps(query)))
+        groups.append(('Parametres', self._search_settings(query)))
+
+        flat_labels = []
+        flat_callbacks = []
+        for category, results in groups:
+            if not results:
+                continue
+            flat_labels.append('-- {} --'.format(category))
+            flat_callbacks.append(None)
+            for label, callback in results:
+                flat_labels.append('   {}'.format(label))
+                flat_callbacks.append(callback)
+
+        if not flat_callbacks:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Aucun resultat pour "{}"'.format(query),
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+
+        choice = xbmcgui.Dialog().select(
+            'Resultats pour "{}"'.format(query), flat_labels)
+        if choice < 0 or flat_callbacks[choice] is None:
+            return
+        flat_callbacks[choice]()
+
+    def _search_divert(self, query):
+        """Search movies/shows across every Divertissement library section
+        (Plex's search() is per-section, so this fans out over the small
+        number of sections rather than a single global-hub call -- there is
+        no such global endpoint wired in plex_client.py/connector_client.py
+        today)."""
+        results = []
+        query_lower = query.lower()
+        for section in self._divert_sections:
+            try:
+                if self._connector_client:
+                    raw = self._connector_client.section_items(section['key'], search=query)
+                    items = divert_source.parse_metadata_list(
+                        raw, self._connector_client.image_url)
+                else:
+                    items = self._plex_client.search(section['key'], query)
+            except Exception as e:
+                xbmc.log('Akasha Aura: search failed for section {}: {}'.format(
+                    section['key'], e), xbmc.LOGWARNING)
+                continue
+            for item in items:
+                if query_lower not in item['title'].lower():
+                    continue
+                results.append((
+                    '{} ({})'.format(item['title'], section['title']),
+                    self._make_search_divert_callback(section, item)))
+        return results[:20]
+
+    def _make_search_divert_callback(self, section, item):
+        def _callback():
+            if section['type'] == 'show':
+                self._open_show(item)
+            else:
+                xbmcgui.Dialog().notification(
+                    'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+        return _callback
+
+    def _search_games(self, query):
+        # Searches the static shortcuts list (games.DATA.xml, already
+        # loaded at __init__) rather than live-fetching the full Steam/
+        # Sunshine catalogs on every keystroke-free search -- keeps the
+        # search responsive; a documented scope limitation, see
+        # docs/aura/decisions.md.
+        query_lower = query.lower()
+        results = []
+        for game in self._games:
+            if query_lower in (game.get('label') or '').lower():
+                results.append((game['label'], self._make_search_game_callback(game)))
+        return results[:20]
+
+    def _make_search_game_callback(self, game):
+        action = game.get('action') or ''
+
+        def _callback():
+            if action:
+                xbmc.executebuiltin(action)
+        return _callback
+
+    def _search_apps(self, query):
+        query_lower = query.lower()
+        results = []
+        try:
+            request = addons_inventory.build_get_addons_request()
+            raw_response = xbmc.executeJSONRPC(json.dumps(request))
+            installed = addons_inventory.parse_get_addons_response(raw_response)
+        except Exception as e:
+            xbmc.log('Akasha Aura: search installed apps failed: {}'.format(e), xbmc.LOGWARNING)
+            installed = []
+        installed_ids = set()
+        for addon in installed:
+            installed_ids.add(addon['addonid'])
+            if query_lower in addon['name'].lower():
+                results.append((
+                    '{} (installee)'.format(addon['name']),
+                    self._make_search_app_callback(addon['addonid'])))
+        try:
+            manifest = store_manifest.load_manifest(self.addon_path)
+            catalog = store_manifest.with_install_status(manifest, installed_ids)
+        except Exception as e:
+            xbmc.log('Akasha Aura: search store catalog failed: {}'.format(e), xbmc.LOGWARNING)
+            catalog = []
+        for entry in catalog:
+            if entry.get('installed'):
+                continue
+            if query_lower in (entry.get('name') or '').lower():
+                results.append((
+                    '{} (a installer)'.format(entry['name']),
+                    self._make_search_store_callback()))
+        return results[:20]
+
+    def _make_search_app_callback(self, addonid):
+        def _callback():
+            xbmc.executebuiltin('RunAddon({})'.format(addonid))
+        return _callback
+
+    def _make_search_store_callback(self):
+        def _callback():
+            self._show_tab(TAB_APP)
+            self._select_app_subtab(APP_SUBTAB_STORE)
+            try:
+                self.setFocus(self.getControl(TAB_BUTTON_IDS[TAB_APP]))
+            except RuntimeError:
+                pass
+        return _callback
+
+    def _search_settings(self, query):
+        query_lower = query.lower()
+        results = []
+        for label, callback in self._settings_menu_options():
+            if query_lower in label.lower():
+                results.append((label, callback))
+        return results
+
+    def _settings_menu_options(self):
+        """The 6 entries from plan 04bda1b4 section 4, shared between the
+        gear's context menu and the search's "Parametres" category."""
+        return [
+            ('Parametres Kodi', self._settings_open_kodi),
+            ('Parametres LibreELEC', self._settings_open_libreelec),
+            ('Parametres Akasha', self._settings_open_akasha),
+            ('Mise en veille', self._settings_sleep),
+            ('Redemarrer', self._settings_restart_menu),
+            ('Arret du systeme', self._settings_shutdown),
+        ]
+
+    def _open_settings_menu(self):
+        """Settings gear: context menu (plan 04bda1b4 phase 3). Uses the
+        native contextmenu() dialog -- same mechanism already relied on by
+        script.akasha.guide for its own quick-access menu -- rather than a
+        custom XML popup, so it inherits the skin's standard placement/
+        close-on-select/close-on-back behaviour for free."""
+        options = self._settings_menu_options()
+        choice = xbmcgui.Dialog().contextmenu([label for label, _ in options])
+        if choice < 0:
+            return
+        options[choice][1]()
+
+    def _settings_open_kodi(self):
+        xbmc.executebuiltin('ActivateWindow(Settings)')
+
+    def _settings_open_libreelec(self):
+        xbmc.executebuiltin('RunAddon(service.libreelec.settings)')
+
+    def _settings_open_akasha(self):
+        xbmc.executebuiltin('RunAddon(script.akasha.settings)')
+
+    def _settings_sleep(self):
+        # Reuses the exact same standby+wake-on-input script already used
+        # by script.akasha.guide's "Mise en veille" entry, rather than
+        # duplicating it -- see docs/aura/decisions.md.
+        if not xbmcgui.Dialog().yesno(
+                'Akasha', "Mettre l'appareil et le televiseur en veille ?"):
+            return
+        script = '/storage/.kodi/scripts/akasha-sleep.py'
+        try:
+            subprocess.Popen([sys.executable, script],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            xbmc.log('Akasha Aura: sleep launch error: {}'.format(e), xbmc.LOGERROR)
+
+    def _settings_restart_menu(self):
+        choice = xbmcgui.Dialog().select(
+            'Redemarrer', ['Redemarrer Akasha', 'Redemarrer le systeme'])
+        if choice == 0:
+            self._settings_restart_akasha()
+        elif choice == 1:
+            self._settings_restart_system()
+
+    def _settings_restart_akasha(self):
+        # Same mechanism as script.akasha.guide's "Redemarrer Akasha":
+        # restarting the kodi service is the only Akasha-only restart
+        # available today (there is no app-level relaunch separate from
+        # the Kodi process) -- flagged as an assumption in the recette
+        # report per the plan's own instruction (section 8).
+        if not xbmcgui.Dialog().yesno('Akasha', 'Redemarrer Akasha maintenant ?'):
+            return
+        try:
+            with open('/tmp/.kodi-restart', 'w') as f:
+                f.write(str(os.getpid()))
+        except Exception:
+            pass
+        subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
+
+    def _settings_restart_system(self):
+        if not xbmcgui.Dialog().yesno('Akasha', 'Redemarrer le systeme maintenant ?'):
+            return
+        subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
+
+    def _settings_shutdown(self):
+        # Same splash + CEC-TV-off sequence as script.akasha.guide/
+        # script.akasha.settings' shutdown action.
+        if not xbmcgui.Dialog().yesno(
+                'Akasha', 'Eteindre le systeme maintenant ?\n(La TV sera aussi eteinte via CEC)'):
+            return
+        subprocess.run(['/storage/.kodi/scripts/show-splash.sh',
+                         '/storage/.kodi/media/splash-shutdown.png', '1'])
+        subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
 
     def _manage_libraries(self):
         """Show a dialog to pin/unpin and reorder every library section."""
@@ -1079,6 +1335,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Accueil, the same safe default as an empty/first load.
         self._activate_home()
 
+    def _open_show(self, item):
+        """Open AuraShowWindow for a show item, found (while wiring up
+        unified search, plan 04bda1b4 phase 2) to be a pre-existing gap
+        rather than something new: AuraShowWindow.client only ever knows
+        how to be a real plex_client.PlexClient (show_seasons/
+        season_episodes aren't implemented on connector_client.ConnectorClient
+        at all), so this silently opened a blank, stuck-on-"-" window
+        whenever a connector-only setup (self._plex_client is None) tried
+        to browse a show -- confirmed on-device via the resulting
+        AttributeError in kodi.log. Extending connector_client.py (and the
+        akasha-os-connector backend, a separate private repo) to support
+        seasons/episodes is out of scope here; falls back to the same
+        notification placeholder used for movies until that exists."""
+        if not self._plex_client:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        show_window = self._get_sub_window(
+            'show', aura_show.AuraShowWindow, 'AuraShow.xml')
+        show_window.client = self._plex_client
+        show_window.show_title = item['title']
+        show_window.show_rating_key = item['rating_key']
+        show_window.doModal()
+
     def _on_divert_item_selected(self):
         try:
             pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
@@ -1090,12 +1370,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section = self._divert_sections[self._divert_active_section]
 
         if section['type'] == 'show':
-            show_window = self._get_sub_window(
-                'show', aura_show.AuraShowWindow, 'AuraShow.xml')
-            show_window.client = self._plex_client
-            show_window.show_title = item['title']
-            show_window.show_rating_key = item['rating_key']
-            show_window.doModal()
+            self._open_show(item)
         else:
             # Playback delegation is not decided yet (see docs/aura/decisions.md);
             # for now just surface the title so selection feels responsive.

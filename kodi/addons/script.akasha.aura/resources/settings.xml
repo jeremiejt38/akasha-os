@@ -10,7 +10,6 @@
         <setting id="connector.session_token" type="text" label="Token de session (interne)" default=""/>
     </category>
     <category label="Onglets">
-        <setting id="tab.default" type="enum" label="Onglet par defaut" default="0" values="Divertissement|Jeux|App|Parametres"/>
         <setting id="divert.last_subtab" type="enum" label="Dernier sous-onglet Divertissement" default="0" values="Recommande|Bibliotheques|Categories"/>
         <setting id="divert.last_library" type="text" label="Derniere bibliotheque consultee (interne)" default=""/>
         <setting id="divert.pinned_libraries" type="text" label="Bibliotheques epinglees (interne)" default=""/>

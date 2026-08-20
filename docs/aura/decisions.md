@@ -311,3 +311,147 @@ symptôme que lors du chantier précédent). Les deux fois, la validation elle-m
 trivialement puisqu'elle ne faisait que ré-exécuter la suite de tests existante sur du code
 inchangé. Vérifier systématiquement `git diff --stat` après chaque job Talos avant de le
 considérer comme terminé, quel que soit le statut renvoyé par `talos_status`.
+
+## Plan 04bda1b4 — Menu principal global (v0.42.1+) : pilules, recherche unifiée, menu Parametres
+
+Chantier séparé du contenu interne de Divertissement : porte sur la barre globale en haut d'écran
+(Divertissement/Jeux/App + recherche + heure/date + engrenage), calquée sur le comportement du menu
+d'accueil natif Kodi/Arctic Horizon 2 (capture de référence fournie).
+
+### Phase 1 — Pilule expansion/collapse + focus par défaut
+
+- Barre restructurée : module 0 = recherche (icône seule, jamais de pilule), modules 1-3 =
+  Divertissement/Jeux/App (icône seule au repos, pilule dégradé bleu→turquoise + icône + libellé
+  au focus), puis heure (gras) + date (`System.Date(ddd d mmm)`, format court pour tenir dans
+  l'espace dispo) + bouton engrenage rond (icône générée, vraie forme d'engrenage — l'ancien
+  `tab-settings.png` réutilisé pour l'onglet Paramètres s'est avéré être une icône de grille, pas
+  un engrenage, une fois comparé au rendu réel).
+- **Paramètres n'est plus un 4ᵉ onglet** : `config.TABS` réduit à 3 entrées, `TAB_BUTTON_IDS` à
+  `(2001, 2002, 2003)`, l'ancien contenu "Parametres Akasha/Kodi" (boutons 2100/2101) supprimé —
+  remplacé par le menu contextuel de la Phase 3. Le setting `tab.default` (qui proposait
+  "Divertissement|Jeux|App|Parametres") est retiré : l'onglet actif n'est plus mémorisé entre les
+  visites, conformément à la section 5 du cahier ("focus par défaut sur Divertissement à chaque
+  arrivée sur l'écran", contrairement à l'ancien comportement qui restaurait le dernier onglet).
+- Les sous-onglets Jeux (SteamLink/Moonlight/Autres) et App (Mes Apps/Store), auparavant ancrés
+  dans la barre du haut à `left=900`, ont dû être déplacés dans la zone de contenu (`top=145`,
+  même schéma que les onglets contextuels de Divertissement) : leur ancienne position entrait en
+  collision avec les pilules élargies (jusqu'à `left=1200`).
+- **Simplification délibérée** : les icônes voisines restent à une position de créneau fixe plutôt
+  que de se rapprocher dynamiquement pour combler l'espace laissé par une pilule repliée (le
+  "resserrement" des icônes voisines observé dans la référence native aurait demandé des
+  animations de glissement conditionnelles par paire de contrôles — faisable en théorie avec
+  seulement 3 modules, mais non retenu par manque de temps ; documenté ici plutôt qu'improvisé
+  silencieusement).
+- **Découverte de fond sur la navigation Kodi** (confirmée avec un label de debug
+  `System.CurrentControlID`, à plusieurs reprises, avec redémarrage complet entre chaque essai
+  pour écarter un artefact de timing) : un bouton **sans aucun** `<texturefocus>` ni `<label>` ni
+  `<texture>` semble être silencieusement "sauté" par la résolution de focus native de Kodi pour
+  Gauche/Droite, qui rebondit alors sur le contrôle suivant dans la chaîne `onleft`/`onright` — y
+  compris quand le code Python tente de rediriger le focus lui-même juste après (le saut natif se
+  produit avant que le script ne voie l'action, donc toute redirection Python s'additionne au saut
+  natif au lieu de le remplacer, provoquant un double-saut). Ajouter un `texturefocus` même à peine
+  visible (`colordiffuse="20FFFFFF"`) aux 3 boutons de module a suffi à rendre la boucle native
+  Gauche/Droite (recherche ↔ module1 ↔ module2 ↔ module3 ↔ engrenage ↔ recherche) parfaitement
+  fiable sans aucune logique Python de redirection — la gestion Python restante se limite à
+  synchroniser `AuraActiveTab`/le contenu avec le module qui a effectivement le focus, jamais à
+  déplacer le focus lui-même. Ceci reconsidère (sans l'invalider, faute de re-test) l'explication
+  "géométrique" retenue pour le bug "Haut" du plan précédent (`f41ce1ad`) : la cause réelle pourrait
+  être la même absence de `texturefocus` plutôt qu'une résolution géométrique — à garder en tête si
+  un bug de navigation similaire réapparaît ailleurs dans le skin.
+- Validé en direct : boucle complète Gauche/Droite sans aucun double-saut, focus par défaut sur
+  Divertissement à chaque réouverture (y compris après un cycle Back-vers-natif complet), contenu
+  synchronisé à chaque changement de module, sidebar/onglets internes de Divertissement inchangés.
+
+### Phase 2 — Recherche unifiée (module 0)
+
+Recherche groupée par catégorie (Films et séries / Jeux / Applications / Paramètres) via
+`xbmc.Keyboard()` puis `xbmcgui.Dialog().select()` avec des en-têtes non sélectionnables
+(`-- Categorie --`) — pas de fenêtre XML dédiée, cohérent avec l'esprit "pas une simple liste
+inerte" du cahier tout en restant dans les mécanismes déjà éprouvés ailleurs dans l'addon.
+
+- **Films/séries** : recherche `search()`/`section_items(search=...)` sur chaque bibliothèque
+  Divertissement (pas de endpoint Plex "hub" global câblé dans `plex_client.py`/
+  `connector_client.py` aujourd'hui, donc un aller-retour par bibliothèque plutôt qu'un seul appel
+  global — acceptable avec le petit nombre de bibliothèques réelles). Sélectionner une série ouvre
+  `AuraShowWindow` (voir bug corrigé ci-dessous) ; un film affiche la même notification-placeholder
+  que le clic normal sur la grille (la résolution de lecture n'est toujours pas décidée, cf. plus
+  haut dans ce fichier).
+- **Jeux** : recherche sur `self._games` (raccourcis statiques déjà chargés à l'ouverture), pas sur
+  le catalogue Steam/Sunshine complet (éviterait un aller-retour réseau à chaque recherche) —
+  limitation de périmètre documentée plutôt qu'un vrai index de jeux complet.
+- **Applications** : recherche sur les extensions installées (`Addons.GetAddons`) et sur le
+  catalogue du Store (`store_manifest.py`) pour les non-installées ; sélectionner une app installée
+  fait `RunAddon`, une app non installée bascule sur l'onglet App → Store.
+- **Paramètres** : recherche sur les 6 entrées du menu contextuel de la Phase 3 (partagé via
+  `_settings_menu_options()`), donc toute nouvelle entrée ajoutée au menu apparaît aussi dans la
+  recherche sans code supplémentaire.
+- **Bug réel trouvé et corrigé en testant cette phase** (affecte aussi le clic normal sur une série
+  dans la grille Bibliothèque, pas seulement la recherche) : `AuraShowWindow.client` était toujours
+  réglé sur `self._plex_client`, qui est `None` dès que le connecteur (`akasha-os-connector`) est
+  utilisé à la place d'un accès Plex direct — `connector_client.py` n'implémente pas
+  `show_seasons()`/`season_episodes()`. Résultat avant correctif : fenêtre de série qui s'ouvre
+  mais reste bloquée sur des libellés vides ("-"), confirmé par
+  `AttributeError: 'NoneType' object has no attribute 'show_seasons'` dans le log. Corrigé avec un
+  repli propre vers la même notification-placeholder que pour les films quand aucun client Plex
+  direct n'est disponible, factorisé dans une nouvelle méthode `_open_show()` réutilisée par les
+  deux points d'entrée (grille et recherche). Étendre `connector_client.py` (et le backend
+  `akasha-os-connector`, dépôt privé séparé) pour supporter saisons/épisodes reste hors périmètre
+  de cette session.
+- Validé en direct : recherche "a" → résultats groupés par catégorie corrects, sélection d'une
+  série ("Angel Beats !") ouvre désormais `AuraShowWindow` sans planter (avant le correctif, plantait
+  silencieusement en arrière-plan avec la fenêtre bloquée sur "-").
+
+### Phase 3 — Menu contextuel Paramètres
+
+Utilise `xbmcgui.Dialog().contextmenu()` (même mécanisme déjà utilisé par
+`script.akasha.guide` pour son propre menu rapide) plutôt qu'une fenêtre XML personnalisée — hérite
+gratuitement du placement standard du skin et de la fermeture sur sélection/Retour.
+
+- 6 entrées dans l'ordre demandé : Paramètres Kodi (`ActivateWindow(Settings)`), Paramètres
+  LibreELEC (`RunAddon(service.libreelec.settings)`, l'addon LibreELEC officiel confirmé installé
+  sur l'appareil), Paramètres Akasha (`RunAddon(script.akasha.settings)`), Mise en veille (réutilise
+  **exactement** le script `akasha-sleep.py` déjà utilisé par `script.akasha.guide`, pas de
+  duplication), Redémarrer (sous-menu à 2 choix), Arrêt du système (confirmation + splash + CEC TV
+  off, même séquence que `script.akasha.guide`/`script.akasha.settings`).
+- **Redémarrer Akasha** : hypothèse retenue faute de mécanisme de relance applicative séparé du
+  système (comme demandé de le documenter en section 8 du cahier si le cas se présentait) —
+  `systemctl restart kodi`, exactement le même mécanisme que l'entrée "Redemarrer Akasha" déjà
+  existante dans `script.akasha.guide`. Pas de nouveau mécanisme inventé.
+- **Arrêt du système** : confirmation simple oui/non ajoutée comme hypothèse par défaut (cahier
+  section 4, point 6), cohérent avec les autres actions destructives du même menu.
+- Validé en direct : menu ouvert depuis Divertissement et depuis l'onglet App, les 6 entrées dans
+  le bon ordre avec le header de branding Akasha déjà en place ailleurs dans le skin ; "Paramètres
+  LibreELEC" testé pour de vrai (non destructif, ouvre le véritable écran de configuration
+  LibreELEC) ; "Redémarrer" ouvre bien le sous-menu à 2 choix ; "Mise en veille" et "Arrêt du
+  système" confirmés comme affichant leur boîte de confirmation respective, **jamais confirmés
+  pour de vrai** pendant cette session (risque réel d'éteindre l'appareil du salon sans validation
+  explicite de Jérémie, cf. `AGENTS.md`) — à valider par Jérémie lui-même en usage réel.
+
+### Phase 4 — Alignement visuel
+
+Fait au fil des itérations de la Phase 1 plutôt qu'en passe séparée : glyphes Unicode (▶/⇄/⋮)
+abandonnés au profit de texte simple après un test réel montrant qu'ils ne s'affichent pas du tout
+avec la police du skin (même leçon que sur le chantier `f41ce1ad`) ; icône engrenage regénérée
+après avoir remarqué que l'ancienne (`tab-settings.png`) est en réalité une icône de grille ;
+dégradé bleu→turquoise calé sur l'accent existant (`FF6C8CFF`) plutôt qu'une nouvelle palette,
+conformément à la demande du cahier de réutiliser la charte déjà en place.
+
+### Phase 5 — Recette finale
+
+Parcours réel validé sur le Pi (PixelCamera + `kodi-send`/JSON-RPC) : arrivée sur Divertissement
+par défaut → boucle Gauche/Droite complète sans double-saut → recherche groupée → menu Paramètres
+(chaque entrée, sans confirmer les actions destructives) → retour propre après un cycle
+Back-vers-natif/réouverture.
+
+**Non fait / hypothèses à faire valider par Jérémie** :
+- Test manette Xbox Wireless et télécommande IR/CEC physiques : aucun matériel disponible dans
+  cette session à distance.
+- "Mise en veille" et "Arrêt du système" jamais réellement exécutés pendant les tests (cf.
+  ci-dessus) — leur code suit exactement les mêmes mécanismes déjà en production ailleurs dans
+  l'OS, mais le déclenchement réel reste à faire par Jérémie.
+- Le "resserrement" dynamique des icônes voisines quand une pilule s'étend (comportement visible
+  dans la capture de référence native) n'est pas reproduit — espacement fixe à la place, documenté
+  en Phase 1.
+- La recherche ne couvre pas le catalogue Steam/Sunshine complet ni les épisodes individuellement
+  (seulement Films/Séries au niveau bibliothèque, Jeux au niveau raccourcis statiques) — périmètre
+  raisonnable pour une première version, à élargir si Jérémie le juge utile après usage réel.
