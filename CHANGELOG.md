@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.41.0...akasha-os-v0.42.0) (2026-08-20)
+
+
+### Features
+
+* **aura:** Bibliotheque toolbar (sort/genre/search/filter/quick actions) ([#87](https://github.com/jeremiejt38/akasha-os/issues/87)) ([d86e199](https://github.com/jeremiejt38/akasha-os/commit/d86e199ea533ffa10fc38cf582caa2db988e659a))
+
 ## [0.41.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.40.1...akasha-os-v0.41.0) (2026-08-20)
 
 
