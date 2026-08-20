@@ -410,27 +410,192 @@
                 </control>
             </control>
 
-            <control type="label" id="3220">
+            <!-- Bibliotheque toolbar: type (info), quick filter, sort, genre,
+                 search, item counter, quick actions (play/shuffle/playlist/
+                 reset), plan f41ce1ad phase A. Reuses the same sort/genre/
+                 search plumbing already proven in aura_library.py, wired
+                 onto this contextual grid instead of a separate window. -->
+            <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
-                <left>160</left>
-                <top>298</top>
-                <width>1700</width>
-                <height>30</height>
-                <font>font12</font>
-                <label>-</label>
-                <textcolor>77FFFFFF</textcolor>
-                <onleft>3310</onleft>
-                <ondown>3230</ondown>
+
+                <!-- Row 1: type (info) + filter/sort/genre/search dropdowns. -->
+                <!-- Type: informational only, a Plex library section is
+                     always a single fixed type (movie or show), so there is
+                     nothing to actually choose here; see docs/aura/decisions.md. -->
+                <control type="label" id="3210">
+                    <left>160</left>
+                    <top>298</top>
+                    <width>130</width>
+                    <height>40</height>
+                    <font>font12</font>
+                    <label>-</label>
+                    <aligny>center</aligny>
+                    <textcolor>77FFFFFF</textcolor>
+                </control>
+
+                <control type="button" id="3211">
+                    <left>300</left>
+                    <top>298</top>
+                    <width>210</width>
+                    <height>40</height>
+                    <label>Filtre: Tout</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3310</onleft>
+                    <onright>3212</onright>
+                    <onup>3100</onup>
+                    <ondown>3215</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3212">
+                    <left>520</left>
+                    <top>298</top>
+                    <width>230</width>
+                    <height>40</height>
+                    <label>Trier: -</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3211</onleft>
+                    <onright>3213</onright>
+                    <onup>3100</onup>
+                    <ondown>3216</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3213">
+                    <left>760</left>
+                    <top>298</top>
+                    <width>150</width>
+                    <height>40</height>
+                    <label>Genre</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3212</onleft>
+                    <onright>3214</onright>
+                    <onup>3100</onup>
+                    <ondown>3217</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3214">
+                    <left>920</left>
+                    <top>298</top>
+                    <width>210</width>
+                    <height>40</height>
+                    <label>Rechercher</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3213</onleft>
+                    <onup>3100</onup>
+                    <ondown>3215</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <!-- Row 2: item counter + quick actions (play/shuffle/playlist/reset). -->
+                <control type="label" id="3220">
+                    <left>160</left>
+                    <top>346</top>
+                    <width>500</width>
+                    <height>40</height>
+                    <font>font12</font>
+                    <label>-</label>
+                    <aligny>center</aligny>
+                    <textcolor>77FFFFFF</textcolor>
+                </control>
+
+                <control type="button" id="3215">
+                    <left>1120</left>
+                    <top>346</top>
+                    <width>150</width>
+                    <height>40</height>
+                    <label>Lire</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3310</onleft>
+                    <onright>3216</onright>
+                    <onup>3211</onup>
+                    <ondown>3230</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3216">
+                    <left>1280</left>
+                    <top>346</top>
+                    <width>190</width>
+                    <height>40</height>
+                    <label>Aleatoire</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3215</onleft>
+                    <onright>3217</onright>
+                    <onup>3212</onup>
+                    <ondown>3230</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3217">
+                    <left>1480</left>
+                    <top>346</top>
+                    <width>150</width>
+                    <height>40</height>
+                    <label>Liste</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3216</onleft>
+                    <onright>3218</onright>
+                    <onup>3213</onup>
+                    <ondown>3230</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
+
+                <control type="button" id="3218">
+                    <left>1640</left>
+                    <top>346</top>
+                    <width>90</width>
+                    <height>40</height>
+                    <label>...</label>
+                    <font>font12</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3217</onleft>
+                    <onup>3214</onup>
+                    <ondown>3230</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FFFFFFFF</focusedcolor>
+                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                </control>
             </control>
 
             <control type="list" id="3230">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
                 <left>160</left>
-                <top>338</top>
+                <top>400</top>
                 <width>1700</width>
                 <height>360</height>
                 <orientation>horizontal</orientation>
-                <onup>3100</onup>
+                <onup>3215</onup>
                 <onleft>3310</onleft>
                 <ondown>3230</ondown>
                 <itemlayout width="220" height="330">
@@ -770,5 +935,6 @@
             <onup>2001</onup>
             <label></label>
         </control>
+
     </controls>
 </window>

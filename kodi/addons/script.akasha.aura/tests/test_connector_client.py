@@ -108,6 +108,30 @@ class TestConnectorClient(unittest.TestCase):
         self.assertIn('search=dragon', mock_urlopen.call_args[0][0].full_url)
 
     @patch('urllib.request.urlopen')
+    def test_section_items_with_unwatched_true(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+        self.client.token = 'abc123'
+
+        self.client.section_items('1', unwatched=True)
+        self.assertIn('unwatched=1', mock_urlopen.call_args[0][0].full_url)
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_unwatched_false(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+        self.client.token = 'abc123'
+
+        self.client.section_items('1', unwatched=False)
+        self.assertIn('unwatched=0', mock_urlopen.call_args[0][0].full_url)
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_unwatched_none_omitted(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+        self.client.token = 'abc123'
+
+        self.client.section_items('1')
+        self.assertNotIn('unwatched=', mock_urlopen.call_args[0][0].full_url)
+
+    @patch('urllib.request.urlopen')
     def test_section_genres(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({'MediaContainer': {}})
         self.client.token = 'abc123'

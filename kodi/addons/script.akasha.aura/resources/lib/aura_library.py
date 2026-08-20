@@ -112,13 +112,17 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura Library: connector section_items failed, falling back '
                          'to Plex direct: {}'.format(e), xbmc.LOGWARNING)
                 self.connector = None
-        # Direct Plex fallback: search/genre use their own dedicated endpoints.
-        genre = kwargs.pop('genre', None)
+        # Direct Plex fallback. `search` still has its own dedicated
+        # endpoint without a sort parameter; `genre` is passed straight to
+        # section_items_with_total (accepts sort+genre+unwatched together
+        # since plan f41ce1ad) instead of the old by_genre_with_total,
+        # which never combined with a custom sort -- see the cache/sort
+        # bug fixed alongside this in _current_mode_key/_fetch_page.
         search = kwargs.pop('search', None)
         if search:
-            return self.client.search_with_total(self.section['key'], search, **kwargs)
-        if genre:
-            return self.client.by_genre_with_total(self.section['key'], genre, **kwargs)
+            return self.client.search_with_total(
+                self.section['key'], search,
+                limit=kwargs.get('limit', 50), offset=kwargs.get('offset', 0))
         return self.client.section_items_with_total(self.section['key'], **kwargs)
 
     def _section_genres(self):
@@ -140,14 +144,21 @@ class AuraLibraryWindow(xbmcgui.WindowXMLDialog):
 
     def _fetch_page(self, offset, limit):
         mode, value = self._current_mode_key()
+        # self.sort must always be part of the cache key, even when mode is
+        # 'genre'/'search' -- otherwise changing the sort while a genre
+        # filter is active silently keeps returning the previous sort's
+        # cached page (found live while testing the equivalent toolbar in
+        # aura_window.py, plan f41ce1ad phase A).
         cache_key = local_cache.page_cache_key(
-            'library', self.section['key'], mode, value, offset, limit)
+            'library', self.section['key'], mode, value, self.sort, offset, limit)
         return local_cache.get_or_set_page(
             self._cache, cache_key, CACHE_TTL_SECONDS,
             lambda: self._fetch_page_uncached(mode, value, offset, limit))
 
     def _fetch_page_uncached(self, mode, value, offset, limit):
         kwargs = {'offset': offset, 'limit': limit, mode: value}
+        if mode != 'sort':
+            kwargs['sort'] = self.sort
         return self._section_items(**kwargs)
 
     def _load_items(self):
