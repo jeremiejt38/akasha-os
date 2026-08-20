@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.42.0...akasha-os-v0.43.0) (2026-08-20)
+
+
+### Features
+
+* **aura:** global top menu bar (pills, unified search, settings menu) ([#89](https://github.com/jeremiejt38/akasha-os/issues/89)) ([e1d7f03](https://github.com/jeremiejt38/akasha-os/commit/e1d7f039657b0ada026cd2f6709ff036b45720ee))
+
 ## [0.42.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.41.0...akasha-os-v0.42.0) (2026-08-20)
 
 
