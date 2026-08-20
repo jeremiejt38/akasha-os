@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.45.0...akasha-os-v0.46.0) (2026-08-20)
+
+
+### Features
+
+* **quickstart:** real content for all wizard steps (plan 3aba4284 phases 2-6) ([#102](https://github.com/jeremiejt38/akasha-os/issues/102)) ([29314a1](https://github.com/jeremiejt38/akasha-os/commit/29314a11fcb06c319a9dd7ef6001b5d4d2d07825))
+
 ## [0.45.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.44.1...akasha-os-v0.45.0) (2026-08-20)
 
 
