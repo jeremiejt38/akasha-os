@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.41.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.40.1...akasha-os-v0.41.0) (2026-08-20)
+
+
+### Features
+
+* **aura:** Divertissement sidebar permanente + onglets contextuels par bibliotheque (plan 780ecf80) ([#85](https://github.com/jeremiejt38/akasha-os/issues/85)) ([688e7fd](https://github.com/jeremiejt38/akasha-os/commit/688e7fd61e8410f353c8d5e3dacab181a28a35aa))
+
 ## [0.40.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.40.0...akasha-os-v0.40.1) (2026-08-19)
 
 
