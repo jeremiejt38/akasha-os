@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.akasha.quickstart" name="Akasha Quick Start" version="1.0.0" provider-name="Akasha">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.python.script" library="default.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_GB">Akasha OS first-run setup wizard.</summary>
+        <summary lang="fr_FR">Assistant de configuration au premier demarrage d'Akasha OS.</summary>
+        <description lang="en_GB">Guides through essential setup (network, display, controllers, accounts) on first boot, relaunchable anytime from Akasha Settings.</description>
+        <description lang="fr_FR">Guide a travers la configuration essentielle (reseau, affichage, manettes, comptes) au premier demarrage, relancable a tout moment depuis Parametres Akasha.</description>
+        <platform>all</platform>
+        <license>MIT</license>
+    </extension>
+</addon>

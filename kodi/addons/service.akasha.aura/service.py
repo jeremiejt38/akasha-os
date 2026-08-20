@@ -5,6 +5,11 @@ boot intro (service.akasha.splash) to finish so Aura opens right after it,
 then launches script.akasha.aura full screen. The native Kodi Home window
 is left untouched underneath: pressing Back from Aura still reveals it as a
 safety net (see docs/aura/decisions.md).
+
+On a first boot (or any boot before the Quick Start wizard has been
+completed, see plan 3aba4284 / script.akasha.quickstart), launches the
+wizard instead -- it chains into Aura itself once finished
+(quickstart_window.QuickStartWindow._finish()).
 """
 import os
 import time
@@ -13,6 +18,11 @@ import xbmc
 
 INTRO_FLAG_FILE = '/tmp/.akasha-intro-played'
 MAX_WAIT_SECONDS = 30
+# Mirrors script.akasha.quickstart/resources/lib/quickstart_state.py's
+# MARKER_PATH -- duplicated rather than cross-imported from another
+# addon's resources/lib for a single path constant, to keep this launcher
+# self-contained.
+QUICKSTART_MARKER_PATH = '/storage/.config/akasha-os/quickstart-completed'
 
 monitor = xbmc.Monitor()
 
@@ -30,6 +40,10 @@ def _wait_for_intro():
 def main():
     _wait_for_intro()
     if monitor.abortRequested():
+        return
+    if not os.path.exists(QUICKSTART_MARKER_PATH):
+        xbmc.log('Akasha Aura Launcher: first run, opening Quick Start', xbmc.LOGINFO)
+        xbmc.executebuiltin('RunScript(script.akasha.quickstart)')
         return
     xbmc.log('Akasha Aura Launcher: opening Akasha Aura', xbmc.LOGINFO)
     xbmc.executebuiltin('RunScript(script.akasha.aura)')
