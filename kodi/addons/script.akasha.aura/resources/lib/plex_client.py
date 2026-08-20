@@ -217,12 +217,20 @@ class PlexClient:
         })
         return self._metadata_list(data)
 
-    def section_items_with_total(self, section_key, sort='titleSort', limit=200, offset=0):
-        data = self._request('/library/sections/{}/all'.format(section_key), {
+    def section_items_with_total(self, section_key, sort='titleSort', limit=200, offset=0,
+                                  genre=None, unwatched=None):
+        params = {
             'sort': sort,
             'X-Plex-Container-Size': limit,
             'X-Plex-Container-Start': offset,
-        })
+        }
+        if genre:
+            params['genre'] = genre
+        if unwatched is True:
+            params['unwatched'] = 1
+        elif unwatched is False:
+            params['unwatched'] = 0
+        data = self._request('/library/sections/{}/all'.format(section_key), params)
         return self._metadata_list_with_total(data)
 
     def search(self, section_key, query, limit=50, offset=0):

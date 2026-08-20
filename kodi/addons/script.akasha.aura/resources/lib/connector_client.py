@@ -81,13 +81,17 @@ class ConnectorClient:
         return self._request('GET', '/api/plex/sections')
 
     def section_items(self, section_key, sort='titleSort', limit=200, offset=0,
-                       genre=None, search=None):
+                       genre=None, search=None, unwatched=None):
         path = '/api/plex/sections/{}/all?sort={}&limit={}&offset={}'.format(
             section_key, urllib.parse.quote(sort, safe=''), limit, offset)
         if genre:
             path += '&genre={}'.format(urllib.parse.quote(genre, safe=''))
         if search:
             path += '&search={}'.format(urllib.parse.quote(search, safe=''))
+        if unwatched is True:
+            path += '&unwatched=1'
+        elif unwatched is False:
+            path += '&unwatched=0'
         return self._request('GET', path)
 
     def section_genres(self, section_key):

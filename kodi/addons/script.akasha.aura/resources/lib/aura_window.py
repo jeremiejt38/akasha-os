@@ -7,6 +7,7 @@ plex_client.py. Later milestones fill the Games and App tabs
 skeleton.
 """
 import json
+import random
 
 import xbmc
 import xbmcaddon
@@ -53,6 +54,49 @@ DIVERT_SIDEBAR_HOME_INDEX = 0
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 
+# Bibliotheque toolbar (plan f41ce1ad phase A).
+DIVERT_TYPE_LABEL_ID = 3210
+DIVERT_FILTER_BUTTON_ID = 3211
+DIVERT_SORT_BUTTON_ID = 3212
+DIVERT_GENRE_BUTTON_ID = 3213
+DIVERT_SEARCH_BUTTON_ID = 3214
+DIVERT_PLAY_BUTTON_ID = 3215
+DIVERT_SHUFFLE_BUTTON_ID = 3216
+DIVERT_PLAYLIST_BUTTON_ID = 3217
+DIVERT_RESET_BUTTON_ID = 3218
+DIVERT_TOOLBAR_BUTTON_IDS = (
+    DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
+    DIVERT_SEARCH_BUTTON_ID, DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
+    DIVERT_PLAYLIST_BUTTON_ID, DIVERT_RESET_BUTTON_ID,
+)
+
+# Mirrors aura_library.py's SORT_OPTIONS so both list the exact same choices
+# (full labels used in the selection dialog); DIVERT_SORT_SHORT_LABELS are
+# the abbreviated captions shown directly on the toolbar button, which has
+# much less room than a full-screen dialog.
+DIVERT_SORT_OPTIONS = [
+    ('addedAt:desc', "Date d'ajout"),
+    ('titleSort', 'Titre'),
+    ('originallyAvailableAt:desc', 'Date de sortie'),
+    ('rating:desc', 'Note'),
+]
+DIVERT_SORT_SHORT_LABELS = {
+    'addedAt:desc': 'Ajout',
+    'titleSort': 'Titre',
+    'originallyAvailableAt:desc': 'Sortie',
+    'rating:desc': 'Note',
+}
+
+# Quick filter: only "Tout"/"Non vus"/"Vus" are wired to a real Plex/connector
+# parameter (unwatched). HDR/DOVI/Sans correspondance/Doublons from the
+# original cahier des charges are not exposed by either source today -- see
+# docs/aura/decisions.md.
+DIVERT_FILTER_OPTIONS = [
+    (None, 'Tout'),
+    (True, 'Non vus'),
+    (False, 'Vus'),
+]
+
 GAME_BUTTON_IDS = (2010, 2011, 2012)
 APP_TILE_IDS = (2030, 2031, 2032, 2033)
 
@@ -93,6 +137,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_active_section = 0
         self._divert_items = []
         self._divert_paged = None
+        # Bibliotheque toolbar state (plan f41ce1ad phase A): reset whenever
+        # the sidebar selection changes to a different library, same
+        # pattern as aura_library.py's onInit -- otherwise a search/filter
+        # left active would silently stick to the next library visited.
+        self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
+        self._divert_filter_genre = None
+        self._divert_filter_unwatched = None  # None=Tout, True=Non vus, False=Vus
+        self._divert_search_query = ''
         # 'home' (Accueil, no library selected) or 'library' (a sidebar library is
         # active and the contextual Recommande/Bibliotheque/Categories tabs apply).
         self._divert_view = addon.getSetting('divert.last_view') or 'home'
@@ -384,20 +436,45 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return 'icon-tv.png'
         return 'icon-film.png'
 
+    def _divert_cache_mode_key(self):
+        """search and genre are mutually exclusive filters; sort and
+        unwatched are independent axes that always apply on top of
+        whichever one is active, so both must always be part of the cache
+        key -- otherwise changing the sort while a genre/search filter is
+        active would silently keep returning the old sort's cached page
+        (found while testing Phase A: switching "Trier" had no visible
+        effect once a genre filter was set). See the identical fix needed
+        in aura_library.py's _current_mode_key/_fetch_page."""
+        if self._divert_search_query:
+            base = ('search', self._divert_search_query)
+        elif self._divert_filter_genre:
+            base = ('genre', self._divert_filter_genre)
+        else:
+            base = ('all',)
+        return base + (self._divert_sort, self._divert_filter_unwatched)
+
     def _divert_section_page(self, section, offset, limit):
-        key = local_cache.page_cache_key('divert', section['key'], offset, limit)
+        key = local_cache.page_cache_key(
+            'divert', section['key'], self._divert_cache_mode_key(), offset, limit)
         return local_cache.get_or_set_page(
             self._cache, key, DIVERT_CACHE_TTL_SECONDS,
             lambda: self._divert_section_page_uncached(section, offset, limit))
 
     def _divert_section_page_uncached(self, section, offset, limit):
+        unwatched = self._divert_filter_unwatched
         if self._connector_client:
             raw = self._connector_client.section_items(
-                section['key'], sort='addedAt:desc', limit=limit, offset=offset)
+                section['key'], sort=self._divert_sort, limit=limit, offset=offset,
+                genre=self._divert_filter_genre, search=self._divert_search_query or None,
+                unwatched=unwatched)
             items = divert_source.parse_metadata_list(raw, self._connector_client.image_url)
             return items, divert_source.parse_total_size(raw)
+        if self._divert_search_query:
+            return self._plex_client.search_with_total(
+                section['key'], self._divert_search_query, limit=limit, offset=offset)
         return self._plex_client.section_items_with_total(
-            section['key'], sort='addedAt:desc', limit=limit, offset=offset)
+            section['key'], sort=self._divert_sort, limit=limit, offset=offset,
+            genre=self._divert_filter_genre, unwatched=unwatched)
 
     def _select_divert_section(self, index):
         if index >= len(self._divert_sections):
@@ -406,7 +483,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section = self._divert_sections[index]
         self._divert_last_library_key = section['key']
         self.addon.setSetting('divert.last_library', section['key'])
+        # Reset the toolbar state: a search/filter/sort left over from a
+        # previous library must never silently stick to this one (same
+        # regression class already fixed once for Recommande/Categories).
+        self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
+        self._divert_filter_genre = None
+        self._divert_filter_unwatched = None
+        self._divert_search_query = ''
+        self._load_divert_section_items(section)
 
+    def _load_divert_section_items(self, section):
         self._divert_paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit))
         error = None
@@ -417,6 +503,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             error = e
         self._divert_items = self._divert_paged.items
 
+        self._render_divert_toolbar(section)
         self._render_divert_status(section, error)
 
         try:
@@ -427,6 +514,25 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
 
+    def _render_divert_toolbar(self, section):
+        try:
+            type_label = 'Series TV' if section.get('type') == 'show' else 'Films'
+            self.getControl(DIVERT_TYPE_LABEL_ID).setLabel(type_label)
+        except RuntimeError:
+            pass
+        try:
+            filter_label = next(
+                label for value, label in DIVERT_FILTER_OPTIONS
+                if value == self._divert_filter_unwatched)
+            self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel('Filtre: {}'.format(filter_label))
+        except RuntimeError:
+            pass
+        try:
+            sort_label = DIVERT_SORT_SHORT_LABELS.get(self._divert_sort, '-')
+            self.getControl(DIVERT_SORT_BUTTON_ID).setLabel('Trier: {}'.format(sort_label))
+        except RuntimeError:
+            pass
+
     def _render_divert_status(self, section, error=None):
         try:
             status = self.getControl(DIVERT_STATUS_ID)
@@ -435,9 +541,101 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 count = self._divert_paged.total if self._divert_paged.total is not None \
                     else len(self._divert_items)
-                status.setLabel('{} — {} element(s)'.format(section['title'], count))
+                label = '{} — {} element(s)'.format(section['title'], count)
+                if self._divert_search_query:
+                    label += ' pour "{}"'.format(self._divert_search_query)
+                if self._divert_filter_genre:
+                    label += ' ({})'.format(self._divert_filter_genre)
+                status.setLabel(label)
         except RuntimeError:
             pass
+
+    def _divert_open_filter_menu(self):
+        if not self._divert_sections:
+            return
+        idx = xbmcgui.Dialog().select(
+            'Filtre', [label for _, label in DIVERT_FILTER_OPTIONS])
+        if idx < 0:
+            return
+        self._divert_filter_unwatched = DIVERT_FILTER_OPTIONS[idx][0]
+        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+
+    def _divert_open_sort_menu(self):
+        if not self._divert_sections:
+            return
+        idx = xbmcgui.Dialog().select(
+            'Trier par', [label for _, label in DIVERT_SORT_OPTIONS])
+        if idx < 0:
+            return
+        self._divert_sort = DIVERT_SORT_OPTIONS[idx][0]
+        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+
+    def _divert_open_genre_menu(self):
+        if not self._divert_sections:
+            return
+        section = self._divert_sections[self._divert_active_section]
+        try:
+            if self._connector_client:
+                genres = divert_source.parse_genres(
+                    self._connector_client.section_genres(section['key']))
+            else:
+                genres = self._plex_client.section_genres(section['key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: divert genre load failed: {}'.format(e), xbmc.LOGERROR)
+            genres = []
+        if not genres:
+            return
+        idx = xbmcgui.Dialog().select('Genre', ['Tous'] + genres)
+        if idx < 0:
+            return
+        self._divert_filter_genre = None if idx == 0 else genres[idx - 1]
+        if self._divert_filter_genre:
+            self._divert_search_query = ''
+        self._load_divert_section_items(section)
+
+    def _divert_open_search(self):
+        if not self._divert_sections:
+            return
+        kb = xbmc.Keyboard(self._divert_search_query, 'Rechercher')
+        kb.doModal()
+        if not kb.isConfirmed():
+            return
+        self._divert_search_query = kb.getText()
+        if self._divert_search_query:
+            self._divert_filter_genre = None
+        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+
+    def _divert_reset_filters(self):
+        if not self._divert_sections:
+            return
+        self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
+        self._divert_filter_genre = None
+        self._divert_filter_unwatched = None
+        self._divert_search_query = ''
+        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+
+    def _divert_play_item(self, item):
+        # Playback resolution for Divertissement items is not decided yet
+        # (see docs/aura/decisions.md) -- the single-item click handler
+        # (_on_divert_item_selected) already only surfaces a notification
+        # for non-show items, so the quick-action buttons mirror that same
+        # placeholder rather than pretending to actually start playback.
+        xbmcgui.Dialog().notification(
+            'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+
+    def _divert_play_first(self):
+        if self._divert_items:
+            self._divert_play_item(self._divert_items[0])
+
+    def _divert_play_random(self):
+        if self._divert_items:
+            self._divert_play_item(random.choice(self._divert_items))
+
+    def _divert_add_to_playlist(self):
+        if self._divert_items:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Playlists : pas encore disponible', xbmcgui.NOTIFICATION_INFO,
+                2000)
 
     def _maybe_load_more_divert(self):
         if not self._divert_paged or not self._divert_sections:
@@ -769,6 +967,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._manage_libraries()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
+        elif controlID == DIVERT_FILTER_BUTTON_ID:
+            self._divert_open_filter_menu()
+        elif controlID == DIVERT_SORT_BUTTON_ID:
+            self._divert_open_sort_menu()
+        elif controlID == DIVERT_GENRE_BUTTON_ID:
+            self._divert_open_genre_menu()
+        elif controlID == DIVERT_SEARCH_BUTTON_ID:
+            self._divert_open_search()
+        elif controlID == DIVERT_PLAY_BUTTON_ID:
+            self._divert_play_first()
+        elif controlID == DIVERT_SHUFFLE_BUTTON_ID:
+            self._divert_play_random()
+        elif controlID == DIVERT_PLAYLIST_BUTTON_ID:
+            self._divert_add_to_playlist()
+        elif controlID == DIVERT_RESET_BUTTON_ID:
+            self._divert_reset_filters()
         elif controlID == 2100:
             xbmc.executebuiltin('RunAddon(script.akasha.settings)')
         elif controlID == 2101:

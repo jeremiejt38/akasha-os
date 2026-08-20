@@ -228,3 +228,86 @@ Validé en conditions réelles sur le Pi (v0.40.1+) : Accueil (rangées globales
 (scopé), Films → Bibliothèque (grille + navigation Gauche/Droite/Bas), Films → Catégories (33
 vraies catégories Plex de la bibliothèque Films, pas celles de la première section par défaut),
 bouton Paramètres inchangé (`ActivateWindow(Settings)`).
+
+## Plan ajusté f41ce1ad — Phase A (barre d'outils Bibliothèque), Phase B (bug "Haut" résolu), Phase C/D
+
+### Phase A — barre d'outils complète sur la grille Bibliothèque contextuelle
+
+Contrôles ajoutés (`3210`-`3218`, deux rangées sous les onglets contextuels) : type (info,
+non interactif — une section Plex a toujours un seul type fixe, rien à choisir réellement),
+filtre rapide (Tout/Non vus/Vus), tri (réutilise les mêmes 4 options que `AuraLibraryWindow`),
+genre (dialogue natif, vraies catégories de la bibliothèque active), recherche (clavier natif),
+compteur, et 4 actions rapides (Lire/Aléatoire/Liste/`...`).
+
+- **Bug de cache réel trouvé et corrigé** (`aura_window.py` et, même défaut préexistant,
+  `aura_library.py`) : la clé de cache ne conservait le tri (`sort`) que lorsqu'aucun genre/
+  recherche n'était actif — changer le tri pendant qu'un filtre genre était actif renvoyait
+  silencieusement la page mise en cache de l'ancien tri (aucune erreur, juste aucun effet
+  visible). Corrigé en incluant systématiquement `sort` (et `unwatched`) dans la clé de cache,
+  quel que soit le mode actif. Validé en direct : Genre="Comédie" + Trier="Titre" combinés
+  correctement (43 éléments, ordre alphabétique).
+- **Lecture/Playlist** : la résolution de lecture n'étant pas encore décidée pour Divertissement
+  (déjà noté plus haut dans ce fichier), Lire/Aléatoire/Liste réutilisent le même placeholder
+  (notification du titre) que le clic sur un item individuel — pas de comportement trompeur.
+- **Filtre rapide "Non vus"/"Vus"** : le paramètre `unwatched` est bien envoyé (`plex_client.py`
+  et `connector_client.py` étendus, testé unitairement), et fonctionne en direct pour l'accès
+  Plex direct. **Non confirmé fonctionnel via le connecteur** en conditions réelles (le compteur
+  ne change pas) — `akasha-os-connector` (repo privé séparé) ne comprend probablement pas encore
+  ce paramètre côté backend ; à corriger dans une session future sur ce repo. Pas un blocage pour
+  cette session (comportement dégradé silencieux, pas d'erreur, cohérent avec "le contenu
+  réellement filtrable dépend de ce que la source expose").
+- HDR/DOVI/Sans correspondance/Doublons du filtre rapide original : toujours hors périmètre, ni
+  Plex ni le connecteur ne les exposent simplement.
+- Job Talos tenté pour l'extension pure des clients (`unwatched`) : encore une fois déclaré
+  "done"/validé sans avoir modifié aucun fichier (`git diff` vide) — implémenté manuellement,
+  jobs résolus (`talos_resolve`) avec la raison. Deuxième occurrence de ce problème, voir
+  `journal.md`/note process ci-dessous.
+
+### Phase B — bug de navigation "Haut" : résolu (effet de bord de la restructuration Phase A)
+
+Diagnostic précis effectué (comme demandé) avec un label de debug temporaire affichant
+`System.CurrentControlID` directement dans le skin. Confirmation que le focus réel de Kodi
+(`getFocusId()` côté script correspond exactement à `System.CurrentControlID` côté skin — pas de
+désynchronisation entre les deux) : le focus était bien sur `3230` (grille) avant "Haut", et sur
+`2001` (barre d'onglets) après — le saut sautait bien `3100` malgré son `<onup>` explicite.
+
+Avec la nouvelle rangée d'actions (`3215` "Lire") positionnée directement au-dessus de la grille
+(remplaçant l'ancien voisin `3100`, décalé plus à droite), le même `<onup>` explicite fonctionne
+maintenant de façon fiable et reproductible (revalidé à plusieurs reprises : grille → Lire →
+Filtre → onglet principal, chaque saut confirmé par le label de debug). Cause probable
+(non confirmée à 100 % mais cohérente avec toutes les observations) : la résolution native de
+Kodi pour "Haut" sur cette liste horizontale semble favoriser géométriquement la cible la plus
+proche/alignée plutôt que de suivre l'`onup` déclaré à la lettre quand la cible explicite est
+excentrée — `3100` était décalé loin à droite du premier item de la grille, `3215` est
+directement au-dessus. Pas de régression introduite : testé à nouveau après un redémarrage Kodi
+propre pour écarter un simple hasard de timing.
+
+### Phase C — polish visuel
+
+Deux bugs de troncature de texte trouvés et corrigés en conditions réelles (pas en théorie) :
+les glyphes Unicode (▶, ⇄, ⋮) choisis pour les boutons d'action rapide ne s'affichent pas du tout
+avec la police du skin (rendu vide) — remplacés par du texte simple ("Lire", "Aleatoire",
+"Liste", "..."). Plusieurs libellés (Filtre, Trier, Rechercher) étaient tronqués dans une seule
+rangée trop dense — restructuré en deux rangées (dropdowns / compteur+actions) avec des largeurs
+revues à la hausse. Aucun chevauchement trouvé avec le header/onglets de la Phase 3 en 1080p.
+Pas de comparaison pixel-par-pixel avec les captures Plex originales (non disponibles dans cette
+session au-delà de la description textuelle du cahier des charges).
+
+### Phase D — recette
+
+Parcours bout en bout validé sur le Pi réel avec PixelCamera + `kodi-send`/JSON-RPC : Accueil →
+sidebar → bibliothèque (Animés) → Recommandé (scopé) → Bibliothèque (tri, genre combinés,
+recherche ouverte, filtre rapide, actions rapides) → retour Accueil (état restauré après un cycle
+Back-vers-Kodi-natif puis réouverture d'Aura) → Paramètres (déjà validé, non cassé). **Non fait** :
+test manette Xbox Wireless physique (aucun matériel disponible dans cette session à distance) ;
+test sur une bibliothèque "Films" à plusieurs milliers d'éléments spécifiquement pour la
+performance de la grille+barre d'outils (testé sur "Animés", 85 éléments, réactif ; le
+comportement à plusieurs milliers reste à valider par l'utilisateur en usage réel).
+
+### Point de vigilance process (deuxième occurrence)
+
+Un deuxième job Talos s'est déclaré "done"/validé sans avoir modifié aucun fichier réel (même
+symptôme que lors du chantier précédent). Les deux fois, la validation elle-même passait
+trivialement puisqu'elle ne faisait que ré-exécuter la suite de tests existante sur du code
+inchangé. Vérifier systématiquement `git diff --stat` après chaque job Talos avant de le
+considérer comme terminé, quel que soit le statut renvoyé par `talos_status`.

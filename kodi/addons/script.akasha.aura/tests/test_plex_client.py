@@ -294,6 +294,55 @@ class TestPlexClientWithTotal(unittest.TestCase):
         self.assertEqual(total, 437)
 
     @patch('urllib.request.urlopen')
+    def test_section_items_with_total_genre_param(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.section_items_with_total('7', genre='Action')
+        self.assertIn('genre=Action', captured['url'])
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_total_unwatched_true(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.section_items_with_total('7', unwatched=True)
+        self.assertIn('unwatched=1', captured['url'])
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_total_unwatched_false(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.section_items_with_total('7', unwatched=False)
+        self.assertIn('unwatched=0', captured['url'])
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_with_total_no_genre_or_unwatched_unchanged(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.section_items_with_total('7')
+        self.assertNotIn('genre=', captured['url'])
+        self.assertNotIn('unwatched=', captured['url'])
+
+    @patch('urllib.request.urlopen')
     def test_by_genre_with_total(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {
