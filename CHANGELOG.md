@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.46.0...akasha-os-v0.46.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* close quickstart open items + icon grouping correctif (c7f0636a) ([#104](https://github.com/jeremiejt38/akasha-os/issues/104)) ([b1b747a](https://github.com/jeremiejt38/akasha-os/commit/b1b747aa7ec2ab059ba533b1c037257cb09f6cc6))
+
 ## [0.46.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.45.0...akasha-os-v0.46.0) (2026-08-20)
 
 
