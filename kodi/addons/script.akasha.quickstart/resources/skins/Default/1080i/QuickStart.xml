@@ -238,6 +238,23 @@
                 <textoffsetx>30</textoffsetx>
                 <aligny>center</aligny>
                 <onup>411</onup>
+                <ondown>413</ondown>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF262B3D" border="16">rounded-solid.png</texturenofocus>
+            </control>
+            <control type="button" id="413">
+                <left>160</left>
+                <top>630</top>
+                <width>900</width>
+                <height>70</height>
+                <label>Tester le son</label>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>30</textoffsetx>
+                <aligny>center</aligny>
+                <onup>412</onup>
                 <ondown>101</ondown>
                 <textcolor>FFFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>

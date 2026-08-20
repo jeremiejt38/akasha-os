@@ -99,16 +99,24 @@ def list_wifi_networks():
 
 
 def connect_wifi(service_id, passphrase=None, timeout=25):
-    """Connect to a Wi-Fi service via connmanctl's non-interactive agent
-    mode (passphrase piped over stdin rather than requiring an
-    interactive TTY). Returns (ok, raw_output)."""
-    script = 'agent on\nconnect {}\n'.format(service_id)
-    if passphrase:
-        script += passphrase + '\n'
-    script += 'quit\n'
+    """Connect to a Wi-Fi service.
+
+    `connmanctl connect <service>` run directly (not through connmanctl's
+    own multi-command script mode) blocks synchronously until the
+    connection actually succeeds or fails and prints "Connected ..." --
+    confirmed live against a real network. Piping commands through
+    script mode instead (`agent on\\nconnect ...\\nquit`) was tried first
+    but `quit` was processed before `connect` actually finished,
+    returning "idle" every time regardless of the real outcome. The
+    passphrase (only needed for a network without saved credentials) is
+    piped over stdin to the same single command, which connman's own
+    interactive agent prompt reads.
+    """
+    args = ['connmanctl', 'connect', service_id]
     try:
         result = subprocess.run(
-            ['connmanctl'], input=script, capture_output=True, text=True, timeout=timeout)
+            args, input=(passphrase + '\n') if passphrase else None,
+            capture_output=True, text=True, timeout=timeout)
         output = (result.stdout or '') + (result.stderr or '')
         ok = 'connected' in output.lower() and 'error' not in output.lower()
         return ok, output

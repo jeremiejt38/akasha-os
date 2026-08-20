@@ -1,7 +1,13 @@
-import xbmc
-import xbmcgui
-import subprocess
 import os
+import subprocess
+import sys
+
+import xbmc
+import xbmcaddon
+import xbmcgui
+
+sys.path.insert(0, os.path.dirname(__file__))
+from cloud_gaming_filter import filter_services  # noqa: E402
 
 SERVICES = [
     ('GeForce NOW', 'https://play.geforcenow.com'),
@@ -10,15 +16,30 @@ SERVICES = [
     ('Google Stadia (Boosteroid)', 'https://cloud.boosteroid.com'),
 ]
 
+
+def _preferred_services():
+    """Whatever the Quick Start wizard's Cloud Gaming step (plan 3aba4284)
+    had the user pre-select, if any -- read directly from
+    script.akasha.aura's own addon setting (cross-addon settings reads
+    are supported, unlike cross-addon Python imports)."""
+    try:
+        raw = xbmcaddon.Addon('script.akasha.aura').getSetting(
+            'quickstart.cloud_gaming_services')
+    except Exception:
+        raw = ''
+    return filter_services(SERVICES, raw)
+
+
 def main():
     dialog = xbmcgui.Dialog()
-    labels = [s[0] for s in SERVICES]
+    services = _preferred_services()
+    labels = [s[0] for s in services]
     choice = dialog.select('Cloud Gaming', labels)
     
     if choice < 0:
         return
     
-    name, url = SERVICES[choice]
+    name, url = services[choice]
     
     ok = dialog.yesno(
         'Cloud Gaming',
