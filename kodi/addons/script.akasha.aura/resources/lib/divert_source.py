@@ -42,6 +42,66 @@ def parse_genres(raw_json):
     return [str(item.get('title')) for item in mc.get('Directory', []) if item.get('title')]
 
 
+# English -> French display names for the genres Plex commonly returns
+# (its metadata agents -- TMDb/TheTVDB -- report genre names in whatever
+# language the *source* database uses, English by default regardless of
+# Kodi/Akasha's own interface language). Covers the standard TMDb/Plex
+# genre vocabulary; anything not listed here is shown as-is rather than
+# raising, since new/uncommon genres do turn up in real libraries.
+GENRE_TRANSLATIONS_FR = {
+    'Action': 'Action',
+    'Action/Adventure': 'Action/Aventure',
+    'Adventure': 'Aventure',
+    'Animation': 'Animation',
+    'Anime': 'Anime',
+    'Biography': 'Biographie',
+    'Children': 'Enfants',
+    'Comedy': 'Comedie',
+    'Crime': 'Crime',
+    'Documentary': 'Documentaire',
+    'Drama': 'Drame',
+    'Family': 'Famille',
+    'Fantasy': 'Fantastique',
+    'Film-Noir': 'Film noir',
+    'Food': 'Cuisine',
+    'History': 'Histoire',
+    'Horror': 'Horreur',
+    'Indie': 'Independant',
+    'Kids': 'Enfants',
+    'Martial Arts': 'Arts martiaux',
+    'Mini-Series': 'Mini-serie',
+    'Music': 'Musique',
+    'Musical': 'Comedie musicale',
+    'Mystery': 'Mystere',
+    'News': 'Actualites',
+    'Podcast': 'Podcast',
+    'Reality': 'Tele-realite',
+    'Reality-TV': 'Tele-realite',
+    'Romance': 'Romance',
+    'Sci-Fi & Fantasy': 'Science-fiction et fantastique',
+    'Science Fiction': 'Science-fiction',
+    'Short': 'Court-metrage',
+    'Soap': 'Feuilleton',
+    'Sport': 'Sport',
+    'Stoner Movie': 'Film Stoner',
+    'Suspense': 'Suspense',
+    'Talk': 'Talk-show',
+    'Talk Show': 'Talk-show',
+    'Thriller': 'Thriller',
+    'TV Movie': 'Telefilm',
+    'War': 'Guerre',
+    'War & Politics': 'Guerre et politique',
+    'Western': 'Western',
+}
+
+
+def translate_genre_fr(name):
+    """Best-effort English -> French genre display name, see
+    GENRE_TRANSLATIONS_FR. Falls back to the original name unchanged when
+    not in the table, rather than hiding/erroring on unfamiliar genres."""
+    return GENRE_TRANSLATIONS_FR.get(name, name)
+
+
 def parse_total_size(raw_json):
     """Return the total item count of a paginated Plex payload, or None.
 

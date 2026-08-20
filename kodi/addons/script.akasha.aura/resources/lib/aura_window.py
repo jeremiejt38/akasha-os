@@ -18,7 +18,6 @@ import xbmcgui
 
 import addons_inventory
 import aura_app
-import aura_library
 import aura_show
 import aura_store
 import config
@@ -72,6 +71,7 @@ RECO_RELEASES_LIST_ID = 5310
 RECO_LIST_IDS = (RECO_ON_DECK_LIST_ID, RECO_RECENT_LIST_ID, RECO_RELEASES_LIST_ID)
 RECO_CACHE_TTL_SECONDS = 120
 RECO_ON_DECK_FETCH_LIMIT = 50  # over-fetch before client-side section filtering
+RECO_MAX_ITEMS_PER_ROW = 100
 
 # Categories content, rendered inline instead of a separate doModal() dialog
 # (previously aura_genres.AuraGenresWindow).
@@ -83,14 +83,13 @@ DIVERT_TYPE_LABEL_ID = 3210
 DIVERT_FILTER_BUTTON_ID = 3211
 DIVERT_SORT_BUTTON_ID = 3212
 DIVERT_GENRE_BUTTON_ID = 3213
-DIVERT_SEARCH_BUTTON_ID = 3214
 DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
 DIVERT_PLAYLIST_BUTTON_ID = 3217
 DIVERT_RESET_BUTTON_ID = 3218
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
-    DIVERT_SEARCH_BUTTON_ID, DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
+    DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
     DIVERT_PLAYLIST_BUTTON_ID, DIVERT_RESET_BUTTON_ID,
 )
 
@@ -391,7 +390,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 releases_section, offset, limit))
 
     def _reco_init_row(self, label_control_id, list_control_id, title, fetch_page_fn):
-        paged = paged_list.PagedList(fetch_page_fn)
+        # Capped at 100 items per row regardless of how large the underlying
+        # library/hub is -- these are "quick highlight" rows, not meant to
+        # be a full browse surface (that's what Bibliotheque is for).
+        paged = paged_list.PagedList(fetch_page_fn, max_items=RECO_MAX_ITEMS_PER_ROW)
         error = None
         try:
             paged.load_initial()
@@ -544,6 +546,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: categories load failed: {}'.format(e), xbmc.LOGERROR)
             genres = []
+        # Kept untranslated for _on_category_genre_selected() -- the Plex/
+        # connector genre filter API expects the original (English) tag,
+        # only the on-screen label is translated (Plex's metadata agents
+        # report genre names in the source database's language, English
+        # regardless of Akasha's own French interface).
         self._category_genres = genres
         if status:
             status.setLabel('{} — {} categorie(s)'.format(section['title'], len(genres)))
@@ -551,7 +558,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel = self.getControl(CATEGORY_PANEL_ID)
             panel.reset()
             for genre in genres:
-                panel.addItem(xbmcgui.ListItem(genre))
+                panel.addItem(xbmcgui.ListItem(divert_source.translate_genre_fr(genre)))
         except RuntimeError:
             pass
 
@@ -734,8 +741,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._load_divert_section_items(section)
 
     def _load_divert_section_items(self, section):
+        # page_size/prefetch_margin=50: only the visible portion of the grid
+        # plus roughly the next/previous 50 items are ever fetched from the
+        # server at once, matching the "50 before / 50 after" smoothness
+        # requested -- items already loaded are kept (no eviction of
+        # earlier pages once fetched, Kodi's panel control has no supported
+        # way to evict/re-virtualize arbitrary items from the middle of an
+        # already-populated list without breaking scroll position), so this
+        # is forward-progressive loading rather than a true sliding window.
+        # See docs/aura/decisions.md.
         self._divert_paged = paged_list.PagedList(
-            lambda offset, limit: self._divert_section_page(section, offset, limit))
+            lambda offset, limit: self._divert_section_page(section, offset, limit),
+            page_size=50, prefetch_margin=50)
         error = None
         try:
             self._divert_paged.load_initial()
@@ -833,18 +850,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if self._divert_filter_genre:
             self._divert_search_query = ''
         self._load_divert_section_items(section)
-
-    def _divert_open_search(self):
-        if not self._divert_sections:
-            return
-        kb = xbmc.Keyboard(self._divert_search_query, 'Rechercher')
-        kb.doModal()
-        if not kb.isConfirmed():
-            return
-        self._divert_search_query = kb.getText()
-        if self._divert_search_query:
-            self._divert_filter_genre = None
-        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
 
     def _divert_reset_filters(self):
         if not self._divert_sections:
@@ -1168,11 +1173,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # state), so left as a documented quirk rather than blocking this
         # release.
         super().onAction(action)
-        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
+        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             focused = self.getFocusId()
+            # DIVERT_PANEL_ID is a wrapping grid (scrolls vertically), so
+            # Up/Down are its primary scroll directions now -- Left/Right
+            # only move a column within the currently loaded rows, kept
+            # here too in case a future layout changes column count.
             if focused == DIVERT_PANEL_ID:
                 self._maybe_load_more_divert()
-            elif focused in RECO_LIST_IDS:
+            elif focused in RECO_LIST_IDS and aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
                 self._maybe_load_more_reco(focused)
         self._update_bar_focused()
 
@@ -1223,8 +1232,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_open_sort_menu()
         elif controlID == DIVERT_GENRE_BUTTON_ID:
             self._divert_open_genre_menu()
-        elif controlID == DIVERT_SEARCH_BUTTON_ID:
-            self._divert_open_search()
         elif controlID == DIVERT_PLAY_BUTTON_ID:
             self._divert_play_first()
         elif controlID == DIVERT_SHUFFLE_BUTTON_ID:

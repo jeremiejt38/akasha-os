@@ -44,7 +44,7 @@
                 <label></label>
                 <onleft>2004</onleft>
                 <onright>2001</onright>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="image">
                 <left>60</left>
@@ -78,7 +78,7 @@
                 <onleft>2000</onleft>
                 <onright>2002</onright>
                 <ondown>3310</ondown>
-                <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
+                <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group">
                 <left>160</left>
@@ -121,7 +121,7 @@
                 <onleft>2001</onleft>
                 <onright>2003</onright>
                 <ondown>2050</ondown>
-                <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
+                <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group">
                 <left>540</left>
@@ -164,7 +164,7 @@
                 <onleft>2002</onleft>
                 <onright>2004</onright>
                 <ondown>2041</ondown>
-                <texturefocus colordiffuse="20FFFFFF">white.png</texturefocus>
+                <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group">
                 <left>920</left>
@@ -290,7 +290,7 @@
                 <ondown>2060</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
 
             <control type="button" id="2051">
@@ -308,7 +308,7 @@
                 <ondown>2060</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
 
             <control type="button" id="2052">
@@ -325,7 +325,7 @@
                 <ondown>2010</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
         </control>
 
@@ -347,7 +347,7 @@
                 <ondown>2030</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
 
             <control type="button" id="2042">
@@ -364,7 +364,7 @@
                 <ondown>2030</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
         </control>
 
@@ -427,7 +427,7 @@
                             <top>0</top>
                             <width>420</width>
                             <height>70</height>
-                            <texture colordiffuse="FF262B3D">white.png</texture>
+                            <texture colordiffuse="FF262B3D" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(3310)</visible>
                         </control>
                         <control type="image">
@@ -435,7 +435,7 @@
                             <top>0</top>
                             <width>6</width>
                             <height>70</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(3310)</visible>
                         </control>
                         <control type="image">
@@ -508,7 +508,7 @@
                     <ondown>9000</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3050">
@@ -527,7 +527,7 @@
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3100">
@@ -546,7 +546,7 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3060">
@@ -565,7 +565,7 @@
                     <ondown>6010</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
             </control>
 
@@ -607,7 +607,7 @@
                     <ondown>3215</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3212">
@@ -625,7 +625,7 @@
                     <ondown>3216</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3213">
@@ -638,30 +638,16 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3212</onleft>
-                    <onright>3214</onright>
                     <onup>3100</onup>
                     <ondown>3217</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
-                <control type="button" id="3214">
-                    <left>920</left>
-                    <top>298</top>
-                    <width>210</width>
-                    <height>40</height>
-                    <label>Rechercher</label>
-                    <font>font10</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>3213</onleft>
-                    <onup>3100</onup>
-                    <ondown>3215</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
-                </control>
+                <!-- No dedicated "Rechercher" button here: a global search
+                     already exists in the top bar (module 0, plan 04bda1b4
+                     phase 2), a per-library one was redundant. -->
 
                 <!-- Row 2: item counter + quick actions (play/shuffle/playlist/reset). -->
                 <control type="label" id="3220">
@@ -690,7 +676,7 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3216">
@@ -708,7 +694,7 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3217">
@@ -726,7 +712,7 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3218">
@@ -743,20 +729,25 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 </control>
             </control>
 
-            <control type="list" id="3230">
+            <!-- Bibliotheque grid: wrapping vertical-scroll panel (a real
+                 "library shelf" browse surface), not a single horizontal
+                 row like Recommande, per feedback from Jeremie. Items load
+                 progressively (paged_list.PagedList, see
+                 aura_window.py::_load_divert_section_items), not all
+                 upfront, triggered as the selection approaches the loaded
+                 end in any direction (Up/Down/Left/Right within the grid). -->
+            <control type="panel" id="3230">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
                 <left>160</left>
                 <top>400</top>
                 <width>1700</width>
-                <height>360</height>
-                <orientation>horizontal</orientation>
+                <height>660</height>
                 <onup>3215</onup>
                 <onleft>3310</onleft>
-                <ondown>3230</ondown>
                 <itemlayout width="220" height="330">
                     <control type="image">
                         <left>5</left>
@@ -793,7 +784,7 @@
                         <top>-4</top>
                         <width>198</width>
                         <height>288</height>
-                        <texture colordiffuse="FF6C8CFF">white.png</texture>
+                        <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                         <visible>Control.HasFocus(3230)</visible>
                     </control>
                     <control type="image">
@@ -840,34 +831,34 @@
                     <left>160</left>
                     <top>298</top>
                     <width>1700</width>
-                    <height>24</height>
+                    <height>22</height>
                     <font>font12</font>
                     <label>-</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="list" id="5110">
                     <left>160</left>
-                    <top>324</top>
+                    <top>320</top>
                     <width>1700</width>
-                    <height>200</height>
+                    <height>205</height>
                     <orientation>horizontal</orientation>
                     <onup>3050</onup>
                     <onleft>3310</onleft>
                     <ondown>5210</ondown>
-                    <itemlayout width="170" height="200">
+                    <itemlayout width="120" height="205">
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>160</width>
-                            <height>150</height>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>154</top>
-                            <width>160</width>
-                            <height>20</height>
+                            <top>169</top>
+                            <width>110</width>
+                            <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
@@ -875,37 +866,37 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>174</top>
-                            <width>160</width>
-                            <height>18</height>
+                            <top>187</top>
+                            <width>110</width>
+                            <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="170" height="200">
+                    <focusedlayout width="120" height="205">
                         <control type="image">
                             <left>1</left>
                             <top>-4</top>
-                            <width>168</width>
-                            <height>182</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <width>118</width>
+                            <height>177</height>
+                            <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(5110)</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>160</width>
-                            <height>150</height>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>154</top>
-                            <width>160</width>
-                            <height>20</height>
+                            <top>169</top>
+                            <width>110</width>
+                            <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
@@ -913,9 +904,9 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>174</top>
-                            <width>160</width>
-                            <height>18</height>
+                            <top>187</top>
+                            <width>110</width>
+                            <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
@@ -926,36 +917,36 @@
 
                 <control type="label" id="5200">
                     <left>160</left>
-                    <top>540</top>
+                    <top>543</top>
                     <width>1700</width>
-                    <height>24</height>
+                    <height>22</height>
                     <font>font12</font>
                     <label>-</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="list" id="5210">
                     <left>160</left>
-                    <top>566</top>
+                    <top>565</top>
                     <width>1700</width>
-                    <height>200</height>
+                    <height>205</height>
                     <orientation>horizontal</orientation>
                     <onup>5110</onup>
                     <onleft>3310</onleft>
                     <ondown>5310</ondown>
-                    <itemlayout width="170" height="200">
+                    <itemlayout width="120" height="205">
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>160</width>
-                            <height>150</height>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>154</top>
-                            <width>160</width>
-                            <height>20</height>
+                            <top>169</top>
+                            <width>110</width>
+                            <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
@@ -963,37 +954,37 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>174</top>
-                            <width>160</width>
-                            <height>18</height>
+                            <top>187</top>
+                            <width>110</width>
+                            <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="170" height="200">
+                    <focusedlayout width="120" height="205">
                         <control type="image">
                             <left>1</left>
                             <top>-4</top>
-                            <width>168</width>
-                            <height>182</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <width>118</width>
+                            <height>177</height>
+                            <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(5210)</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>160</width>
-                            <height>150</height>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>154</top>
-                            <width>160</width>
-                            <height>20</height>
+                            <top>169</top>
+                            <width>110</width>
+                            <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
@@ -1001,9 +992,9 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>174</top>
-                            <width>160</width>
-                            <height>18</height>
+                            <top>187</top>
+                            <width>110</width>
+                            <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
@@ -1014,36 +1005,36 @@
 
                 <control type="label" id="5300">
                     <left>160</left>
-                    <top>782</top>
+                    <top>788</top>
                     <width>1700</width>
-                    <height>24</height>
+                    <height>22</height>
                     <font>font12</font>
                     <label>-</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="list" id="5310">
                     <left>160</left>
-                    <top>808</top>
+                    <top>810</top>
                     <width>1700</width>
-                    <height>200</height>
+                    <height>205</height>
                     <orientation>horizontal</orientation>
                     <onup>5210</onup>
                     <onleft>3310</onleft>
                     <ondown>5310</ondown>
-                    <itemlayout width="170" height="200">
+                    <itemlayout width="120" height="205">
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>160</width>
-                            <height>150</height>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>154</top>
-                            <width>160</width>
-                            <height>20</height>
+                            <top>169</top>
+                            <width>110</width>
+                            <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
@@ -1051,37 +1042,37 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>174</top>
-                            <width>160</width>
-                            <height>18</height>
+                            <top>187</top>
+                            <width>110</width>
+                            <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="170" height="200">
+                    <focusedlayout width="120" height="205">
                         <control type="image">
                             <left>1</left>
                             <top>-4</top>
-                            <width>168</width>
-                            <height>182</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <width>118</width>
+                            <height>177</height>
+                            <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(5310)</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>160</width>
-                            <height>150</height>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>154</top>
-                            <width>160</width>
-                            <height>20</height>
+                            <top>169</top>
+                            <width>110</width>
+                            <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
@@ -1089,9 +1080,9 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>174</top>
-                            <width>160</width>
-                            <height>18</height>
+                            <top>187</top>
+                            <width>110</width>
+                            <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
@@ -1122,49 +1113,63 @@
                     <height>700</height>
                     <onup>3060</onup>
                     <onleft>3310</onleft>
-                    <itemlayout width="280" height="90">
+                    <itemlayout width="284" height="100">
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
-                            <width>270</width>
-                            <height>70</height>
-                            <texture colordiffuse="FF262B3D">white.png</texture>
+                            <width>272</width>
+                            <height>84</height>
+                            <texture colordiffuse="FF262B3D" border="18">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>6</top>
+                            <width>4</width>
+                            <height>72</height>
+                            <texture colordiffuse="996C8CFF">white.png</texture>
                         </control>
                         <control type="label">
-                            <left>0</left>
+                            <left>20</left>
                             <top>0</top>
-                            <width>270</width>
-                            <height>70</height>
+                            <width>252</width>
+                            <height>84</height>
                             <font>font12</font>
-                            <align>center</align>
+                            <align>left</align>
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="280" height="90">
+                    <focusedlayout width="284" height="100">
                         <control type="image">
-                            <left>0</left>
-                            <top>0</top>
-                            <width>270</width>
-                            <height>70</height>
-                            <texture colordiffuse="FF262B3D">white.png</texture>
-                        </control>
-                        <control type="image">
-                            <left>0</left>
-                            <top>0</top>
-                            <width>270</width>
-                            <height>70</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <left>-2</left>
+                            <top>-2</top>
+                            <width>276</width>
+                            <height>88</height>
+                            <texture colordiffuse="FF6C8CFF" border="18">rounded-solid.png</texture>
                             <visible>Control.HasFocus(6010)</visible>
                         </control>
-                        <control type="label">
+                        <control type="image">
                             <left>0</left>
                             <top>0</top>
-                            <width>270</width>
-                            <height>70</height>
+                            <width>272</width>
+                            <height>84</height>
+                            <texture colordiffuse="FF262B3D" border="18">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>6</top>
+                            <width>4</width>
+                            <height>72</height>
+                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                        </control>
+                        <control type="label">
+                            <left>20</left>
+                            <top>0</top>
+                            <width>252</width>
+                            <height>84</height>
                             <font>font12</font>
-                            <align>center</align>
+                            <align>left</align>
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
@@ -1225,7 +1230,7 @@
                             <top>-4</top>
                             <width>198</width>
                             <height>288</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(2060)</visible>
                         </control>
                         <control type="image">
@@ -1263,7 +1268,7 @@
                     <label>-</label>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                     <onup>2052</onup>
                     <onright>2011</onright>
                     <ondown>2010</ondown>
@@ -1278,7 +1283,7 @@
                     <label>-</label>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                     <onup>2052</onup>
                     <onleft>2010</onleft>
                     <onright>2012</onright>
@@ -1294,7 +1299,7 @@
                     <label>-</label>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                    <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                     <onup>2052</onup>
                     <onleft>2011</onleft>
                     <onright>2012</onright>
@@ -1326,7 +1331,7 @@
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 <onup>2041</onup>
                 <onright>2031</onright>
                 <ondown>2030</ondown>
@@ -1341,7 +1346,7 @@
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 <onup>2041</onup>
                 <onleft>2030</onleft>
                 <onright>2032</onright>
@@ -1357,7 +1362,7 @@
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 <onup>2041</onup>
                 <onleft>2031</onleft>
                 <onright>2033</onright>
@@ -1373,7 +1378,7 @@
                 <label>-</label>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+                <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
                 <onup>2041</onup>
                 <onleft>2032</onleft>
                 <ondown>2033</ondown>

@@ -33,7 +33,7 @@
             <label>Retour</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <ondown>5010</ondown>
             <onleft>5004</onleft>
         </control>
@@ -48,7 +48,7 @@
             <label>Lancer</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <onright>5002</onright>
             <ondown>5010</ondown>
         </control>
@@ -62,7 +62,7 @@
             <label>Epingler / Desepingler</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <onleft>5001</onleft>
             <onright>5003</onright>
             <ondown>5010</ondown>
@@ -77,7 +77,7 @@
             <label>Desinstaller</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <onleft>5002</onleft>
             <onright>5004</onright>
             <ondown>5010</ondown>
@@ -92,7 +92,7 @@
             <label>Akasha Store</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <onleft>5003</onleft>
             <onright>5030</onright>
             <ondown>5010</ondown>

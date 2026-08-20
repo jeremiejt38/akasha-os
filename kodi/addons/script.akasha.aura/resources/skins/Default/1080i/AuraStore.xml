@@ -33,7 +33,7 @@
             <label>Retour</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <ondown>6010</ondown>
             <onleft>6001</onleft>
         </control>
@@ -48,7 +48,7 @@
             <label>Installer / Deja installe</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             <onright>6030</onright>
             <ondown>6010</ondown>
         </control>

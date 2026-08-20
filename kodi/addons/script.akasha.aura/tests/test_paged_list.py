@@ -83,6 +83,50 @@ class TestPagedList(unittest.TestCase):
         self.assertTrue(pl.exhausted)
 
 
+class TestPagedListMaxItems(unittest.TestCase):
+    """max_items caps how much a row/list will ever load, regardless of how
+    many the source actually has -- used to keep Recommande's rows bounded
+    (plan feedback: max 100 items per row)."""
+
+    def test_caps_a_single_page_that_overshoots(self):
+        pl = PagedList(make_fetcher(1000), page_size=150, prefetch_margin=15, max_items=100)
+        loaded = pl.load_initial()
+        self.assertEqual(len(loaded), 100)
+        self.assertEqual(len(pl.items), 100)
+        self.assertTrue(pl.exhausted)
+
+    def test_caps_across_multiple_pages(self):
+        calls = []
+        pl = PagedList(make_fetcher(1000, calls), page_size=30, prefetch_margin=15, max_items=100)
+        pl.load_initial()
+        while not pl.exhausted:
+            pl.maybe_load_more(len(pl.items) - 1)
+        self.assertEqual(len(pl.items), 100)
+        self.assertTrue(pl.exhausted)
+
+    def test_no_further_fetch_once_cap_reached(self):
+        calls = []
+        pl = PagedList(make_fetcher(1000, calls), page_size=50, prefetch_margin=15, max_items=100)
+        pl.load_initial()
+        pl.maybe_load_more(49)
+        self.assertEqual(len(pl.items), 100)
+        calls_before = len(calls)
+        pl.maybe_load_more(99)
+        self.assertEqual(len(calls), calls_before)  # no extra fetch attempted
+
+    def test_max_items_larger_than_dataset_is_a_noop(self):
+        pl = PagedList(make_fetcher(10), page_size=30, prefetch_margin=15, max_items=100)
+        pl.load_initial()
+        self.assertEqual(len(pl.items), 10)
+        self.assertTrue(pl.exhausted)
+
+    def test_unset_max_items_is_unbounded(self):
+        pl = PagedList(make_fetcher(1000), page_size=100, prefetch_margin=15)
+        pl.load_initial()
+        self.assertEqual(len(pl.items), 100)
+        self.assertFalse(pl.exhausted)
+
+
 class TestPagedListTotal(unittest.TestCase):
     def test_total_is_none_before_any_load(self):
         pl = PagedList(make_fetcher(100), page_size=30, prefetch_margin=15)

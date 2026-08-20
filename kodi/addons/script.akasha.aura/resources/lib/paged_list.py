@@ -34,10 +34,11 @@ class PagedList:
     """
 
     def __init__(self, fetch_page, page_size=DEFAULT_PAGE_SIZE,
-                 prefetch_margin=DEFAULT_PREFETCH_MARGIN):
+                 prefetch_margin=DEFAULT_PREFETCH_MARGIN, max_items=None):
         self.fetch_page = fetch_page
         self.page_size = page_size
         self.prefetch_margin = prefetch_margin
+        self.max_items = max_items
         self.items = []
         self.exhausted = False
         self.total = None
@@ -60,6 +61,9 @@ class PagedList:
         return self._load_next_page()
 
     def _load_next_page(self):
+        if self.max_items is not None and len(self.items) >= self.max_items:
+            self.exhausted = True
+            return []
         result = self.fetch_page(len(self.items), self.page_size)
         if isinstance(result, tuple):
             page, total = result
@@ -68,6 +72,9 @@ class PagedList:
         page = page or []
         if total is not None:
             self.total = total
+        if self.max_items is not None and len(self.items) + len(page) >= self.max_items:
+            page = page[:max(0, self.max_items - len(self.items))]
+            self.exhausted = True
         self.items.extend(page)
         if len(page) < self.page_size:
             self.exhausted = True

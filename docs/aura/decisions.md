@@ -493,6 +493,68 @@ les fichiers du skin sur le Pi plutôt qu'en réapproximant :
   bonnes proportions, bouton engrenage avec ombre+cercle+icône, menu contextuel avec le dégradé
   assorti sur l'item sélectionné.
 
+## Corrections visuelles/fonctionnelles Divertissement (retour direct de Jérémie)
+
+Quatre points corrigés en une passe, tous issus d'un retour direct après usage réel :
+
+- **Coins arrondis (global)** : deux nouveaux assets 9-slice
+  (`resources/skins/Default/media/rounded-solid.png`, cercle rempli blanc opaque dans un carré
+  transparent, `border=16`) remplace `white.png` pour la quasi-totalité des boutons/cadres de
+  focus/tuiles de tout l'addon (`Aura.xml`, `AuraApp.xml`, `AuraStore.xml`, `AuraShow.xml`) —
+  colordiffuse continue de fonctionner normalement sur ce nouvel asset. Seuls les fonds plein
+  écran/bandeau (qui n'ont pas de "cadre" à proprement parler) restent sur `white.png`. Les
+  posters/vignettes eux-mêmes ne sont **pas** arrondis (Kodi n'a pas de mécanisme de masquage de
+  texture arbitraire sans un overlay dont la couleur devrait suivre exactement ce qu'il y a
+  derrière, focus ou pas — trop fragile pour le temps disponible) ; en pratique l'effet "moderne"
+  recherché est déjà bien perceptible via les boutons, pilules, tuiles de catégories et cadres de
+  focus autour des posters.
+- **Recommandé — limite 100 éléments/ligne** : `paged_list.PagedList` accepte désormais un
+  paramètre `max_items` optionnel (`None` par défaut = comportement inchangé partout ailleurs),
+  appliqué uniquement aux 3 lignes de Recommandé (`RECO_MAX_ITEMS_PER_ROW = 100`). Bibliothèque
+  n'est volontairement pas concernée (c'est le vrai parcours "toute la bibliothèque").
+- **Recommandé — format poster** : les vignettes étaient quasi carrées (160x150). Corrigées en
+  110x165 (ratio 2:3, un vrai format affiche/poster), proportions de ligne recalculées pour que
+  les 3 lignes restent visibles sans scroll (comme avant).
+- **Bibliothèque — grille au lieu d'une ligne** : contrôle 3230 passé de `<control type="list"
+  orientation="horizontal">` à `<control type="panel">` (grille avec retour à la ligne, défilement
+  vertical natif Kodi), hauteur portée à 660px (~2 rangées visibles). Un `<ondown>` explicite
+  pointant sur le contrôle lui-même bloquait le défilement interne de Kodi au-delà de la 2e
+  rangée (fonctionnait par hasard pour un simple changement de ligne, mais empêchait tout
+  défilement au-delà de la zone visible initiale) — retiré, laissant Kodi gérer nativement le
+  défilement à l'intérieur du panel.
+- **Bibliothèque — chargement progressif** : `page_size`/`prefetch_margin` portés à 50 (au lieu de
+  30/15 par défaut), et le déclenchement du chargement de la page suivante
+  (`_maybe_load_more_divert`) étendu de Gauche/Droite à Haut/Bas/Gauche/Droite (la grille défile
+  surtout verticalement désormais). **Simplification assumée** : il s'agit d'un chargement
+  progressif vers l'avant uniquement (chaque page chargée reste en mémoire), pas d'une vraie
+  fenêtre glissante avec déchargement des éléments déjà vus en remontant — les contrôles
+  liste/panel de Kodi n'ont pas de mécanisme supporté pour retirer des éléments au milieu d'une
+  liste déjà peuplée sans casser la position de défilement. Le résultat pratique (pas de
+  chargement de la bibliothèque entière d'un coup, page suivante prête avant qu'on l'atteigne)
+  correspond au besoin réel exprimé, documenté ici pour éviter toute ambiguïté sur ce qui a été
+  implémenté.
+- **Bibliothèque — bouton Rechercher retiré** : redondant avec la recherche unifiée du bandeau
+  supérieur (module 0, plan `04bda1b4` phase 2). Bouton et gestionnaire (`_divert_open_search`)
+  supprimés ; l'état `_divert_search_query` est conservé (toujours utilisé pour les clés de cache
+  et la logique de filtre) mais plus aucune UI ne le renseigne pour l'instant.
+- **Catégories — traduction française** : les agents Plex (TMDb/TheTVDB) renvoient les genres dans
+  la langue de la base source (anglais par défaut), indépendamment de la langue de l'interface
+  Akasha. Nouvelle fonction pure `divert_source.translate_genre_fr()` (dictionnaire EN->FR des
+  genres standard TMDb/Plex, repli sur le nom original si absent de la table) appliquée
+  uniquement à l'affichage — la valeur envoyée à l'API de filtre reste le nom original anglais
+  (`_category_genres`), donc le filtrage par genre continue de fonctionner normalement.
+- **Catégories — affichage amélioré** : tuiles agrandies (280x100 au lieu de 280x90), alignement
+  du texte à gauche avec marge au lieu de centré (plus lisible), liseré coloré à gauche (4px,
+  discret hors focus, couleur d'accent pleine au focus) pour un rendu "carte" plus travaillé que
+  de simples rectangles pleins, coins arrondis (cf. point global ci-dessus).
+- Nettoyage connexe : `aura_library.py`/`AuraLibrary.xml` (fenêtre séparée `AuraLibraryWindow`)
+  étaient devenus du code mort depuis que Bibliothèque est rendue en ligne (chantier précédent) —
+  plus aucune référence active, supprimés.
+- Validé en direct sur le Pi : coins arrondis visibles sur boutons/pilules/tuiles/cadres de focus,
+  lignes Recommandé avec vrais posters portrait, Bibliothèque en grille scrollable (défilement
+  vertical confirmé bien au-delà des 2 premières rangées, chargement progressif sans erreur),
+  bouton Rechercher absent, 33 genres Catégories tous (ou presque) traduits en français.
+
 ## Recommandé et Catégories rendus en place (suite à retour direct de Jérémie)
 
 Jérémie a signalé que sélectionner "Recommandé" ou "Catégories" donnait l'impression d'ouvrir une
