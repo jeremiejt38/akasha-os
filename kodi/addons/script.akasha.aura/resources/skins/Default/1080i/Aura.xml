@@ -503,6 +503,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3060</onleft>
+                    <onright>5110</onright>
                     <onup>2001</onup>
                     <ondown>9000</ondown>
                     <textcolor>BBFFFFFF</textcolor>
@@ -523,7 +524,7 @@
                     <onleft>3310</onleft>
                     <onright>3100</onright>
                     <onup>2001</onup>
-                    <ondown>9000</ondown>
+                    <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
@@ -561,7 +562,7 @@
                     <onleft>3100</onleft>
                     <onright>3402</onright>
                     <onup>2001</onup>
-                    <ondown>9000</ondown>
+                    <ondown>6010</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FFFFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
@@ -826,18 +827,350 @@
                 </focusedlayout>
             </control>
 
-            <!-- Accueil placeholder: shown only while the "Recommande" dialog (opened
-                 automatically when Accueil is selected, see AuraWindow._activate_home) is
-                 not covering it, e.g. right after coming back from it with Back. -->
-            <control type="label" id="3235">
-                <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
-                <left>160</left>
-                <top>150</top>
-                <width>1700</width>
-                <height>30</height>
-                <font>font12</font>
-                <label>Accueil</label>
-                <textcolor>77FFFFFF</textcolor>
+            <!-- Recommande content: inline (Accueil, unscoped, or a library's own
+                 Recommande tab), previously opened AuraRecommendations.xml as a
+                 separate doModal() dialog, which felt like navigating to another
+                 page instead of switching in place like Bibliotheque already does.
+                 Rendered directly in this window instead, same pattern as the
+                 Bibliotheque grid above. -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(DivertView),home) | [String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0)]</visible>
+
+                <control type="label" id="5100">
+                    <left>160</left>
+                    <top>298</top>
+                    <width>1700</width>
+                    <height>24</height>
+                    <font>font12</font>
+                    <label>-</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+                <control type="list" id="5110">
+                    <left>160</left>
+                    <top>324</top>
+                    <width>1700</width>
+                    <height>200</height>
+                    <orientation>horizontal</orientation>
+                    <onup>3050</onup>
+                    <onleft>3310</onleft>
+                    <ondown>5210</ondown>
+                    <itemlayout width="170" height="200">
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>160</width>
+                            <height>150</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>154</top>
+                            <width>160</width>
+                            <height>20</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>174</top>
+                            <width>160</width>
+                            <height>18</height>
+                            <font>font9</font>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>77FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="170" height="200">
+                        <control type="image">
+                            <left>1</left>
+                            <top>-4</top>
+                            <width>168</width>
+                            <height>182</height>
+                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <visible>Control.HasFocus(5110)</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>160</width>
+                            <height>150</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>154</top>
+                            <width>160</width>
+                            <height>20</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>174</top>
+                            <width>160</width>
+                            <height>18</height>
+                            <font>font9</font>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </focusedlayout>
+                </control>
+
+                <control type="label" id="5200">
+                    <left>160</left>
+                    <top>540</top>
+                    <width>1700</width>
+                    <height>24</height>
+                    <font>font12</font>
+                    <label>-</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+                <control type="list" id="5210">
+                    <left>160</left>
+                    <top>566</top>
+                    <width>1700</width>
+                    <height>200</height>
+                    <orientation>horizontal</orientation>
+                    <onup>5110</onup>
+                    <onleft>3310</onleft>
+                    <ondown>5310</ondown>
+                    <itemlayout width="170" height="200">
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>160</width>
+                            <height>150</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>154</top>
+                            <width>160</width>
+                            <height>20</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>174</top>
+                            <width>160</width>
+                            <height>18</height>
+                            <font>font9</font>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>77FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="170" height="200">
+                        <control type="image">
+                            <left>1</left>
+                            <top>-4</top>
+                            <width>168</width>
+                            <height>182</height>
+                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <visible>Control.HasFocus(5210)</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>160</width>
+                            <height>150</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>154</top>
+                            <width>160</width>
+                            <height>20</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>174</top>
+                            <width>160</width>
+                            <height>18</height>
+                            <font>font9</font>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </focusedlayout>
+                </control>
+
+                <control type="label" id="5300">
+                    <left>160</left>
+                    <top>782</top>
+                    <width>1700</width>
+                    <height>24</height>
+                    <font>font12</font>
+                    <label>-</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+                <control type="list" id="5310">
+                    <left>160</left>
+                    <top>808</top>
+                    <width>1700</width>
+                    <height>200</height>
+                    <orientation>horizontal</orientation>
+                    <onup>5210</onup>
+                    <onleft>3310</onleft>
+                    <ondown>5310</ondown>
+                    <itemlayout width="170" height="200">
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>160</width>
+                            <height>150</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>154</top>
+                            <width>160</width>
+                            <height>20</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>174</top>
+                            <width>160</width>
+                            <height>18</height>
+                            <font>font9</font>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>77FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="170" height="200">
+                        <control type="image">
+                            <left>1</left>
+                            <top>-4</top>
+                            <width>168</width>
+                            <height>182</height>
+                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <visible>Control.HasFocus(5310)</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>160</width>
+                            <height>150</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>154</top>
+                            <width>160</width>
+                            <height>20</height>
+                            <font>font10</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>5</left>
+                            <top>174</top>
+                            <width>160</width>
+                            <height>18</height>
+                            <font>font9</font>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </focusedlayout>
+                </control>
+            </control>
+
+            <!-- Categories content: inline genre grid, same rationale as Recommande
+                 above, previously AuraGenres.xml as a separate doModal() dialog. -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2)</visible>
+
+                <control type="label" id="6020">
+                    <left>160</left>
+                    <top>298</top>
+                    <width>1700</width>
+                    <height>30</height>
+                    <font>font12</font>
+                    <label>-</label>
+                    <textcolor>77FFFFFF</textcolor>
+                </control>
+                <control type="panel" id="6010">
+                    <left>160</left>
+                    <top>340</top>
+                    <width>1700</width>
+                    <height>700</height>
+                    <onup>3060</onup>
+                    <onleft>3310</onleft>
+                    <itemlayout width="280" height="90">
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>270</width>
+                            <height>70</height>
+                            <texture colordiffuse="FF262B3D">white.png</texture>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>270</width>
+                            <height>70</height>
+                            <font>font12</font>
+                            <align>center</align>
+                            <aligny>center</aligny>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="280" height="90">
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>270</width>
+                            <height>70</height>
+                            <texture colordiffuse="FF262B3D">white.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>270</width>
+                            <height>70</height>
+                            <texture colordiffuse="FF6C8CFF">white.png</texture>
+                            <visible>Control.HasFocus(6010)</visible>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>270</width>
+                            <height>70</height>
+                            <font>font12</font>
+                            <align>center</align>
+                            <aligny>center</aligny>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FFFFFFFF</textcolor>
+                        </control>
+                    </focusedlayout>
+                </control>
             </control>
         </control>
 
