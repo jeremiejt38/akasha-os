@@ -438,6 +438,14 @@ def _force_shutdown_state():
     set_shutdown_state(0)
     xbmcgui.Dialog().notification('Akasha', 'Mode Shutdown + CEC active', xbmcgui.NOTIFICATION_INFO, 2000)
 
+def _relaunch_quickstart():
+    # Always launches the wizard unconditionally, regardless of the
+    # first-run marker (script.akasha.quickstart/resources/lib/
+    # quickstart_state.py) -- that marker only gates the automatic launch
+    # at boot (service.akasha.aura/service.py), not this manual entry
+    # point, per plan 3aba4284 section 1 ("relancable a tout moment").
+    xbmc.executebuiltin('RunScript(script.akasha.quickstart)')
+
 def _restart_kodi():
     ok = xbmcgui.Dialog().yesno('Akasha', 'Redemarrer Kodi ?')
     if ok:
@@ -499,6 +507,8 @@ def main():
             ('[B]--- Materiel ---[/B]', None),
             ('  Tester le ventilateur', test_fan),
             ('  Tester CEC (eteindre la TV)', test_cec_standby),
+            ('[B]--- Assistant de configuration ---[/B]', None),
+            ('  Relancer l\'assistant de premier demarrage (Quick Start)', _relaunch_quickstart),
             ('[B]--- Actions ---[/B]', None),
             ('  Redemarrer Kodi', _restart_kodi),
             ('  Redemarrer le systeme', _restart_system),

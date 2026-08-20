@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1201">
+    <defaultcontrol>101</defaultcontrol>
+    <controls>
+        <!-- Fullscreen background, same charte graphique as the rest of
+             Akasha OS (see script.akasha.aura/resources/skins/Default/1080i/Aura.xml). -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="FF10131A">white.png</texture>
+        </control>
+
+        <!-- Header: logo + step title + progress indicator. -->
+        <control type="image" id="10">
+            <left>60</left>
+            <top>50</top>
+            <width>60</width>
+            <height>60</height>
+            <aspectratio>keep</aspectratio>
+            <texture>akasha-logo-circle.png</texture>
+        </control>
+        <control type="label" id="11">
+            <left>140</left>
+            <top>55</top>
+            <width>1200</width>
+            <height>50</height>
+            <font>font16</font>
+            <label>-</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+        <control type="label" id="12">
+            <left>1500</left>
+            <top>65</top>
+            <width>360</width>
+            <height>34</height>
+            <align>right</align>
+            <font>font12</font>
+            <label>-</label>
+            <textcolor>99FFFFFF</textcolor>
+        </control>
+
+        <!-- Step content: one group per step (plan 3aba4284 section 2),
+             gated by Window.Property(QSStep). Phase 1 scope is only the
+             navigation skeleton, so each step is a placeholder title here;
+             real content lands step by step in later phases. -->
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),0)</visible>
+            <control type="label">
+                <left>160</left>
+                <top>400</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Bienvenue dans Akasha OS</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label">
+                <left>160</left>
+                <top>480</top>
+                <width>1600</width>
+                <height>40</height>
+                <font>font12</font>
+                <align>center</align>
+                <label>Cet assistant configure votre reseau, votre affichage, vos manettes et vos comptes.</label>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),1)</visible>
+            <control type="label" id="200">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Langue et region</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),2)</visible>
+            <control type="label" id="300">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Connexion reseau</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),3)</visible>
+            <control type="label" id="400">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Affichage et son</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),4)</visible>
+            <control type="label" id="500">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Manette et telecommande</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),5)</visible>
+            <control type="label" id="600">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Comptes de contenu</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),6)</visible>
+            <control type="label" id="700">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Cloud gaming</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),7)</visible>
+            <control type="label" id="800">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Preferences energie</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),8)</visible>
+            <control type="label" id="900">
+                <left>160</left>
+                <top>300</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Profil utilisateur</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <control type="group">
+            <visible>String.IsEqual(Window.Property(QSStep),9)</visible>
+            <control type="label" id="1000">
+                <left>160</left>
+                <top>280</top>
+                <width>1600</width>
+                <height>60</height>
+                <font>font16</font>
+                <align>center</align>
+                <label>Recapitulatif</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label" id="1001">
+                <left>160</left>
+                <top>360</top>
+                <width>1600</width>
+                <height>300</height>
+                <font>font12</font>
+                <align>center</align>
+                <label>-</label>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
+        </control>
+
+        <!-- Footer: Precedent / Passer / Suivant, plus progress dots. -->
+        <control type="button" id="100">
+            <left>160</left>
+            <top>960</top>
+            <width>220</width>
+            <height>60</height>
+            <label>Precedent</label>
+            <font>font12</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onright>102</onright>
+            <onup>100</onup>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+        </control>
+
+        <control type="button" id="102">
+            <left>1300</left>
+            <top>960</top>
+            <width>220</width>
+            <height>60</height>
+            <label>Passer</label>
+            <font>font12</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onleft>100</onleft>
+            <onright>101</onright>
+            <onup>102</onup>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+        </control>
+
+        <control type="button" id="101">
+            <left>1540</left>
+            <top>960</top>
+            <width>220</width>
+            <height>60</height>
+            <label>Suivant</label>
+            <font>font12</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onleft>102</onleft>
+            <onup>101</onup>
+            <textcolor>FFFFFFFF</textcolor>
+            <focusedcolor>FFFFFFFF</focusedcolor>
+            <texturefocus colordiffuse="FF6C8CFF">white.png</texturefocus>
+        </control>
+    </controls>
+</window>

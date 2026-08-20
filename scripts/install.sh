@@ -134,6 +134,10 @@ log "  Installing Akasha Guide addon..."
 rm -rf /storage/.kodi/addons/script.akasha.guide
 cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.guide" /storage/.kodi/addons/
 
+log "  Installing Akasha Quick Start addon..."
+rm -rf /storage/.kodi/addons/script.akasha.quickstart
+cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.quickstart" /storage/.kodi/addons/
+
 log "  Installing Akasha Ambient addon..."
 rm -rf /storage/.kodi/addons/script.akasha.ambient
 cp -r "$SCRIPT_DIR/kodi/addons/script.akasha.ambient" /storage/.kodi/addons/
@@ -226,6 +230,7 @@ sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
         ('service.akasha.overlay', 1, datetime('now')),
         ('script.akasha.settings', 1, datetime('now')),
         ('script.akasha.guide', 1, datetime('now')),
+        ('script.akasha.quickstart', 1, datetime('now')),
         ('script.akasha.ambient', 1, datetime('now')),
         ('service.akasha.ambient', 1, datetime('now')),
         ('script.akasha.aura', 1, datetime('now')),
