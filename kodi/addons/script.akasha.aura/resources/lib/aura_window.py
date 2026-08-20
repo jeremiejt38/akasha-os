@@ -18,9 +18,7 @@ import xbmcgui
 
 import addons_inventory
 import aura_app
-import aura_genres
 import aura_library
-import aura_recommendations
 import aura_show
 import aura_store
 import config
@@ -61,6 +59,24 @@ DIVERT_PANEL_ID = 3230
 DIVERT_SIDEBAR_HOME_INDEX = 0
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
+
+# Recommande content, rendered inline instead of a separate doModal() dialog
+# (previously aura_recommendations.AuraRecommendationsWindow), see
+# docs/aura/decisions.md.
+RECO_ON_DECK_LABEL_ID = 5100
+RECO_ON_DECK_LIST_ID = 5110
+RECO_RECENT_LABEL_ID = 5200
+RECO_RECENT_LIST_ID = 5210
+RECO_RELEASES_LABEL_ID = 5300
+RECO_RELEASES_LIST_ID = 5310
+RECO_LIST_IDS = (RECO_ON_DECK_LIST_ID, RECO_RECENT_LIST_ID, RECO_RELEASES_LIST_ID)
+RECO_CACHE_TTL_SECONDS = 120
+RECO_ON_DECK_FETCH_LIMIT = 50  # over-fetch before client-side section filtering
+
+# Categories content, rendered inline instead of a separate doModal() dialog
+# (previously aura_genres.AuraGenresWindow).
+CATEGORY_STATUS_ID = 6020
+CATEGORY_PANEL_ID = 6010
 
 # Bibliotheque toolbar (plan f41ce1ad phase A).
 DIVERT_TYPE_LABEL_ID = 3210
@@ -158,6 +174,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None  # None=Tout, True=Non vus, False=Vus
         self._divert_search_query = ''
+        # Recommande/Categories, rendered inline like Bibliotheque -- see
+        # docs/aura/decisions.md ("recommandations et categories inlinees").
+        self._reco_rows = {}  # {list_control_id: (label_control_id, title, PagedList)}
+        self._reco_first_section = None
+        self._category_section = None
+        self._category_genres = []
         # 'home' (Accueil, no library selected) or 'library' (a sidebar library is
         # active and the contextual Recommande/Bibliotheque/Categories tabs apply).
         self._divert_view = addon.getSetting('divert.last_view') or 'home'
@@ -283,19 +305,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         Mirrors the Plex reference (cahier des charges 780ecf80, section 2.2):
         Accueil has no per-library tab row, just "Continuer a regarder" across
-        every library -- reuses the existing Recommandations window unscoped
-        (its `section` stays None).
+        every library -- reuses the same inline Recommande content as a
+        library's own Recommande tab, unscoped (section=None).
         """
         self._divert_view = 'home'
         self.setProperty('DivertView', 'home')
         self.addon.setSetting('divert.last_view', 'home')
         self._set_sidebar_selection(DIVERT_SIDEBAR_HOME_INDEX)
-        win = self._get_sub_window(
-            'recommendations', aura_recommendations.AuraRecommendationsWindow,
-            'AuraRecommendations.xml')
-        win.section = None
-        if focus:
-            win.doModal()
+        self._load_recommendations(None)
 
     def _activate_library(self, section_index, tab=None, focus=True):
         """Select a library in the sidebar: shows its header + contextual tabs."""
@@ -325,20 +342,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon.setSetting('divert.last_subtab', str(index))
 
         if index == DIVERT_SUBTAB_RECOMMANDE:
-            win = self._get_sub_window(
-                'recommendations', aura_recommendations.AuraRecommendationsWindow,
-                'AuraRecommendations.xml')
-            win.section = section
-            if focus:
-                win.doModal()
+            self._load_recommendations(section)
             return
 
         if index == DIVERT_SUBTAB_CATEGORIES:
-            win = self._get_sub_window(
-                'genres', aura_genres.AuraGenresWindow, 'AuraGenres.xml')
-            win.initial_section = section
-            if focus:
-                win.doModal()
+            self._load_categories(section)
             return
 
         # Bibliotheque: inline grid, already populated by _select_divert_section.
@@ -352,6 +360,226 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # on its <ondown> to reach the grid avoids the race entirely, since
         # that next input is a separate, later action -- see
         # docs/aura/decisions.md.
+
+    def _load_recommendations(self, section):
+        """Populate the 3 Recommande rows (Continuer a regarder / Ajoutes
+        recemment / Sorties recentes), scoped to `section` or unscoped
+        (Accueil) when None. Ported from the former
+        aura_recommendations.AuraRecommendationsWindow (now rendered inline
+        instead of a separate doModal() dialog, see docs/aura/decisions.md)
+        -- reuses self._connector_client/self._plex_client/self._cache,
+        already established by _load_divertissement(), instead of
+        reconnecting independently."""
+        on_deck_title = 'Continuer a regarder'
+        recent_title = 'Ajoutes recemment'
+        if section:
+            on_deck_title += ' dans {}'.format(section['title'])
+            recent_title += ' dans {}'.format(section['title'])
+        self._reco_init_row(
+            RECO_ON_DECK_LABEL_ID, RECO_ON_DECK_LIST_ID, on_deck_title,
+            lambda offset, limit: self._reco_fetch_on_deck_page(section, offset, limit))
+        self._reco_init_row(
+            RECO_RECENT_LABEL_ID, RECO_RECENT_LIST_ID, recent_title,
+            lambda offset, limit: self._reco_fetch_recently_added_page(section, offset, limit))
+
+        releases_section = section or self._reco_get_first_video_section()
+        releases_title = 'Sorties recentes dans {}'.format(releases_section['title']) \
+            if releases_section else 'Sorties recentes'
+        self._reco_init_row(
+            RECO_RELEASES_LABEL_ID, RECO_RELEASES_LIST_ID, releases_title,
+            lambda offset, limit: self._reco_fetch_recent_releases_page(
+                releases_section, offset, limit))
+
+    def _reco_init_row(self, label_control_id, list_control_id, title, fetch_page_fn):
+        paged = paged_list.PagedList(fetch_page_fn)
+        error = None
+        try:
+            paged.load_initial()
+        except Exception as e:  # defensive: never crash the tab on a row failure
+            error = e
+
+        self._reco_rows[list_control_id] = (label_control_id, title, paged)
+        self._render_reco_row_label(list_control_id, error)
+
+        if error:
+            xbmc.log('Akasha Aura: recommendations row "{}" failed: {}'.format(title, error),
+                     xbmc.LOGWARNING)
+            return
+        try:
+            lst = self.getControl(list_control_id)
+            lst.reset()
+            for item in paged.items:
+                lst.addItem(_build_divert_list_item(item))
+        except Exception as e:
+            xbmc.log('Akasha Aura: recommendations row render error for {}: {}'
+                     .format(title, e), xbmc.LOGERROR)
+
+    def _render_reco_row_label(self, list_control_id, error=None):
+        label_control_id, title, paged = self._reco_rows[list_control_id]
+        try:
+            count = paged.total if paged.total is not None else len(paged.items)
+            self.getControl(label_control_id).setLabel(
+                '{} — erreur de chargement'.format(title) if error else
+                '{} ({} element(s))'.format(title, count))
+        except RuntimeError:
+            pass
+
+    def _maybe_load_more_reco(self, list_control_id):
+        row = self._reco_rows.get(list_control_id)
+        if not row:
+            return
+        label_control_id, title, paged = row
+        try:
+            position = self.getControl(list_control_id).getSelectedPosition()
+        except RuntimeError:
+            return
+        try:
+            new_items = paged.maybe_load_more(position)
+        except Exception as e:
+            xbmc.log('Akasha Aura: recommendations pagination failed for {}: {}'
+                     .format(title, e), xbmc.LOGWARNING)
+            return
+        if not new_items:
+            return
+        try:
+            lst = self.getControl(list_control_id)
+            lst.addItems([_build_divert_list_item(item) for item in new_items])
+        except Exception as e:
+            xbmc.log('Akasha Aura: recommendations append render error for {}: {}'
+                     .format(title, e), xbmc.LOGERROR)
+        self._render_reco_row_label(list_control_id)
+
+    def _reco_fetch_on_deck_page(self, section, offset, limit):
+        key = local_cache.page_cache_key(
+            'on-deck', section['key'] if section else 'home', offset, limit)
+        return local_cache.get_or_set_page(
+            self._cache, key, RECO_CACHE_TTL_SECONDS,
+            lambda: self._reco_fetch_on_deck_page_uncached(section, offset, limit))
+
+    def _reco_fetch_on_deck_page_uncached(self, section, offset, limit):
+        # No dedicated "on-deck for this section" endpoint -- over-fetch the
+        # global on-deck list and filter client-side by section_id (see
+        # divert_source.filter_by_section). Only an approximation of the
+        # real total when scoped to a library, documented in
+        # docs/aura/decisions.md.
+        fetch_limit = RECO_ON_DECK_FETCH_LIMIT if section else limit
+        fetch_offset = 0 if section else offset
+        if self._connector_client:
+            raw = self._connector_client.on_deck(limit=fetch_limit, offset=fetch_offset)
+            items = divert_source.parse_metadata_list(raw, self._connector_client.image_url)
+            total = divert_source.parse_total_size(raw)
+        elif self._plex_client:
+            items, total = self._plex_client.on_deck_with_total(
+                limit=fetch_limit, offset=fetch_offset)
+        else:
+            return [], None
+        if not section:
+            return items, total
+        filtered = divert_source.filter_by_section(items, section['key'])
+        return filtered[offset:offset + limit], len(filtered)
+
+    def _reco_fetch_recently_added_page(self, section, offset, limit):
+        if section:
+            return self._divert_section_page_uncached_sorted(
+                section, 'addedAt:desc', offset, limit)
+        key = local_cache.page_cache_key('recently-added', offset, limit)
+        return local_cache.get_or_set_page(
+            self._cache, key, RECO_CACHE_TTL_SECONDS,
+            lambda: self._reco_fetch_recently_added_page_uncached(offset, limit))
+
+    def _reco_fetch_recently_added_page_uncached(self, offset, limit):
+        if self._connector_client:
+            raw = self._connector_client.recently_added(limit=limit, offset=offset)
+            items = divert_source.parse_metadata_list(raw, self._connector_client.image_url)
+            return items, divert_source.parse_total_size(raw)
+        if self._plex_client:
+            return self._plex_client.recently_added_with_total(limit=limit, offset=offset)
+        return [], None
+
+    def _reco_get_first_video_section(self):
+        if self._reco_first_section is not None:
+            return self._reco_first_section or None
+        self._reco_first_section = self._divert_sections[0] if self._divert_sections else False
+        return self._reco_first_section or None
+
+    def _reco_fetch_recent_releases_page(self, section, offset, limit):
+        if not section:
+            return [], None
+        return self._divert_section_page_uncached_sorted(
+            section, 'originallyAvailableAt:desc', offset, limit)
+
+    def _divert_section_page_uncached_sorted(self, section, sort, offset, limit):
+        """Shared by the Recommande rows above: a plain sort with no
+        genre/search/unwatched filter, unlike _divert_section_page_uncached
+        (the Bibliotheque toolbar's own fetch, which layers those in)."""
+        if self._connector_client:
+            raw = self._connector_client.section_items(
+                section['key'], sort=sort, limit=limit, offset=offset)
+            items = divert_source.parse_metadata_list(raw, self._connector_client.image_url)
+            return items, divert_source.parse_total_size(raw)
+        if self._plex_client:
+            return self._plex_client.section_items_with_total(
+                section['key'], sort=sort, limit=limit, offset=offset)
+        return [], None
+
+    def _load_categories(self, section):
+        """Populate the Categories genre grid for `section`. Ported from the
+        former aura_genres.AuraGenresWindow (now rendered inline)."""
+        self._category_section = section
+        self._category_genres = []
+        try:
+            status = self.getControl(CATEGORY_STATUS_ID)
+        except RuntimeError:
+            status = None
+        if not section:
+            if status:
+                status.setLabel('Aucune bibliotheque video disponible')
+            return
+        try:
+            if self._connector_client:
+                genres = divert_source.parse_genres(
+                    self._connector_client.section_genres(section['key']))
+            else:
+                genres = self._plex_client.section_genres(section['key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: categories load failed: {}'.format(e), xbmc.LOGERROR)
+            genres = []
+        self._category_genres = genres
+        if status:
+            status.setLabel('{} — {} categorie(s)'.format(section['title'], len(genres)))
+        try:
+            panel = self.getControl(CATEGORY_PANEL_ID)
+            panel.reset()
+            for genre in genres:
+                panel.addItem(xbmcgui.ListItem(genre))
+        except RuntimeError:
+            pass
+
+    def _on_category_genre_selected(self):
+        """A genre tile was picked: jump straight to Bibliotheque, pre-filtered
+        to that genre, instead of the former separate AuraLibraryWindow --
+        same in-place-navigation rationale as the rest of this change."""
+        try:
+            pos = self.getControl(CATEGORY_PANEL_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self._category_genres)) or not self._category_section:
+            return
+        genre = self._category_genres[pos]
+        index = next(
+            (i for i, s in enumerate(self._divert_sections)
+             if s['key'] == self._category_section['key']), None)
+        if index is None:
+            return
+        self._divert_active_section = index
+        self._divert_filter_genre = genre
+        self._divert_search_query = ''
+        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
+        self._load_divert_section_items(self._category_section)
+        try:
+            self.setFocus(self.getControl(3100))  # Bibliotheque tab button
+        except RuntimeError:
+            pass
 
     def _set_sidebar_selection(self, index):
         try:
@@ -940,8 +1168,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # state), so left as a documented quirk rather than blocking this
         # release.
         super().onAction(action)
-        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT) and self.getFocusId() == DIVERT_PANEL_ID:
-            self._maybe_load_more_divert()
+        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
+            focused = self.getFocusId()
+            if focused == DIVERT_PANEL_ID:
+                self._maybe_load_more_divert()
+            elif focused in RECO_LIST_IDS:
+                self._maybe_load_more_reco(focused)
         self._update_bar_focused()
 
     def _focus_first_subtab(self):
@@ -983,6 +1215,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._manage_libraries()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
+        elif controlID == CATEGORY_PANEL_ID:
+            self._on_category_genre_selected()
         elif controlID == DIVERT_FILTER_BUTTON_ID:
             self._divert_open_filter_menu()
         elif controlID == DIVERT_SORT_BUTTON_ID:

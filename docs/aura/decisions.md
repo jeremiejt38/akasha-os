@@ -492,3 +492,35 @@ les fichiers du skin sur le Pi plutôt qu'en réapproximant :
 - Validé en direct : les 3 pilules (Divertissement/Jeux/App) rendues avec le vrai dégradé et les
   bonnes proportions, bouton engrenage avec ombre+cercle+icône, menu contextuel avec le dégradé
   assorti sur l'item sélectionné.
+
+## Recommandé et Catégories rendus en place (suite à retour direct de Jérémie)
+
+Jérémie a signalé que sélectionner "Recommandé" ou "Catégories" donnait l'impression d'ouvrir une
+autre page, contrairement à "Bibliothèque" qui s'affiche à l'emplacement prévu sans rien charger de
+séparé. Vérification faite : c'était exactement le cas — `AuraRecommendationsWindow` et
+`AuraGenresWindow` étaient encore des `xbmcgui.WindowXMLDialog` séparées, ouvertes via
+`doModal()`, un reliquat des chantiers précédents (`780ecf80`/`f41ce1ad`) qui avaient déjà inliné
+Bibliothèque dans `Aura.xml` mais pas ces deux-là.
+
+Corrigé en supprimant entièrement `aura_recommendations.py`/`AuraRecommendations.xml` et
+`aura_genres.py`/`AuraGenres.xml`, et en portant leur logique directement dans `aura_window.py`,
+rendue inline dans `Aura.xml` (même mécanisme que Bibliothèque : un groupe avec `<visible>` sur
+`Window.Property(DivertView)`/`DivertLibraryTab`) :
+
+- **Recommandé** : 3 rangées (Continuer à regarder / Ajoutés récemment / Sorties récentes),
+  visibles aussi bien pour Accueil (non scopé) que pour l'onglet Recommandé d'une bibliothèque
+  précise — logique de fetch/pagination reprise à l'identique, réutilise
+  `self._connector_client`/`self._plex_client`/`self._cache` déjà établis par
+  `_load_divertissement()` au lieu de se reconnecter indépendamment comme le faisait l'ancienne
+  fenêtre séparée.
+- **Catégories** : grille de genres inline ; sélectionner un genre bascule maintenant directement
+  sur l'onglet Bibliothèque **de la même fenêtre**, filtré sur ce genre (réutilise le mécanisme
+  déjà existant du filtre "Genre" de la barre d'outils Bibliothèque), au lieu d'ouvrir une
+  troisième fenêtre séparée (`AuraLibraryWindow`) comme avant — même motif de correction, cohérent
+  avec la demande.
+- Boutons d'onglet `Recommande`/`Categories` : leur `ondown` (qui pointait vers un placeholder mort
+  `9000`, faute de contenu inline avant ce correctif) pointe maintenant vers la première rangée/le
+  panneau de genres.
+- Validé en direct : les trois onglets (Recommandé/Bibliothèque/Catégories) s'affichent maintenant
+  tous de la même façon, dans la même fenêtre, sans aucune transition de type "nouvelle page" ;
+  sélection d'un genre bascule bien vers Bibliothèque filtrée sans changer de fenêtre.
