@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.43.1...akasha-os-v0.43.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* **aura:** render Recommande/Categories inline instead of separate dialogs ([#93](https://github.com/jeremiejt38/akasha-os/issues/93)) ([21ccb61](https://github.com/jeremiejt38/akasha-os/commit/21ccb61805b56a7ea2cb3b0d38ec3616be80ee25))
+
 ## [0.43.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.43.0...akasha-os-v0.43.1) (2026-08-20)
 
 
