@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.43.2...akasha-os-v0.44.0) (2026-08-20)
+
+
+### Features
+
+* **quickstart:** first-run wizard technical foundation (plan 3aba4284 phase 1) ([#96](https://github.com/jeremiejt38/akasha-os/issues/96)) ([1f3e47b](https://github.com/jeremiejt38/akasha-os/commit/1f3e47bfd04657b08151a5b487b7d0476e662b95))
+
 ## [0.43.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.43.1...akasha-os-v0.43.2) (2026-08-20)
 
 
