@@ -555,6 +555,35 @@ Quatre points corrigés en une passe, tous issus d'un retour direct après usage
   vertical confirmé bien au-delà des 2 premières rangées, chargement progressif sans erreur),
   bouton Rechercher absent, 33 genres Catégories tous (ou presque) traduits en français.
 
+## Correctif c7f0636a — Regroupement des icônes du menu principal
+
+Écart constaté par rapport à la référence Arctic Horizon 2 : sur Akasha Aura, seule l'icône Jeux
+suivait directement la pilule du module focalisé ; l'icône App restait isolée avec un grand espace
+vide au milieu, car les 3 modules (Divertissement/Jeux/App) étaient positionnés à des `<left>`
+statiques espacés de 380px (assez pour loger la pilule de 340px sans chevaucher le voisin), créant
+un vide de ~320px entre deux icônes repliées (56px) quel que soit le module réellement focalisé.
+
+C'était déjà documenté comme une limitation acceptée du chantier `04bda1b4` ("neighbouring icons
+stay at their fixed slot position rather than sliding"). Ce correctif revient sur cette
+acceptation : implémenté un vrai repositionnement dynamique plutôt que de continuer à vivre avec
+l'écart.
+
+- Chaque pilule (groupe) et icône a désormais un id propre (`2101`/`2102` Divertissement,
+  `2103`/`2104` Jeux, `2105`/`2106` App) — **attention** : ces ids ont dû être choisis en dehors de
+  `2010-2012` (`GAME_BUTTON_IDS`) et `2030-2033` (`APP_TILE_IDS`), déjà utilisés par les tuiles de
+  contenu des onglets Jeux/App — un premier essai avec `2011`/`2012`/`2021`/`2022`/`2031`/`2032`
+  est entré en collision directe avec ces ids existants et a fait planter l'init d'Aura
+  (`AttributeError: 'ControlImage' object has no attribute 'setLabel'`), détecté et corrigé avant
+  la validation finale.
+- `AuraWindow._layout_top_modules(focused)` recalcule à la main la position de chaque
+  bouton/pilule/icône façon flexbox (largeur 340 si focalisé, 56 sinon, espacement fixe de 40px
+  entre modules, départ à `x=160`) et les repositionne via `setPosition()` — appelée depuis
+  `_update_bar_focused()`, elle-même déjà appelée après chaque action et à l'ouverture, donc pas de
+  nouveau point d'accroche à ajouter.
+- Validé en direct sur le Pi dans les 3 états (Divertissement/Jeux/App focalisé tour à tour) :
+  le groupe reste contigu à chaque fois, sans espace anormal, et bascule proprement à la navigation
+  Gauche/Droite.
+
 ## Recommandé et Catégories rendus en place (suite à retour direct de Jérémie)
 
 Jérémie a signalé que sélectionner "Recommandé" ou "Catégories" donnait l'impression d'ouvrir une

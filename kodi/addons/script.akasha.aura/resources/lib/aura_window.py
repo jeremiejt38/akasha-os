@@ -45,6 +45,17 @@ TAB_APP = 2
 MODULE_SEARCH_ID = 2000
 GEAR_BUTTON_ID = 2004
 
+# Dynamic layout of the Divertissement/Jeux/App group (correctif
+# c7f0636a), see _layout_top_modules(). (button_id, pill_group_id,
+# icon_id) per module, same left-to-right order as TAB_BUTTON_IDS.
+MODULE_CONTROL_IDS = ((2001, 2101, 2102), (2002, 2103, 2104), (2003, 2105, 2106))
+MODULE_LAYOUT_START_X = 160
+MODULE_ICON_WIDTH = 56
+MODULE_PILL_WIDTH = 340
+MODULE_GAP = 40
+MODULE_ICON_TOP = 32
+MODULE_PILL_TOP = 20
+
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
 ACTION_MOVE_UP = 3
@@ -1132,6 +1143,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         focused = self.getFocusId()
         is_bar_focused = focused in BAR_CONTROL_IDS
         self.setProperty('AuraBarFocused', 'true' if is_bar_focused else 'false')
+        self._layout_top_modules(focused)
+
+    def _layout_top_modules(self, focused):
+        """Correctif c7f0636a: Divertissement/Jeux/App must stay a single
+        contiguous group (pill of the focused one + the other two icons
+        immediately following), never leaving one of them isolated with a
+        large gap before it -- Kodi has no native flexbox-style reflow, so
+        this recomputes each one's <left> by hand and repositions the
+        button/pill/icon controls via setPosition() every time focus
+        moves onto/off of one of them (called from _update_bar_focused(),
+        itself run after every action -- including onInit's own initial
+        call, so the very first render is already laid out correctly)."""
+        try:
+            focused_index = TAB_BUTTON_IDS.index(focused)
+        except ValueError:
+            focused_index = None
+        x = MODULE_LAYOUT_START_X
+        for i, (button_id, pill_id, icon_id) in enumerate(MODULE_CONTROL_IDS):
+            width = MODULE_PILL_WIDTH if i == focused_index else MODULE_ICON_WIDTH
+            for control_id, top in (
+                    (button_id, MODULE_ICON_TOP), (pill_id, MODULE_PILL_TOP),
+                    (icon_id, MODULE_ICON_TOP)):
+                try:
+                    self.getControl(control_id).setPosition(x, top)
+                except RuntimeError:
+                    pass
+            x += width + MODULE_GAP
 
     def onAction(self, action):
         aid = action.getId()

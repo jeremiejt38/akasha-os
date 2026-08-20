@@ -56,19 +56,23 @@
                 <texture>icon-search.png</texture>
             </control>
 
-            <!-- Modules 1-3: Divertissement/Jeux/App. Each reserves a fixed
-                 slot (icon left-aligned within it); on focus, a gradient
+            <!-- Modules 1-3: Divertissement/Jeux/App. On focus, a gradient
                  pill fades in behind icon+label. Pill texture
                  (pill-gradient.png) and proportions (icon inset/size,
                  label offset) copied directly from Arctic Horizon 2's own
                  main menu item (Includes_Objects.xml "_Object_MenuBar_Item"
                  + the actual generated menumain_h.png asset,
                  addon_data/script.texturemaker/ArcticHorizon/) rather than
-                 an approximation, per explicit request. Neighbouring icons
-                 stay at their fixed slot position rather than sliding to
-                 close the gap when a sibling expands, a deliberate
-                 simplification given Kodi's static layout engine, see
-                 docs/aura/decisions.md. -->
+                 an approximation, per explicit request. The <left> values
+                 below are only the *initial* layout (module 1 focused by
+                 default). AuraWindow._layout_top_modules() repositions
+                 the buttons/pills/icons (ids 2001-2003, 2101/2103/2105,
+                 2102/2104/2106) at runtime via setPosition() so the group
+                 always stays contiguous regardless of which one is
+                 focused, fixing the gap correctif c7f0636a reported
+                 (previously a static layout, deliberately left as an
+                 accepted limitation, superseded now, see
+                 docs/aura/decisions.md). -->
             <control type="button" id="2001">
                 <left>160</left>
                 <top>32</top>
@@ -80,7 +84,7 @@
                 <ondown>3310</ondown>
                 <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
-            <control type="group">
+            <control type="group" id="2101">
                 <left>160</left>
                 <top>20</top>
                 <width>340</width>
@@ -102,7 +106,7 @@
                     <label>Divertissement</label>
                 </control>
             </control>
-            <control type="image">
+            <control type="image" id="2102">
                 <left>160</left>
                 <top>32</top>
                 <width>56</width>
@@ -123,7 +127,7 @@
                 <ondown>2050</ondown>
                 <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
-            <control type="group">
+            <control type="group" id="2103">
                 <left>540</left>
                 <top>20</top>
                 <width>340</width>
@@ -145,7 +149,7 @@
                     <label>Jeux</label>
                 </control>
             </control>
-            <control type="image">
+            <control type="image" id="2104">
                 <left>540</left>
                 <top>32</top>
                 <width>56</width>
@@ -166,7 +170,7 @@
                 <ondown>2041</ondown>
                 <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
-            <control type="group">
+            <control type="group" id="2105">
                 <left>920</left>
                 <top>20</top>
                 <width>340</width>
@@ -188,7 +192,7 @@
                     <label>App</label>
                 </control>
             </control>
-            <control type="image">
+            <control type="image" id="2106">
                 <left>920</left>
                 <top>32</top>
                 <width>56</width>

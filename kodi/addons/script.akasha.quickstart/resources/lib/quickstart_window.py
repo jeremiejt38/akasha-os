@@ -12,7 +12,7 @@ than reimplementing it -- consistent with the same philosophy already
 applied to the unified settings panel (plan a5a87f03).
 """
 import json
-import subprocess
+import os
 
 import xbmc
 import xbmcaddon
@@ -335,6 +335,24 @@ class QuickStartWindow(xbmcgui.WindowXMLDialog):
             self.results['display'].append('Sortie audio configuree')
         self._refresh_display_summary()
 
+    # Bundled with Kodi itself (resource.uisounds.kodi, the default UI
+    # sound pack) -- reused as the section 2 etape 4 "son de test"
+    # rather than bundling a new audio asset with this addon.
+    TEST_SOUND_PATH = (
+        '/usr/share/kodi/addons/resource.uisounds.kodi/resources/notify.wav')
+
+    def _test_audio(self):
+        if not os.path.exists(self.TEST_SOUND_PATH):
+            xbmcgui.Dialog().notification(
+                'Akasha Quick Start', 'Son de test indisponible', xbmcgui.NOTIFICATION_ERROR)
+            return
+        xbmc.playSFX(self.TEST_SOUND_PATH)
+        heard = xbmcgui.Dialog().yesno(
+            'Akasha Quick Start', 'Avez-vous entendu le son ?', autoclose=8000)
+        if heard:
+            self.results['display'].append('Son de test entendu')
+        self._refresh_display_summary()
+
     def _toggle_cec_sync(self):
         # Reuses the same real setting script.akasha.settings' "Mode
         # extinction : Shutdown + CEC" already applies (powermanagement.
@@ -572,6 +590,8 @@ class QuickStartWindow(xbmcgui.WindowXMLDialog):
             self._pick_audio_device()
         elif controlID == 412:
             self._toggle_cec_sync()
+        elif controlID == 413:
+            self._test_audio()
         elif controlID == 510:
             self.close()
             xbmc.executebuiltin('RunAddon(service.libreelec.settings)')
