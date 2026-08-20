@@ -5,7 +5,7 @@ with plain python3 -m unittest, and safely delegated to Talos (see
 docs/talos-strategy.md).
 """
 
-TABS = ('Divertissement', 'Jeux', 'App', 'Parametres')
+TABS = ('Divertissement', 'Jeux', 'App')
 
 DIVERT_SUBTABS = ('Recommande', 'Bibliotheques', 'Categories')
 DIVERT_SUBTAB_RECOMMANDE = 0
