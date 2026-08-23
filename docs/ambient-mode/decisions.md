@@ -242,3 +242,36 @@ Câblé dans `_should_trigger()` via `xbmc.getCondVisibility('Window.IsActive(..
 Ce correctif ne couvre que le déclenchement *initial* d'Ambient (`service.akasha.ambient`) ; une
 fois Ambient réellement actif, l'utilisateur reprend la main dès la moindre entrée
 (`AmbientWindow.onAction` ferme immédiatement Ambient — spec section 17, "réveil immédiat").
+
+## Réutiliser l'instance AmbientWindow au lieu d'en recréer une à chaque déclenchement (2026-08-23)
+
+**Bug trouvé en conditions réelles** (même famille que le correctif équivalent d'Aura, voir plus
+haut "Réutiliser les sous-fenêtres d'Aura") : `service.akasha.ambient` construisait une nouvelle
+`AmbientWindow` (via `RunScript(script.akasha.ambient)` → `default.py` → `xbmcgui.WindowXML(...)`)
+à *chaque* déclenchement automatique par inactivité. Chaque construction consomme un des ~100 IDs
+de fenêtres dynamiques de Kodi, jamais libéré avant un redémarrage complet — sur un appareil resté
+allumé sans interaction pendant l'essentiel de la journée (usage normal en salon), le pool
+s'épuise en quelques heures. Une fois épuisé, `default.py` échoue systématiquement
+(`RuntimeError: maximum number of windows reached`), et comme `_touch_lock()` (dans
+`AmbientWindow.onInit()`) n'est alors jamais atteint, `_lock_file_fresh()` reste `False` en
+permanence : `service.akasha.ambient` retente donc *indéfiniment* toutes les `CHECK_INTERVAL_SECONDS`
+(5s), sans jamais réussir ni abandonner — observé en production : ~650 occurrences en 1h11 de
+fonctionnement, jusqu'au prochain redémarrage complet de Kodi. Symptôme perçu côté utilisateur :
+système qui semble "buggé" (pas de dégradation visible à l'écran, mais logs et CPU pollués en
+continu par ce cycle d'échec).
+
+**Corrigé** : `service.akasha.ambient` (processus persistant pour toute la durée de vie de Kodi,
+contrairement à `RunScript`) possède désormais une unique instance `AmbientWindow`
+(`AmbientTriggerMonitor._window`), construite une seule fois puis réutilisée pour chaque
+activation via `doModal()` — même patron que la réutilisation des sous-fenêtres d'Aura
+(`onInit()` se réexécute à chaque `doModal()`, donc l'état/les réglages sont bien rafraîchis à
+chaque activation malgré l'instance partagée ; le chargement de `AmbientConfig` a été déplacé de
+`__init__` vers `onInit()` pour cette raison).
+
+L'entrée manuelle "Mode Ambiant" du menu Akasha Guide déclenche toujours
+`RunScript(script.akasha.ambient)`, mais `default.py` ne construit plus lui-même de fenêtre : il se
+contente d'écrire une requête d'activation et d'envoyer `NotifyAll` — même pont IPC que
+`home_press_handler.py`/`settings_press_handler.py` côté `script.akasha.aura` — et c'est
+`AmbientTriggerMonitor.onNotification()` (côté service) qui reçoit la notification et réutilise
+l'instance partagée. Les deux points d'entrée (automatique et manuel) ne consomment donc plus
+qu'un seul ID de fenêtre au total pour toute la session Kodi.

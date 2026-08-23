@@ -100,12 +100,6 @@ class AmbientWindow(xbmcgui.WindowXML):
         self._active = False
         self._player = None
         self._is_video_mode = False
-        try:
-            self.cfg = config.load_config(_load_raw_settings())
-        except Exception as e:
-            xbmc.log('Akasha Ambient: failed to load settings, using defaults: {}'.format(e),
-                     xbmc.LOGERROR)
-            self.cfg = config.load_config({})
 
     def is_active(self):
         """Return True until exit() has been called."""
@@ -114,6 +108,18 @@ class AmbientWindow(xbmcgui.WindowXML):
     def onInit(self):
         self._active = True
         _touch_lock()
+        # Reloaded on every activation (not just __init__) since this same
+        # instance is now reused across triggers -- see
+        # service.akasha.ambient/service.py and docs/ambient-mode/decisions.md
+        # ("reutiliser l'instance AmbientWindow au lieu d'en recreer une a
+        # chaque declenchement") -- otherwise a settings change would only
+        # take effect after a full Kodi restart.
+        try:
+            self.cfg = config.load_config(_load_raw_settings())
+        except Exception as e:
+            xbmc.log('Akasha Ambient: failed to load settings, using defaults: {}'.format(e),
+                     xbmc.LOGERROR)
+            self.cfg = config.load_config({})
         try:
             self._setup_background()
             self._start_weather_thread()
