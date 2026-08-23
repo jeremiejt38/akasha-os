@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.46.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.46.1...akasha-os-v0.46.2) (2026-08-23)
+
+
+### Bug Fixes
+
+* **ambient:** reuse a single persistent AmbientWindow instance ([e3cdfad](https://github.com/jeremiejt38/akasha-os/commit/e3cdfada0d19afff2c9d960b7223fc59a8c108dd))
+* **aura:** route settings button via Menu action, fix NotifyAll bridge ([d2c5a59](https://github.com/jeremiejt38/akasha-os/commit/d2c5a5959c9ebccb345cee22dc807a1f9508ee98))
+* **aura:** silent Connector fallback on startup, add skeleton loaders ([60399b6](https://github.com/jeremiejt38/akasha-os/commit/60399b6300f1080f5dd524653c529c8718842bbe))
+
 ## [0.46.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.46.0...akasha-os-v0.46.1) (2026-08-20)
 
 
