@@ -753,6 +753,27 @@
                 <onup>3215</onup>
                 <onleft>3310</onleft>
                 <itemlayout width="220" height="330">
+                    <!-- Skeleton loader (plan a3f9c2e1 phase 5): dimmed silhouette
+                         standing in for a real item not fetched yet, see
+                         aura_window.py::_build_placeholder_list_item(). Real
+                         poster/labels below are hidden for these items instead
+                         of showing an empty thumb/label. -->
+                    <control type="image">
+                        <left>5</left>
+                        <top>0</top>
+                        <width>190</width>
+                        <height>250</height>
+                        <texture colordiffuse="33FFFFFF" border="8">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                    </control>
+                    <control type="image">
+                        <left>5</left>
+                        <top>254</top>
+                        <width>140</width>
+                        <height>18</height>
+                        <texture colordiffuse="22FFFFFF" border="4">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                    </control>
                     <control type="image">
                         <left>5</left>
                         <top>0</top>
@@ -760,6 +781,7 @@
                         <height>250</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
                         <left>5</left>
@@ -770,6 +792,7 @@
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>CCFFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
                         <left>5</left>
@@ -780,6 +803,7 @@
                         <label>$INFO[ListItem.Label2]</label>
                         <textcolor>77FFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                 </itemlayout>
                 <focusedlayout width="220" height="330">
@@ -789,7 +813,23 @@
                         <width>198</width>
                         <height>288</height>
                         <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
-                        <visible>Control.HasFocus(3230)</visible>
+                        <visible>Control.HasFocus(3230) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                    </control>
+                    <control type="image">
+                        <left>5</left>
+                        <top>0</top>
+                        <width>190</width>
+                        <height>250</height>
+                        <texture colordiffuse="33FFFFFF" border="8">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                    </control>
+                    <control type="image">
+                        <left>5</left>
+                        <top>254</top>
+                        <width>140</width>
+                        <height>18</height>
+                        <texture colordiffuse="22FFFFFF" border="4">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
                         <left>5</left>
@@ -798,6 +838,7 @@
                         <height>250</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
                         <left>5</left>
@@ -808,6 +849,7 @@
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
                         <left>5</left>
@@ -818,6 +860,7 @@
                         <label>$INFO[ListItem.Label2]</label>
                         <textcolor>99FFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                 </focusedlayout>
             </control>
@@ -855,8 +898,25 @@
                             <top>0</top>
                             <width>110</width>
                             <height>165</height>
+                            <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>169</top>
+                            <width>80</width>
+                            <height>14</height>
+                            <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -867,6 +927,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -877,6 +938,7 @@
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                     </itemlayout>
                     <focusedlayout width="120" height="205">
@@ -886,7 +948,23 @@
                             <width>118</width>
                             <height>177</height>
                             <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
-                            <visible>Control.HasFocus(5110)</visible>
+                            <visible>Control.HasFocus(5110) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>110</width>
+                            <height>165</height>
+                            <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>169</top>
+                            <width>80</width>
+                            <height>14</height>
+                            <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
@@ -895,6 +973,7 @@
                             <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -905,6 +984,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -915,6 +995,7 @@
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                     </focusedlayout>
                 </control>
@@ -943,8 +1024,25 @@
                             <top>0</top>
                             <width>110</width>
                             <height>165</height>
+                            <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>169</top>
+                            <width>80</width>
+                            <height>14</height>
+                            <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -955,6 +1053,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -965,6 +1064,7 @@
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                     </itemlayout>
                     <focusedlayout width="120" height="205">
@@ -974,7 +1074,23 @@
                             <width>118</width>
                             <height>177</height>
                             <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
-                            <visible>Control.HasFocus(5210)</visible>
+                            <visible>Control.HasFocus(5210) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>110</width>
+                            <height>165</height>
+                            <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>169</top>
+                            <width>80</width>
+                            <height>14</height>
+                            <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
@@ -983,6 +1099,7 @@
                             <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -993,6 +1110,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -1003,6 +1121,7 @@
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                     </focusedlayout>
                 </control>
@@ -1031,8 +1150,25 @@
                             <top>0</top>
                             <width>110</width>
                             <height>165</height>
+                            <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>169</top>
+                            <width>80</width>
+                            <height>14</height>
+                            <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>110</width>
+                            <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -1043,6 +1179,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -1053,6 +1190,7 @@
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                     </itemlayout>
                     <focusedlayout width="120" height="205">
@@ -1062,7 +1200,23 @@
                             <width>118</width>
                             <height>177</height>
                             <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
-                            <visible>Control.HasFocus(5310)</visible>
+                            <visible>Control.HasFocus(5310) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>110</width>
+                            <height>165</height>
+                            <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>169</top>
+                            <width>80</width>
+                            <height>14</height>
+                            <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
@@ -1071,6 +1225,7 @@
                             <height>165</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -1081,6 +1236,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
@@ -1091,6 +1247,7 @@
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
+                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                     </focusedlayout>
                 </control>

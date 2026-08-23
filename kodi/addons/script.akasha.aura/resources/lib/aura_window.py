@@ -63,6 +63,7 @@ ACTION_MOVE_DOWN = 4
 ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
+ACTION_MENU = 163
 
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
@@ -70,6 +71,11 @@ DIVERT_PANEL_ID = 3230
 DIVERT_SIDEBAR_HOME_INDEX = 0
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
+# Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
+# the real remainder is, so a huge library doesn't balloon a panel/list
+# control with thousands of extra placeholder items just to convey "there's
+# more below" -- see _sync_placeholders().
+PLACEHOLDER_ITEM_CAP = 50
 
 # Recommande content, rendered inline instead of a separate doModal() dialog
 # (previously aura_recommendations.AuraRecommendationsWindow), see
@@ -177,6 +183,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_active_section = 0
         self._divert_items = []
         self._divert_paged = None
+        # Skeleton loaders (plan a3f9c2e1 phase 5): how many trailing
+        # placeholder ListItems are currently in each list/panel, so the
+        # next render can remove exactly that many before appending fresh
+        # real items -- see _sync_placeholders().
+        self._divert_placeholder_count = 0
+        self._reco_placeholder_counts = {}
         # Bibliotheque toolbar state (plan f41ce1ad phase A): reset whenever
         # the sidebar selection changes to a different library, same
         # pattern as aura_library.py's onInit -- otherwise a search/filter
@@ -233,6 +245,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # press (open app switcher). See docs/remote/decisions.md.
         self._home_press_monitor = home_press_monitor.HomePressMonitor(
             self._on_home_press_action)
+        # Gear-wheel remote button (dd440e2e section 9), same rationale as
+        # the Home press monitor just above: RunScript can't just stack a
+        # second AuraWindow while one is already running.
+        self._settings_press_monitor = home_press_monitor.SettingsPressMonitor(
+            self._open_settings_panel)
+        # Set by default.py before doModal() when launched via
+        # RunScript(script.akasha.aura, opensettings) and Aura wasn't
+        # already running.
+        self.open_settings_on_init = False
 
     def onInit(self):
         try:
@@ -244,6 +265,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._update_bar_focused()
+            if getattr(self, 'open_settings_on_init', False):
+                self.open_settings_on_init = False
+                self._open_settings_panel()
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
 
@@ -427,6 +451,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: recommendations row render error for {}: {}'
                      .format(title, e), xbmc.LOGERROR)
+        self._reco_placeholder_counts[list_control_id] = self._sync_placeholders(
+            list_control_id, 0, paged)
 
     def _render_reco_row_label(self, list_control_id, error=None):
         label_control_id, title, paged = self._reco_rows[list_control_id]
@@ -457,10 +483,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         try:
             lst = self.getControl(list_control_id)
+            for _ in range(self._reco_placeholder_counts.get(list_control_id, 0)):
+                try:
+                    lst.removeItem(lst.size() - 1)
+                except Exception:
+                    break
             lst.addItems([_build_divert_list_item(item) for item in new_items])
         except Exception as e:
             xbmc.log('Akasha Aura: recommendations append render error for {}: {}'
                      .format(title, e), xbmc.LOGERROR)
+        self._reco_placeholder_counts[list_control_id] = self._sync_placeholders(
+            list_control_id, 0, paged)
         self._render_reco_row_label(list_control_id)
 
     def _reco_fetch_on_deck_page(self, section, offset, limit):
@@ -609,7 +642,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _load_divertissement(self):
-        connector = self._get_connector_client(prompt_if_missing=True)
+        # prompt_if_missing=False here: this runs on every unattended Aura
+        # startup (onInit(), including after an automatic/overnight Kodi
+        # restart), and a missing/expired session token must never block
+        # the whole UI behind a blocking password Keyboard dialog with no
+        # one there to type into it -- observed in production after a
+        # connector outage cleared the stored token (see the
+        # ConnectorAPIError handler below): every subsequent restart froze
+        # on "Mot de passe (Akasha OS Connector)" until someone walked up
+        # and pressed Back. Silently falls back to direct Plex access
+        # instead; the user can explicitly re-authenticate via the gear
+        # menu's "Se connecter (Connector)" entry (_reconnect_connector()),
+        # which does prompt. See docs/aura/decisions.md.
+        connector = self._get_connector_client(prompt_if_missing=False)
         if connector:
             try:
                 self._divert_sections = divert_source.parse_sections(connector.sections())
@@ -783,6 +828,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 panel.addItem(_build_divert_list_item(item))
         except Exception as e:
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
+        self._divert_placeholder_count = self._sync_placeholders(
+            DIVERT_PANEL_ID, 0, self._divert_paged)
 
     def _render_divert_toolbar(self, section):
         try:
@@ -895,6 +942,40 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'Akasha Aura', 'Playlists : pas encore disponible', xbmcgui.NOTIFICATION_INFO,
                 2000)
 
+    def _sync_placeholders(self, control_id, current_placeholder_count, paged):
+        """Skeleton loaders (plan a3f9c2e1 phase 5): replace whatever
+        trailing placeholder items a control already has with a freshly
+        sized run reflecting how many more items are actually left to load,
+        so scrolling towards the loaded end shows dimmed silhouettes
+        instead of the list abruptly stopping. No-op (returns 0) once the
+        source is exhausted or its real total is unknown -- a placeholder
+        implies "more is coming", which would be misleading otherwise.
+        """
+        try:
+            control = self.getControl(control_id)
+        except RuntimeError:
+            return 0
+        for _ in range(current_placeholder_count):
+            try:
+                control.removeItem(control.size() - 1)
+            except Exception:
+                break
+        if paged is None or paged.exhausted or paged.total is None:
+            return 0
+        remaining = max(0, paged.total - len(paged.items))
+        if paged.max_items is not None:
+            # Rows like Recommande cap how many items they'll ever load
+            # (a "quick highlight" row, not a full browse surface) --
+            # never promise more placeholders than that cap allows.
+            remaining = min(remaining, max(0, paged.max_items - len(paged.items)))
+        new_count = min(remaining, PLACEHOLDER_ITEM_CAP)
+        if new_count:
+            try:
+                control.addItems([_build_placeholder_list_item() for _ in range(new_count)])
+            except Exception:
+                return 0
+        return new_count
+
     def _maybe_load_more_divert(self):
         if not self._divert_paged or not self._divert_sections:
             return
@@ -913,10 +994,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_items = self._divert_paged.items
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
+            # Remove the stale trailing placeholders first: they were
+            # standing in for exactly the items `new_items` now replaces
+            # (see _sync_placeholders() -- ControlList has no "insert
+            # before" primitive, so the real items are appended after
+            # removal, then a fresh, shorter run of placeholders is added
+            # back to represent whatever remains).
+            for _ in range(self._divert_placeholder_count):
+                try:
+                    panel.removeItem(panel.size() - 1)
+                except Exception:
+                    break
             panel.addItems([_build_divert_list_item(item) for item in new_items])
         except Exception as e:
             xbmc.log('Akasha Aura: Divertissement append render error: {}'.format(e),
                      xbmc.LOGERROR)
+        self._divert_placeholder_count = self._sync_placeholders(
+            DIVERT_PANEL_ID, 0, self._divert_paged)
         section = self._divert_sections[self._divert_active_section]
         self._render_divert_status(section)
 
@@ -1173,6 +1267,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def onAction(self, action):
         aid = action.getId()
+        if aid == ACTION_MENU:
+            self._open_settings_panel()
+            return
         if aid in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
             self.close()
             return
@@ -1483,10 +1580,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         unchanged, they are not "settings" per that plan's own wording."""
         return [
             ('Parametres', self._open_settings_panel),
+            ('Se connecter (Connector Akasha OS)', self._reconnect_connector),
             ('Mise en veille', self._settings_sleep),
             ('Redemarrer', self._settings_restart_menu),
             ('Arret du systeme', self._settings_shutdown),
         ]
+
+    def _reconnect_connector(self):
+        """Manual, explicit counterpart to _load_divertissement()'s silent
+        prompt_if_missing=False: the only place a user is actually present
+        to type a password into the blocking Keyboard dialog, so this is
+        the only call site allowed to pass prompt_if_missing=True."""
+        connector = self._get_connector_client(prompt_if_missing=True)
+        if not connector:
+            return
+        try:
+            self._divert_sections = divert_source.parse_sections(connector.sections())
+        except connector_client.ConnectorAPIError as e:
+            xbmc.log('Akasha Aura: connector reconnect failed: {}'.format(e), xbmc.LOGWARNING)
+            self.addon.setSetting('connector.session_token', '')
+            xbmcgui.Dialog().notification(
+                'Akasha', 'Connexion au Connector echouee', xbmcgui.NOTIFICATION_ERROR, 3000)
+            return
+        self._connector_client = connector
+        self._plex_client = None
+        xbmcgui.Dialog().notification(
+            'Akasha', 'Connecte au Connector Akasha OS', xbmcgui.NOTIFICATION_INFO, 3000)
+        self._restore_divert_view(focus=False)
 
     def _open_settings_menu(self):
         """Settings gear: context menu (plan 04bda1b4 phase 3). Uses the
@@ -1700,6 +1820,16 @@ def _build_divert_list_item(item):
     li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
     if item.get('thumb_url'):
         li.setArt({'thumb': item['thumb_url']})
+    return li
+
+
+def _build_placeholder_list_item():
+    """Skeleton loader item (plan a3f9c2e1 phase 5): an empty ListItem
+    flagged via a custom property so the skin can render a dimmed
+    silhouette instead of a poster/label, standing in for a real item not
+    fetched yet. See _sync_placeholders()."""
+    li = xbmcgui.ListItem('')
+    li.setProperty('IsPlaceholder', '1')
     return li
 
 

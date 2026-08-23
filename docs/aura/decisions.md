@@ -615,3 +615,51 @@ rendue inline dans `Aura.xml` (même mécanisme que Bibliothèque : un groupe av
 - Validé en direct : les trois onglets (Recommandé/Bibliothèque/Catégories) s'affichent maintenant
   tous de la même façon, dans la même fenêtre, sans aucune transition de type "nouvelle page" ;
   sélection d'un genre bascule bien vers Bibliothèque filtrée sans changer de fenêtre.
+
+## Ne jamais prompter le mot de passe du Connector sur un démarrage automatique (2026-08-23)
+
+**Bug trouvé en conditions réelles** : `_load_divertissement()` (appelée depuis `onInit()`, donc à
+chaque ouverture d'Aura, y compris après un redémarrage Kodi automatique/sans personne devant
+l'écran) appelait `_get_connector_client(prompt_if_missing=True)`. Tant qu'un `connector.session_token`
+valide est stocké, ça ne fait rien de bloquant — mais dès que ce token est vide (premier réglage
+jamais terminé, ou effacé par le mécanisme existant qui le vide après un `ConnectorAPIError`, par
+exemple lors d'une coupure réseau/Unraid), le code tente un nouveau login et ouvre un
+`xbmc.Keyboard` **bloquant** demandant le mot de passe — avec personne pour le saisir sur un
+redémarrage non supervisé. Observé en production : après une coupure réseau ayant invalidé le
+token, chaque redémarrage suivant de Kodi gelait Aura derrière "Mot de passe (Akasha OS Connector)"
+jusqu'à ce que quelqu'un appuie manuellement sur Retour — perçu comme "le système est tout buggé".
+
+**Corrigé** : `_load_divertissement()` appelle désormais `_get_connector_client(prompt_if_missing=False)`
+— jamais de prompt bloquant sur un démarrage automatique, retombe silencieusement sur l'accès Plex
+direct si le token est absent/invalide (comportement de repli déjà existant, inchangé). Une nouvelle
+entrée explicite "Se connecter (Connector Akasha OS)" dans le menu contextuel de la roue crantée
+(`_reconnect_connector()`) reste le seul point d'entrée qui passe `prompt_if_missing=True` — le seul
+moment où un humain est réellement présent devant l'écran pour taper un mot de passe.
+
+## Skeleton loaders pour la Bibliothèque et les rangées Recommandé (plan a3f9c2e1 phase 5, 2026-08-23)
+
+Dernière phase (optionnelle) du plan de pagination `a3f9c2e1` : au lieu que la grille Bibliothèque
+(`DIVERT_PANEL_ID`) ou les rangées Recommandé (`RECO_LIST_IDS`) s'arrêtent brutalement une fois les
+éléments déjà chargés affichés, un nombre limité de silhouettes grisées ("skeleton loaders")
+représente les éléments restants tant que le total réel (déjà connu via `PagedList.total`, fourni
+par Plex sans requête supplémentaire) est supérieur à ce qui est chargé.
+
+- `AuraWindow._sync_placeholders(control_id, current_placeholder_count, paged)` : supprime
+  d'abord les anciens placeholders en fin de liste (`ControlList.removeItem`), puis en ajoute un
+  nombre recalculé — plafonné à `PLACEHOLDER_ITEM_CAP` (50) quel que soit le nombre réel
+  d'éléments restants, pour ne pas alourdir un contrôle avec des milliers d'items juste pour
+  suggérer "il y en a plus" sur une très grosse bibliothèque. Respecte aussi `paged.max_items`
+  (les rangées Recommandé sont plafonnées à 100 éléments, jamais plus, donc jamais plus de
+  placeholders que ce plafond ne le permet).
+- Chaque placeholder est un `ListItem('')` avec la propriété `IsPlaceholder=1`
+  (`_build_placeholder_list_item()`), sans art ni label — le skin (`Aura.xml`, itemlayout des
+  contrôles `3230`/`5110`/`5210`/`5310`) affiche à la place deux rectangles arrondis semi-
+  transparents (silhouette poster + silhouette titre) via `<visible>` conditionné sur
+  `ListItem.Property(IsPlaceholder)`, et masque le poster/label réels pour ces items.
+- `_on_divert_item_selected()` était déjà protégé par `0 <= pos < len(self._divert_items)`,
+  donc sélectionner un placeholder (au-delà des vrais éléments chargés) ne fait rien plutôt que
+  planter — aucun changement nécessaire là.
+- Défiler jusqu'à la zone des placeholders déclenche naturellement le chargement de la page
+  suivante (le calcul de `PagedList.maybe_load_more()` compare déjà la position sélectionnée au
+  nombre de *vrais* éléments chargés, pas à la taille visuelle du contrôle) — les placeholders
+  disparaissent alors progressivement à mesure que de vrais éléments les remplacent.
