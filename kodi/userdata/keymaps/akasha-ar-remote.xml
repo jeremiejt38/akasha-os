@@ -52,10 +52,21 @@ box with Akasha Aura and the rest of the interface.
   <!-- When Akasha Aura (window id 1194) is active, the gear-wheel button
        sends the "Menu" action directly to AuraWindow.onAction(), which opens
        the unified settings panel. When Aura is not open, the <global> entry
-       above falls back to RunScript(script.akasha.aura, opensettings). -->
-  <windowId1194>
+       above falls back to RunScript(script.akasha.aura, opensettings).
+       NOTE: the tag must be exactly "window" + the numeric id (no "Id"
+       infix), per CWindowTranslator::TranslateWindow, which only
+       recognizes that exact "window12345" form for custom/addon window
+       ids (see xbmc/input/WindowTranslator.cpp). An earlier
+       "windowId1194" typo here silently failed to parse ("Window
+       Translator: Can't find window windowId1194" logged on every
+       keymap load), which meant this override never actually applied;
+       the gear-wheel button fell back to the global RunScript entry the
+       whole time regardless (itself fixed separately, see the "Other."
+       prefix bug in docs/remote/decisions.md), so this had no
+       behavioural impact, just log noise. -->
+  <window1194>
     <keyboard>
       <key id="61952">Menu</key>
     </keyboard>
-  </windowId1194>
+  </window1194>
 </keymap>
