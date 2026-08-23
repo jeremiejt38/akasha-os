@@ -141,3 +141,46 @@ direct (`dbus-python` — à vérifier si disponible).
 - Buzzer/IR via la télécommande : bloqué par le protocole propriétaire, non retenté sauf décision
   explicite de l'utilisateur de poursuivre la rétro-ingénierie (cf. `docs/remote/decisions.md`
   §2b/2c ci-dessus pour le point de reprise exact — services/caractéristiques déjà identifiés).
+
+## Bug racine trouvé : le pont `NotifyAll` → `Monitor.onNotification` ne comparait jamais la bonne méthode (2026-08-23)
+
+**Bug trouvé en conditions réelles**, en instrumentant `service.akasha.ambient` avec un log
+inconditionnel dans `onNotification()` : Kodi livre toujours un appel `NotifyAll(sender, message)`
+avec `method` préfixé `"Other."` (son espace de noms JSON-RPC pour tout message qui ne correspond
+pas à un type `Notifications.*` intégré) — confirmé en direct, `method` arrivait comme
+`"Other.ActivateAmbient"`, jamais `"ActivateAmbient"` seul. `home_press_handler.py` et
+`settings_press_handler.py` (`script.akasha.aura`) comparaient déjà `method` à la valeur brute de
+`NOTIFY_METHOD` (`"HomePress"`/`"SettingsPress"`) sans ce préfixe — ce pont IPC n'a donc
+**probablement jamais fonctionné**, y compris avant ce diagnostic (la détection double-appui Home
+et la première tentative de la roue crantée réglages en dépendaient toutes les deux ; cette
+dernière a été contournée entre-temps par un mapping clavier direct sur l'action `Menu`, voir plus
+haut, ce qui a masqué le symptôme sans corriger la cause).
+
+**Corrigé** dans les trois monitors concernés (`home_press_monitor.py` ×2,
+`service.akasha.ambient/service.py`) : comparaison contre `'Other.' + NOTIFY_METHOD` au lieu de
+`NOTIFY_METHOD` seul. Le double-appui Home (app switcher) et le déclenchement manuel "Mode
+Ambiant" (voir `docs/ambient-mode/decisions.md`) redeviennent fonctionnels par ce pont ; le bouton
+roue crantée reste sur son mapping clavier direct (plus simple, pas d'IPC nécessaire), inchangé.
+
+**Validé en direct sur le Pi (2026-08-23)** : deux `RunScript(script.akasha.aura)` envoyés à
+~100ms d'intervalle produisent bien `Akasha Aura: home press action: double` dans les logs (contre
+`... action: single` pour un appui isolé) — la Phase 2 du plan `dd440e2e` (Home & navigation) est
+donc désormais entièrement validée en conditions réelles, double-appui inclus.
+
+## Statut final des points bloqués par le protocole propriétaire (2026-08-23)
+
+Décision explicite de l'utilisateur : ces trois points restent **définitivement abandonnés** pour
+cette télécommande, aucune tentative de contournement supplémentaire n'est prévue (pas de
+rétro-ingénierie du protocole BLE vendor-specific, pas d'achat de matériel dédié pour l'instant) :
+
+- **§2a / Phase 3 du plan — Assistant vocal** : bloqué par le protocole Alexa propriétaire (flux
+  micro chiffré/non documenté, confirmé par capture Bluetooth `btmon`). Chantier séparé
+  `atlas/projects/akasha-os-voice-commands.md` (plan `c8c8548a`) resté en pause, le reste également.
+- **§2b / Phase 4 du plan (volet buzzer) — Retrouver la télécommande** : bloqué par le même mur
+  protocolaire (cloud Alexa + Bluetooth propriétaire), et rien ne garantit même que ce modèle de
+  télécommande dispose d'un haut-parleur physique (fonctionnalité réservée au modèle "Pro"). La
+  partie batterie du plan (§2d), elle, reste acquise et fonctionnelle.
+- **§2c / Phase 5 du plan — IR TV via la télécommande** : bloqué par le même mur protocolaire côté
+  télécommande. L'alternative identifiée (blaster IR dédié sur GPIO du Raspberry Pi via LIRC,
+  indépendant de la télécommande) reste documentée ci-dessus comme piste si le contrôle IR TV
+  redevient prioritaire un jour, mais n'est pas retenue dans le périmètre actuel.

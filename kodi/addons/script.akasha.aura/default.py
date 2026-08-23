@@ -27,6 +27,7 @@ ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
 sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 
 import home_press_handler  # noqa: E402
+import settings_press_handler  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
 
 LOCK_FILE = '/tmp/akasha-aura.lock'
@@ -44,14 +45,25 @@ def _already_running():
 
 
 if __name__ == '__main__':
+    # "opensettings": the gear-wheel remote button's global keymap entry
+    # (dd440e2e section 9), distinct from a plain Home press.
+    open_settings = 'opensettings' in sys.argv[1:]
     if _already_running():
-        # Aura is already open. The user pressed Home again while inside Aura.
-        # Record the press so the running AuraWindow instance can distinguish a
-        # simple press (return to Divertissement tab) from a double press (open
-        # app switcher). See home_press_handler.py and docs/remote/decisions.md.
-        xbmc.log('Akasha Aura: duplicate Home press while running, routing to active window',
-                 xbmc.LOGINFO)
-        home_press_handler.record_home_press()
+        # Aura is already open -- can't just construct a second AuraWindow
+        # (see this module's own docstring on window-id exhaustion).
+        if open_settings:
+            xbmc.log('Akasha Aura: settings button pressed while running, '
+                      'routing to active window', xbmc.LOGINFO)
+            settings_press_handler.record_settings_press()
+        else:
+            # The user pressed Home again while inside Aura. Record the
+            # press so the running AuraWindow instance can distinguish a
+            # simple press (return to Divertissement tab) from a double
+            # press (open app switcher). See home_press_handler.py and
+            # docs/remote/decisions.md.
+            xbmc.log('Akasha Aura: duplicate Home press while running, routing to active window',
+                     xbmc.LOGINFO)
+            home_press_handler.record_home_press()
     else:
         try:
             with open(LOCK_FILE, 'w') as f:
@@ -60,6 +72,7 @@ if __name__ == '__main__':
             pass
         try:
             window = AuraWindow('Aura.xml', ADDON_PATH, 'Default', '1080i')
+            window.open_settings_on_init = open_settings
             window.doModal()
             del window
         finally:

@@ -11,6 +11,7 @@ import xbmc
 
 import home_press_handler
 import press_timing
+import settings_press_handler
 
 DOUBLE_PRESS_WINDOW_SECONDS = 0.3
 
@@ -34,7 +35,14 @@ class HomePressMonitor(xbmc.Monitor):
     def onNotification(self, sender, method, data):
         if sender != home_press_handler.NOTIFY_SENDER:
             return
-        if method != home_press_handler.NOTIFY_METHOD:
+        # Kodi always delivers a NotifyAll(sender, message) call to
+        # onNotification with method prefixed "Other." (its JSON-RPC
+        # namespace for messages that don't match a built-in
+        # Notifications.* type) -- confirmed live via debug logging
+        # (method arrived as "Other.HomePress"/"Other.SettingsPress", not
+        # the bare message). This bridge was silently never firing before
+        # this fix (see docs/remote/decisions.md).
+        if method != 'Other.' + home_press_handler.NOTIFY_METHOD:
             return
         ts = home_press_handler.read_last_press()
         if ts is None:
@@ -68,3 +76,35 @@ class HomePressMonitor(xbmc.Monitor):
             if self._pending_single_timer is not None:
                 self._pending_single_timer.cancel()
                 self._pending_single_timer = None
+
+
+class SettingsPressMonitor(xbmc.Monitor):
+    """Listen for SettingsPress notifications (gear-wheel remote button,
+    dd440e2e section 9) and invoke the window callback. No simple/double
+    distinction needed here, unlike HomePressMonitor -- every press just
+    opens the unified settings panel."""
+
+    def __init__(self, callback, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._callback = callback
+        self._last_seen_ts = 0.0
+
+    def onNotification(self, sender, method, data):
+        if sender != settings_press_handler.NOTIFY_SENDER:
+            return
+        # See the identical "Other." prefix note in HomePressMonitor above.
+        if method != 'Other.' + settings_press_handler.NOTIFY_METHOD:
+            return
+        ts = None
+        try:
+            with open(settings_press_handler.PRESS_FILE) as f:
+                ts = float(f.read().strip())
+        except (OSError, ValueError):
+            return
+        if ts <= self._last_seen_ts:
+            return
+        self._last_seen_ts = ts
+        try:
+            self._callback()
+        except Exception as e:
+            xbmc.log('Akasha Aura: settings press callback failed: {}'.format(e), xbmc.LOGERROR)

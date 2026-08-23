@@ -27,6 +27,19 @@ box with Akasha Aura and the rest of the interface.
       <!-- Fire TV remote power button: trigger Akasha sleep (CEC standby + wake-on-input). -->
       <power>RunScript(service.akasha.remote,power)</power>
       <sleep>RunScript(service.akasha.remote,power)</sleep>
+      <!-- Gear-wheel "Settings" button (dd440e2e section 9). Unnamed
+           key, confirmed live via debug logging: "HandleKey: 0 (0xf200,
+           obc-61697) pressed". The id below is the decimal value of the
+           0xf200 hex keycode itself (61952), not the "obc-61697" figure
+           also printed on that log line (that one is a separate
+           universal-remote identifier, unrelated to this keyboard
+           mapping syntax); confirmed against a matching real-world
+           report (a similar remote with the exact same log signature,
+           OSMC forum). Distinct from the play/playpause keys above
+           (their own key id is 0xf0bd), which stay untouched: only this
+           specific numeric id is remapped, not the whole PlayPause
+           action, so real media play/pause elsewhere is unaffected. -->
+      <key id="61952">RunScript(script.akasha.aura,opensettings)</key>
     </keyboard>
   </global>
   <FullscreenVideo>
@@ -35,4 +48,14 @@ box with Akasha Aura and the rest of the interface.
       <escape>Stop</escape>
     </keyboard>
   </FullscreenVideo>
+
+  <!-- When Akasha Aura (window id 1194) is active, the gear-wheel button
+       sends the "Menu" action directly to AuraWindow.onAction(), which opens
+       the unified settings panel. When Aura is not open, the <global> entry
+       above falls back to RunScript(script.akasha.aura, opensettings). -->
+  <windowId1194>
+    <keyboard>
+      <key id="61952">Menu</key>
+    </keyboard>
+  </windowId1194>
 </keymap>
