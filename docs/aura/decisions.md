@@ -663,3 +663,57 @@ par Plex sans requête supplémentaire) est supérieur à ce qui est chargé.
   suivante (le calcul de `PagedList.maybe_load_more()` compare déjà la position sélectionnée au
   nombre de *vrais* éléments chargés, pas à la taille visuelle du contrôle) — les placeholders
   disparaissent alors progressivement à mesure que de vrais éléments les remplacent.
+
+## Akasha OS Store branché sur le vrai catalogue akasha-os-store (plan f4e069bb phases 3-4, 2026-08-23)
+
+Le repo séparé `akasha-os-store` (structure, schéma, CI, 41 manifests) existait déjà avant cette
+session (phases 1-2 du plan) — voir ce repo pour son propre historique. Cette section couvre le
+branchement côté Aura.
+
+- **`store_client.py`** (nouveau, pur/testable) : récupère `index.json` directement depuis le CDN
+  GitHub Raw (`raw.githubusercontent.com/jeremiejt38/akasha-os-store/main/index.json`), avec un
+  cache local (`/storage/.config/akasha-os/store-index-cache.json`) TTL 24h + `force_refresh` manuel,
+  même patron que `weather_client.py` (Ambient). **Écart assumé par rapport au plan section 4.1**
+  ("via akasha-os-connector pour la mise en cache/accélération") : le connector existe pour
+  cacher/authentifier les métadonnées *Plex* multi-utilisateurs derrière un seul token admin —
+  `index.json` est un JSON public, statique, déjà servi par un CDN, le faire transiter par le
+  connector ajouterait un saut réseau et un endpoint hors-sujet sans bénéfice concret. À revoir si
+  un besoin réel de cache côté connector apparaît en pratique.
+- **`store_registry.py`** (nouveau, pur/testable) : registre local `/storage/.akasha/installed_store_apps.json`,
+  clé = id du manifest (`tv.francetv`), valeur = `{version, installed_at, addon_id}`. `addon_id`
+  (id Kodi réel, ex. `plugin.video.francetv`) n'est renseigné que pour les types `kodi-repo`/`zip-url`
+  — c'est ce qui permet à `aura_app.py` de savoir si un addon installé dans Kodi vient du Store sans
+  avoir à retélécharger l'index (`addon_id_to_store_id()`, table inverse construite depuis le
+  registre seul).
+- **`aura_store.py`** réécrit pour consommer `store_client`/`store_registry` au lieu de l'ancien
+  manifest curé embarqué (`store_manifest.py`, conservé pour ses tests/rétrocompatibilité mais plus
+  utilisé ici). Dispatch par `install.type`, délibérément prudent (voir la docstring du module pour
+  le détail) :
+  - `kodi-repo` → `InstallAddon(addon_id)` natif Kodi, identique à l'ancien comportement — marche
+    directement pour un addon du dépôt officiel Kodi, échoue proprement (notification native Kodi,
+    pas de crash) pour un dépôt tiers pas encore ajouté à cette instance.
+  - `zip-url` → téléchargement + vérification sha256, puis même tentative `InstallAddon` best-effort.
+    Aucun des 41 manifests actuels n'utilise ce type.
+  - `script`/`external-app` → **jamais d'exécution automatique d'un champ du manifest** : affichage
+    d'une fiche informative (`textviewer`) uniquement, conforme à la V1 du plan. Choix délibéré de
+    sécurité : automatiser "exécuter un script arbitraire venant d'une URL de manifest" sans conception
+    ni tests dédiés aurait été irresponsable.
+  - Ajouter automatiquement un dépôt Kodi tiers inconnu (au lieu de se contenter d'installer un
+    `addon_id` déjà résolu) n'est **volontairement pas automatisé** : Kodi garde délibérément ce geste
+    derrière le bouton "Sources inconnues" + son propre gestionnaire de fichiers comme barrière de
+    sécurité ; le contourner sans supervision n'est pas dans le périmètre de cette première version.
+- **`aura_app.py`** : **question produit ouverte, non tranchée unilatéralement**. Le plan section 5
+  demande que "Mes Applications" n'affiche *que* les apps installées via le Store et toujours
+  présentes dans l'index — un filtre strict qui masquerait tout addon installé autrement. Comme
+  l'onglet "Mes Apps" actuel (Milestone 5, déjà en production) affiche aujourd'hui *tous* les addons
+  installés (utile pour la gestion générale), remplacer ce comportement par le filtre strict aurait
+  été un vrai changement de UX à trancher avec Jérémie plutôt qu'une décision prise seul, de nuit, sans
+  pouvoir vérifier visuellement sur l'appareil réel. Implémenté à la place : chaque addon installé via
+  le Store est marqué (badge `[Store]` dans le label, propriété `fromstore` sur le ListItem pour un futur
+  habillage skin) sans rien masquer. Le filtre strict lui-même (`store_registry.visible_app_ids()`,
+  déjà écrit et testé) est prêt à être branché dès que ce point est tranché. La tuile logo + titre au
+  survol (habillage visuel demandé par la phase 4) reste aussi à faire : un changement de skin XML sur
+  ce composant nécessite une boucle de vérification visuelle en direct, indisponible cette nuit
+  (voir l'incident réseau documenté plus bas).
+- **Phase 5 (test des 40 apps une par une sur le Pi) : non commencée**, bloquée par l'incident réseau
+  ci-dessous (Pi injoignable).

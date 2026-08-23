@@ -175,6 +175,38 @@ erreur dans les logs Kodi sur l'ensemble du parcours.
 
 - Connexion Wi-Fi effective (saisie mot de passe + `connmanctl connect`) non exercée en conditions
   réelles (voir étape 3 ci-dessus) -- à valider par Jérémie avec un vrai réseau à portée.
+
+### Incident : test Wi-Fi réel (2026-08-23) — perte totale de connectivité du Pi
+
+En validant le point ouvert ci-dessus directement en SSH (`connmanctl connect` vers le réseau
+Wi-Fi favori "Bbox-3AEEFA4E", donc sans mot de passe à ressaisir), la commande a répondu
+`Connected ...` avec succès, mais le Raspberry Pi a **immédiatement disparu de tout le réseau
+local** dans la foulée : plus aucune réponse ARP/ping sur `192.168.1.88`, aucune trace de son MAC
+Ethernet (`dc:a6:32:...`) ailleurs sur le LAN (`arp-scan --localnet` complet), pendant plus d'une
+heure sans amélioration. Ce n'est pas un simple changement d'IP côté Wi-Fi (un hôte à MAC
+aléatoire est bien apparu séparément sur le LAN peu après, cohérent avec de la randomisation MAC
+Wi-Fi côté connman, mais sans port SSH ouvert dessus) : l'interface Ethernet elle-même a cessé de
+répondre au niveau liaison, ce qui dépasse ce qu'un bug applicatif Aura/Kodi peut expliquer.
+
+**Hypothèse la plus probable** : un conflit de coexistence Ethernet/Wi-Fi côté `connman`
+(bascule de route par défaut, ou perturbation du bail DHCP Ethernet) lors de l'activation
+simultanée des deux interfaces sur le même routeur -- non confirmé faute d'accès aux logs
+`journalctl`/`connmanctl` du Pi après coup (justement inaccessible). Alternative possible : conflit
+MAC/ARP le temps que le commutateur/routeur rafraîchisse sa table (habituellement quelques minutes,
+pas plus d'une heure).
+
+**Suites à donner** (bloquées tant que le Pi n'est pas physiquement redémarré par Jérémie) :
+1. Vérifier `journalctl -u connman` / `kodi.log` autour de l'horodatage de l'incident pour confirmer
+   la cause exacte.
+2. Ne pas retenter de connexion Wi-Fi réelle sans avoir d'abord reproduit ceci de façon contrôlée
+   (ex. avec un accès physique/console de secours disponible), et sans avoir compris la cause.
+3. Envisager de désactiver l'interface Wi-Fi entièrement au niveau connman
+   (`connmanctl disable wifi`) si l'appareil n'a de toute façon jamais vocation à l'utiliser en usage
+   réel (branché en Ethernet dans le salon) -- limiterait le risque à la seule étape Quick Start
+   elle-même, testable de façon plus contrôlée (écran + télécommande sous les yeux) plutôt qu'en
+   pilotage SSH aveugle.
+- Ceci bloque également la Phase 5 du plan `f4e069bb` (protocole de test des 40 apps du Store sur
+  le Pi), qui nécessite le même appareil.
 - Le choix de services cloud gaming (étape 7) est sauvegardé mais pas encore consommé par le
   module Jeux d'Aura pour pré-activer/filtrer les tuiles -- prochaine étape naturelle si Jérémie le
   souhaite.

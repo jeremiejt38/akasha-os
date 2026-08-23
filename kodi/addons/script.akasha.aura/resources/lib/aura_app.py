@@ -13,6 +13,7 @@ import xbmcgui
 
 import addons_inventory
 import aura_store
+import store_registry
 
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
@@ -43,6 +44,25 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         raw_response = xbmc.executeJSONRPC(json.dumps(request))
         all_addons = addons_inventory.parse_get_addons_response(raw_response)
         self.addons = addons_inventory.sort_addons(all_addons, self.pinned_ids)
+        # Plan f4e069bb Phase 4 asks for a "Mes Applications" view showing
+        # *only* Store-installed apps still present in the live catalogue
+        # (tiles, logo, title on hover) -- deliberately NOT implemented as
+        # a hard replacement of this tab's existing "every installed addon"
+        # inventory (Milestone 5's own, already-shipped scope): hiding
+        # every non-Store-installed addon here would be a real UX
+        # regression for a feature already in daily use, and isn't a call
+        # to make unilaterally without live-device verification. Each
+        # addon installed via the Store is flagged instead (self.store_ids)
+        # so the skin can badge it, and the strict filtered/tiled view
+        # described by the plan is left as a follow-up needing an explicit
+        # product decision -- see docs/aura/decisions.md.
+        try:
+            registry = store_registry.load_registry()
+            self.store_ids = store_registry.addon_id_to_store_id(registry)
+        except Exception as e:
+            xbmc.log('Akasha Aura App: store registry load failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            self.store_ids = {}
         self._render()
 
     def _render(self):
@@ -57,8 +77,11 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             lst.reset()
             for addon in self.addons:
                 marker = '* ' if addon['addonid'] in self.pinned_ids else '  '
-                label = '{}{} (v{})'.format(marker, addon['name'], addon['version'])
+                store_badge = ' [Store]' if addon['addonid'] in self.store_ids else ''
+                label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
                 li = xbmcgui.ListItem(label)
+                li.setProperty(
+                    'fromstore', '1' if addon['addonid'] in self.store_ids else '0')
                 lst.addItem(li)
             if self.addons:
                 self.setFocus(lst)
@@ -93,6 +116,15 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             if addon:
                 xbmc.executebuiltin(
                     'ActivateWindow(AddonInformation,{},return)'.format(addon['addonid']))
+                store_app_id = self.store_ids.get(addon['addonid'])
+                if store_app_id:
+                    # Optimistic: same caveat as aura_store.py's own
+                    # install/uninstall bookkeeping -- AddonInformation's
+                    # uninstall confirmation is native Kodi UI we don't get
+                    # a direct callback from, so this assumes the user
+                    # went through with it. Corrected on next _reload() via
+                    # the real Addons.GetAddons() check anyway.
+                    store_registry.record_uninstall(store_app_id)
 
         elif controlID == 5010:
             addon = self._selected_addon()

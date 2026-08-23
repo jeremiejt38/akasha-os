@@ -38,14 +38,17 @@
             <onleft>6001</onleft>
         </control>
 
-        <!-- Toolbar -->
+        <!-- Toolbar: manual catalogue refresh (plan f4e069bb section 1.4,
+             "cache local avec refresh manuel + refresh auto toutes les
+             24h"). Install/uninstall themselves happen directly from the
+             list below (clicking an item), not from this button. -->
         <control type="button" id="6001">
             <left>60</left>
             <top>120</top>
             <width>320</width>
             <height>50</height>
             <font>font12</font>
-            <label>Installer / Deja installe</label>
+            <label>Rafraichir le catalogue</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
