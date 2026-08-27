@@ -41,6 +41,10 @@ is_connected() {
     [ "$state" = "ready" ] || [ "$state" = "online" ]
 }
 
+is_ethernet_connected() {
+    [ "$(cat /sys/class/net/eth0/carrier 2>/dev/null)" = "1" ]
+}
+
 ensure_passphrase() {
     # Ensure the connman config exists with the correct passphrase.
     # Does NOT remove anything — only creates/overwrites the settings file.
@@ -115,7 +119,7 @@ log_event "WiFi watchdog started"
 sleep 15
 
 while true; do
-    if ! is_connected; then
+    if ! is_ethernet_connected && ! is_connected; then
         try_reconnect
         # Cooldown after reconnect attempt to avoid fighting with Kodi
         sleep "$RECONNECT_COOLDOWN"

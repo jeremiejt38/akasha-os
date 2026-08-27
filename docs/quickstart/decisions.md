@@ -195,18 +195,16 @@ simultanée des deux interfaces sur le même routeur -- non confirmé faute d'ac
 MAC/ARP le temps que le commutateur/routeur rafraîchisse sa table (habituellement quelques minutes,
 pas plus d'une heure).
 
-**Suites à donner** (bloquées tant que le Pi n'est pas physiquement redémarré par Jérémie) :
-1. Vérifier `journalctl -u connman` / `kodi.log` autour de l'horodatage de l'incident pour confirmer
-   la cause exacte.
-2. Ne pas retenter de connexion Wi-Fi réelle sans avoir d'abord reproduit ceci de façon contrôlée
-   (ex. avec un accès physique/console de secours disponible), et sans avoir compris la cause.
-3. Envisager de désactiver l'interface Wi-Fi entièrement au niveau connman
-   (`connmanctl disable wifi`) si l'appareil n'a de toute façon jamais vocation à l'utiliser en usage
-   réel (branché en Ethernet dans le salon) -- limiterait le risque à la seule étape Quick Start
-   elle-même, testable de façon plus contrôlée (écran + télécommande sous les yeux) plutôt qu'en
-   pilotage SSH aveugle.
-- Ceci bloque également la Phase 5 du plan `f4e069bb` (protocole de test des 40 apps du Store sur
-  le Pi), qui nécessite le même appareil.
+**Résolution (2026-08-27)** : les logs ont confirmé le conflit de coexistence. Le watchdog tentait
+systématiquement de connecter le Wi-Fi dès qu'il était déconnecté, y compris lorsque l'Ethernet
+était actif. Il avait par ailleurs été désactivé, ce qui supprimait tout basculement après une vraie
+perte Ethernet. Le watchdog ignore désormais le Wi-Fi tant que `/sys/class/net/eth0/carrier` vaut
+`1`, et ne le connecte qu'en secours lorsque le lien Ethernet tombe.
+
+Test contrôlé validé : mise hors ligne temporaire d'`eth0`, connexion automatique du Wi-Fi 5 GHz
+en `192.168.1.89`, puis déconnexion du Wi-Fi et retour nominal de l'Ethernet en `192.168.1.88`.
+Le service `wifi-watchdog.service` est de nouveau activé au démarrage et reste actif. Le Pi est donc
+à nouveau disponible pour la Phase 5 du plan `f4e069bb`.
 - Le choix de services cloud gaming (étape 7) est sauvegardé mais pas encore consommé par le
   module Jeux d'Aura pour pré-activer/filtrer les tuiles -- prochaine étape naturelle si Jérémie le
   souhaite.
