@@ -10,7 +10,7 @@
 # Runs as a systemd service (loop with sleep interval).
 
 SSID="Bbox-3AEEFA4E-5GHz"
-PASSPHRASE="k6Vr76JGnxPQZH7ZHc"
+PASSPHRASE="$(awk -F= '/^Passphrase=/{print substr($0, index($0, "=") + 1); exit}' /storage/.cache/connman/wifi.config 2>/dev/null)"
 CONNMAN_SVC_ID="wifi_dca632af47bf_42626f782d33414545464134452d3547487a_managed_psk"
 LOG="/storage/.config/wifi-watchdog.log"
 CHECK_INTERVAL=10  # seconds between checks
@@ -46,6 +46,7 @@ is_ethernet_connected() {
 }
 
 ensure_passphrase() {
+    [ -n "$PASSPHRASE" ] || return 1
     # Ensure the connman config exists with the correct passphrase.
     # Does NOT remove anything — only creates/overwrites the settings file.
     local svc_dir="/storage/.cache/connman/${CONNMAN_SVC_ID}"
@@ -69,7 +70,10 @@ try_reconnect() {
     log_event "DISCONNECT detected — attempting reconnection"
 
     # Step 1: Make sure the passphrase is in the config
-    ensure_passphrase
+    if ! ensure_passphrase; then
+        log_event "ERROR: No passphrase found in connman provisioning"
+        return 1
+    fi
     log_event "Passphrase ensured in connman config"
 
     # Step 2: Enable WiFi and scan (non-destructive)
