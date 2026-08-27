@@ -176,7 +176,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             xbmc.executebuiltin('InstallAddon({})'.format(addon_id))
             monitor = xbmc.Monitor()
             installed = False
-            for _ in range(30):
+            for _ in range(90):
                 if monitor.waitForAbort(1):
                     break
                 if addon_id in self._fetch_installed_kodi_addon_ids():
