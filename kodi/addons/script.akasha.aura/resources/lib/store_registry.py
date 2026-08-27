@@ -47,7 +47,7 @@ def _save_registry(entries, path=REGISTRY_PATH):
 
 
 def record_install(app_id, version, installed_at, addon_id=None, name=None,
-                   install=None, path=REGISTRY_PATH):
+                   install=None, icon=None, path=REGISTRY_PATH):
     """Add/update a registry entry after a successful install.
 
     `addon_id` is the real Kodi addon id (e.g. "plugin.video.francetv"),
@@ -75,6 +75,8 @@ def record_install(app_id, version, installed_at, addon_id=None, name=None,
         entry['name'] = name
     if install is not None:
         entry['install'] = install
+    if icon is not None:
+        entry['icon'] = icon
     entries[app_id] = entry
     _save_registry(entries, path)
     return entries

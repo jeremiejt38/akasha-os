@@ -68,6 +68,21 @@ class TestValidateInstall(unittest.TestCase):
         self.assertTrue(ok)
 
 
+class TestResolveIconUrl(unittest.TestCase):
+    def test_resolves_relative_store_icon(self):
+        self.assertEqual(
+            store_external.resolve_icon_url('video.netflix', 'icon.png'),
+            store_external.STORE_RAW_BASE + '/video.netflix/icon.png')
+
+    def test_preserves_absolute_icon_url(self):
+        self.assertEqual(
+            store_external.resolve_icon_url('video.netflix', 'https://cdn.example/icon.png'),
+            'https://cdn.example/icon.png')
+
+    def test_empty_icon_stays_empty(self):
+        self.assertEqual(store_external.resolve_icon_url('video.netflix', ''), '')
+
+
 class TestBuildSyntheticAddon(unittest.TestCase):
     def test_uses_index_entry_first(self):
         idx = {
