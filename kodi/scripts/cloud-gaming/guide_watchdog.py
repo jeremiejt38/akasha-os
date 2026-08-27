@@ -19,6 +19,7 @@ import time
 
 HOLD_SECONDS = 5
 POLL_INTERVAL = 0.2
+DOCKER = "/storage/.kodi/addons/service.system.docker/bin/docker"
 
 # struct input_event sur Linux 64 bits : { long tv_sec; long tv_usec; __u16 type; __u16 code; __s32 value; }
 EVENT_FORMAT = "llHHi"
@@ -53,7 +54,7 @@ def find_gamepad_events():
 
 
 def stop_container(container):
-    subprocess.run(["docker", "stop", container], check=False)
+    subprocess.run([DOCKER, "stop", container], check=False)
 
 
 def main():

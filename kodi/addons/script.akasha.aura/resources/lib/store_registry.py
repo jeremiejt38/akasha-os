@@ -46,7 +46,8 @@ def _save_registry(entries, path=REGISTRY_PATH):
         pass
 
 
-def record_install(app_id, version, installed_at, addon_id=None, path=REGISTRY_PATH):
+def record_install(app_id, version, installed_at, addon_id=None, name=None,
+                   install=None, path=REGISTRY_PATH):
     """Add/update a registry entry after a successful install.
 
     `addon_id` is the real Kodi addon id (e.g. "plugin.video.francetv"),
@@ -57,13 +58,24 @@ def record_install(app_id, version, installed_at, addon_id=None, path=REGISTRY_P
     have the registry on hand, like aura_app.py's addon inventory, can
     cross-reference "is this installed Kodi addon one the Store manages"
     without a network fetch.
+
+    `name` and `install` are stored for `external-app` entries: `name` keeps
+    a human-readable label for the synthetic addon list, and `install` (the
+    original install block from the manifest) holds the validated source_url
+    and optional deep_link used at launch time. They are ignored for kodi-repo
+    and zip-url installs.
     """
     entries = load_registry(path)
-    entries[app_id] = {
+    entry = {
         'version': version,
         'installed_at': installed_at,
         'addon_id': addon_id,
     }
+    if name is not None:
+        entry['name'] = name
+    if install is not None:
+        entry['install'] = install
+    entries[app_id] = entry
     _save_registry(entries, path)
     return entries
 
