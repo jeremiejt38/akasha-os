@@ -761,4 +761,9 @@ la vue "toutes les applications". Les apps externes portent un badge `[Web]` pou
   synthétiques, le filtrage/sortie du registre et le montage de la commande de lancement. En direct
   sur le Pi, Amazon Music a été enregistré via le menu Store, retrouvé dans Mes Applications avec
   le badge `[Web]`, lancé dans le conteneur Chromium, puis le conteneur a été arrêté de façon
-  contrôlée avec retour automatique à Kodi. Le registre a ensuite été nettoyé.
+  contrôlée avec retour automatique à Kodi. Le registre a ensuite été nettoyé. Les 7 manifests
+  `kodi-repo` ont également été vérifiés : leurs 6 addons uniques sont installés et activés
+  (YouTube est référencé par deux manifests). SoundCloud 4.1.0 et Catch-up TV & More
+  0.2.41+matrix.1 ont été installés pendant le test ; les quatre autres étaient déjà présents et
+  n'ont pas été désinstallés. Kodi ne fournissant aucune API publique de désinstallation, les deux
+  petits addons de test restent installés plutôt que de contourner la confirmation native.
