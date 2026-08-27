@@ -9,4 +9,4 @@ matchbox-window-manager -use_titlebar no &
 sleep 1
 
 # Lancer Chromium avec les arguments passés
-exec 
+exec "$@"

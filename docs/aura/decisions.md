@@ -715,5 +715,50 @@ branchement côté Aura.
   survol (habillage visuel demandé par la phase 4) reste aussi à faire : un changement de skin XML sur
   ce composant nécessite une boucle de vérification visuelle en direct, indisponible cette nuit
   (voir l'incident réseau documenté plus bas).
-- **Phase 5 (test des 40 apps une par une sur le Pi) : non commencée**, bloquée par l'incident réseau
-  ci-dessous (Pi injoignable).
+- **Phase 5** : le catalogue complet de 41 entrées a été parcouru en direct sur le Pi le 2026-08-27
+  (41 libellés uniques). Les 34 `external-app` disposent désormais d'un flux installable sous forme
+  d'app web Chromium ; les manifests `kodi-repo` restent traités comme des addons Kodi.
+
+## Applications web `external-app` — lancement via Chromium sans exécuter de scripts arbitraires
+
+Le manifest du Store supporte un type `external-app` (applications web qu'on ne veut pas embarquer
+en tant qu'addon Kodi). Cette session implémente un mécanisme **sûr et générique** pour les
+enregistrer, les afficher et les lancer, en réutilisant le lanceur cloud-gaming existant.
+
+- **Validation stricte des URL** (`store_external.py`, pur/testable) : seuls les schémas `http` et
+  `https` avec un hôte sont acceptés pour `source_url` et `deep_link`. Tout autre schéma
+  (`javascript:`, `file:`, `data:`, chemin relatif, etc.) est rejeté avant stockage ou lancement,
+  afin de ne jamais exécuter un script arbitraire ou charger une ressource locale sensible.
+- **Installation = enregistrement local uniquement** : pour `external-app`, l'installation écrit
+  simplement une entrée dans `/storage/.akasha/installed_store_apps.json` via
+  `store_registry.record_install()`. Aucun fichier n'est exécuté automatiquement, aucun paquet n'est
+  téléchargé. Le bloc `install` original (source_url + deep_link) est conservé dans le registre pour
+  le lancement ultérieur, même hors ligne.
+- **Affichage dans Aura App** (`aura_app.py`) : les apps `external-app` sont ajoutées sous forme
+d'addons synthétiques (`external:<store_app_id>`) **à côté de l'inventaire complet des vrais addons
+installés**. Aucun filtrage strict n'est appliqué : l'utilisateur a explicitement demandé de garder
+la vue "toutes les applications". Les apps externes portent un badge `[Web]` pour les distinguer.
+- **Lancement Chromium** : `store_external.launch_command_args()` réutilise le script
+  `/storage/.kodi/scripts/cloud-gaming/launch.sh` existant, donc le watchdog manette (retour à Kodi)
+  et le redémarrage de Kodi sont identiques au cloud-gaming. Le processus est détaché via
+  `systemd-run`, comme dans `script.cloud.gaming/default.py`, pour survivre à l'arrêt de
+  `kodi.service`.
+- **Corrections de la chaîne Chromium** : l'argument `URL` était précédemment ignoré (`""` en fin
+  de commande), le binaire demandé (`chromium-browser`) n'existait pas dans l'image, `docker run -it`
+  échouait sous `systemd-run` sans TTY, le PATH systemd ne contenait pas le client Docker LibreELEC,
+  et l'`ENTRYPOINT` de l'image était mal formé. Le lanceur utilise maintenant le chemin Docker absolu,
+  fonctionne sans TTY, monte l'entrypoint corrigé et transmet l'URL à `chromium`. Le watchdog utilise
+  lui aussi le chemin Docker absolu.
+- **Désinstallation** : pour une app `external-app`, le bouton "Désinstaller" supprime
+  **uniquement l'entrée du registre** ; il n'y a aucun vrai addon Kodi à retirer. Pour les types
+  `kodi-repo`/`zip-url`, le comportement existant (fenêtre `AddonInformation` native + suppression
+  du registre) est conservé.
+- **Différenciation dans le Store** (`aura_store.py`) : le Store n'ayant qu'un simple clic sur la
+  liste, un menu contextuel natif est utilisé pour `external-app` : **Installer / Voir les détails**
+  quand non installé, **Lancer / Voir les détails / Désinstaller** quand installé. C'est la
+  distinction la plus cohérente possible avec les contrôles existants.
+- **Tests** : `tests/test_store_external.py` couvre la validation d'URL, la construction d'addons
+  synthétiques, le filtrage/sortie du registre et le montage de la commande de lancement. En direct
+  sur le Pi, Amazon Music a été enregistré via le menu Store, retrouvé dans Mes Applications avec
+  le badge `[Web]`, lancé dans le conteneur Chromium, puis le conteneur a été arrêté de façon
+  contrôlée avec retour automatique à Kodi. Le registre a ensuite été nettoyé.

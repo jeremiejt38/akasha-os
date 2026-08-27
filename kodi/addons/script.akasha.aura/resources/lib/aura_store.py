@@ -31,6 +31,7 @@ import datetime
 import hashlib
 import json
 import os
+import subprocess
 import tempfile
 import urllib.request
 
@@ -39,6 +40,7 @@ import xbmcaddon
 import xbmcgui
 
 import store_client
+import store_external
 import store_registry
 
 ACTION_PREVIOUS_MENU = 10
@@ -147,6 +149,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             'Version : {}'.format(entry.get('version', '-')),
             'Type d\'installation : {}'.format(install.get('type', '-')),
             'Source : {}'.format(install.get('source_url', '-')),
+            'Lien profond : {}'.format(install.get('deep_link') or '-'),
             '',
             entry.get('legal_notice', ''),
         ]
@@ -159,23 +162,41 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
                   .format(entry['id'], itype), xbmc.LOGINFO)
 
         if entry['installed']:
-            if xbmcgui.Dialog().yesno(
-                    'Akasha Store',
-                    '{} est deja installe. Le desinstaller ?'.format(entry['name'])):
-                self._uninstall(entry)
+            if itype == 'external-app':
+                self._manage_external(entry)
+            else:
+                if xbmcgui.Dialog().yesno(
+                        'Akasha Store',
+                        '{} est deja installe. Le desinstaller ?'.format(entry['name'])):
+                    self._uninstall(entry)
             return
 
         if itype == 'kodi-repo':
             addon_id = install.get('addon_id')
             xbmc.executebuiltin('InstallAddon({})'.format(addon_id))
-            xbmcgui.Dialog().notification(
-                'Akasha Store', 'Installation de {} lancee'.format(entry['name']),
-                xbmcgui.NOTIFICATION_INFO, 3000)
-            store_registry.record_install(
-                entry['id'], entry.get('version', ''), _now_iso(), addon_id=addon_id)
+            monitor = xbmc.Monitor()
+            installed = False
+            for _ in range(30):
+                if monitor.waitForAbort(1):
+                    break
+                if addon_id in self._fetch_installed_kodi_addon_ids():
+                    installed = True
+                    break
+            if installed:
+                store_registry.record_install(
+                    entry['id'], entry.get('version', ''), _now_iso(), addon_id=addon_id)
+                xbmcgui.Dialog().notification(
+                    'Akasha Store', '{} installe'.format(entry['name']),
+                    xbmcgui.NOTIFICATION_INFO, 3000)
+            else:
+                xbmcgui.Dialog().notification(
+                    'Akasha Store', 'Installation non confirmee : {}'.format(entry['name']),
+                    xbmcgui.NOTIFICATION_ERROR, 4000)
         elif itype == 'zip-url':
             self._install_from_zip(entry, install)
-        elif itype in ('script', 'external-app'):
+        elif itype == 'external-app':
+            self._manage_external(entry)
+        elif itype == 'script':
             # Informative only in V1 (plan section 3): never execute
             # anything from a manifest field automatically.
             self._show_detail(entry)
@@ -249,6 +270,88 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
                 'ActivateWindow(AddonInformation,{},return)'.format(addon_id))
         store_registry.record_uninstall(entry['id'])
         self._reload()
+
+    def _manage_external(self, entry):
+        """Context menu for an `external-app` Store entry.
+
+        Existing controls only give us a single list click, so we use a native
+        Kodi context menu to distinguish install / launch / detail / uninstall
+        as coherently as possible.
+        """
+        installed = entry['installed']
+        if installed:
+            options = ['Lancer', 'Voir les details', 'Desinstaller']
+        else:
+            options = ['Installer', 'Voir les details']
+
+        choice = xbmcgui.Dialog().contextmenu(options)
+        if choice < 0:
+            return
+
+        if options[choice] == 'Lancer':
+            self._launch_external(entry)
+        elif options[choice] == 'Voir les details':
+            self._show_detail(entry)
+        elif options[choice] == 'Installer':
+            self._install_external(entry)
+            self._reload()
+        elif options[choice] == 'Desinstaller':
+            self._uninstall_external(entry)
+            self._reload()
+
+    def _install_external(self, entry):
+        install = entry.get('install', {})
+        source_url = install.get('source_url')
+        deep_link = entry.get('deep_link')
+        ok, err = store_external.validate_install(source_url, deep_link)
+        if not ok:
+            xbmc.log('Akasha Aura Store: invalid external app {}: {}'
+                     .format(entry['id'], err), xbmc.LOGERROR)
+            xbmcgui.Dialog().notification(
+                'Akasha Store', 'URL invalide : {}'.format(entry['name']),
+                xbmcgui.NOTIFICATION_ERROR, 4000)
+            return
+
+        persisted_install = dict(install)
+        if deep_link:
+            persisted_install['deep_link'] = deep_link
+        store_registry.record_install(
+            entry['id'], entry.get('version', ''), _now_iso(), addon_id=None,
+            name=entry.get('name', ''), install=persisted_install)
+        xbmcgui.Dialog().notification(
+            'Akasha Store', '{} enregistre'.format(entry['name']),
+            xbmcgui.NOTIFICATION_INFO, 3000)
+
+    def _launch_external(self, entry):
+        install = entry.get('install', {})
+        source_url = install.get('source_url', '')
+        deep_link = entry.get('deep_link') or install.get('deep_link') or ''
+        name = entry.get('name', 'Web App')
+
+        ok, err = store_external.validate_install(source_url, deep_link or None)
+        if not ok:
+            xbmc.log('Akasha Aura Store: cannot launch {}: {}'
+                     .format(entry['id'], err), xbmc.LOGERROR)
+            xbmcgui.Dialog().notification(
+                'Akasha Store', 'URL invalide : {}'.format(name),
+                xbmcgui.NOTIFICATION_ERROR, 4000)
+            return
+
+        args = store_external.launch_command_args(
+            source_url, name, deep_link=deep_link or None, app_id=entry['id'])
+        try:
+            # Detach from Kodi's cgroup before launch.sh stops kodi.service.
+            subprocess.Popen(args)
+            xbmc.sleep(1000)
+        except Exception as e:
+            xbmc.log('Akasha Aura Store: failed to launch {}: {}'
+                     .format(entry['id'], e), xbmc.LOGERROR)
+
+    def _uninstall_external(self, entry):
+        store_registry.record_uninstall(entry['id'])
+        xbmcgui.Dialog().notification(
+            'Akasha Store', '{} retire'.format(entry['name']),
+            xbmcgui.NOTIFICATION_INFO, 3000)
 
     def onClick(self, controlID):
         if controlID == INSTALL_BUTTON_ID:

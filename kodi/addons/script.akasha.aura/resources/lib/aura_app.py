@@ -6,6 +6,7 @@ actions. Uninstall is delegated to the native AddonInformation window
 (see docs/aura/decisions.md — no public JSON-RPC uninstall method exists).
 """
 import json
+import subprocess
 
 import xbmc
 import xbmcaddon
@@ -13,6 +14,7 @@ import xbmcgui
 
 import addons_inventory
 import aura_store
+import store_external
 import store_registry
 
 ACTION_PREVIOUS_MENU = 10
@@ -56,9 +58,20 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         # so the skin can badge it, and the strict filtered/tiled view
         # described by the plan is left as a follow-up needing an explicit
         # product decision -- see docs/aura/decisions.md.
+        #
+        # Web apps installed via the Store (`external-app`) are added as
+        # synthetic entries alongside the real addon inventory: the user
+        # explicitly asked to keep the complete inventory, so we never filter
+        # it to Store-only apps. External apps have no real Kodi addon id, so
+        # they are represented by a synthetic `external:<store_app_id>` id.
         try:
             registry = store_registry.load_registry()
             self.store_ids = store_registry.addon_id_to_store_id(registry)
+            external = store_external.build_synthetic_addons(registry)
+            self.addons = addons_inventory.sort_addons(
+                self.addons + external, self.pinned_ids)
+            for ext in external:
+                self.store_ids[ext['addonid']] = ext['store_id']
         except Exception as e:
             xbmc.log('Akasha Aura App: store registry load failed: {}'.format(e),
                      xbmc.LOGWARNING)
@@ -77,11 +90,18 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             lst.reset()
             for addon in self.addons:
                 marker = '* ' if addon['addonid'] in self.pinned_ids else '  '
-                store_badge = ' [Store]' if addon['addonid'] in self.store_ids else ''
+                if addon.get('is_external'):
+                    store_badge = ' [Web]'
+                elif addon['addonid'] in self.store_ids:
+                    store_badge = ' [Store]'
+                else:
+                    store_badge = ''
                 label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
                 li = xbmcgui.ListItem(label)
                 li.setProperty(
                     'fromstore', '1' if addon['addonid'] in self.store_ids else '0')
+                li.setProperty(
+                    'is_external', '1' if addon.get('is_external') else '0')
                 lst.addItem(li)
             if self.addons:
                 self.setFocus(lst)
@@ -97,11 +117,36 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             return self.addons[pos]
         return None
 
+    def _launch_external_app(self, addon):
+        source_url = addon.get('source_url', '')
+        deep_link = addon.get('deep_link') or ''
+        ok, err = store_external.validate_install(
+            source_url, deep_link or None)
+        if not ok:
+            xbmc.log('Akasha Aura App: cannot launch {}: {}'
+                     .format(addon.get('store_id', ''), err), xbmc.LOGERROR)
+            return
+
+        args = store_external.launch_command_args(
+            source_url, addon['name'], deep_link=deep_link or None,
+            app_id=addon.get('store_id'))
+        try:
+            # Detach from Kodi's cgroup: launch.sh stops kodi.service and
+            # would otherwise kill this Python process with it.
+            subprocess.Popen(args)
+            xbmc.sleep(1000)
+        except Exception as e:
+            xbmc.log('Akasha Aura App: failed to launch {}: {}'
+                     .format(addon.get('store_id', ''), e), xbmc.LOGERROR)
+
     def onClick(self, controlID):
         if controlID == 5001:
             addon = self._selected_addon()
             if addon:
-                xbmc.executebuiltin('RunAddon({})'.format(addon['addonid']))
+                if addon.get('is_external'):
+                    self._launch_external_app(addon)
+                else:
+                    xbmc.executebuiltin('RunAddon({})'.format(addon['addonid']))
 
         elif controlID == 5002:
             addon = self._selected_addon()
@@ -114,17 +159,24 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         elif controlID == 5003:
             addon = self._selected_addon()
             if addon:
-                xbmc.executebuiltin(
-                    'ActivateWindow(AddonInformation,{},return)'.format(addon['addonid']))
-                store_app_id = self.store_ids.get(addon['addonid'])
-                if store_app_id:
-                    # Optimistic: same caveat as aura_store.py's own
-                    # install/uninstall bookkeeping -- AddonInformation's
-                    # uninstall confirmation is native Kodi UI we don't get
-                    # a direct callback from, so this assumes the user
-                    # went through with it. Corrected on next _reload() via
-                    # the real Addons.GetAddons() check anyway.
-                    store_registry.record_uninstall(store_app_id)
+                if addon.get('is_external'):
+                    if xbmcgui.Dialog().yesno(
+                            'Applications',
+                            'Desinstaller {} ?'.format(addon['name'])):
+                        store_registry.record_uninstall(addon['store_id'])
+                        self._reload()
+                else:
+                    xbmc.executebuiltin(
+                        'ActivateWindow(AddonInformation,{},return)'.format(addon['addonid']))
+                    store_app_id = self.store_ids.get(addon['addonid'])
+                    if store_app_id:
+                        # Optimistic: same caveat as aura_store.py's own
+                        # install/uninstall bookkeeping -- AddonInformation's
+                        # uninstall confirmation is native Kodi UI we don't get
+                        # a direct callback from, so this assumes the user
+                        # went through with it. Corrected on next _reload() via
+                        # the real Addons.GetAddons() check anyway.
+                        store_registry.record_uninstall(store_app_id)
 
         elif controlID == 5010:
             addon = self._selected_addon()
