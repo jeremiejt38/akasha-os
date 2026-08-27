@@ -19,6 +19,7 @@ from urllib.parse import urlparse
 
 EXTERNAL_ADDON_ID_PREFIX = 'external:'
 DEFAULT_LAUNCH_SCRIPT = '/storage/.kodi/scripts/cloud-gaming/launch.sh'
+STORE_RAW_BASE = 'https://raw.githubusercontent.com/jeremiejt38/akasha-os-store/main/apps'
 
 
 def is_valid_http_url(url):
@@ -66,6 +67,15 @@ def external_addon_id(store_app_id):
     return '{}{}'.format(EXTERNAL_ADDON_ID_PREFIX, store_app_id)
 
 
+def resolve_icon_url(store_app_id, icon):
+    if is_valid_http_url(icon):
+        return icon.strip()
+    if not isinstance(icon, str) or not icon.strip():
+        return ''
+    return '{}/{}/{}'.format(
+        STORE_RAW_BASE, store_app_id, icon.strip().lstrip('/'))
+
+
 def _sanitize_unit_name(app_id):
     """Make a store app id safe for use in a systemd unit name."""
     return re.sub(r'[^A-Za-z0-9_.\\-]', '_', str(app_id))
@@ -93,9 +103,9 @@ def build_synthetic_addon(store_app_id, index_entry=None, registry_entry=None):
     summary = _first_non_empty(
         index.get('description'), index.get('summary'),
         registry.get('description'), registry.get('summary'), '')
-    icon = _first_non_empty(
+    icon = resolve_icon_url(store_app_id, _first_non_empty(
         index.get('icon'), index.get('thumbnail'),
-        registry.get('icon'), registry.get('thumbnail'), '')
+        registry.get('icon'), registry.get('thumbnail'), ''))
 
     source_url = install.get('source_url', '') if isinstance(install, dict) else ''
     deep_link = _first_non_empty(

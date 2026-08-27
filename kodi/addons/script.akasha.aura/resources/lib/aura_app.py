@@ -98,6 +98,8 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
                     store_badge = ''
                 label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
                 li = xbmcgui.ListItem(label)
+                if addon.get('icon'):
+                    li.setArt({'icon': addon['icon'], 'thumb': addon['icon']})
                 li.setProperty(
                     'fromstore', '1' if addon['addonid'] in self.store_ids else '0')
                 li.setProperty(

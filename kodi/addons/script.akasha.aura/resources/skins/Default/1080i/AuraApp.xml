@@ -110,7 +110,7 @@
         </control>
 
         <!-- Main list -->
-        <control type="list" id="5010">
+        <control type="panel" id="5010">
             <left>60</left>
             <top>250</top>
             <width>1800</width>
@@ -118,24 +118,39 @@
             <onup>5001</onup>
             <ondown>5010</ondown>
             <onleft>5030</onleft>
-            <itemlayout width="1800" height="50">
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>1800</width>
-                    <height>50</height>
-                    <font>font12</font>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>77FFFFFF</textcolor>
+            <itemlayout width="280" height="240">
+                <control type="image">
+                    <left>30</left>
+                    <top>10</top>
+                    <width>220</width>
+                    <height>190</height>
+                    <aspectratio align="center" aligny="center">keep</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
                 </control>
             </itemlayout>
-            <focusedlayout width="1800" height="50">
-                <control type="label">
-                    <left>0</left>
+            <focusedlayout width="280" height="240">
+                <control type="image">
+                    <left>20</left>
                     <top>0</top>
-                    <width>1800</width>
-                    <height>50</height>
+                    <width>240</width>
+                    <height>210</height>
+                    <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>35</left>
+                    <top>15</top>
+                    <width>210</width>
+                    <height>170</height>
+                    <aspectratio align="center" aligny="center">keep</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                </control>
+                <control type="label">
+                    <left>10</left>
+                    <top>190</top>
+                    <width>260</width>
+                    <height>40</height>
                     <font>font12</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>

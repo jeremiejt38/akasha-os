@@ -317,7 +317,8 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             persisted_install['deep_link'] = deep_link
         store_registry.record_install(
             entry['id'], entry.get('version', ''), _now_iso(), addon_id=None,
-            name=entry.get('name', ''), install=persisted_install)
+            name=entry.get('name', ''), install=persisted_install,
+            icon=store_external.resolve_icon_url(entry['id'], entry.get('icon', '')))
         xbmcgui.Dialog().notification(
             'Akasha Store', '{} enregistre'.format(entry['name']),
             xbmcgui.NOTIFICATION_INFO, 3000)
