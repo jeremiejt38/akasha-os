@@ -39,14 +39,20 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
+import paged_list
 import store_client
 import store_external
 import store_registry
 
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
+ACTION_MOVE_LEFT = 1
+ACTION_MOVE_RIGHT = 2
+ACTION_MOVE_UP = 3
+ACTION_MOVE_DOWN = 4
 
 HEADER_LABEL_ID = 6000
+STORE_PAGE_SIZE = 30
 INSTALL_BUTTON_ID = 6001
 STATUS_LABEL_ID = 6020
 LIST_ID = 6010
@@ -70,6 +76,13 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         super().__init__(*args, **kwargs)
         self.addon = xbmcaddon.Addon('script.akasha.aura')
         self.entries = []
+        self._all_entries = []
+        self._paged = None
+
+    def _fetch_page(self, offset, limit):
+        """Local pagination: store catalogue is in memory; slice a page."""
+        page = self._all_entries[offset:offset + limit]
+        return page, len(self._all_entries)
 
     def onInit(self):
         try:
@@ -99,20 +112,26 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         installed_kodi_ids = self._fetch_installed_kodi_addon_ids()
         registry = store_registry.load_registry()
 
-        self.entries = []
+        self._all_entries = []
         for entry in index.get('entries', []):
             install = entry.get('install', {})
             if install.get('type') in ('kodi-repo', 'zip-url'):
                 installed = install.get('addon_id') in installed_kodi_ids
             else:
                 installed = entry['id'] in registry
-            self.entries.append(dict(entry, installed=installed))
+            self._all_entries.append(dict(entry, installed=installed))
+
+        self._paged = paged_list.PagedList(
+            self._fetch_page, page_size=STORE_PAGE_SIZE)
+        self._paged.load_initial()
+        self.entries = self._paged.items
         self._render()
 
     def _render(self):
         try:
             status = self.getControl(STATUS_LABEL_ID)
-            status.setLabel('{} application(s) proposee(s)'.format(len(self.entries)))
+            total = self._paged.total if self._paged else len(self.entries)
+            status.setLabel('{} application(s) proposee(s)'.format(total))
         except RuntimeError:
             pass
 
@@ -369,4 +388,28 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         if aid in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
             self.close()
             return
+        if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
+            try:
+                pos = self.getControl(LIST_ID).getSelectedPosition()
+            except RuntimeError:
+                pos = 0
+            if self._paged:
+                new_items = self._paged.maybe_load_more(pos)
+                if new_items:
+                    self.entries = self._paged.items
+                    self._append_items(new_items)
         super().onAction(action)
+
+    def _append_items(self, new_items):
+        """Append newly paged items to the panel without a full reset."""
+        try:
+            lst = self.getControl(LIST_ID)
+            for entry in new_items:
+                state = 'Installe' if entry['installed'] else 'Non installe'
+                category = entry.get('category', '')
+                li = xbmcgui.ListItem(entry['name'], entry.get('description', ''))
+                li.setProperty('installed', '1' if entry['installed'] else '0')
+                li.setLabel2('{} — {} — {}'.format(category, entry.get('description', ''), state))
+                lst.addItem(li)
+        except Exception as e:
+            xbmc.log('Akasha Aura Store: append render error: {}'.format(e), xbmc.LOGERROR)
