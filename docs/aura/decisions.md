@@ -767,3 +767,9 @@ la vue "toutes les applications". Les apps externes portent un badge `[Web]` pou
   0.2.41+matrix.1 ont été installés pendant le test ; les quatre autres étaient déjà présents et
   n'ont pas été désinstallés. Kodi ne fournissant aucune API publique de désinstallation, les deux
   petits addons de test restent installés plutôt que de contourner la confirmation native.
+
+## Alignement global sur l'accueil Arctic Horizon 2 (2026-08-28)
+
+Nouvelle comparaison effectuée directement avec l'accueil Arctic Horizon 2 installé sur le Pi, à partir d'une capture réelle et de ses fichiers `Home.xml`/`Includes_Objects.xml`. Aura reprend désormais sa composition globale plutôt que seulement ses textures : barre persistante, fond noir uniforme, modules compacts et contigus, icônes 60 px, pilule focalisée de 360 px, typographie plus fine et contenus alignés à 60 px du bord.
+
+La sidebar Divertissement est entièrement masquée hors focus puis glisse au premier plan sur `Left`, supprimant la bande résiduelle visible à l'écran. Les onglets contextuels remontent sous la barre principale, les trois rangées Recommandé utilisent des posters 130x195 plus proches de la densité AH2 et les sous-titres secondaires sont masqués pour éviter une double ligne illisible. Validé visuellement sur le Pi avec de vraies données Plex ; navigation et chargement restent inchangés.
