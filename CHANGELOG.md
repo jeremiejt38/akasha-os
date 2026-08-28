@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.1...akasha-os-v0.48.2) (2026-08-28)
+
+
+### Bug Fixes
+
+* **aura:** focus first content row on Down, wider pills, visible tabs/sidebar ([750cd99](https://github.com/jeremiejt38/akasha-os/commit/750cd992cb8bf7ab0fb1a9541864138248301b0f))
+
 ## [0.48.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.0...akasha-os-v0.48.1) (2026-08-28)
 
 
