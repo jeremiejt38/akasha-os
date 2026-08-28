@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.47.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.46.2...akasha-os-v0.47.0) (2026-08-28)
+
+
+### Features
+
+* **apps:** show installed apps as icon tiles ([ba17ff4](https://github.com/jeremiejt38/akasha-os/commit/ba17ff4ac1c1b1b3f545aa678724d2dec7d580ab))
+* **aura:** wire the Store to the real akasha-os-store catalogue ([fc533e9](https://github.com/jeremiejt38/akasha-os/commit/fc533e9f534cad94c0212c8491e871e3d4c4acdf))
+* **store:** launch external apps as safe web apps ([6d2e57a](https://github.com/jeremiejt38/akasha-os/commit/6d2e57a801bfab77bcd7906ee55851372b316184))
+
+
+### Bug Fixes
+
+* **network:** load Wi-Fi credential at runtime ([425ce92](https://github.com/jeremiejt38/akasha-os/commit/425ce92797bee577045b7b99f496f0bb01f7bfb2))
+* **network:** reserve Wi-Fi for Ethernet failover ([f00fbd0](https://github.com/jeremiejt38/akasha-os/commit/f00fbd09e7d8dc3917dd151bdc8e11567421bf33))
+* **remote:** correct invalid window1194 keymap tag name ([85904b7](https://github.com/jeremiejt38/akasha-os/commit/85904b70b0254e639611c468aa7d9f9304b5df45))
+* **store:** allow Kodi installs to finish ([582ae73](https://github.com/jeremiejt38/akasha-os/commit/582ae73c86a8b73c4aee68c84da07b13fcae7f7f))
+
 ## [0.46.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.46.1...akasha-os-v0.46.2) (2026-08-23)
 
 
