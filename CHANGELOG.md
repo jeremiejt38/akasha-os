@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.3...akasha-os-v0.49.0) (2026-08-28)
+
+
+### Features
+
+* **aura:** align home layout with Arctic Horizon 2 ([b765ad8](https://github.com/jeremiejt38/akasha-os/commit/b765ad88dda2c77001f33bfc4014b34e88cc630e))
+* **aura:** align home layout with Arctic Horizon 2 ([f6f08f7](https://github.com/jeremiejt38/akasha-os/commit/f6f08f77d875e227fcb886fd886737869e5da185))
+
 ## [0.48.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.2...akasha-os-v0.48.3) (2026-08-28)
 
 
