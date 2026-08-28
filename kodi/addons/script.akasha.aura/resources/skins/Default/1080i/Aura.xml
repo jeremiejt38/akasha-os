@@ -8,16 +8,15 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF10131A">white.png</texture>
+            <texture colordiffuse="FF0D1017">white.png</texture>
         </control>
 
         <!-- Top tab bar: main tabs + context-aware sub-tabs.
-             Retracts to a ~20px strip when focus leaves the bar so the
-             content area stays visible while the active tab remains
-             identifiable. -->
+             Remains visible above the content like Arctic Horizon 2's
+             native home menu so the active section stays identifiable. -->
         <control type="group" id="100">
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                <effect type="slide" start="0,0" end="0,-100" time="200" tween="quadratic" easing="inout"/>
+                <effect type="slide" start="0,0" end="0,0" time="200" tween="quadratic" easing="inout"/>
             </animation>
 
             <left>0</left>
@@ -30,27 +29,27 @@
                 <top>0</top>
                 <width>1920</width>
                 <height>120</height>
-                <texture colordiffuse="E610131A">white.png</texture>
+                <texture colordiffuse="FF0D1017">white.png</texture>
             </control>
 
             <!-- Module 0: unified search. Icon-only, never expands, plan
                  04bda1b4 phase 2. Same plain-icon treatment (no circle/pill
                  behind it) as the native Arctic Horizon 2 search icon. -->
             <control type="button" id="2000">
-                <left>60</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <left>50</left>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <label></label>
                 <onleft>2004</onleft>
                 <onright>2001</onright>
                 <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="image">
-                <left>60</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <left>50</left>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <aspectratio>keep</aspectratio>
                 <bordersize>6</bordersize>
                 <texture>icon-search.png</texture>
@@ -75,9 +74,9 @@
                  docs/aura/decisions.md). -->
             <control type="button" id="2001">
                 <left>160</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <label></label>
                 <onleft>2000</onleft>
                 <onright>2002</onright>
@@ -87,30 +86,30 @@
             <control type="group" id="2101">
                 <left>160</left>
                 <top>20</top>
-                <width>400</width>
-                <height>80</height>
+                <width>360</width>
+                <height>60</height>
                 <visible>Control.HasFocus(2001)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>400</width>
-                    <height>80</height>
+                    <width>360</width>
+                    <height>60</height>
                     <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>84</left>
-                    <width>300</width>
-                    <height>80</height>
+                    <left>80</left>
+                    <width>240</width>
+                    <height>60</height>
                     <aligny>center</aligny>
-                    <font>font12</font>
+                    <font>font10</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <label>Divertissement</label>
                 </control>
             </control>
             <control type="image" id="2102">
                 <left>160</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <aspectratio>keep</aspectratio>
                 <bordersize>4</bordersize>
                 <texture>tab-divertissement.png</texture>
@@ -118,9 +117,9 @@
 
             <control type="button" id="2002">
                 <left>540</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <label></label>
                 <onleft>2001</onleft>
                 <onright>2003</onright>
@@ -130,30 +129,30 @@
             <control type="group" id="2103">
                 <left>540</left>
                 <top>20</top>
-                <width>400</width>
-                <height>80</height>
+                <width>360</width>
+                <height>60</height>
                 <visible>Control.HasFocus(2002)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>400</width>
-                    <height>80</height>
+                    <width>360</width>
+                    <height>60</height>
                     <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>84</left>
-                    <width>300</width>
-                    <height>80</height>
+                    <left>80</left>
+                    <width>240</width>
+                    <height>60</height>
                     <aligny>center</aligny>
-                    <font>font12</font>
+                    <font>font10</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <label>Jeux</label>
                 </control>
             </control>
             <control type="image" id="2104">
                 <left>540</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <aspectratio>keep</aspectratio>
                 <bordersize>4</bordersize>
                 <texture>tab-jeux.png</texture>
@@ -161,9 +160,9 @@
 
             <control type="button" id="2003">
                 <left>920</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <label></label>
                 <onleft>2002</onleft>
                 <onright>2004</onright>
@@ -173,30 +172,30 @@
             <control type="group" id="2105">
                 <left>920</left>
                 <top>20</top>
-                <width>400</width>
-                <height>80</height>
+                <width>360</width>
+                <height>60</height>
                 <visible>Control.HasFocus(2003)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>400</width>
-                    <height>80</height>
+                    <width>360</width>
+                    <height>60</height>
                     <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>84</left>
-                    <width>300</width>
-                    <height>80</height>
+                    <left>80</left>
+                    <width>240</width>
+                    <height>60</height>
                     <aligny>center</aligny>
-                    <font>font12</font>
+                    <font>font10</font>
                     <textcolor>FFFFFFFF</textcolor>
                     <label>App</label>
                 </control>
             </control>
             <control type="image" id="2106">
                 <left>920</left>
-                <top>32</top>
-                <width>56</width>
-                <height>56</height>
+                <top>20</top>
+                <width>60</width>
+                <height>60</height>
                 <aspectratio>keep</aspectratio>
                 <bordersize>4</bordersize>
                 <texture>tab-app.png</texture>
@@ -381,13 +380,13 @@
 
             <!-- Sidebar: always visible while browsing Divertissement (Accueil or a library). -->
             <control type="group" id="3300">
-                <left>-320</left>
-                <top>140</top>
+                <left>-420</left>
+                <top>120</top>
                 <width>420</width>
                 <height>860</height>
                 <zorder>3</zorder>
                 <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="true">
-                    <effect type="slide" start="0,0" end="320,0" time="200" tween="quadratic" easing="inout"/>
+                    <effect type="slide" start="0,0" end="420,0" time="200" tween="quadratic" easing="inout"/>
                 </animation>
 
                 <control type="image">
@@ -515,9 +514,9 @@
                 </control>
 
                 <control type="button" id="3050">
-                    <left>160</left>
-                    <top>228</top>
-                    <width>255</width>
+                    <left>60</left>
+                    <top>145</top>
+                    <width>195</width>
                     <height>50</height>
                     <label>Recommande</label>
                     <font>font12</font>
@@ -533,9 +532,9 @@
                 </control>
 
                 <control type="button" id="3100">
-                    <left>415</left>
-                    <top>228</top>
-                    <width>255</width>
+                    <left>270</left>
+                    <top>145</top>
+                    <width>195</width>
                     <height>50</height>
                     <label>Bibliotheque</label>
                     <font>font12</font>
@@ -551,9 +550,9 @@
                 </control>
 
                 <control type="button" id="3060">
-                    <left>670</left>
-                    <top>228</top>
-                    <width>255</width>
+                    <left>480</left>
+                    <top>145</top>
+                    <width>195</width>
                     <height>50</height>
                     <label>Categories</label>
                     <font>font12</font>
@@ -871,35 +870,35 @@
                 <visible>String.IsEqual(Window.Property(DivertView),home) | [String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0)]</visible>
 
                 <control type="label" id="5100">
-                    <left>160</left>
-                    <top>298</top>
-                    <width>1700</width>
+                    <left>60</left>
+                    <top>195</top>
+                    <width>1800</width>
                     <height>22</height>
                     <font>font12</font>
                     <label>-</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="list" id="5110">
-                    <left>160</left>
-                    <top>320</top>
-                    <width>1700</width>
-                    <height>205</height>
+                    <left>60</left>
+                    <top>220</top>
+                    <width>1800</width>
+                    <height>235</height>
                     <orientation>horizontal</orientation>
                     <onup>3050</onup>
                     <onleft>3310</onleft>
                     <ondown>5210</ondown>
-                    <itemlayout width="120" height="205">
+                    <itemlayout width="140" height="235">
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
                             <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
-                            <top>169</top>
+                            <top>199</top>
                             <width>80</width>
                             <height>14</height>
                             <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
@@ -908,16 +907,16 @@
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                             <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>169</top>
-                            <width>110</width>
+                            <top>199</top>
+                            <width>130</width>
                             <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
@@ -927,36 +926,36 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>187</top>
-                            <width>110</width>
+                            <top>217</top>
+                            <width>130</width>
                             <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
-                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            <visible>false</visible>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="120" height="205">
+                    <focusedlayout width="140" height="235">
                         <control type="image">
                             <left>1</left>
                             <top>-4</top>
-                            <width>118</width>
-                            <height>177</height>
+                            <width>138</width>
+                            <height>207</height>
                             <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(5110) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
                             <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
-                            <top>169</top>
+                            <top>199</top>
                             <width>80</width>
                             <height>14</height>
                             <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
@@ -965,16 +964,16 @@
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                             <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>169</top>
-                            <width>110</width>
+                            <top>199</top>
+                            <width>130</width>
                             <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
@@ -984,48 +983,48 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>187</top>
-                            <width>110</width>
+                            <top>217</top>
+                            <width>130</width>
                             <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
-                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            <visible>false</visible>
                         </control>
                     </focusedlayout>
                 </control>
 
                 <control type="label" id="5200">
-                    <left>160</left>
-                    <top>543</top>
-                    <width>1700</width>
+                    <left>60</left>
+                    <top>455</top>
+                    <width>1800</width>
                     <height>22</height>
                     <font>font12</font>
                     <label>-</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="list" id="5210">
-                    <left>160</left>
-                    <top>565</top>
-                    <width>1700</width>
-                    <height>205</height>
+                    <left>60</left>
+                    <top>480</top>
+                    <width>1800</width>
+                    <height>235</height>
                     <orientation>horizontal</orientation>
                     <onup>5110</onup>
                     <onleft>3310</onleft>
                     <ondown>5310</ondown>
-                    <itemlayout width="120" height="205">
+                    <itemlayout width="140" height="235">
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
                             <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
-                            <top>169</top>
+                            <top>199</top>
                             <width>80</width>
                             <height>14</height>
                             <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
@@ -1034,16 +1033,16 @@
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                             <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>169</top>
-                            <width>110</width>
+                            <top>199</top>
+                            <width>130</width>
                             <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
@@ -1053,36 +1052,36 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>187</top>
-                            <width>110</width>
+                            <top>217</top>
+                            <width>130</width>
                             <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
-                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            <visible>false</visible>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="120" height="205">
+                    <focusedlayout width="140" height="235">
                         <control type="image">
                             <left>1</left>
                             <top>-4</top>
-                            <width>118</width>
-                            <height>177</height>
+                            <width>138</width>
+                            <height>207</height>
                             <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(5210) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
                             <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
-                            <top>169</top>
+                            <top>199</top>
                             <width>80</width>
                             <height>14</height>
                             <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
@@ -1091,16 +1090,16 @@
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                             <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>169</top>
-                            <width>110</width>
+                            <top>199</top>
+                            <width>130</width>
                             <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
@@ -1110,48 +1109,48 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>187</top>
-                            <width>110</width>
+                            <top>217</top>
+                            <width>130</width>
                             <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
-                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            <visible>false</visible>
                         </control>
                     </focusedlayout>
                 </control>
 
                 <control type="label" id="5300">
-                    <left>160</left>
-                    <top>788</top>
-                    <width>1700</width>
+                    <left>60</left>
+                    <top>715</top>
+                    <width>1800</width>
                     <height>22</height>
                     <font>font12</font>
                     <label>-</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="list" id="5310">
-                    <left>160</left>
-                    <top>810</top>
-                    <width>1700</width>
-                    <height>205</height>
+                    <left>60</left>
+                    <top>740</top>
+                    <width>1800</width>
+                    <height>235</height>
                     <orientation>horizontal</orientation>
                     <onup>5210</onup>
                     <onleft>3310</onleft>
                     <ondown>5310</ondown>
-                    <itemlayout width="120" height="205">
+                    <itemlayout width="140" height="235">
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
                             <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
-                            <top>169</top>
+                            <top>199</top>
                             <width>80</width>
                             <height>14</height>
                             <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
@@ -1160,16 +1159,16 @@
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                             <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>169</top>
-                            <width>110</width>
+                            <top>199</top>
+                            <width>130</width>
                             <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
@@ -1179,36 +1178,36 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>187</top>
-                            <width>110</width>
+                            <top>217</top>
+                            <width>130</width>
                             <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>77FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
-                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            <visible>false</visible>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="120" height="205">
+                    <focusedlayout width="140" height="235">
                         <control type="image">
                             <left>1</left>
                             <top>-4</top>
-                            <width>118</width>
-                            <height>177</height>
+                            <width>138</width>
+                            <height>207</height>
                             <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
                             <visible>Control.HasFocus(5310) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <texture colordiffuse="33FFFFFF" border="6">rounded-solid.png</texture>
                             <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="image">
                             <left>5</left>
-                            <top>169</top>
+                            <top>199</top>
                             <width>80</width>
                             <height>14</height>
                             <texture colordiffuse="22FFFFFF" border="3">rounded-solid.png</texture>
@@ -1217,16 +1216,16 @@
                         <control type="image">
                             <left>5</left>
                             <top>0</top>
-                            <width>110</width>
-                            <height>165</height>
+                            <width>130</width>
+                            <height>195</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                             <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>169</top>
-                            <width>110</width>
+                            <top>199</top>
+                            <width>130</width>
                             <height>18</height>
                             <font>font10</font>
                             <label>$INFO[ListItem.Label]</label>
@@ -1236,14 +1235,14 @@
                         </control>
                         <control type="label">
                             <left>5</left>
-                            <top>187</top>
-                            <width>110</width>
+                            <top>217</top>
+                            <width>130</width>
                             <height>16</height>
                             <font>font9</font>
                             <label>$INFO[ListItem.Label2]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
-                            <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            <visible>false</visible>
                         </control>
                     </focusedlayout>
                 </control>
