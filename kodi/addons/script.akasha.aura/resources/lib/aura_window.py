@@ -1296,23 +1296,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._update_bar_focused()
             return
-        # Sidebar ↔ content navigation: horizontal lists swallow Left, so force
-        # the jump manually when at the first/last content position.
-        if focused in RECO_LIST_IDS and aid == ACTION_MOVE_LEFT:
-            try:
-                if self.getControl(focused).getSelectedPosition() == 0:
-                    self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
-                    self._update_bar_focused()
-                    return
-            except Exception:
-                pass
-        if focused == DIVERT_SIDEBAR_ID and aid == ACTION_MOVE_RIGHT:
-            try:
-                self.setFocus(self.getControl(RECO_LIST_IDS[0]))
-                self._update_bar_focused()
-                return
-            except Exception:
-                pass
         # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
         # DIVERT_PANEL_ID's grid lands on the main tab bar (2001) instead of
         # the Bibliotheque tab button (3100), even though the grid's XML
@@ -1345,7 +1328,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 if self._divert_view == 'library':
                     self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_library_tab]))
                 else:
-                    self.setFocus(self.getControl(RECO_LIST_IDS[0]))
+                    lst = self.getControl(RECO_LIST_IDS[0])
+                    if lst.size() > 0:
+                        lst.selectItem(0)
+                    self.setFocus(lst)
             elif self.active_tab == TAB_JEUX:
                 self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
             elif self.active_tab == TAB_APP:
