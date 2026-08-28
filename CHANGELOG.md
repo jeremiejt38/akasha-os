@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.2...akasha-os-v0.48.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* **aura:** hide library header labels in home view ([7d4b2df](https://github.com/jeremiejt38/akasha-os/commit/7d4b2dfc87c9f748c5d88828e0e45a0385e639a1))
+
 ## [0.48.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.1...akasha-os-v0.48.2) (2026-08-28)
 
 
