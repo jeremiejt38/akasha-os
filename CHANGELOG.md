@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.0...akasha-os-v0.48.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **aura:** navigation, sidebar visibility, and module pill sizing ([bb4109a](https://github.com/jeremiejt38/akasha-os/commit/bb4109a2a643688016766728eace375c646d9f5e))
+
 ## [0.48.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.47.0...akasha-os-v0.48.0) (2026-08-28)
 
 
