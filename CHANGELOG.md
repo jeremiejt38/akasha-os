@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.48.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.47.0...akasha-os-v0.48.0) (2026-08-28)
+
+
+### Features
+
+* **aura:** paginate Akasha Store catalogue with PagedList (a3f9c2e1) ([5ae6080](https://github.com/jeremiejt38/akasha-os/commit/5ae6080ad51ab98594f93e2d82de908865a9b29b))
+* **aura:** paginate installed apps list with PagedList (a3f9c2e1) ([6e4f611](https://github.com/jeremiejt38/akasha-os/commit/6e4f6117881ce9e988f573b580e5a5aeca897d75))
+
 ## [0.47.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.46.2...akasha-os-v0.47.0) (2026-08-28)
 
 
