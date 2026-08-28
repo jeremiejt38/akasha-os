@@ -51,7 +51,7 @@ GEAR_BUTTON_ID = 2004
 MODULE_CONTROL_IDS = ((2001, 2101, 2102), (2002, 2103, 2104), (2003, 2105, 2106))
 MODULE_LAYOUT_START_X = 160
 MODULE_ICON_WIDTH = 56
-MODULE_PILL_WIDTH = 340
+MODULE_PILL_WIDTH = 400
 MODULE_GAP = 40
 MODULE_ICON_TOP = 32
 MODULE_PILL_TOP = 20
@@ -1296,6 +1296,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._update_bar_focused()
             return
+        # Sidebar ↔ content navigation: horizontal lists swallow Left, so force
+        # the jump manually when at the first/last content position.
+        if focused in RECO_LIST_IDS and aid == ACTION_MOVE_LEFT:
+            try:
+                if self.getControl(focused).getSelectedPosition() == 0:
+                    self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
+                    self._update_bar_focused()
+                    return
+            except Exception:
+                pass
+        if focused == DIVERT_SIDEBAR_ID and aid == ACTION_MOVE_RIGHT:
+            try:
+                self.setFocus(self.getControl(RECO_LIST_IDS[0]))
+                self._update_bar_focused()
+                return
+            except Exception:
+                pass
         # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
         # DIVERT_PANEL_ID's grid lands on the main tab bar (2001) instead of
         # the Bibliotheque tab button (3100), even though the grid's XML
@@ -1322,16 +1339,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._update_bar_focused()
 
     def _focus_first_subtab(self):
-        """Move focus from the main tab to the first sub-tab of the active tab."""
-        if self.active_tab == TAB_DIVERTISSEMENT:
-            # The sidebar is the permanent entry point (Accueil or a library);
-            # the Recommande/Bibliotheque/Categories tabs are only reachable
-            # once a library is selected there.
-            self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
-        elif self.active_tab == TAB_JEUX:
-            self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
-        elif self.active_tab == TAB_APP:
-            self.setFocus(self.getControl(APP_SUBTAB_IDS[self._app_subtab]))
+        """Move focus from the main tab to the first meaningful content control."""
+        try:
+            if self.active_tab == TAB_DIVERTISSEMENT:
+                if self._divert_view == 'library':
+                    self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_library_tab]))
+                else:
+                    self.setFocus(self.getControl(RECO_LIST_IDS[0]))
+            elif self.active_tab == TAB_JEUX:
+                self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
+            elif self.active_tab == TAB_APP:
+                self.setFocus(self.getControl(APP_SUBTAB_IDS[self._app_subtab]))
+        except Exception as e:
+            xbmc.log('Akasha Aura: focus first subtab failed: {}'.format(e), xbmc.LOGERROR)
 
     def onClick(self, controlID):
         if controlID in TAB_BUTTON_IDS:

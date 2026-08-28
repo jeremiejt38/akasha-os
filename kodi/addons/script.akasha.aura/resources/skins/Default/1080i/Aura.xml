@@ -87,18 +87,18 @@
             <control type="group" id="2101">
                 <left>160</left>
                 <top>20</top>
-                <width>340</width>
+                <width>400</width>
                 <height>80</height>
                 <visible>Control.HasFocus(2001)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>340</width>
+                    <width>400</width>
                     <height>80</height>
                     <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
                     <left>84</left>
-                    <width>240</width>
+                    <width>300</width>
                     <height>80</height>
                     <aligny>center</aligny>
                     <font>font12</font>
@@ -130,18 +130,18 @@
             <control type="group" id="2103">
                 <left>540</left>
                 <top>20</top>
-                <width>340</width>
+                <width>400</width>
                 <height>80</height>
                 <visible>Control.HasFocus(2002)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>340</width>
+                    <width>400</width>
                     <height>80</height>
                     <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
                     <left>84</left>
-                    <width>240</width>
+                    <width>300</width>
                     <height>80</height>
                     <aligny>center</aligny>
                     <font>font12</font>
@@ -173,18 +173,18 @@
             <control type="group" id="2105">
                 <left>920</left>
                 <top>20</top>
-                <width>340</width>
+                <width>400</width>
                 <height>80</height>
                 <visible>Control.HasFocus(2003)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>340</width>
+                    <width>400</width>
                     <height>80</height>
                     <texture border="80">pill-gradient.png</texture>
                 </control>
                 <control type="label">
                     <left>84</left>
-                    <width>240</width>
+                    <width>300</width>
                     <height>80</height>
                     <aligny>center</aligny>
                     <font>font12</font>
@@ -385,6 +385,7 @@
                 <top>140</top>
                 <width>420</width>
                 <height>860</height>
+                <zorder>3</zorder>
                 <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="true">
                     <effect type="slide" start="0,0" end="320,0" time="200" tween="quadratic" easing="inout"/>
                 </animation>
@@ -394,7 +395,7 @@
                     <top>0</top>
                     <width>420</width>
                     <height>860</height>
-                    <texture colordiffuse="E610131A">white.png</texture>
+                    <texture colordiffuse="F210131A">white.png</texture>
                 </control>
 
                 <control type="list" id="3310">
@@ -403,7 +404,7 @@
                     <width>420</width>
                     <height>840</height>
                     <onup>2001</onup>
-                    <onright>3050</onright>
+                    <onright>5110</onright>
                     <itemlayout width="420" height="70">
                         <control type="image">
                             <left>25</left>
@@ -470,10 +471,8 @@
                  title/tab row, matching the Plex reference (section 2.2 of the cahier des
                  charges). -->
             <control type="group">
-                <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
 
                 <control type="label" id="3400">
-                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>160</left>
                     <top>145</top>
                     <width>1500</width>
@@ -483,7 +482,6 @@
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="label" id="3401">
-                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>162</left>
                     <top>190</top>
                     <width>600</width>
@@ -497,7 +495,6 @@
                      "Gerer les bibliotheques" dialog (pin/reorder) as the most reasonable
                      placeholder action, see docs/aura/decisions.md. -->
                 <control type="button" id="3402">
-                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>1830</left>
                     <top>150</top>
                     <width>60</width>
@@ -516,7 +513,6 @@
                 </control>
 
                 <control type="button" id="3050">
-                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>160</left>
                     <top>228</top>
                     <width>255</width>
@@ -535,7 +531,6 @@
                 </control>
 
                 <control type="button" id="3100">
-                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>415</left>
                     <top>228</top>
                     <width>255</width>
@@ -554,7 +549,6 @@
                 </control>
 
                 <control type="button" id="3060">
-                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>670</left>
                     <top>228</top>
                     <width>255</width>
