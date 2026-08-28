@@ -473,6 +473,7 @@
             <control type="group">
 
                 <control type="label" id="3400">
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>160</left>
                     <top>145</top>
                     <width>1500</width>
@@ -482,6 +483,7 @@
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
                 <control type="label" id="3401">
+                    <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                     <left>162</left>
                     <top>190</top>
                     <width>600</width>
