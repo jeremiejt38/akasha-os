@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.50.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.5...akasha-os-v0.50.0) (2026-08-29)
+
+
+### Features
+
+* **remote:** add skinned app switcher and settings access ([7459279](https://github.com/jeremiejt38/akasha-os/commit/745927995540170ff4b6186b11b3fcbdcb6cf73a))
+* **remote:** add skinned app switcher and settings access ([fbcd3d8](https://github.com/jeremiejt38/akasha-os/commit/fbcd3d875b89e15722446a45baecb85b701dbd14))
+
 ## [0.49.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.4...akasha-os-v0.49.5) (2026-08-29)
 
 
