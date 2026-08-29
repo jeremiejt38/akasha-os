@@ -147,6 +147,23 @@ class TestConnectorClient(unittest.TestCase):
         self.client.metadata_children('42')
         self.assertIn('/api/plex/metadata/42/children', mock_urlopen.call_args[0][0].full_url)
 
+    @patch('urllib.request.urlopen')
+    def test_show_seasons_and_episodes_are_normalized(self, mock_urlopen):
+        payload = {'MediaContainer': {'Metadata': [{
+            'ratingKey': '43', 'parentRatingKey': '42', 'title': 'Saison 1',
+            'type': 'season', 'thumb': '/library/metadata/43/thumb/1',
+        }]}}
+        mock_urlopen.side_effect = [MockHTTPResponse(payload), MockHTTPResponse(payload)]
+        self.client.token = 'abc123'
+
+        seasons = self.client.show_seasons('42')
+        episodes = self.client.season_episodes('43')
+
+        self.assertEqual(seasons[0]['rating_key'], '43')
+        self.assertEqual(seasons[0]['title'], 'Saison 1')
+        self.assertIn('/api/plex/image?path=', seasons[0]['thumb_url'])
+        self.assertEqual(episodes[0]['parent_rating_key'], '42')
+
     def test_image_url_includes_encoded_path_and_auth_header(self):
         self.client.token = 'abc123'
 

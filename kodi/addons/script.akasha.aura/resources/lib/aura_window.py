@@ -1755,25 +1755,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._activate_home()
 
     def _open_show(self, item):
-        """Open AuraShowWindow for a show item, found (while wiring up
-        unified search, plan 04bda1b4 phase 2) to be a pre-existing gap
-        rather than something new: AuraShowWindow.client only ever knows
-        how to be a real plex_client.PlexClient (show_seasons/
-        season_episodes aren't implemented on connector_client.ConnectorClient
-        at all), so this silently opened a blank, stuck-on-"-" window
-        whenever a connector-only setup (self._plex_client is None) tried
-        to browse a show -- confirmed on-device via the resulting
-        AttributeError in kodi.log. Extending connector_client.py (and the
-        akasha-os-connector backend, a separate private repo) to support
-        seasons/episodes is out of scope here; falls back to the same
-        notification placeholder used for movies until that exists."""
-        if not self._plex_client:
+        """Open AuraShowWindow with the active Connector or direct Plex client."""
+        client = self._connector_client or self._plex_client
+        if not client:
             xbmcgui.Dialog().notification(
                 'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
             return
         show_window = self._get_sub_window(
             'show', aura_show.AuraShowWindow, 'AuraShow.xml')
-        show_window.client = self._plex_client
+        show_window.client = client
         show_window.show_title = item['title']
         show_window.show_rating_key = item['rating_key']
         show_window.doModal()

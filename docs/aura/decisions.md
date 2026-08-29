@@ -385,18 +385,13 @@ inerte" du cahier tout en restant dans les mécanismes déjà éprouvés ailleur
 - **Paramètres** : recherche sur les 6 entrées du menu contextuel de la Phase 3 (partagé via
   `_settings_menu_options()`), donc toute nouvelle entrée ajoutée au menu apparaît aussi dans la
   recherche sans code supplémentaire.
-- **Bug réel trouvé et corrigé en testant cette phase** (affecte aussi le clic normal sur une série
-  dans la grille Bibliothèque, pas seulement la recherche) : `AuraShowWindow.client` était toujours
-  réglé sur `self._plex_client`, qui est `None` dès que le connecteur (`akasha-os-connector`) est
-  utilisé à la place d'un accès Plex direct — `connector_client.py` n'implémente pas
-  `show_seasons()`/`season_episodes()`. Résultat avant correctif : fenêtre de série qui s'ouvre
-  mais reste bloquée sur des libellés vides ("-"), confirmé par
-  `AttributeError: 'NoneType' object has no attribute 'show_seasons'` dans le log. Corrigé avec un
-  repli propre vers la même notification-placeholder que pour les films quand aucun client Plex
-  direct n'est disponible, factorisé dans une nouvelle méthode `_open_show()` réutilisée par les
-  deux points d'entrée (grille et recherche). Étendre `connector_client.py` (et le backend
-  `akasha-os-connector`, dépôt privé séparé) pour supporter saisons/épisodes reste hors périmètre
-  de cette session.
+- **Navigation séries via Connector** : `connector_client.py` normalise désormais l'endpoint
+  `metadata/{rating_key}/children` déjà exposé par le backend en implémentant
+  `show_seasons()`/`season_episodes()`. `_open_show()` sélectionne le Connector actif ou le client
+  Plex direct et ouvre la même `AuraShowWindow` dans les deux cas. Les tests couvrent les saisons,
+  épisodes, identifiants et URLs d'images. La validation live du nouveau chemin Connector reste
+  bloquée par le jeton de session expiré enregistré sur le Pi (`401 Unauthorized`) ; aucun mot de
+  passe n'étant conservé, son renouvellement nécessite une authentification utilisateur.
 - Validé en direct : recherche "a" → résultats groupés par catégorie corrects, sélection d'une
   série ("Angel Beats !") ouvre désormais `AuraShowWindow` sans planter (avant le correctif, plantait
   silencieusement en arrière-plan avec la fenêtre bloquée sur "-").
