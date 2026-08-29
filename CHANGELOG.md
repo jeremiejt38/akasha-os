@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.1...akasha-os-v0.49.2) (2026-08-29)
+
+
+### Bug Fixes
+
+* **aura:** match AH2 top menu proportions ([28e6c4f](https://github.com/jeremiejt38/akasha-os/commit/28e6c4f4eefb3fc5bc3703085f8d2eb1971ebcc0))
+* **aura:** match AH2 top menu proportions ([529978a](https://github.com/jeremiejt38/akasha-os/commit/529978a3d61082783959f607e7000ea4e0e9118c))
+
 ## [0.49.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.0...akasha-os-v0.49.1) (2026-08-29)
 
 
