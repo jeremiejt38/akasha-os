@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.0...akasha-os-v0.49.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* **aura:** center top menu pills on their icons ([e51d62f](https://github.com/jeremiejt38/akasha-os/commit/e51d62f6e19283c1f0b6a2506640c7bef6a5ff61))
+* **aura:** center top menu pills on their icons ([126d158](https://github.com/jeremiejt38/akasha-os/commit/126d158de6c1cb92ce79774bdb5f71a7ac261b82))
+
 ## [0.49.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.48.3...akasha-os-v0.49.0) (2026-08-28)
 
 
