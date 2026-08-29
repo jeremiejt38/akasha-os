@@ -1811,7 +1811,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
         elif action == 'double':
-            _HomePressAppSwitcher(self).show()
+            switcher = self._get_sub_window(
+                'app_switcher', _HomePressAppSwitcher, 'AuraSwitcher.xml')
+            switcher.parent_window = self
+            switcher.doModal()
 
     def _close_sub_windows(self):
         """Close any currently open sub-windows so we land back on Aura shell."""
@@ -1840,45 +1843,47 @@ def _build_placeholder_list_item():
     return li
 
 
-class _HomePressAppSwitcher:
-    """Minimal app switcher invoked by a double Home press inside Aura.
+class _HomePressAppSwitcher(xbmcgui.WindowXMLDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent_window = None
+        self._actions = []
 
-    Shows a native Kodi select dialog listing pinned apps and a few
-    system/utility options. A skinned, full WindowXML-based switcher can
-    replace this in a later milestone without changing the press-detection
-    plumbing.
-    """
+    def onInit(self):
+        panel = self.getControl(100)
+        panel.reset()
+        self._actions = []
+        apps = self.parent_window._pinned_apps if self.parent_window else []
+        for app in apps:
+            item = xbmcgui.ListItem(app['name'])
+            if app.get('thumbnail'):
+                item.setArt({'thumb': app['thumbnail']})
+            panel.addItem(item)
+            self._actions.append('RunAddon({})'.format(app['addonid']))
+        for label, action, icon in (
+                ('Parametres Akasha', 'RunAddon(script.akasha.settings)', 'icon-gear.png'),
+                ('Guide Akasha', 'RunScript(script.akasha.guide)', 'tab-divertissement.png'),
+                ('Mode Ambiant', 'RunScript(script.akasha.ambient)', 'tab-app.png')):
+            item = xbmcgui.ListItem(label)
+            item.setArt({'thumb': icon})
+            panel.addItem(item)
+            self._actions.append(action)
+        panel.selectItem(0)
+        self.setFocus(panel)
 
-    def __init__(self, aura_window):
-        self._window = aura_window
-
-    def show(self):
-        try:
-            panel = self._window.getControl(DIVERT_PANEL_ID)
-            last_item = panel.getSelectedItem()
-            last_title = last_item.getLabel() if last_item else ''
-        except RuntimeError:
-            last_title = ''
-
-        items = []
-        actions = []
-        for app in self._window._pinned_apps:
-            items.append(app['name'])
-            actions.append(('runaddon', app['addonid']))
-        items.append('Parametres Akasha')
-        actions.append(('exec', 'RunAddon(script.akasha.settings)'))
-        items.append('Guide Akasha')
-        actions.append(('exec', 'RunScript(script.akasha.guide)'))
-        items.append('Mode Ambiant')
-        actions.append(('exec', 'RunScript(script.akasha.ambient)'))
-
-        dialog = xbmcgui.Dialog()
-        idx = dialog.select('Applications', items)
-        if idx < 0:
+    def onAction(self, action):
+        if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
+            self.close()
             return
-        kind, value = actions[idx]
-        if kind == 'runaddon':
-            xbmc.executebuiltin('RunAddon({})'.format(value))
-        else:
-            xbmc.executebuiltin(value)
+        super().onAction(action)
+
+    def onClick(self, controlID):
+        if controlID != 100:
+            return
+        pos = self.getControl(100).getSelectedPosition()
+        if not (0 <= pos < len(self._actions)):
+            return
+        action = self._actions[pos]
+        self.close()
+        xbmc.executebuiltin(action)
 

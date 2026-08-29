@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1203">
+    <defaultcontrol>100</defaultcontrol>
+    <zorder>3</zorder>
+    <controls>
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="D910131A">white.png</texture>
+        </control>
+        <control type="group">
+            <animation effect="fade" start="0" end="100" time="180">WindowOpen</animation>
+            <control type="label">
+                <left>70</left>
+                <top>80</top>
+                <width>1780</width>
+                <height>55</height>
+                <font>font16</font>
+                <label>Applications recentes</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label">
+                <left>72</left>
+                <top>135</top>
+                <width>1780</width>
+                <height>30</height>
+                <font>font11</font>
+                <label>Double Home pour ouvrir</label>
+                <textcolor>77FFFFFF</textcolor>
+            </control>
+            <control type="panel" id="100">
+                <left>60</left>
+                <top>210</top>
+                <width>1800</width>
+                <height>700</height>
+                <onup>100</onup>
+                <ondown>100</ondown>
+                <itemlayout width="300" height="230">
+                    <control type="image">
+                        <left>15</left>
+                        <top>10</top>
+                        <width>270</width>
+                        <height>160</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="label">
+                        <left>20</left>
+                        <top>175</top>
+                        <width>260</width>
+                        <height>40</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>CCFFFFFF</textcolor>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="300" height="230">
+                    <control type="image">
+                        <left>5</left>
+                        <top>0</top>
+                        <width>290</width>
+                        <height>220</height>
+                        <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
+                        <visible>Control.HasFocus(100)</visible>
+                    </control>
+                    <control type="image">
+                        <left>15</left>
+                        <top>10</top>
+                        <width>270</width>
+                        <height>160</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="label">
+                        <left>20</left>
+                        <top>175</top>
+                        <width>260</width>
+                        <height>40</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+    </controls>
+</window>
