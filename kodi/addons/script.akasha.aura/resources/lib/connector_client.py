@@ -10,6 +10,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import divert_source
+
 
 class ConnectorAPIError(Exception):
     """Raised when a connector API call fails or returns an unexpected shape."""
@@ -99,6 +101,14 @@ class ConnectorClient:
 
     def metadata_children(self, rating_key):
         return self._request('GET', '/api/plex/metadata/{}/children'.format(rating_key))
+
+    def show_seasons(self, show_rating_key):
+        return divert_source.parse_metadata_list(
+            self.metadata_children(show_rating_key), self.image_url)
+
+    def season_episodes(self, season_rating_key):
+        return divert_source.parse_metadata_list(
+            self.metadata_children(season_rating_key), self.image_url)
 
     def image_url(self, plex_path):
         """Build a Kodi-playable URL for a Plex image via the connector's proxy.
