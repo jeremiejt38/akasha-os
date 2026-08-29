@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.3...akasha-os-v0.49.4) (2026-08-29)
+
+
+### Bug Fixes
+
+* **aura:** prevent settings from opening during startup ([7f99deb](https://github.com/jeremiejt38/akasha-os/commit/7f99debfe9b229e01fbc9ec6b289c0edad1017e4))
+* **aura:** prevent settings from opening during startup ([898cbfe](https://github.com/jeremiejt38/akasha-os/commit/898cbfec04f91c88bed8cc589468326e5940a16a))
+
 ## [0.49.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.2...akasha-os-v0.49.3) (2026-08-29)
 
 
