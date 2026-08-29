@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.2...akasha-os-v0.49.3) (2026-08-29)
+
+
+### Bug Fixes
+
+* **aura:** restore search focus and balance tab icons ([f3b3171](https://github.com/jeremiejt38/akasha-os/commit/f3b3171b12cc2a69d98e7ab01befdba9a9514d6c))
+* **aura:** restore search focus and balance tab icons ([06dcee9](https://github.com/jeremiejt38/akasha-os/commit/06dcee99ede3f39af4d5d833921aaeef4075b0b4))
+
 ## [0.49.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.1...akasha-os-v0.49.2) (2026-08-29)
 
 
