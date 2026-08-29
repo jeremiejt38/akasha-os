@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="General">
+        <setting id="language" type="labelenum" label="Recognition language" default="fr">
+            <label>fr</label>
+            <label>en</label>
+        </setting>
+        <setting id="debug_logging" type="bool" label="Debug logging" default="false"/>
+    </category>
+</settings>
