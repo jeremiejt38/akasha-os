@@ -49,10 +49,11 @@ GEAR_BUTTON_ID = 2004
 # c7f0636a), see _layout_top_modules(). (button_id, pill_group_id,
 # icon_id) per module, same left-to-right order as TAB_BUTTON_IDS.
 MODULE_CONTROL_IDS = ((2001, 2101, 2102), (2002, 2103, 2104), (2003, 2105, 2106))
-MODULE_LAYOUT_START_X = 130
-MODULE_ICON_WIDTH = 60
-MODULE_PILL_WIDTH = 320
-MODULE_GAP = 0
+MODULE_LAYOUT_START_X = 100
+MODULE_ICON_OFFSET = 40
+MODULE_ICON_WIDTH = 80
+MODULE_ITEM_WIDTH = 100
+MODULE_PILL_WIDTH = 360
 MODULE_ICON_TOP = 20
 MODULE_PILL_TOP = 20
 
@@ -1255,15 +1256,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             focused_index = None
         x = MODULE_LAYOUT_START_X
         for i, (button_id, pill_id, icon_id) in enumerate(MODULE_CONTROL_IDS):
-            width = MODULE_PILL_WIDTH if i == focused_index else MODULE_ICON_WIDTH
-            for control_id, top in (
-                    (button_id, MODULE_ICON_TOP), (pill_id, MODULE_PILL_TOP),
-                    (icon_id, MODULE_ICON_TOP)):
-                try:
-                    self.getControl(control_id).setPosition(x, top)
-                except RuntimeError:
-                    pass
-            x += width + MODULE_GAP
+            try:
+                self.getControl(pill_id).setPosition(x, MODULE_PILL_TOP)
+                self.getControl(button_id).setPosition(x + MODULE_ICON_OFFSET, MODULE_ICON_TOP)
+                self.getControl(icon_id).setPosition(x + MODULE_ICON_OFFSET, MODULE_ICON_TOP)
+            except RuntimeError:
+                pass
+            x += MODULE_PILL_WIDTH if i == focused_index else MODULE_ITEM_WIDTH
 
     def onAction(self, action):
         aid = action.getId()
