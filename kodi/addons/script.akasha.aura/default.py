@@ -72,7 +72,7 @@ if __name__ == '__main__':
             pass
         try:
             window = AuraWindow('Aura.xml', ADDON_PATH, 'Default', '1080i')
-            window.open_settings_on_init = open_settings
+            window.open_settings_on_init = False
             window.doModal()
             del window
         finally:
