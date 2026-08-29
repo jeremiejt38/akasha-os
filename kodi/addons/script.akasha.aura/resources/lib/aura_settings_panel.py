@@ -60,6 +60,8 @@ def _build_categories():
         ('controllers', 'Manettes & Telecommandes', [
             ('Appairage Bluetooth (LibreELEC)',
              _run('RunAddon(service.libreelec.settings)')),
+            ('Batterie et destination des touches volume',
+             _run('Addon.OpenSettings(service.akasha.remote)')),
             # Deliberately NOT ActivateWindow(peripheralsettings): reliably
             # crashes Kodi (SIGSEGV in CVariant::CVariant, native engine
             # bug unrelated to this addon -- reproduced both from here and

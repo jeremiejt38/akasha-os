@@ -127,17 +127,14 @@ direct (`dbus-python` — à vérifier si disponible).
 
 ## Reste à faire (prochaines itérations)
 
-- App switcher skinné complet (remplacer le dialogue natif par une fenêtre Akasha dédiée).
-- Bouton roue crantée → Akasha Settings (§9, keymap trivial une fois le keycode confirmé
-  empiriquement sur le device).
+- App switcher skinné complet : terminé avec `AuraSwitcher.xml`, ouvert par double Home et réutilisé entre les ouvertures pour préserver le pool de fenêtres Kodi.
+- Bouton roue crantée → panneau Paramètres unifié : terminé et protégé contre l'ouverture automatique au démarrage.
 - Touches services de streaming → no-op (§10) : keycodes non confirmés sur ce modèle de
   télécommande (peut ne pas avoir de boutons dédiés Netflix/Prime/Amazon — à vérifier avec
   l'utilisateur).
-- Volume : implémenté (routage Akasha/CEC). Mode IR nécessite un blaster dédié.
-- Bouton Power : implémenté (appelle `akasha-sleep.py`).
-- App switcher skinné complet (remplacer le dialogue natif par une fenêtre Akasha dédiée).
-- Affichage de la batterie et du sélecteur de mode volume dans Akasha Settings > Télécommande
-  (nouvelle catégorie UI, pas encore ajoutée à `script.akasha.settings`).
+- Volume : implémenté (routage Akasha/CEC). Mode IR nécessite un blaster dédié. Le routage CEC est temporairement neutralisé par le marqueur `CEC_DISABLED`.
+- Bouton Power : implémenté (appelle `akasha-sleep.py`). Les commandes CEC du script sont temporairement neutralisées.
+- Affichage de la batterie et du sélecteur de mode volume : accessible depuis Paramètres unifiés > Manettes & Télécommandes.
 - Buzzer/IR via la télécommande : bloqué par le protocole propriétaire, non retenté sauf décision
   explicite de l'utilisateur de poursuivre la rétro-ingénierie (cf. `docs/remote/decisions.md`
   §2b/2c ci-dessus pour le point de reprise exact — services/caractéristiques déjà identifiés).
