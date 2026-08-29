@@ -1,4 +1,5 @@
 #!/bin/sh
+[ -e /storage/.config/akasha-os/CEC_DISABLED ] && exit 0
 # CEC TV Wake on boot or after Kodi restart
 # Wait for the CEC device to appear (up to ~15s)
 for i in $(seq 1 30); do

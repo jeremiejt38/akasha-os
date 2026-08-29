@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -e /storage/.config/akasha-os/CEC_DISABLED ] && exit 0
 # Envoie CEC Standby à la TV avant extinction
 # Configure CEC adapter as a playback device so the TV accepts our messages
 cec-ctl -d0 --phys-addr 1.0.0.0 --osd-name Akasha --vendor-id 0x000c03 --playback --allow-unreg-fallback 2>/dev/null

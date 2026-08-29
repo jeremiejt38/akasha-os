@@ -1,13 +1,14 @@
 """Unit tests for volume_router.py — no xbmc/subprocess dependency."""
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
 
 from volume_router import (  # noqa: E402
     ACTIONS, VOLUME_DOWN, VOLUME_MUTE, VOLUME_UP, cec_volume_command,
-    mode_from_setting, route,
+    mode_from_setting, route, run_cec_volume_command,
 )
 
 
@@ -39,6 +40,15 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(cmd[0], 'cec-ctl')
         self.assertIn('--user-control-pressed', cmd)
         self.assertIn('ui-cmd=volume-up', cmd)
+
+    def test_cec_disabled_marker_blocks_commands(self):
+        executed = []
+        with tempfile.NamedTemporaryFile() as marker:
+            handled = run_cec_volume_command(
+                'volume-up', run=lambda *args, **kwargs: executed.append(args),
+                disabled_file=marker.name)
+        self.assertFalse(handled)
+        self.assertEqual(executed, [])
 
 
 class VolumeModeSettingTests(unittest.TestCase):

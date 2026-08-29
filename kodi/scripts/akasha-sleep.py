@@ -14,6 +14,7 @@ import sys
 import time
 
 CEC_DEVICE = '/dev/cec0'
+CEC_DISABLED_FILE = '/storage/.config/akasha-os/CEC_DISABLED'
 DISPLAY_ID = 0  # HDMI 0
 TIMEOUT_BEFORE_WAKE = 5  # seconds
 
@@ -28,6 +29,8 @@ def _run(cmd, timeout=10):
 
 def _cec_setup():
     """Configure the CEC adapter as a playback device so the TV listens."""
+    if os.path.exists(CEC_DISABLED_FILE):
+        return False
     _run('cec-ctl -d0 --phys-addr 1.0.0.0 --osd-name Akasha '
          '--vendor-id 0x000c03 --playback --allow-unreg-fallback')
     time.sleep(0.5)
@@ -37,13 +40,14 @@ def _cec_setup():
     _run('cec-ctl -d0 --from 4 --device-vendor-id '
          'vendor-id=0x000c03 --raw-msg')
     time.sleep(0.5)
+    return True
 
 
 def tv_standby():
     """Send CEC standby and turn off HDMI output."""
-    _cec_setup()
-    _run('cec-ctl -d0 --from 4 --to 0 --standby --raw-msg')
-    time.sleep(1)
+    if _cec_setup():
+        _run('cec-ctl -d0 --from 4 --to 0 --standby --raw-msg')
+        time.sleep(1)
     # Turn off HDMI output to reduce power/noise.
     _run('vcgencmd display_power {} 0'.format(DISPLAY_ID))
 
@@ -52,11 +56,11 @@ def tv_wake():
     """Turn HDMI back on and send CEC wake/active-source."""
     _run('vcgencmd display_power {} 1'.format(DISPLAY_ID))
     time.sleep(0.5)
-    _cec_setup()
-    # Image View On (opcode 0x04) wakes most TVs, followed by Active Source.
-    _run('cec-ctl -d0 --from 4 --to 0 --custom-command cmd=0x04')
-    time.sleep(0.5)
-    _run('cec-ctl -d0 --from 4 --active-source phys-addr=1.0.0.0 --raw-msg')
+    if _cec_setup():
+        # Image View On (opcode 0x04) wakes most TVs, followed by Active Source.
+        _run('cec-ctl -d0 --from 4 --to 0 --custom-command cmd=0x04')
+        time.sleep(0.5)
+        _run('cec-ctl -d0 --from 4 --active-source phys-addr=1.0.0.0 --raw-msg')
 
 
 def _open_input_devices():

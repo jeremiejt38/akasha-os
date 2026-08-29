@@ -7,6 +7,7 @@ Maps the remote's volume buttons to one of three destinations:
 
 This module has no xbmc dependency so it can be unit-tested in isolation.
 """
+import os
 import subprocess
 
 VOLUME_UP = 'volume_up'
@@ -87,11 +88,15 @@ def cec_volume_command(ui_cmd, device='/dev/cec0'):
     ]
 
 
-def run_cec_volume_command(ui_cmd, device='/dev/cec0', run=subprocess.run):
+def run_cec_volume_command(ui_cmd, device='/dev/cec0', run=subprocess.run,
+                           disabled_file='/storage/.config/akasha-os/CEC_DISABLED'):
     """Send a CEC volume command and the corresponding release message."""
+    if os.path.exists(disabled_file):
+        return False
     cmd = cec_volume_command(ui_cmd, device)
     run(cmd, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     run(
         ['cec-ctl', '-d', device, '--user-control-released'],
         check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
+    return True
