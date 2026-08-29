@@ -81,23 +81,24 @@
                 <onleft>2000</onleft>
                 <onright>2002</onright>
                 <ondown>3310</ondown>
-                <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group" id="2101">
                 <left>160</left>
                 <top>20</top>
-                <width>360</width>
+                <width>320</width>
                 <height>60</height>
                 <visible>Control.HasFocus(2001)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>360</width>
-                    <height>60</height>
-                    <texture border="80">pill-gradient.png</texture>
+                    <top>-10</top>
+                    <width>320</width>
+                    <height>80</height>
+                    <texture>pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>80</left>
-                    <width>240</width>
+                    <left>70</left>
+                    <width>230</width>
                     <height>60</height>
                     <aligny>center</aligny>
                     <font>font10</font>
@@ -124,23 +125,24 @@
                 <onleft>2001</onleft>
                 <onright>2003</onright>
                 <ondown>2050</ondown>
-                <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group" id="2103">
                 <left>540</left>
                 <top>20</top>
-                <width>360</width>
+                <width>320</width>
                 <height>60</height>
                 <visible>Control.HasFocus(2002)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>360</width>
-                    <height>60</height>
-                    <texture border="80">pill-gradient.png</texture>
+                    <top>-10</top>
+                    <width>320</width>
+                    <height>80</height>
+                    <texture>pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>80</left>
-                    <width>240</width>
+                    <left>70</left>
+                    <width>230</width>
                     <height>60</height>
                     <aligny>center</aligny>
                     <font>font10</font>
@@ -167,23 +169,24 @@
                 <onleft>2002</onleft>
                 <onright>2004</onright>
                 <ondown>2041</ondown>
-                <texturefocus colordiffuse="20FFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group" id="2105">
                 <left>920</left>
                 <top>20</top>
-                <width>360</width>
+                <width>320</width>
                 <height>60</height>
                 <visible>Control.HasFocus(2003)</visible>
                 <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
                 <control type="image">
-                    <width>360</width>
-                    <height>60</height>
-                    <texture border="80">pill-gradient.png</texture>
+                    <top>-10</top>
+                    <width>320</width>
+                    <height>80</height>
+                    <texture>pill-gradient.png</texture>
                 </control>
                 <control type="label">
-                    <left>80</left>
-                    <width>240</width>
+                    <left>70</left>
+                    <width>230</width>
                     <height>60</height>
                     <aligny>center</aligny>
                     <font>font10</font>
