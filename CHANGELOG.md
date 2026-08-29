@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.49.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.4...akasha-os-v0.49.5) (2026-08-29)
+
+
+### Bug Fixes
+
+* **cec:** honor persistent HDMI-CEC disable marker ([22988a0](https://github.com/jeremiejt38/akasha-os/commit/22988a08e270ec2ffc89bad3c842fe9623ba6a86))
+* **cec:** honor persistent HDMI-CEC disable marker ([4c53be8](https://github.com/jeremiejt38/akasha-os/commit/4c53be8714434730c289b24aba0530b79654f5ae))
+
 ## [0.49.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.3...akasha-os-v0.49.4) (2026-08-29)
 
 
