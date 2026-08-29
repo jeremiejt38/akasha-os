@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.51.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.50.0...akasha-os-v0.51.0) (2026-08-29)
+
+
+### Features
+
+* **aura:** browse show seasons through connector ([467c86d](https://github.com/jeremiejt38/akasha-os/commit/467c86d7dbb95a695fa02bc5abefbca13966d876))
+* **aura:** browse show seasons through connector ([6531a69](https://github.com/jeremiejt38/akasha-os/commit/6531a694236da16ce27fc2e93315fd5bcdf7f4dc))
+
 ## [0.50.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.49.5...akasha-os-v0.50.0) (2026-08-29)
 
 
