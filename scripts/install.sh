@@ -386,9 +386,13 @@ echo 'Akasha OS' > /storage/.cache/hostname
 
 # Enable / disable services
 systemctl daemon-reload
-systemctl enable cec-tv.service cec-wakeup.service cec-wake-early.service \
-                 splash-video.service splash-poweroff.service splash-reboot.service \
+systemctl enable splash-video.service splash-poweroff.service splash-reboot.service \
                  akasha-disable-official-updates.service wifi-silent-agent.service 2>/dev/null || true
+if [ -e /storage/.config/akasha-os/CEC_DISABLED ]; then
+    systemctl disable cec-tv.service cec-wakeup.service cec-wake-early.service 2>/dev/null || true
+else
+    systemctl enable cec-tv.service cec-wakeup.service cec-wake-early.service 2>/dev/null || true
+fi
 systemctl disable wifi-watchdog.service 2>/dev/null || true
 
 log "=== Akasha OS install complete ==="
