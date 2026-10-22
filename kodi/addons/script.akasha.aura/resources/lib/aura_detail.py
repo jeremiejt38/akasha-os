@@ -448,6 +448,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
         li = xbmcgui.ListItem(item.get('title') or '')
+        self._apply_info_tags(li, item)
         if item.get('view_offset_ms'):
             # Kodi honours resumetime/totaltime as start offset.
             li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
@@ -455,6 +456,46 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         li.setMimeType('video/mp4')
         self.close()
         xbmc.Player().play(url, li)
+
+    @staticmethod
+    def _apply_info_tags(li, item):
+        """Feed VideoPlayer.* infolabels (OSD title block) — Kodi 21's
+        InfoTagVideo API, with the legacy setInfo as fallback."""
+        try:
+            tag = li.getVideoInfoTag()
+            if item.get('type') == 'episode':
+                tag.setMediaType('episode')
+                if item.get('show_title'):
+                    tag.setTvShowTitle(item['show_title'])
+                if item.get('season') is not None:
+                    tag.setSeason(int(item['season']))
+                if item.get('index') is not None:
+                    tag.setEpisode(int(item['index']))
+            else:
+                tag.setMediaType('movie')
+            tag.setTitle(item.get('title') or '')
+            if item.get('year'):
+                tag.setYear(int(item['year']))
+            if item.get('summary'):
+                tag.setPlot(item['summary'])
+            if item.get('genres'):
+                tag.setGenres(item['genres'])
+        except Exception:
+            try:
+                info = {'title': item.get('title') or ''}
+                if item.get('type') == 'episode':
+                    info.update({
+                        'tvshowtitle': item.get('show_title') or '',
+                        'season': int(item.get('season') or 0),
+                        'episode': int(item.get('index') or 0),
+                    })
+                if item.get('year'):
+                    info['year'] = int(item['year'])
+                if item.get('summary'):
+                    info['plot'] = item['summary']
+                li.setInfo('video', info)
+            except Exception:
+                pass
 
     def _toggle_watched(self):
         if not self.client or not self.item.get('rating_key'):

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha Plex-style VideoOSD (replaces Arctic Horizon 2's).
+     Mirrors the Android TV OSD measured in docs/plex-parity/reference/lecteur/:
+     title + SxEx/show/duration top-left, clock top-right, slim seek bar
+     bottom with play/pause + times, subtitle and settings circles at the
+     bottom-right, a down chevron to dismiss. -->
+<window>
+    <defaultcontrol>9100</defaultcontrol>
+    <controls>
+        <!-- Scrim gradients for readability -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>220</height>
+            <texture>akasha-osd-scrim-top.png</texture>
+        </control>
+        <control type="image">
+            <left>0</left>
+            <top>860</top>
+            <width>1920</width>
+            <height>220</height>
+            <texture>akasha-osd-scrim-bottom.png</texture>
+        </control>
+
+        <!-- Title block, top-left -->
+        <control type="label">
+            <left>105</left>
+            <top>50</top>
+            <width>1400</width>
+            <height>48</height>
+            <font>font_mini_bold</font>
+            <label>$INFO[VideoPlayer.Title]</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+        <control type="label">
+            <left>105</left>
+            <top>96</top>
+            <width>1400</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration] • $INFO[VideoPlayer.VideoResolution]</label>
+            <textcolor>DDFFFFFF</textcolor>
+            <visible>VideoPlayer.Content(episodes)</visible>
+        </control>
+        <control type="label">
+            <left>105</left>
+            <top>96</top>
+            <width>1400</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration] • $INFO[VideoPlayer.VideoResolution]</label>
+            <textcolor>DDFFFFFF</textcolor>
+            <visible>VideoPlayer.Content(movies)</visible>
+        </control>
+        <control type="label">
+            <left>105</left>
+            <top>96</top>
+            <width>1400</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <label>$INFO[VideoPlayer.Duration] • $INFO[VideoPlayer.VideoResolution]</label>
+            <textcolor>DDFFFFFF</textcolor>
+            <visible>!VideoPlayer.Content(episodes) + !VideoPlayer.Content(movies)</visible>
+        </control>
+
+        <!-- Clock, top-right -->
+        <control type="label">
+            <left>1640</left>
+            <top>50</top>
+            <width>200</width>
+            <height>48</height>
+            <font>font_mini</font>
+            <align>right</align>
+            <label>$INFO[System.Time]</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+
+        <!-- Subtitle + settings circles, bottom-right -->
+        <control type="button" id="9110">
+            <left>1650</left>
+            <top>828</top>
+            <width>64</width>
+            <height>64</height>
+            <label></label>
+            <onclick>ActivateWindow(osdsubtitlesettings)</onclick>
+            <onleft>9100</onleft>
+            <onright>9111</onright>
+            <ondown>9101</ondown>
+            <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
+        </control>
+        <control type="image">
+            <left>1666</left>
+            <top>844</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>osd/subs.png</texture>
+        </control>
+        <control type="button" id="9111">
+            <left>1730</left>
+            <top>828</top>
+            <width>64</width>
+            <height>64</height>
+            <label></label>
+            <onclick>ActivateWindow(osdvideosettings)</onclick>
+            <onleft>9110</onleft>
+            <ondown>9101</ondown>
+            <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
+        </control>
+        <control type="image">
+            <left>1746</left>
+            <top>844</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>osd/settings.png</texture>
+        </control>
+
+        <!-- Bottom bar: play/pause, time, seek, remaining -->
+        <control type="button" id="9100">
+            <left>70</left>
+            <top>912</top>
+            <width>56</width>
+            <height>56</height>
+            <label></label>
+            <onclick>PlayerControl(Play)</onclick>
+            <onright>9101</onright>
+            <onup>9110</onup>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="33FFFFFF">akasha-circle.png</texturefocus>
+        </control>
+        <control type="image">
+            <left>82</left>
+            <top>924</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>osd/pause.png</texture>
+            <visible>!Player.Paused</visible>
+        </control>
+        <control type="image">
+            <left>82</left>
+            <top>924</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>osd/play.png</texture>
+            <visible>Player.Paused</visible>
+        </control>
+        <control type="label">
+            <left>140</left>
+            <top>918</top>
+            <width>110</width>
+            <height>44</height>
+            <font>font_mini</font>
+            <aligny>center</aligny>
+            <label>$INFO[Player.Time]</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+        <control type="slider" id="9101">
+            <left>250</left>
+            <top>928</top>
+            <width>1380</width>
+            <height>24</height>
+            <info>Player.Progress</info>
+            <action>seek</action>
+            <texturesliderbar colordiffuse="59FFFFFF">progress/slider_bg.png</texturesliderbar>
+            <textureslidernib colordiffuse="FFFFFFFF">progress/slider_nib.png</textureslidernib>
+            <textureslidernibfocus colordiffuse="FFFFFFFF">progress/slider_nib.png</textureslidernibfocus>
+            <onleft>9100</onleft>
+            <onup>9110</onup>
+            <ondown>9102</ondown>
+        </control>
+        <control type="label">
+            <left>1660</left>
+            <top>918</top>
+            <width>180</width>
+            <height>44</height>
+            <font>font_mini</font>
+            <align>right</align>
+            <aligny>center</aligny>
+            <label>$INFO[Player.TimeRemaining,-]</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+
+        <!-- Dismiss chevron -->
+        <control type="button" id="9102">
+            <left>930</left>
+            <top>1000</top>
+            <width>60</width>
+            <height>40</height>
+            <label></label>
+            <onclick>Action(Back)</onclick>
+            <onup>9101</onup>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus>-</texturefocus>
+        </control>
+        <control type="image">
+            <left>940</left>
+            <top>1010</top>
+            <width>40</width>
+            <height>24</height>
+            <texture colordiffuse="CCFFFFFF">akasha-chev-down.png</texture>
+        </control>
+    </controls>
+</window>

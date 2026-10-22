@@ -301,6 +301,10 @@ if [ -d "$SKIN_DIR" ]; then
     cp "$SCRIPT_DIR/kodi/media/akasha-title.png" "$SKIN_DIR/media/akasha-title.png"
     AKASHA_VERSION=$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.release-please-manifest.json'))['.'])" 2>/dev/null || echo '')
     python3 "$SCRIPT_DIR/skin-patches/patch_contextmenu_title.py" "$SKIN_DIR" "$AKASHA_VERSION"
+
+    # Plex-parity OSD: replace VideoOSD.xml with the minimal Plex layout
+    # (original kept as VideoOSD.xml.ah2-orig).
+    python3 "$SCRIPT_DIR/skin-patches/patch_plex_osd.py" "$SKIN_DIR"
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi
