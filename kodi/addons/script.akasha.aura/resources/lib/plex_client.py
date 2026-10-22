@@ -334,6 +334,20 @@ class PlexClient:
         })
         return self._metadata_list_with_total(data)
 
+    def scrobble(self, rating_key):
+        """Mark an item watched (Plex `scrobble` endpoint)."""
+        self._request('/:/scrobble', {
+            'key': rating_key,
+            'identifier': 'com.plexapp.plugins.library',
+        })
+
+    def unscrobble(self, rating_key):
+        """Mark an item unwatched."""
+        self._request('/:/unscrobble', {
+            'key': rating_key,
+            'identifier': 'com.plexapp.plugins.library',
+        })
+
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
         data = self._request('/library/metadata/{}/children'.format(show_rating_key))

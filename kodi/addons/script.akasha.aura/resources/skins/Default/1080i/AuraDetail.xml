@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1199">
+    <defaultcontrol>7100</defaultcontrol>
+    <zorder>3</zorder>
+    <controls>
+        <!-- Plex-style item detail page (plan 2e7c9375, docs/plex-parity/SPEC.md).
+             Right-weighted backdrop, dimmed gradient, then title/logo, meta
+             line, rating chips, synopsis, director, action pills, media
+             badges and a circular Cast &amp; Crew row. -->
+
+        <!-- Base -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="FF10131A">white.png</texture>
+        </control>
+
+        <!-- Backdrop, full-bleed right-anchored like Plex -->
+        <control type="image" id="7001">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>765</height>
+            <aspectratio align="right" aligny="top">scale</aspectratio>
+            <fadetime>200</fadetime>
+            <texture background="true"></texture>
+        </control>
+        <!-- Dim + left gradient over the backdrop -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture>scrim-hero.png</texture>
+        </control>
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="7310131A">white.png</texture>
+        </control>
+
+        <!-- Clear logo (when available) or text title -->
+        <control type="image" id="7010">
+            <left>105</left>
+            <top>140</top>
+            <width>720</width>
+            <height>160</height>
+            <aspectratio align="left" aligny="bottom">keep</aspectratio>
+            <fadetime>150</fadetime>
+            <texture background="true"></texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
+        </control>
+        <control type="label" id="7011">
+            <left>105</left>
+            <top>200</top>
+            <width>1100</width>
+            <height>70</height>
+            <font>font_main_bold</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
+        </control>
+
+        <!-- Meta line: year - duration - genres -->
+        <control type="label" id="7020">
+            <left>105</left>
+            <top>310</top>
+            <width>1100</width>
+            <height>36</height>
+            <font>font_mini</font>
+            <textcolor>EEFFFFFF</textcolor>
+        </control>
+
+        <!-- Rating chips row (positions/widths computed in Python):
+             slot 0 = content rating, slot 1 = critic, slot 2 = audience -->
+        <control type="image" id="7021">
+            <left>105</left>
+            <top>356</top>
+            <width>90</width>
+            <height>36</height>
+            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip0))</visible>
+        </control>
+        <control type="label" id="7022">
+            <left>105</left>
+            <top>356</top>
+            <width>90</width>
+            <height>36</height>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip0))</visible>
+        </control>
+        <control type="image" id="7023">
+            <left>205</left>
+            <top>356</top>
+            <width>120</width>
+            <height>36</height>
+            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip1))</visible>
+        </control>
+        <control type="label" id="7024">
+            <left>205</left>
+            <top>356</top>
+            <width>120</width>
+            <height>36</height>
+            <font>font_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip1))</visible>
+        </control>
+        <control type="image" id="7025">
+            <left>335</left>
+            <top>356</top>
+            <width>130</width>
+            <height>36</height>
+            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip2))</visible>
+        </control>
+        <control type="label" id="7026">
+            <left>335</left>
+            <top>356</top>
+            <width>130</width>
+            <height>36</height>
+            <font>font_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip2))</visible>
+        </control>
+
+        <!-- Synopsis (3 lines like Plex) -->
+        <control type="textbox" id="7030">
+            <left>105</left>
+            <top>412</top>
+            <width>1150</width>
+            <height>96</height>
+            <font>font_mini</font>
+            <textcolor>DDFFFFFF</textcolor>
+        </control>
+
+        <!-- Director / creator line -->
+        <control type="label" id="7040">
+            <left>105</left>
+            <top>518</top>
+            <width>1100</width>
+            <height>32</height>
+            <font>font_mini</font>
+            <textcolor>99FFFFFF</textcolor>
+        </control>
+
+        <!-- Action row: Watch/Resume pill + watchlist + watched + more -->
+        <control type="button" id="7100">
+            <left>105</left>
+            <top>576</top>
+            <width>250</width>
+            <height>64</height>
+            <font>font_tiny_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <label>Regarder</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+            <onright>7103</onright>
+            <ondown>7110</ondown>
+        </control>
+        <control type="button" id="7103">
+            <left>375</left>
+            <top>576</top>
+            <width>64</width>
+            <height>64</height>
+            <label>+</label>
+            <font>font_main_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onleft>7100</onleft>
+            <onright>7101</onright>
+            <ondown>7110</ondown>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+        </control>
+        <control type="button" id="7101">
+            <left>459</left>
+            <top>576</top>
+            <width>64</width>
+            <height>64</height>
+            <label></label>
+            <onleft>7103</onleft>
+            <onright>7102</onright>
+            <ondown>7110</ondown>
+            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+        </control>
+        <control type="image">
+            <left>479</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <texture colordiffuse="FFFFFFFF">check.png</texture>
+            <visible>String.IsEqual(Window.Property(AuraDetailWatched),1)</visible>
+        </control>
+        <control type="button" id="7102">
+            <left>543</left>
+            <top>576</top>
+            <width>64</width>
+            <height>64</height>
+            <label>...</label>
+            <font>font_tiny_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onleft>7101</onleft>
+            <ondown>7110</ondown>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+        </control>
+
+        <!-- Media badges (video / audio / subs), right side like Plex -->
+        <control type="image" id="7050">
+            <left>1150</left>
+            <top>584</top>
+            <width>350</width>
+            <height>44</height>
+            <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailVideoBadge))</visible>
+        </control>
+        <control type="label" id="7051">
+            <left>1150</left>
+            <top>584</top>
+            <width>350</width>
+            <height>44</height>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailVideoBadge))</visible>
+        </control>
+        <control type="image" id="7052">
+            <left>1510</left>
+            <top>584</top>
+            <width>220</width>
+            <height>44</height>
+            <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailAudioBadge))</visible>
+        </control>
+        <control type="label" id="7053">
+            <left>1510</left>
+            <top>584</top>
+            <width>220</width>
+            <height>44</height>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailAudioBadge))</visible>
+        </control>
+
+        <!-- Cast &amp; Crew -->
+        <control type="label">
+            <left>105</left>
+            <top>690</top>
+            <width>600</width>
+            <height>44</height>
+            <font>font_mini_bold</font>
+            <label>Cast &amp; Crew</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailHasCast))</visible>
+        </control>
+        <control type="list" id="7110">
+            <left>97</left>
+            <top>740</top>
+            <width>1800</width>
+            <height>240</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <itemlayout width="200" height="230">
+                <control type="image">
+                    <left>20</left>
+                    <top>0</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>0</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <texture>cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>168</top>
+                    <width>200</width>
+                    <height>26</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>194</top>
+                    <width>200</width>
+                    <height>24</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="200" height="230">
+                <control type="image">
+                    <left>20</left>
+                    <top>0</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>0</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <texture>cast-mask.png</texture>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>-2</top>
+                    <width>164</width>
+                    <height>164</height>
+                    <texture>cast-ring.png</texture>
+                    <visible>Control.HasFocus(7110)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>168</top>
+                    <width>200</width>
+                    <height>26</height>
+                    <font>font_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>194</top>
+                    <width>200</width>
+                    <height>24</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+    </controls>
+</window>

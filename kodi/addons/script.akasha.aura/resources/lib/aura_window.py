@@ -18,6 +18,7 @@ import xbmcgui
 
 import addons_inventory
 import aura_app
+import aura_detail
 import aura_settings_panel
 import aura_show
 import aura_store
@@ -773,10 +774,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'rating_key': item['grandparent_rating_key'],
             })
         else:
-            # Same placeholder as the grid: detail pages are a later lot of
-            # the Plex-parity plan (docs/plex-parity/SPEC.md).
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+            self._open_detail(item)
+
+    def _open_detail(self, item):
+        """Open the Plex-style detail page (AuraDetail.xml) for a playable
+        item (movie, episode, trailer/clip)."""
+        detail = self._get_sub_window(
+            'detail', aura_detail.AuraDetailWindow, 'AuraDetail.xml')
+        detail.client = self._connector_client or self._plex_client
+        detail.item = item
+        detail.doModal()
 
     def _render_reco_row_label(self, list_control_id, error=None):
         label_control_id, title, paged = self._reco_rows[list_control_id]
@@ -2254,10 +2261,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if section['type'] == 'show':
             self._open_show(item)
         else:
-            # Playback delegation is not decided yet (see docs/aura/decisions.md);
-            # for now just surface the title so selection feels responsive.
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+            self._open_detail(item)
 
     def _on_home_press_action(self, action):
         """React to a repeated Home press while Aura is already open.
