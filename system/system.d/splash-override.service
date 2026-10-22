@@ -1,0 +1,12 @@
+[Unit]
+Description=Override Kodi splash with Akasha OS
+Before=kodi.service
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/mount --bind /storage/.config/splash.jpg /usr/share/kodi/media/splash.jpg
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

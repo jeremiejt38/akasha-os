@@ -1,17 +1,19 @@
 #!/bin/bash
 # wifi-watchdog.sh — Akasha OS WiFi auto-reconnect watchdog
 #
-# Monitors WiFi connectivity. If disconnected, ensures the connman
-# config has the correct passphrase and attempts to reconnect.
-# NEVER removes/deletes profiles — only writes the passphrase and
-# calls connect.
+# Monitors WiFi connectivity. If Ethernet is down AND the configured
+# (connman "Favorite") WiFi network is not connected, attempts to
+# reconnect to it. Network-agnostic: the service is discovered
+# dynamically from connman's settings, nothing is hardcoded.
+#
+# NEVER removes/deletes profiles — at most it appends a missing
+# Passphrase line (recovered from wifi.config) to an existing profile.
 #
 # Logs every reconnection event to /storage/.config/wifi-watchdog.log.
 # Runs as a systemd service (loop with sleep interval).
 
-SSID="Bbox-3AEEFA4E-5GHz"
-PASSPHRASE="$(awk -F= '/^Passphrase=/{print substr($0, index($0, "=") + 1); exit}' /storage/.cache/connman/wifi.config 2>/dev/null)"
-CONNMAN_SVC_ID="wifi_dca632af47bf_42626f782d33414545464134452d3547487a_managed_psk"
+CONNMAN_DIR="/storage/.cache/connman"
+WIFI_CONFIG="$CONNMAN_DIR/wifi.config"
 LOG="/storage/.config/wifi-watchdog.log"
 CHECK_INTERVAL=10  # seconds between checks
 MAX_RETRIES=5
@@ -21,21 +23,32 @@ log_event() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> "$LOG"
 }
 
-get_wifi_service() {
-    connmanctl services 2>/dev/null | grep "$SSID" | awk '{print $NF}'
+# Prints the connman service id of the Favorite WiFi profile (the one the
+# user actually configured), falling back to any known wifi_* service.
+get_favorite_wifi_service() {
+    local d
+    for d in "$CONNMAN_DIR"/wifi_*; do
+        [ -f "$d/settings" ] || continue
+        if grep -q 'Favorite=true' "$d/settings" 2>/dev/null; then
+            basename "$d"
+            return 0
+        fi
+    done
+    connmanctl services 2>/dev/null | awk '/wifi_.*managed/ {print $NF; exit}'
+    return 1
+}
+
+service_name() {
+    grep -m1 '^Name=' "$CONNMAN_DIR/$1/settings" 2>/dev/null | cut -d= -f2-
 }
 
 get_service_state() {
-    local svc="$1"
-    connmanctl services "$svc" 2>/dev/null | grep '  State' | head -1 | awk '{print $3}'
+    connmanctl services "$1" 2>/dev/null | grep '  State' | head -1 | awk '{print $3}'
 }
 
 is_connected() {
-    local svc
-    svc=$(get_wifi_service)
-    if [ -z "$svc" ]; then
-        return 1
-    fi
+    local svc="$1"
+    [ -n "$svc" ] || return 1
     local state
     state=$(get_service_state "$svc")
     [ "$state" = "ready" ] || [ "$state" = "online" ]
@@ -45,64 +58,44 @@ is_ethernet_connected() {
     [ "$(cat /sys/class/net/eth0/carrier 2>/dev/null)" = "1" ]
 }
 
+# If the favorite profile lost its Passphrase, restore it from wifi.config.
 ensure_passphrase() {
-    [ -n "$PASSPHRASE" ] || return 1
-    # Ensure the connman config exists with the correct passphrase.
-    # Does NOT remove anything — only creates/overwrites the settings file.
-    local svc_dir="/storage/.cache/connman/${CONNMAN_SVC_ID}"
-    mkdir -p "$svc_dir"
-    cat > "${svc_dir}/settings" << EOF
-[${CONNMAN_SVC_ID}]
-Name=${SSID}
-SSID=42626f782d33414545464134452d3547487a
-Frequency=0
-Favorite=true
-AutoConnect=true
-Modified=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-Passphrase=${PASSPHRASE}
-IPv4.method=dhcp
-IPv6.method=off
-IPv6.privacy=prefered
-EOF
+    local svc="$1"
+    local settings="$CONNMAN_DIR/$svc/settings"
+    [ -f "$settings" ] || return 0
+    grep -q '^Passphrase=' "$settings" && return 0
+    local pass
+    pass="$(awk -F= '/^Passphrase=/{print substr($0, index($0, "=") + 1); exit}' "$WIFI_CONFIG" 2>/dev/null)"
+    [ -n "$pass" ] || return 1
+    echo "Passphrase=$pass" >> "$settings"
+    log_event "Passphrase restored into $svc from wifi.config"
 }
 
 try_reconnect() {
-    log_event "DISCONNECT detected — attempting reconnection"
-
-    # Step 1: Make sure the passphrase is in the config
-    if ! ensure_passphrase; then
-        log_event "ERROR: No passphrase found in connman provisioning"
+    local svc
+    svc=$(get_favorite_wifi_service)
+    if [ -z "$svc" ]; then
+        log_event "ERROR: no WiFi service known to connman"
         return 1
     fi
-    log_event "Passphrase ensured in connman config"
+    local name
+    name="$(service_name "$svc")"
+    log_event "DISCONNECT detected — attempting reconnection to '${name:-$svc}'"
 
-    # Step 2: Enable WiFi and scan (non-destructive)
+    ensure_passphrase "$svc"
+
     connmanctl enable wifi 2>/dev/null
     connmanctl scan wifi 2>/dev/null
     sleep 3
 
-    # Step 3: Find the service
-    local svc
-    svc=$(get_wifi_service)
-    if [ -z "$svc" ]; then
-        connmanctl scan wifi 2>/dev/null
-        sleep 3
-        svc=$(get_wifi_service)
-    fi
-    if [ -z "$svc" ]; then
-        log_event "ERROR: SSID '$SSID' not found after scan"
-        return 1
-    fi
-
-    # Step 4: Try to connect (with patience between retries)
     local retry=0
     while [ $retry -lt $MAX_RETRIES ]; do
-        connmanctl connect "$svc" 2>/dev/null
+        timeout 20 connmanctl connect "$svc" 2>/dev/null
         sleep 5
 
-        if is_connected; then
+        if is_connected "$svc"; then
             local ip
-            ip=$(connmanctl services "$svc" 2>/dev/null | grep 'IPv4 =' | grep -oP 'Address=\K[0-9.]+')
+            ip=$(connmanctl services "$svc" 2>/dev/null | grep 'IPv4 =' | grep -o 'Address=[0-9.]*' | cut -d= -f2)
             log_event "RECONNECTED successfully (IP: ${ip:-unknown}, attempt $((retry+1)))"
             return 0
         fi
@@ -123,7 +116,7 @@ log_event "WiFi watchdog started"
 sleep 15
 
 while true; do
-    if ! is_ethernet_connected && ! is_connected; then
+    if ! is_ethernet_connected && ! is_connected "$(get_favorite_wifi_service)"; then
         try_reconnect
         # Cooldown after reconnect attempt to avoid fighting with Kodi
         sleep "$RECONNECT_COOLDOWN"
