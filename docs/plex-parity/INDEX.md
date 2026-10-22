@@ -94,3 +94,7 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `reference/parametres/sidebar_top_004.png` | parametres | sidebar_top | 051837 | focus=u0 |
 | `reference/parametres/settings_focus_005.png` | parametres | settings_focus | 051855 | focus=u0 |
 | `reference/parametres/settings_home_006.png` | parametres | settings_home | 051902 | focus=u0 |
+| `akasha-direct/divertissement/baseline_1_001.png` | divertissement | baseline_1 | 052016 | pi |
+| `akasha-direct/divertissement/baseline_rail_002.png` | divertissement | baseline_rail | 052021 | pi |
+| `akasha-direct/divertissement/retry_003.png` | divertissement | retry | 052104 | pi |
+| `akasha-direct/divertissement/aura_opened_004.png` | divertissement | aura_opened | 052202 | pi |

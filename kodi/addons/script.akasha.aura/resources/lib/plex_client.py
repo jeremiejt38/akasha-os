@@ -16,6 +16,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import divert_source
+
 
 class PlexAPIError(Exception):
     """Raised when a Plex API call fails or returns an unexpected shape."""
@@ -32,7 +34,10 @@ class PlexClient:
     def _url(self, path, params=None):
         url = self.server_url + path
         if params:
-            url += '?' + urllib.parse.urlencode(params)
+            # Hub `key`/`hubKey` values come back with their own query string
+            # (e.g. '/library/sections/1/all?sort=addedAt:desc'), so pagination
+            # params must be appended with '&' rather than a second '?'.
+            url += ('&' if '?' in url else '?') + urllib.parse.urlencode(params)
         return url
 
     def _headers(self):
@@ -65,30 +70,14 @@ class PlexClient:
 
     @staticmethod
     def _video_dict(item, server_url, token):
-        thumb = item.get('thumb') or ''
-        art = item.get('art') or ''
-        section_id = item.get('librarySectionID')
-
         def image_url(path):
             if not path:
                 return ''
             return '{}?X-Plex-Token={}'.format(server_url + path, token)
 
-        return {
-            'title': item.get('title') or 'Sans titre',
-            'type': item.get('type') or 'video',
-            'rating_key': item.get('ratingKey'),
-            'parent_rating_key': item.get('parentRatingKey'),
-            'index': item.get('index'),
-            'season': item.get('parentIndex'),
-            'show_title': item.get('grandparentTitle') or '',
-            'year': item.get('year'),
-            'originally_available_at': item.get('originallyAvailableAt'),
-            'summary': item.get('summary') or '',
-            'thumb_url': image_url(thumb),
-            'art_url': image_url(art),
-            'section_id': str(section_id) if section_id is not None else None,
-        }
+        # Shared normaliser keeps connector and direct-Plex payloads identical
+        # (see divert_source.build_video_item).
+        return divert_source.build_video_item(item, image_url)
 
     def _metadata_list(self, data):
         mc = self._media_container(data)
@@ -109,6 +98,53 @@ class PlexClient:
                  for item in mc.get('Metadata', [])]
         total = mc.get('totalSize', mc.get('size'))
         return items, total
+
+    def home_hubs(self, hub_count=24, per_hub=16):
+        """The promoted "For You" hubs Plex TV renders as the home rows.
+
+        `/hubs/promoted` returns the same curated list (Continue Watching,
+        On Deck, Recently Added/Released, genre/director spotlights...) the
+        official client shows, each hub already carrying its first `per_hub`
+        items inline so the initial paint needs a single request.
+        """
+        data = self._request('/hubs/promoted', {
+            'count': per_hub,
+            'X-Plex-Container-Size': hub_count,
+        })
+        return self._hub_list(data)
+
+    def section_hubs(self, section_key, hub_count=24, per_hub=16):
+        """The per-library hubs Plex shows on a library's Recommended tab."""
+        data = self._request('/hubs/sections/{}'.format(section_key), {
+            'count': per_hub,
+            'X-Plex-Container-Size': hub_count,
+        })
+        return self._hub_list(data)
+
+    def _hub_list(self, data):
+        mc = self._media_container(data)
+        hubs = []
+        for hub in mc.get('Hub', []):
+            hubs.append({
+                'title': hub.get('title') or hub.get('title2') or '',
+                'key': hub.get('key') or hub.get('hubKey') or '',
+                'identifier': hub.get('hubIdentifier') or '',
+                'context': hub.get('context') or '',
+                'type': hub.get('type') or '',
+                'style': hub.get('style') or '',
+                'more': bool(hub.get('more')),
+                'items': [self._video_dict(item, self.server_url, self.token)
+                          for item in hub.get('Metadata', [])],
+            })
+        return hubs
+
+    def hub_items_with_total(self, key, limit=20, offset=0):
+        """Paginate a hub's own `key`/`hubKey` path (its "more" endpoint)."""
+        data = self._request(key, {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
 
     def on_deck(self, limit=20, offset=0):
         data = self._request('/library/onDeck', {

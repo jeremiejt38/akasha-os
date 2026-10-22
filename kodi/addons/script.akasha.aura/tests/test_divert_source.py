@@ -133,6 +133,129 @@ class TestDivertSource(unittest.TestCase):
         items = [{'title': 'A', 'section_id': '1'}]
         self.assertEqual(divert_source.filter_by_section(items, '99'), [])
 
+    def test_episode_uses_show_poster_and_fanart(self):
+        raw = {
+            'MediaContainer': {
+                'Metadata': [
+                    {
+                        'title': 'Pilot', 'type': 'episode',
+                        'thumb': '/ep/thumb', 'grandparentThumb': '/show/thumb',
+                        'grandparentArt': '/show/art',
+                    }
+                ]
+            }
+        }
+        items = divert_source.parse_metadata_list(raw, lambda p: 'r:' + p)
+        self.assertEqual(items[0]['poster_url'], 'r:/show/thumb')
+        self.assertEqual(items[0]['fanart_url'], 'r:/show/art')
+        self.assertEqual(items[0]['landscape_url'], 'r:/ep/thumb')
+
+    def test_movie_prefers_own_thumb_and_art(self):
+        raw = {'MediaContainer': {'Metadata': [
+            {'title': 'M', 'type': 'movie', 'thumb': '/m/thumb', 'art': '/m/art'}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: 'r:' + p)
+        self.assertEqual(items[0]['poster_url'], 'r:/m/thumb')
+        self.assertEqual(items[0]['fanart_url'], 'r:/m/art')
+
+    def test_progress_from_view_offset(self):
+        raw = {'MediaContainer': {'Metadata': [
+            {'title': 'M', 'duration': 1200000, 'viewOffset': 300000}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertAlmostEqual(items[0]['progress'], 0.25)
+        self.assertEqual(items[0]['duration_ms'], 1200000)
+        self.assertEqual(items[0]['view_offset_ms'], 300000)
+
+    def test_progress_absent_without_view_offset(self):
+        raw = {'MediaContainer': {'Metadata': [{'title': 'M', 'duration': 1200000}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertIsNone(items[0]['progress'])
+
+    def test_content_rating_strips_locale_prefix(self):
+        raw = {'MediaContainer': {'Metadata': [{'title': 'M', 'contentRating': 'fr/10'}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertEqual(items[0]['content_rating'], '10')
+
+    def test_ratings_genres_cast_and_crew(self):
+        raw = {
+            'MediaContainer': {
+                'Metadata': [
+                    {
+                        'title': 'M', 'rating': 7.8, 'audienceRating': 8.4,
+                        'audienceRatingImage': 'themoviedb://image.rating',
+                        'Genre': [{'tag': 'Action'}, {'tag': 'Sci-Fi'}],
+                        'Director': [{'tag': 'Dir Ector'}],
+                        'Writer': [{'tag': 'Wri Ter'}],
+                        'Role': [
+                            {'tag': 'Actor One', 'role': 'Hero', 'thumb': '/role/1'},
+                            {'tag': 'Actor Two'},
+                            {},
+                        ],
+                        'studio': 'Studio X',
+                    }
+                ]
+            }
+        }
+        items = divert_source.parse_metadata_list(raw, lambda p: 'r:' + p)
+        item = items[0]
+        self.assertEqual(item['rating'], 7.8)
+        self.assertEqual(item['audience_rating'], 8.4)
+        self.assertEqual(item['genres'], ['Action', 'Sci-Fi'])
+        self.assertEqual(item['directors'], ['Dir Ector'])
+        self.assertEqual(item['writers'], ['Wri Ter'])
+        self.assertEqual(item['studio'], 'Studio X')
+        self.assertEqual(len(item['cast']), 2)
+        self.assertEqual(item['cast'][0],
+                         {'name': 'Actor One', 'role': 'Hero', 'thumb_url': 'r:/role/1'})
+        self.assertEqual(item['cast'][1]['thumb_url'], '')
+
+    def test_clear_logo_extracted(self):
+        raw = {'MediaContainer': {'Metadata': [
+            {'title': 'M', 'Image': [
+                {'type': 'coverPoster', 'url': '/poster'},
+                {'type': 'clearLogo', 'url': '/logo'},
+            ]}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: 'r:' + p)
+        self.assertEqual(items[0]['logo_url'], 'r:/logo')
+
+    def test_media_labels(self):
+        raw = {
+            'MediaContainer': {
+                'Metadata': [
+                    {
+                        'title': 'M',
+                        'Media': [{
+                            'videoResolution': '4k', 'videoCodec': 'hevc',
+                            'Part': [{'key': '/part/1', 'Stream': [
+                                {'streamType': 1, 'codec': 'hevc', 'colorTrc': 'smpte2084'},
+                                {'streamType': 2, 'codec': 'eac3', 'channels': 6,
+                                 'language': 'French'},
+                                {'streamType': 3, 'codec': 'srt', 'language': 'French'},
+                            ]}],
+                        }],
+                    }
+                ]
+            }
+        }
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        item = items[0]
+        self.assertEqual(item['video_label'], '4K HDR10 HEVC')
+        self.assertEqual(item['audio_label'], 'French EAC3 5.1')
+        self.assertEqual(item['subtitle_label'], 'French SRT')
+        self.assertEqual(item['part_key'], '/part/1')
+
+    def test_watched_flag_from_view_count(self):
+        raw = {'MediaContainer': {'Metadata': [
+            {'title': 'A', 'viewCount': 1}, {'title': 'B'}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertTrue(items[0]['watched'])
+        self.assertFalse(items[1]['watched'])
+
+    def test_non_dict_item_does_not_raise(self):
+        raw = {'MediaContainer': {'Metadata': [None, {'title': 'Ok'}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p: p)
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]['title'], 'Sans titre')
+
 
 if __name__ == '__main__':
     unittest.main()
