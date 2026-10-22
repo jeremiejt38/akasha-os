@@ -19,6 +19,7 @@ import xbmcgui
 
 ACTION_MOVE_LEFT = 1
 ACTION_PREVIOUS_MENU = 10
+ACTION_CONTEXT_MENU = 117
 ACTION_NAV_BACK = 92
 
 WATCH_BUTTON_ID = 7100
@@ -31,6 +32,17 @@ CAST_LIST_ID = 7110
 SEASON_STRIP_ID = 7120
 EPISODES_LIST_ID = 7130
 SEASONS_LIST_ID = 7140
+
+# "Plus d'actions" side panel entries (Plex More Actions sheet).
+MORE_SUBTITLES_ID = 7200
+MORE_LIST_ID = 7201
+MORE_PLAYLIST_ID = 7202
+MORE_MANAGE_ID = 7203
+MORE_FILE_INFO_ID = 7204
+MORE_WAYS_ID = 7205
+MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
+MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
+                  MORE_MANAGE_ID, MORE_FILE_INFO_ID, MORE_WAYS_ID)
 
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, WATCHLIST_BUTTON_ID,
                   RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID)
@@ -454,6 +466,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._rate()
         elif controlID == MORE_BUTTON_ID:
             self._open_more_menu()
+        elif controlID in MORE_PANEL_IDS:
+            self._on_more_entry(controlID)
         elif controlID == SEASON_STRIP_ID:
             self._on_strip_selected()
         elif controlID == SEASONS_LIST_ID:
@@ -514,9 +528,26 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         return True
 
     def onAction(self, action):
-        if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
+        # The "Plus d'actions" side panel swallows Back/Left like Plex's
+        # sheet: it collapses back onto the action row instead of closing
+        # the whole page.
+        if self._more_menu_open():
+            if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
+                                  ACTION_MOVE_LEFT):
+                self._close_more_menu()
+                return
+        elif action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
             if not self._back_to_show():
                 self.close()
+            return
+        if action.getId() == ACTION_CONTEXT_MENU:
+            # Plex long-press parity: a long press fires the same action
+            # as a plain click on the focused control (open the episode,
+            # the action button, ...) and never raises a context menu.
+            try:
+                self.onClick(self.getFocusId())
+            except Exception:
+                pass
             return
         if action.getId() == ACTION_MOVE_LEFT and self._at_left_edge():
             # Plex: pressing Left on the left edge opens the sidebar rail.
@@ -691,31 +722,41 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _open_more_menu(self):
         """Plex's 'More' button opens a 'More Actions' side panel
         (Subtitles, Add to List, Playlist/Collection, Manage, File Info,
-        More Ways to Watch). Cloud-only entries surface an explicit
-        notification; File Info shows the media data we actually have."""
-        entries = [
-            'Sous-titres',
-            'Ajouter à une liste',
-            'Ajouter à une playlist/collection',
-            'Gérer',
-            'Infos fichier',
-            'Autres façons de regarder',
-        ]
-        choice = xbmcgui.Dialog().select('Plus', entries)
-        if choice < 0:
-            return
-        if choice == 4:
+        More Ways to Watch). The panel slides over the dimmed page from
+        the right edge; cloud-only entries surface an explicit
+        notification and File Info shows the media data we actually
+        have."""
+        _set(self, 'AuraDetailMore', '1')
+        try:
+            self.setFocus(self.getControl(MORE_PANEL_FIRST_ID))
+        except RuntimeError:
+            pass
+
+    def _close_more_menu(self):
+        _set(self, 'AuraDetailMore', '')
+        try:
+            self.setFocus(self.getControl(MORE_BUTTON_ID))
+        except RuntimeError:
+            pass
+
+    def _more_menu_open(self):
+        return self.getProperty('AuraDetailMore') == '1'
+
+    def _on_more_entry(self, control_id):
+        self._close_more_menu()
+        if control_id == MORE_FILE_INFO_ID:
             self._show_file_info()
             return
         msg = {
-            0: 'Choix des sous-titres pendant la lecture',
-            1: 'Listes indisponibles (fonction Plex cloud)',
-            2: 'Playlists indisponibles (fonction Plex cloud)',
-            3: 'Gestion indisponible (fonction Plex cloud)',
-            5: 'Sources externes indisponibles (fonction Plex cloud)',
-        }[choice]
-        xbmcgui.Dialog().notification('Akasha Aura', msg,
-                                      xbmcgui.NOTIFICATION_INFO, 2500)
+            MORE_SUBTITLES_ID: 'Choix des sous-titres pendant la lecture',
+            MORE_LIST_ID: 'Listes indisponibles (fonction Plex cloud)',
+            MORE_PLAYLIST_ID: 'Playlists indisponibles (fonction Plex cloud)',
+            MORE_MANAGE_ID: 'Gestion indisponible (fonction Plex cloud)',
+            MORE_WAYS_ID: 'Sources externes indisponibles (fonction Plex cloud)',
+        }.get(control_id)
+        if msg:
+            xbmcgui.Dialog().notification('Akasha Aura', msg,
+                                          xbmcgui.NOTIFICATION_INFO, 2500)
 
     def _show_file_info(self):
         item = self._playable_item() or self.item

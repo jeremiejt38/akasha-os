@@ -67,6 +67,7 @@ ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 ACTION_MENU = 163
+ACTION_CONTEXT_MENU = 117
 
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
@@ -1821,6 +1822,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         focused = self.getFocusId()
+        # Plex long-press parity: a long press on a card or sidebar entry
+        # behaves exactly like a plain click in the Android TV client --
+        # it opens the target and never raises a context menu.
+        if aid == ACTION_CONTEXT_MENU:
+            if focused in RECO_LIST_IDS:
+                self._on_reco_item_selected(focused)
+            elif focused == DIVERT_PANEL_ID:
+                self._on_divert_item_selected()
+            elif focused == CATEGORY_PANEL_ID:
+                self._on_category_genre_selected()
+            elif focused == DIVERT_SIDEBAR_ID:
+                self._on_sidebar_item_selected()
+            return
         # Left/Right across the whole top bar (search, the 3 modules, gear)
         # is a single native <onleft>/<onright> loop declared directly in
         # Aura.xml; no Python override needed there. Found on-device (plan
