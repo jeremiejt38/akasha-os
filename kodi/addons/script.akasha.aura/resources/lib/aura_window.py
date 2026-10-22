@@ -650,6 +650,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _reco_slot_has_row(self, slot_index):
         return self._hub_offset + slot_index < len(self._hub_rows)
 
+    def _reco_list_has_items(self, list_id):
+        try:
+            return self.getControl(list_id).size() > 0
+        except RuntimeError:
+            return False
+
     def _sync_navigation(self):
         """Re-wire directional navigation targets to the current state.
 
@@ -687,17 +693,39 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Reco slots: Up from the first slot reaches the contextual strip
         # only once the viewport is back at the top; while deeper hubs are
         # reachable it pins itself so _reco_scroll(-1) keeps focus anchored.
-        # Down between slots only when the next slot is bound to a hub.
+        # Up/down chain through slots that actually rendered items -- a hub
+        # whose load failed stays bound (label shows the error) but empty,
+        # and focusing an empty list is a dead end.
         strip_up = (DIVERT_SUBTAB_IDS[self._divert_library_tab]
                     if self._divert_view == 'library'
                     else HOME_TAB_IDS[self._home_tab])
+        filled_slots = [list_id for _, list_id in RECO_SLOT_IDS
+                        if self._reco_list_has_items(list_id)]
         for i, (_, list_id) in enumerate(RECO_SLOT_IDS):
-            up = (RECO_SLOT_IDS[i - 1][1] if i > 0
+            before = [l for l in filled_slots
+                      if RECO_LIST_IDS.index(l) < i]
+            after = [l for l in filled_slots
+                     if RECO_LIST_IDS.index(l) > i]
+            up = (before[-1] if before
                   else (list_id if self._hub_offset > 0 else strip_up))
-            down = (RECO_SLOT_IDS[i + 1][1]
-                    if i < len(RECO_SLOT_IDS) - 1
-                    and self._reco_slot_has_row(i + 1) else list_id)
+            down = after[0] if after else list_id
             nav(list_id, up=up, down=down, left=DIVERT_SIDEBAR_ID)
+
+        # Sidebar rail: Right must land on whatever content the active
+        # view actually shows -- the XML's static 5110 target is a dead
+        # end in library Browse/Collections/Categories (the reco rows are
+        # hidden there), trapping the user inside the rail.
+        if (self._divert_view == 'library' and
+                self._divert_library_tab in (DIVERT_SUBTAB_BIBLIOTHEQUES,
+                                             DIVERT_SUBTAB_COLLECTIONS)):
+            sidebar_right = DIVERT_PANEL_ID
+        elif (self._divert_view == 'library' and
+                self._divert_library_tab == DIVERT_SUBTAB_CATEGORIES):
+            sidebar_right = CATEGORY_PANEL_ID
+        else:
+            sidebar_right = (filled_slots[0] if filled_slots
+                             else RECO_ON_DECK_LIST_ID)
+        nav(DIVERT_SIDEBAR_ID, right=sidebar_right)
 
     def _focused_reco_item(self):
         """The item dict currently focused in a Recommande row slot."""
