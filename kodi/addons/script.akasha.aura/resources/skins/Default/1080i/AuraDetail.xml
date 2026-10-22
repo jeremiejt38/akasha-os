@@ -244,7 +244,7 @@
             <focusedcolor>FF1A1A1A</focusedcolor>
             <texturenofocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
-            <onright>7103</onright>
+            <onright>7106</onright>
             <ondown>7110</ondown>
         </control>
         <control type="image" id="7090">
@@ -265,6 +265,37 @@
             <textcolor>FF1A1A1A</textcolor>
             <label></label>
         </control>
+        <control type="button" id="7106">
+            <left>375</left>
+            <top>576</top>
+            <width>64</width>
+            <height>64</height>
+            <label></label>
+            <onleft>7100</onleft>
+            <onright>7103</onright>
+            <ondown>7110</ondown>
+            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+            <visible>String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
+        </control>
+        <control type="image" id="7107">
+            <left>395</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-restart.png</texture>
+            <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
+        </control>
+        <control type="image" id="7108">
+            <left>395</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-restart-dark.png</texture>
+            <visible>Control.HasFocus(7106)</visible>
+        </control>
         <control type="button" id="7103">
             <left>375</left>
             <top>576</top>
@@ -274,7 +305,7 @@
             <font>font_main_bold</font>
             <align>center</align>
             <aligny>center</aligny>
-            <onleft>7100</onleft>
+            <onleft>7106</onleft>
             <onright>7104</onright>
             <ondown>7110</ondown>
             <textcolor>BBFFFFFF</textcolor>
@@ -492,6 +523,14 @@
             <ondown>7100</ondown>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
             <itemlayout width="200" height="56">
+                <control type="image">
+                    <left>14</left>
+                    <top>4</top>
+                    <width>172</width>
+                    <height>48</height>
+                    <texture colordiffuse="33FFFFFF" border="24">chip-outline.png</texture>
+                    <visible>ListItem.IsSelected</visible>
+                </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
@@ -565,10 +604,18 @@
                     <texture>poster-corners.png</texture>
                 </control>
                 <control type="image">
-                    <left>156</left>
-                    <top>16</top>
-                    <width>28</width>
-                    <height>28</height>
+                    <left>150</left>
+                    <top>10</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="CC10131A">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="image">
+                    <left>158</left>
+                    <top>18</top>
+                    <width>24</width>
+                    <height>24</height>
                     <texture>check.png</texture>
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
@@ -597,10 +644,18 @@
                     <texture border="20">focus-ring.png</texture>
                 </control>
                 <control type="image">
-                    <left>156</left>
-                    <top>16</top>
-                    <width>28</width>
-                    <height>28</height>
+                    <left>150</left>
+                    <top>10</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="CC10131A">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="image">
+                    <left>158</left>
+                    <top>18</top>
+                    <width>24</width>
+                    <height>24</height>
                     <texture>check.png</texture>
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>

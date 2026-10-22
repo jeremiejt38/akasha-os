@@ -25,6 +25,7 @@ WATCHED_BUTTON_ID = 7101
 MORE_BUTTON_ID = 7102
 WATCHLIST_BUTTON_ID = 7103
 RATE_BUTTON_ID = 7104
+RESTART_BUTTON_ID = 7106
 CAST_LIST_ID = 7110
 SEASON_STRIP_ID = 7120
 EPISODES_LIST_ID = 7130
@@ -144,7 +145,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self.getControl(7090).setPosition(105 + 22, 595)
         except RuntimeError:
             pass
-        for i, cid in enumerate((7103, 7104, 7101, 7102)):
+        # Plex shows a "restart from beginning" circle only when the item
+        # that would play carries a resume offset.
+        restart = bool(self._playable_item() and
+                       self._playable_item().get('view_offset_ms'))
+        _set(self, 'AuraDetailRestart', '1' if restart else '')
+        circles = ([7106] if restart else []) + [7103, 7104, 7101, 7102]
+        icons = ([(7107, 7108)] if restart else []) + [
+            (7092, 7093), (7099, 7105), (7094, 7095), (7097, 7098)]
+        for i, cid in enumerate(circles):
             try:
                 self.getControl(cid).setPosition(105 + pill_w + 20 + i * 84,
                                                  576)
@@ -152,8 +161,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 pass
         # icon overlays ride along with the circles (light/dark pairs +
         # the accent check that shows when the item is watched)
-        for i, pair in enumerate(((7092, 7093), (7099, 7105), (7094, 7095),
-                                  (7097, 7098))):
+        for i, pair in enumerate(icons):
             for cid in pair:
                 try:
                     self.getControl(cid).setPosition(
@@ -161,7 +169,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 except RuntimeError:
                     pass
         try:
-            self.getControl(7096).setPosition(105 + pill_w + 188 + 20, 596)
+            self.getControl(7096).setPosition(
+                105 + pill_w + 20 + circles.index(7101) * 84 + 20, 596)
         except RuntimeError:
             pass
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
@@ -224,7 +233,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # prefixes are only the fallback when no icon is known.
         chips = []
         if item.get('content_rating'):
-            chips.append((item['content_rating'], ''))
+            chips.append((_age_label(item['content_rating']), ''))
         if item.get('rating'):
             chips.append(self._rating_chip(item['rating'],
                                            item.get('rating_image')))
@@ -359,7 +368,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 row = self.getControl(cid)
                 if mode == self.mode or (mode == 'item' and
                                          self.mode == 'item'):
-                    watch.setNavigation(strip, row, watch, self.getControl(7103))
+                    right_id = (7106 if self.getProperty('AuraDetailRestart')
+                                else 7103)
+                    watch.setNavigation(strip, row, watch,
+                                        self.getControl(right_id))
                     row.setNavigation(watch, row, row, row)
             if self.mode in ('show', 'season'):
                 strip.setNavigation(strip, watch, strip, strip)
@@ -372,6 +384,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID == WATCH_BUTTON_ID:
             self._play()
+        elif controlID == RESTART_BUTTON_ID:
+            self._play(start_over=True)
         elif controlID == WATCHED_BUTTON_ID:
             self._toggle_watched()
         elif controlID == WATCHLIST_BUTTON_ID:
@@ -448,6 +462,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     # ------------------------------------------------------------ actions
 
+    def _playable_item(self):
+        """The item Watch/Resume would actually start (OnDeck episode for
+        shows, the item itself otherwise)."""
+        if self.mode in ('show', 'season'):
+            nxt = self._find_next_episode()
+            if nxt:
+                return nxt
+            if self._seasons:
+                self._load_episodes(0)
+                return self._episodes[0] if self._episodes else None
+            return None
+        return self.item
+
     def _watch_label(self):
         item = self.item
         if self.mode in ('show', 'season'):
@@ -491,7 +518,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return None
         return '{}{}?X-Plex-Token={}'.format(base, item['part_key'], token)
 
-    def _play(self):
+    def _play(self, start_over=False):
         item = self.item
         if self.mode in ('show', 'season'):
             item = self._find_next_episode()
@@ -512,7 +539,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         li = xbmcgui.ListItem(item.get('title') or '')
         self._apply_info_tags(li, item)
-        if item.get('view_offset_ms'):
+        if item.get('view_offset_ms') and not start_over:
             # Kodi honours resumetime/totaltime as start offset.
             li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
             li.setProperty('totaltime', str(float(item.get('duration_ms') or 0) / 1000.0))
@@ -588,6 +615,24 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 xbmcgui.NOTIFICATION_INFO, 1500)
         except Exception as e:
             xbmc.log('Akasha Aura Detail: rate failed: {}'.format(e), xbmc.LOGERROR)
+
+
+_AGE_RATINGS = {
+    'g': 'age 0+', 'tv-y': 'age 0+', 'tv-g': 'age 0+', 'u': 'age 0+',
+    'pg': 'age 9+', 'tv-pg': 'age 9+', '10': 'age 10+',
+    'pg-13': 'age 13+', 'tv-14': 'age 13+', '12': 'age 12+',
+    'r': 'age 17+', 'tv-ma': 'age 17+', '16': 'age 16+',
+    'nc-17': 'age 18+', '18': 'age 18+',
+}
+
+
+def _age_label(content_rating):
+    """Plex renders the content rating as a friendly 'age N+' chip."""
+    raw = (content_rating or '').strip()
+    mapped = _AGE_RATINGS.get(raw.lower())
+    if mapped == 'age 0+':
+        return 'Tous publics'
+    return mapped or raw
 
 
 def _provider_icon(rating_image, audience=False):
