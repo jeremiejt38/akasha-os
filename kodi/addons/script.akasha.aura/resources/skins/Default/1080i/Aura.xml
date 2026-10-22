@@ -43,9 +43,9 @@
                  by Window.Property(AuraHero*) from aura_window.py. -->
             <control type="image">
                 <left>127</left>
-                <top>170</top>
+                <top>160</top>
                 <width>720</width>
-                <height>140</height>
+                <height>128</height>
                 <aspectratio align="left" aligny="bottom">keep</aspectratio>
                 <fadetime>250</fadetime>
                 <texture background="true">$INFO[Window.Property(AuraHeroLogo)]</texture>
@@ -53,7 +53,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>244</top>
+                <top>206</top>
                 <width>1500</width>
                 <height>62</height>
                 <font>font_info_black_doublerow</font>
@@ -63,23 +63,25 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>314</top>
+                <top>292</top>
                 <width>1500</width>
-                <height>36</height>
-                <font>font_main</font>
-                <textcolor>FFFFFFFF</textcolor>
+                <height>44</height>
+                <font>font_midi</font>
+                <textcolor>FFF0F0F0</textcolor>
                 <label>$INFO[Window.Property(AuraHeroSubtitle)]</label>
                 <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
             </control>
             <!-- Meta line + rating chip: horizontal grouplist so the chip
-                 hugs the end of the variable-width meta text, like Plex. -->
+                 hugs the end of the variable-width meta text, like Plex.
+                 Chip width is resized at runtime (id 5005) to hug its
+                 label text. -->
             <control type="grouplist">
                 <left>127</left>
-                <top>354</top>
+                <top>340</top>
                 <width>1400</width>
                 <height>36</height>
                 <orientation>horizontal</orientation>
-                <itemgap>18</itemgap>
+                <itemgap>14</itemgap>
                 <align>left</align>
                 <control type="label">
                     <width min="20" max="1350">auto</width>
@@ -89,21 +91,21 @@
                     <textcolor>DDFFFFFF</textcolor>
                     <label>$INFO[Window.Property(AuraHeroMeta)]</label>
                 </control>
-                <control type="group">
-                    <width>150</width>
+                <control type="group" id="5005">
+                    <width>44</width>
                     <height>36</height>
                     <visible>!String.IsEmpty(Window.Property(AuraHeroRating))</visible>
-                    <control type="image">
+                    <control type="image" id="5006">
                         <left>0</left>
                         <top>0</top>
-                        <width>150</width>
+                        <width>44</width>
                         <height>34</height>
                         <texture border="14">chip-outline.png</texture>
                     </control>
-                    <control type="label">
+                    <control type="label" id="5007">
                         <left>0</left>
                         <top>0</top>
-                        <width>150</width>
+                        <width>44</width>
                         <height>34</height>
                         <align>center</align>
                         <aligny>center</aligny>
@@ -115,18 +117,18 @@
             </control>
             <control type="textbox">
                 <left>127</left>
-                <top>398</top>
+                <top>380</top>
                 <width>880</width>
-                <height>46</height>
-                <font>font_tiny</font>
+                <height>70</height>
+                <font>font_mini</font>
                 <textcolor>CCFFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroPlot)]</label>
             </control>
             <control type="label">
                 <left>127</left>
-                <top>474</top>
+                <top>458</top>
                 <width>1100</width>
-                <height>24</height>
+                <height>26</height>
                 <font>font_tiny</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroCast)]</label>
@@ -652,20 +654,55 @@
                      container, plain text tabs, focused tab = white pill
                      with dark text. -->
                 <control type="image">
-                    <left>111</left>
-                    <top>120</top>
-                    <width>915</width>
-                    <height>44</height>
-                    <texture colordiffuse="B81A1A1A" border="22">rounded-solid.png</texture>
+                    <left>119</left>
+                    <top>112</top>
+                    <width>784</width>
+                    <height>52</height>
+                    <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
+                </control>
+
+                <!-- Active-tab outline (visible when the strip is not
+                     focused; white focus fill covers it otherwise). -->
+                <control type="image">
+                    <left>127</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
+                </control>
+                <control type="image">
+                    <left>305</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
+                </control>
+                <control type="image">
+                    <left>483</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
+                </control>
+                <control type="image">
+                    <left>661</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
 
                 <control type="button" id="3050">
                     <left>127</left>
-                    <top>124</top>
-                    <width>190</width>
-                    <height>36</height>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
                     <label>Recommandé</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -674,16 +711,16 @@
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3100">
-                    <left>327</left>
-                    <top>124</top>
-                    <width>200</width>
-                    <height>36</height>
+                    <left>305</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
                     <label>Bibliothèque</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3050</onleft>
@@ -692,17 +729,17 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <!-- Plex "Collections" tab (4th contextual library tab). -->
                 <control type="button" id="3075">
-                    <left>537</left>
-                    <top>124</top>
-                    <width>200</width>
-                    <height>36</height>
+                    <left>483</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
                     <label>Collections</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3100</onleft>
@@ -711,16 +748,16 @@
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3060">
-                    <left>747</left>
-                    <top>124</top>
-                    <width>200</width>
-                    <height>36</height>
+                    <left>661</left>
+                    <top>118</top>
+                    <width>170</width>
+                    <height>40</height>
                     <label>Catégories</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3075</onleft>
@@ -729,7 +766,7 @@
                     <ondown>6010</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <!-- Options button ("..."): no dedicated per-library options menu specified
@@ -737,10 +774,10 @@
                      "Gerer les bibliotheques" dialog (pin/reorder) as the most reasonable
                      placeholder action, see docs/aura/decisions.md. -->
                 <control type="button" id="3402">
-                    <left>957</left>
-                    <top>124</top>
+                    <left>839</left>
+                    <top>118</top>
                     <width>56</width>
-                    <height>36</height>
+                    <height>40</height>
                     <label>...</label>
                     <font>font14</font>
                     <align>center</align>
@@ -751,7 +788,7 @@
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
             </control>
 
@@ -762,19 +799,46 @@
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
                 <control type="image">
-                    <left>111</left>
-                    <top>120</top>
-                    <width>750</width>
-                    <height>44</height>
-                    <texture colordiffuse="B81A1A1A" border="22">rounded-solid.png</texture>
+                    <left>119</left>
+                    <top>112</top>
+                    <width>612</width>
+                    <height>52</height>
+                    <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
+                </control>
+                <!-- Active-tab outline (Plex shows a rounded outline on the
+                     selected tab when the strip is not focused; the white
+                     fill on focus covers it anyway). -->
+                <control type="image">
+                    <left>127</left>
+                    <top>118</top>
+                    <width>200</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
+                </control>
+                <control type="image">
+                    <left>335</left>
+                    <top>118</top>
+                    <width>200</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
+                </control>
+                <control type="image">
+                    <left>543</left>
+                    <top>118</top>
+                    <width>180</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>127</left>
-                    <top>124</top>
-                    <width>220</width>
-                    <height>36</height>
+                    <top>118</top>
+                    <width>200</width>
+                    <height>40</height>
                     <label>Pour vous</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -783,15 +847,15 @@
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
                 <control type="button" id="3071">
-                    <left>357</left>
-                    <top>124</top>
-                    <width>230</width>
-                    <height>36</height>
+                    <left>335</left>
+                    <top>118</top>
+                    <width>200</width>
+                    <height>40</height>
                     <label>Tendances</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
@@ -800,15 +864,15 @@
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
                 <control type="button" id="3072">
-                    <left>597</left>
-                    <top>124</top>
-                    <width>220</width>
-                    <height>36</height>
+                    <left>543</left>
+                    <top>118</top>
+                    <width>180</width>
+                    <height>40</height>
                     <label>Activité</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3071</onleft>
@@ -817,7 +881,7 @@
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
             </control>
 

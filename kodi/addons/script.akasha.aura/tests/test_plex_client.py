@@ -166,9 +166,9 @@ class TestPlexClient(unittest.TestCase):
             'genres_per_section': 1,
         })
         labels = [r['label'] for r in rows]
-        self.assertIn('Continuer a regarder', labels)
-        self.assertIn('Ajoutes recemment', labels)
-        self.assertIn('Films — Sortis recemment', labels)
+        self.assertIn('Continuer à regarder', labels)
+        self.assertIn('Ajoutés récemment', labels)
+        self.assertIn('Films — Sorties récentes', labels)
         self.assertIn('Films — Drame', labels)
 
     @patch('urllib.request.urlopen')

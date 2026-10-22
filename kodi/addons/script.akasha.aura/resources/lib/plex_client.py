@@ -380,15 +380,15 @@ class PlexClient:
             }
 
         rows = [
-            {'label': 'Continuer a regarder', 'items': self.on_deck(limits['on_deck'])},
-            {'label': 'Ajoutes recemment', 'items': self.recently_added(limits['recently_added'])},
+            {'label': 'Continuer à regarder', 'items': self.on_deck(limits['on_deck'])},
+            {'label': 'Ajoutés récemment', 'items': self.recently_added(limits['recently_added'])},
         ]
 
         for section in self.movie_sections():
             rr = self.recently_released(section['key'], limits['recently_released'])
             if rr:
                 rows.append({
-                    'label': '{} — Sortis recemment'.format(section['title']),
+                    'label': '{} — Sorties récentes'.format(section['title']),
                     'items': rr,
                 })
 

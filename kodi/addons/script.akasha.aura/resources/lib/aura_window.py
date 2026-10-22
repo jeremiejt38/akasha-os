@@ -557,8 +557,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _reco_legacy_rows(self, section):
         """Connector mode: the connector has no hubs endpoint, so rebuild the
         original 3 hand-picked rows through the same slot mechanism."""
-        on_deck_title = 'Continuer a regarder'
-        recent_title = 'Ajoutes recemment'
+        on_deck_title = 'Continuer à regarder'
+        recent_title = 'Ajoutés récemment'
         if section:
             on_deck_title += ' dans {}'.format(section['title'])
             recent_title += ' dans {}'.format(section['title'])
@@ -746,8 +746,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('AuraHeroTitle', title)
         self.setProperty('AuraHeroSubtitle', subtitle)
         self.setProperty('AuraHeroMeta', _hero_meta_line(item))
-        self.setProperty('AuraHeroRating', item.get('content_rating') or '')
-        self.setProperty('AuraHeroPlot', item.get('summary') or '')
+        rating = item.get('content_rating') or ''
+        self.setProperty('AuraHeroRating', rating)
+        # Plex's age chip hugs its text (~40px for "10"): resize the
+        # chip group/image/label since Kodi cannot auto-size it.
+        chip_w = max(44, 11 * len(rating) + 24)
+        for cid in (5005, 5006, 5007):
+            try:
+                self.getControl(cid).setWidth(chip_w)
+            except RuntimeError:
+                pass
+        self.setProperty('AuraHeroPlot', _truncate_plot(item.get('summary') or ''))
         self.setProperty('AuraHeroCast', cast)
 
     def _on_reco_item_selected(self, list_control_id):
@@ -1002,7 +1011,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._fill_divert_panel()
         try:
             self.getControl(DIVERT_STATUS_ID).setLabel(
-                '{} — {} element(s)'.format(item['title'], len(self._divert_items)))
+                '{} — {} élément(s)'.format(item['title'], len(self._divert_items)))
             self.getControl(DIVERT_PANEL_ID).selectItem(0)
         except RuntimeError:
             pass
@@ -1258,7 +1267,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 count = self._divert_paged.total if self._divert_paged.total is not None \
                     else len(self._divert_items)
-                label = '{} element(s)'.format(count)
+                label = '{} élément(s)'.format(count)
                 if self._divert_search_query:
                     label += ' pour "{}"'.format(self._divert_search_query)
                 if self._divert_filter_genre:
@@ -2344,31 +2353,31 @@ def _hub_title_fr(hub):
     title = hub.get('title') or ''
 
     if 'continue' in identifier or 'ondeck' in identifier:
-        base = 'Continuer a regarder'
+        base = 'Continuer à regarder'
     elif 'recentlyadded' in identifier:
-        base = 'Ajoutes recemment'
+        base = 'Ajoutés récemment'
         if ' in ' in title:
             base += ' dans {}'.format(title.rsplit(' in ', 1)[-1])
     elif 'recentlyreleased' in identifier:
-        base = 'Sorties recentes'
+        base = 'Sorties récentes'
         if 'Movies' in title:
             base += ' dans Films'
     elif 'recentlyviewed' in identifier or 'recentlywatched' in identifier:
-        base = 'Vus recemment'
+        base = 'Vus récemment'
     else:
         # Discover ("Tendances") provider hub identifiers.
         discover_titles = {
             'home.recently-released-trailers': 'Nouvelles bandes-annonces',
             'home.trending-trailers': 'Bandes-annonces en vogue',
-            'home.recommended-on-services': 'Recommande sur vos services',
+            'home.recommended-on-services': 'Recommandé sur vos services',
             'home.top_watchlisted': 'Les plus suivis cette semaine',
             'home.new-trailers': 'Bandes-annonces de votre Watchlist',
             'home.watchlist-available': 'Disponibles sur vos services',
-            'home.coming-soon': 'Bientot disponible',
-            'home.available-rentals': 'Disponibles a la location',
+            'home.coming-soon': 'Bientôt disponible',
+            'home.available-rentals': 'Disponibles à la location',
             'home.genres': 'Parcourir par genre',
-            'home.historical-week': 'Sortis cette semaine un jour de l\'histoire',
-            'home.blockbuster-trailers': 'Blockbusters a venir',
+            'home.historical-week': 'Cette semaine dans l\'histoire',
+            'home.blockbuster-trailers': 'Blockbusters à venir',
             'home.preferred-services': 'Vos services',
         }
         base = discover_titles.get(identifier, title)
@@ -2378,7 +2387,9 @@ def _hub_title_fr(hub):
     scoped = bool(identifier) and not identifier.startswith('home.') \
         and 'hub.home' not in context
     if scoped and '·' not in base:
-        base += ' · Akasha'
+        # Plex renders the server suffix smaller and grey; Kodi labels
+        # cannot mix sizes, so we match the dimmed tone at least.
+        base += '[COLOR FF8A9199] · Akasha[/COLOR]'
     return base
 
 
@@ -2418,6 +2429,16 @@ def _hero_meta_line(item):
         if duration:
             parts.append(duration)
     return '   '.join(parts)
+
+
+def _truncate_plot(text, limit=130):
+    """Clamp the hero synopsis to roughly two lines (like Plex): cut at a
+    word boundary and append an ellipsis when truncated."""
+    text = ' '.join((text or '').split())
+    if len(text) <= limit:
+        return text
+    cut = text[:limit].rsplit(' ', 1)[0].rstrip(',;:.')
+    return cut + '…'
 
 
 def _build_divert_list_item(item):
