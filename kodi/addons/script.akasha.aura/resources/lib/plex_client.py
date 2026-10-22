@@ -56,7 +56,13 @@ class PlexClient:
         req = urllib.request.Request(url, headers=self._headers())
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                return json.loads(resp.read().decode('utf-8'))
+                body = resp.read().decode('utf-8')
+                # Action endpoints (scrobble/unscrobble/rate) answer 200
+                # with an empty body -- a bare decode would JSON-decode
+                # crash and the caller would treat it as a failure.
+                if not body.strip():
+                    return {}
+                return json.loads(body)
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise PlexAPIError('Plex API {} for {}: {}'.format(e.code, path, body)) from e

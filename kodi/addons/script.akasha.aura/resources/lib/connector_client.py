@@ -47,7 +47,10 @@ class ConnectorClient:
 
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                return json.loads(resp.read().decode('utf-8'))
+                body = resp.read().decode('utf-8')
+                if not body.strip():
+                    return {}
+                return json.loads(body)
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise ConnectorAPIError('Connector API {} for {}: {}'.format(e.code, path, body)) from e
