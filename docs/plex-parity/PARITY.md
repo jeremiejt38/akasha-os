@@ -19,6 +19,9 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Fiche — portraits du cast | Livré (partiel) | Photos réelles | Cercles propres + fallback silhouette `actor-fallback.png` quand `thumb=NONE` | 🟡 | Beaucoup d'acteurs n'ont pas de thumb côté serveur | captures |
 | Fiche série — saisons | Livré | `fiche/show_detail_top_005` | Strip Série / Saison N, rangée posters de saisons, liste épisodes landscape par saison | ✅ | — | captures |
 | Fiche épisode | Livré | — | Méta `S1 • E1 · date · durée`, synopsis, cast, Resume | ✅ | — | captures |
+| Fiche — cercle restart ↻ | Livré | `fiche/show_detail_top_005` | Visible si l'item à lire a un offset de reprise ; `play(start_over=True)` | ✅ | — | `detail_v7.png` |
+| Fiche — chip âge | Livré | `fiche/film_detail_top_001` | Format `age N+` / `Tous publics` (mapping PG-13/TV-MA/…) | ✅ | — | `detail_v7.png` |
+| Fiche — scroll bas de page | Limitation | `fiche/film_scroll_2_003`, `film_scroll_3_004` | Page fixe (Cast & Crew = dernière section) | ⬜ | Sections « Ratings & Reviews » et « Discussions » = API sociale privée Plex ; pas de scroll fenêtre Kodi | — |
 | Lecture | Livré | Plex player | Lecture réelle via `part_key`, reprise (viewOffset) | ✅ | — | captures |
 | Recherche | Livré | `recherche/` | Grille clavier a-z + suggestions live, cartes résultats 2 colonnes | ✅ | — | captures |
 | OSD vidéo | Livré | `osd/` | Minimaliste : titre, méta, horloge, seek fine, cercles subs/settings | ✅ | — | captures |
