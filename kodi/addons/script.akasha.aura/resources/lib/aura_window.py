@@ -1436,26 +1436,57 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_az_jump(self):
         """A-Z rail: jump the grid to the first loaded item starting with
         the selected letter (Plex only offers the rail on title sort)."""
+        # The control-level getters misbehave on this static <content>
+        # list (getSelectedPosition -> -1, getSelectedItem may raise),
+        # but Kodi's infolabels report the selection correctly.
         try:
-            pos = self.getControl(DIVERT_AZ_RAIL_ID).getSelectedPosition()
-        except RuntimeError:
+            pos = int(xbmc.getInfoLabel('Container({}).Position'.format(
+                DIVERT_AZ_RAIL_ID)) or -1)
+        except ValueError:
             return
         letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         if not (0 <= pos < len(letters)):
             return
         letter = letters[pos]
-        target = None
-        for i, item in enumerate(self._divert_items):
-            title = (item.get('title') or '').strip().upper()
-            if not title:
-                continue
-            first = title[0]
-            if letter == '#' and first.isdigit():
-                target = i
+
+        def find_index():
+            for i, item in enumerate(self._divert_items):
+                title = (item.get('title') or '').strip().upper()
+                if not title:
+                    continue
+                first = title[0]
+                if letter == '#' and first.isdigit():
+                    return i
+                if first == letter:
+                    return i
+            return None
+
+        target = find_index()
+        # The rail must also reach items beyond the loaded window: pull
+        # the list forward through the same fetch pipeline (same filters
+        # and sort) until the letter appears or the source is exhausted.
+        # 500-item chunks keep a 5k-title library to ~10 requests instead
+        # of ~100, so the jump stays under a few seconds; scanning only
+        # what was already loaded left the rail dead past the first page.
+        guard = 0
+        while (target is None and self._divert_paged
+               and not self._divert_paged.exhausted and guard < 40):
+            try:
+                chunk = self._divert_paged.fetch_page(
+                    len(self._divert_items), 500)
+            except Exception as e:
+                xbmc.log('Akasha Aura: AZ chunk fetch failed: {}'.format(e),
+                         xbmc.LOGWARNING)
                 break
-            if first == letter:
-                target = i
+            page, _total = chunk if isinstance(chunk, tuple) else (chunk, None)
+            if not page:
+                self._divert_paged.exhausted = True
                 break
+            self._divert_paged.items.extend(page)
+            self._divert_items = self._divert_paged.items
+            self._divert_append_new(page)
+            target = find_index()
+            guard += 1
         if target is None:
             return
         try:
@@ -1538,6 +1569,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not new_items:
             return
         self._divert_items = self._divert_paged.items
+        self._divert_append_new(new_items)
+
+    def _divert_append_new(self, new_items):
+        """Append freshly fetched items to the grid after swapping out the
+        stale trailing placeholders they replace."""
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             # Remove the stale trailing placeholders first: they were
@@ -1834,6 +1870,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._on_category_genre_selected()
             elif focused == DIVERT_SIDEBAR_ID:
                 self._on_sidebar_item_selected()
+            return
+        # The A-Z rail's static <content> items carry no <onclick>, so Kodi
+        # treats them as dead items and never dispatches GUI_MSG_CLICKED to
+        # onClick() -- Select must be routed manually, like a long-press.
+        if aid == ACTION_SELECT_ITEM and focused == DIVERT_AZ_RAIL_ID:
+            self._divert_az_jump()
             return
         # Left/Right across the whole top bar (search, the 3 modules, gear)
         # is a single native <onleft>/<onright> loop declared directly in
