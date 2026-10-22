@@ -28,3 +28,9 @@ Thumbs.db
 # not part of this project's own source of truth (KSP repo is private).
 .devin/templates/
 .devin/workflows/
+
+# plex-parity raw captures (docs md + scripts stay versioned)
+docs/plex-parity/reference/
+docs/plex-parity/akasha-direct/
+docs/plex-parity/akasha-camera/
+docs/plex-parity/diff/

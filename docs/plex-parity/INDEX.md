@@ -1,0 +1,96 @@
+# Plex Parity — Index des captures
+
+Convention : `reference/` = vraie appli Plex (émulateur Google TV API 36, 1920x1080),
+`akasha-direct/` = capture numérique Kodi sur le Pi, `akasha-camera/` = même source
+(historiquement la caméra Pixel ; l'outil physique a été remplacé par l'endpoint
+PixelCamera HTTP — voir SPEC.md, note "camera").
+
+| Fichier | Écran | État/action | Heure | Notes |
+|---------|-------|-------------|-------|-------|
+| `reference/profil/select_init_001.png` | profil | select_init | 050140 | focus=u0 |
+| `reference/profil/pin_prompt_002.png` | profil | pin_prompt | 050145 | focus=u0 |
+| `reference/onboarding/after_continue_001.png` | onboarding | after_continue | 050201 | focus=u0 |
+| `reference/onboarding/continue2_002.png` | onboarding | continue2 | 050222 | focus=u0 |
+| `reference/onboarding/step2_003.png` | onboarding | step2 | 050248 | focus=u0 |
+| `reference/onboarding/step3_004.png` | onboarding | step3 | 050301 | focus=u0 |
+| `reference/onboarding/step4_005.png` | onboarding | step4 | 050306 | focus=u0 |
+| `reference/onboarding/step5_006.png` | onboarding | step5 | 050310 | focus=u0 |
+| `reference/accueil/first_load_001.png` | accueil | first_load | 050333 | focus=u0 |
+| `reference/accueil/cw_focus_item4_002.png` | accueil | cw_focus_item4 | 050409 | focus=u0 |
+| `reference/accueil/cw_focus_item7_scroll_003.png` | accueil | cw_focus_item7_scroll | 050416 | focus=u0 |
+| `reference/accueil/row2_focus_004.png` | accueil | row2_focus | 050424 | focus=u0 |
+| `reference/accueil/row3_focus_005.png` | accueil | row3_focus | 050429 | focus=u0 |
+| `reference/accueil/row4_focus_006.png` | accueil | row4_focus | 050433 | focus=u0 |
+| `reference/accueil/row5_focus_007.png` | accueil | row5_focus | 050447 | focus=u0 |
+| `reference/accueil/row6_focus_008.png` | accueil | row6_focus | 050451 | focus=u0 |
+| `reference/accueil/row7_focus_009.png` | accueil | row7_focus | 050455 | focus=u0 |
+| `reference/sidebar/expanded_focus_001.png` | sidebar | expanded_focus | 050501 | focus=u0 |
+| `reference/sidebar/focus_profile_002.png` | sidebar | focus_profile | 050516 | focus=u0 |
+| `reference/sidebar/focus_mylists_003.png` | sidebar | focus_mylists | 050519 | focus=u0 |
+| `reference/sidebar/focus_search_004.png` | sidebar | focus_search | 050523 | focus=u0 |
+| `reference/sidebar/focus_home_005.png` | sidebar | focus_home | 050527 | focus=u0 |
+| `reference/sidebar/focus_films_006.png` | sidebar | focus_films | 050530 | focus=u0 |
+| `reference/sidebar/focus_seriestv_007.png` | sidebar | focus_seriestv | 050534 | focus=u0 |
+| `reference/sidebar/focus_dessins_008.png` | sidebar | focus_dessins | 050537 | focus=u0 |
+| `reference/sidebar/focus_cartoons_009.png` | sidebar | focus_cartoons | 050541 | focus=u0 |
+| `reference/sidebar/focus_docu_010.png` | sidebar | focus_docu | 050545 | focus=u0 |
+| `reference/sidebar/focus_spectacles_011.png` | sidebar | focus_spectacles | 050548 | focus=u0 |
+| `reference/sidebar/focus_animes_012.png` | sidebar | focus_animes | 050552 | focus=u0 |
+| `reference/sidebar/focus_docuseries_013.png` | sidebar | focus_docuseries | 050555 | focus=u0 |
+| `reference/sidebar/focus_emissions_014.png` | sidebar | focus_emissions | 050559 | focus=u0 |
+| `reference/sidebar/focus_playlists_015.png` | sidebar | focus_playlists | 050602 | focus=u0 |
+| `reference/sidebar/scroll_down_1_016.png` | sidebar | scroll_down_1 | 050610 | focus=u0 |
+| `reference/sidebar/scroll_down_2_017.png` | sidebar | scroll_down_2 | 050613 | focus=u0 |
+| `reference/sidebar/scroll_down_3_018.png` | sidebar | scroll_down_3 | 050617 | focus=u0 |
+| `reference/sidebar/scroll_down_4_019.png` | sidebar | scroll_down_4 | 050620 | focus=u0 |
+| `reference/sidebar/after_discover_1_020.png` | sidebar | after_discover_1 | 050639 | focus=u0 |
+| `reference/sidebar/after_discover_2_021.png` | sidebar | after_discover_2 | 050643 | focus=u0 |
+| `reference/sidebar/after_discover_3_022.png` | sidebar | after_discover_3 | 050646 | focus=u0 |
+| `reference/sidebar/back_to_films_023.png` | sidebar | back_to_films | 050656 | focus=u0 |
+| `reference/bibliotheque/films_entry_001.png` | bibliotheque | films_entry | 050714 | focus=u0 |
+| `reference/bibliotheque/films_tabs_focus_002.png` | bibliotheque | films_tabs_focus | 050728 | focus=u0 |
+| `reference/bibliotheque/films_browse_focus_003.png` | bibliotheque | films_browse_focus | 050731 | focus=u0 |
+| `reference/bibliotheque/films_browse_grid_004.png` | bibliotheque | films_browse_grid | 050738 | focus=u0 |
+| `reference/bibliotheque/grid_focus_item2_005.png` | bibliotheque | grid_focus_item2 | 050750 | focus=u0 |
+| `reference/fiche/film_detail_top_001.png` | fiche | film_detail_top | 050757 | focus=u0 |
+| `reference/fiche/film_scroll_1_002.png` | fiche | film_scroll_1 | 050810 | focus=u0 |
+| `reference/fiche/film_scroll_2_003.png` | fiche | film_scroll_2 | 050814 | focus=u0 |
+| `reference/fiche/film_scroll_3_004.png` | fiche | film_scroll_3 | 050817 | focus=u0 |
+| `reference/sidebar/focus_for_series_024.png` | sidebar | focus_for_series | 050831 | focus=u0 |
+| `reference/sidebar/focus_seriestv2_025.png` | sidebar | focus_seriestv2 | 050835 | focus=u0 |
+| `reference/bibliotheque/series_entry_006.png` | bibliotheque | series_entry | 050842 | focus=u0 |
+| `reference/recherche/nav_to_search_001.png` | recherche | nav_to_search | 050855 | focus=u0 |
+| `reference/recherche/focus_search_rail_002.png` | recherche | focus_search_rail | 050858 | focus=u0 |
+| `reference/recherche/search_open_003.png` | recherche | search_open | 050905 | focus=u0 |
+| `reference/recherche/typed_r_004.png` | recherche | typed_r | 050925 | focus=u0 |
+| `reference/recherche/typed_ro_005.png` | recherche | typed_ro | 050930 | focus=u0 |
+| `reference/recherche/typed_roo_006.png` | recherche | typed_roo | 050937 | focus=u0 |
+| `reference/recherche/results_rook_007.png` | recherche | results_rook | 050946 | focus=u0 |
+| `reference/recherche/result_focus_008.png` | recherche | result_focus | 050959 | focus=u0 |
+| `reference/fiche/show_detail_top_005.png` | fiche | show_detail_top | 051007 | focus=u0 |
+| `reference/fiche/season1_view_006.png` | fiche | season1_view | 051021 | focus=u0 |
+| `reference/fiche/season1_loaded_007.png` | fiche | season1_loaded | 051035 | focus=u0 |
+| `reference/lecteur/osd_controls_001.png` | lecteur | osd_controls | 051056 | focus=u0 |
+| `reference/lecteur/osd_down_002.png` | lecteur | osd_down | 051104 | focus=u0 |
+| `reference/lecteur/after_back_003.png` | lecteur | after_back | 051121 | focus=u0 |
+| `reference/sidebar/nav_settings_026.png` | sidebar | nav_settings | 051125 | focus=u0 |
+| `reference/sidebar/profile_top_027.png` | sidebar | profile_top | 051131 | focus=u0 |
+| `reference/profil/switch_menu_003.png` | profil | switch_menu | 051136 | focus=u0 |
+| `reference/navigation/back_to_home_001.png` | navigation | back_to_home | 051153 | focus=u0 |
+| `reference/navigation/rail_open_002.png` | navigation | rail_open | 051207 | focus=u0 |
+| `reference/sidebar/focus_more_028.png` | sidebar | focus_more | 051215 | focus=u0 |
+| `reference/navigation/more_screen_003.png` | navigation | more_screen | 051223 | focus=u0 |
+| `reference/profil/pin_screen_004.png` | profil | pin_screen | 051623 | focus=u0 |
+| `reference/profil/after_pin_005.png` | profil | after_pin | 051629 | focus=u0 |
+| `reference/sidebar/to_films_029.png` | sidebar | to_films | 051654 | focus=u0 |
+| `reference/bibliotheque/films_recommended_007.png` | bibliotheque | films_recommended | 051700 | focus=u0 |
+| `reference/bibliotheque/films_tabs_top_008.png` | bibliotheque | films_tabs_top | 051709 | focus=u0 |
+| `reference/bibliotheque/films_collections_focus_009.png` | bibliotheque | films_collections_focus | 051713 | focus=u0 |
+| `reference/bibliotheque/films_collections_view_010.png` | bibliotheque | films_collections_view | 051719 | focus=u0 |
+| `reference/parametres/profile_focus_001.png` | parametres | profile_focus | 051734 | focus=u0 |
+| `reference/parametres/chevron_002.png` | parametres | chevron | 051737 | focus=u0 |
+| `reference/parametres/profile_menu_003.png` | parametres | profile_menu | 051742 | focus=u0 |
+| `reference/navigation/rail_from_grid_004.png` | navigation | rail_from_grid | 051814 | focus=u0 |
+| `reference/parametres/sidebar_top_004.png` | parametres | sidebar_top | 051837 | focus=u0 |
+| `reference/parametres/settings_focus_005.png` | parametres | settings_focus | 051855 | focus=u0 |
+| `reference/parametres/settings_home_006.png` | parametres | settings_home | 051902 | focus=u0 |
