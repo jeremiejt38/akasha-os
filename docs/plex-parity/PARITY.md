@@ -36,5 +36,9 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 - **Flux « Activité »** : feed social (GraphQL privé) → empty state explicite.
 - **Ligne « Activity by you… » sur les fiches** : même raison.
 - **Watchlist** : synchronisation compte Plex en ligne — notification « Watchlist indisponible » en attendant le connector.
+- **Multi-utilisateurs / PIN (« Who's watching? »)** : fonction compte plex.tv — `profil/*` ; hors périmètre du connecteur privé.
+- **Onboarding Plex** (`onboarding/*`) : parcours de première ouverture de l'app Plex elle-même — hors périmètre Aura.
+- **Contenus « Sur Plex »** (TV en direct, Découvrir) : sources cloud Plex, notification explicite en attendant un proxy éventuel.
+- **Écran « Plus »** : Plex liste des sources supplémentaires (souvent vide) ; Aura ouvre « Gérer les bibliothèques » (épinglage) — équivalent fonctionnel.
 - **Portraits d'acteurs** : le serveur renvoie souvent `thumb=NONE` → fallback `actor-fallback.png`.
 - **Backdrop** : couleur de fondu légèrement différente (scrim proche mais pas pixel-perfect).
