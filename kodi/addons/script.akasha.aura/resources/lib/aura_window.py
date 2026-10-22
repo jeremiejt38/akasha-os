@@ -825,7 +825,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         _, _, paged = row
         if not (0 <= pos < len(paged.items)):
             return
-        item = paged.items[pos]
+        self._reco_open(paged.items[pos])
+
+    def _reco_open(self, item):
         if item['type'] in ('show', 'season'):
             self._open_show(item)
         elif item['type'] == 'episode' and item.get('grandparent_rating_key'):
@@ -836,6 +838,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             })
         else:
             self._open_detail(item)
+
+    def _on_reco_context_menu(self, list_control_id):
+        row = self._reco_rows.get(list_control_id)
+        if not row:
+            return
+        try:
+            li = self.getControl(list_control_id).getSelectedItem()
+            if li is not None and li.getProperty('IsPlaceholder'):
+                return
+            pos = self.getControl(list_control_id).getSelectedPosition()
+        except RuntimeError:
+            return
+        _, _, paged = row
+        if not (0 <= pos < len(paged.items)):
+            return
+        item = paged.items[pos]
+        self._open_item_context_menu(
+            item, lambda: self._reco_open(item), list_control_id)
 
     def _open_detail(self, item):
         """Open the Plex-style detail page (AuraDetail.xml) for a playable
@@ -1879,14 +1899,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         focused = self.getFocusId()
-        # Plex long-press parity: a long press on a card or sidebar entry
-        # behaves exactly like a plain click in the Android TV client --
-        # it opens the target and never raises a context menu.
+        # Plex long-press: content cards open an option sheet whose
+        # entries depend on the element type (see
+        # _open_item_context_menu); navigation elements (sidebar, genre
+        # cards) keep the long-press == click parity.
         if aid == ACTION_CONTEXT_MENU:
             if focused in RECO_LIST_IDS:
-                self._on_reco_item_selected(focused)
+                self._on_reco_context_menu(focused)
             elif focused == DIVERT_PANEL_ID:
-                self._on_divert_item_selected()
+                self._on_divert_context_menu()
             elif focused == CATEGORY_PANEL_ID:
                 self._on_category_genre_selected()
             elif focused == DIVERT_SIDEBAR_ID:
@@ -2471,8 +2492,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if not (0 <= pos < len(self._divert_items)):
             return
-        item = self._divert_items[pos]
+        self._divert_open(self._divert_items[pos])
 
+    def _divert_open(self, item):
         if item.get('type') == 'collection':
             self._open_collection(item)
             return
@@ -2482,6 +2504,161 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._open_show(item)
         else:
             self._open_detail(item)
+
+    def _on_divert_context_menu(self):
+        try:
+            pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self._divert_items)):
+            return
+        item = self._divert_items[pos]
+        self._open_item_context_menu(
+            item, lambda: self._divert_open(item), DIVERT_PANEL_ID)
+
+    # -- Long-press context menus (Plex option sheets) -------------------
+    #
+    # Plex's Android TV long-press opens a small action sheet whose
+    # entries depend on the element under focus: playable items get
+    # Play/Resume/Restart, everything gets Open, rateable entries get
+    # Mark-as-watched + Rate, then the cloud-limited "Add to list" and a
+    # File Info dump for media-bearing items. Navigation elements
+    # (sidebar, genre cards) keep the plain long-press == click parity.
+
+    def _open_item_context_menu(self, item, open_default, control_id):
+        typ = item.get('type')
+        client = self._connector_client or self._plex_client
+        rateable = typ in ('movie', 'show', 'season', 'episode') \
+            and item.get('rating_key') and client is not None
+        offset = item.get('view_offset_ms') or 0
+        watched = (item.get('view_count') or 0) > 0
+
+        entries = []
+        if typ in ('movie', 'episode') and item.get('part_key'):
+            entries.append(('Reprendre' if offset else 'Regarder',
+                            lambda: self._ctx_play(item)))
+            if offset:
+                entries.append(('Recommencer',
+                                lambda: self._ctx_play(item, start_over=True)))
+        entries.append(('Ouvrir', open_default))
+        if rateable:
+            entries.append(('Marquer comme non vu' if watched
+                            else 'Marquer comme vu',
+                            lambda: self._ctx_toggle_watched(item, control_id)))
+            entries.append(('Noter', lambda: self._ctx_rate(item)))
+        entries.append(('Ajouter à ma liste', self._ctx_list_notice))
+        if item.get('video_label') or item.get('audio_label'):
+            entries.append(('Infos fichier', lambda: self._ctx_file_info(item)))
+
+        idx = xbmcgui.Dialog().contextmenu([label for label, _ in entries])
+        if 0 <= idx < len(entries):
+            entries[idx][1]()
+
+    def _ctx_play(self, item, start_over=False):
+        """Direct playback from the option sheet -- same modal lifecycle
+        as the detail page: every dialog leaves the screen before the
+        video starts, and default.py re-opens Aura once it ends."""
+        item = self._hydrate_item(item)
+        client = self._connector_client or self._plex_client
+        base = getattr(client, 'server_url', None) if client else None
+        token = getattr(client, 'token', None) if client else None
+        url = ('{}{}?X-Plex-Token={}'.format(base, item['part_key'], token)
+               if base and token and item.get('part_key') else None)
+        if not url:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Lecture indisponible (flux introuvable)',
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        li = xbmcgui.ListItem(item.get('title') or '')
+        aura_detail.AuraDetailWindow._apply_info_tags(li, item)
+        if item.get('view_offset_ms') and not start_over:
+            li.setProperty('resumetime',
+                           str(float(item['view_offset_ms']) / 1000.0))
+            li.setProperty('totaltime',
+                           str(float(item.get('duration_ms') or 0) / 1000.0))
+        li.setMimeType('video/mp4')
+        self.playback_started = True
+        self._playback_item = item
+        self.close()
+        xbmc.Player().play(url, li)
+
+    def _hydrate_item(self, item):
+        """Grid/row payloads usually carry part_key already; shallow hub
+        items get one fetch of full metadata, like _open_show does."""
+        if item.get('part_key') or not item.get('rating_key'):
+            return item
+        client = self._connector_client or self._plex_client
+        if not client:
+            return item
+        try:
+            full = client.metadata_item(item['rating_key'])
+            if isinstance(full, dict) and full:
+                full.setdefault('type', item.get('type'))
+                item = full
+        except Exception as e:
+            xbmc.log('Akasha Aura: item hydration failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+        return item
+
+    def _ctx_toggle_watched(self, item, control_id):
+        client = self._connector_client or self._plex_client
+        if not client or not item.get('rating_key'):
+            return
+        watched = (item.get('view_count') or 0) > 0
+        try:
+            if watched:
+                client.unscrobble(item['rating_key'])
+            else:
+                client.scrobble(item['rating_key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: watched toggle failed: {}'.format(e),
+                     xbmc.LOGERROR)
+            return
+        item['view_count'] = 0 if watched else 1
+        try:
+            li = self.getControl(control_id).getSelectedItem()
+            li.getVideoInfoTag().setPlayCount(item['view_count'])
+        except Exception:
+            pass
+        xbmcgui.Dialog().notification(
+            'Akasha Aura',
+            'Marqué comme non vu' if watched else 'Marqué comme vu',
+            xbmcgui.NOTIFICATION_INFO, 1500)
+
+    def _ctx_rate(self, item):
+        client = self._connector_client or self._plex_client
+        if not client or not item.get('rating_key'):
+            return
+        choices = ['{} / 10'.format(i) for i in range(1, 11)]
+        pos = xbmcgui.Dialog().select('Noter', choices)
+        if pos < 0:
+            return
+        try:
+            client.rate(item['rating_key'], pos + 1)
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Note enregistrée : {}'.format(choices[pos]),
+                xbmcgui.NOTIFICATION_INFO, 1500)
+        except Exception as e:
+            xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
+
+    def _ctx_list_notice(self):
+        xbmcgui.Dialog().notification(
+            'Akasha Aura', 'Listes indisponibles (fonction Plex cloud)',
+            xbmcgui.NOTIFICATION_INFO, 2500)
+
+    def _ctx_file_info(self, item):
+        lines = [item.get('title') or '']
+        meta = [x for x in (item.get('year'),
+                            _format_duration(item.get('duration_ms')))
+                if x]
+        if meta:
+            lines.append(' · '.join(str(m) for m in meta))
+        for label, key in (('Vidéo', 'video_label'),
+                           ('Audio', 'audio_label'),
+                           ('Sous-titres', 'subtitle_label')):
+            if item.get(key):
+                lines.append('{} : {}'.format(label, item[key]))
+        xbmcgui.Dialog().ok('Infos fichier', '[CR]'.join(lines))
 
     def _on_home_press_action(self, action):
         """React to a repeated Home press while Aura is already open.
