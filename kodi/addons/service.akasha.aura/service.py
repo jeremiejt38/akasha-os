@@ -15,9 +15,15 @@ import os
 import time
 
 import xbmc
+import xbmcgui
 
 INTRO_FLAG_FILE = '/tmp/.akasha-intro-played'
 MAX_WAIT_SECONDS = 30
+# Bounded wait for the native Home window before launching Aura: the intro
+# video, first-run dialogs or a leftover startup notification can still own
+# the screen when this service fires. A one-shot check at that exact moment
+# skipped Aura permanently and stranded the user on the native Kodi Home.
+HOME_WINDOW_WAIT_SECONDS = 30
 # Mirrors script.akasha.quickstart/resources/lib/quickstart_state.py's
 # MARKER_PATH -- duplicated rather than cross-imported from another
 # addon's resources/lib for a single path constant, to keep this launcher
@@ -37,6 +43,21 @@ def _wait_for_intro():
         waited += 0.5
 
 
+def _wait_for_home_window():
+    """Wait until Kodi's native Home window is active with no modal dialog
+    on top. Returns False on abort or timeout -- the caller still launches
+    Aura in that case, so Home always ends up in Aura."""
+    waited = 0
+    while waited < HOME_WINDOW_WAIT_SECONDS and not monitor.abortRequested():
+        if (xbmcgui.getCurrentWindowId() == 10000
+                and xbmcgui.getCurrentWindowDialogId() == 9999):
+            return True
+        if monitor.waitForAbort(0.5):
+            return False
+        waited += 0.5
+    return False
+
+
 def main():
     _wait_for_intro()
     if monitor.abortRequested():
@@ -45,6 +66,12 @@ def main():
         xbmc.log('Akasha Aura Launcher: first run, opening Quick Start', xbmc.LOGINFO)
         xbmc.executebuiltin('RunScript(script.akasha.quickstart)')
         return
+    if not _wait_for_home_window():
+        if monitor.abortRequested():
+            return
+        xbmc.log('Akasha Aura Launcher: Home window not active after {}s, '
+                 'launching Aura anyway'.format(HOME_WINDOW_WAIT_SECONDS),
+                 xbmc.LOGWARNING)
     xbmc.log('Akasha Aura Launcher: opening Akasha Aura', xbmc.LOGINFO)
     xbmc.executebuiltin('RunScript(script.akasha.aura)')
 

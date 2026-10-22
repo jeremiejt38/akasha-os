@@ -19,6 +19,8 @@ docs/aura/decisions.md.
 """
 import os
 import sys
+import threading
+import time
 
 import xbmc
 import xbmcaddon
@@ -31,16 +33,34 @@ import settings_press_handler  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
 
 LOCK_FILE = '/tmp/akasha-aura.lock'
+# The running script rewrites the lock on a heartbeat; a lock older than
+# this means the previous script died without reaching its finally block
+# (killed thread, addon reload, Kodi crash). The stored PID alone cannot
+# detect that case: it is Kodi's own PID, which outlives every RunScript
+# invocation -- a stale lock then kept reporting "already running" and
+# swallowed every Home press for the rest of the session.
+LOCK_STALE_SECONDS = 6.0
+_LOCK_HEARTBEAT_SECONDS = 2.0
+
+
+def _write_lock():
+    try:
+        with open(LOCK_FILE, 'w') as f:
+            f.write(str(os.getpid()))
+    except OSError:
+        pass
+
+
+def _heartbeat(stop_event):
+    while not stop_event.wait(_LOCK_HEARTBEAT_SECONDS):
+        _write_lock()
 
 
 def _already_running():
     """True if a previous invocation's AuraWindow is still alive."""
     try:
-        with open(LOCK_FILE) as f:
-            pid = int(f.read().strip())
-        os.kill(pid, 0)  # raises OSError if that PID is no longer alive
-        return True
-    except (OSError, ValueError, FileNotFoundError):
+        return (time.time() - os.path.getmtime(LOCK_FILE)) < LOCK_STALE_SECONDS
+    except OSError:
         return False
 
 
@@ -65,11 +85,10 @@ if __name__ == '__main__':
                      xbmc.LOGINFO)
             home_press_handler.record_home_press()
     else:
-        try:
-            with open(LOCK_FILE, 'w') as f:
-                f.write(str(os.getpid()))
-        except OSError:
-            pass
+        _write_lock()
+        heartbeat_stop = threading.Event()
+        threading.Thread(
+            target=_heartbeat, args=(heartbeat_stop,), daemon=True).start()
         try:
             window = AuraWindow('Aura.xml', ADDON_PATH, 'Default', '1080i')
             window.open_settings_on_init = False
@@ -92,6 +111,7 @@ if __name__ == '__main__':
                 window.doModal()
             del window
         finally:
+            heartbeat_stop.set()
             try:
                 os.remove(LOCK_FILE)
             except OSError:

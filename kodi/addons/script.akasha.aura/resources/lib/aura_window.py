@@ -303,6 +303,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # for the video to end and re-opens Aura (modal dialogs suppress
         # the fullscreen video window, so Aura must leave the screen).
         self.playback_started = False
+        # Home press received while the window was closed for fullscreen
+        # playback: applied by onInit() once Aura re-opens.
+        self._pending_home_action = None
 
     def onInit(self):
         try:
@@ -320,10 +323,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._update_bar_focused()
             # Re-opened after a playback session: return to the item's
             # detail page like Plex does when a video stops.
+            pending_home = getattr(self, '_pending_home_action', None)
+            self._pending_home_action = None
             playback_item = getattr(self, '_playback_item', None)
             self._playback_item = None
-            if playback_item:
+            if playback_item and pending_home is None:
                 self._open_detail(playback_item)
+            if pending_home:
+                self._on_home_press_action(pending_home)
             if getattr(self, 'open_settings_on_init', False):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
@@ -2667,6 +2674,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         'double' -> open the minimal app switcher.
         """
         xbmc.log('Akasha Aura: home press action: {}'.format(action), xbmc.LOGINFO)
+        if xbmc.Player().isPlayingVideo():
+            # The window is closed while a video plays fullscreen: queue
+            # the action for the re-open and leave fullscreen now -- Home
+            # must always land the user back inside Aura.
+            self._pending_home_action = action
+            xbmc.Player().stop()
+            return
         if action == 'single':
             self._close_sub_windows()
             self._show_tab(0)
