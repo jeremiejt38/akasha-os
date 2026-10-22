@@ -17,6 +17,7 @@ The caller must set `item` (a divert_source normalised dict) and `client`
 import xbmc
 import xbmcgui
 
+ACTION_MOVE_LEFT = 1
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
@@ -30,6 +31,22 @@ CAST_LIST_ID = 7110
 SEASON_STRIP_ID = 7120
 EPISODES_LIST_ID = 7130
 SEASONS_LIST_ID = 7140
+
+ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, WATCHLIST_BUTTON_ID,
+                  RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID)
+# light/dark icon overlay pairs that ride on top of each action button
+ACTION_ICON_OVERLAYS = {
+    WATCH_BUTTON_ID: (7087, 7088, 7089, 7090),
+    RESTART_BUTTON_ID: (7107, 7108),
+    WATCHLIST_BUTTON_ID: (7092, 7093),
+    RATE_BUTTON_ID: (7099, 7105),
+    WATCHED_BUTTON_ID: (7094, 7095, 7096),
+    MORE_BUTTON_ID: (7097, 7098),
+}
+ACTION_ROW_TOP = 576
+ACTION_ROW_LEFT = 105
+ACTION_ROW_GAP = 20
+ACTION_CIRCLE_W = 64
 
 
 def _set(window, prop, value):
@@ -48,6 +65,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._episodes = []
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
+        self.exit_to_sidebar = False
 
     def onInit(self):
         try:
@@ -133,47 +151,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
-        # Watch button: white pill sized to its label, play icon + text
-        # drawn by overlay controls 7090/7091, circle buttons follow.
-        label = self._watch_label()
-        pill_w = max(190, 96 + len(label) * 11)
-        try:
-            self.getControl(WATCH_BUTTON_ID).setWidth(pill_w)
-            self.getControl(7091).setLabel(label)
-            self.getControl(7091).setPosition(105 + 56, 576)
-            self.getControl(7091).setWidth(pill_w - 74)
-            self.getControl(7090).setPosition(105 + 22, 595)
-        except RuntimeError:
-            pass
-        # Plex shows a "restart from beginning" circle only when the item
-        # that would play carries a resume offset.
+        # Action row: labels live on the buttons themselves (invisible
+        # while unfocused via transparent textcolor, dark on the white
+        # pill when focused) and _sync_action_row() lays the row out --
+        # the focused circle expands into a labeled pill, Plex-style.
         restart = bool(self._playable_item() and
                        self._playable_item().get('view_offset_ms'))
         _set(self, 'AuraDetailRestart', '1' if restart else '')
-        circles = ([7106] if restart else []) + [7103, 7104, 7101, 7102]
-        icons = ([(7107, 7108)] if restart else []) + [
-            (7092, 7093), (7099, 7105), (7094, 7095), (7097, 7098)]
-        for i, cid in enumerate(circles):
-            try:
-                self.getControl(cid).setPosition(105 + pill_w + 20 + i * 84,
-                                                 576)
-            except RuntimeError:
-                pass
-        # icon overlays ride along with the circles (light/dark pairs +
-        # the accent check that shows when the item is watched)
-        for i, pair in enumerate(icons):
-            for cid in pair:
-                try:
-                    self.getControl(cid).setPosition(
-                        105 + pill_w + 20 + i * 84 + 20, 596)
-                except RuntimeError:
-                    pass
-        try:
-            self.getControl(7096).setPosition(
-                105 + pill_w + 20 + circles.index(7101) * 84 + 20, 596)
-        except RuntimeError:
-            pass
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
+        # Plex draws a resume ring instead of the play glyph when the
+        # item carries a resume offset.
+        _set(self, 'AuraDetailResume', '1' if restart else '')
+        self._set_action_labels()
+        self._sync_action_row()
 
         # Media badges, right-packed like Plex (video, audio, subtitles)
         video = item.get('video_label') or ''
@@ -381,6 +371,73 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     # ------------------------------------------------------------- input
 
+    def _action_label(self, control_id):
+        """Text shown inside an action pill once it is focused (Plex:
+        circles expand into 'Add to Watchlist' / 'Mark as Unwatched'...)."""
+        if control_id == WATCH_BUTTON_ID:
+            return self._watch_label()
+        return {
+            RESTART_BUTTON_ID: 'Recommencer',
+            WATCHLIST_BUTTON_ID: 'Ajouter à ma liste',
+            RATE_BUTTON_ID: 'Noter',
+            WATCHED_BUTTON_ID: ('Marquer comme non vu' if self.watched
+                                else 'Marquer comme vu'),
+            MORE_BUTTON_ID: 'Plus',
+        }[control_id]
+
+    def _set_action_labels(self):
+        for cid in ACTION_ROW_IDS:
+            try:
+                self.getControl(cid).setLabel(self._action_label(cid))
+            except (RuntimeError, KeyError):
+                pass
+
+    def _action_width(self, control_id, focused_id):
+        if control_id != focused_id:
+            return ACTION_CIRCLE_W
+        label = self._action_label(control_id)
+        # Rough text measure for RobotoCondensed-Bold 24 (font_tiny_bold):
+        # narrow glyphs ~12px, average ~16px, wide ones ~22px -- Kodi has
+        # no text-metrics API and clips overflowing labels into a scroll.
+        text_w = sum(22 if c in 'mwMWÉÈÊ' else
+                     (12 if c.isdigit() or c in ' ilj.,:;·\'()-–' else 16)
+                     for c in label)
+        return max(96, 110 + text_w)
+
+    def _sync_action_row(self):
+        """Plex layout: unfocused actions are 64px circles; the focused
+        one expands into a white pill (icon + label) and pushes the rest
+        of the row right."""
+        restart = bool(self._playable_item() and
+                       self._playable_item().get('view_offset_ms'))
+        order = ([WATCH_BUTTON_ID] + ([RESTART_BUTTON_ID] if restart else [])
+                 + [WATCHLIST_BUTTON_ID, RATE_BUTTON_ID,
+                    WATCHED_BUTTON_ID, MORE_BUTTON_ID])
+        try:
+            focused = self.getFocusId()
+        except RuntimeError:
+            focused = 0
+        if focused not in ACTION_ROW_IDS:
+            focused = 0
+        x = ACTION_ROW_LEFT
+        for cid in order:
+            w = self._action_width(cid, focused)
+            try:
+                self.getControl(cid).setPosition(x, ACTION_ROW_TOP)
+                self.getControl(cid).setWidth(w)
+            except RuntimeError:
+                pass
+            for ov_id in ACTION_ICON_OVERLAYS.get(cid, ()):
+                try:
+                    self.getControl(ov_id).setPosition(x + 20,
+                                                       ACTION_ROW_TOP + 20)
+                except RuntimeError:
+                    pass
+            x += w + ACTION_ROW_GAP
+
+    def onFocus(self, controlID):
+        self._sync_action_row()
+
     def onClick(self, controlID):
         if controlID == WATCH_BUTTON_ID:
             self._play()
@@ -396,8 +453,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif controlID == RATE_BUTTON_ID:
             self._rate()
         elif controlID == MORE_BUTTON_ID:
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Plus d\u2019options à venir', xbmcgui.NOTIFICATION_INFO, 1500)
+            self._open_more_menu()
         elif controlID == SEASON_STRIP_ID:
             self._on_strip_selected()
         elif controlID == SEASONS_LIST_ID:
@@ -407,7 +463,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif controlID == EPISODES_LIST_ID:
             self._open_episode()
         elif controlID == CAST_LIST_ID:
-            pass
+            # Plex opens the cast member's filmography page via its cloud
+            # service -- not reachable through the local Plex API.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Filmographie indisponible (fonction Plex cloud)',
+                xbmcgui.NOTIFICATION_INFO, 2000)
 
     def _on_strip_selected(self):
         try:
@@ -458,7 +518,27 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if not self._back_to_show():
                 self.close()
             return
+        if action.getId() == ACTION_MOVE_LEFT and self._at_left_edge():
+            # Plex: pressing Left on the left edge opens the sidebar rail.
+            self.exit_to_sidebar = True
+            self.close()
+            return
         super().onAction(action)
+
+    def _at_left_edge(self):
+        try:
+            focused = self.getFocusId()
+        except RuntimeError:
+            return False
+        if focused == WATCH_BUTTON_ID:
+            return True
+        if focused in (CAST_LIST_ID, EPISODES_LIST_ID, SEASONS_LIST_ID,
+                       SEASON_STRIP_ID):
+            try:
+                return self.getControl(focused).getSelectedPosition() == 0
+            except RuntimeError:
+                return False
+        return False
 
     # ------------------------------------------------------------ actions
 
@@ -600,6 +680,57 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         self.watched = not self.watched
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
+        # 'Mark as watched/unwatched' label flips with the state
+        try:
+            self.getControl(WATCHED_BUTTON_ID).setLabel(
+                self._action_label(WATCHED_BUTTON_ID))
+        except RuntimeError:
+            pass
+        self._sync_action_row()
+
+    def _open_more_menu(self):
+        """Plex's 'More' button opens a 'More Actions' side panel
+        (Subtitles, Add to List, Playlist/Collection, Manage, File Info,
+        More Ways to Watch). Cloud-only entries surface an explicit
+        notification; File Info shows the media data we actually have."""
+        entries = [
+            'Sous-titres',
+            'Ajouter à une liste',
+            'Ajouter à une playlist/collection',
+            'Gérer',
+            'Infos fichier',
+            'Autres façons de regarder',
+        ]
+        choice = xbmcgui.Dialog().select('Plus', entries)
+        if choice < 0:
+            return
+        if choice == 4:
+            self._show_file_info()
+            return
+        msg = {
+            0: 'Choix des sous-titres pendant la lecture',
+            1: 'Listes indisponibles (fonction Plex cloud)',
+            2: 'Playlists indisponibles (fonction Plex cloud)',
+            3: 'Gestion indisponible (fonction Plex cloud)',
+            5: 'Sources externes indisponibles (fonction Plex cloud)',
+        }[choice]
+        xbmcgui.Dialog().notification('Akasha Aura', msg,
+                                      xbmcgui.NOTIFICATION_INFO, 2500)
+
+    def _show_file_info(self):
+        item = self._playable_item() or self.item
+        lines = [item.get('title') or '']
+        meta = [x for x in (item.get('year'),
+                            _fmt_duration(item.get('duration_ms')))
+                if x]
+        if meta:
+            lines.append(' · '.join(str(m) for m in meta))
+        for label, key in (('Vidéo', 'video_label'),
+                           ('Audio', 'audio_label'),
+                           ('Sous-titres', 'subtitle_label')):
+            if item.get(key):
+                lines.append('{} : {}'.format(label, item[key]))
+        xbmcgui.Dialog().ok('Infos fichier', '[CR]'.join(lines))
 
     def _rate(self):
         if not self.client or not self.item.get('rating_key'):

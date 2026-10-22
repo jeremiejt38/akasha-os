@@ -230,211 +230,254 @@
             <textcolor>99FFFFFF</textcolor>
         </control>
 
-        <!-- Action row: Watch/Resume pill + watchlist + watched + more -->
-        <control type="button" id="7100">
-            <left>105</left>
-            <top>576</top>
-            <width>250</width>
-            <height>64</height>
-            <font>font_tiny_bold</font>
-            <align>center</align>
-            <aligny>center</aligny>
-            <label></label>
-            <textcolor>FF1A1A1A</textcolor>
-            <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
-            <onright>7106</onright>
-            <ondown>7110</ondown>
-        </control>
-        <control type="image" id="7090">
-            <left>127</left>
-            <top>596</top>
-            <width>22</width>
-            <height>26</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-play-dark.png</texture>
-        </control>
-        <control type="label" id="7091">
-            <left>161</left>
-            <top>576</top>
-            <width min="40" max="800">auto</width>
-            <height>64</height>
-            <aligny>center</aligny>
-            <font>font_tiny_bold</font>
-            <textcolor>FF1A1A1A</textcolor>
-            <label></label>
-        </control>
-        <control type="button" id="7106">
-            <left>375</left>
-            <top>576</top>
-            <width>64</width>
-            <height>64</height>
-            <label></label>
-            <onleft>7100</onleft>
-            <onright>7103</onright>
-            <ondown>7110</ondown>
-            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
-            <visible>String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
-        </control>
-        <control type="image" id="7107">
-            <left>395</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-restart.png</texture>
-            <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
-        </control>
-        <control type="image" id="7108">
-            <left>395</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-restart-dark.png</texture>
-            <visible>Control.HasFocus(7106)</visible>
-        </control>
-        <control type="button" id="7103">
-            <left>375</left>
-            <top>576</top>
-            <width>64</width>
-            <height>64</height>
-            <label></label>
-            <font>font_main_bold</font>
-            <align>center</align>
-            <aligny>center</aligny>
-            <onleft>7106</onleft>
-            <onright>7104</onright>
-            <ondown>7110</ondown>
-            <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
-        </control>
-        <control type="image" id="7092">
-            <left>395</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-bookmark.png</texture>
-            <visible>!Control.HasFocus(7103)</visible>
-        </control>
-        <control type="image" id="7093">
-            <left>395</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-bookmark-dark.png</texture>
-            <visible>Control.HasFocus(7103)</visible>
-        </control>
-        <control type="button" id="7104">
-            <left>459</left>
-            <top>576</top>
-            <width>64</width>
-            <height>64</height>
-            <label></label>
-            <onleft>7103</onleft>
-            <onright>7101</onright>
-            <ondown>7110</ondown>
-            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
-        </control>
-        <control type="image" id="7099">
-            <left>479</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-rate.png</texture>
-            <visible>!Control.HasFocus(7104)</visible>
-        </control>
-        <control type="image" id="7105">
-            <left>479</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-rate-dark.png</texture>
-            <visible>Control.HasFocus(7104)</visible>
-        </control>
-        <control type="button" id="7101">
-            <left>459</left>
-            <top>576</top>
-            <width>64</width>
-            <height>64</height>
-            <label></label>
-            <onleft>7104</onleft>
-            <onright>7102</onright>
-            <ondown>7110</ondown>
-            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
-        </control>
-        <control type="image" id="7094">
-            <left>479</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>check.png</texture>
-            <visible>!Control.HasFocus(7101)</visible>
-        </control>
-        <control type="image" id="7095">
-            <left>479</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-check-dark.png</texture>
-            <visible>Control.HasFocus(7101)</visible>
-        </control>
-        <control type="image" id="7096">
-            <left>479</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <texture colordiffuse="FFE5A00D">check.png</texture>
-            <visible>String.IsEqual(Window.Property(AuraDetailWatched),1) + !Control.HasFocus(7101)</visible>
-        </control>
-        <control type="button" id="7102">
-            <left>543</left>
-            <top>576</top>
-            <width>64</width>
-            <height>64</height>
-            <label></label>
-            <font>font_tiny_bold</font>
-            <align>center</align>
-            <aligny>center</aligny>
-            <onleft>7101</onleft>
-            <ondown>7110</ondown>
-            <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
-        </control>
-        <control type="image" id="7097">
-            <left>563</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-dots.png</texture>
-            <visible>!Control.HasFocus(7102)</visible>
-        </control>
-        <control type="image" id="7098">
-            <left>563</left>
-            <top>596</top>
-            <width>24</width>
-            <height>24</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon-dots-dark.png</texture>
-            <visible>Control.HasFocus(7102)</visible>
-        </control>
+        <!-- Action row: watch pill + circle buttons that expand into labeled
+         pills on focus (Plex behavior). Positions/widths are computed by
+         _sync_action_row(); each button carries its label, invisible while
+         unfocused (transparent textcolor) and dark on the white pill when
+         focused (focusedcolor + textoffsetx clears the icon zone). -->
+    <control type="button" id="7100">
+        <left>105</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onright>7106</onright>
+        <ondown>7110</ondown>
+    </control>
+    <control type="image" id="7089">
+        <left>125</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-play.png</texture>
+        <visible>!Control.HasFocus(7100) + !String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+    </control>
+    <control type="image" id="7087">
+        <left>125</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-resume.png</texture>
+        <visible>!Control.HasFocus(7100) + String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+    </control>
+    <control type="image" id="7090">
+        <left>125</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-play-dark.png</texture>
+        <visible>Control.HasFocus(7100) + !String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+    </control>
+    <control type="image" id="7088">
+        <left>125</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-resume-dark.png</texture>
+        <visible>Control.HasFocus(7100) + String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+    </control>
+    <control type="button" id="7106">
+        <left>375</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onleft>7100</onleft>
+        <onright>7103</onright>
+        <ondown>7110</ondown>
+        <visible>String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
+    </control>
+    <control type="image" id="7107">
+        <left>395</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-restart.png</texture>
+        <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
+    </control>
+    <control type="image" id="7108">
+        <left>395</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-restart-dark.png</texture>
+        <visible>Control.HasFocus(7106)</visible>
+    </control>
+    <control type="button" id="7103">
+        <left>375</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onleft>7106</onleft>
+        <onright>7104</onright>
+        <ondown>7110</ondown>
+    </control>
+    <control type="image" id="7092">
+        <left>395</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-bookmark.png</texture>
+        <visible>!Control.HasFocus(7103)</visible>
+    </control>
+    <control type="image" id="7093">
+        <left>395</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-bookmark-dark.png</texture>
+        <visible>Control.HasFocus(7103)</visible>
+    </control>
+    <control type="button" id="7104">
+        <left>459</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onleft>7103</onleft>
+        <onright>7101</onright>
+        <ondown>7110</ondown>
+    </control>
+    <control type="image" id="7099">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-rate.png</texture>
+        <visible>!Control.HasFocus(7104)</visible>
+    </control>
+    <control type="image" id="7105">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-rate-dark.png</texture>
+        <visible>Control.HasFocus(7104)</visible>
+    </control>
+    <control type="button" id="7101">
+        <left>459</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onleft>7104</onleft>
+        <onright>7102</onright>
+        <ondown>7110</ondown>
+    </control>
+    <control type="image" id="7094">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-watched.png</texture>
+        <visible>!Control.HasFocus(7101)</visible>
+    </control>
+    <control type="image" id="7095">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-watched-dark.png</texture>
+        <visible>Control.HasFocus(7101)</visible>
+    </control>
+    <control type="image" id="7096">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <texture colordiffuse="FFE5A00D">icon-watched.png</texture>
+        <visible>String.IsEqual(Window.Property(AuraDetailWatched),1) + !Control.HasFocus(7101)</visible>
+    </control>
+    <control type="button" id="7102">
+        <left>543</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onleft>7101</onleft>
+        <ondown>7110</ondown>
+    </control>
+    <control type="image" id="7097">
+        <left>563</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-dots.png</texture>
+        <visible>!Control.HasFocus(7102)</visible>
+    </control>
+    <control type="image" id="7098">
+        <left>563</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-dots-dark.png</texture>
+        <visible>Control.HasFocus(7102)</visible>
+    </control>
 
-        <!-- Media badges (video / audio / subs), right side like Plex -->
+    <!-- Media badges (video / audio / subs), right side like Plex -->
         <control type="image" id="7050">
             <left>1150</left>
             <top>584</top>

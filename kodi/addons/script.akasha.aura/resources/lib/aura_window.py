@@ -305,7 +305,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._load_divertissement()
             self._divert_load_attempted = True
             self._restore_divert_view(focus=False)
-            self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK)
+            # interactive=False: missing Steam/Sunshine credentials must
+            # never pop a Keyboard dialog during unattended startup (same
+            # rule as the connector token -- docs/aura/decisions.md).
+            self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK, interactive=False)
             self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._sync_navigation()
@@ -809,7 +812,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         detail._episodes = []
         detail._next_episode = None
         detail._active_season = 0
+        detail.exit_to_sidebar = False
         detail.doModal()
+        # Plex behavior: Left on the detail page's left edge pops the
+        # sidebar rail open -- mirrored by closing the detail and handing
+        # the focus to the sidebar list.
+        if getattr(detail, 'exit_to_sidebar', False):
+            try:
+                self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
+            except RuntimeError:
+                pass
 
     def _render_reco_row_label(self, list_control_id, error=None):
         label_control_id, title, paged = self._reco_rows[list_control_id]
@@ -1530,7 +1542,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 btn.setLabel('')
 
-    def _select_jeux_subtab(self, index):
+    def _select_jeux_subtab(self, index, interactive=True):
         self._jeux_active_subtab = index
         self.setProperty('JeuxActiveSubtab', str(index))
         self._sync_navigation()
@@ -1544,7 +1556,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
 
         if index == JEUX_SUBTAB_STEAMLINK:
-            client = self._get_steam_client(prompt_if_missing=True)
+            client = self._get_steam_client(prompt_if_missing=interactive)
             if not client or not client.is_configured():
                 self._set_jeux_panel([], 'SteamLink non configure — cle API et SteamID64 requis')
                 return
@@ -1562,7 +1574,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
 
         if index == JEUX_SUBTAB_MOONLIGHT:
-            client = self._get_sunshine_client(prompt_if_missing=True)
+            client = self._get_sunshine_client(prompt_if_missing=interactive)
             if not client or not client.is_configured():
                 self._set_jeux_panel([], 'Sunshine non configure — URL, utilisateur et mot de passe requis')
                 return

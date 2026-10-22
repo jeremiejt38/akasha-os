@@ -17,7 +17,11 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Bibliothèque — grille Browse | Livré | `films_browse_focus_003` | 6 colonnes 240×360, titre+année, pills de filtres, rail A-Z, badge ✓ | ✅ | — | captures |
 | Bibliothèque — Collections | Livré | endpoint `/library/collections` | Rangée collections + drill-down | ✅ | — | captures |
 | Fiche film — hero | Livré | `fiche/film_detail_top_001` | Clearlogo/titre, méta, chips providers (IMDb/RT/TMDB + icônes), synopsis `...`, réalisateur | ✅ | — | `detail_v6.png` |
-| Fiche film — actions | Livré | `fiche/film_detail_top_001` | Pill `▶ Reprendre · … restantes` à largeur dynamique + 4 cercles glyphes (watchlist, noter, vu, ⋯) ; noter → dialog 1-10 → `PUT /:/rate` | ✅ | — | captures |
+| Fiche film — actions | Livré | `fiche/film_detail_top_001`, `detail-pills/` | Cercles compacts qui s'étendent en **pill blanche labellisée** au focus (Plex : `▶ Regarder` / `↺ Reprendre …`, `Recommencer`, `Ajouter à ma liste`, `Noter`, `Marquer comme (non) vu`, `Plus`) ; icône ↺ sur reprise ; noter → dialog 1-10 → `PUT /:/rate` | ✅ | — | captures |
+| Fiche — bouton « Plus » | Livré | `more_dialog_008` | Menu « Sous-titres / Ajouter à une liste / Playlist / Gérer / Infos fichier / Autres façons » ; Infos fichier = vrai dialog données média ; entrées cloud → notification explicite | ✅ | — | `more_menu.png` |
+| Fiche — bord gauche → sidebar | Livré | — | `Left` depuis l'action la plus à gauche (pill Regarder, strip Série, premier item d'une rangée) ferme la fiche et ouvre la sidebar expansée | ✅ | — | `left_to_sidebar.png` |
+| Fiche — clic cast | Limitation | `cast_click_009` | Plex ouvre la filmographie (social/cloud) ; Aura → notification explicite | ⬜ | API privée non proxyée | — |
+| Fiche — chip âge cliquable | Limitation | `longpress_center_002` | Plex mène à Common Sense Media (cloud) ; chip passive côté Aura | ⬜ | API privée non proxyée | — |
 | Fiche film — badges média | Livré | `fiche/film_detail_top_001` | Pills séparées vidéo / audio 🔊 / sous-titres ▭, alignées à droite | 🟡 | Dépend des champs `video/audio/subtitle_label` remplis par item | captures |
 | Fiche — ligne « Activity by you… » | Non implémentable | Avatars + activité des amis | Absente | ⬜ | API sociale privée ; limitation documentée | — |
 | Fiche — portraits du cast | Livré (partiel) | Photos réelles | Cercles propres + fallback silhouette `actor-fallback.png` quand `thumb=NONE` | 🟡 | Beaucoup d'acteurs n'ont pas de thumb côté serveur | captures |
