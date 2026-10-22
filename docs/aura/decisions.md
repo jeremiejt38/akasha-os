@@ -768,3 +768,25 @@ la vue "toutes les applications". Les apps externes portent un badge `[Web]` pou
 Nouvelle comparaison effectuée directement avec l'accueil Arctic Horizon 2 installé sur le Pi, à partir d'une capture réelle et de ses fichiers `Home.xml`/`Includes_Objects.xml`. Aura reprend désormais sa composition globale plutôt que seulement ses textures : barre persistante, fond noir uniforme, modules compacts et contigus, icônes 60 px, pilule focalisée de 320 px, typographie plus fine et contenus alignés à 60 px du bord. Le fond de pilule est étiré comme une image 320x80 centrée autour du contrôle plutôt qu'en 9-slice avec `border=80` dans une boîte haute de 60 px : cette ancienne combinaison invalide déformait la texture, la collait au bord supérieur et la décalait par rapport au logo.
 
 La sidebar Divertissement est entièrement masquée hors focus puis glisse au premier plan sur `Left`, supprimant la bande résiduelle visible à l'écran. Les onglets contextuels remontent sous la barre principale, les trois rangées Recommandé utilisent des posters 130x195 plus proches de la densité AH2 et les sous-titres secondaires sont masqués pour éviter une double ligne illisible. Validé visuellement sur le Pi avec de vraies données Plex ; navigation et chargement restent inchangés.
+
+## Toujours atterrir sur Aura — boot et touche Home (2026-10-22)
+
+Trois défauts laissaient l'utilisateur bloqué sur l'accueil Kodi natif :
+
+- **Lanceur au boot** (`service.akasha.aura`) : le garde `getCurrentWindowId() != 10000` (ajouté
+  localement sur le Pi, jamais commité) sautait le lancement **définitivement** quand une autre
+  fenêtre était active à l'instant exact du service (fin d'intro, dialog résiduel). Le service
+  attend maintenant jusqu'à 30 s que la fenêtre Home soit au premier plan, puis lance Aura même
+  en cas de timeout — l'accueil natif n'est qu'un filet de sécurité via Back, jamais une
+  destination.
+- **Verrou d'instance** (`/tmp/akasha-aura.lock`) : le fichier stockait `os.getpid()`, c'est-à-dire
+  le PID de `kodi.bin` — toujours vivant tant que Kodi tourne. Tout verrou survivant à une mort
+  anormale du script (thread tué, reload d'addon, crash) faisait croire à une instance active :
+  chaque appui Home était avalé comme « duplicate press » et la touche restait morte jusqu'au
+  reboot. Le script vivant réécrit maintenant le verrou toutes les 2 s (heartbeat) ; une mtime de
+  plus de 6 s = instance morte → nouvelle Aura autorisée.
+- **Home pendant la lecture** : l'appui était routé vers la fenêtre fermée (cycle modal autour de
+  la vidéo). Le handler met maintenant l'action en file (`_pending_home_action`), stoppe la
+  vidéo, et `onInit` l'applique à la réouverture — simple pression → onglet Divertissement,
+  double pression → app switcher. Pendant la lecture, Home ramène donc dans Aura comme la
+  touche Home de Plex ATV.
