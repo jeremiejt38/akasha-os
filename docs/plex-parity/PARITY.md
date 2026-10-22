@@ -14,7 +14,8 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Sidebar — section « Sur Plex » | Limitation | `sidebar/focus_more_028` (On Plex : Live TV, Discover) | Header + items présents, clic → notification | ⬜ | Contenus cloud Plex hors connecteur privé | — |
 | Sidebar — outline bibliothèque active | Livré | `parametres/settings_focus_005` | Pill outline sur la bibliothèque active (propriété `DivertActiveLibrary`) | ✅ | — | captures |
 | Bibliothèque — onglets | Livré | `films_tabs_focus_002` | Recommandé / Bibliothèque / Collections / Catégories + ⋯ | ✅ | — | captures |
-| Bibliothèque — grille Browse | Livré | `films_browse_focus_003` | 6 colonnes 240×360, titre+année, pills de filtres, rail A-Z, badge ✓ | ✅ | — | captures |
+| Bibliothèque — grille Browse | Livré | `films_browse_focus_003` | 6 colonnes 240×360, titre+année centrés, pills sombres (`2EFFFFFF`) en flux à gauche (type, par tri, Genre, compteur en pill, ⋯), zoom 108% + ring fin externe `poster-ring-thin.png`, rail A-Z avec cercle `az-ring.png`, badge ✓ + barre de progression ambrée | ✅ | — | `grid_v5.png` |
+| Bibliothèque — rail A-Z | Livré | `films_browse_focus_003` | Saut fonctionnel : lettre lue via `Container(3250).Position` (items statiques sans `<onclick>`), recherche dans les items chargés puis fetch par chunks de 500 via `PagedList` | ✅ | — | captures |
 | Bibliothèque — Collections | Livré | endpoint `/library/collections` | Rangée collections + drill-down | ✅ | — | captures |
 | Fiche film — hero | Livré | `fiche/film_detail_top_001` | Clearlogo/titre, méta, chips providers (IMDb/RT/TMDB + icônes), synopsis `...`, réalisateur | ✅ | — | `detail_v6.png` |
 | Fiche film — actions | Livré | `fiche/film_detail_top_001`, `detail-pills/` | Cercles compacts qui s'étendent en **pill blanche labellisée** au focus (Plex : `▶ Regarder` / `↺ Reprendre …`, `Recommencer`, `Ajouter à ma liste`, `Noter`, `Marquer comme (non) vu`, `Plus`) ; icône ↺ sur reprise ; noter → dialog 1-10 → `PUT /:/rate` | ✅ | — | captures |
@@ -30,9 +31,11 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Fiche — cercle restart ↻ | Livré | `fiche/show_detail_top_005` | Visible si l'item à lire a un offset de reprise ; `play(start_over=True)` | ✅ | — | `detail_v7.png` |
 | Fiche — chip âge | Livré | `fiche/film_detail_top_001` | Format `age N+` / `Tous publics` (mapping PG-13/TV-MA/…) | ✅ | — | `detail_v7.png` |
 | Fiche — scroll bas de page | Limitation | `fiche/film_scroll_2_003`, `film_scroll_3_004` | Page fixe (Cast & Crew = dernière section) | ⬜ | Sections « Ratings & Reviews » et « Discussions » = API sociale privée Plex ; pas de scroll fenêtre Kodi | — |
-| Lecture | Livré | Plex player | Lecture réelle via `part_key`, reprise (viewOffset) | ✅ | — | captures |
+| Lecture | Livré | Plex player | Lecture réelle via `part_key`, reprise (viewOffset) ; les fenêtres modales Aura se ferment avant `Player.play()` puis se rouvrent sur la fiche après fin/stop — comme Plex | ✅ | — | captures |
+| Appui long | Livré | Plex TV | `ContextMenu`/`Info` interceptés partout = même action qu'un clic (ouverture fiche / action du bouton) — aucun menu contextuel, fidèle à Plex | ✅ | — | audit |
+| Navigation sidebar ↔ contenu | Livré | `sidebar/` | `Right` depuis la sidebar routé dynamiquement vers la surface visible de chaque vue (rangées Reco, grille 3230, cartes Catégories 6010) ; `Left` au bord gauche du contenu ouvre la sidebar | ✅ | — | audit |
 | Recherche | Livré | `recherche/` | Grille clavier a-z + suggestions live, cartes résultats 2 colonnes | ✅ | — | captures |
-| OSD vidéo | Livré | `osd/` | Minimaliste : titre, méta, horloge, seek fine, cercles subs/settings | ✅ | — | captures |
+| OSD vidéo | Livré | `osd/` | Minimaliste : titre, méta, horloge, seek fine avec **remplissage ambre** (`FFE5A00D`, trio left/mid/right textures), curseur blanc, temps écoulé/restant, cercles subs/settings, chevron de sortie. `DialogSeekBar.xml` passif patché en plus (sinon l'overlay Arctic se superposait : double barre + double timecode) | ✅ | — | `osd_v5.png` |
 | Focus carte sélectionnée quand focus ailleurs | Livré | `films_tabs_focus_002` | Ring discret via `ListItem.IsSelected` | ✅ | — | captures |
 
 ## Limitations connues (non contournables sans API privée Plex)
@@ -46,3 +49,6 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 - **Écran « Plus »** : Plex liste des sources supplémentaires (souvent vide) ; Aura ouvre « Gérer les bibliothèques » (épinglage) — équivalent fonctionnel.
 - **Portraits d'acteurs** : le serveur renvoie souvent `thumb=NONE` → fallback `actor-fallback.png`.
 - **Backdrop** : couleur de fondu légèrement différente (scrim proche mais pas pixel-perfect).
+- **Typographie** : Aura utilise `RobotoCondensed` (skin) vs le sans-serif standard de Plex — écart mineur, un changement de police casserait les métriques de toute la skin.
+- **Format des timecodes OSD** : `hh:mm:ss` via infolabels Kodi (`Player.Time`) vs `h:mm` chez Plex — pas de formatage disponible côté skin.
+- **`ReloadSkin` pendant une lecture active** : peut faire planter Kodi (SIGSEGV observé en test au teardown du player) — opération dev uniquement, pas un chemin utilisateur.

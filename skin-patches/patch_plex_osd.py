@@ -12,7 +12,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, 'plex-osd')
 
-WINDOW = 'VideoOSD.xml'
+WINDOWS = ('VideoOSD.xml', 'DialogSeekBar.xml')
 TEXTURES = ('akasha-osd-scrim-top.png', 'akasha-osd-scrim-bottom.png',
             'akasha-circle.png', 'akasha-chev-down.png')
 
@@ -20,19 +20,20 @@ TEXTURES = ('akasha-osd-scrim-top.png', 'akasha-osd-scrim-bottom.png',
 def patch(skin_dir):
     xml_dir = os.path.join(skin_dir, '1080i')
     media_dir = os.path.join(skin_dir, 'media')
-    target = os.path.join(xml_dir, WINDOW)
-    backup = target + '.ah2-orig'
-    if not os.path.exists(target):
-        print('VideoOSD.xml not found; skipping Plex OSD patch')
-        return
-    if not os.path.exists(backup):
-        shutil.copy2(target, backup)
-    shutil.copy2(os.path.join(SRC, WINDOW), target)
+    for window in WINDOWS:
+        target = os.path.join(xml_dir, window)
+        backup = target + '.ah2-orig'
+        if not os.path.exists(target):
+            print('{} not found; skipping Plex OSD patch'.format(window))
+            continue
+        if not os.path.exists(backup):
+            shutil.copy2(target, backup)
+        shutil.copy2(os.path.join(SRC, window), target)
     for texture in TEXTURES:
         src = os.path.join(SRC, texture)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(media_dir, texture))
-    print('Plex-style VideoOSD installed (backup: VideoOSD.xml.ah2-orig)')
+    print('Plex-style OSD installed (backups: *.ah2-orig)')
 
 
 if __name__ == '__main__':

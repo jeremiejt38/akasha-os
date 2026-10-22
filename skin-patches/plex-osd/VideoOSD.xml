@@ -156,6 +156,29 @@
             <label>$INFO[Player.Time]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
+        <!-- Seek visuals: a passive progress draws the gray track + amber
+             played fill (Plex accent), the interactive slider above it only
+             renders the white thumb. -->
+        <control type="progress">
+            <left>250</left>
+            <top>937</top>
+            <width>1380</width>
+            <height>6</height>
+            <info>Player.Progress</info>
+            <texturebg colordiffuse="59FFFFFF" border="4">progress/progress-bg.png</texturebg>
+        </control>
+        <control type="progress">
+            <left>250</left>
+            <top>937</top>
+            <width>1380</width>
+            <height>6</height>
+            <info>Player.Progress</info>
+            <texturebg colordiffuse="00FFFFFF">progress/progress-bg.png</texturebg>
+            <lefttexture colordiffuse="FFE5A00D" border="2">progress/progress-left.png</lefttexture>
+            <midtexture colordiffuse="FFE5A00D" border="2">progress/progress-end.png</midtexture>
+            <righttexture colordiffuse="FFE5A00D" border="2">progress/progress-right.png</righttexture>
+            <overlaytexture></overlaytexture>
+        </control>
         <control type="slider" id="9101">
             <left>250</left>
             <top>928</top>
@@ -163,7 +186,7 @@
             <height>24</height>
             <info>Player.Progress</info>
             <action>seek</action>
-            <texturesliderbar colordiffuse="59FFFFFF">progress/slider_bg.png</texturesliderbar>
+            <texturesliderbar colordiffuse="00FFFFFF">progress/slider_bg.png</texturesliderbar>
             <textureslidernib colordiffuse="FFFFFFFF">progress/slider_nib.png</textureslidernib>
             <textureslidernibfocus colordiffuse="FFFFFFFF">progress/slider_nib.png</textureslidernibfocus>
             <onleft>9100</onleft>
