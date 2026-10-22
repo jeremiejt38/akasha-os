@@ -24,6 +24,7 @@ WATCH_BUTTON_ID = 7100
 WATCHED_BUTTON_ID = 7101
 MORE_BUTTON_ID = 7102
 WATCHLIST_BUTTON_ID = 7103
+RATE_BUTTON_ID = 7104
 CAST_LIST_ID = 7110
 SEASON_STRIP_ID = 7120
 EPISODES_LIST_ID = 7130
@@ -113,8 +114,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._render_chips(item)
 
         # Synopsis + director
+        summary = item.get('summary') or ''
+        if len(summary) > 240:
+            summary = summary[:240].rsplit(' ', 1)[0].rstrip(',. ') + '...'
         try:
-            self.getControl(7030).setText(item.get('summary') or '')
+            self.getControl(7030).setText(summary)
         except RuntimeError:
             pass
         director = ''
@@ -128,27 +132,67 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
-        # Watch button
+        # Watch button: white pill sized to its label, play icon + text
+        # drawn by overlay controls 7090/7091, circle buttons follow.
+        label = self._watch_label()
+        pill_w = max(190, 96 + len(label) * 11)
         try:
-            self.getControl(WATCH_BUTTON_ID).setLabel(self._watch_label())
+            self.getControl(WATCH_BUTTON_ID).setWidth(pill_w)
+            self.getControl(7091).setLabel(label)
+            self.getControl(7091).setPosition(105 + 56, 576)
+            self.getControl(7091).setWidth(pill_w - 74)
+            self.getControl(7090).setPosition(105 + 22, 595)
+        except RuntimeError:
+            pass
+        for i, cid in enumerate((7103, 7104, 7101, 7102)):
+            try:
+                self.getControl(cid).setPosition(105 + pill_w + 20 + i * 84,
+                                                 576)
+            except RuntimeError:
+                pass
+        # icon overlays ride along with the circles (light/dark pairs +
+        # the accent check that shows when the item is watched)
+        for i, pair in enumerate(((7092, 7093), (7099, 7105), (7094, 7095),
+                                  (7097, 7098))):
+            for cid in pair:
+                try:
+                    self.getControl(cid).setPosition(
+                        105 + pill_w + 20 + i * 84 + 20, 596)
+                except RuntimeError:
+                    pass
+        try:
+            self.getControl(7096).setPosition(105 + pill_w + 188 + 20, 596)
         except RuntimeError:
             pass
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
 
-        # Media badges
-        _set(self, 'AuraDetailVideoBadge', item.get('video_label') or '')
-        try:
-            self.getControl(7051).setLabel(item.get('video_label') or '')
-        except RuntimeError:
-            pass
+        # Media badges, right-packed like Plex (video, audio, subtitles)
+        video = item.get('video_label') or ''
         audio = item.get('audio_label') or ''
-        if item.get('subtitle_label'):
-            audio = (audio + ' · ' if audio else '') + item['subtitle_label']
-        _set(self, 'AuraDetailAudioBadge', audio)
-        try:
-            self.getControl(7053).setLabel(audio)
-        except RuntimeError:
-            pass
+        subs = item.get('subtitle_label') or ''
+        badge_x = 1890
+        for text, bg_id, lb_id, ic_id in ((subs, 7054, 7055, 7057),
+                                          (audio, 7052, 7053, 7056),
+                                          (video, 7050, 7051, 0)):
+            if not text:
+                continue
+            ic_w = 36 if ic_id else 0
+            w = 34 + len(text) * 11 + ic_w
+            badge_x -= w
+            try:
+                self.getControl(bg_id).setPosition(badge_x, 584)
+                self.getControl(bg_id).setWidth(w)
+                self.getControl(lb_id).setPosition(badge_x + ic_w, 584)
+                self.getControl(lb_id).setWidth(w - ic_w)
+                self.getControl(lb_id).setLabel(text)
+                if ic_id:
+                    self.getControl(ic_id).setPosition(badge_x + 12, 592)
+            except RuntimeError:
+                pass
+            badge_x -= 14
+        _set(self, 'AuraDetailVideoBadge', '1' if video else '')
+        _set(self, 'AuraDetailAudioBadge', '1' if audio else '')
+        _set(self, 'AuraDetailSubsBadge', '1' if subs else '')
 
         # Bottom section
         if self.mode == 'item':
@@ -175,33 +219,50 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _render_chips(self, item):
+        # Each chip: (text, provider icon or ''). Plex draws a provider
+        # glyph (IMDb / RT splat / popcorn / TMDB) before the value; text
+        # prefixes are only the fallback when no icon is known.
         chips = []
         if item.get('content_rating'):
-            chips.append(item['content_rating'])
+            chips.append((item['content_rating'], ''))
         if item.get('rating'):
-            chips.append('{} {}'.format(
-                _provider_label(item.get('rating_image')),
-                _fmt_rating(item['rating'], item.get('rating_image'))).strip())
+            chips.append(self._rating_chip(item['rating'],
+                                           item.get('rating_image')))
         if item.get('audience_rating'):
-            chips.append('{} {}'.format(
-                _provider_label(item.get('audience_rating_image')),
-                _fmt_rating(item['audience_rating'],
-                            item.get('audience_rating_image'))).strip())
+            chips.append(self._rating_chip(item['audience_rating'],
+                                           item.get('audience_rating_image'),
+                                           audience=True))
         chip_x = 105
         for slot in range(3):
             _set(self, 'AuraDetailChip{}'.format(slot), '')
-        for slot, text in enumerate(chips[:3]):
-            width = 34 + len(text) * 11
+            _set(self, 'AuraDetailChipIcon{}'.format(slot), '')
+        for slot, (text, icon) in enumerate(chips[:3]):
+            width = 34 + len(text) * 11 + (30 if icon else 0)
             _set(self, 'AuraDetailChip{}'.format(slot), '1')
             try:
                 self.getControl(7021 + slot * 2).setPosition(chip_x, 356)
                 self.getControl(7021 + slot * 2).setWidth(width)
-                self.getControl(7022 + slot * 2).setPosition(chip_x, 356)
-                self.getControl(7022 + slot * 2).setWidth(width)
+                if icon:
+                    self.getControl(7045 + slot).setPosition(chip_x + 8, 362)
+                    _set(self, 'AuraDetailChipIcon{}'.format(slot), icon)
+                    lbl_x, lbl_w = chip_x + 34, width - 40
+                else:
+                    lbl_x, lbl_w = chip_x, width
+                self.getControl(7022 + slot * 2).setPosition(lbl_x, 356)
+                self.getControl(7022 + slot * 2).setWidth(lbl_w)
                 self.getControl(7022 + slot * 2).setLabel(text)
             except RuntimeError:
                 pass
             chip_x += width + 12
+
+    @staticmethod
+    def _rating_chip(value, rating_image, audience=False):
+        icon = _provider_icon(rating_image, audience)
+        text = _fmt_rating(value, rating_image)
+        if not icon:
+            text = '{} {}'.format(_provider_label(rating_image),
+                                  text).strip()
+        return (text, icon)
 
     def _render_cast(self):
         cast = self.item.get('cast') or []
@@ -210,7 +271,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             lst.reset()
             for member in cast[:20]:
                 li = xbmcgui.ListItem(member['name'], member.get('role') or '')
-                li.setArt({'thumb': member.get('thumb_url') or 'DefaultActor.png'})
+                li.setArt({'thumb': member.get('thumb_url') or 'actor-fallback.png'})
                 lst.addItem(li)
         except RuntimeError:
             pass
@@ -318,6 +379,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # once the connector proxies it.
             xbmcgui.Dialog().notification(
                 'Akasha Aura', 'Watchlist indisponible', xbmcgui.NOTIFICATION_INFO, 1500)
+        elif controlID == RATE_BUTTON_ID:
+            self._rate()
         elif controlID == MORE_BUTTON_ID:
             xbmcgui.Dialog().notification(
                 'Akasha Aura', 'Plus d\u2019options à venir', xbmcgui.NOTIFICATION_INFO, 1500)
@@ -510,6 +573,34 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         self.watched = not self.watched
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
+
+    def _rate(self):
+        if not self.client or not self.item.get('rating_key'):
+            return
+        choices = ['{} / 10'.format(i) for i in range(1, 11)]
+        pos = xbmcgui.Dialog().select('Noter', choices)
+        if pos < 0:
+            return
+        try:
+            self.client.rate(self.item['rating_key'], pos + 1)
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Note enregistrée : {}'.format(choices[pos]),
+                xbmcgui.NOTIFICATION_INFO, 1500)
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: rate failed: {}'.format(e), xbmc.LOGERROR)
+
+
+def _provider_icon(rating_image, audience=False):
+    """Plex chips draw a provider glyph (IMDb yellow, RT splat, popcorn,
+    TMDB teal) before the value -- small generated textures in media/."""
+    img = rating_image or ''
+    if 'imdb' in img:
+        return 'prov-imdb.png'
+    if 'themoviedb' in img:
+        return 'prov-tmdb.png'
+    if 'rottentomatoes' in img:
+        return 'prov-rt-aud.png' if audience else 'prov-rt.png'
+    return ''
 
 
 def _provider_label(rating_image):

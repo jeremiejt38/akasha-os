@@ -42,6 +42,13 @@
             <height>1080</height>
             <texture colordiffuse="7310131A">white.png</texture>
         </control>
+        <control type="image">
+            <left>0</left>
+            <top>620</top>
+            <width>1920</width>
+            <height>460</height>
+            <texture>scrim-bottom.png</texture>
+        </control>
 
         <!-- Clear logo (when available) or text title -->
         <control type="image" id="7010">
@@ -59,9 +66,51 @@
             <top>200</top>
             <width>1100</width>
             <height>70</height>
-            <font>font_main_bold</font>
+            <font>font_head_bold</font>
             <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
+        </control>
+
+        <!-- Plex keeps its collapsed rail visible on detail pages too.
+                 Decorative here: Back still returns to the library. -->
+        <control type="image">
+            <left>14</left>
+            <top>330</top>
+            <width>64</width>
+            <height>300</height>
+            <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+        </control>
+        <control type="image">
+            <left>25</left>
+            <top>352</top>
+            <width>42</width>
+            <height>42</height>
+            <aspectratio>keep</aspectratio>
+            <texture colordiffuse="FFE5A00D">circle.png</texture>
+        </control>
+        <control type="image">
+            <left>28</left>
+            <top>430</top>
+            <width>36</width>
+            <height>36</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-search.png</texture>
+        </control>
+        <control type="image">
+            <left>28</left>
+            <top>496</top>
+            <width>36</width>
+            <height>36</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-home.png</texture>
+        </control>
+        <control type="image">
+            <left>28</left>
+            <top>562</top>
+            <width>36</width>
+            <height>36</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-more.png</texture>
         </control>
 
         <!-- Meta line: year - duration - genres -->
@@ -84,6 +133,15 @@
             <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChip0))</visible>
         </control>
+        <control type="image" id="7045">
+            <left>105</left>
+            <top>362</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>$INFO[Window.Property(AuraDetailChipIcon0)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipIcon0))</visible>
+        </control>
         <control type="label" id="7022">
             <left>105</left>
             <top>356</top>
@@ -103,6 +161,15 @@
             <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChip1))</visible>
         </control>
+        <control type="image" id="7046">
+            <left>205</left>
+            <top>362</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>$INFO[Window.Property(AuraDetailChipIcon1)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipIcon1))</visible>
+        </control>
         <control type="label" id="7024">
             <left>205</left>
             <top>356</top>
@@ -121,6 +188,15 @@
             <height>36</height>
             <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChip2))</visible>
+        </control>
+        <control type="image" id="7047">
+            <left>335</left>
+            <top>362</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>$INFO[Window.Property(AuraDetailChipIcon2)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipIcon2))</visible>
         </control>
         <control type="label" id="7026">
             <left>335</left>
@@ -163,7 +239,7 @@
             <font>font_tiny_bold</font>
             <align>center</align>
             <aligny>center</aligny>
-            <label>Regarder</label>
+            <label></label>
             <textcolor>FF1A1A1A</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
             <texturenofocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturenofocus>
@@ -171,22 +247,88 @@
             <onright>7103</onright>
             <ondown>7110</ondown>
         </control>
+        <control type="image" id="7090">
+            <left>127</left>
+            <top>596</top>
+            <width>22</width>
+            <height>26</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-play-dark.png</texture>
+        </control>
+        <control type="label" id="7091">
+            <left>161</left>
+            <top>576</top>
+            <width min="40" max="800">auto</width>
+            <height>64</height>
+            <aligny>center</aligny>
+            <font>font_tiny_bold</font>
+            <textcolor>FF1A1A1A</textcolor>
+            <label></label>
+        </control>
         <control type="button" id="7103">
             <left>375</left>
             <top>576</top>
             <width>64</width>
             <height>64</height>
-            <label>+</label>
+            <label></label>
             <font>font_main_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <onleft>7100</onleft>
-            <onright>7101</onright>
+            <onright>7104</onright>
             <ondown>7110</ondown>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
             <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+        </control>
+        <control type="image" id="7092">
+            <left>395</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-bookmark.png</texture>
+            <visible>!Control.HasFocus(7103)</visible>
+        </control>
+        <control type="image" id="7093">
+            <left>395</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-bookmark-dark.png</texture>
+            <visible>Control.HasFocus(7103)</visible>
+        </control>
+        <control type="button" id="7104">
+            <left>459</left>
+            <top>576</top>
+            <width>64</width>
+            <height>64</height>
+            <label></label>
+            <onleft>7103</onleft>
+            <onright>7101</onright>
+            <ondown>7110</ondown>
+            <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+        </control>
+        <control type="image" id="7099">
+            <left>479</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-rate.png</texture>
+            <visible>!Control.HasFocus(7104)</visible>
+        </control>
+        <control type="image" id="7105">
+            <left>479</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-rate-dark.png</texture>
+            <visible>Control.HasFocus(7104)</visible>
         </control>
         <control type="button" id="7101">
             <left>459</left>
@@ -194,26 +336,44 @@
             <width>64</width>
             <height>64</height>
             <label></label>
-            <onleft>7103</onleft>
+            <onleft>7104</onleft>
             <onright>7102</onright>
             <ondown>7110</ondown>
             <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
         </control>
-        <control type="image">
+        <control type="image" id="7094">
             <left>479</left>
             <top>596</top>
             <width>24</width>
             <height>24</height>
-            <texture colordiffuse="FFFFFFFF">check.png</texture>
-            <visible>String.IsEqual(Window.Property(AuraDetailWatched),1)</visible>
+            <aspectratio>keep</aspectratio>
+            <texture>check.png</texture>
+            <visible>!Control.HasFocus(7101)</visible>
+        </control>
+        <control type="image" id="7095">
+            <left>479</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-check-dark.png</texture>
+            <visible>Control.HasFocus(7101)</visible>
+        </control>
+        <control type="image" id="7096">
+            <left>479</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <texture colordiffuse="FFE5A00D">check.png</texture>
+            <visible>String.IsEqual(Window.Property(AuraDetailWatched),1) + !Control.HasFocus(7101)</visible>
         </control>
         <control type="button" id="7102">
             <left>543</left>
             <top>576</top>
             <width>64</width>
             <height>64</height>
-            <label>...</label>
+            <label></label>
             <font>font_tiny_bold</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -223,6 +383,24 @@
             <focusedcolor>FF1A1A1A</focusedcolor>
             <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
+        </control>
+        <control type="image" id="7097">
+            <left>563</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-dots.png</texture>
+            <visible>!Control.HasFocus(7102)</visible>
+        </control>
+        <control type="image" id="7098">
+            <left>563</left>
+            <top>596</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon-dots-dark.png</texture>
+            <visible>Control.HasFocus(7102)</visible>
         </control>
 
         <!-- Media badges (video / audio / subs), right side like Plex -->
@@ -263,6 +441,44 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraDetailAudioBadge))</visible>
+        </control>
+        <control type="image" id="7054">
+            <left>1510</left>
+            <top>584</top>
+            <width>220</width>
+            <height>44</height>
+            <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailSubsBadge))</visible>
+        </control>
+        <control type="label" id="7055">
+            <left>1510</left>
+            <top>584</top>
+            <width>220</width>
+            <height>44</height>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailSubsBadge))</visible>
+        </control>
+        <!-- badge glyphs (speaker / subtitle box); video pill stays text-only -->
+        <control type="image" id="7056">
+            <left>1522</left>
+            <top>592</top>
+            <width>28</width>
+            <height>28</height>
+            <aspectratio>keep</aspectratio>
+            <texture>badge-audio.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailAudioBadge))</visible>
+        </control>
+        <control type="image" id="7057">
+            <left>1522</left>
+            <top>592</top>
+            <width>28</width>
+            <height>28</height>
+            <aspectratio>keep</aspectratio>
+            <texture>badge-subs.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailSubsBadge))</visible>
         </control>
 
         <!-- Season pill strip (show pages only): Show | Saison 1 | ... -->

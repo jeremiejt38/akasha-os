@@ -348,6 +348,21 @@ class PlexClient:
             'identifier': 'com.plexapp.plugins.library',
         })
 
+    def rate(self, rating_key, rating):
+        """Set a user rating (1-10) via Plex's `/:/rate` endpoint."""
+        url = self._url('/:/rate', {
+            'key': rating_key,
+            'identifier': 'com.plexapp.plugins.library',
+            'rating': int(rating),
+        })
+        req = urllib.request.Request(url, headers=self._headers(), method='PUT')
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                resp.read()
+        except urllib.error.URLError as e:
+            raise PlexAPIError('Plex rate failed for {}: {}'.format(
+                rating_key, getattr(e, 'reason', e))) from e
+
     def metadata_item(self, rating_key):
         """Fetch and normalise a single item by rating key (used to hydrate
         thin items before opening the detail page)."""
