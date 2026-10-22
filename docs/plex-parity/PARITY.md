@@ -38,7 +38,55 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | OSD vidéo | Livré | `osd/` | Minimaliste : titre, méta, horloge, seek fine avec **remplissage ambre** (`FFE5A00D`, trio left/mid/right textures), curseur blanc, temps écoulé/restant, cercles subs/settings, chevron de sortie. `DialogSeekBar.xml` passif patché en plus (sinon l'overlay Arctic se superposait : double barre + double timecode) | ✅ | — | `osd_v5.png` |
 | Focus carte sélectionnée quand focus ailleurs | Livré | `films_tabs_focus_002` | Ring discret via `ListItem.IsSelected` | ✅ | — | captures |
 
-## Limitations connues (non contournables sans API privée Plex)
+## Backlog de parité — manques restants (audit Devin × Claude, 2026-10-22)
+
+Audit croisé code Aura + 100 captures de référence + dumps UI Plex + revue externe Claude
+(conversation `[DCb] Audit parité Plex TV vs Aura`). Chaque ligne est vérifiée sur le serveur
+de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant implémentation.
+
+### Implémentable via l'API serveur locale (priorité usage salon)
+
+| # | Manque | Endpoint / mécanisme | Vérifié | Prio |
+|---|--------|----------------------|---------|------|
+| B1 | **Up Next** — autoplay épisode suivant avec compte à rebours Plex | Callbacks `Player` de Kodi à la fin d'épisode + fenêtre overlay compte à rebours + `next episode` via `/library/metadata/{show}/children` | mécanisme | **P1** |
+| B2 | **Skip Intro / Skip Credits** — bouton OSD pendant les marqueurs | `includeMarkers=1` sur la métadonnée → `Marker type='intro'/'credits'` (start/endTimeOffset) ; bouton OSD + `Player.seekTime` | ✅ marker `credits` confirmé sur épisode réel | **P1** |
+| B3 | **`/:/timeline` reports** — progression envoyée au serveur pendant la lecture | `GET /:/timeline?ratingKey=…&time=…&state=playing` périodique ; améliore la fraîcheur de « Continuer à regarder » et le resume multi-appareils | endpoint documenté ⚠️ | **P1** |
+| B4 | **Filtres dynamiques serveur** | `/library/sections/{id}/filters` → 15 filtres (genre, year, contentRating, studio, resolution…) ; un dialog générique les couvre tous. Aura : seulement Tout/Non vus/Vus + genre + tri | ✅ 15 filtres confirmés | P2 |
+| B5 | **« Retirer de Continuer à regarder »** (appui long) | `PUT /actions/removeFromContinueWatching?ratingKey=` (ou `/:/unscrobble` en fallback) | ⚠️ endpoint à confirmer | P2 |
+| B6 | **« You watched » / Activity feed propre** | `/status/sessions/history/all` → entrées propres du serveur (les entrées amis restent 🔴 cloud) ; ligne d'activité sur fiche + contenu réel dans l'onglet Activité | ✅ fonctionnel | P2 |
+| B7 | **« More Like This »** sur les fiches | `/library/metadata/{id}/related` → hubs | ✅ hub retourné | P2 |
+| B8 | **Recherche enrichie** | historique persisté + bouton « Effacer l'historique », résultats personnes/genres via `/hubs/search`, état vide avec suggestions | `/hubs/search` ⚠️ | P2 |
+| B9 | **Extras / bandes-annonces** | `/library/metadata/{id}/extras` → trailer/making-of jouables (dégrade à vide si absent) | ✅ endpoint, 0 extra sur item testé | P3 |
+| B10 | **Playlists locales serveur** | `/playlists` est server-local (pas cloud !) ; la sidebar peut les lister/lire | ✅ endpoint OK (vide actuellement) | P3 |
+| B11 | **« Go to Show / Season »** depuis une fiche épisode | `grandparent_rating_key` déjà disponible | mécanisme | P3 |
+| B12 | **Sélecteur de version** (fichiers multi-part) | plusieurs `Media`/`Part` par item → choix dans le menu Plus | mécanisme | P3 |
+| B13 | **UltraBlurColors** — teinte du fond de fiche | champ `ultraBlurColors` de la métadonnée → fond coloré comme Plex au lieu du scrim générique | ⚠️ champ à confirmer | P3 |
+| B14 | **Chapitres** | `Player.Chapters` Kodi / chapitres dans la métadonnée Plex → liste dans OSD ou fiche | mécanisme | P4 |
+| B15 | **Continuité audio/sous-titres par série** | Plex mémorise les pistes choisies ; équivalent : mémoriser par `grandparent_rating_key` en profil addon | mécanisme local | P4 |
+| B16 | **Bibliothèques non-vidéo (Musique)** dans la sidebar | section `type=artist` confirmée (id 6) ; actuellement dans le launcher, absent du rail Plex | ✅ section présente | P4 |
+| B17 | **Écran d'erreur serveur** propre | Plex affiche « server unreachable » + retry ; Aura montre « erreur de chargement » par ligne | mécanisme | P4 |
+
+### Vraies limitations (cloud / plateforme)
+
+| # | Manque | Raison |
+|---|--------|--------|
+| L1 | Onglet Activité — entrées **amis**, réactions | GraphQL social privé plex.tv |
+| L2 | Watchlist cloud synchronisée | metadata.provider.plex.tv (voir note : `discover.provider` déjà utilisé pour Tendances — limite possiblement côté connecteur, à trancher) |
+| L3 | Multi-profils Plex Home + PIN, « Switch Profile » | Fonction compte plex.tv ; Aura mono-utilisateur |
+| L4 | Live TV / chaînes « Sur Plex », Discover cloud | Contenus cloud |
+| L5 | « More Ways to Watch », Watch Together | Cloud / social |
+| L6 | Miniatures de seek (trickplay bif) | Kodi n'a pas de support trickplay |
+| L7 | Ratings & Reviews, Discussions | API sociale privée |
+| L8 | Recherche vocale | Micro télécommande = protocole BLE propriétaire (voir plan voix `c8c8548a`) |
+
+### Écarts visuels restants (revue Claude sur captures)
+
+- **Clavier recherche** : touches `_`, `←`, `X` en texte brut vs icônes chez Plex ; touches plus petites.
+- **Recherche** : pas de rail, pas d'historique visible, pas de rangée « Popular Searches », zone droite vide avant saisie.
+- **Accueil** : rangée coupée net à x≈1823 (dernier poster rogné vs fade Plex), trou ~90 px entre titre et méta quand pas de clearlogo, icône « maison » fantôme près du titre (à investiguer).
+- **Hero** : suit le focus (vérifié) — mais seed au premier item de la première rangée, pas un carrousel vedette comme Plex.
+
+
 
 - **Flux « Activité »** : feed social (GraphQL privé) → empty state explicite.
 - **Ligne « Activity by you… » sur les fiches** : même raison.
