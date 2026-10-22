@@ -22,7 +22,7 @@
             <left>0</left>
             <top>0</top>
             <width>1920</width>
-            <height>765</height>
+            <height>1080</height>
             <aspectratio align="right" aligny="top">scale</aspectratio>
             <fadetime>200</fadetime>
             <texture background="true"></texture>

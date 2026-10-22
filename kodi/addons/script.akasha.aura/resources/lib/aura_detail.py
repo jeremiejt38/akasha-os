@@ -57,7 +57,7 @@ ACTION_ICON_OVERLAYS = {
 }
 ACTION_ROW_TOP = 576
 ACTION_ROW_LEFT = 105
-ACTION_ROW_GAP = 20
+ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
 
 
@@ -441,8 +441,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 pass
             for ov_id in ACTION_ICON_OVERLAYS.get(cid, ()):
                 try:
-                    self.getControl(ov_id).setPosition(x + 20,
-                                                       ACTION_ROW_TOP + 20)
+                    # 28px glyphs centred in the 64px circle, like Plex.
+                    self.getControl(ov_id).setPosition(x + 18,
+                                                       ACTION_ROW_TOP + 18)
                 except RuntimeError:
                     pass
             x += w + ACTION_ROW_GAP
