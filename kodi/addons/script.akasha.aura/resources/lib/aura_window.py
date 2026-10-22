@@ -21,7 +21,6 @@ import aura_app
 import aura_detail
 import aura_search
 import aura_settings_panel
-import aura_show
 import aura_store
 import config
 import connector_client

@@ -91,8 +91,9 @@ IDLE_SAFE_WINDOW_NAMES = (
     '1196',  # script.akasha.aura: AuraApp.xml
     '1197',  # script.akasha.aura: AuraStore.xml
     '1198',  # script.akasha.aura: AuraShow.xml
-    '1199',  # script.akasha.aura: AuraRecommendations.xml
+    '1199',  # script.akasha.aura: AuraDetail.xml (Plex-style item page)
     '1200',  # script.akasha.aura: AuraGenres.xml
+    '1201',  # script.akasha.aura: AuraSearch.xml (Plex-style search)
 )
 
 
