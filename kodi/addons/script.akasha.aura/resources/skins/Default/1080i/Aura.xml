@@ -522,105 +522,6 @@
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),0)</visible>
 
-            <!-- Sidebar: Plex-style rail. Collapsed = the icon column stays
-                 visible over the backdrop (never fully hidden, cahier
-                 950e65d3); focused = the dark panel + labels reveal.
-                 Previously the whole group lived at left=-420 and slid in
-                 on focus, leaving zero icons visible when unfocused. -->
-            <control type="group" id="3300">
-                <left>0</left>
-                <top>120</top>
-                <width>420</width>
-                <height>860</height>
-                <zorder>3</zorder>
-
-                <!-- Collapsed rail: floating rounded pill behind the icon
-                     column (Plex's collapsed sidebar is a floating pill,
-                     not an edge-to-edge slab). -->
-                <control type="image">
-                    <left>14</left>
-                    <top>8</top>
-                    <width>64</width>
-                    <height>844</height>
-                    <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
-                    <visible>!Control.HasFocus(3310)</visible>
-                </control>
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>420</width>
-                    <height>860</height>
-                    <texture colordiffuse="F210131A">white.png</texture>
-                    <visible>Control.HasFocus(3310)</visible>
-                </control>
-
-                <control type="list" id="3310">
-                    <left>0</left>
-                    <top>10</top>
-                    <width>420</width>
-                    <height>840</height>
-                    <onup>2001</onup>
-                    <onright>5110</onright>
-                    <itemlayout width="420" height="56">
-                        <control type="image">
-                            <left>28</left>
-                            <top>11</top>
-                            <width>34</width>
-                            <height>34</height>
-                            <aspectratio>keep</aspectratio>
-                            <texture>$INFO[ListItem.Art(icon)]</texture>
-                        </control>
-                        <control type="label">
-                            <left>90</left>
-                            <top>0</top>
-                            <width>300</width>
-                            <height>56</height>
-                            <aligny>center</aligny>
-                            <font>font_tiny_bold</font>
-                            <label>$INFO[ListItem.Label]</label>
-                            <textcolor>CCFFFFFF</textcolor>
-                            <visible>Control.HasFocus(3310)</visible>
-                        </control>
-                    </itemlayout>
-                    <focusedlayout width="420" height="56">
-                        <control type="image">
-                            <left>0</left>
-                            <top>0</top>
-                            <width>420</width>
-                            <height>56</height>
-                            <texture colordiffuse="FF262B3D" border="16">rounded-solid.png</texture>
-                            <visible>Control.HasFocus(3310)</visible>
-                        </control>
-                        <control type="image">
-                            <left>0</left>
-                            <top>0</top>
-                            <width>6</width>
-                            <height>56</height>
-                            <texture colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texture>
-                            <visible>Control.HasFocus(3310)</visible>
-                        </control>
-                        <control type="image">
-                            <left>28</left>
-                            <top>11</top>
-                            <width>34</width>
-                            <height>34</height>
-                            <aspectratio>keep</aspectratio>
-                            <texture>$INFO[ListItem.Art(icon)]</texture>
-                        </control>
-                        <control type="label">
-                            <left>90</left>
-                            <top>0</top>
-                            <width>300</width>
-                            <height>56</height>
-                            <aligny>center</aligny>
-                            <font>font_tiny_bold</font>
-                            <label>$INFO[ListItem.Label]</label>
-                            <textcolor>FFFFFFFF</textcolor>
-                            <visible>Control.HasFocus(3310)</visible>
-                        </control>
-                    </focusedlayout>
-                </control>
-            </control>
 
             <!-- Library header + contextual tabs: only shown once a library is selected
                  in the sidebar (Window.Property(DivertView)=="library"); Accueil has no
@@ -1777,6 +1678,178 @@
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
+                        </control>
+                    </focusedlayout>
+                </control>
+            </control>
+
+            <!-- Sidebar: Plex-style rail. Collapsed = the icon column stays
+                 visible over the backdrop (never fully hidden, cahier
+                 950e65d3); focused = floating dark panel + labels + profile
+                 row + screen dim (document-order z: this group is the last
+                 child of the Divertissement group so it renders above the
+                 content it overlaps). -->
+            <control type="group" id="3300">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+
+                <!-- Plex dims the whole screen behind the expanded panel. -->
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>1920</width>
+                    <height>1080</height>
+                    <texture colordiffuse="8C000000">white.png</texture>
+                    <visible>Control.HasFocus(3310)</visible>
+                </control>
+
+                <!-- Collapsed rail: floating rounded pill behind the icon
+                     column (Plex's collapsed sidebar is a floating pill,
+                     not an edge-to-edge slab). -->
+                <control type="image">
+                    <left>14</left>
+                    <top>128</top>
+                    <width>64</width>
+                    <height>844</height>
+                    <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+                    <visible>!Control.HasFocus(3310)</visible>
+                </control>
+
+                <!-- Expanded panel: floating rounded slab (Plex does not
+                     flush it against the screen edges). -->
+                <control type="image">
+                    <left>20</left>
+                    <top>20</top>
+                    <width>400</width>
+                    <height>1040</height>
+                    <texture colordiffuse="FF10131A" border="26">rounded-solid.png</texture>
+                    <visible>Control.HasFocus(3310)</visible>
+                </control>
+
+                <control type="list" id="3310">
+                    <left>20</left>
+                    <top>28</top>
+                    <width>400</width>
+                    <height>1020</height>
+                    <onup>2001</onup>
+                    <onright>5110</onright>
+                    <itemlayout width="400" height="56">
+                        <control type="image">
+                            <left>9</left>
+                            <top>11</top>
+                            <width>34</width>
+                            <height>34</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture>$INFO[ListItem.Art(icon)]</texture>
+                            <visible>!Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>30</left>
+                            <top>11</top>
+                            <width>34</width>
+                            <height>34</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture>$INFO[ListItem.Art(icon)]</texture>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="label">
+                            <left>92</left>
+                            <top>0</top>
+                            <width>290</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_tiny_bold</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>348</left>
+                            <top>12</top>
+                            <width>32</width>
+                            <height>32</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="AAFFFFFF">icon-chevron-right.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="label">
+                            <left>30</left>
+                            <top>0</top>
+                            <width>120</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_hint</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>150</left>
+                            <top>27</top>
+                            <width>240</width>
+                            <height>2</height>
+                            <texture colordiffuse="33FFFFFF">white.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="400" height="56">
+                        <control type="image">
+                            <left>8</left>
+                            <top>0</top>
+                            <width>384</width>
+                            <height>56</height>
+                            <texture colordiffuse="FFFFFFFF" border="28">rounded-solid.png</texture>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>30</left>
+                            <top>11</top>
+                            <width>34</width>
+                            <height>34</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="label">
+                            <left>92</left>
+                            <top>0</top>
+                            <width>290</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_tiny_bold</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FF1A1A1A</textcolor>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>348</left>
+                            <top>12</top>
+                            <width>32</width>
+                            <height>32</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="FF1A1A1A">icon-chevron-right.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="label">
+                            <left>30</left>
+                            <top>0</top>
+                            <width>120</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_hint</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>150</left>
+                            <top>27</top>
+                            <width>240</width>
+                            <height>2</height>
+                            <texture colordiffuse="33FFFFFF">white.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                     </focusedlayout>
                 </control>

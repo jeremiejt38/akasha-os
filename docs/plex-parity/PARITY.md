@@ -8,7 +8,10 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Accueil — rangées posters | Livré | `accueil/` | Pitch ~272, posters 240×360, ring détaché + zoom, barres de progression fines, badge ✓ "vu" | ✅ | — | captures |
 | Accueil — onglets Pour vous / Tendances / Activité | Livré | `films_tabs_focus_002` | Pills lisibles, actif = outline, focus = pill blanche ; Tendances via `discover.provider.plex.tv/hubs/promoted` | ✅ | — | captures |
 | Accueil — Activité (flux social) | Non implémentable | Feed d'activité des amis | Empty state « Aucune activité d'amis à afficher » | ⬜ | API sociale GraphQL privée Plex non exposée ; limitation documentée | — |
-| Sidebar rail | Livré | `films_browse_focus_003` | Pilule flottante, icônes distinctes, avatar, expansion au focus | ✅ | — | captures |
+| Sidebar rail replié | Livré | `sidebar/expanded_focus_001`, `parametres/profile_menu_003` | Pilule flottante, avatar en tête, icônes distinctes | ✅ | — | captures |
+| Sidebar rail expansé | Livré | `sidebar/expanded_focus_001` | Panneau flottant arrondi + dim écran ; profil (avatar + « Akasha » + ›), Ma liste, Recherche, Accueil, header « Bibliothèques » + ligne, bibliothèques, Playlists, Plus ; focus = pill blanche | ✅ | — | captures |
+| Sidebar — profil / Ma liste / Playlists | Limitation | Menu compte plex.tv, My Lists, Playlists | Item présent, clic → notification explicite | ⬜ | Fonctions cloud plex.tv non proxifiées par le connecteur privé | — |
+| Sidebar — section « On Plex » | Limitation | Contenus cloud Plex (Discover, Music…) | Absente | ⬜ | Sections cloud Plex hors connecteur privé | — |
 | Bibliothèque — onglets | Livré | `films_tabs_focus_002` | Recommandé / Bibliothèque / Collections / Catégories + ⋯ | ✅ | — | captures |
 | Bibliothèque — grille Browse | Livré | `films_browse_focus_003` | 6 colonnes 240×360, titre+année, pills de filtres, rail A-Z, badge ✓ | ✅ | — | captures |
 | Bibliothèque — Collections | Livré | endpoint `/library/collections` | Rangée collections + drill-down | ✅ | — | captures |

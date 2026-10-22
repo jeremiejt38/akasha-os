@@ -71,7 +71,15 @@ ACTION_MENU = 163
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
-DIVERT_SIDEBAR_HOME_INDEX = 0
+# Plex's expanded rail puts fixed entries above the libraries: profile,
+# My Lists, Search, Home -- then a divider, the library sections,
+# Playlists and Plus.
+DIVERT_SIDEBAR_PROFILE_INDEX = 0
+DIVERT_SIDEBAR_MYLIST_INDEX = 1
+DIVERT_SIDEBAR_SEARCH_INDEX = 2
+DIVERT_SIDEBAR_HOME_INDEX = 3
+DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 4
+DIVERT_SIDEBAR_LIBS_OFFSET = 5
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 # Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
@@ -396,7 +404,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('DivertView', 'library')
         self.addon.setSetting('divert.last_view', 'library')
         self._select_divert_section(section_index)
-        self._set_sidebar_selection(section_index + 1)
+        self._set_sidebar_selection(section_index + DIVERT_SIDEBAR_LIBS_OFFSET)
         self._sync_navigation()
         section = self._divert_sections[section_index]
         try:
@@ -1119,14 +1127,39 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         sidebar.reset()
 
+        # Plex profile row: circular avatar + account name + chevron
+        # (is_profile restyles it in the itemlayout).
+        profile_item = xbmcgui.ListItem('Akasha')
+        profile_item.setProperty('is_profile', '1')
+        profile_item.setArt({'icon': 'avatar-plex.png'})
+        sidebar.addItem(profile_item)
+
+        mylist_item = xbmcgui.ListItem('Ma liste')
+        mylist_item.setArt({'icon': 'icon-bookmark.png'})
+        sidebar.addItem(mylist_item)
+
+        search_item = xbmcgui.ListItem('Recherche')
+        search_item.setArt({'icon': 'icon-search.png'})
+        sidebar.addItem(search_item)
+
         home_item = xbmcgui.ListItem('Accueil')
         home_item.setArt({'icon': 'icon-home.png'})
         sidebar.addItem(home_item)
+
+        # Plex's 'Libraries' divider label (is_header restyles it in the
+        # itemlayout and keeps the white focus pill off it).
+        header_item = xbmcgui.ListItem('Bibliothèques')
+        header_item.setProperty('is_header', '1')
+        sidebar.addItem(header_item)
 
         for section in self._divert_sections:
             li = xbmcgui.ListItem(section['title'])
             li.setArt({'icon': self._divert_section_icon(section)})
             sidebar.addItem(li)
+
+        playlists_item = xbmcgui.ListItem('Playlists')
+        playlists_item.setArt({'icon': 'icon-playlists.png'})
+        sidebar.addItem(playlists_item)
 
         more_item = xbmcgui.ListItem('Plus')
         more_item.setArt({'icon': 'icon-more.png'})
@@ -1904,14 +1937,38 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pos = self.getControl(DIVERT_SIDEBAR_ID).getSelectedPosition()
         except RuntimeError:
             return
+        if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
+            # Plex's profile entry opens the plex.tv account menu (switch
+            # user / sign out); the private connector doesn't proxy it.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Profil Plex indisponible',
+                xbmcgui.NOTIFICATION_INFO, 1500)
+            return
+        if pos == DIVERT_SIDEBAR_MYLIST_INDEX:
+            # Plex 'My Lists' = watchlist/playlists -- a plex.tv cloud
+            # feature; surface it once the connector proxies it.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Ma liste indisponible',
+                xbmcgui.NOTIFICATION_INFO, 1500)
+            return
+        if pos == DIVERT_SIDEBAR_SEARCH_INDEX:
+            self._open_search()
+            return
         if pos == DIVERT_SIDEBAR_HOME_INDEX:
             self._activate_home()
             return
-        more_index = len(self._divert_sections) + 1
-        if pos == more_index:
+        if pos == DIVERT_SIDEBAR_LIBS_HEADER_INDEX:
+            return
+        playlists_index = len(self._divert_sections) + DIVERT_SIDEBAR_LIBS_OFFSET
+        if pos == playlists_index:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Playlists à venir',
+                xbmcgui.NOTIFICATION_INFO, 1500)
+            return
+        if pos == playlists_index + 1:
             self._manage_libraries()
             return
-        section_index = pos - 1
+        section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
             self._activate_library(section_index)
 
