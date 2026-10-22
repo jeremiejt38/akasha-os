@@ -299,6 +299,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # RunScript(script.akasha.aura, opensettings) and Aura wasn't
         # already running.
         self.open_settings_on_init = False
+        # Set when a detail page started playback: default.py then waits
+        # for the video to end and re-opens Aura (modal dialogs suppress
+        # the fullscreen video window, so Aura must leave the screen).
+        self.playback_started = False
 
     def onInit(self):
         try:
@@ -314,6 +318,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._sync_navigation()
             self._update_bar_focused()
+            # Re-opened after a playback session: return to the item's
+            # detail page like Plex does when a video stops.
+            playback_item = getattr(self, '_playback_item', None)
+            self._playback_item = None
+            if playback_item:
+                self._open_detail(playback_item)
             if getattr(self, 'open_settings_on_init', False):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
@@ -851,6 +861,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
             except RuntimeError:
                 pass
+        # A modal WindowXMLDialog stays above the fullscreen video and
+        # blocks its activation, so playback requested from the detail
+        # page also has to close Aura itself. default.py waits for the
+        # video to stop and re-opens this same window, like Plex's
+        # "return to app" after playback.
+        if getattr(detail, 'playback_started', False):
+            self.playback_started = True
+            # Plex returns to the item's detail page when playback stops;
+            # onInit re-opens it via this marker.
+            self._playback_item = item
+            self.close()
 
     def _render_reco_row_label(self, list_control_id, error=None):
         label_control_id, title, paged = self._reco_rows[list_control_id]

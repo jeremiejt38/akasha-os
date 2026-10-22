@@ -655,6 +655,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
             li.setProperty('totaltime', str(float(item.get('duration_ms') or 0) / 1000.0))
         li.setMimeType('video/mp4')
+        # Tells the owner (Aura window + default.py) that playback began:
+        # every modal dialog must leave the screen for the fullscreen
+        # video to activate, and Aura re-opens once playback ends.
+        self.playback_started = True
         self.close()
         xbmc.Player().play(url, li)
 

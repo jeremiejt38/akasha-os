@@ -74,6 +74,22 @@ if __name__ == '__main__':
             window = AuraWindow('Aura.xml', ADDON_PATH, 'Default', '1080i')
             window.open_settings_on_init = False
             window.doModal()
+            # Playback started from Aura: the window closed itself because
+            # a modal dialog would otherwise cover the fullscreen video.
+            # Wait for playback to end, then re-open Aura where the user
+            # left it -- Plex-style "return to app" after watching.
+            while getattr(window, 'playback_started', False):
+                window.playback_started = False
+                # Player.play() is asynchronous: wait for the stream to
+                # actually start before watching for its end, otherwise
+                # Aura re-opens instantly and covers the video again.
+                waited = 0
+                while not xbmc.Player().isPlayingVideo() and waited < 15000:
+                    xbmc.sleep(200)
+                    waited += 200
+                while xbmc.Player().isPlayingVideo():
+                    xbmc.sleep(500)
+                window.doModal()
             del window
         finally:
             try:
