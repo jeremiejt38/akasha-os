@@ -390,6 +390,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """
         self._divert_view = 'home'
         self.setProperty('DivertView', 'home')
+        self.setProperty('DivertActiveLibrary', '')
         self.setProperty('DivertHomeTab', str(self._home_tab))
         self.addon.setSetting('divert.last_view', 'home')
         self._set_sidebar_selection(DIVERT_SIDEBAR_HOME_INDEX)
@@ -402,6 +403,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         self._divert_view = 'library'
         self.setProperty('DivertView', 'library')
+        self.setProperty('DivertActiveLibrary', self._divert_sections[section_index]['title'])
         self.addon.setSetting('divert.last_view', 'library')
         self._select_divert_section(section_index)
         self._set_sidebar_selection(section_index + DIVERT_SIDEBAR_LIBS_OFFSET)

@@ -1705,16 +1705,51 @@
                     <visible>Control.HasFocus(3310)</visible>
                 </control>
 
-                <!-- Collapsed rail: floating rounded pill behind the icon
-                     column (Plex's collapsed sidebar is a floating pill,
-                     not an edge-to-edge slab). -->
-                <control type="image">
-                    <left>14</left>
-                    <top>128</top>
-                    <width>64</width>
-                    <height>844</height>
-                    <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+                <!-- Collapsed rail: short floating pill with the 4 primary
+                     shortcuts only (avatar, search, home, more), vertically
+                     centered like Plex. The full list is hidden while the
+                     sidebar is unfocused; it appears as soon as the panel
+                     expands on focus. -->
+                <control type="group">
                     <visible>!Control.HasFocus(3310)</visible>
+                    <control type="image">
+                        <left>14</left>
+                        <top>435</top>
+                        <width>64</width>
+                        <height>228</height>
+                        <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>23</left>
+                        <top>450</top>
+                        <width>46</width>
+                        <height>46</height>
+                        <texture>avatar-plex.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>30</left>
+                        <top>512</top>
+                        <width>32</width>
+                        <height>32</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture colordiffuse="CCFFFFFF">icon-search.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>30</left>
+                        <top>565</top>
+                        <width>32</width>
+                        <height>32</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture colordiffuse="CCFFFFFF">icon-home.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>30</left>
+                        <top>618</top>
+                        <width>32</width>
+                        <height>32</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture colordiffuse="CCFFFFFF">icon-more.png</texture>
+                    </control>
                 </control>
 
                 <!-- Expanded panel: floating rounded slab (Plex does not
@@ -1737,13 +1772,12 @@
                     <onright>5110</onright>
                     <itemlayout width="400" height="56">
                         <control type="image">
-                            <left>9</left>
-                            <top>11</top>
-                            <width>34</width>
-                            <height>34</height>
-                            <aspectratio>keep</aspectratio>
-                            <texture>$INFO[ListItem.Art(icon)]</texture>
-                            <visible>!Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <left>8</left>
+                            <top>0</top>
+                            <width>384</width>
+                            <height>56</height>
+                            <texture colordiffuse="AAFFFFFF" border="28">chip-outline.png</texture>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
                         </control>
                         <control type="image">
                             <left>30</left>
