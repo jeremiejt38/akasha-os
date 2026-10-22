@@ -1167,6 +1167,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         more_item.setArt({'icon': 'icon-more.png'})
         sidebar.addItem(more_item)
 
+        # Plex's 'On Plex' section: cloud sources (Live TV, Discover) the
+        # private connector can't proxy -- kept for structural parity,
+        # selecting them surfaces a notification.
+        onplex_item = xbmcgui.ListItem('Sur Plex')
+        onplex_item.setProperty('is_header', '1')
+        sidebar.addItem(onplex_item)
+
+        livetv_item = xbmcgui.ListItem('TV en direct')
+        livetv_item.setArt({'icon': 'icon-livetv.png'})
+        sidebar.addItem(livetv_item)
+
+        discover_item = xbmcgui.ListItem('Découvrir')
+        discover_item.setArt({'icon': 'icon-discover.png'})
+        sidebar.addItem(discover_item)
+
     def _divert_section_icon(self, section):
         """Return a distinct icon name for a library section.
 
@@ -1969,6 +1984,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if pos == playlists_index + 1:
             self._manage_libraries()
+            return
+        if pos == playlists_index + 2:
+            return  # 'Sur Plex' section header
+        if pos in (playlists_index + 3, playlists_index + 4):
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Contenu Plex.tv indisponible',
+                xbmcgui.NOTIFICATION_INFO, 1500)
             return
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
