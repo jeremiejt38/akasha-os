@@ -10,8 +10,9 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Accueil — Activité (flux social) | Non implémentable | Feed d'activité des amis | Empty state « Aucune activité d'amis à afficher » | ⬜ | API sociale GraphQL privée Plex non exposée ; limitation documentée | — |
 | Sidebar rail replié | Livré | `sidebar/expanded_focus_001`, `parametres/profile_menu_003` | Pilule flottante, avatar en tête, icônes distinctes | ✅ | — | captures |
 | Sidebar rail expansé | Livré | `sidebar/expanded_focus_001` | Panneau flottant arrondi + dim écran ; profil (avatar + « Akasha » + ›), Ma liste, Recherche, Accueil, header « Bibliothèques » + ligne, bibliothèques, Playlists, Plus ; focus = pill blanche | ✅ | — | captures |
-| Sidebar — profil / Ma liste / Playlists | Limitation | Menu compte plex.tv, My Lists, Playlists | Item présent, clic → notification explicite | ⬜ | Fonctions cloud plex.tv non proxifiées par le connecteur privé | — |
-| Sidebar — section « On Plex » | Limitation | Contenus cloud Plex (Discover, Music…) | Absente | ⬜ | Sections cloud Plex hors connecteur privé | — |
+| Sidebar — profil / Ma liste / Playlists | Limitation | Menu compte plex.tv, My Lists, Playlists | Items présents, clic → notification explicite | ⬜ | Fonctions cloud plex.tv non proxifiées par le connecteur privé | — |
+| Sidebar — section « Sur Plex » | Limitation | `sidebar/focus_more_028` (On Plex : Live TV, Discover) | Header + items présents, clic → notification | ⬜ | Contenus cloud Plex hors connecteur privé | — |
+| Sidebar — outline bibliothèque active | Livré | `parametres/settings_focus_005` | Pill outline sur la bibliothèque active (propriété `DivertActiveLibrary`) | ✅ | — | captures |
 | Bibliothèque — onglets | Livré | `films_tabs_focus_002` | Recommandé / Bibliothèque / Collections / Catégories + ⋯ | ✅ | — | captures |
 | Bibliothèque — grille Browse | Livré | `films_browse_focus_003` | 6 colonnes 240×360, titre+année, pills de filtres, rail A-Z, badge ✓ | ✅ | — | captures |
 | Bibliothèque — Collections | Livré | endpoint `/library/collections` | Rangée collections + drill-down | ✅ | — | captures |
