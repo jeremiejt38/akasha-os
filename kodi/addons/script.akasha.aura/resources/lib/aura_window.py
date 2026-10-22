@@ -2351,20 +2351,33 @@ def _hub_title_fr(hub):
     identifier = (hub.get('identifier') or '').lower()
     context = (hub.get('context') or '').lower()
     title = hub.get('title') or ''
+    title_lc = title.lower()
+    # Section hubs use machine identifiers ('movie.inprogress'...), so the
+    # raw English title is the reliable signal for standard Plex rows.
+    standard = (
+        'continue' in identifier or 'ondeck' in identifier
+        or 'inprogress' in identifier or 'continue watching' in title_lc
+        or 'on deck' in title_lc)
+    # Standard Plex hubs ("Continue Watching", "Recently Added"...) carry
+    # no server suffix in the reference client; only curated hubs do
+    # ("Top Movies in Mystère · Akasha").
+    suffix = False
 
-    if 'continue' in identifier or 'ondeck' in identifier:
+    if standard:
         base = 'Continuer à regarder'
-    elif 'recentlyadded' in identifier:
+    elif 'recentlyadded' in identifier or 'recently added' in title_lc:
         base = 'Ajoutés récemment'
         if ' in ' in title:
             base += ' dans {}'.format(title.rsplit(' in ', 1)[-1])
-    elif 'recentlyreleased' in identifier:
+    elif 'recentlyreleased' in identifier or 'recently released' in title_lc:
         base = 'Sorties récentes'
         if 'Movies' in title:
             base += ' dans Films'
-    elif 'recentlyviewed' in identifier or 'recentlywatched' in identifier:
+    elif 'recentlyviewed' in identifier or 'recentlywatched' in identifier \
+            or 'recently viewed' in title_lc or 'recently watched' in title_lc:
         base = 'Vus récemment'
     else:
+        suffix = True
         # Discover ("Tendances") provider hub identifiers.
         discover_titles = {
             'home.recently-released-trailers': 'Nouvelles bandes-annonces',
@@ -2384,7 +2397,7 @@ def _hub_title_fr(hub):
 
     # Plex suffixes section-scoped rows with the server name (" · Akasha"),
     # home-scoped hubs (identifier 'home.*', context 'hub.home.*') get none.
-    scoped = bool(identifier) and not identifier.startswith('home.') \
+    scoped = suffix and bool(identifier) and not identifier.startswith('home.') \
         and 'hub.home' not in context
     if scoped and '·' not in base:
         # Plex renders the server suffix smaller and grey; Kodi labels

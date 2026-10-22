@@ -534,12 +534,16 @@
                 <height>860</height>
                 <zorder>3</zorder>
 
+                <!-- Collapsed rail: floating rounded pill behind the icon
+                     column (Plex's collapsed sidebar is a floating pill,
+                     not an edge-to-edge slab). -->
                 <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>92</width>
-                    <height>860</height>
-                    <texture colordiffuse="B810131A">white.png</texture>
+                    <left>14</left>
+                    <top>8</top>
+                    <width>64</width>
+                    <height>844</height>
+                    <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+                    <visible>!Control.HasFocus(3310)</visible>
                 </control>
                 <control type="image">
                     <left>0</left>
@@ -656,7 +660,7 @@
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
-                    <width>784</width>
+                    <width>829</width>
                     <height>52</height>
                     <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
                 </control>
@@ -666,29 +670,29 @@
                 <control type="image">
                     <left>127</left>
                     <top>118</top>
-                    <width>170</width>
+                    <width>195</width>
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
-                    <left>305</left>
+                    <left>330</left>
                     <top>118</top>
-                    <width>170</width>
+                    <width>185</width>
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
-                    <left>483</left>
+                    <left>523</left>
                     <top>118</top>
-                    <width>170</width>
+                    <width>175</width>
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
-                    <left>661</left>
+                    <left>706</left>
                     <top>118</top>
                     <width>170</width>
                     <height>40</height>
@@ -699,10 +703,10 @@
                 <control type="button" id="3050">
                     <left>127</left>
                     <top>118</top>
-                    <width>170</width>
+                    <width>195</width>
                     <height>40</height>
                     <label>Recommandé</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -715,12 +719,12 @@
                 </control>
 
                 <control type="button" id="3100">
-                    <left>305</left>
+                    <left>330</left>
                     <top>118</top>
-                    <width>170</width>
+                    <width>185</width>
                     <height>40</height>
                     <label>Bibliothèque</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3050</onleft>
@@ -734,12 +738,12 @@
 
                 <!-- Plex "Collections" tab (4th contextual library tab). -->
                 <control type="button" id="3075">
-                    <left>483</left>
+                    <left>523</left>
                     <top>118</top>
-                    <width>170</width>
+                    <width>175</width>
                     <height>40</height>
                     <label>Collections</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3100</onleft>
@@ -752,12 +756,12 @@
                 </control>
 
                 <control type="button" id="3060">
-                    <left>661</left>
+                    <left>706</left>
                     <top>118</top>
                     <width>170</width>
                     <height>40</height>
                     <label>Catégories</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3075</onleft>
@@ -774,7 +778,7 @@
                      "Gerer les bibliotheques" dialog (pin/reorder) as the most reasonable
                      placeholder action, see docs/aura/decisions.md. -->
                 <control type="button" id="3402">
-                    <left>839</left>
+                    <left>884</left>
                     <top>118</top>
                     <width>56</width>
                     <height>40</height>
@@ -801,7 +805,7 @@
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
-                    <width>612</width>
+                    <width>502</width>
                     <height>52</height>
                     <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
                 </control>
@@ -811,23 +815,23 @@
                 <control type="image">
                     <left>127</left>
                     <top>118</top>
-                    <width>200</width>
+                    <width>160</width>
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
-                    <left>335</left>
+                    <left>295</left>
                     <top>118</top>
-                    <width>200</width>
+                    <width>170</width>
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
-                    <left>543</left>
+                    <left>473</left>
                     <top>118</top>
-                    <width>180</width>
+                    <width>140</width>
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
@@ -835,10 +839,10 @@
                 <control type="button" id="3070">
                     <left>127</left>
                     <top>118</top>
-                    <width>200</width>
+                    <width>160</width>
                     <height>40</height>
                     <label>Pour vous</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -850,12 +854,12 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
                 <control type="button" id="3071">
-                    <left>335</left>
+                    <left>295</left>
                     <top>118</top>
-                    <width>200</width>
+                    <width>170</width>
                     <height>40</height>
                     <label>Tendances</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
@@ -867,12 +871,12 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
                 <control type="button" id="3072">
-                    <left>543</left>
+                    <left>473</left>
                     <top>118</top>
-                    <width>180</width>
+                    <width>140</width>
                     <height>40</height>
                     <label>Activité</label>
-                    <font>font_mini_bold</font>
+                    <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3071</onleft>
@@ -1214,7 +1218,16 @@
                         <wrapmultiline>false</wrapmultiline>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
-                </itemlayout>
+                
+                            <control type="image">
+                                <left>-10</left>
+                                <top>-10</top>
+                                <width>260</width>
+                                <height>380</height>
+                                <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                                <visible>!Control.HasFocus(3230) + ListItem.IsSelected + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            </control>
+</itemlayout>
                 <focusedlayout width="283" height="460">
                     <control type="image">
                         <left>0</left>
@@ -1399,7 +1412,16 @@
                                 <info>ListItem.Property(AuraProgress)</info>
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
-                        </itemlayout>
+                        
+                            <control type="image">
+                                <left>-10</left>
+                                <top>-10</top>
+                                <width>260</width>
+                                <height>380</height>
+                                <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                                <visible>!Control.HasFocus(5110) + ListItem.IsSelected + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            </control>
+</itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -1505,7 +1527,16 @@
                                 <info>ListItem.Property(AuraProgress)</info>
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
-                        </itemlayout>
+                        
+                            <control type="image">
+                                <left>-10</left>
+                                <top>-10</top>
+                                <width>260</width>
+                                <height>380</height>
+                                <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                                <visible>!Control.HasFocus(5210) + ListItem.IsSelected + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            </control>
+</itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -1609,7 +1640,16 @@
                                 <info>ListItem.Property(AuraProgress)</info>
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
-                        </itemlayout>
+                        
+                            <control type="image">
+                                <left>-10</left>
+                                <top>-10</top>
+                                <width>260</width>
+                                <height>380</height>
+                                <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                                <visible>!Control.HasFocus(5310) + ListItem.IsSelected + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                            </control>
+</itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
