@@ -783,6 +783,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             'detail', aura_detail.AuraDetailWindow, 'AuraDetail.xml')
         detail.client = self._connector_client or self._plex_client
         detail.item = item
+        # Reset per-open state (the window instance is cached/reused).
+        detail.mode = 'show' if item.get('type') == 'show' else 'item'
+        detail._show_item = None
+        detail._seasons = []
+        detail._episodes = []
+        detail._next_episode = None
+        detail._active_season = 0
         detail.doModal()
 
     def _render_reco_row_label(self, list_control_id, error=None):
@@ -2231,18 +2238,26 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._activate_home()
 
     def _open_show(self, item):
-        """Open AuraShowWindow with the active Connector or direct Plex client."""
+        """Route show selections to the Plex-style detail page.
+
+        Thin items (e.g. an episode card that only carries the show's
+        rating key) are hydrated through /library/metadata first."""
         client = self._connector_client or self._plex_client
         if not client:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+                'Akasha Aura', item.get('title') or '', xbmcgui.NOTIFICATION_INFO, 2000)
             return
-        show_window = self._get_sub_window(
-            'show', aura_show.AuraShowWindow, 'AuraShow.xml')
-        show_window.client = client
-        show_window.show_title = item['title']
-        show_window.show_rating_key = item['rating_key']
-        show_window.doModal()
+        if not item.get('art_url') and item.get('rating_key') \
+                and hasattr(client, 'metadata_item'):
+            try:
+                full = client.metadata_item(item['rating_key'])
+                if full:
+                    full.setdefault('type', 'show')
+                    item = full
+            except Exception as e:
+                xbmc.log('Akasha Aura: show hydration failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+        self._open_detail(item)
 
     def _on_divert_item_selected(self):
         try:

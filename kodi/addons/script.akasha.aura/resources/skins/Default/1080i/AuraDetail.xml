@@ -265,16 +265,249 @@
             <visible>!String.IsEmpty(Window.Property(AuraDetailAudioBadge))</visible>
         </control>
 
-        <!-- Cast &amp; Crew -->
-        <control type="label">
+        <!-- Season pill strip (show pages only): Show | Saison 1 | ... -->
+        <control type="list" id="7120">
+            <left>97</left>
+            <top>40</top>
+            <width>1700</width>
+            <height>56</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>150</scrolltime>
+            <ondown>7100</ondown>
+            <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
+            <itemlayout width="200" height="56">
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>56</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>CCFFFFFF</textcolor>
+                </control>
+            </itemlayout>
+            <focusedlayout width="200" height="56">
+                <control type="image">
+                    <left>14</left>
+                    <top>4</top>
+                    <width>172</width>
+                    <height>48</height>
+                    <texture colordiffuse="FFFFFFFF" border="24">rounded-solid.png</texture>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>56</height>
+                    <font>font_mini_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
+        <control type="label" id="7060">
             <left>105</left>
             <top>690</top>
-            <width>600</width>
+            <width>800</width>
             <height>44</height>
             <font>font_mini_bold</font>
             <label>Cast &amp; Crew</label>
             <textcolor>FFFFFFFF</textcolor>
-            <visible>!String.IsEmpty(Window.Property(AuraDetailHasCast))</visible>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailSectionTitle))</visible>
+        </control>
+
+        <!-- Seasons poster row (show "Show" tab) -->
+        <control type="list" id="7140">
+            <left>97</left>
+            <top>740</top>
+            <width>1800</width>
+            <height>310</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailSeasonsRow),1)</visible>
+            <itemlayout width="212" height="310">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>300</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>300</height>
+                    <texture>poster-corners.png</texture>
+                </control>
+                <control type="image">
+                    <left>156</left>
+                    <top>16</top>
+                    <width>28</width>
+                    <height>28</height>
+                    <texture>check.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+            </itemlayout>
+            <focusedlayout width="212" height="310">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>300</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>300</height>
+                    <texture>poster-corners.png</texture>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>208</width>
+                    <height>308</height>
+                    <texture border="20">focus-ring.png</texture>
+                </control>
+                <control type="image">
+                    <left>156</left>
+                    <top>16</top>
+                    <width>28</width>
+                    <height>28</height>
+                    <texture>check.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Episodes row (season tab): landscape cards -->
+        <control type="list" id="7130">
+            <left>97</left>
+            <top>740</top>
+            <width>1800</width>
+            <height>310</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailEpisodesRow),1)</visible>
+            <itemlayout width="340" height="310">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>320</width>
+                    <height>180</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>320</width>
+                    <height>180</height>
+                    <texture>poster-corners.png</texture>
+                </control>
+                <control type="progress">
+                    <left>4</left>
+                    <top>170</top>
+                    <width>312</width>
+                    <height>6</height>
+                    <info>ListItem.PercentPlayed</info>
+                    <midtexture colordiffuse="FFFF9D00">white.png</midtexture>
+                    <lefttexture>-</lefttexture>
+                    <righttexture>-</righttexture>
+                    <overlaytexture>-</overlaytexture>
+                    <texturebg colordiffuse="59FFFFFF">white.png</texturebg>
+                    <visible>ListItem.IsResumable</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>190</top>
+                    <width>320</width>
+                    <height>28</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>218</top>
+                    <width>320</width>
+                    <height>26</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="340" height="310">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>320</width>
+                    <height>180</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>320</width>
+                    <height>180</height>
+                    <texture>poster-corners.png</texture>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>328</width>
+                    <height>188</height>
+                    <texture border="20">focus-ring.png</texture>
+                </control>
+                <control type="progress">
+                    <left>4</left>
+                    <top>170</top>
+                    <width>312</width>
+                    <height>6</height>
+                    <info>ListItem.PercentPlayed</info>
+                    <midtexture colordiffuse="FFFF9D00">white.png</midtexture>
+                    <lefttexture>-</lefttexture>
+                    <righttexture>-</righttexture>
+                    <overlaytexture>-</overlaytexture>
+                    <texturebg colordiffuse="59FFFFFF">white.png</texturebg>
+                    <visible>ListItem.IsResumable</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>190</top>
+                    <width>320</width>
+                    <height>28</height>
+                    <font>font_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>218</top>
+                    <width>320</width>
+                    <height>26</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
         </control>
         <control type="list" id="7110">
             <left>97</left>
@@ -284,6 +517,7 @@
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailCastRow),1)</visible>
             <itemlayout width="200" height="230">
                 <control type="image">
                     <left>20</left>

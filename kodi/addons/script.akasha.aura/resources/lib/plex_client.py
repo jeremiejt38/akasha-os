@@ -348,6 +348,13 @@ class PlexClient:
             'identifier': 'com.plexapp.plugins.library',
         })
 
+    def metadata_item(self, rating_key):
+        """Fetch and normalise a single item by rating key (used to hydrate
+        thin items before opening the detail page)."""
+        data = self._request('/library/metadata/{}'.format(rating_key))
+        items = self._metadata_list(data)
+        return items[0] if items else None
+
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
         data = self._request('/library/metadata/{}/children'.format(show_rating_key))
