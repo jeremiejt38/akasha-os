@@ -100,6 +100,15 @@ RECO_SLOT_IDS = (
     (RECO_RELEASES_LABEL_ID, RECO_RELEASES_LIST_ID),
 )
 RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
+# Home tab strip (Plex "For You" / "Trending" / "Activity"), only on the
+# Divertissement Accueil view -- the library view has its own strip
+# (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
+# private GraphQL API on community.plex.tv), so it shows an honest
+# empty-state instead of fake rows.
+HOME_TAB_IDS = (3070, 3071, 3072)
+HOME_TAB_FOR_YOU = 0
+HOME_TAB_TRENDING = 1
+HOME_TAB_ACTIVITY = 2
 RECO_CACHE_TTL_SECONDS = 120
 RECO_ON_DECK_FETCH_LIMIT = 50  # over-fetch before client-side section filtering
 RECO_MAX_ITEMS_PER_ROW = 100
@@ -174,7 +183,7 @@ APP_SUBTAB_STORE = 1
 
 BAR_CONTROL_IDS = set(
     (MODULE_SEARCH_ID, GEAR_BUTTON_ID) + TAB_BUTTON_IDS
-    + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS)
+    + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS)
 
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
@@ -208,6 +217,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # fallback produce the same shape.
         self._hub_rows = []
         self._hub_offset = 0
+        # Plex home tab strip ("For You" / "Trending" / "Activity").
+        # 0 = Pour vous (local /hubs/promoted), 1 = Tendances (Discover
+        # provider hubs), 2 = Activité (social feed -- not supported, see
+        # the empty-state note in Aura.xml).
+        self._home_tab = 0
         # Bibliotheque toolbar state (plan f41ce1ad phase A): reset whenever
         # the sidebar selection changes to a different library, same
         # pattern as aura_library.py's onInit -- otherwise a search/filter
@@ -283,6 +297,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK)
             self._load_pinned_apps()
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._sync_navigation()
             self._update_bar_focused()
             if getattr(self, 'open_settings_on_init', False):
                 self.open_settings_on_init = False
@@ -364,9 +379,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """
         self._divert_view = 'home'
         self.setProperty('DivertView', 'home')
+        self.setProperty('DivertHomeTab', str(self._home_tab))
         self.addon.setSetting('divert.last_view', 'home')
         self._set_sidebar_selection(DIVERT_SIDEBAR_HOME_INDEX)
         self._load_recommendations(None)
+        self._sync_navigation()
 
     def _activate_library(self, section_index, tab=None, focus=True):
         """Select a library in the sidebar: shows its header + contextual tabs."""
@@ -377,6 +394,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.addon.setSetting('divert.last_view', 'library')
         self._select_divert_section(section_index)
         self._set_sidebar_selection(section_index + 1)
+        self._sync_navigation()
         section = self._divert_sections[section_index]
         try:
             self.getControl(3400).setLabel(section['title'])
@@ -397,10 +415,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         if index == DIVERT_SUBTAB_RECOMMANDE:
             self._load_recommendations(section)
+            self._sync_navigation()
             return
 
         if index == DIVERT_SUBTAB_CATEGORIES:
             self._load_categories(section)
+            self._sync_navigation()
             return
 
         # Bibliotheque: inline grid, already populated by _select_divert_section.
@@ -414,6 +434,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # on its <ondown> to reach the grid avoids the race entirely, since
         # that next input is a separate, later action -- see
         # docs/aura/decisions.md.
+        self._sync_navigation()
 
     def _load_recommendations(self, section):
         """Populate the Recommande rows, scoped to `section` or unscoped
@@ -434,13 +455,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._rebind_reco_slots()
         self._update_hero()
 
+    def _set_home_tab(self, index):
+        """Switch the Accueil tab (Pour vous / Tendances / Activité) and
+        rebuild the hub viewport -- mirrors Plex's home tab strip."""
+        if index == self._home_tab:
+            return
+        self._home_tab = index
+        self.setProperty('DivertHomeTab', str(index))
+        self._load_recommendations(None)
+        self._sync_navigation()
+
     def _reco_hub_rows(self, section):
-        """Build row descriptors from real Plex hubs, or None if unavailable."""
+        """Build row descriptors from real Plex hubs, or None if unavailable.
+
+        Returns [] (empty viewport, never the legacy fallback) for the
+        Activité tab -- its social feed has no public endpoint -- and for
+        Tendances when there is no direct-Plex client."""
+        if section is None and self._home_tab == HOME_TAB_ACTIVITY:
+            return []
         if not self._plex_client:
+            if section is None and self._home_tab != HOME_TAB_FOR_YOU:
+                return []
             return None
         try:
             if section:
                 hubs = self._plex_client.section_hubs(section['key'])
+            elif self._home_tab == HOME_TAB_TRENDING:
+                hubs = self._plex_client.discover_hubs()
             else:
                 hubs = self._plex_client.home_hubs()
         except Exception as e:
@@ -450,6 +491,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         rows = []
         seen_titles = set()
         for hub in hubs:
+            # Discover emits non-shelf hubs (genre buttons, service pills)
+            # that have no poster content to render.
+            if hub.get('style') in ('button', 'availabilityPlatforms'):
+                continue
             if not hub['items'] and not hub['key']:
                 continue
             row = self._reco_init_hub_row(hub)
@@ -569,6 +614,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                          .format(row['title'], e), xbmc.LOGERROR)
             self._reco_placeholder_counts[list_id] = self._sync_placeholders(
                 list_id, 0, row['paged'])
+        self._sync_navigation()
 
     def _reco_scroll(self, delta):
         """Slide the hub viewport by `delta` (+1 down / -1 up), if possible."""
@@ -582,6 +628,55 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _reco_slot_has_row(self, slot_index):
         return self._hub_offset + slot_index < len(self._hub_rows)
+
+    def _sync_navigation(self):
+        """Re-wire directional navigation targets to the current state.
+
+        Kodi resolves <ondown>/<onup> natively from whichever control held
+        focus when the action started, so a setFocus() inside onAction is
+        overridden by the XML-declared target (the earlier "double hop"
+        bug). The only reliable way to get Plex-style nav (top bar ->
+        contextual tabs -> pinned first row -> viewport scroll) is to keep
+        the declared targets themselves in sync with the active view/tab.
+        """
+        # setNavigation() takes Control objects (not ids) and requires all
+        # four positional args; passing the control itself pins a direction.
+        def nav(control_id, up=None, down=None, left=None, right=None):
+            try:
+                ctl = self.getControl(control_id)
+                ctl.setNavigation(
+                    self.getControl(up) if up is not None else ctl,
+                    self.getControl(down) if down is not None else ctl,
+                    self.getControl(left) if left is not None else ctl,
+                    self.getControl(right) if right is not None else ctl)
+            except RuntimeError:
+                pass
+
+        # Top bar modules -> their own contextual strip. Left/right keep
+        # the declared top-bar loop (search, modules, gear).
+        divert_down = (DIVERT_SUBTAB_IDS[self._divert_library_tab]
+                       if self._divert_view == 'library'
+                       else HOME_TAB_IDS[self._home_tab])
+        nav(TAB_BUTTON_IDS[TAB_DIVERTISSEMENT], down=divert_down, left=2000, right=2002)
+        nav(TAB_BUTTON_IDS[TAB_JEUX], down=JEUX_SUBTAB_IDS[self._jeux_active_subtab],
+            left=2001, right=2003)
+        nav(TAB_BUTTON_IDS[TAB_APP], down=APP_SUBTAB_IDS[self._app_subtab],
+            left=2002, right=2004)
+
+        # Reco slots: Up from the first slot reaches the contextual strip
+        # only once the viewport is back at the top; while deeper hubs are
+        # reachable it pins itself so _reco_scroll(-1) keeps focus anchored.
+        # Down between slots only when the next slot is bound to a hub.
+        strip_up = (DIVERT_SUBTAB_IDS[self._divert_library_tab]
+                    if self._divert_view == 'library'
+                    else HOME_TAB_IDS[self._home_tab])
+        for i, (_, list_id) in enumerate(RECO_SLOT_IDS):
+            up = (RECO_SLOT_IDS[i - 1][1] if i > 0
+                  else (list_id if self._hub_offset > 0 else strip_up))
+            down = (RECO_SLOT_IDS[i + 1][1]
+                    if i < len(RECO_SLOT_IDS) - 1
+                    and self._reco_slot_has_row(i + 1) else list_id)
+            nav(list_id, up=up, down=down, left=DIVERT_SIDEBAR_ID)
 
     def _focused_reco_item(self):
         """The item dict currently focused in a Recommande row slot."""
@@ -608,6 +703,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         currently focused in a Recommande row -- Plex repaints the whole
         header every time the focused card changes, including while
         scrolling horizontally inside one row."""
+        if self._divert_view == 'home' and self._home_tab == HOME_TAB_ACTIVITY:
+            for prop in ('AuraHeroFanart', 'AuraHeroLogo', 'AuraHeroTitle',
+                         'AuraHeroSubtitle', 'AuraHeroMeta', 'AuraHeroRating',
+                         'AuraHeroPlot', 'AuraHeroCast'):
+                self.setProperty(prop, '')
+            return
         item = self._focused_reco_item()
         if item is None:
             # Nothing focused yet (fresh load, focus still on the top bar):
@@ -1244,6 +1345,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _select_jeux_subtab(self, index):
         self._jeux_active_subtab = index
         self.setProperty('JeuxActiveSubtab', str(index))
+        self._sync_navigation()
 
         if index == JEUX_SUBTAB_OTHERS:
             self._load_other_games()
@@ -1291,6 +1393,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _select_app_subtab(self, index):
         self._app_subtab = index
         self.setProperty('AppActiveSubtab', str(index))
+        self._sync_navigation()
         if index == APP_SUBTAB_MES_APPS:
             self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml').doModal()
             self._load_pinned_apps()
@@ -1447,6 +1550,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if index == TAB_DIVERTISSEMENT and self._divert_load_attempted and not self._divert_sections:
             self._load_divertissement()
             self._restore_divert_view(focus=False)
+        self._sync_navigation()
 
     def _update_bar_focused(self):
         """Update the top-bar focused property used by the retract animation."""
@@ -1507,7 +1611,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._focus_first_subtab()
             self._update_bar_focused()
             return
-        if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS):
+        if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS):
             self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
             self._update_bar_focused()
             return
@@ -1537,7 +1641,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if self._divert_view == 'library':
                 self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[0]))
             else:
-                self.setFocus(self.getControl(TAB_BUTTON_IDS[TAB_DIVERTISSEMENT]))
+                self.setFocus(self.getControl(HOME_TAB_IDS[self._home_tab]))
             self._update_bar_focused()
             return
         # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
@@ -1576,10 +1680,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 if self._divert_view == 'library':
                     self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_library_tab]))
                 else:
-                    lst = self.getControl(RECO_LIST_IDS[0])
-                    if lst.size() > 0:
-                        lst.selectItem(0)
-                    self.setFocus(lst)
+                    self.setFocus(self.getControl(HOME_TAB_IDS[self._home_tab]))
             elif self.active_tab == TAB_JEUX:
                 self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
             elif self.active_tab == TAB_APP:
@@ -1590,6 +1691,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID in TAB_BUTTON_IDS:
             self._show_tab(TAB_BUTTON_IDS.index(controlID))
+        elif controlID in HOME_TAB_IDS:
+            self._set_home_tab(HOME_TAB_IDS.index(controlID))
         elif controlID in DIVERT_SUBTAB_IDS:
             self._select_library_tab(DIVERT_SUBTAB_IDS.index(controlID))
         elif controlID in JEUX_SUBTAB_IDS:
@@ -2115,7 +2218,22 @@ def _hub_title_fr(hub):
     elif 'recentlyviewed' in identifier or 'recentlywatched' in identifier:
         base = 'Vus recemment'
     else:
-        base = title
+        # Discover ("Tendances") provider hub identifiers.
+        discover_titles = {
+            'home.recently-released-trailers': 'Nouvelles bandes-annonces',
+            'home.trending-trailers': 'Bandes-annonces en vogue',
+            'home.recommended-on-services': 'Recommande sur vos services',
+            'home.top_watchlisted': 'Les plus suivis cette semaine',
+            'home.new-trailers': 'Bandes-annonces de votre Watchlist',
+            'home.watchlist-available': 'Disponibles sur vos services',
+            'home.coming-soon': 'Bientot disponible',
+            'home.available-rentals': 'Disponibles a la location',
+            'home.genres': 'Parcourir par genre',
+            'home.historical-week': 'Sortis cette semaine un jour de l\'histoire',
+            'home.blockbuster-trailers': 'Blockbusters a venir',
+            'home.preferred-services': 'Vos services',
+        }
+        base = discover_titles.get(identifier, title)
 
     # Plex suffixes section-scoped rows with the server name (" · Akasha"),
     # home-scoped hubs (identifier 'home.*', context 'hub.home.*') get none.

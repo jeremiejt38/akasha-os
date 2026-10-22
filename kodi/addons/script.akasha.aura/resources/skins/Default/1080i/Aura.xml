@@ -213,7 +213,7 @@
                 <focusedcolor>00FFFFFF</focusedcolor>
                 <onleft>2000</onleft>
                 <onright>2002</onright>
-                <ondown>3310</ondown>
+                <ondown>3070</ondown>
                 <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="group" id="2101">
@@ -734,6 +734,84 @@
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 </control>
+            </control>
+
+            <!-- Home tab strip: Plex's "For You / Trending / Activity" row.
+                 Same dark pill container + white focused pill as the library
+                 strip. Activite shows an empty state (Plex's friend-activity
+                 feed is a private GraphQL API, no usable endpoint). -->
+            <control type="group">
+                <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
+                <control type="image">
+                    <left>111</left>
+                    <top>120</top>
+                    <width>750</width>
+                    <height>44</height>
+                    <texture colordiffuse="B81A1A1A" border="22">rounded-solid.png</texture>
+                </control>
+                <control type="button" id="3070">
+                    <left>127</left>
+                    <top>124</top>
+                    <width>220</width>
+                    <height>36</height>
+                    <label>Pour vous</label>
+                    <font>font_tiny_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3310</onleft>
+                    <onright>3071</onright>
+                    <onup>2001</onup>
+                    <ondown>5110</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                </control>
+                <control type="button" id="3071">
+                    <left>357</left>
+                    <top>124</top>
+                    <width>230</width>
+                    <height>36</height>
+                    <label>Tendances</label>
+                    <font>font_tiny_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3070</onleft>
+                    <onright>3072</onright>
+                    <onup>2001</onup>
+                    <ondown>5110</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                </control>
+                <control type="button" id="3072">
+                    <left>597</left>
+                    <top>124</top>
+                    <width>220</width>
+                    <height>36</height>
+                    <label>Activité</label>
+                    <font>font_tiny_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3071</onleft>
+                    <onright>5110</onright>
+                    <onup>2001</onup>
+                    <ondown>5110</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                </control>
+            </control>
+
+            <!-- Activite empty state -->
+            <control type="label">
+                <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),2)</visible>
+                <left>127</left>
+                <top>400</top>
+                <width>1600</width>
+                <height>40</height>
+                <font>font_main</font>
+                <textcolor>AAFFFFFF</textcolor>
+                <label>Aucune activité d'amis à afficher.</label>
             </control>
 
             <!-- Bibliotheque toolbar: type (info), quick filter, sort, genre,

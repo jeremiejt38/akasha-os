@@ -32,7 +32,10 @@ class PlexClient:
         self.timeout = timeout
 
     def _url(self, path, params=None):
-        url = self.server_url + path
+        # Absolute URLs (cloud provider endpoints like
+        # discover.provider.plex.tv) are used as-is; relative paths are
+        # resolved against the local server.
+        url = path if path.startswith('http') else self.server_url + path
         if params:
             # Hub `key`/`hubKey` values come back with their own query string
             # (e.g. '/library/sections/1/all?sort=addedAt:desc'), so pagination
@@ -73,6 +76,13 @@ class PlexClient:
         def image_url(path):
             if not path:
                 return ''
+            # Cloud provider metadata (Discover/Trending hubs) carries
+            # absolute image URLs -- just attach the token to them.
+            if path.startswith('http'):
+                sep = '&' if '?' in path else '?'
+                if 'X-Plex-Token' not in path:
+                    path += sep + 'X-Plex-Token=' + token
+                return path
             return '{}?X-Plex-Token={}'.format(server_url + path, token)
 
         # Shared normaliser keeps connector and direct-Plex payloads identical
@@ -112,6 +122,24 @@ class PlexClient:
             'X-Plex-Container-Size': hub_count,
         })
         return self._hub_list(data)
+
+    DISCOVER_BASE = 'https://discover.provider.plex.tv'
+
+    def discover_hubs(self, hub_count=24, per_hub=16):
+        """The promoted Discover hubs Plex TV renders under the home
+        "Trending" tab (trailers, watchlisted, services...) -- served by
+        Plex's cloud metadata provider rather than the local server."""
+        data = self._request(self.DISCOVER_BASE + '/hubs/promoted', {
+            'count': per_hub,
+            'X-Plex-Container-Size': hub_count,
+        })
+        hubs = self._hub_list(data)
+        for hub in hubs:
+            # Provider hubs carry relative `key` paths and no inline items:
+            # resolve the continuation endpoint against the provider base.
+            if hub['key'] and not hub['key'].startswith('http'):
+                hub['key'] = self.DISCOVER_BASE + hub['key']
+        return hubs
 
     def section_hubs(self, section_key, hub_count=24, per_hub=16):
         """The per-library hubs Plex shows on a library's Recommended tab."""
