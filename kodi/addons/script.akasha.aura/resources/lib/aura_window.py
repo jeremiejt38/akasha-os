@@ -19,6 +19,7 @@ import xbmcgui
 import addons_inventory
 import aura_app
 import aura_detail
+import aura_search
 import aura_settings_panel
 import aura_show
 import aura_store
@@ -1907,15 +1908,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._activate_library(section_index)
 
     def _open_search(self):
-        """Module 0: unified search (plan 04bda1b4 phase 2)."""
-        kb = xbmc.Keyboard('', 'Rechercher')
-        kb.doModal()
-        if not kb.isConfirmed():
-            return
-        query = kb.getText().strip()
-        if not query:
-            return
-        self._run_unified_search(query)
+        """Module 0: Plex-style live search screen (AuraSearch.xml)."""
+        search = self._get_sub_window(
+            'search', aura_search.AuraSearchWindow, 'AuraSearch.xml')
+        search.client = self._connector_client or self._plex_client
+        search.sections = self._divert_sections
+        search.on_select = self._open_detail
+        search.doModal()
 
     def _run_unified_search(self, query):
         groups = []  # list of (category_label, [(result_label, callback), ...])
