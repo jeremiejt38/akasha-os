@@ -652,9 +652,17 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         li = xbmcgui.ListItem(item.get('title') or '')
         self._apply_info_tags(li, item)
         if item.get('view_offset_ms') and not start_over:
-            # Kodi honours resumetime/totaltime as start offset.
-            li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
-            li.setProperty('totaltime', str(float(item.get('duration_ms') or 0) / 1000.0))
+            # Kodi 20+ resume point (resumetime/totaltime are deprecated).
+            try:
+                li.getVideoInfoTag().setResumePoint(
+                    float(item['view_offset_ms']) / 1000.0,
+                    float(item.get('duration_ms') or 0) / 1000.0)
+            except Exception:
+                li.setProperty(
+                    'resumetime', str(float(item['view_offset_ms']) / 1000.0))
+                li.setProperty(
+                    'totaltime',
+                    str(float(item.get('duration_ms') or 0) / 1000.0))
         li.setMimeType('video/mp4')
         # Tells the owner (Aura window + default.py) that playback began:
         # every modal dialog must leave the screen for the fullscreen

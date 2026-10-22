@@ -2579,10 +2579,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         li = xbmcgui.ListItem(item.get('title') or '')
         aura_detail.AuraDetailWindow._apply_info_tags(li, item)
         if item.get('view_offset_ms') and not start_over:
-            li.setProperty('resumetime',
-                           str(float(item['view_offset_ms']) / 1000.0))
-            li.setProperty('totaltime',
-                           str(float(item.get('duration_ms') or 0) / 1000.0))
+            _set_resume_point(li, item)
         li.setMimeType('video/mp4')
         self.playback_started = True
         self._playback_item = item
@@ -2843,6 +2840,24 @@ def _truncate_plot(text, limit=130):
     return cut + '…'
 
 
+_KODI_MEDIA_TYPES = frozenset(
+    ('video', 'movie', 'tvshow', 'season', 'episode', 'musicvideo', 'set'))
+
+
+def _set_resume_point(li, item):
+    """Kodi 20+ InfoTagVideo resume point, with the deprecated
+    resumetime/totaltime properties as fallback."""
+    try:
+        li.getVideoInfoTag().setResumePoint(
+            float(item['view_offset_ms']) / 1000.0,
+            float(item.get('duration_ms') or 0) / 1000.0)
+    except Exception:
+        li.setProperty('resumetime',
+                       str(float(item['view_offset_ms']) / 1000.0))
+        li.setProperty('totaltime',
+                       str(float(item.get('duration_ms') or 0) / 1000.0))
+
+
 def _build_divert_list_item(item):
     # Plex home rows carry no per-card text: the hero (driven by the focused
     # item, see Aura.xml "Plex hero" group) shows title/meta/plot. Labels are
@@ -2861,44 +2876,83 @@ def _build_divert_list_item(item):
     if art:
         li.setArt(art)
 
-    info = {
-        'title': item['title'],
-        'plot': item.get('summary') or '',
-        'mediatype': item.get('type') or 'video',
-    }
-    if item.get('show_title'):
-        info['tvshowtitle'] = item['show_title']
-    if item.get('year'):
-        info['year'] = item['year']
-    if item.get('duration_ms'):
-        info['duration'] = int(item['duration_ms']) // 1000
-    if item.get('season') is not None:
-        info['season'] = item['season']
-    if item.get('index') is not None:
-        info['episode'] = item['index']
-    if item.get('genres'):
-        info['genre'] = ' / '.join(item['genres'])
-    if item.get('rating'):
-        info['rating'] = float(item['rating'])
-    if item.get('content_rating'):
-        info['mpaa'] = item['content_rating']
-    if item.get('directors'):
-        info['director'] = ' / '.join(item['directors'])
-    if item.get('writers'):
-        info['writer'] = ' / '.join(item['writers'])
-    if item.get('studio'):
-        info['studio'] = item['studio']
-    if item.get('cast'):
-        info['cast'] = [(c['name'], c.get('role') or '') for c in item['cast']]
-    if item.get('view_count'):
-        info['playcount'] = item['view_count']
-    li.setInfo('video', info)
+    # Kodi 20+ InfoTagVideo API (setInfo/resumetime are deprecated and warn
+    # in kodi.log); the legacy path stays as fallback for stubbed test runs.
+    try:
+        _type = {'show': 'tvshow'}.get(item.get('type'), item.get('type'))
+        tag = li.getVideoInfoTag()
+        tag.setMediaType(
+            _type if _type in _KODI_MEDIA_TYPES else 'video')
+        tag.setTitle(item['title'])
+        if item.get('summary'):
+            tag.setPlot(item['summary'])
+        if item.get('show_title'):
+            tag.setTvShowTitle(item['show_title'])
+        if item.get('year'):
+            tag.setYear(int(item['year']))
+        if item.get('duration_ms'):
+            tag.setDuration(int(item['duration_ms']) // 1000)
+        if item.get('season') is not None:
+            tag.setSeason(int(item['season']))
+        if item.get('index') is not None:
+            tag.setEpisode(int(item['index']))
+        if item.get('genres'):
+            tag.setGenres(item['genres'])
+        if item.get('rating'):
+            tag.setRating(float(item['rating']), 0, 'plex', True)
+        if item.get('content_rating'):
+            tag.setMpaa(item['content_rating'])
+        if item.get('directors'):
+            tag.setDirectors(item['directors'])
+        if item.get('writers'):
+            tag.setWritingCredits(item['writers'])
+        if item.get('studio'):
+            tag.setStudio(item['studio'])
+        if item.get('cast'):
+            tag.setCast([xbmc.Actor(c['name'], c.get('role') or '')
+                         for c in item['cast']])
+        if item.get('view_count'):
+            tag.setPlayCount(int(item['view_count']))
+        if item.get('view_offset_ms') and item.get('duration_ms'):
+            tag.setResumePoint(float(item['view_offset_ms']) / 1000.0,
+                               float(item['duration_ms']) / 1000.0)
+    except Exception:
+        info = {
+            'title': item['title'],
+            'plot': item.get('summary') or '',
+            'mediatype': item.get('type') or 'video',
+        }
+        if item.get('show_title'):
+            info['tvshowtitle'] = item['show_title']
+        if item.get('year'):
+            info['year'] = item['year']
+        if item.get('duration_ms'):
+            info['duration'] = int(item['duration_ms']) // 1000
+        if item.get('season') is not None:
+            info['season'] = item['season']
+        if item.get('index') is not None:
+            info['episode'] = item['index']
+        if item.get('genres'):
+            info['genre'] = ' / '.join(item['genres'])
+        if item.get('rating'):
+            info['rating'] = float(item['rating'])
+        if item.get('content_rating'):
+            info['mpaa'] = item['content_rating']
+        if item.get('directors'):
+            info['director'] = ' / '.join(item['directors'])
+        if item.get('writers'):
+            info['writer'] = ' / '.join(item['writers'])
+        if item.get('studio'):
+            info['studio'] = item['studio']
+        if item.get('cast'):
+            info['cast'] = [(c['name'], c.get('role') or '') for c in item['cast']]
+        if item.get('view_count'):
+            info['playcount'] = item['view_count']
+        li.setInfo('video', info)
 
-    # Resume info via properties (setInfo has no 'resume' dict support):
-    # resumetime/totaltime are the standard Kodi properties.
-    if item.get('view_offset_ms') and item.get('duration_ms'):
-        li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
-        li.setProperty('totaltime', str(float(item['duration_ms']) / 1000.0))
+        if item.get('view_offset_ms') and item.get('duration_ms'):
+            li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
+            li.setProperty('totaltime', str(float(item['duration_ms']) / 1000.0))
 
     if item.get('progress') is not None:
         li.setProperty('AuraProgress', str(int(item['progress'] * 100)))
