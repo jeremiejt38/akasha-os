@@ -127,6 +127,7 @@ DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
 DIVERT_PLAYLIST_BUTTON_ID = 3217
 DIVERT_RESET_BUTTON_ID = 3218
+DIVERT_AZ_RAIL_ID = 3250
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
     DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
@@ -163,10 +164,11 @@ DIVERT_FILTER_OPTIONS = [
 GAME_BUTTON_IDS = (2010, 2011, 2012)
 APP_TILE_IDS = (2030, 2031, 2032, 2033)
 
-DIVERT_SUBTAB_IDS = (3050, 3100, 3060)
+DIVERT_SUBTAB_IDS = (3050, 3100, 3075, 3060)
 DIVERT_SUBTAB_RECOMMANDE = 0
 DIVERT_SUBTAB_BIBLIOTHEQUES = 1
-DIVERT_SUBTAB_CATEGORIES = 2
+DIVERT_SUBTAB_COLLECTIONS = 2
+DIVERT_SUBTAB_CATEGORIES = 3
 
 JEUX_SUBTAB_IDS = (2050, 2051, 2052)
 JEUX_STATUS_ID = 2055
@@ -415,6 +417,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         if index == DIVERT_SUBTAB_RECOMMANDE:
             self._load_recommendations(section)
+            self._sync_navigation()
+            return
+
+        if index == DIVERT_SUBTAB_COLLECTIONS:
+            self._load_collections(section)
             self._sync_navigation()
             return
 
@@ -924,6 +931,68 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
+    def _collections_paged(self, section):
+        """PagedList over the section's Plex collections (Directory items)."""
+        def fetch(offset, limit):
+            if self._plex_client:
+                return self._plex_client.section_collections_with_total(
+                    section['key'], limit=limit, offset=offset)
+            # The connector has no collections proxy endpoint -- degrade to
+            # an empty tab rather than failing hard.
+            return [], 0
+        return paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+
+    def _fill_divert_panel(self):
+        try:
+            panel = self.getControl(DIVERT_PANEL_ID)
+            panel.reset()
+            for item in self._divert_items:
+                panel.addItem(_build_divert_list_item(item))
+        except Exception as e:
+            xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
+        self._divert_placeholder_count = self._sync_placeholders(
+            DIVERT_PANEL_ID, 0, self._divert_paged)
+
+    def _load_collections(self, section):
+        """Plex's Collections library tab: the same poster grid as Browse,
+        one card per collection."""
+        self._divert_collection_key = None
+        self._divert_paged = self._collections_paged(section)
+        error = None
+        try:
+            self._divert_paged.load_initial()
+        except Exception as e:
+            xbmc.log('Akasha Aura: collections load failed: {}'.format(e), xbmc.LOGERROR)
+            error = e
+        self._divert_items = self._divert_paged.items
+        self._render_divert_status(section, error)
+        self._fill_divert_panel()
+
+    def _open_collection(self, item):
+        """Drill into a Plex collection: the grid shows its children until
+        the tab is re-entered."""
+        if not self._plex_client or not item.get('rating_key'):
+            return
+
+        def fetch(offset, limit):
+            return self._plex_client.collection_items_with_total(
+                item['rating_key'], limit=limit, offset=offset)
+        self._divert_paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        try:
+            self._divert_paged.load_initial()
+        except Exception as e:
+            xbmc.log('Akasha Aura: collection children load failed: {}'.format(e), xbmc.LOGERROR)
+            return
+        self._divert_items = self._divert_paged.items
+        self._divert_collection_key = item['rating_key']
+        self._fill_divert_panel()
+        try:
+            self.getControl(DIVERT_STATUS_ID).setLabel(
+                '{} — {} element(s)'.format(item['title'], len(self._divert_items)))
+            self.getControl(DIVERT_PANEL_ID).selectItem(0)
+        except RuntimeError:
+            pass
+
     def _on_category_genre_selected(self):
         """A genre tile was picked: jump straight to Bibliotheque, pre-filtered
         to that genre, instead of the former separate AuraLibraryWindow --
@@ -1158,12 +1227,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             filter_label = next(
                 label for value, label in DIVERT_FILTER_OPTIONS
                 if value == self._divert_filter_unwatched)
-            self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel('Filtre: {}'.format(filter_label))
+            self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel(filter_label)
         except RuntimeError:
             pass
         try:
             sort_label = DIVERT_SORT_SHORT_LABELS.get(self._divert_sort, '-')
-            self.getControl(DIVERT_SORT_BUTTON_ID).setLabel('Trier: {}'.format(sort_label))
+            self.getControl(DIVERT_SORT_BUTTON_ID).setLabel(sort_label)
         except RuntimeError:
             pass
 
@@ -1175,7 +1244,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 count = self._divert_paged.total if self._divert_paged.total is not None \
                     else len(self._divert_items)
-                label = '{} — {} element(s)'.format(section['title'], count)
+                label = '{} element(s)'.format(count)
                 if self._divert_search_query:
                     label += ' pour "{}"'.format(self._divert_search_query)
                 if self._divert_filter_genre:
@@ -1235,6 +1304,52 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_filter_unwatched = None
         self._divert_search_query = ''
         self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+
+    def _divert_open_more_menu(self):
+        """The trailing "..." pill of the Browse toolbar: hosts the quick
+        actions Plex keeps in its overflow menu."""
+        actions = [
+            ('Lire', self._divert_play_first),
+            ('Aleatoire', self._divert_play_random),
+            ('Ajouter a une liste', self._divert_add_to_playlist),
+            ('Reinitialiser les filtres', self._divert_reset_filters),
+        ]
+        idx = xbmcgui.Dialog().select('', [label for label, _ in actions])
+        if idx < 0:
+            return
+        actions[idx][1]()
+
+    def _divert_az_jump(self):
+        """A-Z rail: jump the grid to the first loaded item starting with
+        the selected letter (Plex only offers the rail on title sort)."""
+        try:
+            pos = self.getControl(DIVERT_AZ_RAIL_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        if not (0 <= pos < len(letters)):
+            return
+        letter = letters[pos]
+        target = None
+        for i, item in enumerate(self._divert_items):
+            title = (item.get('title') or '').strip().upper()
+            if not title:
+                continue
+            first = title[0]
+            if letter == '#' and first.isdigit():
+                target = i
+                break
+            if first == letter:
+                target = i
+                break
+        if target is None:
+            return
+        try:
+            panel = self.getControl(DIVERT_PANEL_ID)
+            panel.selectItem(target)
+            self.setFocus(panel)
+        except RuntimeError:
+            pass
 
     def _divert_play_item(self, item):
         # Playback resolution for Divertissement items is not decided yet
@@ -1734,7 +1849,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         elif controlID == DIVERT_PLAYLIST_BUTTON_ID:
             self._divert_add_to_playlist()
         elif controlID == DIVERT_RESET_BUTTON_ID:
-            self._divert_reset_filters()
+            self._divert_open_more_menu()
+        elif controlID == DIVERT_AZ_RAIL_ID:
+            self._divert_az_jump()
         elif controlID == MODULE_SEARCH_ID:
             self._open_search()
         elif controlID == GEAR_BUTTON_ID:
@@ -2128,8 +2245,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not (0 <= pos < len(self._divert_items)):
             return
         item = self._divert_items[pos]
-        section = self._divert_sections[self._divert_active_section]
 
+        if item.get('type') == 'collection':
+            self._open_collection(item)
+            return
+
+        section = self._divert_sections[self._divert_active_section]
         if section['type'] == 'show':
             self._open_show(item)
         else:

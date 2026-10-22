@@ -314,6 +314,26 @@ class PlexClient:
         })
         return self._metadata_list_with_total(data)
 
+    def section_collections_with_total(self, section_key, limit=200, offset=0):
+        """JSON payloads list collections under `Metadata` (only XML uses
+        `Directory`); same normaliser applies (thumb -> poster, childCount)."""
+        data = self._request('/library/sections/{}/collections'.format(section_key), {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        mc = self._media_container(data)
+        items = [self._video_dict(d, self.server_url, self.token)
+                 for d in mc.get('Metadata', mc.get('Directory', []))]
+        total = mc.get('totalSize', mc.get('size'))
+        return items, total
+
+    def collection_items_with_total(self, collection_key, limit=200, offset=0):
+        data = self._request('/library/collections/{}/children'.format(collection_key), {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
+
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
         data = self._request('/library/metadata/{}/children'.format(show_rating_key))
