@@ -863,3 +863,12 @@ entre eux, chaque item garde son propre point de reprise Plex, et
 de silence continu avant de rouvrir Aura, pour absorber le trou
 « not-playing » entre deux items de la playlist. Vérifié sur le Pi :
 fin de S2E1 → S2E2 enchaîne automatiquement.
+
+## Freeze UI et timeouts Plex (2026-10-23)
+
+Les appels Plex sont synchrones sur le thread GUI. Quand le serveur devient injoignable
+(la route réseau a sauté deux fois ce jour), chaque requête brûlait le timeout complet de
+10 s et les requêtes enchaînées figeaient l'interface des dizaines de secondes. Timeout
+abaissé à 5 s dans `plex_client.py` et `connector_client.py` (`32d4a63`). Une vraie
+solution (fetch asynchrone avec état « hors-ligne ») resterait préférable à terme.
+
