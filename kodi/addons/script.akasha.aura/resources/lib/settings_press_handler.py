@@ -26,6 +26,11 @@ NOTIFY_METHOD = 'SettingsPress'
 # Two presses within this window count as an intentional double press.
 # Wider than Home's 0.3s: the gear-wheel is a less habitual button.
 DOUBLE_PRESS_WINDOW_SECONDS = 0.9
+# The remote reports one physical press twice ~25ms apart (its two HID
+# interfaces both deliver the event, seen live in the debug log). Sub-
+# 120ms neighbours are collapsed into a single press -- a human double
+# press is never that fast, so only deliberate repeats survive.
+MIN_PRESS_GAP_SECONDS = 0.12
 _HISTORY = 4
 
 
@@ -46,12 +51,22 @@ def record_settings_press():
 
 
 def read_presses():
-    """Recorded press timestamps, oldest first (empty list on failure)."""
+    """Recorded press timestamps, oldest first (empty list on failure).
+
+    Near-simultaneous duplicates (< MIN_PRESS_GAP_SECONDS, one physical
+    press reported by both of the remote's HID interfaces) are collapsed
+    into a single press.
+    """
     try:
         with open(PRESS_FILE) as f:
-            return [float(s) for s in f.read().split() if s]
+            raw = [float(s) for s in f.read().split() if s]
     except (OSError, ValueError):
         return []
+    presses = []
+    for ts in raw:
+        if not presses or ts - presses[-1] > MIN_PRESS_GAP_SECONDS:
+            presses.append(ts)
+    return presses
 
 
 def double_press_just_happened(freshness=4.0):
