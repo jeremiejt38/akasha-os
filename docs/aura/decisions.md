@@ -790,3 +790,39 @@ Trois défauts laissaient l'utilisateur bloqué sur l'accueil Kodi natif :
   vidéo, et `onInit` l'applique à la réouverture — simple pression → onglet Divertissement,
   double pression → app switcher. Pendant la lecture, Home ramène donc dans Aura comme la
   touche Home de Plex ATV.
+
+## Barre d'onglets en liste native Kodi (2026-10-23)
+
+La barre de modules (Divertissement/Jeux/App) n'est plus trois boutons pill séparés mais une
+**liste horizontale skinshortcuts** identique au menu principal de la skin
+(`Includes_Objects.xml` "Object_MenuBar_List") : slots d'icônes 100 px, le slot sélectionné
+s'étend en pilule de 360 px, glissement animé par le `scrolltime` du conteneur (400 ms,
+tween quadratic). Objectif : reproduire exactement le comportement du menu natif au passage
+d'un onglet à l'autre — mouvement natif de la liste au lieu d'un reflow Python.
+
+Constats mesurés sur le Pi qui ont guidé l'implémentation :
+
+- **Les items `<content>` statiques ne sont pas navigables** dans un `WindowXMLDialog` :
+  ils s'affichent mais ne répondent ni à Left ni à Right. La liste est remplie depuis le
+  script (`_populate_tab_list`), comme skinshortcuts le fait pour le menu natif.
+- **`<onleft>`/`<onright>` sur un conteneur se déclenchent à CHAQUE appui** horizontal, pas
+  seulement en bord de liste : Left depuis l'item 2 sautait hors de la liste au lieu de
+  reculer. Les sorties de bord (recherche à gauche, engrenage à droite) sont donc gérées
+  en Python.
+- **`onAction` peut être appelé avant OU après le déplacement interne** selon le chemin de
+  traitement du contrôle, et une pression qui transfère le focus dans la liste (engrenage
+  →Left→ liste) est **re-livrée une seconde fois** au handler sans bouger d'item. La
+  décision « déplacé vs resté au bord » compare donc la position finale à `_tab_list_pos`
+  par direction, et la sortie de bord n'exige le saut que si la position suivie était déjà
+  au bord — sinon le Left transféré éjecterait vers la recherche depuis le milieu de barre.
+- **Les listes Kodi bouclent** (wrap-around) : Right sur le dernier item repart au premier.
+  Aura annule l'enroulement (`selectItem` inverse) et traite l'appui comme une sortie de
+  bord — la barre se lit « recherche | onglets | engrenage » sans boucle interne.
+- Down depuis la liste entre dans les sous-onglets du module actif, Up y remonte
+  (`onup` repointé sur 2007 partout, les anciennes cibles 2001/2003 étaient mortes).
+- Le Guide → « Accueil » route désormais `RunScript(script.akasha.aura)` comme la touche
+  Home, au lieu d'`ActivateWindow(Home)` qui laissait l'utilisateur sur l'accueil natif.
+
+Validé en direct : cycle search ⇄ onglets ⇄ engrenage complet, positions JSON-RPC
+`Container(2007).Position` 0→1→2→sortie, sous-onglets synchronisés au module, Home depuis
+n'importe quel onglet revient sur Divertissement avec la liste focusée.

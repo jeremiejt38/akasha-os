@@ -2039,17 +2039,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._update_bar_focused()
             return
         # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
-        # DIVERT_PANEL_ID's grid lands on the main tab bar (2001) instead of
-        # the Bibliotheque tab button (3100), even though the grid's XML
-        # declares <onup>3100</onup> and 3100 is confirmed visible/enabled
-        # at that moment (verified on-device with a System.CurrentControlID
-        # debug label). Neither an explicit Python-side focused==
-        # DIVERT_PANEL_ID interception nor per-control <visible> duplication
-        # changed this -- Kodi's native navigation appears to resolve Up
-        # geometrically for this horizontal list rather than honouring the
-        # explicit onup. Not a dead end (2001 is a perfectly navigable
-        # state), so left as a documented quirk rather than blocking this
-        # release.
+        # DIVERT_PANEL_ID's grid lands on the module tab list (2007)
+        # instead of the Bibliotheque tab button (3100), even though the
+        # grid's XML declares <onup>3100</onup> and 3100 is confirmed
+        # visible/enabled at that moment (verified on-device with a
+        # System.CurrentControlID debug label). Neither an explicit
+        # Python-side focused== DIVERT_PANEL_ID interception nor
+        # per-control <visible> duplication changed this -- Kodi's native
+        # navigation appears to resolve Up geometrically for this
+        # horizontal list rather than honouring the explicit onup. Not a
+        # dead end (2007 is a perfectly navigable state), so left as a
+        # documented quirk rather than blocking this release.
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             focused = self.getFocusId()
