@@ -351,7 +351,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not server_url:
             return None
 
-        client = connector_client.ConnectorClient(server_url, timeout=15)
+        client = connector_client.ConnectorClient(server_url, timeout=5)
         stored_token = self.addon.getSetting('connector.session_token')
         if stored_token:
             client.token = stored_token
@@ -1183,7 +1183,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     pass
                 return
             try:
-                self._plex_client = plex_client.PlexClient(server_url, token, timeout=15)
+                self._plex_client = plex_client.PlexClient(server_url, token, timeout=5)
                 self._divert_sections = self._plex_client.video_sections()
             except Exception as e:
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
@@ -1732,7 +1732,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         steam_id = self.addon.getSetting('steam.steam_id')
         if prompt_if_missing and not (api_key and steam_id):
             api_key, steam_id = self._prompt_steam_credentials(api_key, steam_id)
-        return steam_client.SteamClient(api_key, steam_id, timeout=15)
+        return steam_client.SteamClient(api_key, steam_id, timeout=5)
 
     def _prompt_steam_credentials(self, api_key, steam_id):
         if not api_key:
@@ -1756,7 +1756,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if prompt_if_missing and not (server_url and username and password):
             server_url, username, password = self._prompt_sunshine_credentials(
                 server_url, username, password)
-        return sunshine_client.SunshineClient(server_url, username, password, timeout=15)
+        return sunshine_client.SunshineClient(server_url, username, password, timeout=5)
 
     def _prompt_sunshine_credentials(self, server_url, username, password):
         if not server_url:

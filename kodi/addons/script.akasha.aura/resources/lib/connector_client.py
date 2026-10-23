@@ -6,11 +6,43 @@ docs/talos-strategy.md). Mirrors the style of plex_client.py.
 """
 
 import json
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 
 import divert_source
+
+# Same circuit breaker as plex_client: an unreachable connector used to
+# burn the full timeout per call on the GUI thread. GET responses are
+# cached briefly; POST/other methods are never cached.
+_OFFLINE_BACKOFF_SECONDS = 30.0
+_CACHE_TTL_SECONDS = 30.0
+_CACHE_MAX_ENTRIES = 64
+_offline_until = {}
+_read_cache = {}
+
+
+def _mark_offline(host):
+    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+
+
+def _mark_online(host):
+    _offline_until.pop(host, None)
+
+
+def _is_offline(host):
+    return time.time() < _offline_until.get(host, 0.0)
+
+
+def _cache_put(key, data):
+    if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+        now = time.time()
+        for k in [k for k, v in _read_cache.items() if v[0] <= now]:
+            del _read_cache[k]
+        if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+            _read_cache.clear()
+    _read_cache[key] = (time.time() + _CACHE_TTL_SECONDS, data)
 
 
 class ConnectorAPIError(Exception):
@@ -43,19 +75,34 @@ class ConnectorClient:
             headers['Content-Type'] = 'application/json'
 
         url = self.server_url + path
+        host = urllib.parse.urlparse(url).netloc
+        if _is_offline(host):
+            raise ConnectorAPIError('Connector {} unreachable '
+                                    '(offline backoff)'.format(host))
+        cacheable = method == 'GET'
+        key = (host, method, path,
+               json.dumps(json_body, sort_keys=True) if json_body else '')
+        if cacheable:
+            entry = _read_cache.get(key)
+            if entry and time.time() < entry[0]:
+                return entry[1]
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
 
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 body = resp.read().decode('utf-8')
-                if not body.strip():
-                    return {}
-                return json.loads(body)
+                _mark_online(host)
+                result = json.loads(body) if body.strip() else {}
+                if cacheable:
+                    _cache_put(key, result)
+                return result
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise ConnectorAPIError('Connector API {} for {}: {}'.format(e.code, path, body)) from e
-        except urllib.error.URLError as e:
-            raise ConnectorAPIError('Connector URL error for {}: {}'.format(path, e.reason)) from e
+        except OSError as e:
+            _mark_offline(host)
+            reason = getattr(e, 'reason', e)
+            raise ConnectorAPIError('Connector URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise ConnectorAPIError('Connector JSON decode error for {}: {}'.format(path, e)) from e
 

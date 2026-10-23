@@ -12,11 +12,46 @@ It mirrors the endpoints consumed by the official Plex/Fire TV clients:
 """
 
 import json
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 
 import divert_source
+
+# A dead server used to burn the full socket timeout on EVERY fetch --
+# Aura loads rows sequentially on the GUI thread, so the interface froze
+# for tens of seconds (reported as "Aura rame / impossible d'en sortir").
+# Circuit breaker: after one transport failure, calls fail fast for this
+# window; plus a short read-through cache so re-entering a view does not
+# re-hit the server seconds later (user-reported "pas de cache").
+_OFFLINE_BACKOFF_SECONDS = 30.0
+_CACHE_TTL_SECONDS = 30.0
+_CACHE_MAX_ENTRIES = 64
+_offline_until = {}
+_read_cache = {}
+
+
+def _mark_offline(host):
+    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+
+
+def _mark_online(host):
+    _offline_until.pop(host, None)
+
+
+def _is_offline(host):
+    return time.time() < _offline_until.get(host, 0.0)
+
+
+def _cache_put(key, data):
+    if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+        now = time.time()
+        for k in [k for k, v in _read_cache.items() if v[0] <= now]:
+            del _read_cache[k]
+        if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+            _read_cache.clear()
+    _read_cache[key] = (time.time() + _CACHE_TTL_SECONDS, data)
 
 
 class PlexAPIError(Exception):
@@ -53,21 +88,37 @@ class PlexClient:
         if not self.server_url or not self.token:
             raise PlexAPIError('Plex server URL and token are required')
         url = self._url(path, params)
+        host = urllib.parse.urlparse(url).netloc
+        if _is_offline(host):
+            raise PlexAPIError('Plex server {} unreachable '
+                               '(offline backoff)'.format(host))
+        # Mutation endpoints (/:/scrobble, /:/rate...) must never be
+        # served from cache.
+        cacheable = not path.startswith('/:')
+        key = (host, path, tuple(sorted((params or {}).items())))
+        if cacheable:
+            entry = _read_cache.get(key)
+            if entry and time.time() < entry[0]:
+                return entry[1]
         req = urllib.request.Request(url, headers=self._headers())
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 body = resp.read().decode('utf-8')
+                _mark_online(host)
                 # Action endpoints (scrobble/unscrobble/rate) answer 200
                 # with an empty body -- a bare decode would JSON-decode
                 # crash and the caller would treat it as a failure.
-                if not body.strip():
-                    return {}
-                return json.loads(body)
+                data = json.loads(body) if body.strip() else {}
+                if cacheable:
+                    _cache_put(key, data)
+                return data
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise PlexAPIError('Plex API {} for {}: {}'.format(e.code, path, body)) from e
-        except urllib.error.URLError as e:
-            raise PlexAPIError('Plex URL error for {}: {}'.format(path, e.reason)) from e
+        except OSError as e:
+            _mark_offline(host)
+            reason = getattr(e, 'reason', e)
+            raise PlexAPIError('Plex URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise PlexAPIError('Plex JSON decode error for {}: {}'.format(path, e)) from e
 
