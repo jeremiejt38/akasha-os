@@ -106,7 +106,15 @@ if __name__ == '__main__':
                 while not xbmc.Player().isPlayingVideo() and waited < 15000:
                     xbmc.sleep(200)
                     waited += 200
-                while xbmc.Player().isPlayingVideo():
+                # Queued episodes (Plex-style season chaining) go through a
+                # brief not-playing gap between playlist items; only reopen
+                # Aura after ~2s of real silence.
+                silent = 0
+                while silent < 4:
+                    if xbmc.Player().isPlayingVideo():
+                        silent = 0
+                    else:
+                        silent += 1
                     xbmc.sleep(500)
                 window.doModal()
             del window

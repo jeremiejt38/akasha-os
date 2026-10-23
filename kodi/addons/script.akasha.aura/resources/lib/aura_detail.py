@@ -22,6 +22,48 @@ ACTION_PREVIOUS_MENU = 10
 ACTION_CONTEXT_MENU = 117
 ACTION_NAV_BACK = 92
 
+
+def episode_queue_items(client, item):
+    """Episodes to chain after `item`: the current one plus every later
+    episode in its season -- Plex-style continuous playback built on a
+    Kodi video playlist. Returns None when chaining doesn't apply (movie,
+    missing season key, lookup failure, or a single-episode queue)."""
+    if item.get('type') != 'episode' or not item.get('parent_rating_key'):
+        return None
+    if not client:
+        return None
+    try:
+        eps = client.season_episodes(item['parent_rating_key'])
+    except Exception as e:
+        xbmc.log('Akasha Aura Detail: season queue lookup failed: {}'.format(e),
+                 xbmc.LOGWARNING)
+        return None
+    if not eps:
+        return None
+    for i, ep in enumerate(eps):
+        if ep.get('rating_key') and ep.get('rating_key') == item.get('rating_key'):
+            return eps[i:]
+    idx = item.get('index')
+    if idx is not None:
+        for i, ep in enumerate(eps):
+            if ep.get('index') == idx:
+                return eps[i:]
+    return None
+
+
+def apply_resume_point(li, item, start_over=False):
+    """Set the Kodi 20+ resume point (resumetime/totaltime properties are
+    deprecated) when the item carries a Plex view offset."""
+    if not item.get('view_offset_ms') or start_over:
+        return
+    try:
+        li.getVideoInfoTag().setResumePoint(
+            float(item['view_offset_ms']) / 1000.0,
+            float(item.get('duration_ms') or 0) / 1000.0)
+    except Exception:
+        li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
+        li.setProperty('totaltime', str(float(item['duration_ms'] or 0) / 1000.0))
+
 WATCH_BUTTON_ID = 7100
 WATCHED_BUTTON_ID = 7101
 MORE_BUTTON_ID = 7102
@@ -651,24 +693,32 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         li = xbmcgui.ListItem(item.get('title') or '')
         self._apply_info_tags(li, item)
-        if item.get('view_offset_ms') and not start_over:
-            # Kodi 20+ resume point (resumetime/totaltime are deprecated).
-            try:
-                li.getVideoInfoTag().setResumePoint(
-                    float(item['view_offset_ms']) / 1000.0,
-                    float(item.get('duration_ms') or 0) / 1000.0)
-            except Exception:
-                li.setProperty(
-                    'resumetime', str(float(item['view_offset_ms']) / 1000.0))
-                li.setProperty(
-                    'totaltime',
-                    str(float(item.get('duration_ms') or 0) / 1000.0))
+        # Kodi 20+ resume point (resumetime/totaltime are deprecated).
+        apply_resume_point(li, item, start_over)
         li.setMimeType('video/mp4')
         # Tells the owner (Aura window + default.py) that playback began:
         # every modal dialog must leave the screen for the fullscreen
         # video to activate, and Aura re-opens once playback ends.
         self.playback_started = True
         self.close()
+        queue = episode_queue_items(self.client, item)
+        if queue:
+            playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+            playlist.clear()
+            queued = 0
+            for i, ep in enumerate(queue):
+                ep_url = self._stream_url(ep)
+                if not ep_url:
+                    continue
+                ep_li = xbmcgui.ListItem(ep.get('title') or '')
+                self._apply_info_tags(ep_li, ep)
+                apply_resume_point(ep_li, ep, start_over=(start_over and i == 0))
+                ep_li.setMimeType('video/mp4')
+                playlist.add(ep_url, ep_li)
+                queued += 1
+            if queued > 1:
+                xbmc.Player().play(playlist)
+                return
         xbmc.Player().play(url, li)
 
     @staticmethod
