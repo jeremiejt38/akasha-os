@@ -33,7 +33,11 @@ ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
 OPTIONS = [
-    ('Accueil', 'ActivateWindow(Home)', False),
+    # "Accueil" must land on Aura, not the native Kodi Home window: the
+    # RunScript hits the running Aura instance's heartbeat lock and is
+    # treated as a Home press (back to Divertissement), or launches Aura
+    # when it isn't running -- same path as the remote's Home key.
+    ('Accueil', 'RunScript(script.akasha.aura)', False),
     ('Akasha Settings', 'RunAddon(script.akasha.settings)', False),
     ('Temporisation', '__sleep_timer__', False),
     ('Options developpeurs', '__developer_options__', False),

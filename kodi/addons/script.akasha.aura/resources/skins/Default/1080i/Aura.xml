@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1194">
-    <defaultcontrol>2001</defaultcontrol>
+    <defaultcontrol>2007</defaultcontrol>
     <controls>
         <!-- Fullscreen background -->
         <control type="image">
@@ -174,7 +174,7 @@
                 <textcolor>00FFFFFF</textcolor>
                 <focusedcolor>00FFFFFF</focusedcolor>
                 <onleft>2004</onleft>
-                <onright>2001</onright>
+                <onright>2007</onright>
                 <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
             </control>
             <control type="image">
@@ -187,162 +187,89 @@
                 <texture>icon-search.png</texture>
             </control>
 
-            <!-- Modules 1-3: Divertissement/Jeux/App. On focus, a gradient
-                 pill fades in behind icon+label. Pill texture
-                 (pill-gradient.png) and proportions (icon inset/size,
-                 label offset) copied directly from Arctic Horizon 2's own
-                 main menu item (Includes_Objects.xml "_Object_MenuBar_Item"
-                 + the actual generated menumain_h.png asset,
-                 addon_data/script.texturemaker/ArcticHorizon/) rather than
-                 an approximation, per explicit request. The <left> values
-                 below are only the *initial* layout (module 1 focused by
-                 default). AuraWindow._layout_top_modules() repositions
-                 the buttons/pills/icons (ids 2001-2003, 2101/2103/2105,
-                 2102/2104/2106) at runtime via setPosition() so the group
-                 always stays contiguous regardless of which one is
-                 focused, fixing the gap correctif c7f0636a reported
-                 (previously a static layout, deliberately left as an
-                 accepted limitation, superseded now, see
-                 docs/aura/decisions.md). -->
-            <control type="button" id="2001">
-                <left>160</left>
+            <!-- Modules: Divertissement/Jeux/App as ONE horizontal list:
+                 the exact mechanism Arctic Horizon 2's own main menu uses
+                 (Includes_Objects.xml "Object_MenuBar_List"): a list whose
+                 unfocused slots are 100px icons while the focused slot
+                 widens to the 360px pill; the slide/expand animation is
+                 the container's own scrolltime (tween quadratic, 400ms),
+                 so no Python reflow is needed and the motion matches the
+                 native Akasha home bar exactly. Item label/icon come from
+                 ListItem.Label / ListItem.Icon (static content below).
+                 Two focusedlayouts reproduce the skin's behaviour: full
+                 pill while the bar is focused, dimmed pill once the focus
+                 drops into the content. Navigation in/out is declared via
+                 onleft/onright (edge exits) and handled dynamically for
+                 Down in _sync_navigation() (target depends on the active
+                 module). -->
+            <control type="list" id="2007">
+                <left>140</left>
                 <top>20</top>
-                <width>80</width>
+                <width>720</width>
                 <height>60</height>
-                <label>Divertissement</label>
-                <font>font10</font>
-                <textcolor>00FFFFFF</textcolor>
-                <focusedcolor>00FFFFFF</focusedcolor>
-                <onleft>2000</onleft>
-                <onright>2002</onright>
-                <ondown>3070</ondown>
-                <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
-            </control>
-            <control type="group" id="2101">
-                <left>160</left>
-                <top>20</top>
-                <width>360</width>
-                <height>60</height>
-                <visible>Control.HasFocus(2001)</visible>
-                <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
-                <control type="image">
-                    <top>-67</top>
-                    <width>360</width>
-                    <height>194</height>
-                    <texture>pill-gradient.png</texture>
-                </control>
-                <control type="label">
-                    <left>120</left>
-                    <width>200</width>
-                    <height>60</height>
-                    <aligny>center</aligny>
-                    <font>font_mini_bold</font>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <label>Divertissement</label>
-                </control>
-            </control>
-            <control type="image" id="2102">
-                <left>160</left>
-                <top>20</top>
-                <width>80</width>
-                <height>60</height>
-                <aspectratio>keep</aspectratio>
-                <bordersize>4</bordersize>
-                <texture>tab-divertissement.png</texture>
-            </control>
-
-            <control type="button" id="2002">
-                <left>540</left>
-                <top>20</top>
-                <width>80</width>
-                <height>60</height>
-                <label>Jeux</label>
-                <font>font10</font>
-                <textcolor>00FFFFFF</textcolor>
-                <focusedcolor>00FFFFFF</focusedcolor>
-                <onleft>2001</onleft>
-                <onright>2003</onright>
-                <ondown>2050</ondown>
-                <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
-            </control>
-            <control type="group" id="2103">
-                <left>540</left>
-                <top>20</top>
-                <width>360</width>
-                <height>60</height>
-                <visible>Control.HasFocus(2002)</visible>
-                <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
-                <control type="image">
-                    <top>-67</top>
-                    <width>360</width>
-                    <height>194</height>
-                    <texture>pill-gradient.png</texture>
-                </control>
-                <control type="label">
-                    <left>120</left>
-                    <width>200</width>
-                    <height>60</height>
-                    <aligny>center</aligny>
-                    <font>font_mini_bold</font>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <label>Jeux</label>
-                </control>
-            </control>
-            <control type="image" id="2104">
-                <left>540</left>
-                <top>20</top>
-                <width>80</width>
-                <height>60</height>
-                <aspectratio>keep</aspectratio>
-                <bordersize>4</bordersize>
-                <texture>tab-jeux.png</texture>
-            </control>
-
-            <control type="button" id="2003">
-                <left>920</left>
-                <top>20</top>
-                <width>80</width>
-                <height>60</height>
-                <label>App</label>
-                <font>font10</font>
-                <textcolor>00FFFFFF</textcolor>
-                <focusedcolor>00FFFFFF</focusedcolor>
-                <onleft>2002</onleft>
-                <onright>2004</onright>
-                <ondown>2041</ondown>
-                <texturefocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturefocus>
-            </control>
-            <control type="group" id="2105">
-                <left>920</left>
-                <top>20</top>
-                <width>360</width>
-                <height>60</height>
-                <visible>Control.HasFocus(2003)</visible>
-                <animation effect="fade" start="0" end="100" time="150" reversible="true">Visible</animation>
-                <control type="image">
-                    <top>-67</top>
-                    <width>360</width>
-                    <height>194</height>
-                    <texture>pill-gradient.png</texture>
-                </control>
-                <control type="label">
-                    <left>120</left>
-                    <width>200</width>
-                    <height>60</height>
-                    <aligny>center</aligny>
-                    <font>font_mini_bold</font>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <label>App</label>
-                </control>
-            </control>
-            <control type="image" id="2106">
-                <left>920</left>
-                <top>25</top>
-                <width>50</width>
-                <height>50</height>
-                <aspectratio>keep</aspectratio>
-                <bordersize>4</bordersize>
-                <texture>tab-app.png</texture>
+                <orientation>horizontal</orientation>
+                <scrolltime tween="quadratic">400</scrolltime>
+                <itemlayout height="60" width="100">
+                    <control type="image">
+                        <left>10</left>
+                        <width>80</width>
+                        <height>60</height>
+                        <aspectratio>keep</aspectratio>
+                        <bordersize>4</bordersize>
+                        <texture colordiffuse="B3FFFFFF">$INFO[ListItem.Icon]</texture>
+                    </control>
+                </itemlayout>
+                <focusedlayout height="60" width="360" condition="Control.HasFocus(2007)">
+                    <control type="image">
+                        <top>-67</top>
+                        <width>360</width>
+                        <height>194</height>
+                        <texture>pill-gradient.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>28</left>
+                        <width>80</width>
+                        <height>60</height>
+                        <aspectratio>keep</aspectratio>
+                        <bordersize>4</bordersize>
+                        <texture>$INFO[ListItem.Icon]</texture>
+                    </control>
+                    <control type="label">
+                        <left>120</left>
+                        <width>220</width>
+                        <height>60</height>
+                        <aligny>center</aligny>
+                        <font>font_mini_bold</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <label>$INFO[ListItem.Label]</label>
+                    </control>
+                </focusedlayout>
+                <focusedlayout height="60" width="360" condition="!Control.HasFocus(2007)">
+                    <control type="image">
+                        <top>-67</top>
+                        <width>360</width>
+                        <height>194</height>
+                        <texture colordiffuse="66FFFFFF">pill-gradient.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>28</left>
+                        <width>80</width>
+                        <height>60</height>
+                        <aspectratio>keep</aspectratio>
+                        <bordersize>4</bordersize>
+                        <texture colordiffuse="B3FFFFFF">$INFO[ListItem.Icon]</texture>
+                    </control>
+                    <control type="label">
+                        <left>120</left>
+                        <width>220</width>
+                        <height>60</height>
+                        <aligny>center</aligny>
+                        <font>font_mini_bold</font>
+                        <textcolor>B3FFFFFF</textcolor>
+                        <label>$INFO[ListItem.Label]</label>
+                    </control>
+                </focusedlayout>
+                <content />
             </control>
 
             <!-- Right side: time + date (always visible, unaffected by
@@ -391,7 +318,7 @@
                     <width>60</width>
                     <height>60</height>
                     <label></label>
-                    <onleft>2003</onleft>
+                    <onleft>2007</onleft>
                     <onright>2000</onright>
                     <ondown>9000</ondown>
                     <texturenofocus colordiffuse="CC262B3D">circle.png</texturenofocus>
@@ -490,7 +417,7 @@
                 <align>center</align>
                 <aligny>center</aligny>
                 <onright>2042</onright>
-                <onup>2003</onup>
+                <onup>2007</onup>
                 <ondown>2030</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -507,7 +434,7 @@
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>2041</onleft>
-                <onup>2003</onup>
+                <onup>2007</onup>
                 <ondown>2030</ondown>
                 <textcolor>BBFFFFFF</textcolor>
                 <focusedcolor>FFFFFFFF</focusedcolor>
@@ -612,7 +539,7 @@
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
                     <onright>3100</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -630,7 +557,7 @@
                     <aligny>center</aligny>
                     <onleft>3050</onleft>
                     <onright>3075</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -649,7 +576,7 @@
                     <aligny>center</aligny>
                     <onleft>3100</onleft>
                     <onright>3060</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>3230</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -667,7 +594,7 @@
                     <aligny>center</aligny>
                     <onleft>3075</onleft>
                     <onright>3402</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>6010</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -689,7 +616,7 @@
                     <aligny>center</aligny>
                     <onleft>3060</onleft>
                     <onright>5110</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -748,7 +675,7 @@
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
                     <onright>3071</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -765,7 +692,7 @@
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
                     <onright>3072</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -782,7 +709,7 @@
                     <aligny>center</aligny>
                     <onleft>3071</onleft>
                     <onright>5110</onright>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <ondown>5110</ondown>
                     <textcolor>BBFFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
@@ -1285,7 +1212,7 @@
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime>220</scrolltime>
-                        <onup>2001</onup>
+                        <onup>2007</onup>
                         <onleft>3310</onleft>
                         <ondown>5210</ondown>
                         <visible>!Control.HasFocus(5210) + !Control.HasFocus(5310)</visible>
@@ -1784,7 +1711,7 @@
                     <top>28</top>
                     <width>400</width>
                     <height>1020</height>
-                    <onup>2001</onup>
+                    <onup>2007</onup>
                     <onright>5110</onright>
                     <itemlayout width="400" height="56">
                         <control type="image">
@@ -2120,7 +2047,7 @@
             <top>-100</top>
             <width>1</width>
             <height>1</height>
-            <onup>2001</onup>
+            <onup>2007</onup>
             <label></label>
         </control>
 

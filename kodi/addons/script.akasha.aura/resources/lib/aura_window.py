@@ -34,7 +34,11 @@ import steam_client
 import store_manifest
 import sunshine_client
 
-TAB_BUTTON_IDS = (2001, 2002, 2003)
+# The Divertissement/Jeux/App tabs are a single horizontal list control
+# (same mechanism as the native skin main menu, see Aura.xml): the
+# focused slot widens to the pill and the container animates the slide
+# itself via scrolltime. Tab index == selected item position.
+TAB_LIST_ID = 2007
 
 # Main-tab IDs in the same order as config.TABS.
 TAB_DIVERTISSEMENT = 0
@@ -45,19 +49,6 @@ TAB_APP = 2
 # are not "tabs" -- neither switches active_tab/content, see plan 04bda1b4.
 MODULE_SEARCH_ID = 2000
 GEAR_BUTTON_ID = 2004
-
-# Dynamic layout of the Divertissement/Jeux/App group (correctif
-# c7f0636a), see _layout_top_modules(). (button_id, pill_group_id,
-# icon_id) per module, same left-to-right order as TAB_BUTTON_IDS.
-MODULE_CONTROL_IDS = ((2001, 2101, 2102), (2002, 2103, 2104), (2003, 2105, 2106))
-MODULE_LAYOUT_START_X = 100
-MODULE_BUTTON_OFFSET = 40
-MODULE_ICON_OFFSETS = (28, 40, 55)
-MODULE_ICON_TOPS = (20, 20, 25)
-MODULE_ITEM_WIDTH = 100
-MODULE_PILL_WIDTH = 360
-MODULE_ICON_TOP = 20
-MODULE_PILL_TOP = 20
 
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
@@ -194,7 +185,7 @@ APP_SUBTAB_MES_APPS = 0
 APP_SUBTAB_STORE = 1
 
 BAR_CONTROL_IDS = set(
-    (MODULE_SEARCH_ID, GEAR_BUTTON_ID) + TAB_BUTTON_IDS
+    (MODULE_SEARCH_ID, GEAR_BUTTON_ID, TAB_LIST_ID)
     + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS)
 
 
@@ -309,6 +300,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         try:
+            self._populate_tab_list()
             self._show_tab(self.active_tab)
             self._load_divertissement()
             self._divert_load_attempted = True
@@ -318,7 +310,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # rule as the connector token -- docs/aura/decisions.md).
             self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK, interactive=False)
             self._load_pinned_apps()
-            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._focus_tab(self.active_tab)
             self._sync_navigation()
             self._update_bar_focused()
             # Re-opened after a playback session: return to the item's
@@ -697,16 +689,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
 
-        # Top bar modules -> their own contextual strip. Left/right keep
-        # the declared top-bar loop (search, modules, gear).
-        divert_down = (DIVERT_SUBTAB_IDS[self._divert_library_tab]
-                       if self._divert_view == 'library'
-                       else HOME_TAB_IDS[self._home_tab])
-        nav(TAB_BUTTON_IDS[TAB_DIVERTISSEMENT], down=divert_down, left=2000, right=2002)
-        nav(TAB_BUTTON_IDS[TAB_JEUX], down=JEUX_SUBTAB_IDS[self._jeux_active_subtab],
-            left=2001, right=2003)
-        nav(TAB_BUTTON_IDS[TAB_APP], down=APP_SUBTAB_IDS[self._app_subtab],
-            left=2002, right=2004)
+        # Top bar tab list: Down is intercepted in onAction (routed to the
+        # active module's sub-tab strip); Left/Right edge exits are the
+        # declared <onleft>/<onright> in Aura.xml. No setNavigation here:
+        # nav() defaults unset directions to the control itself, which
+        # would swallow the list's internal left/right item movement.
 
         # Reco slots: Up from the first slot reaches the contextual strip
         # only once the viewport is back at the top; while deeper hubs are
@@ -1842,6 +1829,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         index = index % len(config.TABS)
         self.active_tab = index
         self.setProperty('AuraActiveTab', str(index))
+        # Keep the tab list's selected item aligned when the tab change
+        # comes from code (Home press, programmatic focus) rather than
+        # from left/right inside the list itself.
+        try:
+            tabs = self.getControl(TAB_LIST_ID)
+            if tabs.getSelectedPosition() != index:
+                tabs.selectItem(index)
+            self._tab_list_pos = index
+        except (RuntimeError, AttributeError):
+            pass
 
         if index == TAB_DIVERTISSEMENT:
             self.setProperty('DivertView', self._divert_view)
@@ -1870,32 +1867,36 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         focused = self.getFocusId()
         is_bar_focused = focused in BAR_CONTROL_IDS
         self.setProperty('AuraBarFocused', 'true' if is_bar_focused else 'false')
-        self._layout_top_modules(focused)
 
-    def _layout_top_modules(self, focused):
-        """Correctif c7f0636a: Divertissement/Jeux/App must stay a single
-        contiguous group (pill of the focused one + the other two icons
-        immediately following), never leaving one of them isolated with a
-        large gap before it -- Kodi has no native flexbox-style reflow, so
-        this recomputes each one's <left> by hand and repositions the
-        button/pill/icon controls via setPosition() every time focus
-        moves onto/off of one of them (called from _update_bar_focused(),
-        itself run after every action -- including onInit's own initial
-        call, so the very first render is already laid out correctly)."""
+    def _populate_tab_list(self):
+        """Fill the module tab list. Static <content> items declared in the
+        XML render but are not navigable inside a WindowXMLDialog, so the
+        items are added from the script, like skinshortcuts does for the
+        native main menu."""
         try:
-            focused_index = TAB_BUTTON_IDS.index(focused)
-        except ValueError:
-            focused_index = None
-        x = MODULE_LAYOUT_START_X
-        for i, (button_id, pill_id, icon_id) in enumerate(MODULE_CONTROL_IDS):
-            try:
-                self.getControl(pill_id).setPosition(x, MODULE_PILL_TOP)
-                self.getControl(button_id).setPosition(x + MODULE_BUTTON_OFFSET, MODULE_ICON_TOP)
-                self.getControl(icon_id).setPosition(
-                    x + MODULE_ICON_OFFSETS[i], MODULE_ICON_TOPS[i])
-            except RuntimeError:
-                pass
-            x += MODULE_PILL_WIDTH if i == focused_index else MODULE_ITEM_WIDTH
+            tabs = self.getControl(TAB_LIST_ID)
+        except RuntimeError:
+            return
+        if tabs.size() == len(config.TABS):
+            return
+        tabs.reset()
+        icons = ('tab-divertissement.png', 'tab-jeux.png', 'tab-app.png')
+        for name, icon in zip(config.TABS, icons):
+            item = xbmcgui.ListItem(name)
+            item.setArt({'icon': icon})
+            tabs.addItem(item)
+        self._tab_list_pos = 0
+
+    def _focus_tab(self, index):
+        """Focus the module tab list on the given tab (the list widens its
+        focused slot into the pill itself, like the native menu bar)."""
+        try:
+            tabs = self.getControl(TAB_LIST_ID)
+            tabs.selectItem(index)
+            self._tab_list_pos = index
+            self.setFocus(tabs)
+        except RuntimeError:
+            pass
 
     def onAction(self, action):
         aid = action.getId()
@@ -1937,15 +1938,75 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # the native loop on its own; this handler now only keeps
         # AuraActiveTab/content in sync with whichever module ends up
         # focused, without moving focus itself.
-        if focused in TAB_BUTTON_IDS and TAB_BUTTON_IDS.index(focused) != self.active_tab:
-            self._show_tab(TAB_BUTTON_IDS.index(focused))
-            self._update_bar_focused()
-        if aid == ACTION_MOVE_DOWN and focused in TAB_BUTTON_IDS:
-            self._focus_first_subtab()
-            self._update_bar_focused()
-            return
+        # Inside the tab list, focus stays on the same control while the
+        # selected item changes -- the active tab follows the selection,
+        # like the native main menu's Container().ListItem binding. The
+        # selection-vs-edge decision is deferred until after
+        # super().onAction() has processed the move: whether Kodi calls us
+        # before or after the internal item move, comparing the position
+        # across super() is the only ordering-agnostic way to tell "moved
+        # to a neighbour item" apart from "stayed put at an edge exit".
+        # (XML <onleft>/<onright> can't be used either: a list consumes
+        # them on EVERY horizontal press, not just at the edges.)
+        if focused == TAB_LIST_ID:
+            if aid == ACTION_MOVE_DOWN:
+                self._focus_first_subtab()
+                self._update_bar_focused()
+                return
+            if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
+                # Kodi may call onAction before OR after the internal item
+                # move depending on the control path, so the position delta
+                # alone can't tell "moved" from "stayed at an edge". Track
+                # the last observed selection in _tab_list_pos instead: a
+                # press that produced a new position is a move (sync the
+                # module), a press that produced the same position at the
+                # matching edge is an exit (search on the left, gear on the
+                # right). XML <onleft>/<onright> can't be used: a list
+                # consumes them on EVERY horizontal press.
+                last_known = getattr(self, '_tab_list_pos', self.active_tab)
+                super().onAction(action)
+                try:
+                    pos_after = self.getControl(TAB_LIST_ID).getSelectedPosition()
+                except RuntimeError:
+                    pos_after = last_known
+                last = len(config.TABS) - 1
+                # Kodi lists wrap around and onAction can fire before OR
+                # after the internal item move, so compare the final
+                # position against the tracked one per direction. A press
+                # that lands in the expected direction is an item move
+                # (sync the module). Staying/wrapping past the tracked
+                # edge is an exit -- search on the left, gear on the
+                # right -- and the wrap is undone. IMPORTANT: a nav press
+                # that transferred focus INTO the list (gear ->Left-> list)
+                # is re-delivered here a second time without moving items;
+                # the edge exit therefore only fires when the tracked
+                # position was ALREADY at that edge, else a transferred
+                # Left would eject to search from the middle of the bar.
+                if aid == ACTION_MOVE_RIGHT and pos_after > last_known:
+                    self._tab_list_pos = pos_after
+                    if pos_after != self.active_tab:
+                        self._show_tab(pos_after)
+                elif aid == ACTION_MOVE_LEFT and pos_after < last_known:
+                    self._tab_list_pos = pos_after
+                    if pos_after != self.active_tab:
+                        self._show_tab(pos_after)
+                elif ((aid == ACTION_MOVE_RIGHT and last_known == last)
+                        or (aid == ACTION_MOVE_LEFT and last_known == 0)):
+                    tabs = self.getControl(TAB_LIST_ID)
+                    edge = 0 if aid == ACTION_MOVE_LEFT else last
+                    if pos_after != edge:
+                        tabs.selectItem(edge)
+                    self._tab_list_pos = edge
+                    try:
+                        self.setFocus(self.getControl(
+                            MODULE_SEARCH_ID if aid == ACTION_MOVE_LEFT
+                            else GEAR_BUTTON_ID))
+                    except RuntimeError:
+                        pass
+                self._update_bar_focused()
+                return
         if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS):
-            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._focus_tab(self.active_tab)
             self._update_bar_focused()
             return
         # Recommande row viewport (see RECO_SLOT_IDS): Plex pins the focused
@@ -2022,8 +2083,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura: focus first subtab failed: {}'.format(e), xbmc.LOGERROR)
 
     def onClick(self, controlID):
-        if controlID in TAB_BUTTON_IDS:
-            self._show_tab(TAB_BUTTON_IDS.index(controlID))
+        if controlID == TAB_LIST_ID:
+            try:
+                self._show_tab(self.getControl(TAB_LIST_ID).getSelectedPosition())
+            except RuntimeError:
+                pass
         elif controlID in HOME_TAB_IDS:
             self._set_home_tab(HOME_TAB_IDS.index(controlID))
         elif controlID in DIVERT_SUBTAB_IDS:
@@ -2280,10 +2344,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         def _callback():
             self._show_tab(TAB_APP)
             self._select_app_subtab(APP_SUBTAB_STORE)
-            try:
-                self.setFocus(self.getControl(TAB_BUTTON_IDS[TAB_APP]))
-            except RuntimeError:
-                pass
+            self._focus_tab(TAB_APP)
         return _callback
 
     def _search_settings(self, query):
@@ -2681,10 +2742,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if action == 'single':
             self._close_sub_windows()
             self._show_tab(0)
-            try:
-                self.setFocus(self.getControl(TAB_BUTTON_IDS[0]))
-            except RuntimeError:
-                pass
+            self._focus_tab(0)
         elif action == 'double':
             switcher = self._get_sub_window(
                 'app_switcher', _HomePressAppSwitcher, 'AuraSwitcher.xml')
