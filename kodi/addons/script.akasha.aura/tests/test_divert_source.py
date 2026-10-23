@@ -79,6 +79,19 @@ class TestDivertSource(unittest.TestCase):
     def test_item_subtitle_missing_data_returns_empty(self):
         self.assertEqual(divert_source.item_subtitle({}), '')
 
+    def test_video_label_empty_without_media(self):
+        item = divert_source.build_video_item(
+            {'title': 'Lupin', 'type': 'season'},
+            lambda p, w=None, h=None: p)
+        self.assertEqual(item['video_label'], '')
+
+    def test_video_label_sd_with_real_media(self):
+        item = divert_source.build_video_item(
+            {'title': 'Ep', 'type': 'episode',
+             'Media': [{'videoResolution': 'sd', 'Part': [{'key': '/x'}]}]},
+            lambda p, w=None, h=None: p)
+        self.assertEqual(item['video_label'], 'SD')
+
     def test_parse_metadata_list_captures_episode_fields(self):
         raw = {
             'MediaContainer': {

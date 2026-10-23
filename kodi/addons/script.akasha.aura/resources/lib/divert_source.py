@@ -158,8 +158,13 @@ def _streams(raw_item, stream_type):
 
 
 def _video_label(raw_item):
-    """Plex-style media badge, e.g. '4K HDR10', 'HD', 'SD'."""
+    """Plex-style media badge, e.g. '4K HDR10', 'HD', 'SD'.
+
+    Empty when the item carries no Media at all (shows, seasons,
+    collections) -- a bare 'SD' badge on a series page is meaningless."""
     media = _first_media(raw_item)
+    if not media:
+        return ''
     resolution = str(media.get('videoResolution') or '').lower()
     if resolution in ('4k', '2160', '2160p'):
         base = '4K'

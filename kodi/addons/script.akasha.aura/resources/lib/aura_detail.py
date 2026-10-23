@@ -121,6 +121,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._episodes = []
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
+        self._pending_season_index = None  # season card entry point
         self.exit_to_sidebar = False
 
     def onInit(self):
@@ -261,6 +262,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif self.mode == 'show':
             self._load_seasons()
             self._render_seasons()
+            # Opened from a season card: jump straight into that season's
+            # tab, like Plex TV opening a recently-added season.
+            pending = self._pending_season_index
+            self._pending_season_index = None
+            if pending is not None:
+                for pos, season in enumerate(self._seasons):
+                    if season.get('index') == pending:
+                        try:
+                            self.getControl(SEASON_STRIP_ID).selectItem(pos + 1)
+                        except RuntimeError:
+                            pass
+                        self._show_season(pos + 1)
+                        break
         elif self.mode == 'season':
             self._render_episodes()
 

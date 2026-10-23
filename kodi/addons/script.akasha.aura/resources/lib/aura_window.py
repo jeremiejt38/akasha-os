@@ -905,9 +905,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._open_item_context_menu(
             item, lambda: self._reco_open(item), list_control_id)
 
-    def _open_detail(self, item):
+    def _open_detail(self, item, season_index=None):
         """Open the Plex-style detail page (AuraDetail.xml) for a playable
-        item (movie, episode, trailer/clip)."""
+        item (movie, episode, trailer/clip). `season_index` pre-selects a
+        season tab when a season card was the entry point."""
         detail = self._get_sub_window(
             'detail', aura_detail.AuraDetailWindow, 'AuraDetail.xml')
         detail.client = self._connector_client or self._plex_client
@@ -919,6 +920,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         detail._episodes = []
         detail._next_episode = None
         detail._active_season = 0
+        detail._pending_season_index = season_index
         detail.exit_to_sidebar = False
         detail.doModal()
         # Plex behavior: Left on the detail page's left edge pops the
@@ -2613,13 +2615,27 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """Route show selections to the Plex-style detail page.
 
         Thin items (e.g. an episode card that only carries the show's
-        rating key) are hydrated through /library/metadata first."""
+        rating key) are hydrated through /library/metadata first. Season
+        cards open their parent show's page with that season's tab
+        pre-selected, like Plex TV."""
         client = self._connector_client or self._plex_client
         if not client:
             xbmcgui.Dialog().notification(
                 'Akasha Aura', item.get('title') or '', xbmcgui.NOTIFICATION_INFO, 2000)
             return
-        if not item.get('art_url') and item.get('rating_key') \
+        season_index = None
+        if item.get('type') == 'season' and item.get('parent_rating_key') \
+                and hasattr(client, 'metadata_item'):
+            season_index = item.get('index')
+            try:
+                full = client.metadata_item(item['parent_rating_key'])
+                if full:
+                    full.setdefault('type', 'show')
+                    item = full
+            except Exception as e:
+                xbmc.log('Akasha Aura: season parent hydration failed: {}'
+                         .format(e), xbmc.LOGWARNING)
+        elif not item.get('art_url') and item.get('rating_key') \
                 and hasattr(client, 'metadata_item'):
             try:
                 full = client.metadata_item(item['rating_key'])
@@ -2629,7 +2645,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except Exception as e:
                 xbmc.log('Akasha Aura: show hydration failed: {}'.format(e),
                          xbmc.LOGWARNING)
-        self._open_detail(item)
+        self._open_detail(item, season_index=season_index)
 
     def _on_divert_item_selected(self):
         try:
