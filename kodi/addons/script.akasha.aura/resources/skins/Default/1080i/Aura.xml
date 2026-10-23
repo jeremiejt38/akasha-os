@@ -636,6 +636,7 @@
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
@@ -743,6 +744,7 @@
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
 
                 <!-- Plex pills row (plan 2e7c9375): "All | type | by sort |
                      Genre | N items | ..." just under the library tab strip.
@@ -964,6 +966,7 @@
             <control type="panel" id="3230">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + [String.IsEqual(Window.Property(DivertLibraryTab),1) | String.IsEqual(Window.Property(DivertLibraryTab),2)]</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
                 <!-- Plex Browse grid geometry (docs/plex-parity/SPEC.md):
                      6 columns of 240x360 posters, cell pitch 283x460,
                      title + year centered under the poster. -->
@@ -1190,6 +1193,7 @@
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home) | [String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0)]</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
 
                 <!-- Poster rows. Three slots at a fixed vertical pitch of
                      472px (Plex's own measurement); conditional slides keep
@@ -1560,6 +1564,7 @@
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3)</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
 
                 <control type="label" id="6020">
                     <left>160</left>
