@@ -826,3 +826,30 @@ Constats mesurés sur le Pi qui ont guidé l'implémentation :
 Validé en direct : cycle search ⇄ onglets ⇄ engrenage complet, positions JSON-RPC
 `Container(2007).Position` 0→1→2→sortie, sous-onglets synchronisés au module, Home depuis
 n'importe quel onglet revient sur Divertissement avec la liste focusée.
+
+## Lecture vidéo interrompue / paramètres qui s'ouvrent seuls (oct. 2026)
+
+Symptôme rapporté : un épisode se ferme après ~1 min, puis le panneau paramètres
+s'ouvre sans action. Diagnostic sur le Pi (logs debug + captures d'entrées brutes) :
+
+- Le `CloseFile` est demandé sur le thread principal (`CApplication::StopPlaying`)
+  = un événement d'entrée externe (touche retour/stop), pas un crash décodeur.
+- Les monitors `xbmc.Monitor` (Home/gear) **restent vivants** sur l'AuraWindow
+  fermée pendant la lecture : un appui engrenage en plein écran appelait
+  `doModal()` sur la fenêtre morte → panneau « Type d'arrêt » par-dessus la
+  vidéo en cours (reproduit en direct), ou panneau rouvert dès la réouverture.
+- Un appui `browser_home` pendant la lecture appelle `xbmc.Player().stop()`
+  (comportement voulu : Home ramène dans Aura) — mais un événement parasite
+  tue donc la vidéo instantanément.
+- `window.open_settings_on_init` était codé `False` en dur : un appui engrenage
+  Aura fermée n'ouvrait jamais le panneau. Corrigé → `= open_settings`.
+
+Correctifs (commit 0d29ba8) : `_open_settings_panel` ignore l'appui quand
+`isPlayingVideo()` — l'OSD plein écran a déjà sa propre entrée paramètres ;
+`open_settings_on_init` reflète l'argument `opensettings`.
+
+Point matériel résiduel : la télécommande Amazon émet sporadiquement des
+événements parasites (rafales d'appuis engrenage/Home sans cause connue —
+rafale observée 03:31→03:40, silence total ensuite). Pistes : bouton coincé,
+IR du récepteur GPIO23 (`gpio-ir`, actif via `dtoverlay`), rebond matériel.
+Le debug logging reste activé pour capturer la source à la prochaine occurrence.
