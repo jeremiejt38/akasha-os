@@ -117,6 +117,8 @@ cp "$SCRIPT_DIR/kodi/scripts/akasha-sleep.py" /storage/.kodi/scripts/akasha-slee
 chmod +x /storage/.kodi/scripts/akasha-sleep.py
 cp "$SCRIPT_DIR/kodi/scripts/akasha-sleep-timer.py" /storage/.kodi/scripts/akasha-sleep-timer.py
 chmod +x /storage/.kodi/scripts/akasha-sleep-timer.py
+cp "$SCRIPT_DIR/kodi/scripts/volume.py" /storage/.kodi/scripts/volume.py
+chmod +x /storage/.kodi/scripts/volume.py
 
 chmod +x /storage/.kodi/scripts/show-splash.sh \
           /storage/.kodi/scripts/show-splash-if-restart.sh \

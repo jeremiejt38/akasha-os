@@ -16,11 +16,13 @@ class RouteTests(unittest.TestCase):
     def test_akasha_routes_to_kodi_builtins(self):
         executed = []
         route(VOLUME_UP, 'akasha', kodi_executebuiltin=executed.append)
-        self.assertEqual(executed, ['VolumeUp'])
+        self.assertEqual(executed, ['Action(volumeup)'])
         route(VOLUME_DOWN, 'akasha', kodi_executebuiltin=executed.append)
-        self.assertEqual(executed, ['VolumeUp', 'VolumeDown'])
+        self.assertEqual(executed, ['Action(volumeup)', 'Action(volumedown)'])
         route(VOLUME_MUTE, 'akasha', kodi_executebuiltin=executed.append)
-        self.assertEqual(executed, ['VolumeUp', 'VolumeDown', 'Mute'])
+        self.assertEqual(
+            executed,
+            ['Action(volumeup)', 'Action(volumedown)', 'Action(mute)'])
 
     def test_cec_routes_to_ui_commands(self):
         executed = []

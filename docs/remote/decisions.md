@@ -181,3 +181,28 @@ rétro-ingénierie du protocole BLE vendor-specific, pas d'achat de matériel d�
   télécommande. L'alternative identifiée (blaster IR dédié sur GPIO du Raspberry Pi via LIRC,
   indépendant de la télécommande) reste documentée ci-dessus comme piste si le contrôle IR TV
   redevient prioritaire un jour, mais n'est pas retenue dans le périmètre actuel.
+
+## Correctif volume/mute — liaison directe (2026-10-23)
+
+Les touches volume étaient mortes : la keymap appelait `RunScript(service.akasha.remote,
+volume_*)` → `default.py` → `volume_router.route()` → `xbmc.executebuiltin('VolumeUp')`,
+mais `VolumeUp`/`VolumeDown`/`Mute` sont des **noms d'actions de keymap**, pas des builtins —
+`executebuiltin` les ignorait silencieusement (« script successfully run » sans effet).
+
+Deux problèmes corrigés :
+
+- **Latence de maintien** : la télécommande répète à ~33 ms ; chaque `RunScript` lançait un
+  interpréteur Python (~150 ms) — file d'attente ingérable. Les touches volume/mute sont
+  maintenant liées **directement** aux actions natives dans `akasha-ar-remote.xml`
+  (`<volume_up>VolumeUp</volume_up>`), donc réponse instantanée + répétition native + barre
+  OSD, sans dépendre du mode de routage.
+- **Routeur scripté** : `KODI_BUILTINS` passe par le wrapper `Action(<nom>)`
+  (`Action(volumeup)` / `Action(volumedown)` / `Action(mute)`), vérifié sur le Pi. Le mode
+  CEC (`cec-ctl --user-control-pressed`) est inchangé ; le mode reste sélectionnable dans
+  les réglages de l'addon pour un éventuel usage scripté, mais la keymap ne le consulte plus
+  (bindings statiques).
+
+Vérifié en direct : `HandleKey: volume_up (0xf0b9) / volume_down (0xf0b8)` capturés en
+debug — la télécommande envoie bien les keysyms standard, c'est la chaîne d'action qui était
+cassée. `volume.py` (helper bumpers LB/RB du gamepad, 5 % premier appui / 1 % en maintien)
+était absent du repo : importé depuis le Pi et ajouté à `install.sh`.
