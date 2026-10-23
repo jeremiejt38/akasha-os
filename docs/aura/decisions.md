@@ -853,3 +853,13 @@ Point matériel résiduel : la télécommande Amazon émet sporadiquement des
 rafale observée 03:31→03:40, silence total ensuite). Pistes : bouton coincé,
 IR du récepteur GPIO23 (`gpio-ir`, actif via `dtoverlay`), rebond matériel.
 Le debug logging reste activé pour capturer la source à la prochaine occurrence.
+
+## Chaînage des épisodes (Plex PlayQueue) (oct. 2026)
+
+Lancer un épisode enfile désormais le reste de sa saison dans la playlist
+vidéo Kodi (`xbmc.PlayList`) : les épisodes défilent sans retour à Aura
+entre eux, chaque item garde son propre point de reprise Plex, et
+« Recommencer » ne réinitialise que le premier. `default.py` exige ~2 s
+de silence continu avant de rouvrir Aura, pour absorber le trou
+« not-playing » entre deux items de la playlist. Vérifié sur le Pi :
+fin de S2E1 → S2E2 enchaîne automatiquement.
