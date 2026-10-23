@@ -11,6 +11,7 @@ import os
 import random
 import subprocess
 import sys
+import time
 
 import xbmc
 import xbmcaddon
@@ -23,6 +24,7 @@ import aura_search
 import aura_settings_panel
 import aura_store
 import config
+import settings_press_handler
 import connector_client
 import divert_source
 import games_shortcuts
@@ -297,6 +299,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Home press received while the window was closed for fullscreen
         # playback: applied by onInit() once Aura re-opens.
         self._pending_home_action = None
+        # Last settings-panel open, for the gear-wheel debounce in
+        # _open_settings_panel() (spurious remote events burst).
+        self._settings_last_open = 0.0
 
     def onInit(self):
         try:
@@ -323,7 +328,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._open_detail(playback_item)
             if pending_home:
                 self._on_home_press_action(pending_home)
-            if getattr(self, 'open_settings_on_init', False):
+            # A double press completed across a (re)launch can evade both
+            # paths: default.py only sees the first half, and the monitor
+            # was not listening for the second notification. The press
+            # file history is the ground truth.
+            if (getattr(self, 'open_settings_on_init', False) or
+                    settings_press_handler.double_press_just_happened()):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
         except Exception as e:
@@ -2407,17 +2417,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _open_settings_panel(self):
         """Unified settings panel (plan a5a87f03): categories list + curated
         actions, replacing the old direct Kodi/LibreELEC/Akasha shortcuts."""
-        if xbmc.Player().isPlayingVideo():
+        if getattr(self, 'playback_started', False) or xbmc.Player().isPlayingVideo():
             # The SettingsPressMonitor stays alive while this window is
             # closed for fullscreen playback, so a (possibly spurious)
             # gear-wheel press still lands here. Opening a modal
             # sub-dialog over the video -- or having it pop up the moment
             # Aura re-opens -- is the "settings opens by itself" bug.
+            # playback_started covers the whole session, including the
+            # ~1-2s not-playing gap between chained playlist episodes
+            # where isPlayingVideo() alone would let a press through.
             # The fullscreen OSD has its own settings gear; drop the
             # press instead.
             xbmc.log('Akasha Aura: settings press ignored during playback',
                      xbmc.LOGINFO)
             return
+        now = time.time()
+        if now - self._settings_last_open < 3.0:
+            # The remote emits occasional spurious gear-wheel events; a
+            # burst of presses must not reopen the panel repeatedly (nor
+            # right after the user closed it). Deliberate presses are
+            # seconds apart, so a short cooldown is invisible.
+            xbmc.log('Akasha Aura: settings press ignored (debounce)',
+                     xbmc.LOGINFO)
+            return
+        self._settings_last_open = now
         win = self._get_sub_window(
             'settings_panel', aura_settings_panel.AuraSettingsPanelWindow,
             'AuraSettingsPanel.xml')

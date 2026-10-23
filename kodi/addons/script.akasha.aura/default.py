@@ -91,6 +91,19 @@ if __name__ == '__main__':
             target=_heartbeat, args=(heartbeat_stop,), daemon=True).start()
         try:
             window = AuraWindow('Aura.xml', ADDON_PATH, 'Default', '1080i')
+            if open_settings:
+                # Same double-press rule as SettingsPressMonitor: the
+                # remote emits spurious single gear-wheel events, and a
+                # lone one must not pop the settings panel "by itself".
+                # The monitor handles presses while Aura runs; here the
+                # file history decides -- record this press first, then
+                # check whether it pairs with a recent previous one.
+                prev = settings_press_handler.read_presses()
+                settings_press_handler.record_settings_press()
+                open_settings = (
+                    bool(prev) and
+                    time.time() - prev[-1]
+                    <= settings_press_handler.DOUBLE_PRESS_WINDOW_SECONDS)
             window.open_settings_on_init = open_settings
             window.doModal()
             # Playback started from Aura: the window closed itself because
@@ -98,10 +111,14 @@ if __name__ == '__main__':
             # Wait for playback to end, then re-open Aura where the user
             # left it -- Plex-style "return to app" after watching.
             while getattr(window, 'playback_started', False):
-                window.playback_started = False
                 # Player.play() is asynchronous: wait for the stream to
                 # actually start before watching for its end, otherwise
                 # Aura re-opens instantly and covers the video again.
+                # playback_started deliberately stays True for the whole
+                # session -- including the wait-for-start phase and the
+                # gaps between chained episodes -- so monitors can tell
+                # "Aura closed for playback" apart from "Aura just closed"
+                # and ignore presses that should not open dialogs.
                 waited = 0
                 while not xbmc.Player().isPlayingVideo() and waited < 15000:
                     xbmc.sleep(200)
@@ -116,6 +133,7 @@ if __name__ == '__main__':
                     else:
                         silent += 1
                     xbmc.sleep(500)
+                window.playback_started = False
                 window.doModal()
             del window
         finally:
