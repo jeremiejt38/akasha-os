@@ -139,8 +139,13 @@
              Remains visible above the content like Arctic Horizon 2's
              native home menu so the active section stays identifiable. -->
         <control type="group" id="100">
+            <!-- Was a no-op slide 0,0 to 0,0: the intended "bar recedes
+                 when unfocused" cue is now an actual subtle fade,
+                 cheap on the Pi4 (single alpha blend, no transform).
+                 85% only: the tab pills already carry their own
+                 focused/unfocused dimming, deeper would double-dim. -->
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                <effect type="slide" start="0,0" end="0,0" time="200" tween="quadratic" easing="inout"/>
+                <effect type="fade" start="100" end="85" time="200" tween="quadratic" easing="out"/>
             </animation>
 
             <left>0</left>
@@ -630,6 +635,7 @@
                  feed is a private GraphQL API, no usable endpoint). -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
+                <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
@@ -736,6 +742,7 @@
                  onto this contextual grid instead of a separate window. -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
+                <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
 
                 <!-- Plex pills row (plan 2e7c9375): "All | type | by sort |
                      Genre | N items | ..." just under the library tab strip.
@@ -956,6 +963,7 @@
                  end in any direction (Up/Down/Left/Right within the grid). -->
             <control type="panel" id="3230">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + [String.IsEqual(Window.Property(DivertLibraryTab),1) | String.IsEqual(Window.Property(DivertLibraryTab),2)]</visible>
+                <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
                 <!-- Plex Browse grid geometry (docs/plex-parity/SPEC.md):
                      6 columns of 240x360 posters, cell pitch 283x460,
                      title + year centered under the poster. -->
@@ -963,7 +971,7 @@
                 <top>226</top>
                 <width>1698</width>
                 <height>854</height>
-                <scrolltime>220</scrolltime>
+                <scrolltime tween="quadratic" easing="out">200</scrolltime>
                 <onup>3100</onup>
                 <onleft>3310</onleft>
                 <onright>3250</onright>
@@ -1181,6 +1189,7 @@
                  y=504, matching the Android TV reference measurements. -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home) | [String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0)]</visible>
+                <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
 
                 <!-- Poster rows. Three slots at a fixed vertical pitch of
                      472px (Plex's own measurement); conditional slides keep
@@ -1211,7 +1220,7 @@
                         <width>1696</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
-                        <scrolltime>220</scrolltime>
+                        <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>2007</onup>
                         <onleft>3310</onleft>
                         <ondown>5210</ondown>
@@ -1326,7 +1335,7 @@
                         <width>1696</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
-                        <scrolltime>220</scrolltime>
+                        <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5110</onup>
                         <onleft>3310</onleft>
                         <ondown>5310</ondown>
@@ -1433,6 +1442,11 @@
                         <font>font_mini_bold</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
+                        <!-- Only rendered while reachable: when focus is on
+                             5210 the row peeks at y=1040, on itself at 568;
+                             otherwise it sits below the viewport and would
+                             decode its posters for nothing. -->
+                        <visible>Control.HasFocus(5210) + Control.HasFocus(5310)</visible>
                     </control>
                     <control type="list" id="5310">
                         <left>127</left>
@@ -1440,10 +1454,11 @@
                         <width>1696</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
-                        <scrolltime>220</scrolltime>
+                        <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5210</onup>
                         <onleft>3310</onleft>
                         <ondown>5310</ondown>
+                        <visible>Control.HasFocus(5210) + Control.HasFocus(5310)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -1544,6 +1559,7 @@
                  above, previously AuraGenres.xml as a separate doModal() dialog. -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3)</visible>
+                <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
 
                 <control type="label" id="6020">
                     <left>160</left>
@@ -1646,6 +1662,9 @@
                     <height>1080</height>
                     <texture colordiffuse="8C000000">white.png</texture>
                     <visible>Control.HasFocus(3310)</visible>
+                    <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="true">
+                        <effect type="fade" start="0" end="100" time="180" easing="out"/>
+                    </animation>
                 </control>
 
                 <!-- Collapsed rail: short floating pill with the 4 primary
@@ -1696,7 +1715,9 @@
                 </control>
 
                 <!-- Expanded panel: floating rounded slab (Plex does not
-                     flush it against the screen edges). -->
+                     flush it against the screen edges). Slides in from the
+                     rail on focus; the reverse cannot play since the
+                     control drops out of the render tree instantly. -->
                 <control type="image">
                     <left>20</left>
                     <top>20</top>
@@ -1704,6 +1725,12 @@
                     <height>1040</height>
                     <texture colordiffuse="FF10131A" border="26">rounded-solid.png</texture>
                     <visible>Control.HasFocus(3310)</visible>
+                    <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="false">
+                        <effect type="slide" start="-420,0" end="0,0" time="200" tween="quadratic" easing="out"/>
+                    </animation>
+                    <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="false">
+                        <effect type="fade" start="0" end="100" time="160" easing="out"/>
+                    </animation>
                 </control>
 
                 <control type="list" id="3310">

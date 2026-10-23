@@ -8,6 +8,18 @@
              line, rating chips, synopsis, director, action pills, media
              badges and a circular Cast &amp; Crew row. -->
 
+        <!-- Whole-page transition group: Plex TV settles a detail page in
+             with a quick fade + a 2% zoom-out, and fades it back out on
+             close. Wrapping every control in one group at 0,0 keeps all
+             coordinates identical while giving Kodi a single animation
+             target. -->
+        <control type="group">
+            <left>0</left>
+            <top>0</top>
+            <animation effect="fade" start="0" end="100" time="200" tween="quadratic" easing="out">WindowOpen</animation>
+            <animation effect="zoom" start="102" end="100" center="auto" time="250" tween="quadratic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="100" end="0" time="150" tween="quadratic" easing="in">WindowClose</animation>
+
         <!-- Base -->
         <control type="image">
             <left>0</left>
@@ -1160,6 +1172,7 @@
                 <texture>icon-discover-dark.png</texture>
                 <visible>Control.HasFocus(7205)</visible>
             </control>
+        </control>
         </control>
     </controls>
 </window>
