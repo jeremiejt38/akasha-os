@@ -82,6 +82,9 @@ class PlexClient:
         return {
             'X-Plex-Token': self.token,
             'Accept': 'application/json',
+            # Cloudflare fronts the public plex.akasha.ing endpoint and
+            # blocks Python-urllib's default UA (HTTP 403, error 1010).
+            'User-Agent': 'AkashaOSAura/1.0',
         }
 
     def _request(self, path, params=None):
