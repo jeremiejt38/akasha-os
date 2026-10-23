@@ -53,6 +53,12 @@ box with Akasha Aura and the rest of the interface.
     <keyboard>
       <back>Stop</back>
       <escape>Stop</escape>
+      <!-- Without this, the gear-wheel key (0xf200/obc-61697) resolves to
+           the built-in media-stop appcommand in fullscreen and kills the
+           video. Routing it to the same opensettings entry keeps one
+           meaning everywhere, and Aura's playback guard makes it a
+           no-op while a video plays. -->
+      <key id="61952">RunScript(script.akasha.aura,opensettings)</key>
     </keyboard>
   </FullscreenVideo>
 
