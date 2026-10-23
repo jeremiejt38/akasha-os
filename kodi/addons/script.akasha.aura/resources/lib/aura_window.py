@@ -2407,6 +2407,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _open_settings_panel(self):
         """Unified settings panel (plan a5a87f03): categories list + curated
         actions, replacing the old direct Kodi/LibreELEC/Akasha shortcuts."""
+        if xbmc.Player().isPlayingVideo():
+            # The SettingsPressMonitor stays alive while this window is
+            # closed for fullscreen playback, so a (possibly spurious)
+            # gear-wheel press still lands here. Opening a modal
+            # sub-dialog over the video -- or having it pop up the moment
+            # Aura re-opens -- is the "settings opens by itself" bug.
+            # The fullscreen OSD has its own settings gear; drop the
+            # press instead.
+            xbmc.log('Akasha Aura: settings press ignored during playback',
+                     xbmc.LOGINFO)
+            return
         win = self._get_sub_window(
             'settings_panel', aura_settings_panel.AuraSettingsPanelWindow,
             'AuraSettingsPanel.xml')

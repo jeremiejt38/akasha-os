@@ -91,7 +91,7 @@ if __name__ == '__main__':
             target=_heartbeat, args=(heartbeat_stop,), daemon=True).start()
         try:
             window = AuraWindow('Aura.xml', ADDON_PATH, 'Default', '1080i')
-            window.open_settings_on_init = False
+            window.open_settings_on_init = open_settings
             window.doModal()
             # Playback started from Aura: the window closed itself because
             # a modal dialog would otherwise cover the fullscreen video.
