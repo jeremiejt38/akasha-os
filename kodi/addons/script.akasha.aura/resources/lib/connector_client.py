@@ -20,7 +20,7 @@ class ConnectorAPIError(Exception):
 class ConnectorClient:
     """Minimal JSON client for the akasha-os-connector service."""
 
-    def __init__(self, server_url, timeout=10):
+    def __init__(self, server_url, timeout=5):
         self.server_url = (server_url or '').strip().rstrip('/')
         self.timeout = timeout
         self.token = None

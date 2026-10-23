@@ -26,7 +26,7 @@ class PlexAPIError(Exception):
 class PlexClient:
     """Minimal JSON client for a local Plex Media Server."""
 
-    def __init__(self, server_url, token, timeout=10):
+    def __init__(self, server_url, token, timeout=5):
         self.server_url = (server_url or '').strip().rstrip('/')
         self.token = (token or '').strip()
         self.timeout = timeout
