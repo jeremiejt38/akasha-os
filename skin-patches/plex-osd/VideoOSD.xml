@@ -83,7 +83,7 @@
             <width>64</width>
             <height>64</height>
             <label></label>
-            <onclick>ActivateWindow(osdsubtitlesettings)</onclick>
+            <onclick>RunScript(script.akasha.aura,osdmenu,streams)</onclick>
             <onleft>9100</onleft>
             <onright>9111</onright>
             <ondown>9101</ondown>
@@ -103,7 +103,7 @@
             <width>64</width>
             <height>64</height>
             <label></label>
-            <onclick>ActivateWindow(osdvideosettings)</onclick>
+            <onclick>RunScript(script.akasha.aura,osdmenu,quality)</onclick>
             <onleft>9110</onleft>
             <ondown>9101</ondown>
             <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>

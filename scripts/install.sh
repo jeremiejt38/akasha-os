@@ -369,9 +369,26 @@ log "[13/13] Finalizing system tweaks..."
 
 # Disable Kodi built-in splash (replaced by intro video)
 if [ ! -f /storage/.kodi/userdata/advancedsettings.xml ]; then
-    echo '<advancedsettings><splash>false</splash></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml
-elif ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml; then
-    sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml
+    cat > /storage/.kodi/userdata/advancedsettings.xml <<'EOF'
+<advancedsettings>
+  <splash>false</splash>
+  <cache>
+    <buffermode>1</buffermode>
+    <memorysize>52428800</memorysize>
+    <readfactor>8</readfactor>
+  </cache>
+</advancedsettings>
+EOF
+else
+    if ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml; then
+        sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml
+    fi
+    # Network video cache: a 50MB read-ahead absorbs transient stalls of the
+    # public Plex endpoint (a dropped keep-alive / slow range response used to
+    # end playback outright on the first arrow-seek).
+    if ! grep -q '<buffermode>' /storage/.kodi/userdata/advancedsettings.xml; then
+        sed -i 's|</advancedsettings>|<cache><buffermode>1</buffermode><memorysize>52428800</memorysize><readfactor>8</readfactor></cache></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml
+    fi
 fi
 
 # Disable automatic addon updates (notify only), so Akasha OS remains in control

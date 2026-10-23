@@ -24,7 +24,7 @@ box with Akasha Aura and the rest of the interface.
       <!-- Volume binds directly to the native actions: the remote repeats
            at ~33ms while held and each RunScript spawns a fresh Python
            interpreter (~150ms on the Pi), so the scripted router piled up
-           presses and lagged badly -- and its akasha-mode handler was
+           presses and lagged badly - and its akasha-mode handler was
            broken anyway (VolumeUp is an action name, not a builtin). The
            volume_mode setting (CEC routing) is retained in the addon for
            the documented scripted path; see docs/remote/decisions.md. -->
@@ -61,11 +61,30 @@ box with Akasha Aura and the rest of the interface.
       <key id="61952">RunScript(script.akasha.aura,opensettings)</key>
       <!-- A long Home press falls through to the GLOBAL binding and
            launches script.akasha.guide over the video; its "Accueil"/power
-           entries then tear down playback -- and a stray Yes/No dialog can
+           entries then tear down playback - and a stray Yes/No dialog can
            even exit Kodi entirely (observed live: guide opened at
            fullscreen, presses wandered, Kodi quit cleanly). In fullscreen
            the sensible "menu" surface is the player OSD itself. -->
       <browser_home mod="longpress">ActivateWindow(videoosd)</browser_home>
+      <!-- Plex Android TV transport: arrows seek fixed offsets instead of
+           Kodi's StepBack/StepForward (which use variable seek-steps and
+           historically hid the real "video froze" cause: every arrow press
+           re-opened a new HTTP range request against the remote stream and
+           a stalled range read killed playback). -->
+      <left>Seek(-10)</left>
+      <right>Seek(30)</right>
+      <!-- Up/Down show the player controls like the Plex TV remote. They
+           also kill the default ChapterOrBigStep* jumps: Plex chapters
+           aren't exposed to Kodi over plain HTTP playback anyway, so the
+           default binding was a silent random jump. -->
+      <up>OSD</up>
+      <down>OSD</down>
+      <menu>OSD</menu>
+      <!-- OK toggles pause directly when the OSD bar isn't open (Plex does
+           the same: center button pauses). Once the VideoOSD window is up
+           its own window context handles select on the focused control. -->
+      <return>PlayPause</return>
+      <enter>PlayPause</enter>
     </keyboard>
   </FullscreenVideo>
 

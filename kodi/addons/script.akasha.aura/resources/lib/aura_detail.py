@@ -17,6 +17,8 @@ The caller must set `item` (a divert_source normalised dict) and `client`
 import xbmc
 import xbmcgui
 
+import osd_menu
+
 ACTION_MOVE_LEFT = 1
 ACTION_PREVIOUS_MENU = 10
 ACTION_CONTEXT_MENU = 117
@@ -717,8 +719,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 playlist.add(ep_url, ep_li)
                 queued += 1
             if queued > 1:
+                osd_menu.store_playback_context(
+                    self.client,
+                    [ep for ep in queue if ep.get('part_key')])
                 xbmc.Player().play(playlist)
                 return
+        osd_menu.store_playback_context(self.client, [item])
         xbmc.Player().play(url, li)
 
     @staticmethod

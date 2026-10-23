@@ -26,6 +26,7 @@ import aura_settings_panel
 import aura_store
 import config
 import settings_press_handler
+import osd_menu
 import connector_client
 import divert_source
 import games_shortcuts
@@ -2743,8 +2744,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                              ep_li)
                 queued += 1
             if queued > 1:
+                osd_menu.store_playback_context(client, queue)
                 xbmc.Player().play(playlist)
                 return
+        osd_menu.store_playback_context(client, [item])
         xbmc.Player().play(url, li)
 
     def _hydrate_item(self, item):

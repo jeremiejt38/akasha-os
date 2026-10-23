@@ -24,6 +24,7 @@ import time
 
 import xbmc
 import xbmcaddon
+import xbmcgui
 
 ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
 sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
@@ -56,6 +57,28 @@ def _heartbeat(stop_event):
         _write_lock()
 
 
+def _watch_external_playback(window, stop):
+    """Yield Aura to fullscreen if playback starts through a path that
+    bypasses AuraWindow._play -- JSON-RPC, PM4K, a CEC resume, etc.
+
+    Aura's own launches set playback_started and close the window before the
+    stream begins, so they never hit this watchdog. An externally started
+    stream would otherwise keep playing silently behind the still-open
+    modal; marking playback_started here also gives the user the same
+    "return to Aura" behaviour once that playback ends.
+    """
+    while not stop.is_set():
+        try:
+            if (xbmc.Player().isPlayingVideo()
+                    and not getattr(window, 'playback_started', False)):
+                window.playback_started = True
+                window.close()
+                return
+        except Exception:
+            pass
+        stop.wait(1.0)
+
+
 def _already_running():
     """True if a previous invocation's AuraWindow is still alive."""
     try:
@@ -68,6 +91,16 @@ if __name__ == '__main__':
     # "opensettings": the gear-wheel remote button's global keymap entry
     # (dd440e2e section 9), distinct from a plain Home press.
     open_settings = 'opensettings' in sys.argv[1:]
+    # "osdmenu": invoked from the VideoOSD circles mid-playback, while the
+    # Aura process below is parked in its wait-for-end loop -- handle it
+    # BEFORE the already-running guard, as a standalone dialog.
+    if 'osdmenu' in sys.argv[1:]:
+        import osd_menu
+        mode = 'quality' if 'quality' in sys.argv[1:] else 'streams'
+        osd_menu.AuraOsdMenuWindow.mode = mode
+        osd_menu.AuraOsdMenuWindow(
+            'AuraOsdMenu.xml', ADDON_PATH, 'Default', '1080i').doModal()
+        sys.exit(0)
     if _already_running():
         # Aura is already open -- can't just construct a second AuraWindow
         # (see this module's own docstring on window-id exhaustion).
@@ -105,7 +138,22 @@ if __name__ == '__main__':
                     time.time() - prev[-1]
                     <= settings_press_handler.DOUBLE_PRESS_WINDOW_SECONDS)
             window.open_settings_on_init = open_settings
-            window.doModal()
+
+            def _run_window():
+                # Don't even open the modal if a video is already running:
+                # skip straight to the wait-for-end loop below.
+                if (xbmc.Player().isPlayingVideo()
+                        and not getattr(window, 'playback_started', False)):
+                    window.playback_started = True
+                    return
+                watch_stop = threading.Event()
+                threading.Thread(
+                    target=_watch_external_playback,
+                    args=(window, watch_stop), daemon=True).start()
+                window.doModal()
+                watch_stop.set()
+
+            _run_window()
             # Playback started from Aura: the window closed itself because
             # a modal dialog would otherwise cover the fullscreen video.
             # Wait for playback to end, then re-open Aura where the user
@@ -130,11 +178,17 @@ if __name__ == '__main__':
                 while silent < 4:
                     if xbmc.Player().isPlayingVideo():
                         silent = 0
+                    # A quality switch stop/starts the player; the OSD menu
+                    # holds this property across the gap so the brief silence
+                    # isn't read as end-of-playback.
+                    elif (xbmcgui.Window(10000)
+                          .getProperty('AuraSwitchingPlayback')):
+                        silent = 0
                     else:
                         silent += 1
                     xbmc.sleep(500)
                 window.playback_started = False
-                window.doModal()
+                _run_window()
             del window
         finally:
             heartbeat_stop.set()
