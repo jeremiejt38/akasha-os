@@ -160,8 +160,12 @@ class ConnectorClient:
         return divert_source.parse_metadata_list(
             self.metadata_children(season_rating_key), self.image_url)
 
-    def image_url(self, plex_path):
+    def image_url(self, plex_path, width=None, height=None):
         """Build a Kodi-playable URL for a Plex image via the connector's proxy.
+
+        `width`/`height` are accepted for signature parity with
+        PlexClient's resolver (server-side transcode); the connector proxy
+        currently has no resize support so the hints are ignored.
 
         The admin Plex token never reaches the client: the connector resolves
         it server-side (see docs/api.md of akasha-os-connector). The session

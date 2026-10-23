@@ -11,6 +11,7 @@ import os
 import random
 import subprocess
 import sys
+import threading
 import time
 
 import xbmc
@@ -302,6 +303,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Last settings-panel open, for the gear-wheel debounce in
         # _open_settings_panel() (spurious remote events burst).
         self._settings_last_open = 0.0
+        # Hero backdrop debounce (see _schedule_hero_fanart): the pending
+        # timer and the URL actually pushed to the skin property.
+        self._hero_fanart_timer = None
+        self._hero_fanart_lock = threading.Lock()
+        self._hero_fanart_current = None
 
     def onInit(self):
         try:
@@ -768,6 +774,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         header every time the focused card changes, including while
         scrolling horizontally inside one row."""
         if self._divert_view == 'home' and self._home_tab == HOME_TAB_ACTIVITY:
+            self._schedule_hero_fanart(None)
             for prop in ('AuraHeroFanart', 'AuraHeroLogo', 'AuraHeroTitle',
                          'AuraHeroSubtitle', 'AuraHeroMeta', 'AuraHeroRating',
                          'AuraHeroPlot', 'AuraHeroCast'):
@@ -797,7 +804,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             subtitle = ''
 
         cast = ', '.join(c['name'] for c in (item.get('cast') or [])[:4])
-        self.setProperty('AuraHeroFanart', item.get('fanart_url') or item.get('art_url') or '')
+        self._schedule_hero_fanart(
+            item.get('fanart_url') or item.get('art_url') or '')
         self.setProperty('AuraHeroLogo', item.get('logo_url') or '')
         self.setProperty('AuraHeroTitle', title)
         self.setProperty('AuraHeroSubtitle', subtitle)
@@ -814,6 +822,41 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 pass
         self.setProperty('AuraHeroPlot', _truncate_plot(item.get('summary') or ''))
         self.setProperty('AuraHeroCast', cast)
+
+    def _schedule_hero_fanart(self, url):
+        """Debounce the 1080p backdrop swap while the user scrolls.
+
+        Without this every keypress pushes a new fanart URL into the skin
+        property, and Kodi decodes a full-res JPEG on the Pi4's modest GPU
+        for each one -- the classic hero stutter when holding Right. Text
+        props still update immediately; the backdrop only catches up
+        ~300ms after scrolling stops, matching Plex's own hero behaviour
+        (it never repaints mid-fling either).
+        """
+        with self._hero_fanart_lock:
+            if self._hero_fanart_timer is not None:
+                self._hero_fanart_timer.cancel()
+                self._hero_fanart_timer = None
+            if url == self._hero_fanart_current:
+                return
+            if url is None:
+                self._hero_fanart_current = None
+                return
+            self._hero_fanart_timer = threading.Timer(
+                0.3, self._apply_hero_fanart, args=(url,))
+            self._hero_fanart_timer.daemon = True
+            self._hero_fanart_timer.start()
+
+    def _apply_hero_fanart(self, url):
+        with self._hero_fanart_lock:
+            self._hero_fanart_timer = None
+            if url == self._hero_fanart_current:
+                return
+            self._hero_fanart_current = url
+        try:
+            self.setProperty('AuraHeroFanart', url)
+        except RuntimeError:
+            pass
 
     def _on_reco_item_selected(self, list_control_id):
         row = self._reco_rows.get(list_control_id)

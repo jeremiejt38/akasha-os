@@ -133,7 +133,7 @@ class PlexClient:
 
     @staticmethod
     def _video_dict(item, server_url, token):
-        def image_url(path):
+        def image_url(path, width=None, height=None):
             if not path:
                 return ''
             # Cloud provider metadata (Discover/Trending hubs) carries
@@ -143,6 +143,15 @@ class PlexClient:
                 if 'X-Plex-Token' not in path:
                     path += sep + 'X-Plex-Token=' + token
                 return path
+            # Sized requests go through Plex's own photo transcoder: a
+            # 240px card used to pull the full 2000x3000 JPEG and make
+            # the Pi4 decode it (visible scroll stutter). Server-side
+            # downscale is what official Plex clients do anyway.
+            if width and height:
+                return ('{}/photo/:/transcode?url={}&width={}&height={}'
+                        '&minSize=1&upscale=0&X-Plex-Token={}'.format(
+                            server_url, urllib.parse.quote(path),
+                            width, height, token))
             return '{}?X-Plex-Token={}'.format(server_url + path, token)
 
         # Shared normaliser keeps connector and direct-Plex payloads identical

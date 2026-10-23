@@ -226,9 +226,11 @@ def _content_rating_display(raw_item):
 def build_video_item(raw_item, image_resolver):
     """Normalise one raw Plex `Metadata` entry into a display dict.
 
-    `image_resolver(plex_path) -> url` builds a displayable URL for a Plex
-    image path (e.g. `ConnectorClient.image_url`, or `server+path?token=` for
-    the direct Plex client). Carries every field the Plex-style UI needs:
+    `image_resolver(plex_path, width=None, height=None) -> url` builds a
+    displayable URL for a Plex image path (e.g. `ConnectorClient.image_url`,
+    or `server+path?token=` for the direct Plex client). Resolvers that
+    support it (direct Plex) downscale server-side; the others ignore the
+    size hints. Carries every field the Plex-style UI needs:
     posters, fanart, progress, ratings, cast, media badges.
     """
     if not isinstance(raw_item, dict):
@@ -284,7 +286,7 @@ def build_video_item(raw_item, image_resolver):
             {
                 'name': str(role.get('tag')),
                 'role': str(role.get('role') or ''),
-                'thumb_url': image_resolver(role['thumb']) if role.get('thumb') else '',
+                'thumb_url': image_resolver(role['thumb'], 160, 160) if role.get('thumb') else '',
             }
             for role in raw_item.get('Role') or []
             if role.get('tag')
@@ -295,12 +297,14 @@ def build_video_item(raw_item, image_resolver):
         'progress': progress,
         'view_count': view_count,
         'watched': bool(view_count),
-        'thumb_url': image_resolver(thumb) if thumb else '',
-        'art_url': image_resolver(art) if art else '',
-        'poster_url': image_resolver(poster) if poster else '',
-        'fanart_url': image_resolver(fanart) if fanart else '',
+        'thumb_url': image_resolver(thumb, 640, 360) if thumb else '',
+        'art_url': image_resolver(art, 1920, 1080) if art else '',
+        'poster_url': image_resolver(poster, 320, 480) if poster else '',
+        'fanart_url': image_resolver(fanart, 1920, 1080) if fanart else '',
+        # clearLogos are transparent PNGs -- Plex's photo transcoder emits
+        # JPEG only, so logos keep the direct URL to preserve alpha.
         'logo_url': image_resolver(logo) if logo else '',
-        'landscape_url': image_resolver(thumb) if (thumb and item_type == 'episode') else '',
+        'landscape_url': image_resolver(thumb, 640, 360) if (thumb and item_type == 'episode') else '',
         'video_label': _video_label(raw_item),
         'audio_label': _audio_label(raw_item),
         'subtitle_label': _subtitle_label(raw_item),
