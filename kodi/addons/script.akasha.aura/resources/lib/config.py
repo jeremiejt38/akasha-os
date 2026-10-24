@@ -10,13 +10,11 @@ import i18n
 
 TABS = (i18n.tr(33002), i18n.tr(33003), i18n.tr(33004))
 
-DIVERT_SUBTABS = ('Recommande', 'Bibliotheques', 'Categories')
+# Subtab labels live in Aura.xml as $ADDON ids; only the counts are needed here.
+DIVERT_SUBTAB_COUNT = 3
 DIVERT_SUBTAB_RECOMMANDE = 0
 DIVERT_SUBTAB_BIBLIOTHEQUES = 1
 DIVERT_SUBTAB_CATEGORIES = 2
-
-JEUX_SUBTABS = ('SteamLink', 'Moonlight', 'Autres')
-APP_SUBTABS = ('Mes Apps', 'Store')
 
 
 def normalize_server_url(url):
@@ -50,7 +48,7 @@ def default_tab_index(value, tab_count=len(TABS)):
     return index
 
 
-def default_subtab_index(value, subtab_count=len(DIVERT_SUBTABS)):
+def default_subtab_index(value, subtab_count=DIVERT_SUBTAB_COUNT):
     """Clamp a stored 'default subtab' setting value to a valid subtab index."""
     try:
         index = int(value)
