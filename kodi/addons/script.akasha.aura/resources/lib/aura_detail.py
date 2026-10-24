@@ -72,6 +72,7 @@ MORE_BUTTON_ID = 7102
 WATCHLIST_BUTTON_ID = 7103
 RATE_BUTTON_ID = 7104
 RESTART_BUTTON_ID = 7106
+EXTRAS_BUTTON_ID = 7109
 CAST_LIST_ID = 7110
 SEASON_STRIP_ID = 7120
 EPISODES_LIST_ID = 7130
@@ -89,12 +90,14 @@ MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # the skin; only Subtitles and File Info remain reachable.
 MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID)
 
-ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, WATCHLIST_BUTTON_ID,
-                  RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID)
+ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
+                  WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
+                  MORE_BUTTON_ID)
 # light/dark icon overlay pairs that ride on top of each action button
 ACTION_ICON_OVERLAYS = {
     WATCH_BUTTON_ID: (7087, 7088, 7089, 7090),
     RESTART_BUTTON_ID: (7107, 7108),
+    EXTRAS_BUTTON_ID: (7111, 7112),
     WATCHLIST_BUTTON_ID: (7092, 7093),
     RATE_BUTTON_ID: (7099, 7105),
     WATCHED_BUTTON_ID: (7094, 7095, 7096),
@@ -117,9 +120,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self.item = {}
         self.watched = False
         self.mode = 'item'          # 'item' | 'show' | 'season'
+        # WindowXMLDialog ctor arg 2 is the script path -- kept so the
+        # person page can be opened as a sub-dialog.
+        self.addon_path = args[1] if len(args) > 1 else ''
         self._show_item = None      # saved show item while in episode mode
         self._seasons = []
         self._episodes = []
+        self._extras = []
+        self._extras_key = None
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
         self._pending_season_index = None  # season card entry point
@@ -208,6 +216,20 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self.getControl(7040).setLabel(director)
         except RuntimeError:
             pass
+
+        # Bonus clips (trailer, deleted scenes...): Plex shows a trailer
+        # button whenever /extras answers -- fetched once per item.
+        if self._extras_key != item.get('rating_key'):
+            self._extras_key = item.get('rating_key')
+            self._extras = []
+            if self.client and item.get('rating_key'):
+                try:
+                    self._extras = self.client.item_extras(
+                        item['rating_key'])
+                except Exception as e:
+                    xbmc.log('Akasha Aura Detail: extras failed: {}'.format(e),
+                             xbmc.LOGWARNING)
+        _set(self, 'AuraDetailExtras', '1' if self._extras else '')
 
         # Action row: labels live on the buttons themselves (invisible
         # while unfocused via transparent textcolor, dark on the white
@@ -429,8 +451,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 row = self.getControl(cid)
                 if mode == self.mode or (mode == 'item' and
                                          self.mode == 'item'):
-                    right_id = (7106 if self.getProperty('AuraDetailRestart')
-                                else 7103)
+                    right_id = (
+                        RESTART_BUTTON_ID
+                        if self.getProperty('AuraDetailRestart')
+                        else (EXTRAS_BUTTON_ID
+                              if self.getProperty('AuraDetailExtras')
+                              else RATE_BUTTON_ID))
                     watch.setNavigation(strip, row, watch,
                                         self.getControl(right_id))
                     row.setNavigation(watch, row, row, row)
@@ -449,12 +475,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return self._watch_label()
         return {
             RESTART_BUTTON_ID: 'Recommencer',
+            EXTRAS_BUTTON_ID: self._extras_label(),
             WATCHLIST_BUTTON_ID: 'Ajouter à ma liste',
             RATE_BUTTON_ID: 'Noter',
             WATCHED_BUTTON_ID: ('Marquer comme non vu' if self.watched
                                 else 'Marquer comme vu'),
             MORE_BUTTON_ID: 'Plus',
         }[control_id]
+
+    def _extras_label(self):
+        """'Bande-annonce' when a trailer clip exists, 'Bonus' otherwise."""
+        if any(e.get('subtype') == 'trailer' for e in self._extras):
+            return 'Bande-annonce'
+        return 'Bonus'
 
     def _set_action_labels(self):
         for cid in ACTION_ROW_IDS:
@@ -481,7 +514,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         of the row right."""
         restart = bool(self._playable_item() and
                        self._playable_item().get('view_offset_ms'))
-        order = ([WATCH_BUTTON_ID] + ([RESTART_BUTTON_ID] if restart else [])
+        order = ([WATCH_BUTTON_ID]
+                 + ([RESTART_BUTTON_ID] if restart else [])
+                 + ([EXTRAS_BUTTON_ID] if self._extras else [])
                  + [RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID])
         # Plex watchlist sync is a plex.tv cloud feature -- the button stays
         # hidden rather than surfacing an "unavailable" notification.
@@ -513,6 +548,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 except RuntimeError:
                     pass
             x += w + ACTION_ROW_GAP
+        # Left/right nav follows the visible order exactly -- hidden
+        # buttons (watchlist, and restart/extras when absent) must never
+        # land under the cursor. Up reaches the season strip in show
+        # mode, Down the visible bottom row.
+        bottom_id = {'item': CAST_LIST_ID, 'show': SEASONS_LIST_ID,
+                     'season': EPISODES_LIST_ID}.get(self.mode)
+        bottom_prop = {'item': 'AuraDetailCastRow',
+                       'show': 'AuraDetailSeasonsRow',
+                       'season': 'AuraDetailEpisodesRow'}.get(self.mode)
+        show_strip = self.mode in ('show', 'season')
+        for i, cid in enumerate(order):
+            try:
+                ctl = self.getControl(cid)
+                if i:
+                    ctl.controlLeft(self.getControl(order[i - 1]))
+                if i + 1 < len(order):
+                    ctl.controlRight(self.getControl(order[i + 1]))
+                if show_strip:
+                    ctl.controlUp(self.getControl(SEASON_STRIP_ID))
+                if self.getProperty(bottom_prop):
+                    ctl.controlDown(self.getControl(bottom_id))
+            except RuntimeError:
+                pass
 
     def onFocus(self, controlID):
         self._sync_action_row()
@@ -529,6 +587,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # once the connector proxies it.
             xbmcgui.Dialog().notification(
                 'Akasha Aura', 'Watchlist indisponible', xbmcgui.NOTIFICATION_INFO, 1500)
+        elif controlID == EXTRAS_BUTTON_ID:
+            self._play_extra()
         elif controlID == RATE_BUTTON_ID:
             self._rate()
         elif controlID == MORE_BUTTON_ID:
@@ -544,11 +604,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif controlID == EPISODES_LIST_ID:
             self._open_episode()
         elif controlID == CAST_LIST_ID:
-            # Plex opens the cast member's filmography page via its cloud
-            # service -- not reachable through the local Plex API.
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Filmographie indisponible (fonction Plex cloud)',
-                xbmcgui.NOTIFICATION_INFO, 2000)
+            self._open_person()
 
     def _on_strip_selected(self):
         try:
@@ -694,7 +750,83 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         token = getattr(self.client, 'token', None)
         if not base or not token:
             return None
-        return '{}{}?X-Plex-Token={}'.format(base, item['part_key'], token)
+        # Extras parts carry their own query string ('?fmt=4&bitrate=...').
+        joiner = '&' if '?' in item['part_key'] else '?'
+        return '{}{}{}X-Plex-Token={}'.format(
+            base, item['part_key'], joiner, token)
+
+    def _open_person(self):
+        """Cast & Crew pick -> Plex-style person page (photo + the
+        person's server-side filmography across the video sections)."""
+        try:
+            pos = self.getControl(CAST_LIST_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        cast = self.item.get('cast') or []
+        if not (0 <= pos < len(cast)):
+            return
+        member = cast[pos]
+        person_filter = member.get('person_filter')
+        if not person_filter and self.client and \
+                self.item.get('grandparent_rating_key'):
+            # Episode-level Role entries carry no filter: resolve it from
+            # the parent show's cast (same tag, with 'actor=ID').
+            try:
+                parent = self.client.metadata_item(
+                    self.item['grandparent_rating_key'])
+                for parent_member in (parent or {}).get('cast', []):
+                    if parent_member.get('name') == member.get('name') \
+                            and parent_member.get('person_filter'):
+                        person_filter = parent_member['person_filter']
+                        break
+            except Exception:
+                pass
+        if not person_filter or not self.client:
+            return
+        try:
+            filmography = self.client.person_filmography(person_filter)
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: filmography failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            filmography = []
+        import aura_person
+        person = aura_person.AuraPersonWindow(
+            'AuraPerson.xml', self.addon_path, 'Default', '1080i')
+        person.client = self.client
+        person.addon_path = self.addon_path
+        person.person = member
+        person.items = filmography
+        person.doModal()
+
+    def _play_extra(self):
+        """Bande-annonce/Bonus button: a single extra plays straight
+        away, several open Plex's pick list first."""
+        if not self._extras:
+            return
+        pick = self._extras[0]
+        if len(self._extras) > 1:
+            trailers = [e for e in self._extras
+                        if e.get('subtype') == 'trailer']
+            ordered = trailers + [e for e in self._extras
+                                  if e.get('subtype') != 'trailer']
+            pos = xbmcgui.Dialog().select(
+                self._extras_label(),
+                [e.get('title') or 'Bonus' for e in ordered])
+            if pos < 0:
+                return
+            pick = ordered[pos]
+        url = self._stream_url(pick)
+        if not url:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Lecture indisponible (flux introuvable)',
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        li = xbmcgui.ListItem(pick.get('title') or '')
+        li.setMimeType('video/mp4')
+        self.playback_started = True
+        self.close()
+        osd_menu.store_playback_context(self.client, [pick])
+        xbmc.Player().play(url, li)
 
     def _play(self, start_over=False):
         item = self.item

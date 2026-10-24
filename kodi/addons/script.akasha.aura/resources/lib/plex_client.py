@@ -403,6 +403,54 @@ class PlexClient:
         })
         return self._metadata_list_with_total(data)
 
+    def items_by_filter_with_total(self, section_key, filter_str,
+                                   limit=200, offset=0):
+        """Section items matching a Plex tag filter ('actor=11550', ...)."""
+        params = {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        }
+        if filter_str and '=' in filter_str:
+            key, value = filter_str.split('=', 1)
+            params[key] = value
+        data = self._request('/library/sections/{}/all'.format(section_key),
+                             params)
+        return self._metadata_list_with_total(data)
+
+    def person_filmography(self, filter_str):
+        """Items tagged with a person ('actor=ID', 'director=ID'...) across
+        every video section -- the server-side filmography Plex renders on
+        a person page, deduped and newest first."""
+        seen = set()
+        items = []
+        for section in self.video_sections():
+            try:
+                page, _total = self.items_by_filter_with_total(
+                    section['key'], filter_str)
+            except PlexAPIError:
+                continue
+            for item in page:
+                if item.get('rating_key') in seen:
+                    continue
+                seen.add(item.get('rating_key'))
+                items.append(item)
+        items.sort(key=lambda i: i.get('year') or 0, reverse=True)
+        return items
+
+    def item_extras(self, rating_key):
+        """Bonus clips attached to an item (trailers, deleted scenes...).
+
+        Each normalised item keeps its Plex `subtype` ('trailer', ...) so
+        the UI can prefer the trailer when several extras exist."""
+        data = self._request('/library/metadata/{}/extras'.format(rating_key))
+        mc = self._media_container(data)
+        items = []
+        for raw in mc.get('Metadata', []):
+            item = self._video_dict(raw, self.server_url, self.token)
+            item['subtype'] = raw.get('subtype') or ''
+            items.append(item)
+        return items
+
     def scrobble(self, rating_key):
         """Mark an item watched (Plex `scrobble` endpoint)."""
         self._request('/:/scrobble', {

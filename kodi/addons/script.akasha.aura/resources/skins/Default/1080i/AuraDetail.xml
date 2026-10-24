@@ -315,7 +315,7 @@
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
         <onleft>7100</onleft>
-        <onright>7103</onright>
+        <onright>7109</onright>
         <ondown>7110</ondown>
         <visible>String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
     </control>
@@ -337,6 +337,44 @@
         <texture>icon-restart-dark.png</texture>
         <visible>Control.HasFocus(7106)</visible>
     </control>
+    <!-- Bande-annonce / Bonus: only when /extras returns clips -->
+    <control type="button" id="7109">
+        <left>459</left>
+        <top>576</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <onleft>7106</onleft>
+        <onright>7103</onright>
+        <ondown>7110</ondown>
+        <visible>String.IsEqual(Window.Property(AuraDetailExtras),1)</visible>
+    </control>
+    <control type="image" id="7111">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-film.png</texture>
+        <visible>!Control.HasFocus(7109) + String.IsEqual(Window.Property(AuraDetailExtras),1)</visible>
+    </control>
+    <control type="image" id="7112">
+        <left>479</left>
+        <top>596</top>
+        <width>24</width>
+        <height>24</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-film-dark.png</texture>
+        <visible>Control.HasFocus(7109)</visible>
+    </control>
     <control type="button" id="7103">
         <left>375</left>
         <top>576</top>
@@ -351,7 +389,7 @@
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
-        <onleft>7106</onleft>
+        <onleft>7109</onleft>
         <onright>7104</onright>
         <ondown>7110</ondown>
     </control>

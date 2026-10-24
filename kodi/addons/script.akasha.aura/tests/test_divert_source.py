@@ -199,7 +199,8 @@ class TestDivertSource(unittest.TestCase):
                         'Director': [{'tag': 'Dir Ector'}],
                         'Writer': [{'tag': 'Wri Ter'}],
                         'Role': [
-                            {'tag': 'Actor One', 'role': 'Hero', 'thumb': '/role/1'},
+                            {'tag': 'Actor One', 'role': 'Hero',
+                             'thumb': '/role/1', 'filter': 'actor=11550'},
                             {'tag': 'Actor Two'},
                             {},
                         ],
@@ -218,8 +219,11 @@ class TestDivertSource(unittest.TestCase):
         self.assertEqual(item['studio'], 'Studio X')
         self.assertEqual(len(item['cast']), 2)
         self.assertEqual(item['cast'][0],
-                         {'name': 'Actor One', 'role': 'Hero', 'thumb_url': 'r:/role/1'})
+                         {'name': 'Actor One', 'role': 'Hero',
+                          'thumb_url': 'r:/role/1',
+                          'person_filter': 'actor=11550'})
         self.assertEqual(item['cast'][1]['thumb_url'], '')
+        self.assertEqual(item['cast'][1]['person_filter'], '')
 
     def test_clear_logo_extracted(self):
         raw = {'MediaContainer': {'Metadata': [

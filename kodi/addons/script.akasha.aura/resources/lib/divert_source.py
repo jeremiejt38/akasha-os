@@ -292,6 +292,9 @@ def build_video_item(raw_item, image_resolver):
                 'name': str(role.get('tag')),
                 'role': str(role.get('role') or ''),
                 'thumb_url': image_resolver(role['thumb'], 160, 160) if role.get('thumb') else '',
+                # 'actor=11550' -- server-side tag filter for the person's
+                # filmography page (see PlexClient.person_filmography).
+                'person_filter': str(role.get('filter') or ''),
             }
             for role in raw_item.get('Role') or []
             if role.get('tag')
