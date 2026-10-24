@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.55.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.3...akasha-os-v0.55.0) (2026-10-24)
+
+
+### Features
+
+* **aura:** real Android TV-style settings menu ([#145](https://github.com/jeremiejt38/akasha-os/issues/145)) ([0184c01](https://github.com/jeremiejt38/akasha-os/commit/0184c01063752599fb6cd15d0ed5244b1579fdf0))
+
 ## [0.54.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.2...akasha-os-v0.54.3) (2026-10-24)
 
 
