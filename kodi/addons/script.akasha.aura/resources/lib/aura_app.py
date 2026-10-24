@@ -183,7 +183,7 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             if addon:
                 if addon.get('is_external'):
                     if xbmcgui.Dialog().yesno(
-                            'Applications',
+                            i18n.tr(33319),
                             i18n.tr(33305).format(addon['name'])):
                         store_registry.record_uninstall(addon['store_id'])
                         self._reload()

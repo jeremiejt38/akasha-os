@@ -565,6 +565,21 @@ msgctxt "#33141"
 msgid "in {}"
 msgstr ""
 
+# Installer
+msgctxt "#33144"
+msgid "Install"
+msgstr ""
+
+# Tous publics
+msgctxt "#33145"
+msgid "All audiences"
+msgstr ""
+
+# Retiré de Continuer à regarder
+msgctxt "#33146"
+msgid "Removed from Continue Watching"
+msgstr ""
+
 # Séries
 msgctxt "#33150"
 msgid "Shows"
@@ -583,6 +598,31 @@ msgstr ""
 # Réalisateur
 msgctxt "#33154"
 msgid "Director"
+msgstr ""
+
+# Ouvrir
+msgctxt "#33155"
+msgid "Open"
+msgstr ""
+
+# Reprendre
+msgctxt "#33156"
+msgid "Resume"
+msgstr ""
+
+# Mise en veille
+msgctxt "#33157"
+msgid "Sleep"
+msgstr ""
+
+# Arrêter le système
+msgctxt "#33158"
+msgid "Shut down the system"
+msgstr ""
+
+# Films et séries
+msgctxt "#33159"
+msgid "Movies & Shows"
 msgstr ""
 
 # Nouvelles bandes-annonces
