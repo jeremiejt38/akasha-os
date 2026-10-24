@@ -2446,7 +2446,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         unchanged, they are not "settings" per that plan's own wording."""
         return [
             (i18n.tr(33019), self._open_settings_panel),
-            ('Se connecter (Connector Akasha OS)', self._reconnect_connector),
+            (i18n.tr(33327), self._reconnect_connector),
             (i18n.tr(33157), self._settings_sleep),
             (i18n.tr(33090), self._settings_restart_menu),
             (i18n.tr(33158), self._settings_shutdown),

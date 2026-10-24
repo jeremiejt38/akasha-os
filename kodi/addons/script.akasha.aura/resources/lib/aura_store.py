@@ -166,10 +166,10 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             entry.get('description', ''),
             '',
             i18n.tr(33304).format(entry.get('category', '-')),
-            'Version : {}'.format(entry.get('version', '-')),
-            'Type d\'installation : {}'.format(install.get('type', '-')),
-            'Source : {}'.format(install.get('source_url', '-')),
-            'Lien profond : {}'.format(install.get('deep_link') or '-'),
+            i18n.tr(33323).format(entry.get('version', '-')),
+            i18n.tr(33324).format(install.get('type', '-')),
+            i18n.tr(33325).format(install.get('source_url', '-')),
+            i18n.tr(33326).format(install.get('deep_link') or '-'),
             '',
             entry.get('legal_notice', ''),
         ]
@@ -347,7 +347,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         install = entry.get('install', {})
         source_url = install.get('source_url', '')
         deep_link = entry.get('deep_link') or install.get('deep_link') or ''
-        name = entry.get('name', 'Web App')
+        name = entry.get('name', i18n.tr(33321))
 
         ok, err = store_external.validate_install(source_url, deep_link or None)
         if not ok:

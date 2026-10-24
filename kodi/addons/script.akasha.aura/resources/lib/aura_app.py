@@ -112,9 +112,9 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             for addon in self.addons:
                 marker = '* ' if addon['addonid'] in self.pinned_ids else '  '
                 if addon.get('is_external'):
-                    store_badge = ' [Web]'
+                    store_badge = ' [{}]'.format(i18n.tr(33322))
                 elif addon['addonid'] in self.store_ids:
-                    store_badge = ' [Store]'
+                    store_badge = ' [{}]'.format(i18n.tr(33013))
                 else:
                     store_badge = ''
                 label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
@@ -236,9 +236,9 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             for addon in new_items:
                 marker = '* ' if addon['addonid'] in self.pinned_ids else '  '
                 if addon.get('is_external'):
-                    store_badge = ' [Web]'
+                    store_badge = ' [{}]'.format(i18n.tr(33322))
                 elif addon['addonid'] in self.store_ids:
-                    store_badge = ' [Store]'
+                    store_badge = ' [{}]'.format(i18n.tr(33013))
                 else:
                     store_badge = ''
                 label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
