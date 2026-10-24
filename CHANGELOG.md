@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.52.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.51.0...akasha-os-v0.52.0) (2026-10-24)
+
+
+### Features
+
+* **aura:** clickable cast pages and extras playback on detail ([6126dd6](https://github.com/jeremiejt38/akasha-os/commit/6126dd62c66f3f9ecfd0ebd2f5198876cc921217))
+* **aura:** expand recommendation feed to five sliding hub slots ([8bf570a](https://github.com/jeremiejt38/akasha-os/commit/8bf570a28cb86782de89b955e950875b75be4fee))
+* **aura:** hide unsupported Plex cloud stubs across the UI ([512a9d1](https://github.com/jeremiejt38/akasha-os/commit/512a9d17c65375d59807197e66e71cefca95a59a))
+* **aura:** Plex-style people results in search ([45a427f](https://github.com/jeremiejt38/akasha-os/commit/45a427ffbfce531fba44545ce11a85034fbe3a06))
+* **player:** Plex-style OSD menus for audio, subtitles and quality ([36b5dc5](https://github.com/jeremiejt38/akasha-os/commit/36b5dc56228e6aac6971a1f5d44e8dc3b4407932))
+
+
+### Bug Fixes
+
+* **aura:** open season cards on the parent show's season tab ([9cc4660](https://github.com/jeremiejt38/akasha-os/commit/9cc4660e571fd7ff1dbb06ea43d847e1c486473e))
+* **aura:** route top-bar Down to the active sub-tab instead of the 9000 trap ([69a8734](https://github.com/jeremiejt38/akasha-os/commit/69a8734aae6238d20034458e775ba8facc1a3177))
+
 ## [0.51.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.50.0...akasha-os-v0.51.0) (2026-08-29)
 
 
