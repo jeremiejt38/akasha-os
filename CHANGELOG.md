@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.52.0...akasha-os-v0.53.0) (2026-10-24)
+
+
+### Features
+
+* **aura:** route every user-visible string through a fr/en i18n catalog ([#135](https://github.com/jeremiejt38/akasha-os/issues/135)) ([08953e7](https://github.com/jeremiejt38/akasha-os/commit/08953e7d8a8dbc8a50422948630e6c0b31cf68ae))
+
 ## [0.52.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.51.0...akasha-os-v0.52.0) (2026-10-24)
 
 
