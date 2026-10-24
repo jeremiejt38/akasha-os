@@ -196,9 +196,11 @@ APP_SUBTAB_IDS = (2041, 2042)
 APP_SUBTAB_MES_APPS = 0
 APP_SUBTAB_STORE = 1
 
-BAR_CONTROL_IDS = set(
-    (MODULE_SEARCH_ID, GEAR_BUTTON_ID, TAB_LIST_ID)
-    + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS)
+# Only the *global* bar counts as "bar focused": the contextual sub-tab
+# strips (Divertissement/Jeux/App/Home) live in the content area, so
+# focusing them keeps the top bar recessed and lets the strip float up
+# into the freed space -- Plex TV's exact behaviour.
+BAR_CONTROL_IDS = {MODULE_SEARCH_ID, GEAR_BUTTON_ID, TAB_LIST_ID}
 
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
@@ -1921,6 +1923,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._load_divertissement()
             self._restore_divert_view(focus=False)
         self._sync_navigation()
+
+    def onFocus(self, controlID):
+        # Focus changes that bypass onAction (programmatic setFocus,
+        # Kodi restoring focus when a modal sub-window closes) must still
+        # drive the bar retract/return animations.
+        try:
+            self._update_bar_focused()
+        except RuntimeError:
+            pass
 
     def _update_bar_focused(self):
         """Update the top-bar focused property used by the retract animation."""
