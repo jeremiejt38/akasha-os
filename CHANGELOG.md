@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.1...akasha-os-v0.54.2) (2026-10-24)
+
+
+### Bug Fixes
+
+* **aura:** smooth reco row transitions — one fade per row, texture prewarm ([#141](https://github.com/jeremiejt38/akasha-os/issues/141)) ([dfca122](https://github.com/jeremiejt38/akasha-os/commit/dfca122d90c38f3300bf66794a5df6a3488b11a3))
+
 ## [0.54.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.0...akasha-os-v0.54.1) (2026-10-24)
 
 
