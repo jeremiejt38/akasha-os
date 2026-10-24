@@ -130,6 +130,10 @@ pas de reboot/poweroff/CEC sans confirmation ; préférer « Redémarrer Akasha 
 - **Historique de conversation** : les résumés automatiques Devin vivent
   dans `~/.local/share/devin/cli/summaries/` (`history_*.md`) si jamais la
   nouvelle session veut recouper un détail.
+- **Branche `feature/voice-commands`** : chantier commandes vocales, projet
+  en pause (fiche Atlas `akasha-os-voice-commands`). Poussée sur origin
+  2026-10-24 pour préservation — ne pas la reprendre sans réactivation
+  explicite du projet dans ariane.
 - **Stash résiduel** : `git stash` contient `stash@{0}` (WIP
   « prevent-aura-app-interruptions » sur `akasha-guide.py`, `akasha-sleep.py`,
   keymaps, `install.sh`). Presque certainement **obsolète** — le sleep-timer
