@@ -161,13 +161,12 @@
              Remains visible above the content like Arctic Horizon 2's
              native home menu so the active section stays identifiable. -->
         <control type="group" id="100">
-            <!-- Was a no-op slide 0,0 to 0,0: the intended "bar recedes
-                 when unfocused" cue is now an actual subtle fade,
-                 cheap on the Pi4 (single alpha blend, no transform).
-                 85% only: the tab pills already carry their own
-                 focused/unfocused dimming, deeper would double-dim. -->
+            <!-- Plex behavior: the global top bar disappears entirely
+                 once the selection drops into the content, freeing the
+                 whole strip for the contextual tabs below, and fades
+                 back in when focus climbs back to it. -->
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                <effect type="fade" start="100" end="85" time="200" tween="quadratic" easing="out"/>
+                <effect type="fade" start="100" end="0" time="220" tween="quadratic" easing="out"/>
             </animation>
 
             <left>0</left>
@@ -376,6 +375,9 @@
              pills above, plan 04bda1b4 phase 1. -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
+                <effect type="slide" start="0,0" end="0,-85" time="250" tween="quadratic" easing="out"/>
+            </animation>
 
             <control type="button" id="2050">
                 <left>60</left>
@@ -433,6 +435,9 @@
         <!-- App sub-tabs: Mes Apps / Store. Same relocation as Jeux's above. -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
+                <effect type="slide" start="0,0" end="0,-85" time="250" tween="quadratic" easing="out"/>
+            </animation>
 
             <control type="button" id="2041">
                 <left>60</left>
@@ -483,6 +488,12 @@
                  charges). -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
+                <!-- The strip recenters itself in the freed top space when
+                     the global bar recedes (y 118 -> 60), and slides back
+                     under it when the bar fades back in. -->
+                <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
+                    <effect type="slide" start="0,0" end="0,-58" time="250" tween="quadratic" easing="out"/>
+                </animation>
 
                 <!-- Plex's library view has no big title block: the context
                      is carried by the tab strip + sidebar highlight (see
@@ -658,6 +669,11 @@
                 <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
                 <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
+                <!-- Same recentering as the library strip: y 118 -> 60
+                     while the global bar is recessed. -->
+                <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
+                    <effect type="slide" start="0,0" end="0,-58" time="250" tween="quadratic" easing="out"/>
+                </animation>
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
