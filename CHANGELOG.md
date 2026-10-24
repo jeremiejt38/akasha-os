@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.57.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.56.0...akasha-os-v0.57.0) (2026-10-24)
+
+
+### Features
+
+* **aura:** retract the global top bar like Plex TV ([#149](https://github.com/jeremiejt38/akasha-os/issues/149)) ([692f7e6](https://github.com/jeremiejt38/akasha-os/commit/692f7e6643f962e4b307c4c4e72313849dcfc419))
+
 ## [0.56.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.55.0...akasha-os-v0.56.0) (2026-10-24)
 
 
