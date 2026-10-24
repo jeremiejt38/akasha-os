@@ -80,14 +80,28 @@ class HomePressMonitor(xbmc.Monitor):
 
 class SettingsPressMonitor(xbmc.Monitor):
     """Listen for SettingsPress notifications (gear-wheel remote button,
-    dd440e2e section 9) and invoke the window callback. No simple/double
-    distinction needed here, unlike HomePressMonitor -- every press just
-    opens the unified settings panel."""
+    dd440e2e section 9) and invoke the window callback.
+
+    Requires a DOUBLE press: the remote emits isolated spurious gear-wheel
+    events (observed live in the debug log as lone `scancode 0xf0`
+    HandleKey entries while nobody was holding it), and a single such
+    event used to pop the settings panel "by itself" over whatever the
+    user was doing. A real double press still opens the panel instantly;
+    the Aura sidebar/gear icon stays a single-click alternative.
+
+    Comparison is timestamp-file based (two newest recorded presses), so
+    it also catches a double press whose first half fired while Aura was
+    still starting up and the monitor was not listening yet.
+    """
 
     def __init__(self, callback, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._callback = callback
-        self._last_seen_ts = 0.0
+        # Seed from the press file so a press recorded just before this
+        # instance existed still counts as the first half of a double.
+        presses = settings_press_handler.read_presses()
+        self._last_seen_ts = presses[-1] if presses else 0.0
+        self._lock = threading.Lock()
 
     def onNotification(self, sender, method, data):
         if sender != settings_press_handler.NOTIFY_SENDER:
@@ -95,15 +109,22 @@ class SettingsPressMonitor(xbmc.Monitor):
         # See the identical "Other." prefix note in HomePressMonitor above.
         if method != 'Other.' + settings_press_handler.NOTIFY_METHOD:
             return
-        ts = None
-        try:
-            with open(settings_press_handler.PRESS_FILE) as f:
-                ts = float(f.read().strip())
-        except (OSError, ValueError):
+        presses = settings_press_handler.read_presses()
+        if not presses:
             return
-        if ts <= self._last_seen_ts:
-            return
-        self._last_seen_ts = ts
+        ts = presses[-1]
+        with self._lock:
+            if ts <= self._last_seen_ts:
+                return
+            self._last_seen_ts = ts
+        if (len(presses) >= 2 and
+                ts - presses[-2] <= settings_press_handler.DOUBLE_PRESS_WINDOW_SECONDS):
+            self._invoke()
+        else:
+            xbmc.log('Akasha Aura: lone settings press ignored '
+                     '(double-press required)', xbmc.LOGINFO)
+
+    def _invoke(self):
         try:
             self._callback()
         except Exception as e:

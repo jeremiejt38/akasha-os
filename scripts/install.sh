@@ -62,6 +62,10 @@ cp "$SCRIPT_DIR/system/system.d/splash-video.service" /storage/.config/system.d/
 cp "$SCRIPT_DIR/system/system.d/splash-poweroff.service" /storage/.config/system.d/splash-poweroff.service
 cp "$SCRIPT_DIR/system/system.d/splash-reboot.service" /storage/.config/system.d/splash-reboot.service
 cp "$SCRIPT_DIR/system/system.d/akasha-disable-official-updates.service" /storage/.config/system.d/akasha-disable-official-updates.service
+cp "$SCRIPT_DIR/system/system.d/splash-override.service" /storage/.config/system.d/splash-override.service
+cp "$SCRIPT_DIR/system/system.d/wifi-watchdog.service" /storage/.config/system.d/wifi-watchdog.service
+cp "$SCRIPT_DIR/system/system.d/wifi-regdomain.service" /storage/.config/system.d/wifi-regdomain.service
+cp "$SCRIPT_DIR/system/system.d/wifi-silent-agent.service" /storage/.config/system.d/wifi-silent-agent.service
 cp "$SCRIPT_DIR/system/system.d/kodi.service.d/splash-restart.conf" /storage/.config/system.d/kodi.service.d/splash-restart.conf
 
 chmod +x /storage/.config/autostart.sh \
@@ -96,6 +100,13 @@ if [ -x "$FFMPEG" ] && [ -f /storage/.kodi/media/splash-intro.mp4 ]; then
         -vn -ac 2 -ar 48000 /storage/.kodi/media/splash-intro.wav 2>/dev/null || true
 fi
 
+# Kodi's built-in splash (/usr/share/kodi/media/splash.jpg) is bind-mounted
+# to ours by splash-override.service; generate the jpg from the png source.
+if [ -x "$FFMPEG" ] && [ -f /storage/.kodi/media/splash.png ]; then
+    "$FFMPEG" -y -i /storage/.kodi/media/splash.png -frames:v 1 \
+        /storage/.config/splash.jpg 2>/dev/null || true
+fi
+
 cp "$SCRIPT_DIR/kodi/scripts/show-splash.sh" /storage/.kodi/scripts/show-splash.sh
 cp "$SCRIPT_DIR/kodi/scripts/show-splash-if-restart.sh" /storage/.kodi/scripts/show-splash-if-restart.sh
 cp "$SCRIPT_DIR/kodi/scripts/generate-splash-messages.py" /storage/.kodi/scripts/generate-splash-messages.py
@@ -104,6 +115,10 @@ cp "$SCRIPT_DIR/kodi/scripts/akasha-guide.py" /storage/.kodi/scripts/akasha-guid
 chmod +x /storage/.kodi/scripts/akasha-guide.py
 cp "$SCRIPT_DIR/kodi/scripts/akasha-sleep.py" /storage/.kodi/scripts/akasha-sleep.py
 chmod +x /storage/.kodi/scripts/akasha-sleep.py
+cp "$SCRIPT_DIR/kodi/scripts/akasha-sleep-timer.py" /storage/.kodi/scripts/akasha-sleep-timer.py
+chmod +x /storage/.kodi/scripts/akasha-sleep-timer.py
+cp "$SCRIPT_DIR/kodi/scripts/volume.py" /storage/.kodi/scripts/volume.py
+chmod +x /storage/.kodi/scripts/volume.py
 
 chmod +x /storage/.kodi/scripts/show-splash.sh \
           /storage/.kodi/scripts/show-splash-if-restart.sh \
@@ -301,6 +316,10 @@ if [ -d "$SKIN_DIR" ]; then
     cp "$SCRIPT_DIR/kodi/media/akasha-title.png" "$SKIN_DIR/media/akasha-title.png"
     AKASHA_VERSION=$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.release-please-manifest.json'))['.'])" 2>/dev/null || echo '')
     python3 "$SCRIPT_DIR/skin-patches/patch_contextmenu_title.py" "$SKIN_DIR" "$AKASHA_VERSION"
+
+    # Plex-parity OSD: replace VideoOSD.xml with the minimal Plex layout
+    # (original kept as VideoOSD.xml.ah2-orig).
+    python3 "$SCRIPT_DIR/skin-patches/patch_plex_osd.py" "$SKIN_DIR"
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi
@@ -350,9 +369,26 @@ log "[13/13] Finalizing system tweaks..."
 
 # Disable Kodi built-in splash (replaced by intro video)
 if [ ! -f /storage/.kodi/userdata/advancedsettings.xml ]; then
-    echo '<advancedsettings><splash>false</splash></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml
-elif ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml; then
-    sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml
+    cat > /storage/.kodi/userdata/advancedsettings.xml <<'EOF'
+<advancedsettings>
+  <splash>false</splash>
+  <cache>
+    <buffermode>1</buffermode>
+    <memorysize>52428800</memorysize>
+    <readfactor>8</readfactor>
+  </cache>
+</advancedsettings>
+EOF
+else
+    if ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml; then
+        sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml
+    fi
+    # Network video cache: a 50MB read-ahead absorbs transient stalls of the
+    # public Plex endpoint (a dropped keep-alive / slow range response used to
+    # end playback outright on the first arrow-seek).
+    if ! grep -q '<buffermode>' /storage/.kodi/userdata/advancedsettings.xml; then
+        sed -i 's|</advancedsettings>|<cache><buffermode>1</buffermode><memorysize>52428800</memorysize><readfactor>8</readfactor></cache></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml
+    fi
 fi
 
 # Disable automatic addon updates (notify only), so Akasha OS remains in control
@@ -387,12 +423,19 @@ echo 'Akasha OS' > /storage/.cache/hostname
 # Enable / disable services
 systemctl daemon-reload
 systemctl enable splash-video.service splash-poweroff.service splash-reboot.service \
+                 splash-override.service wifi-regdomain.service \
                  akasha-disable-official-updates.service wifi-silent-agent.service 2>/dev/null || true
+# Dead unit from an earlier release (idle-shutdown watchdog, superseded by
+# the Guide menu's "Temporisation" script): drop it if still deployed.
+rm -f /storage/.config/system.d/sleep-timer.service
+systemctl disable sleep-timer.service 2>/dev/null || true
 if [ -e /storage/.config/akasha-os/CEC_DISABLED ]; then
     systemctl disable cec-tv.service cec-wakeup.service cec-wake-early.service 2>/dev/null || true
 else
     systemctl enable cec-tv.service cec-wakeup.service cec-wake-early.service 2>/dev/null || true
 fi
-systemctl disable wifi-watchdog.service 2>/dev/null || true
+# wifi-watchdog is now network-agnostic (discovers the connman Favorite
+# profile instead of a hardcoded SSID): safe to keep enabled everywhere.
+systemctl enable wifi-watchdog.service 2>/dev/null || true
 
 log "=== Akasha OS install complete ==="

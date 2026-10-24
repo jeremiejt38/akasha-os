@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import threading
+import xml.etree.ElementTree as ET
 import xbmc
 import xbmcgui
 import xbmcaddon
@@ -19,6 +20,11 @@ import xbmcaddon
 LOCK_FILE = '/tmp/akasha-guide.lock'
 CLOSE_FILE = '/tmp/akasha-guide.close'
 LOCK_TTL = 10  # seconds; refreshed while the menu is open
+SLEEP_TIMER_STATE = '/storage/.config/akasha-os/sleep-timer.json'
+SLEEP_TIMER_SCRIPT = '/storage/.kodi/scripts/akasha-sleep-timer.py'
+CEC_DISABLED_FILE = '/storage/.config/akasha-os/CEC_DISABLED'
+CEC_SETTINGS_FILE = '/storage/.kodi/userdata/peripheral_data/cec_CEC_Adapter.xml'
+CEC_SERVICES = ('cec-tv.service', 'cec-wakeup.service', 'cec-wake-early.service')
 
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
@@ -27,15 +33,60 @@ ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 
 OPTIONS = [
-    ('Accueil', 'ActivateWindow(Home)', False),
+    # "Accueil" must land on Aura, not the native Kodi Home window: the
+    # RunScript hits the running Aura instance's heartbeat lock and is
+    # treated as a Home press (back to Divertissement), or launches Aura
+    # when it isn't running -- same path as the remote's Home key.
+    ('Accueil', 'RunScript(script.akasha.aura)', False),
     ('Akasha Settings', 'RunAddon(script.akasha.settings)', False),
-    ('Activer / desactiver overlay systeme', '__overlay__', False),
-    ('Mode Ambiant', 'RunScript(script.akasha.ambient)', False),
+    ('Temporisation', '__sleep_timer__', False),
+    ('Options developpeurs', '__developer_options__', False),
     ('Redemarrer Akasha', 'RestartApp', True),
     ('Mise en veille', '__sleep__', True),
     ('Eteindre le systeme', 'Shutdown', True),
 ]
-LABELS = [opt[0] for opt in OPTIONS]
+
+DEVELOPER_OPTIONS = [
+    ('Lancer PM4K', '__launch_pm4k__', False),
+    ('Extensions Kodi', '__addon_browser__', False),
+    ('Activer / desactiver overlay systeme', '__overlay__', False),
+    ('Mode Ambiant', 'RunScript(script.akasha.ambient)', False),
+    ('Commande HDMI-CEC', '__cec_toggle__', False),
+]
+def _sleep_timer_state():
+    try:
+        with open(SLEEP_TIMER_STATE) as f:
+            state = json.load(f)
+        target = float(state['target'])
+        pid = int(state['pid'])
+        os.kill(pid, 0)
+        if target <= time.time():
+            return None
+        return {'target': target, 'pid': pid}
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def _format_remaining(seconds):
+    minutes = max(0, int(seconds + 59) // 60)
+    hours, minutes = divmod(minutes, 60)
+    return '{} h {:02d} min'.format(hours, minutes) if hours else '{} min'.format(minutes)
+
+
+def _options(source=OPTIONS):
+    timer = _sleep_timer_state()
+    options = []
+    for label, action, confirm in source:
+        if action == '__sleep_timer__' and timer:
+            target = time.localtime(timer['target'])
+            remaining = _format_remaining(timer['target'] - time.time())
+            label = 'Annuler temporisation - {:02d}:{:02d} (reste {})'.format(
+                target.tm_hour, target.tm_min, remaining)
+        elif action == '__cec_toggle__':
+            label = 'Commande HDMI-CEC : {}'.format(
+                'OFF' if os.path.exists(CEC_DISABLED_FILE) else 'ON')
+        options.append((label, action, confirm))
+    return options
 
 
 def _send_back():
@@ -73,6 +124,55 @@ def _is_open():
     return False
 
 
+def _cancel_sleep_timer(state):
+    try:
+        os.remove(SLEEP_TIMER_STATE)
+    except OSError:
+        pass
+    xbmcgui.Dialog().notification(
+        'Akasha Guide', 'Temporisation annulee', xbmcgui.NOTIFICATION_INFO, 2000)
+
+
+def _sleep_timer():
+    state = _sleep_timer_state()
+    if state:
+        target = time.localtime(state['target'])
+        remaining = _format_remaining(state['target'] - time.time())
+        if xbmcgui.Dialog().yesno(
+                'Akasha Guide', 'Annuler la mise en veille prevue a {:02d}:{:02d} ?\nTemps restant : {}'.format(
+                    target.tm_hour, target.tm_min, remaining)):
+            _cancel_sleep_timer(state)
+        return
+    default = time.strftime('%H:%M', time.localtime(time.time() + 3600))
+    selected = xbmcgui.Dialog().numeric(2, 'Heure de mise en veille', default)
+    if not selected:
+        return
+    try:
+        hour, minute = (int(part) for part in selected.split(':', 1))
+        now = time.time()
+        current = time.localtime(now)
+        target = time.mktime((current.tm_year, current.tm_mon, current.tm_mday,
+                              hour, minute, 0, current.tm_wday, current.tm_yday, current.tm_isdst))
+        if target <= now:
+            target += 86400
+    except (TypeError, ValueError):
+        xbmcgui.Dialog().notification(
+            'Akasha Guide', 'Heure invalide', xbmcgui.NOTIFICATION_ERROR, 2000)
+        return
+    try:
+        process = subprocess.Popen([sys.executable, SLEEP_TIMER_SCRIPT, str(target)],
+                                   start_new_session=True, stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL)
+        os.makedirs(os.path.dirname(SLEEP_TIMER_STATE), exist_ok=True)
+        with open(SLEEP_TIMER_STATE, 'w') as f:
+            json.dump({'target': target, 'pid': process.pid}, f)
+        xbmcgui.Dialog().notification(
+            'Akasha Guide', 'Veille a {:02d}:{:02d} - dans {}'.format(
+                hour, minute, _format_remaining(target - now)), xbmcgui.NOTIFICATION_INFO, 4000)
+    except Exception as e:
+        xbmc.log('Akasha Guide: sleep timer launch error: {}'.format(e), xbmc.LOGERROR)
+
+
 def _sleep():
     """Put the system/TV to sleep and wake on input."""
     if not xbmcgui.Dialog().yesno('Akasha Guide', 'Mettre l\'appareil et le televiseur en veille ?'):
@@ -82,6 +182,45 @@ def _sleep():
         subprocess.Popen([sys.executable, script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception as e:
         xbmc.log('Akasha Guide: sleep launch error: {}'.format(e), xbmc.LOGERROR)
+
+
+def _set_kodi_cec_activation(enabled):
+    try:
+        tree = ET.parse(CEC_SETTINGS_FILE)
+        setting = tree.getroot().find("./setting[@id='activate_source']")
+        if setting is None:
+            return False
+        setting.set('value', '1' if enabled else '0')
+        tree.write(CEC_SETTINGS_FILE, encoding='UTF-8', xml_declaration=True)
+        return True
+    except (OSError, ET.ParseError):
+        return False
+
+
+def _toggle_cec():
+    enabled = os.path.exists(CEC_DISABLED_FILE)
+    try:
+        os.makedirs(os.path.dirname(CEC_DISABLED_FILE), exist_ok=True)
+        if enabled:
+            os.remove(CEC_DISABLED_FILE)
+            subprocess.run(['systemctl', 'enable'] + list(CEC_SERVICES),
+                           timeout=10, check=False, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        else:
+            with open(CEC_DISABLED_FILE, 'w') as f:
+                f.write('disabled by Akasha Guide\n')
+            subprocess.run(['systemctl', 'disable', '--now'] + list(CEC_SERVICES),
+                           timeout=10, check=False, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        kodi_updated = _set_kodi_cec_activation(enabled)
+        suffix = '' if kodi_updated else ' (reglage Kodi non modifie)'
+        xbmcgui.Dialog().notification(
+            'Akasha Guide', 'Commande HDMI-CEC : {}{}'.format(
+                'ON' if enabled else 'OFF', suffix), xbmcgui.NOTIFICATION_INFO, 3000)
+    except Exception as e:
+        xbmc.log('Akasha Guide: CEC toggle error: {}'.format(e), xbmc.LOGERROR)
+        xbmcgui.Dialog().notification(
+            'Akasha Guide', 'Echec du changement HDMI-CEC', xbmcgui.NOTIFICATION_ERROR, 3000)
 
 
 def _toggle_overlay():
@@ -124,12 +263,36 @@ def _shutdown_system():
     subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
 
 
+def _launch_after_dialogs_close(action):
+    def launch():
+        xbmc.executebuiltin('Dialog.Close(all,true)')
+        time.sleep(1)
+        xbmc.executebuiltin(action)
+
+    threading.Thread(target=launch).start()
+
+
 def _run_builtin(action):
+    if action == '__launch_pm4k__':
+        _launch_after_dialogs_close('RunAddon(script.plexmod)')
+        return
+    if action == '__addon_browser__':
+        _launch_after_dialogs_close('ActivateWindow(AddonBrowser)')
+        return
     if action == '__overlay__':
         _toggle_overlay()
         return
     if action == '__sleep__':
         _sleep()
+        return
+    if action == '__sleep_timer__':
+        _sleep_timer()
+        return
+    if action == '__cec_toggle__':
+        _toggle_cec()
+        return
+    if action == '__developer_options__':
+        _developer_menu()
         return
     if action == 'RestartApp':
         _restart_kodi()
@@ -148,13 +311,14 @@ class GuideWindow(xbmcgui.WindowXMLDialog):
         self.list = None
         self._closing = False
         self.preset = 0
+        self.menu_options = OPTIONS
         super().__init__(*args, **kwargs)
 
     def onInit(self):
         try:
             self.list = self.getControl(9000)
             self.list.reset()
-            for label, action, confirm in OPTIONS:
+            for label, action, confirm in _options(self.menu_options):
                 self.list.addItem(xbmcgui.ListItem(label=label))
             self.setFocus(self.list)
             self._set_preset(self.preset)
@@ -190,11 +354,12 @@ class GuideWindow(xbmcgui.WindowXMLDialog):
         if self.list is None:
             return
         idx = self.list.getSelectedPosition()
-        if idx < 0 or idx >= len(OPTIONS):
+        options = _options(self.menu_options)
+        if idx < 0 or idx >= len(options):
             return
-        label, action, confirm = OPTIONS[idx]
-        _run_builtin(action)
+        label, action, confirm = options[idx]
         self.close_safe()
+        _run_builtin(action)
 
     def close_safe(self):
         if self._closing:
@@ -206,24 +371,48 @@ class GuideWindow(xbmcgui.WindowXMLDialog):
             pass
 
 
-def _open_custom():
+def _open_custom(menu_options=OPTIONS):
     addon = xbmcaddon.Addon('script.akasha.guide')
     path = addon.getAddonInfo('path')
-    return GuideWindow('Guide.xml', path, 'Default', '1080i')
+    window = GuideWindow('Guide.xml', path, 'Default', '1080i')
+    window.menu_options = menu_options
+    return window
 
 
-def _native_menu(style):
+def _native_menu(style, menu_options=OPTIONS, title='Akasha Guide'):
     """Open a native dialog and return when closed."""
     dialog = xbmcgui.Dialog()
+    options = _options(menu_options)
+    labels = [opt[0] for opt in options]
     if style == 1:
-        choice = dialog.select('Akasha Guide', LABELS, preselect=0)
+        choice = dialog.select(title, labels, preselect=0)
     else:
-        choice = dialog.contextmenu(LABELS)
+        choice = dialog.contextmenu(labels)
 
     if choice < 0:
         return
-    label, action, confirm = OPTIONS[choice]
+    label, action, confirm = options[choice]
     _run_builtin(action)
+
+
+def _guide_style():
+    try:
+        settings = xbmcaddon.Addon('script.akasha.settings')
+        return int(settings.getSetting('guide.style') or '0')
+    except Exception:
+        return 0
+
+
+def _developer_menu():
+    style = _guide_style()
+    if style != 2:
+        _native_menu(style, DEVELOPER_OPTIONS, 'Options developpeurs')
+        return
+    window = _open_custom(DEVELOPER_OPTIONS)
+    try:
+        window.doModal()
+    finally:
+        del window
 
 
 def main():
@@ -233,11 +422,7 @@ def main():
         return
 
     # Read chosen style from Akasha Settings
-    try:
-        settings = xbmcaddon.Addon('script.akasha.settings')
-        style = int(settings.getSetting('guide.style') or '0')
-    except Exception:
-        style = 0
+    style = _guide_style()
 
     if style != 2:
         # Native dialog style (contextmenu / select)
@@ -286,5 +471,9 @@ def main():
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'overlay_toggle':
         _toggle_overlay()
+    elif len(sys.argv) > 1 and sys.argv[1] == 'launch_pm4k':
+        _launch_after_dialogs_close('RunAddon(script.plexmod)')
+    elif len(sys.argv) > 1 and sys.argv[1] == 'addon_browser':
+        _launch_after_dialogs_close('ActivateWindow(AddonBrowser)')
     else:
         main()

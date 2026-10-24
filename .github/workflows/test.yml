@@ -27,7 +27,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install pytest
+        run: pip install pytest
+
       - name: Run unit tests (${{ matrix.addon }})
         working-directory: kodi/addons/${{ matrix.addon }}
         run: |
-          PYTHONPATH=resources/lib python3 -m unittest discover -v tests
+          PYTHONPATH=resources/lib python3 -m pytest tests -q

@@ -48,7 +48,7 @@ $SCP "$SCRIPT_DIR/skin-patches/shortcuts/mainmenu.DATA.xml" "root@$PI_IP:$SKIN_D
 $SSH "rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash"
 
 echo "[5/5] Disabling Kodi built-in splash..."
-$SSH "if [ ! -f /storage/.kodi/userdata/advancedsettings.xml ]; then echo '<advancedsettings><splash>false</splash></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml; elif ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml; then sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml; fi"
+$SSH "if [ ! -f /storage/.kodi/userdata/advancedsettings.xml ]; then echo '<advancedsettings><splash>false</splash><cache><buffermode>1</buffermode><memorysize>52428800</memorysize><readfactor>8</readfactor></cache></advancedsettings>' > /storage/.kodi/userdata/advancedsettings.xml; else { ! grep -q '<splash>' /storage/.kodi/userdata/advancedsettings.xml && sed -i 's|</advancedsettings>|<splash>false</splash></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml; }; { ! grep -q '<buffermode>' /storage/.kodi/userdata/advancedsettings.xml && sed -i 's|</advancedsettings>|<cache><buffermode>1</buffermode><memorysize>52428800</memorysize><readfactor>8</readfactor></cache></advancedsettings>|' /storage/.kodi/userdata/advancedsettings.xml; }; fi"
 
 echo ""
 echo "=== Restarting Kodi to apply changes... ==="

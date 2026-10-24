@@ -132,6 +132,195 @@ def item_subtitle(item):
     return ''
 
 
+def _tags(raw_item, key):
+    """Return tag names from a Plex `Genre`/`Director`/`Writer`/`Role` array."""
+    return [str(tag['tag']) for tag in raw_item.get(key) or [] if tag.get('tag')]
+
+
+def _image_of_type(raw_item, image_type):
+    """Return the `url` of the first `Image` entry of the given type."""
+    for image in raw_item.get('Image') or []:
+        if image.get('type') == image_type and image.get('url'):
+            return image['url']
+    return ''
+
+
+def _first_media(raw_item):
+    medias = raw_item.get('Media') or []
+    return medias[0] if medias and isinstance(medias[0], dict) else {}
+
+
+def _streams(raw_item, stream_type):
+    media = _first_media(raw_item)
+    parts = media.get('Part') or []
+    streams = (parts[0].get('Stream') or []) if parts else []
+    return [s for s in streams if s.get('streamType') == stream_type]
+
+
+def _video_label(raw_item):
+    """Plex-style media badge, e.g. '4K HDR10', 'HD', 'SD'.
+
+    Empty when the item carries no Media at all (shows, seasons,
+    collections) -- a bare 'SD' badge on a series page is meaningless."""
+    media = _first_media(raw_item)
+    if not media:
+        return ''
+    resolution = str(media.get('videoResolution') or '').lower()
+    if resolution in ('4k', '2160', '2160p'):
+        base = '4K'
+    elif resolution in ('1080', '1080p'):
+        base = '1080p'
+    elif resolution in ('720', '720p'):
+        base = '720p'
+    else:
+        base = resolution.upper() if resolution else 'SD'
+    hdr = ''
+    for stream in _streams(raw_item, 1):
+        trc = str(stream.get('colorTrc') or stream.get('colourTrc') or '').lower()
+        if stream.get('DOVIPresent') or stream.get('doviPresent'):
+            hdr = 'DV'
+            break
+        if 'smpte2084' in trc or 'bt2020' in trc:
+            hdr = 'HDR10'
+            break
+        if 'arib-std-b67' in trc or 'hlg' in trc:
+            hdr = 'HLG'
+            break
+    codec = str(media.get('videoCodec') or '').upper()
+    parts = [base]
+    if hdr:
+        parts.append(hdr)
+    if codec:
+        parts.append(codec)
+    return ' '.join(parts)
+
+
+def _audio_label(raw_item):
+    """Plex-style audio badge, e.g. 'French EAC3 5.1'."""
+    for stream in _streams(raw_item, 2):
+        language = stream.get('language') or stream.get('languageTag') or ''
+        codec = str(stream.get('codec') or '').upper()
+        channels = stream.get('channels')
+        layout = {2: '2.0', 6: '5.1', 8: '7.1'}.get(channels, str(channels) if channels else '')
+        label = ' '.join(p for p in (language, codec, layout) if p)
+        if label:
+            return label
+    return ''
+
+
+def _subtitle_label(raw_item):
+    """Short subtitle summary, e.g. 'French SRT' (first sub) or '3 sous-titres'."""
+    subs = _streams(raw_item, 3)
+    if not subs:
+        return ''
+    first = subs[0]
+    language = first.get('language') or first.get('languageTag') or ''
+    codec = str(first.get('codec') or first.get('format') or '').upper()
+    label = ' '.join(p for p in (language, codec) if p)
+    return label or '{} sous-titres'.format(len(subs))
+
+
+def _content_rating_display(raw_item):
+    """Strip the locale prefix from contentRating ('fr/10' -> '10')."""
+    rating = str(raw_item.get('contentRating') or '')
+    if '/' in rating:
+        rating = rating.rsplit('/', 1)[-1]
+    return rating
+
+
+def build_video_item(raw_item, image_resolver):
+    """Normalise one raw Plex `Metadata` entry into a display dict.
+
+    `image_resolver(plex_path, width=None, height=None) -> url` builds a
+    displayable URL for a Plex image path (e.g. `ConnectorClient.image_url`,
+    or `server+path?token=` for the direct Plex client). Resolvers that
+    support it (direct Plex) downscale server-side; the others ignore the
+    size hints. Carries every field the Plex-style UI needs:
+    posters, fanart, progress, ratings, cast, media badges.
+    """
+    if not isinstance(raw_item, dict):
+        raw_item = {}
+    item_type = raw_item.get('type') or 'video'
+    thumb = raw_item.get('thumb') or ''
+    art = raw_item.get('art') or ''
+    grandparent_thumb = raw_item.get('grandparentThumb') or ''
+    grandparent_art = raw_item.get('grandparentArt') or ''
+    logo = _image_of_type(raw_item, 'clearLogo')
+    section_id = raw_item.get('librarySectionID')
+
+    # Plex TV cards show the *show* poster for episodes (2:3), the item's own
+    # thumb for movies/shows/seasons; fanart falls back to the show's art.
+    poster = grandparent_thumb if item_type == 'episode' and grandparent_thumb else thumb
+    fanart = art or grandparent_art
+
+    duration_ms = raw_item.get('duration')
+    view_offset_ms = raw_item.get('viewOffset')
+    progress = None
+    if duration_ms and view_offset_ms:
+        progress = min(1.0, max(0.0, float(view_offset_ms) / float(duration_ms)))
+
+    media = _first_media(raw_item)
+    part_key = ''
+    parts = media.get('Part') or []
+    if parts:
+        part_key = parts[0].get('key') or ''
+
+    view_count = raw_item.get('viewCount') or 0
+    return {
+        'title': raw_item.get('title') or 'Sans titre',
+        'type': item_type,
+        'rating_key': raw_item.get('ratingKey'),
+        'parent_rating_key': raw_item.get('parentRatingKey'),
+        'grandparent_rating_key': raw_item.get('grandparentRatingKey'),
+        'index': raw_item.get('index'),
+        'season': raw_item.get('parentIndex'),
+        'show_title': raw_item.get('grandparentTitle') or '',
+        'year': raw_item.get('year'),
+        'originally_available_at': raw_item.get('originallyAvailableAt'),
+        'tagline': raw_item.get('tagline') or '',
+        'summary': raw_item.get('summary') or '',
+        'content_rating': _content_rating_display(raw_item),
+        'rating': raw_item.get('rating'),
+        'audience_rating': raw_item.get('audienceRating'),
+        'rating_image': raw_item.get('ratingImage') or '',
+        'audience_rating_image': raw_item.get('audienceRatingImage') or '',
+        'genres': _tags(raw_item, 'Genre'),
+        'directors': _tags(raw_item, 'Director'),
+        'writers': _tags(raw_item, 'Writer'),
+        'cast': [
+            {
+                'name': str(role.get('tag')),
+                'role': str(role.get('role') or ''),
+                'thumb_url': image_resolver(role['thumb'], 160, 160) if role.get('thumb') else '',
+                # 'actor=11550' -- server-side tag filter for the person's
+                # filmography page (see PlexClient.person_filmography).
+                'person_filter': str(role.get('filter') or ''),
+            }
+            for role in raw_item.get('Role') or []
+            if role.get('tag')
+        ],
+        'studio': raw_item.get('studio') or '',
+        'duration_ms': duration_ms,
+        'view_offset_ms': view_offset_ms,
+        'progress': progress,
+        'view_count': view_count,
+        'watched': bool(view_count),
+        'thumb_url': image_resolver(thumb, 640, 360) if thumb else '',
+        'art_url': image_resolver(art, 1920, 1080) if art else '',
+        'poster_url': image_resolver(poster, 320, 480) if poster else '',
+        'fanart_url': image_resolver(fanart, 1920, 1080) if fanart else '',
+        # clearLogos are transparent PNGs -- Plex's photo transcoder emits
+        # JPEG only, so logos keep the direct URL to preserve alpha.
+        'logo_url': image_resolver(logo) if logo else '',
+        'landscape_url': image_resolver(thumb, 640, 360) if (thumb and item_type == 'episode') else '',
+        'video_label': _video_label(raw_item),
+        'audio_label': _audio_label(raw_item),
+        'subtitle_label': _subtitle_label(raw_item),
+        'part_key': part_key,
+        'section_id': str(section_id) if section_id is not None else None,
+    }
+
+
 def parse_metadata_list(raw_json, image_resolver):
     """Return normalised video dicts from a raw Metadata-bearing payload.
 
@@ -139,27 +328,8 @@ def parse_metadata_list(raw_json, image_resolver):
     image path (e.g. `ConnectorClient.image_url`).
     """
     mc = _media_container(raw_json)
-    items = []
-    for item in mc.get('Metadata', []):
-        thumb = item.get('thumb') or ''
-        art = item.get('art') or ''
-        section_id = item.get('librarySectionID')
-        items.append({
-            'title': item.get('title') or 'Sans titre',
-            'type': item.get('type') or 'video',
-            'rating_key': item.get('ratingKey'),
-            'parent_rating_key': item.get('parentRatingKey'),
-            'index': item.get('index'),
-            'season': item.get('parentIndex'),
-            'show_title': item.get('grandparentTitle') or '',
-            'year': item.get('year'),
-            'originally_available_at': item.get('originallyAvailableAt'),
-            'summary': item.get('summary') or '',
-            'thumb_url': image_resolver(thumb) if thumb else '',
-            'art_url': image_resolver(art) if art else '',
-            'section_id': str(section_id) if section_id is not None else None,
-        })
-    return items
+    return [build_video_item(item, image_resolver)
+            for item in mc.get('Metadata', [])]
 
 
 def filter_by_section(items, section_key):

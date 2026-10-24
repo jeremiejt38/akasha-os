@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha Plex-style OSD quick menu: the floating picker Plex Android TV
+     shows above the seek bar for the audio/subtitles circle and for the
+     gear (quality + advanced settings). -->
+<window type="dialog" id="1203">
+    <defaultcontrol>1000</defaultcontrol>
+    <controls>
+        <!-- Scrim: same readability layer the VideoOSD uses. -->
+        <control type="image">
+            <left>0</left>
+            <top>860</top>
+            <width>1920</width>
+            <height>220</height>
+            <texture colordiffuse="CC000000">white.png</texture>
+        </control>
+
+        <control type="group">
+            <left>570</left>
+            <top>230</top>
+            <animation effect="slide" start="0,80" end="0,0" time="180" tween="quadratic" easing="out" condition="true">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="160" condition="true">WindowOpen</animation>
+
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>780</width>
+                <height>700</height>
+                <texture colordiffuse="F214161F" border="28">rounded-solid.png</texture>
+            </control>
+            <control type="label" id="10">
+                <left>50</left>
+                <top>30</top>
+                <width>680</width>
+                <height>44</height>
+                <font>font_midi</font>
+                <label>Pistes</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="list" id="1000">
+                <left>30</left>
+                <top>90</top>
+                <width>720</width>
+                <height>580</height>
+                <itemlayout width="720" height="64">
+                    <control type="label">
+                        <left>20</left>
+                        <top>0</top>
+                        <width>660</width>
+                        <height>64</height>
+                        <aligny>center</aligny>
+                        <font>font_mini</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>99FFFFFF</textcolor>
+                        <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>666</left>
+                        <top>18</top>
+                        <width>28</width>
+                        <height>28</height>
+                        <texture>check.png</texture>
+                        <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
+                    </control>
+                    <control type="label">
+                        <left>20</left>
+                        <top>0</top>
+                        <width>660</width>
+                        <height>64</height>
+                        <aligny>center</aligny>
+                        <font>font_tiny</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>66FFFFFF</textcolor>
+                        <visible>String.IsEqual(ListItem.Property(header),1)</visible>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="720" height="64">
+                    <control type="image">
+                        <left>0</left>
+                        <top>2</top>
+                        <width>720</width>
+                        <height>60</height>
+                        <texture colordiffuse="FFE5A00D" border="16">rounded-solid.png</texture>
+                        <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
+                    </control>
+                    <control type="label">
+                        <left>20</left>
+                        <top>0</top>
+                        <width>660</width>
+                        <height>64</height>
+                        <aligny>center</aligny>
+                        <font>font_mini</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FF10131A</textcolor>
+                        <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>666</left>
+                        <top>18</top>
+                        <width>28</width>
+                        <height>28</height>
+                        <texture colordiffuse="FF10131A">check.png</texture>
+                        <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
+                    </control>
+                    <control type="label">
+                        <left>20</left>
+                        <top>0</top>
+                        <width>660</width>
+                        <height>64</height>
+                        <aligny>center</aligny>
+                        <font>font_tiny</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>AA10131A</textcolor>
+                        <visible>String.IsEqual(ListItem.Property(header),1)</visible>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+    </controls>
+</window>

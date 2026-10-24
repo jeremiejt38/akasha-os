@@ -768,3 +768,135 @@ la vue "toutes les applications". Les apps externes portent un badge `[Web]` pou
 Nouvelle comparaison effectuée directement avec l'accueil Arctic Horizon 2 installé sur le Pi, à partir d'une capture réelle et de ses fichiers `Home.xml`/`Includes_Objects.xml`. Aura reprend désormais sa composition globale plutôt que seulement ses textures : barre persistante, fond noir uniforme, modules compacts et contigus, icônes 60 px, pilule focalisée de 320 px, typographie plus fine et contenus alignés à 60 px du bord. Le fond de pilule est étiré comme une image 320x80 centrée autour du contrôle plutôt qu'en 9-slice avec `border=80` dans une boîte haute de 60 px : cette ancienne combinaison invalide déformait la texture, la collait au bord supérieur et la décalait par rapport au logo.
 
 La sidebar Divertissement est entièrement masquée hors focus puis glisse au premier plan sur `Left`, supprimant la bande résiduelle visible à l'écran. Les onglets contextuels remontent sous la barre principale, les trois rangées Recommandé utilisent des posters 130x195 plus proches de la densité AH2 et les sous-titres secondaires sont masqués pour éviter une double ligne illisible. Validé visuellement sur le Pi avec de vraies données Plex ; navigation et chargement restent inchangés.
+
+## Toujours atterrir sur Aura — boot et touche Home (2026-10-22)
+
+Trois défauts laissaient l'utilisateur bloqué sur l'accueil Kodi natif :
+
+- **Lanceur au boot** (`service.akasha.aura`) : le garde `getCurrentWindowId() != 10000` (ajouté
+  localement sur le Pi, jamais commité) sautait le lancement **définitivement** quand une autre
+  fenêtre était active à l'instant exact du service (fin d'intro, dialog résiduel). Le service
+  attend maintenant jusqu'à 30 s que la fenêtre Home soit au premier plan, puis lance Aura même
+  en cas de timeout — l'accueil natif n'est qu'un filet de sécurité via Back, jamais une
+  destination.
+- **Verrou d'instance** (`/tmp/akasha-aura.lock`) : le fichier stockait `os.getpid()`, c'est-à-dire
+  le PID de `kodi.bin` — toujours vivant tant que Kodi tourne. Tout verrou survivant à une mort
+  anormale du script (thread tué, reload d'addon, crash) faisait croire à une instance active :
+  chaque appui Home était avalé comme « duplicate press » et la touche restait morte jusqu'au
+  reboot. Le script vivant réécrit maintenant le verrou toutes les 2 s (heartbeat) ; une mtime de
+  plus de 6 s = instance morte → nouvelle Aura autorisée.
+- **Home pendant la lecture** : l'appui était routé vers la fenêtre fermée (cycle modal autour de
+  la vidéo). Le handler met maintenant l'action en file (`_pending_home_action`), stoppe la
+  vidéo, et `onInit` l'applique à la réouverture — simple pression → onglet Divertissement,
+  double pression → app switcher. Pendant la lecture, Home ramène donc dans Aura comme la
+  touche Home de Plex ATV.
+
+## Barre d'onglets en liste native Kodi (2026-10-23)
+
+La barre de modules (Divertissement/Jeux/App) n'est plus trois boutons pill séparés mais une
+**liste horizontale skinshortcuts** identique au menu principal de la skin
+(`Includes_Objects.xml` "Object_MenuBar_List") : slots d'icônes 100 px, le slot sélectionné
+s'étend en pilule de 360 px, glissement animé par le `scrolltime` du conteneur (400 ms,
+tween quadratic). Objectif : reproduire exactement le comportement du menu natif au passage
+d'un onglet à l'autre — mouvement natif de la liste au lieu d'un reflow Python.
+
+Constats mesurés sur le Pi qui ont guidé l'implémentation :
+
+- **Les items `<content>` statiques ne sont pas navigables** dans un `WindowXMLDialog` :
+  ils s'affichent mais ne répondent ni à Left ni à Right. La liste est remplie depuis le
+  script (`_populate_tab_list`), comme skinshortcuts le fait pour le menu natif.
+- **`<onleft>`/`<onright>` sur un conteneur se déclenchent à CHAQUE appui** horizontal, pas
+  seulement en bord de liste : Left depuis l'item 2 sautait hors de la liste au lieu de
+  reculer. Les sorties de bord (recherche à gauche, engrenage à droite) sont donc gérées
+  en Python.
+- **`onAction` peut être appelé avant OU après le déplacement interne** selon le chemin de
+  traitement du contrôle, et une pression qui transfère le focus dans la liste (engrenage
+  →Left→ liste) est **re-livrée une seconde fois** au handler sans bouger d'item. La
+  décision « déplacé vs resté au bord » compare donc la position finale à `_tab_list_pos`
+  par direction, et la sortie de bord n'exige le saut que si la position suivie était déjà
+  au bord — sinon le Left transféré éjecterait vers la recherche depuis le milieu de barre.
+- **Les listes Kodi bouclent** (wrap-around) : Right sur le dernier item repart au premier.
+  Aura annule l'enroulement (`selectItem` inverse) et traite l'appui comme une sortie de
+  bord — la barre se lit « recherche | onglets | engrenage » sans boucle interne.
+- Down depuis la liste entre dans les sous-onglets du module actif, Up y remonte
+  (`onup` repointé sur 2007 partout, les anciennes cibles 2001/2003 étaient mortes).
+- Le Guide → « Accueil » route désormais `RunScript(script.akasha.aura)` comme la touche
+  Home, au lieu d'`ActivateWindow(Home)` qui laissait l'utilisateur sur l'accueil natif.
+
+Validé en direct : cycle search ⇄ onglets ⇄ engrenage complet, positions JSON-RPC
+`Container(2007).Position` 0→1→2→sortie, sous-onglets synchronisés au module, Home depuis
+n'importe quel onglet revient sur Divertissement avec la liste focusée.
+
+## Lecture vidéo interrompue / paramètres qui s'ouvrent seuls (oct. 2026)
+
+Symptôme rapporté : un épisode se ferme après ~1 min, puis le panneau paramètres
+s'ouvre sans action. Diagnostic sur le Pi (logs debug + captures d'entrées brutes) :
+
+- Le `CloseFile` est demandé sur le thread principal (`CApplication::StopPlaying`)
+  = un événement d'entrée externe (touche retour/stop), pas un crash décodeur.
+- Les monitors `xbmc.Monitor` (Home/gear) **restent vivants** sur l'AuraWindow
+  fermée pendant la lecture : un appui engrenage en plein écran appelait
+  `doModal()` sur la fenêtre morte → panneau « Type d'arrêt » par-dessus la
+  vidéo en cours (reproduit en direct), ou panneau rouvert dès la réouverture.
+- Un appui `browser_home` pendant la lecture appelle `xbmc.Player().stop()`
+  (comportement voulu : Home ramène dans Aura) — mais un événement parasite
+  tue donc la vidéo instantanément.
+- `window.open_settings_on_init` était codé `False` en dur : un appui engrenage
+  Aura fermée n'ouvrait jamais le panneau. Corrigé → `= open_settings`.
+
+Correctifs (commit 0d29ba8) : `_open_settings_panel` ignore l'appui quand
+`isPlayingVideo()` — l'OSD plein écran a déjà sa propre entrée paramètres ;
+`open_settings_on_init` reflète l'argument `opensettings`.
+
+Point matériel résiduel : la télécommande Amazon émet sporadiquement des
+événements parasites (rafales d'appuis engrenage/Home sans cause connue —
+rafale observée 03:31→03:40, silence total ensuite). Pistes : bouton coincé,
+IR du récepteur GPIO23 (`gpio-ir`, actif via `dtoverlay`), rebond matériel.
+Le debug logging reste activé pour capturer la source à la prochaine occurrence.
+
+## Chaînage des épisodes (Plex PlayQueue) (oct. 2026)
+
+Lancer un épisode enfile désormais le reste de sa saison dans la playlist
+vidéo Kodi (`xbmc.PlayList`) : les épisodes défilent sans retour à Aura
+entre eux, chaque item garde son propre point de reprise Plex, et
+« Recommencer » ne réinitialise que le premier. `default.py` exige ~2 s
+de silence continu avant de rouvrir Aura, pour absorber le trou
+« not-playing » entre deux items de la playlist. Vérifié sur le Pi :
+fin de S2E1 → S2E2 enchaîne automatiquement.
+
+## Freeze UI et timeouts Plex (2026-10-23)
+
+Les appels Plex sont synchrones sur le thread GUI. Quand le serveur devient injoignable
+(la route réseau a sauté deux fois ce jour), chaque requête brûlait le timeout complet de
+10 s et les requêtes enchaînées figeaient l'interface des dizaines de secondes. Timeout
+abaissé à 5 s dans `plex_client.py` et `connector_client.py` (`32d4a63`). Une vraie
+solution (fetch asynchrone avec état « hors-ligne ») resterait préférable à terme.
+
+
+## Profils Plex Home — investigation (2026-10-24)
+
+Le compte Plex lié possède un **Plex Home actif** (« jeremiejt38 » ) avec
+2 utilisateurs, tous deux `protected` (PIN requis au switch) :
+
+- `.Akasha` — admin, `hasPassword`, **token actuellement utilisé par Aura**
+- `jeremy carlier` — utilisateur managé, PIN seul (`hasPassword: false`)
+- Invité (`guestUserID`) présent mais `guestEnabled: false`
+
+Endpoints confirmés en direct :
+
+- `GET https://plex.tv/api/v2/home/users` (token compte + `X-Plex-Client-Identifier`)
+  → liste les utilisateurs du foyer (id, titre, avatar, flags admin/protected).
+- `POST https://plex.tv/api/v2/home/users/<id>/switch?pin=<PIN>` → nouveau
+  `authToken` (non testé : action avec effet réel, à implémenter derrière un
+  pavé PIN dédié).
+- `GET /api/v2/home/users` **côté serveur** → 403 : l'endpoint vit sur plex.tv,
+  pas sur le serveur.
+
+Conséquence : l'entrée « Profil » masquée en P2 correspondait à une vraie
+capacité — le switch est implémentable (fenêtre de sélection de profil +
+pavé PIN + swap du `plex.token` en settings + rebuild `PlexClient` + flush
+`_read_cache`/`_people_cache`/cache local + reload sections/hubs). Les états
+« vu », « continuer à regarder » et bibliothèques visibles changent alors par
+utilisateur, comme dans l'app Plex TV. À planifier en phase dédiée — le PIN
+est saisi à la télécommande et le nouveau token persiste en settings, comme
+sur Plex.

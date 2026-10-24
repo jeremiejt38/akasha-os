@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1201">
+    <defaultcontrol>8100</defaultcontrol>
+    <zorder>3</zorder>
+    <controls>
+        <!-- Plex-style search (docs/plex-parity/reference/recherche/):
+             letter-grid keyboard left, suggestions under it, filter pills
+             on top of a 2-column card grid of live results. -->
+
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="FF16171A">white.png</texture>
+        </control>
+
+        <!-- Typed query -->
+        <control type="label" id="8200">
+            <left>105</left>
+            <top>40</top>
+            <width>360</width>
+            <height>56</height>
+            <font>font_mini</font>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+        <!-- Mic + filter-tune icons (visual parity, non functional) -->
+        <control type="image">
+            <left>380</left>
+            <top>52</top>
+            <width>32</width>
+            <height>32</height>
+            <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
+        </control>
+        <control type="image">
+            <left>428</left>
+            <top>52</top>
+            <width>32</width>
+            <height>32</height>
+            <texture colordiffuse="CCFFFFFF">search-tune.png</texture>
+        </control>
+
+        <!-- Letter grid: a-z then 1-0, 6 columns -->
+        <control type="panel" id="8100">
+            <left>105</left>
+            <top>110</top>
+            <width>396</width>
+            <height>440</height>
+            <itemgap>0</itemgap>
+            <scrolltime>120</scrolltime>
+            <onright>8130</onright>
+            <ondown>8115</ondown>
+            <itemlayout width="66" height="72">
+                <control type="image">
+                    <left>7</left>
+                    <top>7</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
+                </control>
+                <control type="label">
+                    <left>7</left>
+                    <top>7</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+            </itemlayout>
+            <focusedlayout width="66" height="72">
+                <control type="image">
+                    <left>7</left>
+                    <top>7</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texture>
+                    <visible>Control.HasFocus(8100)</visible>
+                </control>
+                <control type="label">
+                    <left>7</left>
+                    <top>7</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <font>font_mini_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Space / backspace / clear -->
+        <control type="button" id="8115">
+            <left>112</left>
+            <top>552</top>
+            <width>118</width>
+            <height>52</height>
+            <label>_</label>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
+            <onup>8100</onup>
+            <onright>8116</onright>
+            <ondown>8110</ondown>
+        </control>
+        <control type="button" id="8116">
+            <left>244</left>
+            <top>552</top>
+            <width>118</width>
+            <height>52</height>
+            <label>&lt;-</label>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
+            <onup>8100</onup>
+            <onleft>8115</onleft>
+            <onright>8117</onright>
+            <ondown>8110</ondown>
+        </control>
+        <control type="button" id="8117">
+            <left>376</left>
+            <top>552</top>
+            <width>118</width>
+            <height>52</height>
+            <label>X</label>
+            <font>font_mini_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
+            <onup>8100</onup>
+            <onleft>8116</onleft>
+            <onright>8130</onright>
+            <ondown>8110</ondown>
+        </control>
+
+        <!-- Recent searches -->
+        <control type="list" id="8110">
+            <left>105</left>
+            <top>630</top>
+            <width>390</width>
+            <height>400</height>
+            <orientation>vertical</orientation>
+            <scrolltime>120</scrolltime>
+            <onup>8115</onup>
+            <onright>8130</onright>
+            <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
+            <itemlayout width="390" height="56">
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>390</width>
+                    <height>56</height>
+                    <font>font_mini</font>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>CCFFFFFF</textcolor>
+                </control>
+            </itemlayout>
+            <focusedlayout width="390" height="56">
+                <control type="image">
+                    <left>-14</left>
+                    <top>4</top>
+                    <width>404</width>
+                    <height>48</height>
+                    <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>390</width>
+                    <height>56</height>
+                    <font>font_mini_bold</font>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Filter pills: Tout | Films | Series | Episodes -->
+        <control type="list" id="8120">
+            <left>560</left>
+            <top>44</top>
+            <width>1350</width>
+            <height>52</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>120</scrolltime>
+            <onleft>8100</onleft>
+            <ondown>8130</ondown>
+            <itemlayout width="150" height="52">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>136</width>
+                    <height>52</height>
+                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>136</width>
+                    <height>52</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                </control>
+            </itemlayout>
+            <focusedlayout width="150" height="52">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>136</width>
+                    <height>52</height>
+                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>136</width>
+                    <height>52</height>
+                    <font>font_mini_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFF9D00</textcolor>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Results: 2-column card grid -->
+        <control type="panel" id="8130">
+            <left>560</left>
+            <top>120</top>
+            <width>1360</width>
+            <height>960</height>
+            <itemgap>0</itemgap>
+            <scrolltime>200</scrolltime>
+            <onleft>8100</onleft>
+            <onup>8120</onup>
+            <itemlayout width="680" height="220">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>660</width>
+                    <height>210</height>
+                    <texture colordiffuse="FF26272B" border="12">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>10</left>
+                    <top>10</top>
+                    <width>132</width>
+                    <height>190</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                </control>
+                <control type="label">
+                    <left>160</left>
+                    <top>60</top>
+                    <width>480</width>
+                    <height>34</height>
+                    <font>font_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>160</left>
+                    <top>98</top>
+                    <width>480</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>160</left>
+                    <top>130</top>
+                    <width>480</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Property(server)]</label>
+                    <textcolor>FFFF9D00</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="680" height="220">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>660</width>
+                    <height>210</height>
+                    <texture colordiffuse="FF3A3B40" border="12">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>668</width>
+                    <height>218</height>
+                    <texture border="20">focus-ring.png</texture>
+                </control>
+                <control type="image">
+                    <left>10</left>
+                    <top>10</top>
+                    <width>132</width>
+                    <height>190</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                </control>
+                <control type="label">
+                    <left>160</left>
+                    <top>60</top>
+                    <width>480</width>
+                    <height>34</height>
+                    <font>font_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>160</left>
+                    <top>98</top>
+                    <width>480</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>160</left>
+                    <top>130</top>
+                    <width>480</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Property(server)]</label>
+                    <textcolor>FFFF9D00</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Empty state -->
+        <control type="label" id="8201">
+            <left>560</left>
+            <top>430</top>
+            <width>1360</width>
+            <height>40</height>
+            <font>font_mini</font>
+            <align>center</align>
+            <textcolor>77FFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraSearchEmpty))</visible>
+        </control>
+    </controls>
+</window>

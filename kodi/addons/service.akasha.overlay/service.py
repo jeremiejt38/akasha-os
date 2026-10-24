@@ -20,8 +20,20 @@ CHECK_INTERVAL = 1.0
 
 
 class SystemStats:
+    # The fan reading forks an i2cget subprocess — cache it so the 1 Hz
+    # refresh loop doesn't spawn a process every second.
+    FAN_CACHE_SECONDS = 15
+
     def __init__(self):
         self.last_cpu = {}
+        self._fan_cache = (0.0, '?')
+
+    def fan_status_cached(self):
+        ts, value = self._fan_cache
+        if time.time() - ts > self.FAN_CACHE_SECONDS:
+            value = self.fan_status()
+            self._fan_cache = (time.time(), value)
+        return value
 
     @staticmethod
     def _read_int(path, default=0):
@@ -148,7 +160,7 @@ class SystemStats:
             'gov': self.cpu_governor(),
             'ram': self.ram_usage(),
             'temp': self.cpu_temp(),
-            'fan': self.fan_status(),
+            'fan': self.fan_status_cached(),
             'load': self.load_avg(),
             'uptime': self.uptime(),
         }

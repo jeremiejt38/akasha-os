@@ -12,9 +12,53 @@ It mirrors the endpoints consumed by the official Plex/Fire TV clients:
 """
 
 import json
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
+
+import divert_source
+
+# A dead server used to burn the full socket timeout on EVERY fetch --
+# Aura loads rows sequentially on the GUI thread, so the interface froze
+# for tens of seconds (reported as "Aura rame / impossible d'en sortir").
+# Circuit breaker: after one transport failure, calls fail fast for this
+# window; plus a short read-through cache so re-entering a view does not
+# re-hit the server seconds later (user-reported "pas de cache").
+_OFFLINE_BACKOFF_SECONDS = 30.0
+_CACHE_TTL_SECONDS = 30.0
+_CACHE_MAX_ENTRIES = 64
+_offline_until = {}
+_read_cache = {}
+
+# People directories (/library/sections/<k>/actor|director) hold thousands
+# of entries that barely change; a longer-lived cache keeps people search
+# instant after the first query (the 30s read cache would refetch per
+# search session).
+_PEOPLE_CACHE_TTL_SECONDS = 600.0
+_people_cache = {}
+
+
+def _mark_offline(host):
+    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+
+
+def _mark_online(host):
+    _offline_until.pop(host, None)
+
+
+def _is_offline(host):
+    return time.time() < _offline_until.get(host, 0.0)
+
+
+def _cache_put(key, data):
+    if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+        now = time.time()
+        for k in [k for k, v in _read_cache.items() if v[0] <= now]:
+            del _read_cache[k]
+        if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+            _read_cache.clear()
+    _read_cache[key] = (time.time() + _CACHE_TTL_SECONDS, data)
 
 
 class PlexAPIError(Exception):
@@ -24,36 +68,67 @@ class PlexAPIError(Exception):
 class PlexClient:
     """Minimal JSON client for a local Plex Media Server."""
 
-    def __init__(self, server_url, token, timeout=10):
+    def __init__(self, server_url, token, timeout=5):
         self.server_url = (server_url or '').strip().rstrip('/')
         self.token = (token or '').strip()
         self.timeout = timeout
 
     def _url(self, path, params=None):
-        url = self.server_url + path
+        # Absolute URLs (cloud provider endpoints like
+        # discover.provider.plex.tv) are used as-is; relative paths are
+        # resolved against the local server.
+        url = path if path.startswith('http') else self.server_url + path
         if params:
-            url += '?' + urllib.parse.urlencode(params)
+            # Hub `key`/`hubKey` values come back with their own query string
+            # (e.g. '/library/sections/1/all?sort=addedAt:desc'), so pagination
+            # params must be appended with '&' rather than a second '?'.
+            url += ('&' if '?' in url else '?') + urllib.parse.urlencode(params)
         return url
 
     def _headers(self):
         return {
             'X-Plex-Token': self.token,
             'Accept': 'application/json',
+            # Cloudflare fronts the public plex.akasha.ing endpoint and
+            # blocks Python-urllib's default UA (HTTP 403, error 1010).
+            'User-Agent': 'AkashaOSAura/1.0',
         }
 
     def _request(self, path, params=None):
         if not self.server_url or not self.token:
             raise PlexAPIError('Plex server URL and token are required')
         url = self._url(path, params)
+        host = urllib.parse.urlparse(url).netloc
+        if _is_offline(host):
+            raise PlexAPIError('Plex server {} unreachable '
+                               '(offline backoff)'.format(host))
+        # Mutation endpoints (/:/scrobble, /:/rate...) must never be
+        # served from cache.
+        cacheable = not path.startswith('/:')
+        key = (host, path, tuple(sorted((params or {}).items())))
+        if cacheable:
+            entry = _read_cache.get(key)
+            if entry and time.time() < entry[0]:
+                return entry[1]
         req = urllib.request.Request(url, headers=self._headers())
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                return json.loads(resp.read().decode('utf-8'))
+                body = resp.read().decode('utf-8')
+                _mark_online(host)
+                # Action endpoints (scrobble/unscrobble/rate) answer 200
+                # with an empty body -- a bare decode would JSON-decode
+                # crash and the caller would treat it as a failure.
+                data = json.loads(body) if body.strip() else {}
+                if cacheable:
+                    _cache_put(key, data)
+                return data
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise PlexAPIError('Plex API {} for {}: {}'.format(e.code, path, body)) from e
-        except urllib.error.URLError as e:
-            raise PlexAPIError('Plex URL error for {}: {}'.format(path, e.reason)) from e
+        except OSError as e:
+            _mark_offline(host)
+            reason = getattr(e, 'reason', e)
+            raise PlexAPIError('Plex URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise PlexAPIError('Plex JSON decode error for {}: {}'.format(path, e)) from e
 
@@ -65,30 +140,30 @@ class PlexClient:
 
     @staticmethod
     def _video_dict(item, server_url, token):
-        thumb = item.get('thumb') or ''
-        art = item.get('art') or ''
-        section_id = item.get('librarySectionID')
-
-        def image_url(path):
+        def image_url(path, width=None, height=None):
             if not path:
                 return ''
+            # Cloud provider metadata (Discover/Trending hubs) carries
+            # absolute image URLs -- just attach the token to them.
+            if path.startswith('http'):
+                sep = '&' if '?' in path else '?'
+                if 'X-Plex-Token' not in path:
+                    path += sep + 'X-Plex-Token=' + token
+                return path
+            # Sized requests go through Plex's own photo transcoder: a
+            # 240px card used to pull the full 2000x3000 JPEG and make
+            # the Pi4 decode it (visible scroll stutter). Server-side
+            # downscale is what official Plex clients do anyway.
+            if width and height:
+                return ('{}/photo/:/transcode?url={}&width={}&height={}'
+                        '&minSize=1&upscale=0&X-Plex-Token={}'.format(
+                            server_url, urllib.parse.quote(path),
+                            width, height, token))
             return '{}?X-Plex-Token={}'.format(server_url + path, token)
 
-        return {
-            'title': item.get('title') or 'Sans titre',
-            'type': item.get('type') or 'video',
-            'rating_key': item.get('ratingKey'),
-            'parent_rating_key': item.get('parentRatingKey'),
-            'index': item.get('index'),
-            'season': item.get('parentIndex'),
-            'show_title': item.get('grandparentTitle') or '',
-            'year': item.get('year'),
-            'originally_available_at': item.get('originallyAvailableAt'),
-            'summary': item.get('summary') or '',
-            'thumb_url': image_url(thumb),
-            'art_url': image_url(art),
-            'section_id': str(section_id) if section_id is not None else None,
-        }
+        # Shared normaliser keeps connector and direct-Plex payloads identical
+        # (see divert_source.build_video_item).
+        return divert_source.build_video_item(item, image_url)
 
     def _metadata_list(self, data):
         mc = self._media_container(data)
@@ -109,6 +184,71 @@ class PlexClient:
                  for item in mc.get('Metadata', [])]
         total = mc.get('totalSize', mc.get('size'))
         return items, total
+
+    def home_hubs(self, hub_count=24, per_hub=16):
+        """The promoted "For You" hubs Plex TV renders as the home rows.
+
+        `/hubs/promoted` returns the same curated list (Continue Watching,
+        On Deck, Recently Added/Released, genre/director spotlights...) the
+        official client shows, each hub already carrying its first `per_hub`
+        items inline so the initial paint needs a single request.
+        """
+        data = self._request('/hubs/promoted', {
+            'count': per_hub,
+            'X-Plex-Container-Size': hub_count,
+        })
+        return self._hub_list(data)
+
+    DISCOVER_BASE = 'https://discover.provider.plex.tv'
+
+    def discover_hubs(self, hub_count=24, per_hub=16):
+        """The promoted Discover hubs Plex TV renders under the home
+        "Trending" tab (trailers, watchlisted, services...) -- served by
+        Plex's cloud metadata provider rather than the local server."""
+        data = self._request(self.DISCOVER_BASE + '/hubs/promoted', {
+            'count': per_hub,
+            'X-Plex-Container-Size': hub_count,
+        })
+        hubs = self._hub_list(data)
+        for hub in hubs:
+            # Provider hubs carry relative `key` paths and no inline items:
+            # resolve the continuation endpoint against the provider base.
+            if hub['key'] and not hub['key'].startswith('http'):
+                hub['key'] = self.DISCOVER_BASE + hub['key']
+        return hubs
+
+    def section_hubs(self, section_key, hub_count=24, per_hub=16):
+        """The per-library hubs Plex shows on a library's Recommended tab."""
+        data = self._request('/hubs/sections/{}'.format(section_key), {
+            'count': per_hub,
+            'X-Plex-Container-Size': hub_count,
+        })
+        return self._hub_list(data)
+
+    def _hub_list(self, data):
+        mc = self._media_container(data)
+        hubs = []
+        for hub in mc.get('Hub', []):
+            hubs.append({
+                'title': hub.get('title') or hub.get('title2') or '',
+                'key': hub.get('key') or hub.get('hubKey') or '',
+                'identifier': hub.get('hubIdentifier') or '',
+                'context': hub.get('context') or '',
+                'type': hub.get('type') or '',
+                'style': hub.get('style') or '',
+                'more': bool(hub.get('more')),
+                'items': [self._video_dict(item, self.server_url, self.token)
+                          for item in hub.get('Metadata', [])],
+            })
+        return hubs
+
+    def hub_items_with_total(self, key, limit=20, offset=0):
+        """Paginate a hub's own `key`/`hubKey` path (its "more" endpoint)."""
+        data = self._request(key, {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
 
     def on_deck(self, limit=20, offset=0):
         data = self._request('/library/onDeck', {
@@ -250,6 +390,171 @@ class PlexClient:
         })
         return self._metadata_list_with_total(data)
 
+    def section_collections_with_total(self, section_key, limit=200, offset=0):
+        """JSON payloads list collections under `Metadata` (only XML uses
+        `Directory`); same normaliser applies (thumb -> poster, childCount)."""
+        data = self._request('/library/sections/{}/collections'.format(section_key), {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        mc = self._media_container(data)
+        items = [self._video_dict(d, self.server_url, self.token)
+                 for d in mc.get('Metadata', mc.get('Directory', []))]
+        total = mc.get('totalSize', mc.get('size'))
+        return items, total
+
+    def collection_items_with_total(self, collection_key, limit=200, offset=0):
+        data = self._request('/library/collections/{}/children'.format(collection_key), {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        })
+        return self._metadata_list_with_total(data)
+
+    def items_by_filter_with_total(self, section_key, filter_str,
+                                   limit=200, offset=0):
+        """Section items matching a Plex tag filter ('actor=11550', ...)."""
+        params = {
+            'X-Plex-Container-Size': limit,
+            'X-Plex-Container-Start': offset,
+        }
+        if filter_str and '=' in filter_str:
+            key, value = filter_str.split('=', 1)
+            params[key] = value
+        data = self._request('/library/sections/{}/all'.format(section_key),
+                             params)
+        return self._metadata_list_with_total(data)
+
+    def person_filmography(self, filter_str):
+        """Items tagged with a person ('actor=ID', 'director=ID'...) across
+        every video section -- the server-side filmography Plex renders on
+        a person page, deduped and newest first."""
+        seen = set()
+        items = []
+        for section in self.video_sections():
+            try:
+                page, _total = self.items_by_filter_with_total(
+                    section['key'], filter_str)
+            except PlexAPIError:
+                continue
+            for item in page:
+                if item.get('rating_key') in seen:
+                    continue
+                seen.add(item.get('rating_key'))
+                items.append(item)
+        items.sort(key=lambda i: i.get('year') or 0, reverse=True)
+        return items
+
+    def people_directory(self, section_key, kind='actor'):
+        """Every person tagged in a section ('actor' or 'director').
+
+        The Plex hub search reports matching people counts but never the
+        items themselves, so people search is done client-side over this
+        directory -- cached for a few minutes since it is huge.
+        """
+        cache_key = (section_key, kind)
+        entry = _people_cache.get(cache_key)
+        if entry and time.time() < entry[0]:
+            return entry[1]
+        data = self._request(
+            '/library/sections/{}/{}'.format(section_key, kind))
+        mc = self._media_container(data)
+        people = []
+        for d in mc.get('Directory', []):
+            name = d.get('title') or d.get('tag')
+            person_id = d.get('key')
+            if not name or not person_id:
+                continue
+            thumb = d.get('thumb') or ''
+            if thumb and not thumb.startswith('http'):
+                thumb = '{}{}?X-Plex-Token={}'.format(
+                    self.server_url, thumb, self.token)
+            people.append({'id': str(person_id), 'name': name,
+                           'thumb_url': thumb, 'kind': kind})
+        _people_cache[cache_key] = (
+            time.time() + _PEOPLE_CACHE_TTL_SECONDS, people)
+        return people
+
+    def search_people(self, query, kinds=('actor',)):
+        """Client-side people search over the per-section directories.
+
+        Returns AuraSearch-ready dicts flagged '_person' with a
+        'person_filter' ('actor=ID') usable by person_filmography."""
+        q = (query or '').strip().lower()
+        if len(q) < 2:
+            return []
+        seen = set()
+        out = []
+        for section in self.video_sections():
+            for kind in kinds:
+                try:
+                    people = self.people_directory(section['key'], kind)
+                except PlexAPIError:
+                    continue
+                for person in people:
+                    if q not in person['name'].lower() \
+                            or person['id'] in seen:
+                        continue
+                    seen.add(person['id'])
+                    out.append({
+                        'name': person['name'],
+                        'thumb_url': person['thumb_url'],
+                        'role': ('Réalisateur' if kind == 'director'
+                                 else 'Acteur'),
+                        'person_filter': '{}={}'.format(kind, person['id']),
+                        '_person': True,
+                    })
+        return out[:20]
+
+    def item_extras(self, rating_key):
+        """Bonus clips attached to an item (trailers, deleted scenes...).
+
+        Each normalised item keeps its Plex `subtype` ('trailer', ...) so
+        the UI can prefer the trailer when several extras exist."""
+        data = self._request('/library/metadata/{}/extras'.format(rating_key))
+        mc = self._media_container(data)
+        items = []
+        for raw in mc.get('Metadata', []):
+            item = self._video_dict(raw, self.server_url, self.token)
+            item['subtype'] = raw.get('subtype') or ''
+            items.append(item)
+        return items
+
+    def scrobble(self, rating_key):
+        """Mark an item watched (Plex `scrobble` endpoint)."""
+        self._request('/:/scrobble', {
+            'key': rating_key,
+            'identifier': 'com.plexapp.plugins.library',
+        })
+
+    def unscrobble(self, rating_key):
+        """Mark an item unwatched."""
+        self._request('/:/unscrobble', {
+            'key': rating_key,
+            'identifier': 'com.plexapp.plugins.library',
+        })
+
+    def rate(self, rating_key, rating):
+        """Set a user rating (1-10) via Plex's `/:/rate` endpoint."""
+        url = self._url('/:/rate', {
+            'key': rating_key,
+            'identifier': 'com.plexapp.plugins.library',
+            'rating': int(rating),
+        })
+        req = urllib.request.Request(url, headers=self._headers(), method='PUT')
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                resp.read()
+        except urllib.error.URLError as e:
+            raise PlexAPIError('Plex rate failed for {}: {}'.format(
+                rating_key, getattr(e, 'reason', e))) from e
+
+    def metadata_item(self, rating_key):
+        """Fetch and normalise a single item by rating key (used to hydrate
+        thin items before opening the detail page)."""
+        data = self._request('/library/metadata/{}'.format(rating_key))
+        items = self._metadata_list(data)
+        return items[0] if items else None
+
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
         data = self._request('/library/metadata/{}/children'.format(show_rating_key))
@@ -275,15 +580,15 @@ class PlexClient:
             }
 
         rows = [
-            {'label': 'Continuer a regarder', 'items': self.on_deck(limits['on_deck'])},
-            {'label': 'Ajoutes recemment', 'items': self.recently_added(limits['recently_added'])},
+            {'label': 'Continuer à regarder', 'items': self.on_deck(limits['on_deck'])},
+            {'label': 'Ajoutés récemment', 'items': self.recently_added(limits['recently_added'])},
         ]
 
         for section in self.movie_sections():
             rr = self.recently_released(section['key'], limits['recently_released'])
             if rr:
                 rows.append({
-                    'label': '{} — Sortis recemment'.format(section['title']),
+                    'label': '{} — Sorties récentes'.format(section['title']),
                     'items': rr,
                 })
 

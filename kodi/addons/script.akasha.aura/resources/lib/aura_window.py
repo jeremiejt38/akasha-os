@@ -11,6 +11,8 @@ import os
 import random
 import subprocess
 import sys
+import threading
+import time
 
 import xbmc
 import xbmcaddon
@@ -18,10 +20,13 @@ import xbmcgui
 
 import addons_inventory
 import aura_app
+import aura_detail
+import aura_search
 import aura_settings_panel
-import aura_show
 import aura_store
 import config
+import settings_press_handler
+import osd_menu
 import connector_client
 import divert_source
 import games_shortcuts
@@ -33,7 +38,11 @@ import steam_client
 import store_manifest
 import sunshine_client
 
-TAB_BUTTON_IDS = (2001, 2002, 2003)
+# The Divertissement/Jeux/App tabs are a single horizontal list control
+# (same mechanism as the native skin main menu, see Aura.xml): the
+# focused slot widens to the pill and the container animates the slide
+# itself via scrolltime. Tab index == selected item position.
+TAB_LIST_ID = 2007
 
 # Main-tab IDs in the same order as config.TABS.
 TAB_DIVERTISSEMENT = 0
@@ -45,19 +54,6 @@ TAB_APP = 2
 MODULE_SEARCH_ID = 2000
 GEAR_BUTTON_ID = 2004
 
-# Dynamic layout of the Divertissement/Jeux/App group (correctif
-# c7f0636a), see _layout_top_modules(). (button_id, pill_group_id,
-# icon_id) per module, same left-to-right order as TAB_BUTTON_IDS.
-MODULE_CONTROL_IDS = ((2001, 2101, 2102), (2002, 2103, 2104), (2003, 2105, 2106))
-MODULE_LAYOUT_START_X = 100
-MODULE_BUTTON_OFFSET = 40
-MODULE_ICON_OFFSETS = (28, 40, 55)
-MODULE_ICON_TOPS = (20, 20, 25)
-MODULE_ITEM_WIDTH = 100
-MODULE_PILL_WIDTH = 360
-MODULE_ICON_TOP = 20
-MODULE_PILL_TOP = 20
-
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
 ACTION_MOVE_UP = 3
@@ -66,11 +62,19 @@ ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 ACTION_MENU = 163
+ACTION_CONTEXT_MENU = 117
 
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
-DIVERT_SIDEBAR_HOME_INDEX = 0
+# Plex's expanded rail puts fixed entries above the libraries: Search,
+# Home -- then a divider, the library sections and Plus. Plex cloud-only
+# entries (profile, My Lists, playlists, On Plex) are hidden: they only
+# surfaced "unavailable" notifications.
+DIVERT_SIDEBAR_SEARCH_INDEX = 0
+DIVERT_SIDEBAR_HOME_INDEX = 1
+DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 2
+DIVERT_SIDEBAR_LIBS_OFFSET = 3
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 # Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
@@ -88,7 +92,32 @@ RECO_RECENT_LABEL_ID = 5200
 RECO_RECENT_LIST_ID = 5210
 RECO_RELEASES_LABEL_ID = 5300
 RECO_RELEASES_LIST_ID = 5310
-RECO_LIST_IDS = (RECO_ON_DECK_LIST_ID, RECO_RECENT_LIST_ID, RECO_RELEASES_LIST_ID)
+RECO_ROW4_LABEL_ID = 5400
+RECO_ROW4_LIST_ID = 5410
+RECO_ROW5_LABEL_ID = 5500
+RECO_ROW5_LIST_ID = 5510
+# The 5 visible row slots form a sliding viewport over the hub list returned
+# by /hubs/promoted (Plex "For You"): Plex keeps the focused row pinned at a
+# fixed screen position and scrolls the rows above off the top, which Kodi
+# can't clip natively -- so slot contents are re-bound when focus reaches an
+# edge slot instead of scrolling the group pixel by pixel. See
+# docs/plex-parity/SPEC.md.
+RECO_SLOT_IDS = (
+    (RECO_ON_DECK_LABEL_ID, RECO_ON_DECK_LIST_ID),
+    (RECO_RECENT_LABEL_ID, RECO_RECENT_LIST_ID),
+    (RECO_RELEASES_LABEL_ID, RECO_RELEASES_LIST_ID),
+    (RECO_ROW4_LABEL_ID, RECO_ROW4_LIST_ID),
+    (RECO_ROW5_LABEL_ID, RECO_ROW5_LIST_ID),
+)
+RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
+# Home tab strip (Plex "For You" / "Trending" / "Activity"), only on the
+# Divertissement Accueil view -- the library view has its own strip
+# (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
+# private GraphQL API on community.plex.tv), so it shows an honest
+# empty-state instead of fake rows.
+HOME_TAB_IDS = (3070, 3071)
+HOME_TAB_FOR_YOU = 0
+HOME_TAB_TRENDING = 1
 RECO_CACHE_TTL_SECONDS = 120
 RECO_ON_DECK_FETCH_LIMIT = 50  # over-fetch before client-side section filtering
 RECO_MAX_ITEMS_PER_ROW = 100
@@ -105,12 +134,12 @@ DIVERT_SORT_BUTTON_ID = 3212
 DIVERT_GENRE_BUTTON_ID = 3213
 DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
-DIVERT_PLAYLIST_BUTTON_ID = 3217
 DIVERT_RESET_BUTTON_ID = 3218
+DIVERT_AZ_RAIL_ID = 3250
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
     DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
-    DIVERT_PLAYLIST_BUTTON_ID, DIVERT_RESET_BUTTON_ID,
+    DIVERT_RESET_BUTTON_ID,
 )
 
 # Mirrors aura_library.py's SORT_OPTIONS so both list the exact same choices
@@ -143,10 +172,11 @@ DIVERT_FILTER_OPTIONS = [
 GAME_BUTTON_IDS = (2010, 2011, 2012)
 APP_TILE_IDS = (2030, 2031, 2032, 2033)
 
-DIVERT_SUBTAB_IDS = (3050, 3100, 3060)
+DIVERT_SUBTAB_IDS = (3050, 3100, 3075, 3060)
 DIVERT_SUBTAB_RECOMMANDE = 0
 DIVERT_SUBTAB_BIBLIOTHEQUES = 1
-DIVERT_SUBTAB_CATEGORIES = 2
+DIVERT_SUBTAB_COLLECTIONS = 2
+DIVERT_SUBTAB_CATEGORIES = 3
 
 JEUX_SUBTAB_IDS = (2050, 2051, 2052)
 JEUX_STATUS_ID = 2055
@@ -162,8 +192,8 @@ APP_SUBTAB_MES_APPS = 0
 APP_SUBTAB_STORE = 1
 
 BAR_CONTROL_IDS = set(
-    (MODULE_SEARCH_ID, GEAR_BUTTON_ID) + TAB_BUTTON_IDS
-    + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS)
+    (MODULE_SEARCH_ID, GEAR_BUTTON_ID, TAB_LIST_ID)
+    + DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS)
 
 
 class AuraWindow(xbmcgui.WindowXMLDialog):
@@ -191,6 +221,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # real items -- see _sync_placeholders().
         self._divert_placeholder_count = 0
         self._reco_placeholder_counts = {}
+        # Plex-style hub rows (see RECO_SLOT_IDS): every row slot binds to a
+        # hub descriptor {'title', 'paged'}; _hub_offset is the hub shown in
+        # the top slot. Both the Plex /hubs source and the legacy 3-row
+        # fallback produce the same shape.
+        self._hub_rows = []
+        self._hub_offset = 0
+        # Plex home tab strip ("For You" / "Trending" / "Activity").
+        # 0 = Pour vous (local /hubs/promoted), 1 = Tendances (Discover
+        # provider hubs), 2 = Activité (social feed -- not supported, see
+        # the empty-state note in Aura.xml).
+        self._home_tab = 0
         # Bibliotheque toolbar state (plan f41ce1ad phase A): reset whenever
         # the sidebar selection changes to a different library, same
         # pattern as aura_library.py's onInit -- otherwise a search/filter
@@ -256,18 +297,53 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # RunScript(script.akasha.aura, opensettings) and Aura wasn't
         # already running.
         self.open_settings_on_init = False
+        # Set when a detail page started playback: default.py then waits
+        # for the video to end and re-opens Aura (modal dialogs suppress
+        # the fullscreen video window, so Aura must leave the screen).
+        self.playback_started = False
+        # Home press received while the window was closed for fullscreen
+        # playback: applied by onInit() once Aura re-opens.
+        self._pending_home_action = None
+        # Last settings-panel open, for the gear-wheel debounce in
+        # _open_settings_panel() (spurious remote events burst).
+        self._settings_last_open = 0.0
+        # Hero backdrop debounce (see _schedule_hero_fanart): the pending
+        # timer and the URL actually pushed to the skin property.
+        self._hero_fanart_timer = None
+        self._hero_fanart_lock = threading.Lock()
+        self._hero_fanart_current = None
 
     def onInit(self):
         try:
+            self._populate_tab_list()
             self._show_tab(self.active_tab)
             self._load_divertissement()
             self._divert_load_attempted = True
             self._restore_divert_view(focus=False)
-            self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK)
+            # interactive=False: missing Steam/Sunshine credentials must
+            # never pop a Keyboard dialog during unattended startup (same
+            # rule as the connector token -- docs/aura/decisions.md).
+            self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK, interactive=False)
             self._load_pinned_apps()
-            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+            self._focus_tab(self.active_tab)
+            self._sync_navigation()
             self._update_bar_focused()
-            if getattr(self, 'open_settings_on_init', False):
+            # Re-opened after a playback session: return to the item's
+            # detail page like Plex does when a video stops.
+            pending_home = getattr(self, '_pending_home_action', None)
+            self._pending_home_action = None
+            playback_item = getattr(self, '_playback_item', None)
+            self._playback_item = None
+            if playback_item and pending_home is None:
+                self._open_detail(playback_item)
+            if pending_home:
+                self._on_home_press_action(pending_home)
+            # A double press completed across a (re)launch can evade both
+            # paths: default.py only sees the first half, and the monitor
+            # was not listening for the second notification. The press
+            # file history is the ground truth.
+            if (getattr(self, 'open_settings_on_init', False) or
+                    settings_press_handler.double_press_just_happened()):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
         except Exception as e:
@@ -285,7 +361,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not server_url:
             return None
 
-        client = connector_client.ConnectorClient(server_url, timeout=15)
+        client = connector_client.ConnectorClient(server_url, timeout=5)
         stored_token = self.addon.getSetting('connector.session_token')
         if stored_token:
             client.token = stored_token
@@ -347,9 +423,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """
         self._divert_view = 'home'
         self.setProperty('DivertView', 'home')
+        self.setProperty('DivertActiveLibrary', '')
+        self.setProperty('DivertHomeTab', str(self._home_tab))
         self.addon.setSetting('divert.last_view', 'home')
         self._set_sidebar_selection(DIVERT_SIDEBAR_HOME_INDEX)
         self._load_recommendations(None)
+        self._sync_navigation()
 
     def _activate_library(self, section_index, tab=None, focus=True):
         """Select a library in the sidebar: shows its header + contextual tabs."""
@@ -357,9 +436,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         self._divert_view = 'library'
         self.setProperty('DivertView', 'library')
+        self.setProperty('DivertActiveLibrary', self._divert_sections[section_index]['title'])
         self.addon.setSetting('divert.last_view', 'library')
         self._select_divert_section(section_index)
-        self._set_sidebar_selection(section_index + 1)
+        self._set_sidebar_selection(section_index + DIVERT_SIDEBAR_LIBS_OFFSET)
+        self._sync_navigation()
         section = self._divert_sections[section_index]
         try:
             self.getControl(3400).setLabel(section['title'])
@@ -380,10 +461,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         if index == DIVERT_SUBTAB_RECOMMANDE:
             self._load_recommendations(section)
+            self._sync_navigation()
+            return
+
+        if index == DIVERT_SUBTAB_COLLECTIONS:
+            self._load_collections(section)
+            self._sync_navigation()
             return
 
         if index == DIVERT_SUBTAB_CATEGORIES:
             self._load_categories(section)
+            self._sync_navigation()
             return
 
         # Bibliotheque: inline grid, already populated by _select_divert_section.
@@ -397,72 +485,490 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # on its <ondown> to reach the grid avoids the race entirely, since
         # that next input is a separate, later action -- see
         # docs/aura/decisions.md.
+        self._sync_navigation()
 
     def _load_recommendations(self, section):
-        """Populate the 3 Recommande rows (Continuer a regarder / Ajoutes
-        recemment / Sorties recentes), scoped to `section` or unscoped
-        (Accueil) when None. Ported from the former
-        aura_recommendations.AuraRecommendationsWindow (now rendered inline
-        instead of a separate doModal() dialog, see docs/aura/decisions.md)
-        -- reuses self._connector_client/self._plex_client/self._cache,
-        already established by _load_divertissement(), instead of
-        reconnecting independently."""
-        on_deck_title = 'Continuer a regarder'
-        recent_title = 'Ajoutes recemment'
-        if section:
-            on_deck_title += ' dans {}'.format(section['title'])
-            recent_title += ' dans {}'.format(section['title'])
-        self._reco_init_row(
-            RECO_ON_DECK_LABEL_ID, RECO_ON_DECK_LIST_ID, on_deck_title,
-            lambda offset, limit: self._reco_fetch_on_deck_page(section, offset, limit))
-        self._reco_init_row(
-            RECO_RECENT_LABEL_ID, RECO_RECENT_LIST_ID, recent_title,
-            lambda offset, limit: self._reco_fetch_recently_added_page(section, offset, limit))
+        """Populate the Recommande rows, scoped to `section` or unscoped
+        (Accueil) when None.
 
-        releases_section = section or self._reco_get_first_video_section()
-        releases_title = 'Sorties recentes dans {}'.format(releases_section['title']) \
-            if releases_section else 'Sorties recentes'
-        self._reco_init_row(
-            RECO_RELEASES_LABEL_ID, RECO_RELEASES_LIST_ID, releases_title,
-            lambda offset, limit: self._reco_fetch_recent_releases_page(
-                releases_section, offset, limit))
+        Plex direct mode reads the real `/hubs/promoted` ("For You") or
+        `/hubs/sections/{key}` hub list -- the exact same rows, order and
+        titles as the official Android TV client (see docs/plex-parity/).
+        The connector has no hubs endpoint yet, so connector mode keeps the
+        previous hand-built 3-row layout as a fallback; all rows bind
+        through the same slot mechanism either way.
+        """
+        self._hub_rows = self._reco_hub_rows(section)
+        if self._hub_rows is None:
+            self._hub_rows = self._reco_legacy_rows(section)
+        self._hub_offset = 0
+        self._reco_rows = {}
+        self._rebind_reco_slots()
+        self._update_hero()
 
-    def _reco_init_row(self, label_control_id, list_control_id, title, fetch_page_fn):
-        # Capped at 100 items per row regardless of how large the underlying
-        # library/hub is -- these are "quick highlight" rows, not meant to
-        # be a full browse surface (that's what Bibliotheque is for).
-        paged = paged_list.PagedList(fetch_page_fn, max_items=RECO_MAX_ITEMS_PER_ROW)
-        error = None
+    def _set_home_tab(self, index):
+        """Switch the Accueil tab (Pour vous / Tendances / Activité) and
+        rebuild the hub viewport -- mirrors Plex's home tab strip."""
+        if index == self._home_tab:
+            return
+        self._home_tab = index
+        self.setProperty('DivertHomeTab', str(index))
+        self._load_recommendations(None)
+        self._sync_navigation()
+
+    def _reco_hub_rows(self, section):
+        """Build row descriptors from real Plex hubs, or None if unavailable.
+
+        Returns [] (empty viewport, never the legacy fallback) for
+        Tendances when there is no direct-Plex client."""
+        if not self._plex_client:
+            if section is None and self._home_tab != HOME_TAB_FOR_YOU:
+                return []
+            return None
+        try:
+            if section:
+                hubs = self._plex_client.section_hubs(section['key'])
+            elif self._home_tab == HOME_TAB_TRENDING:
+                hubs = self._plex_client.discover_hubs()
+            else:
+                hubs = self._plex_client.home_hubs()
+        except Exception as e:
+            xbmc.log('Akasha Aura: hubs load failed, falling back to legacy rows: {}'
+                     .format(e), xbmc.LOGWARNING)
+            return None
+        rows = []
+        seen_keys = set()
+        for hub in hubs:
+            # Discover emits non-shelf hubs (genre buttons, service pills)
+            # that have no poster content to render.
+            if hub.get('style') in ('button', 'availabilityPlatforms'):
+                continue
+            if not hub['items'] and not hub['key']:
+                continue
+            # Distinct sections can emit same-titled hubs ("Oh, The Horror!"
+            # in Movies and TV): dedup on the hub's continuation key (or its
+            # hubIdentifier for inline-only hubs), never on the title -- the
+            # Android TV client renders each of them.
+            hub_id = hub.get('key') or hub.get('identifier') or ''
+            if hub_id and hub_id in seen_keys:
+                continue
+            if hub_id:
+                seen_keys.add(hub_id)
+            row = self._reco_init_hub_row(hub)
+            if not row:
+                continue
+            # Empty hubs (key present but zero items server-side) render as
+            # a bare label -- Plex drops them, so do we.
+            if not row['paged'].items and not row.get('error'):
+                continue
+            rows.append(row)
+        return rows or None
+
+    def _reco_init_hub_row(self, hub):
+        """Wrap one hub in a PagedList: the first page is served from the
+        hub's own inline Metadata (already fetched with the hub list, zero
+        extra requests); later pages paginate the hub's `key` endpoint."""
+        inline = list(hub.get('items') or [])
+        key = hub.get('key') or ''
+        # page_size must match the inline page exactly: a shorter first page
+        # would mark the PagedList exhausted even though the hub key can
+        # still paginate further.
+        page_size = len(inline) if inline else 16
+
+        def fetch_page(offset, limit):
+            if offset < len(inline):
+                page = inline[offset:offset + limit]
+                # Inline items exhausted and no continuation endpoint:
+                # report the known total so the row is marked complete.
+                if offset + limit >= len(inline) and not key:
+                    return page, len(inline)
+                return page, None
+            if not key:
+                return [], len(inline)
+            try:
+                return self._plex_client.hub_items_with_total(key, limit, offset)
+            except Exception as e:
+                xbmc.log('Akasha Aura: hub page fetch failed for {}: {}'
+                         .format(key, e), xbmc.LOGWARNING)
+                return [], None
+
+        paged = paged_list.PagedList(
+            fetch_page, page_size=page_size, max_items=RECO_MAX_ITEMS_PER_ROW)
         try:
             paged.load_initial()
         except Exception as e:  # defensive: never crash the tab on a row failure
-            error = e
-
-        self._reco_rows[list_control_id] = (label_control_id, title, paged)
-        self._render_reco_row_label(list_control_id, error)
-
-        if error:
-            xbmc.log('Akasha Aura: recommendations row "{}" failed: {}'.format(title, error),
+            xbmc.log('Akasha Aura: hub row "{}" failed: {}'.format(hub.get('title'), e),
                      xbmc.LOGWARNING)
+            return {'title': _hub_title_fr(hub), 'paged': paged, 'error': e}
+        return {'title': _hub_title_fr(hub), 'paged': paged, 'error': None}
+
+    def _reco_legacy_rows(self, section):
+        """Connector mode: the connector has no hubs endpoint, so rebuild the
+        original 3 hand-picked rows through the same slot mechanism."""
+        on_deck_title = 'Continuer à regarder'
+        recent_title = 'Ajoutés récemment'
+        if section:
+            on_deck_title += ' dans {}'.format(section['title'])
+            recent_title += ' dans {}'.format(section['title'])
+        rows = [
+            (on_deck_title,
+             lambda offset, limit: self._reco_fetch_on_deck_page(section, offset, limit)),
+            (recent_title,
+             lambda offset, limit: self._reco_fetch_recently_added_page(section, offset, limit)),
+        ]
+        releases_section = section or self._reco_get_first_video_section()
+        releases_title = 'Sorties recentes dans {}'.format(releases_section['title']) \
+            if releases_section else 'Sorties recentes'
+        rows.append((
+            releases_title,
+            lambda offset, limit: self._reco_fetch_recent_releases_page(
+                releases_section, offset, limit)))
+        built = []
+        for title, fetch_page in rows:
+            paged = paged_list.PagedList(fetch_page, max_items=RECO_MAX_ITEMS_PER_ROW)
+            error = None
+            try:
+                paged.load_initial()
+            except Exception as e:
+                error = e
+            built.append({'title': title, 'paged': paged, 'error': error})
+        return built
+
+    def _rebind_reco_slots(self):
+        """Bind each visible row slot to `_hub_rows[_hub_offset + i]`.
+
+        Called on (re)load and every time the viewport slides by one hub --
+        see RECO_SLOT_IDS. Slots without a hub are emptied rather than
+        hidden so their ondown/left navigation stays consistent.
+        """
+        for i, (label_id, list_id) in enumerate(RECO_SLOT_IDS):
+            index = self._hub_offset + i
+            row = self._hub_rows[index] if index < len(self._hub_rows) else None
+            try:
+                lst = self.getControl(list_id)
+            except RuntimeError:
+                continue
+            if row is None:
+                lst.reset()
+                self._reco_rows.pop(list_id, None)
+                try:
+                    self.getControl(label_id).setLabel('')
+                except RuntimeError:
+                    pass
+                continue
+            self._reco_rows[list_id] = (label_id, row['title'], row['paged'])
+            self._render_reco_row_label(list_id, row.get('error'))
+            if row.get('error'):
+                lst.reset()
+                continue
+            try:
+                lst.reset()
+                for item in row['paged'].items:
+                    lst.addItem(_build_divert_list_item(item))
+            except Exception as e:
+                xbmc.log('Akasha Aura: recommendations row render error for {}: {}'
+                         .format(row['title'], e), xbmc.LOGERROR)
+            self._reco_placeholder_counts[list_id] = self._sync_placeholders(
+                list_id, 0, row['paged'])
+        self._sync_navigation()
+
+    def _reco_scroll(self, delta):
+        """Slide the hub viewport by `delta` (+1 down / -1 up), if possible."""
+        max_offset = max(0, len(self._hub_rows) - len(RECO_SLOT_IDS))
+        new_offset = min(max(self._hub_offset + delta, 0), max_offset)
+        if new_offset == self._hub_offset:
+            return False
+        self._hub_offset = new_offset
+        self._rebind_reco_slots()
+        return True
+
+    def _reco_slot_has_row(self, slot_index):
+        return self._hub_offset + slot_index < len(self._hub_rows)
+
+    def _reco_list_has_items(self, list_id):
+        try:
+            return self.getControl(list_id).size() > 0
+        except RuntimeError:
+            return False
+
+    def _sync_navigation(self):
+        """Re-wire directional navigation targets to the current state.
+
+        Kodi resolves <ondown>/<onup> natively from whichever control held
+        focus when the action started, so a setFocus() inside onAction is
+        overridden by the XML-declared target (the earlier "double hop"
+        bug). The only reliable way to get Plex-style nav (top bar ->
+        contextual tabs -> pinned first row -> viewport scroll) is to keep
+        the declared targets themselves in sync with the active view/tab.
+        """
+        # setNavigation() takes Control objects (not ids) and requires all
+        # four positional args; passing the control itself pins a direction.
+        def nav(control_id, up=None, down=None, left=None, right=None):
+            try:
+                ctl = self.getControl(control_id)
+                ctl.setNavigation(
+                    self.getControl(up) if up is not None else ctl,
+                    self.getControl(down) if down is not None else ctl,
+                    self.getControl(left) if left is not None else ctl,
+                    self.getControl(right) if right is not None else ctl)
+            except RuntimeError:
+                pass
+
+        # Top bar tab list: Down is intercepted in onAction (routed to the
+        # active module's sub-tab strip); Left/Right edge exits are the
+        # declared <onleft>/<onright> in Aura.xml. No setNavigation here:
+        # nav() defaults unset directions to the control itself, which
+        # would swallow the list's internal left/right item movement.
+
+        # Reco slots: Up from the first slot reaches the contextual strip
+        # only once the viewport is back at the top; while deeper hubs are
+        # reachable it pins itself so _reco_scroll(-1) keeps focus anchored.
+        # Up/down chain through slots that actually rendered items -- a hub
+        # whose load failed stays bound (label shows the error) but empty,
+        # and focusing an empty list is a dead end.
+        strip_up = (DIVERT_SUBTAB_IDS[self._divert_library_tab]
+                    if self._divert_view == 'library'
+                    else HOME_TAB_IDS[self._home_tab])
+        filled_slots = [list_id for _, list_id in RECO_SLOT_IDS
+                        if self._reco_list_has_items(list_id)]
+        for i, (_, list_id) in enumerate(RECO_SLOT_IDS):
+            before = [l for l in filled_slots
+                      if RECO_LIST_IDS.index(l) < i]
+            after = [l for l in filled_slots
+                     if RECO_LIST_IDS.index(l) > i]
+            up = (before[-1] if before
+                  else (list_id if self._hub_offset > 0 else strip_up))
+            down = after[0] if after else list_id
+            nav(list_id, up=up, down=down, left=DIVERT_SIDEBAR_ID)
+
+        # Sidebar rail: Right must land on whatever content the active
+        # view actually shows -- the XML's static 5110 target is a dead
+        # end in library Browse/Collections/Categories (the reco rows are
+        # hidden there), trapping the user inside the rail.
+        if (self._divert_view == 'library' and
+                self._divert_library_tab in (DIVERT_SUBTAB_BIBLIOTHEQUES,
+                                             DIVERT_SUBTAB_COLLECTIONS)):
+            sidebar_right = DIVERT_PANEL_ID
+        elif (self._divert_view == 'library' and
+                self._divert_library_tab == DIVERT_SUBTAB_CATEGORIES):
+            sidebar_right = CATEGORY_PANEL_ID
+        else:
+            sidebar_right = (filled_slots[0] if filled_slots
+                             else RECO_ON_DECK_LIST_ID)
+        nav(DIVERT_SIDEBAR_ID, right=sidebar_right)
+
+        # Top bar: the gear's declared <ondown>9000</ondown> was a leftover
+        # milestone-1 placeholder -- an invisible 1x1 button whose only
+        # exit is Up, trapping focus off-screen on every Down press from
+        # the gear. Route Down from both top-bar buttons to the sub-tab
+        # the tab list's own Down reaches (_focus_first_subtab), and keep
+        # 9000 itself escapable in every direction in case anything still
+        # lands on it before the first sync. nav() pins unset directions
+        # to the control itself, so the XML-declared left/right targets
+        # must be repeated explicitly here.
+        first_sub = self._first_subtab_id()
+        escape = first_sub if first_sub is not None else TAB_LIST_ID
+        nav(GEAR_BUTTON_ID, up=GEAR_BUTTON_ID, down=escape,
+            left=TAB_LIST_ID, right=MODULE_SEARCH_ID)
+        nav(MODULE_SEARCH_ID, up=MODULE_SEARCH_ID, down=escape,
+            left=GEAR_BUTTON_ID, right=TAB_LIST_ID)
+        nav(9000, up=TAB_LIST_ID, down=escape,
+            left=escape, right=escape)
+
+    def _focused_reco_item(self):
+        """The item dict currently focused in a Recommande row slot."""
+        try:
+            focused = self.getFocusId()
+        except RuntimeError:
+            return None
+        if focused not in self._reco_rows:
+            return None
+        _, _, paged = self._reco_rows[focused]
+        try:
+            li = self.getControl(focused).getSelectedItem()
+            if li is not None and li.getProperty('IsPlaceholder'):
+                return None
+            pos = self.getControl(focused).getSelectedPosition()
+        except RuntimeError:
+            return None
+        if not (0 <= pos < len(paged.items)):
+            return None
+        return paged.items[pos]
+
+    def _update_hero(self):
+        """Sync the Plex hero (backdrop/logo/meta/plot/cast) with the item
+        currently focused in a Recommande row -- Plex repaints the whole
+        header every time the focused card changes, including while
+        scrolling horizontally inside one row."""
+        item = self._focused_reco_item()
+        if item is None:
+            # Nothing focused yet (fresh load, focus still on the top bar):
+            # seed the hero with the first item of the first row, matching
+            # Plex's initial auto-highlight.
+            for _, list_id in RECO_SLOT_IDS:
+                row = self._reco_rows.get(list_id)
+                if row and row[2].items:
+                    item = row[2].items[0]
+                    break
+        if item is None:
+            return
+
+        is_episode = item.get('type') == 'episode'
+        title = item.get('show_title') if is_episode else item.get('title')
+        title = title or item.get('title') or ''
+        if is_episode:
+            subtitle = item.get('title') or ''
+        elif item.get('type') in ('show', 'season'):
+            subtitle = ''  # the logo/title already names the show
+        else:
+            subtitle = ''
+
+        cast = ', '.join(c['name'] for c in (item.get('cast') or [])[:4])
+        self._schedule_hero_fanart(
+            item.get('fanart_url') or item.get('art_url') or '')
+        self.setProperty('AuraHeroLogo', item.get('logo_url') or '')
+        self.setProperty('AuraHeroTitle', title)
+        self.setProperty('AuraHeroSubtitle', subtitle)
+        self.setProperty('AuraHeroMeta', _hero_meta_line(item))
+        rating = item.get('content_rating') or ''
+        self.setProperty('AuraHeroRating', rating)
+        # Plex's age chip hugs its text (~40px for "10"): resize the
+        # chip group/image/label since Kodi cannot auto-size it.
+        chip_w = max(44, 11 * len(rating) + 24)
+        for cid in (5005, 5006, 5007):
+            try:
+                self.getControl(cid).setWidth(chip_w)
+            except RuntimeError:
+                pass
+        self.setProperty('AuraHeroPlot', _truncate_plot(item.get('summary') or ''))
+        self.setProperty('AuraHeroCast', cast)
+
+    def _schedule_hero_fanart(self, url):
+        """Debounce the 1080p backdrop swap while the user scrolls.
+
+        Without this every keypress pushes a new fanart URL into the skin
+        property, and Kodi decodes a full-res JPEG on the Pi4's modest GPU
+        for each one -- the classic hero stutter when holding Right. Text
+        props still update immediately; the backdrop only catches up
+        ~300ms after scrolling stops, matching Plex's own hero behaviour
+        (it never repaints mid-fling either).
+        """
+        with self._hero_fanart_lock:
+            if self._hero_fanart_timer is not None:
+                self._hero_fanart_timer.cancel()
+                self._hero_fanart_timer = None
+            if url == self._hero_fanart_current:
+                return
+            if url is None:
+                self._hero_fanart_current = None
+                return
+            self._hero_fanart_timer = threading.Timer(
+                0.3, self._apply_hero_fanart, args=(url,))
+            self._hero_fanart_timer.daemon = True
+            self._hero_fanart_timer.start()
+
+    def _apply_hero_fanart(self, url):
+        with self._hero_fanart_lock:
+            self._hero_fanart_timer = None
+            if url == self._hero_fanart_current:
+                return
+            self._hero_fanart_current = url
+        try:
+            self.setProperty('AuraHeroFanart', url)
+        except RuntimeError:
+            pass
+
+    def _on_reco_item_selected(self, list_control_id):
+        row = self._reco_rows.get(list_control_id)
+        if not row:
             return
         try:
-            lst = self.getControl(list_control_id)
-            lst.reset()
-            for item in paged.items:
-                lst.addItem(_build_divert_list_item(item))
-        except Exception as e:
-            xbmc.log('Akasha Aura: recommendations row render error for {}: {}'
-                     .format(title, e), xbmc.LOGERROR)
-        self._reco_placeholder_counts[list_control_id] = self._sync_placeholders(
-            list_control_id, 0, paged)
+            li = self.getControl(list_control_id).getSelectedItem()
+            if li is not None and li.getProperty('IsPlaceholder'):
+                return
+            pos = self.getControl(list_control_id).getSelectedPosition()
+        except RuntimeError:
+            return
+        _, _, paged = row
+        if not (0 <= pos < len(paged.items)):
+            return
+        self._reco_open(paged.items[pos])
+
+    def _reco_open(self, item):
+        if item['type'] in ('show', 'season'):
+            self._open_show(item)
+        elif item['type'] == 'episode' and item.get('grandparent_rating_key'):
+            # Episode card -> open its show's page, like Plex does.
+            self._open_show({
+                'title': item.get('show_title') or item['title'],
+                'rating_key': item['grandparent_rating_key'],
+            })
+        else:
+            self._open_detail(item)
+
+    def _on_reco_context_menu(self, list_control_id):
+        row = self._reco_rows.get(list_control_id)
+        if not row:
+            return
+        try:
+            li = self.getControl(list_control_id).getSelectedItem()
+            if li is not None and li.getProperty('IsPlaceholder'):
+                return
+            pos = self.getControl(list_control_id).getSelectedPosition()
+        except RuntimeError:
+            return
+        _, _, paged = row
+        if not (0 <= pos < len(paged.items)):
+            return
+        item = paged.items[pos]
+        self._open_item_context_menu(
+            item, lambda: self._reco_open(item), list_control_id)
+
+    def _open_detail(self, item, season_index=None):
+        """Open the Plex-style detail page (AuraDetail.xml) for a playable
+        item (movie, episode, trailer/clip). `season_index` pre-selects a
+        season tab when a season card was the entry point."""
+        detail = self._get_sub_window(
+            'detail', aura_detail.AuraDetailWindow, 'AuraDetail.xml')
+        detail.client = self._connector_client or self._plex_client
+        detail.item = item
+        # Reset per-open state (the window instance is cached/reused).
+        detail.mode = 'show' if item.get('type') == 'show' else 'item'
+        detail._show_item = None
+        detail._seasons = []
+        detail._episodes = []
+        detail._next_episode = None
+        detail._active_season = 0
+        detail._pending_season_index = season_index
+        detail.exit_to_sidebar = False
+        detail.doModal()
+        # Plex behavior: Left on the detail page's left edge pops the
+        # sidebar rail open -- mirrored by closing the detail and handing
+        # the focus to the sidebar list.
+        if getattr(detail, 'exit_to_sidebar', False):
+            try:
+                self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
+            except RuntimeError:
+                pass
+        # A modal WindowXMLDialog stays above the fullscreen video and
+        # blocks its activation, so playback requested from the detail
+        # page also has to close Aura itself. default.py waits for the
+        # video to stop and re-opens this same window, like Plex's
+        # "return to app" after playback.
+        if getattr(detail, 'playback_started', False):
+            self.playback_started = True
+            # Plex returns to the item's detail page when playback stops;
+            # onInit re-opens it via this marker.
+            self._playback_item = item
+            self.close()
 
     def _render_reco_row_label(self, list_control_id, error=None):
         label_control_id, title, paged = self._reco_rows[list_control_id]
         try:
-            count = paged.total if paged.total is not None else len(paged.items)
+            # Plex shows the bare row title ("Continue Watching", "Top Movies
+            # in Mystère · Akasha") -- no item counter on home rows.
             self.getControl(label_control_id).setLabel(
-                '{} — erreur de chargement'.format(title) if error else
-                '{} ({} element(s))'.format(title, count))
+                '{} — erreur de chargement'.format(title) if error else title)
         except RuntimeError:
             pass
 
@@ -609,6 +1115,68 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
+    def _collections_paged(self, section):
+        """PagedList over the section's Plex collections (Directory items)."""
+        def fetch(offset, limit):
+            if self._plex_client:
+                return self._plex_client.section_collections_with_total(
+                    section['key'], limit=limit, offset=offset)
+            # The connector has no collections proxy endpoint -- degrade to
+            # an empty tab rather than failing hard.
+            return [], 0
+        return paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+
+    def _fill_divert_panel(self):
+        try:
+            panel = self.getControl(DIVERT_PANEL_ID)
+            panel.reset()
+            for item in self._divert_items:
+                panel.addItem(_build_divert_list_item(item))
+        except Exception as e:
+            xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
+        self._divert_placeholder_count = self._sync_placeholders(
+            DIVERT_PANEL_ID, 0, self._divert_paged)
+
+    def _load_collections(self, section):
+        """Plex's Collections library tab: the same poster grid as Browse,
+        one card per collection."""
+        self._divert_collection_key = None
+        self._divert_paged = self._collections_paged(section)
+        error = None
+        try:
+            self._divert_paged.load_initial()
+        except Exception as e:
+            xbmc.log('Akasha Aura: collections load failed: {}'.format(e), xbmc.LOGERROR)
+            error = e
+        self._divert_items = self._divert_paged.items
+        self._render_divert_status(section, error)
+        self._fill_divert_panel()
+
+    def _open_collection(self, item):
+        """Drill into a Plex collection: the grid shows its children until
+        the tab is re-entered."""
+        if not self._plex_client or not item.get('rating_key'):
+            return
+
+        def fetch(offset, limit):
+            return self._plex_client.collection_items_with_total(
+                item['rating_key'], limit=limit, offset=offset)
+        self._divert_paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        try:
+            self._divert_paged.load_initial()
+        except Exception as e:
+            xbmc.log('Akasha Aura: collection children load failed: {}'.format(e), xbmc.LOGERROR)
+            return
+        self._divert_items = self._divert_paged.items
+        self._divert_collection_key = item['rating_key']
+        self._fill_divert_panel()
+        try:
+            self.getControl(DIVERT_STATUS_ID).setLabel(
+                '{} — {} élément(s)'.format(item['title'], len(self._divert_items)))
+            self.getControl(DIVERT_PANEL_ID).selectItem(0)
+        except RuntimeError:
+            pass
+
     def _on_category_genre_selected(self):
         """A genre tile was picked: jump straight to Bibliotheque, pre-filtered
         to that genre, instead of the former separate AuraLibraryWindow --
@@ -680,7 +1248,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     pass
                 return
             try:
-                self._plex_client = plex_client.PlexClient(server_url, token, timeout=15)
+                self._plex_client = plex_client.PlexClient(server_url, token, timeout=5)
                 self._divert_sections = self._plex_client.video_sections()
             except Exception as e:
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
@@ -712,9 +1280,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         sidebar.reset()
 
+        search_item = xbmcgui.ListItem('Recherche')
+        search_item.setArt({'icon': 'icon-search.png'})
+        sidebar.addItem(search_item)
+
         home_item = xbmcgui.ListItem('Accueil')
         home_item.setArt({'icon': 'icon-home.png'})
         sidebar.addItem(home_item)
+
+        # Plex's 'Libraries' divider label (is_header restyles it in the
+        # itemlayout and keeps the white focus pill off it).
+        header_item = xbmcgui.ListItem('Bibliothèques')
+        header_item.setProperty('is_header', '1')
+        sidebar.addItem(header_item)
 
         for section in self._divert_sections:
             li = xbmcgui.ListItem(section['title'])
@@ -843,12 +1421,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             filter_label = next(
                 label for value, label in DIVERT_FILTER_OPTIONS
                 if value == self._divert_filter_unwatched)
-            self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel('Filtre: {}'.format(filter_label))
+            self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel(filter_label)
         except RuntimeError:
             pass
         try:
             sort_label = DIVERT_SORT_SHORT_LABELS.get(self._divert_sort, '-')
-            self.getControl(DIVERT_SORT_BUTTON_ID).setLabel('Trier: {}'.format(sort_label))
+            self.getControl(DIVERT_SORT_BUTTON_ID).setLabel(sort_label)
         except RuntimeError:
             pass
 
@@ -860,7 +1438,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 count = self._divert_paged.total if self._divert_paged.total is not None \
                     else len(self._divert_items)
-                label = '{} — {} element(s)'.format(section['title'], count)
+                label = '{} élément(s)'.format(count)
                 if self._divert_search_query:
                     label += ' pour "{}"'.format(self._divert_search_query)
                 if self._divert_filter_genre:
@@ -921,6 +1499,82 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_search_query = ''
         self._load_divert_section_items(self._divert_sections[self._divert_active_section])
 
+    def _divert_open_more_menu(self):
+        """The trailing "..." pill of the Browse toolbar: hosts the quick
+        actions Plex keeps in its overflow menu."""
+        actions = [
+            ('Lire', self._divert_play_first),
+            ('Aleatoire', self._divert_play_random),
+            ('Reinitialiser les filtres', self._divert_reset_filters),
+        ]
+        idx = xbmcgui.Dialog().select('', [label for label, _ in actions])
+        if idx < 0:
+            return
+        actions[idx][1]()
+
+    def _divert_az_jump(self):
+        """A-Z rail: jump the grid to the first loaded item starting with
+        the selected letter (Plex only offers the rail on title sort)."""
+        # The control-level getters misbehave on this static <content>
+        # list (getSelectedPosition -> -1, getSelectedItem may raise),
+        # but Kodi's infolabels report the selection correctly.
+        try:
+            pos = int(xbmc.getInfoLabel('Container({}).Position'.format(
+                DIVERT_AZ_RAIL_ID)) or -1)
+        except ValueError:
+            return
+        letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        if not (0 <= pos < len(letters)):
+            return
+        letter = letters[pos]
+
+        def find_index():
+            for i, item in enumerate(self._divert_items):
+                title = (item.get('title') or '').strip().upper()
+                if not title:
+                    continue
+                first = title[0]
+                if letter == '#' and first.isdigit():
+                    return i
+                if first == letter:
+                    return i
+            return None
+
+        target = find_index()
+        # The rail must also reach items beyond the loaded window: pull
+        # the list forward through the same fetch pipeline (same filters
+        # and sort) until the letter appears or the source is exhausted.
+        # 500-item chunks keep a 5k-title library to ~10 requests instead
+        # of ~100, so the jump stays under a few seconds; scanning only
+        # what was already loaded left the rail dead past the first page.
+        guard = 0
+        while (target is None and self._divert_paged
+               and not self._divert_paged.exhausted and guard < 40):
+            try:
+                chunk = self._divert_paged.fetch_page(
+                    len(self._divert_items), 500)
+            except Exception as e:
+                xbmc.log('Akasha Aura: AZ chunk fetch failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+                break
+            page, _total = chunk if isinstance(chunk, tuple) else (chunk, None)
+            if not page:
+                self._divert_paged.exhausted = True
+                break
+            self._divert_paged.items.extend(page)
+            self._divert_items = self._divert_paged.items
+            self._divert_append_new(page)
+            target = find_index()
+            guard += 1
+        if target is None:
+            return
+        try:
+            panel = self.getControl(DIVERT_PANEL_ID)
+            panel.selectItem(target)
+            self.setFocus(panel)
+        except RuntimeError:
+            pass
+
     def _divert_play_item(self, item):
         # Playback resolution for Divertissement items is not decided yet
         # (see docs/aura/decisions.md) -- the single-item click handler
@@ -937,12 +1591,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_play_random(self):
         if self._divert_items:
             self._divert_play_item(random.choice(self._divert_items))
-
-    def _divert_add_to_playlist(self):
-        if self._divert_items:
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Playlists : pas encore disponible', xbmcgui.NOTIFICATION_INFO,
-                2000)
 
     def _sync_placeholders(self, control_id, current_placeholder_count, paged):
         """Skeleton loaders (plan a3f9c2e1 phase 5): replace whatever
@@ -994,6 +1642,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not new_items:
             return
         self._divert_items = self._divert_paged.items
+        self._divert_append_new(new_items)
+
+    def _divert_append_new(self, new_items):
+        """Append freshly fetched items to the grid after swapping out the
+        stale trailing placeholders they replace."""
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             # Remove the stale trailing placeholders first: they were
@@ -1027,9 +1680,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 btn.setLabel('')
 
-    def _select_jeux_subtab(self, index):
+    def _select_jeux_subtab(self, index, interactive=True):
         self._jeux_active_subtab = index
         self.setProperty('JeuxActiveSubtab', str(index))
+        self._sync_navigation()
 
         if index == JEUX_SUBTAB_OTHERS:
             self._load_other_games()
@@ -1040,7 +1694,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
 
         if index == JEUX_SUBTAB_STEAMLINK:
-            client = self._get_steam_client(prompt_if_missing=True)
+            client = self._get_steam_client(prompt_if_missing=interactive)
             if not client or not client.is_configured():
                 self._set_jeux_panel([], 'SteamLink non configure — cle API et SteamID64 requis')
                 return
@@ -1058,7 +1712,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
 
         if index == JEUX_SUBTAB_MOONLIGHT:
-            client = self._get_sunshine_client(prompt_if_missing=True)
+            client = self._get_sunshine_client(prompt_if_missing=interactive)
             if not client or not client.is_configured():
                 self._set_jeux_panel([], 'Sunshine non configure — URL, utilisateur et mot de passe requis')
                 return
@@ -1077,6 +1731,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _select_app_subtab(self, index):
         self._app_subtab = index
         self.setProperty('AppActiveSubtab', str(index))
+        self._sync_navigation()
         if index == APP_SUBTAB_MES_APPS:
             self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml').doModal()
             self._load_pinned_apps()
@@ -1105,7 +1760,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         steam_id = self.addon.getSetting('steam.steam_id')
         if prompt_if_missing and not (api_key and steam_id):
             api_key, steam_id = self._prompt_steam_credentials(api_key, steam_id)
-        return steam_client.SteamClient(api_key, steam_id, timeout=15)
+        return steam_client.SteamClient(api_key, steam_id, timeout=5)
 
     def _prompt_steam_credentials(self, api_key, steam_id):
         if not api_key:
@@ -1129,7 +1784,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if prompt_if_missing and not (server_url and username and password):
             server_url, username, password = self._prompt_sunshine_credentials(
                 server_url, username, password)
-        return sunshine_client.SunshineClient(server_url, username, password, timeout=15)
+        return sunshine_client.SunshineClient(server_url, username, password, timeout=5)
 
     def _prompt_sunshine_credentials(self, server_url, username, password):
         if not server_url:
@@ -1212,6 +1867,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         index = index % len(config.TABS)
         self.active_tab = index
         self.setProperty('AuraActiveTab', str(index))
+        # Keep the tab list's selected item aligned when the tab change
+        # comes from code (Home press, programmatic focus) rather than
+        # from left/right inside the list itself.
+        try:
+            tabs = self.getControl(TAB_LIST_ID)
+            if tabs.getSelectedPosition() != index:
+                tabs.selectItem(index)
+            self._tab_list_pos = index
+        except (RuntimeError, AttributeError):
+            pass
 
         if index == TAB_DIVERTISSEMENT:
             self.setProperty('DivertView', self._divert_view)
@@ -1233,38 +1898,43 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if index == TAB_DIVERTISSEMENT and self._divert_load_attempted and not self._divert_sections:
             self._load_divertissement()
             self._restore_divert_view(focus=False)
+        self._sync_navigation()
 
     def _update_bar_focused(self):
         """Update the top-bar focused property used by the retract animation."""
         focused = self.getFocusId()
         is_bar_focused = focused in BAR_CONTROL_IDS
         self.setProperty('AuraBarFocused', 'true' if is_bar_focused else 'false')
-        self._layout_top_modules(focused)
 
-    def _layout_top_modules(self, focused):
-        """Correctif c7f0636a: Divertissement/Jeux/App must stay a single
-        contiguous group (pill of the focused one + the other two icons
-        immediately following), never leaving one of them isolated with a
-        large gap before it -- Kodi has no native flexbox-style reflow, so
-        this recomputes each one's <left> by hand and repositions the
-        button/pill/icon controls via setPosition() every time focus
-        moves onto/off of one of them (called from _update_bar_focused(),
-        itself run after every action -- including onInit's own initial
-        call, so the very first render is already laid out correctly)."""
+    def _populate_tab_list(self):
+        """Fill the module tab list. Static <content> items declared in the
+        XML render but are not navigable inside a WindowXMLDialog, so the
+        items are added from the script, like skinshortcuts does for the
+        native main menu."""
         try:
-            focused_index = TAB_BUTTON_IDS.index(focused)
-        except ValueError:
-            focused_index = None
-        x = MODULE_LAYOUT_START_X
-        for i, (button_id, pill_id, icon_id) in enumerate(MODULE_CONTROL_IDS):
-            try:
-                self.getControl(pill_id).setPosition(x, MODULE_PILL_TOP)
-                self.getControl(button_id).setPosition(x + MODULE_BUTTON_OFFSET, MODULE_ICON_TOP)
-                self.getControl(icon_id).setPosition(
-                    x + MODULE_ICON_OFFSETS[i], MODULE_ICON_TOPS[i])
-            except RuntimeError:
-                pass
-            x += MODULE_PILL_WIDTH if i == focused_index else MODULE_ITEM_WIDTH
+            tabs = self.getControl(TAB_LIST_ID)
+        except RuntimeError:
+            return
+        if tabs.size() == len(config.TABS):
+            return
+        tabs.reset()
+        icons = ('tab-divertissement.png', 'tab-jeux.png', 'tab-app.png')
+        for name, icon in zip(config.TABS, icons):
+            item = xbmcgui.ListItem(name)
+            item.setArt({'icon': icon})
+            tabs.addItem(item)
+        self._tab_list_pos = 0
+
+    def _focus_tab(self, index):
+        """Focus the module tab list on the given tab (the list widens its
+        focused slot into the pill itself, like the native menu bar)."""
+        try:
+            tabs = self.getControl(TAB_LIST_ID)
+            tabs.selectItem(index)
+            self._tab_list_pos = index
+            self.setFocus(tabs)
+        except RuntimeError:
+            pass
 
     def onAction(self, action):
         aid = action.getId()
@@ -1275,6 +1945,26 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         focused = self.getFocusId()
+        # Plex long-press: content cards open an option sheet whose
+        # entries depend on the element type (see
+        # _open_item_context_menu); navigation elements (sidebar, genre
+        # cards) keep the long-press == click parity.
+        if aid == ACTION_CONTEXT_MENU:
+            if focused in RECO_LIST_IDS:
+                self._on_reco_context_menu(focused)
+            elif focused == DIVERT_PANEL_ID:
+                self._on_divert_context_menu()
+            elif focused == CATEGORY_PANEL_ID:
+                self._on_category_genre_selected()
+            elif focused == DIVERT_SIDEBAR_ID:
+                self._on_sidebar_item_selected()
+            return
+        # The A-Z rail's static <content> items carry no <onclick>, so Kodi
+        # treats them as dead items and never dispatches GUI_MSG_CLICKED to
+        # onClick() -- Select must be routed manually, like a long-press.
+        if aid == ACTION_SELECT_ITEM and focused == DIVERT_AZ_RAIL_ID:
+            self._divert_az_jump()
+            return
         # Left/Right across the whole top bar (search, the 3 modules, gear)
         # is a single native <onleft>/<onright> loop declared directly in
         # Aura.xml; no Python override needed there. Found on-device (plan
@@ -1286,29 +1976,118 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # the native loop on its own; this handler now only keeps
         # AuraActiveTab/content in sync with whichever module ends up
         # focused, without moving focus itself.
-        if focused in TAB_BUTTON_IDS and TAB_BUTTON_IDS.index(focused) != self.active_tab:
-            self._show_tab(TAB_BUTTON_IDS.index(focused))
-            self._update_bar_focused()
-        if aid == ACTION_MOVE_DOWN and focused in TAB_BUTTON_IDS:
-            self._focus_first_subtab()
+        # Inside the tab list, focus stays on the same control while the
+        # selected item changes -- the active tab follows the selection,
+        # like the native main menu's Container().ListItem binding. The
+        # selection-vs-edge decision is deferred until after
+        # super().onAction() has processed the move: whether Kodi calls us
+        # before or after the internal item move, comparing the position
+        # across super() is the only ordering-agnostic way to tell "moved
+        # to a neighbour item" apart from "stayed put at an edge exit".
+        # (XML <onleft>/<onright> can't be used either: a list consumes
+        # them on EVERY horizontal press, not just at the edges.)
+        if focused == TAB_LIST_ID:
+            if aid == ACTION_MOVE_DOWN:
+                self._focus_first_subtab()
+                self._update_bar_focused()
+                return
+            if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
+                # Kodi may call onAction before OR after the internal item
+                # move depending on the control path, so the position delta
+                # alone can't tell "moved" from "stayed at an edge". Track
+                # the last observed selection in _tab_list_pos instead: a
+                # press that produced a new position is a move (sync the
+                # module), a press that produced the same position at the
+                # matching edge is an exit (search on the left, gear on the
+                # right). XML <onleft>/<onright> can't be used: a list
+                # consumes them on EVERY horizontal press.
+                last_known = getattr(self, '_tab_list_pos', self.active_tab)
+                super().onAction(action)
+                try:
+                    pos_after = self.getControl(TAB_LIST_ID).getSelectedPosition()
+                except RuntimeError:
+                    pos_after = last_known
+                last = len(config.TABS) - 1
+                # Kodi lists wrap around and onAction can fire before OR
+                # after the internal item move, so compare the final
+                # position against the tracked one per direction. A press
+                # that lands in the expected direction is an item move
+                # (sync the module). Staying/wrapping past the tracked
+                # edge is an exit -- search on the left, gear on the
+                # right -- and the wrap is undone. IMPORTANT: a nav press
+                # that transferred focus INTO the list (gear ->Left-> list)
+                # is re-delivered here a second time without moving items;
+                # the edge exit therefore only fires when the tracked
+                # position was ALREADY at that edge, else a transferred
+                # Left would eject to search from the middle of the bar.
+                if aid == ACTION_MOVE_RIGHT and pos_after > last_known:
+                    self._tab_list_pos = pos_after
+                    if pos_after != self.active_tab:
+                        self._show_tab(pos_after)
+                elif aid == ACTION_MOVE_LEFT and pos_after < last_known:
+                    self._tab_list_pos = pos_after
+                    if pos_after != self.active_tab:
+                        self._show_tab(pos_after)
+                elif ((aid == ACTION_MOVE_RIGHT and last_known == last)
+                        or (aid == ACTION_MOVE_LEFT and last_known == 0)):
+                    tabs = self.getControl(TAB_LIST_ID)
+                    edge = 0 if aid == ACTION_MOVE_LEFT else last
+                    if pos_after != edge:
+                        tabs.selectItem(edge)
+                    self._tab_list_pos = edge
+                    try:
+                        self.setFocus(self.getControl(
+                            MODULE_SEARCH_ID if aid == ACTION_MOVE_LEFT
+                            else GEAR_BUTTON_ID))
+                    except RuntimeError:
+                        pass
+                self._update_bar_focused()
+                return
+        if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS):
+            self._focus_tab(self.active_tab)
             self._update_bar_focused()
             return
-        if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS):
-            self.setFocus(self.getControl(TAB_BUTTON_IDS[self.active_tab]))
+        # Recommande row viewport (see RECO_SLOT_IDS): Plex pins the focused
+        # row at a fixed screen position -- focus stays on a slot while its
+        # contents slide by one hub when scrolling past an edge.
+        if aid == ACTION_MOVE_DOWN and focused == RECO_LIST_IDS[-1] \
+                and self._reco_slot_has_row(len(RECO_SLOT_IDS)):
+            self._reco_scroll(+1)
+            self._update_hero()
+            self._update_bar_focused()
+            return
+        if aid == ACTION_MOVE_UP and focused == RECO_LIST_IDS[0] \
+                and self._hub_offset > 0:
+            self._reco_scroll(-1)
+            self._update_hero()
+            self._update_bar_focused()
+            return
+        # Prevent Down landing on an empty slot when fewer hubs remain than
+        # slots, and Up from the top slot reaching the right header control
+        # (contextual tabs in a library, main tab bar on Accueil).
+        if aid == ACTION_MOVE_DOWN and focused in RECO_LIST_IDS[:-1] \
+                and not self._reco_slot_has_row(RECO_LIST_IDS.index(focused) + 1):
+            self._update_bar_focused()
+            return
+        if aid == ACTION_MOVE_UP and focused == RECO_LIST_IDS[0]:
+            if self._divert_view == 'library':
+                self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[0]))
+            else:
+                self.setFocus(self.getControl(HOME_TAB_IDS[self._home_tab]))
             self._update_bar_focused()
             return
         # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
-        # DIVERT_PANEL_ID's grid lands on the main tab bar (2001) instead of
-        # the Bibliotheque tab button (3100), even though the grid's XML
-        # declares <onup>3100</onup> and 3100 is confirmed visible/enabled
-        # at that moment (verified on-device with a System.CurrentControlID
-        # debug label). Neither an explicit Python-side focused==
-        # DIVERT_PANEL_ID interception nor per-control <visible> duplication
-        # changed this -- Kodi's native navigation appears to resolve Up
-        # geometrically for this horizontal list rather than honouring the
-        # explicit onup. Not a dead end (2001 is a perfectly navigable
-        # state), so left as a documented quirk rather than blocking this
-        # release.
+        # DIVERT_PANEL_ID's grid lands on the module tab list (2007)
+        # instead of the Bibliotheque tab button (3100), even though the
+        # grid's XML declares <onup>3100</onup> and 3100 is confirmed
+        # visible/enabled at that moment (verified on-device with a
+        # System.CurrentControlID debug label). Neither an explicit
+        # Python-side focused== DIVERT_PANEL_ID interception nor
+        # per-control <visible> duplication changed this -- Kodi's native
+        # navigation appears to resolve Up geometrically for this
+        # horizontal list rather than honouring the explicit onup. Not a
+        # dead end (2007 is a perfectly navigable state), so left as a
+        # documented quirk rather than blocking this release.
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             focused = self.getFocusId()
@@ -1318,31 +2097,43 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # here too in case a future layout changes column count.
             if focused == DIVERT_PANEL_ID:
                 self._maybe_load_more_divert()
-            elif focused in RECO_LIST_IDS and aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
-                self._maybe_load_more_reco(focused)
+            elif focused in RECO_LIST_IDS:
+                if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
+                    self._maybe_load_more_reco(focused)
+                # The Plex hero follows the focused card on every move --
+                # left/right within a row, up/down between rows.
+                self._update_hero()
         self._update_bar_focused()
+
+    def _first_subtab_id(self):
+        """Control id _focus_first_subtab() would target, or None."""
+        if self.active_tab == TAB_DIVERTISSEMENT:
+            if self._divert_view == 'library':
+                return DIVERT_SUBTAB_IDS[self._divert_library_tab]
+            return HOME_TAB_IDS[self._home_tab]
+        if self.active_tab == TAB_JEUX:
+            return JEUX_SUBTAB_IDS[self._jeux_active_subtab]
+        if self.active_tab == TAB_APP:
+            return APP_SUBTAB_IDS[self._app_subtab]
+        return None
 
     def _focus_first_subtab(self):
         """Move focus from the main tab to the first meaningful content control."""
         try:
-            if self.active_tab == TAB_DIVERTISSEMENT:
-                if self._divert_view == 'library':
-                    self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_library_tab]))
-                else:
-                    lst = self.getControl(RECO_LIST_IDS[0])
-                    if lst.size() > 0:
-                        lst.selectItem(0)
-                    self.setFocus(lst)
-            elif self.active_tab == TAB_JEUX:
-                self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
-            elif self.active_tab == TAB_APP:
-                self.setFocus(self.getControl(APP_SUBTAB_IDS[self._app_subtab]))
+            target = self._first_subtab_id()
+            if target is not None:
+                self.setFocus(self.getControl(target))
         except Exception as e:
             xbmc.log('Akasha Aura: focus first subtab failed: {}'.format(e), xbmc.LOGERROR)
 
     def onClick(self, controlID):
-        if controlID in TAB_BUTTON_IDS:
-            self._show_tab(TAB_BUTTON_IDS.index(controlID))
+        if controlID == TAB_LIST_ID:
+            try:
+                self._show_tab(self.getControl(TAB_LIST_ID).getSelectedPosition())
+            except RuntimeError:
+                pass
+        elif controlID in HOME_TAB_IDS:
+            self._set_home_tab(HOME_TAB_IDS.index(controlID))
         elif controlID in DIVERT_SUBTAB_IDS:
             self._select_library_tab(DIVERT_SUBTAB_IDS.index(controlID))
         elif controlID in JEUX_SUBTAB_IDS:
@@ -1367,6 +2158,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._manage_libraries()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
+        elif controlID in RECO_LIST_IDS:
+            self._on_reco_item_selected(controlID)
         elif controlID == CATEGORY_PANEL_ID:
             self._on_category_genre_selected()
         elif controlID == DIVERT_FILTER_BUTTON_ID:
@@ -1379,10 +2172,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_play_first()
         elif controlID == DIVERT_SHUFFLE_BUTTON_ID:
             self._divert_play_random()
-        elif controlID == DIVERT_PLAYLIST_BUTTON_ID:
-            self._divert_add_to_playlist()
         elif controlID == DIVERT_RESET_BUTTON_ID:
-            self._divert_reset_filters()
+            self._divert_open_more_menu()
+        elif controlID == DIVERT_AZ_RAIL_ID:
+            self._divert_az_jump()
         elif controlID == MODULE_SEARCH_ID:
             self._open_search()
         elif controlID == GEAR_BUTTON_ID:
@@ -1412,27 +2205,53 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pos = self.getControl(DIVERT_SIDEBAR_ID).getSelectedPosition()
         except RuntimeError:
             return
+        if pos == DIVERT_SIDEBAR_SEARCH_INDEX:
+            self._open_search()
+            return
         if pos == DIVERT_SIDEBAR_HOME_INDEX:
             self._activate_home()
             return
-        more_index = len(self._divert_sections) + 1
+        if pos == DIVERT_SIDEBAR_LIBS_HEADER_INDEX:
+            return
+        more_index = len(self._divert_sections) + DIVERT_SIDEBAR_LIBS_OFFSET
         if pos == more_index:
             self._manage_libraries()
             return
-        section_index = pos - 1
+        section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
             self._activate_library(section_index)
 
     def _open_search(self):
-        """Module 0: unified search (plan 04bda1b4 phase 2)."""
-        kb = xbmc.Keyboard('', 'Rechercher')
-        kb.doModal()
-        if not kb.isConfirmed():
+        """Module 0: Plex-style live search screen (AuraSearch.xml)."""
+        search = self._get_sub_window(
+            'search', aura_search.AuraSearchWindow, 'AuraSearch.xml')
+        search.client = self._connector_client or self._plex_client
+        search.sections = self._divert_sections
+        search.on_select = self._open_detail
+        search.on_person = self._open_person_page
+        search.doModal()
+
+    def _open_person_page(self, person):
+        """People search hit -> person page (photo + filmography)."""
+        client = self._plex_client
+        if not client or not person.get('person_filter'):
             return
-        query = kb.getText().strip()
-        if not query:
-            return
-        self._run_unified_search(query)
+        try:
+            filmography = client.person_filmography(
+                person['person_filter'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: filmography failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            filmography = []
+        import aura_person
+        page = aura_person.AuraPersonWindow(
+            'AuraPerson.xml', self.addon.getAddonInfo('path'),
+            'Default', '1080i')
+        page.client = client
+        page.addon_path = self.addon.getAddonInfo('path')
+        page.person = person
+        page.items = filmography
+        page.doModal()
 
     def _run_unified_search(self, query):
         groups = []  # list of (category_label, [(result_label, callback), ...])
@@ -1564,10 +2383,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         def _callback():
             self._show_tab(TAB_APP)
             self._select_app_subtab(APP_SUBTAB_STORE)
-            try:
-                self.setFocus(self.getControl(TAB_BUTTON_IDS[TAB_APP]))
-            except RuntimeError:
-                pass
+            self._focus_tab(TAB_APP)
         return _callback
 
     def _search_settings(self, query):
@@ -1630,6 +2446,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _open_settings_panel(self):
         """Unified settings panel (plan a5a87f03): categories list + curated
         actions, replacing the old direct Kodi/LibreELEC/Akasha shortcuts."""
+        if getattr(self, 'playback_started', False) or xbmc.Player().isPlayingVideo():
+            # The SettingsPressMonitor stays alive while this window is
+            # closed for fullscreen playback, so a (possibly spurious)
+            # gear-wheel press still lands here. Opening a modal
+            # sub-dialog over the video -- or having it pop up the moment
+            # Aura re-opens -- is the "settings opens by itself" bug.
+            # playback_started covers the whole session, including the
+            # ~1-2s not-playing gap between chained playlist episodes
+            # where isPlayingVideo() alone would let a press through.
+            # The fullscreen OSD has its own settings gear; drop the
+            # press instead.
+            xbmc.log('Akasha Aura: settings press ignored during playback',
+                     xbmc.LOGINFO)
+            return
+        now = time.time()
+        if now - self._settings_last_open < 3.0:
+            # The remote emits occasional spurious gear-wheel events; a
+            # burst of presses must not reopen the panel repeatedly (nor
+            # right after the user closed it). Deliberate presses are
+            # seconds apart, so a short cooldown is invisible.
+            xbmc.log('Akasha Aura: settings press ignored (debounce)',
+                     xbmc.LOGINFO)
+            return
+        self._settings_last_open = now
         win = self._get_sub_window(
             'settings_panel', aura_settings_panel.AuraSettingsPanelWindow,
             'AuraSettingsPanel.xml')
@@ -1755,18 +2595,40 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._activate_home()
 
     def _open_show(self, item):
-        """Open AuraShowWindow with the active Connector or direct Plex client."""
+        """Route show selections to the Plex-style detail page.
+
+        Thin items (e.g. an episode card that only carries the show's
+        rating key) are hydrated through /library/metadata first. Season
+        cards open their parent show's page with that season's tab
+        pre-selected, like Plex TV."""
         client = self._connector_client or self._plex_client
         if not client:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+                'Akasha Aura', item.get('title') or '', xbmcgui.NOTIFICATION_INFO, 2000)
             return
-        show_window = self._get_sub_window(
-            'show', aura_show.AuraShowWindow, 'AuraShow.xml')
-        show_window.client = client
-        show_window.show_title = item['title']
-        show_window.show_rating_key = item['rating_key']
-        show_window.doModal()
+        season_index = None
+        if item.get('type') == 'season' and item.get('parent_rating_key') \
+                and hasattr(client, 'metadata_item'):
+            season_index = item.get('index')
+            try:
+                full = client.metadata_item(item['parent_rating_key'])
+                if full:
+                    full.setdefault('type', 'show')
+                    item = full
+            except Exception as e:
+                xbmc.log('Akasha Aura: season parent hydration failed: {}'
+                         .format(e), xbmc.LOGWARNING)
+        elif not item.get('art_url') and item.get('rating_key') \
+                and hasattr(client, 'metadata_item'):
+            try:
+                full = client.metadata_item(item['rating_key'])
+                if full:
+                    full.setdefault('type', 'show')
+                    item = full
+            except Exception as e:
+                xbmc.log('Akasha Aura: show hydration failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+        self._open_detail(item, season_index=season_index)
 
     def _on_divert_item_selected(self):
         try:
@@ -1775,16 +2637,189 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if not (0 <= pos < len(self._divert_items)):
             return
-        item = self._divert_items[pos]
-        section = self._divert_sections[self._divert_active_section]
+        self._divert_open(self._divert_items[pos])
 
+    def _divert_open(self, item):
+        if item.get('type') == 'collection':
+            self._open_collection(item)
+            return
+
+        section = self._divert_sections[self._divert_active_section]
         if section['type'] == 'show':
             self._open_show(item)
         else:
-            # Playback delegation is not decided yet (see docs/aura/decisions.md);
-            # for now just surface the title so selection feels responsive.
+            self._open_detail(item)
+
+    def _on_divert_context_menu(self):
+        try:
+            pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self._divert_items)):
+            return
+        item = self._divert_items[pos]
+        self._open_item_context_menu(
+            item, lambda: self._divert_open(item), DIVERT_PANEL_ID)
+
+    # -- Long-press context menus (Plex option sheets) -------------------
+    #
+    # Plex's Android TV long-press opens a small action sheet whose
+    # entries depend on the element under focus: playable items get
+    # Play/Resume/Restart, everything gets Open, rateable entries get
+    # Mark-as-watched + Rate, then the cloud-limited "Add to list" and a
+    # File Info dump for media-bearing items. Navigation elements
+    # (sidebar, genre cards) keep the plain long-press == click parity.
+
+    def _open_item_context_menu(self, item, open_default, control_id):
+        typ = item.get('type')
+        client = self._connector_client or self._plex_client
+        rateable = typ in ('movie', 'show', 'season', 'episode') \
+            and item.get('rating_key') and client is not None
+        offset = item.get('view_offset_ms') or 0
+        watched = (item.get('view_count') or 0) > 0
+
+        entries = []
+        if typ in ('movie', 'episode') and item.get('part_key'):
+            entries.append(('Reprendre' if offset else 'Regarder',
+                            lambda: self._ctx_play(item)))
+            if offset:
+                entries.append(('Recommencer',
+                                lambda: self._ctx_play(item, start_over=True)))
+        entries.append(('Ouvrir', open_default))
+        if rateable:
+            entries.append(('Marquer comme non vu' if watched
+                            else 'Marquer comme vu',
+                            lambda: self._ctx_toggle_watched(item, control_id)))
+            entries.append(('Noter', lambda: self._ctx_rate(item)))
+        if item.get('video_label') or item.get('audio_label'):
+            entries.append(('Infos fichier', lambda: self._ctx_file_info(item)))
+
+        idx = xbmcgui.Dialog().contextmenu([label for label, _ in entries])
+        if 0 <= idx < len(entries):
+            entries[idx][1]()
+
+    def _ctx_play(self, item, start_over=False):
+        """Direct playback from the option sheet -- same modal lifecycle
+        as the detail page: every dialog leaves the screen before the
+        video starts, and default.py re-opens Aura once it ends."""
+        item = self._hydrate_item(item)
+        client = self._connector_client or self._plex_client
+        base = getattr(client, 'server_url', None) if client else None
+        token = getattr(client, 'token', None) if client else None
+        url = ('{}{}?X-Plex-Token={}'.format(base, item['part_key'], token)
+               if base and token and item.get('part_key') else None)
+        if not url:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
+                'Akasha Aura', 'Lecture indisponible (flux introuvable)',
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        li = xbmcgui.ListItem(item.get('title') or '')
+        aura_detail.AuraDetailWindow._apply_info_tags(li, item)
+        if item.get('view_offset_ms') and not start_over:
+            _set_resume_point(li, item)
+        li.setMimeType('video/mp4')
+        self.playback_started = True
+        self._playback_item = item
+        self.close()
+        queue = aura_detail.episode_queue_items(client, item)
+        if queue:
+            playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+            playlist.clear()
+            queued = 0
+            for i, ep in enumerate(queue):
+                ep_key = ep.get('part_key')
+                if not ep_key:
+                    ep = self._hydrate_item(ep)
+                    ep_key = ep.get('part_key')
+                if not ep_key:
+                    continue
+                ep_li = xbmcgui.ListItem(ep.get('title') or '')
+                aura_detail.AuraDetailWindow._apply_info_tags(ep_li, ep)
+                if ep.get('view_offset_ms') and not (start_over and i == 0):
+                    _set_resume_point(ep_li, ep)
+                ep_li.setMimeType('video/mp4')
+                playlist.add('{}{}?X-Plex-Token={}'.format(base, ep_key, token),
+                             ep_li)
+                queued += 1
+            if queued > 1:
+                osd_menu.store_playback_context(client, queue)
+                xbmc.Player().play(playlist)
+                return
+        osd_menu.store_playback_context(client, [item])
+        xbmc.Player().play(url, li)
+
+    def _hydrate_item(self, item):
+        """Grid/row payloads usually carry part_key already; shallow hub
+        items get one fetch of full metadata, like _open_show does."""
+        if item.get('part_key') or not item.get('rating_key'):
+            return item
+        client = self._connector_client or self._plex_client
+        if not client:
+            return item
+        try:
+            full = client.metadata_item(item['rating_key'])
+            if isinstance(full, dict) and full:
+                full.setdefault('type', item.get('type'))
+                item = full
+        except Exception as e:
+            xbmc.log('Akasha Aura: item hydration failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+        return item
+
+    def _ctx_toggle_watched(self, item, control_id):
+        client = self._connector_client or self._plex_client
+        if not client or not item.get('rating_key'):
+            return
+        watched = (item.get('view_count') or 0) > 0
+        try:
+            if watched:
+                client.unscrobble(item['rating_key'])
+            else:
+                client.scrobble(item['rating_key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: watched toggle failed: {}'.format(e),
+                     xbmc.LOGERROR)
+            return
+        item['view_count'] = 0 if watched else 1
+        try:
+            li = self.getControl(control_id).getSelectedItem()
+            li.getVideoInfoTag().setPlayCount(item['view_count'])
+        except Exception:
+            pass
+        xbmcgui.Dialog().notification(
+            'Akasha Aura',
+            'Marqué comme non vu' if watched else 'Marqué comme vu',
+            xbmcgui.NOTIFICATION_INFO, 1500)
+
+    def _ctx_rate(self, item):
+        client = self._connector_client or self._plex_client
+        if not client or not item.get('rating_key'):
+            return
+        choices = ['{} / 10'.format(i) for i in range(1, 11)]
+        pos = xbmcgui.Dialog().select('Noter', choices)
+        if pos < 0:
+            return
+        try:
+            client.rate(item['rating_key'], pos + 1)
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Note enregistrée : {}'.format(choices[pos]),
+                xbmcgui.NOTIFICATION_INFO, 1500)
+        except Exception as e:
+            xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
+
+    def _ctx_file_info(self, item):
+        lines = [item.get('title') or '']
+        meta = [x for x in (item.get('year'),
+                            _format_duration(item.get('duration_ms')))
+                if x]
+        if meta:
+            lines.append(' · '.join(str(m) for m in meta))
+        for label, key in (('Vidéo', 'video_label'),
+                           ('Audio', 'audio_label'),
+                           ('Sous-titres', 'subtitle_label')):
+            if item.get(key):
+                lines.append('{} : {}'.format(label, item[key]))
+        xbmcgui.Dialog().ok('Infos fichier', '[CR]'.join(lines))
 
     def _on_home_press_action(self, action):
         """React to a repeated Home press while Aura is already open.
@@ -1793,13 +2828,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         'double' -> open the minimal app switcher.
         """
         xbmc.log('Akasha Aura: home press action: {}'.format(action), xbmc.LOGINFO)
+        if xbmc.Player().isPlayingVideo():
+            # The window is closed while a video plays fullscreen: queue
+            # the action for the re-open and leave fullscreen now -- Home
+            # must always land the user back inside Aura.
+            self._pending_home_action = action
+            xbmc.Player().stop()
+            return
         if action == 'single':
             self._close_sub_windows()
             self._show_tab(0)
-            try:
-                self.setFocus(self.getControl(TAB_BUTTON_IDS[0]))
-            except RuntimeError:
-                pass
+            self._focus_tab(0)
         elif action == 'double':
             switcher = self._get_sub_window(
                 'app_switcher', _HomePressAppSwitcher, 'AuraSwitcher.xml')
@@ -1816,10 +2855,281 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 pass
 
 
+def _format_duration(duration_ms):
+    """Plex-style '1h 24m' / '24m' display for a millisecond duration."""
+    if not duration_ms:
+        return ''
+    minutes = int(duration_ms) // 60000
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return '{}h {}m'.format(hours, minutes)
+    return '{}m'.format(minutes)
+
+
+_MONTHS_FR = ('janv.', 'fevr.', 'mars', 'avr.', 'mai', 'juin', 'juil.',
+              'aout', 'sept.', 'oct.', 'nov.', 'dec.')
+
+
+def _format_date_fr(iso_date):
+    """'2019-11-10' -> '10 nov. 2019' (Plex shows the release/air date)."""
+    try:
+        year, month, day = (int(p) for p in str(iso_date)[:10].split('-'))
+        return '{} {} {}'.format(day, _MONTHS_FR[month - 1], year)
+    except Exception:
+        return ''
+
+
+def _hub_title_fr(hub):
+    """Localise the well-known Plex hub titles.
+
+    The server reports hub titles in its own locale (English on Akasha),
+    while the UI language is French -- so the standard hub identifiers are
+    mapped here rather than trusting the raw title. Section-scoped curated
+    hubs get the ' · Akasha' server suffix Plex appends on the reference
+    client ("Top Movies in Mystère · Akasha").
+    """
+    identifier = (hub.get('identifier') or '').lower()
+    context = (hub.get('context') or '').lower()
+    title = hub.get('title') or ''
+    title_lc = title.lower()
+    # Section hubs use machine identifiers ('movie.inprogress'...), so the
+    # raw English title is the reliable signal for standard Plex rows.
+    standard = (
+        'continue' in identifier or 'ondeck' in identifier
+        or 'inprogress' in identifier or 'continue watching' in title_lc
+        or 'on deck' in title_lc)
+    # Standard Plex hubs ("Continue Watching", "Recently Added"...) carry
+    # no server suffix in the reference client; only curated hubs do
+    # ("Top Movies in Mystère · Akasha").
+    suffix = False
+
+    if standard:
+        base = 'Continuer à regarder'
+    elif 'recentlyadded' in identifier or 'recently added' in title_lc:
+        base = 'Ajoutés récemment'
+        if ' in ' in title:
+            base += ' dans {}'.format(title.rsplit(' in ', 1)[-1])
+    elif 'recentlyreleased' in identifier or 'recently released' in title_lc:
+        base = 'Sorties récentes'
+        if 'Movies' in title:
+            base += ' dans Films'
+    elif 'recentlyviewed' in identifier or 'recentlywatched' in identifier \
+            or 'recently viewed' in title_lc or 'recently watched' in title_lc:
+        base = 'Vus récemment'
+    else:
+        suffix = True
+        # Discover ("Tendances") provider hub identifiers.
+        discover_titles = {
+            'home.recently-released-trailers': 'Nouvelles bandes-annonces',
+            'home.trending-trailers': 'Bandes-annonces en vogue',
+            'home.recommended-on-services': 'Recommandé sur vos services',
+            'home.top_watchlisted': 'Les plus suivis cette semaine',
+            'home.new-trailers': 'Bandes-annonces de votre Watchlist',
+            'home.watchlist-available': 'Disponibles sur vos services',
+            'home.coming-soon': 'Bientôt disponible',
+            'home.available-rentals': 'Disponibles à la location',
+            'home.genres': 'Parcourir par genre',
+            'home.historical-week': 'Cette semaine dans l\'histoire',
+            'home.blockbuster-trailers': 'Blockbusters à venir',
+            'home.preferred-services': 'Vos services',
+        }
+        base = discover_titles.get(identifier, title)
+
+    # Plex suffixes section-scoped rows with the server name (" · Akasha"),
+    # home-scoped hubs (identifier 'home.*', context 'hub.home.*') get none.
+    scoped = suffix and bool(identifier) and not identifier.startswith('home.') \
+        and 'hub.home' not in context
+    if scoped and '·' not in base:
+        # Plex renders the server suffix smaller and grey; Kodi labels
+        # cannot mix sizes, so we match the dimmed tone at least.
+        base += '[COLOR FF8A9199] · Akasha[/COLOR]'
+    return base
+
+
+def _hero_meta_line(item):
+    """Plex hero meta row: 'S18 • E6   10 nov. 2019   21m' for episodes,
+    '2002   1h 50m   Comédie, Mystère' for movies (rating chip rendered
+    separately). Matches docs/plex-parity/SPEC.md measurements."""
+    parts = []
+    item_type = item.get('type')
+    if item_type == 'episode':
+        if item.get('season') is not None and item.get('index') is not None:
+            parts.append('S{} • E{}'.format(item['season'], item['index']))
+        elif item.get('index') is not None:
+            parts.append('E{}'.format(item['index']))
+        date = _format_date_fr(item.get('originally_available_at'))
+        if date:
+            parts.append(date)
+        duration = _format_duration(item.get('duration_ms'))
+        if duration:
+            parts.append(duration)
+    elif item_type == 'movie':
+        if item.get('year'):
+            parts.append(str(item['year']))
+        duration = _format_duration(item.get('duration_ms'))
+        if duration:
+            parts.append(duration)
+        genres = item.get('genres') or []
+        if genres:
+            parts.append(', '.join(genres[:2]))
+    else:  # show / season / other
+        if item.get('year'):
+            parts.append(str(item['year']))
+        genres = item.get('genres') or []
+        if genres:
+            parts.append(', '.join(genres[:2]))
+        duration = _format_duration(item.get('duration_ms'))
+        if duration:
+            parts.append(duration)
+    return '   '.join(parts)
+
+
+def _truncate_plot(text, limit=130):
+    """Clamp the hero synopsis to roughly two lines (like Plex): cut at a
+    word boundary and append an ellipsis when truncated."""
+    text = ' '.join((text or '').split())
+    if len(text) <= limit:
+        return text
+    cut = text[:limit].rsplit(' ', 1)[0].rstrip(',;:.')
+    return cut + '…'
+
+
+_KODI_MEDIA_TYPES = frozenset(
+    ('video', 'movie', 'tvshow', 'season', 'episode', 'musicvideo', 'set'))
+
+
+def _set_resume_point(li, item):
+    """Kodi 20+ InfoTagVideo resume point, with the deprecated
+    resumetime/totaltime properties as fallback."""
+    try:
+        li.getVideoInfoTag().setResumePoint(
+            float(item['view_offset_ms']) / 1000.0,
+            float(item.get('duration_ms') or 0) / 1000.0)
+    except Exception:
+        li.setProperty('resumetime',
+                       str(float(item['view_offset_ms']) / 1000.0))
+        li.setProperty('totaltime',
+                       str(float(item.get('duration_ms') or 0) / 1000.0))
+
+
 def _build_divert_list_item(item):
+    # Plex home rows carry no per-card text: the hero (driven by the focused
+    # item, see Aura.xml "Plex hero" group) shows title/meta/plot. Labels are
+    # still filled so grid-type views keep their two-line caption.
     li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
-    if item.get('thumb_url'):
-        li.setArt({'thumb': item['thumb_url']})
+    art = {}
+    if item.get('poster_url') or item.get('thumb_url'):
+        art['poster'] = item.get('poster_url') or item.get('thumb_url')
+        art['thumb'] = item.get('poster_url') or item.get('thumb_url')
+    if item.get('fanart_url') or item.get('art_url'):
+        art['fanart'] = item.get('fanart_url') or item.get('art_url')
+    if item.get('landscape_url'):
+        art['landscape'] = item['landscape_url']
+    if item.get('logo_url'):
+        art['clearlogo'] = item['logo_url']
+    if art:
+        li.setArt(art)
+
+    # Kodi 20+ InfoTagVideo API (setInfo/resumetime are deprecated and warn
+    # in kodi.log); the legacy path stays as fallback for stubbed test runs.
+    try:
+        _type = {'show': 'tvshow'}.get(item.get('type'), item.get('type'))
+        tag = li.getVideoInfoTag()
+        tag.setMediaType(
+            _type if _type in _KODI_MEDIA_TYPES else 'video')
+        tag.setTitle(item['title'])
+        if item.get('summary'):
+            tag.setPlot(item['summary'])
+        if item.get('show_title'):
+            tag.setTvShowTitle(item['show_title'])
+        if item.get('year'):
+            tag.setYear(int(item['year']))
+        if item.get('duration_ms'):
+            tag.setDuration(int(item['duration_ms']) // 1000)
+        if item.get('season') is not None:
+            tag.setSeason(int(item['season']))
+        if item.get('index') is not None:
+            tag.setEpisode(int(item['index']))
+        if item.get('genres'):
+            tag.setGenres(item['genres'])
+        if item.get('rating'):
+            tag.setRating(float(item['rating']), 0, 'plex', True)
+        if item.get('content_rating'):
+            tag.setMpaa(item['content_rating'])
+        if item.get('directors'):
+            tag.setDirectors(item['directors'])
+        if item.get('writers'):
+            tag.setWritingCredits(item['writers'])
+        if item.get('studio'):
+            tag.setStudio(item['studio'])
+        if item.get('cast'):
+            tag.setCast([xbmc.Actor(c['name'], c.get('role') or '')
+                         for c in item['cast']])
+        if item.get('view_count'):
+            tag.setPlayCount(int(item['view_count']))
+        if item.get('view_offset_ms') and item.get('duration_ms'):
+            tag.setResumePoint(float(item['view_offset_ms']) / 1000.0,
+                               float(item['duration_ms']) / 1000.0)
+    except Exception:
+        info = {
+            'title': item['title'],
+            'plot': item.get('summary') or '',
+            'mediatype': item.get('type') or 'video',
+        }
+        if item.get('show_title'):
+            info['tvshowtitle'] = item['show_title']
+        if item.get('year'):
+            info['year'] = item['year']
+        if item.get('duration_ms'):
+            info['duration'] = int(item['duration_ms']) // 1000
+        if item.get('season') is not None:
+            info['season'] = item['season']
+        if item.get('index') is not None:
+            info['episode'] = item['index']
+        if item.get('genres'):
+            info['genre'] = ' / '.join(item['genres'])
+        if item.get('rating'):
+            info['rating'] = float(item['rating'])
+        if item.get('content_rating'):
+            info['mpaa'] = item['content_rating']
+        if item.get('directors'):
+            info['director'] = ' / '.join(item['directors'])
+        if item.get('writers'):
+            info['writer'] = ' / '.join(item['writers'])
+        if item.get('studio'):
+            info['studio'] = item['studio']
+        if item.get('cast'):
+            info['cast'] = [(c['name'], c.get('role') or '') for c in item['cast']]
+        if item.get('view_count'):
+            info['playcount'] = item['view_count']
+        li.setInfo('video', info)
+
+        if item.get('view_offset_ms') and item.get('duration_ms'):
+            li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
+            li.setProperty('totaltime', str(float(item['duration_ms']) / 1000.0))
+
+    if item.get('progress') is not None:
+        li.setProperty('AuraProgress', str(int(item['progress'] * 100)))
+    if item.get('content_rating'):
+        li.setProperty('AuraContentRating', item['content_rating'])
+    if item.get('audience_rating'):
+        li.setProperty('AuraAudienceRating', '{:.1f}'.format(float(item['audience_rating'])))
+    if item.get('rating'):
+        li.setProperty('AuraCriticRating', '{:.1f}'.format(float(item['rating'])))
+    if item.get('video_label'):
+        li.setProperty('AuraVideoLabel', item['video_label'])
+    if item.get('audio_label'):
+        li.setProperty('AuraAudioLabel', item['audio_label'])
+    if item.get('subtitle_label'):
+        li.setProperty('AuraSubtitleLabel', item['subtitle_label'])
+    if item.get('logo_url'):
+        li.setProperty('AuraLogo', item['logo_url'])
+    if item.get('tagline'):
+        li.setProperty('AuraTagline', item['tagline'])
+    if item.get('show_title'):
+        li.setProperty('AuraShowTitle', item['show_title'])
+    li.setProperty('AuraDuration', _format_duration(item.get('duration_ms')))
+    li.setProperty('AuraType', item.get('type') or 'video')
     return li
 
 

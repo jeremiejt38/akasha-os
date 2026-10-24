@@ -181,3 +181,56 @@ rétro-ingénierie du protocole BLE vendor-specific, pas d'achat de matériel d�
   télécommande. L'alternative identifiée (blaster IR dédié sur GPIO du Raspberry Pi via LIRC,
   indépendant de la télécommande) reste documentée ci-dessus comme piste si le contrôle IR TV
   redevient prioritaire un jour, mais n'est pas retenue dans le périmètre actuel.
+
+## Correctif volume/mute — liaison directe (2026-10-23)
+
+Les touches volume étaient mortes : la keymap appelait `RunScript(service.akasha.remote,
+volume_*)` → `default.py` → `volume_router.route()` → `xbmc.executebuiltin('VolumeUp')`,
+mais `VolumeUp`/`VolumeDown`/`Mute` sont des **noms d'actions de keymap**, pas des builtins —
+`executebuiltin` les ignorait silencieusement (« script successfully run » sans effet).
+
+Deux problèmes corrigés :
+
+- **Latence de maintien** : la télécommande répète à ~33 ms ; chaque `RunScript` lançait un
+  interpréteur Python (~150 ms) — file d'attente ingérable. Les touches volume/mute sont
+  maintenant liées **directement** aux actions natives dans `akasha-ar-remote.xml`
+  (`<volume_up>VolumeUp</volume_up>`), donc réponse instantanée + répétition native + barre
+  OSD, sans dépendre du mode de routage.
+- **Routeur scripté** : `KODI_BUILTINS` passe par le wrapper `Action(<nom>)`
+  (`Action(volumeup)` / `Action(volumedown)` / `Action(mute)`), vérifié sur le Pi. Le mode
+  CEC (`cec-ctl --user-control-pressed`) est inchangé ; le mode reste sélectionnable dans
+  les réglages de l'addon pour un éventuel usage scripté, mais la keymap ne le consulte plus
+  (bindings statiques).
+
+Vérifié en direct : `HandleKey: volume_up (0xf0b9) / volume_down (0xf0b8)` capturés en
+debug — la télécommande envoie bien les keysyms standard, c'est la chaîne d'action qui était
+cassée. `volume.py` (helper bumpers LB/RB du gamepad, 5 % premier appui / 1 % en maintien)
+était absent du repo : importé depuis le Pi et ajouté à `install.sh`.
+
+## Appuis parasites confirmés + durcissement (2026-10-23, suite)
+
+Diagnostic en direct : la télécommande émet **des événements isolés sporadiques** sur la
+touche engrenage (`scancode 0xf0` → `0xf200, obc-61697`) sans appui physique — captures
+brutes `/dev/input` vides en période calme, puis un `HandleKey` isolé surgit (ex. 50 s
+après le boot, personne ne touchait la télécommande). Hypothèses matérielles : bouton « ≡ »
+fatigué, réveil BT qui émet un rapport résiduel. Le récepteur IR GPIO23, lui, est désactivé
+(`rmmod gpio_ir_recv` + `dtoverlay` commenté dans `/flash/config.txt`).
+
+Durcissements appliqués :
+
+- **Panneau paramètres = double appui** (`c4a9747`) : le fichier de pression garde un
+  historique des 4 derniers timestamps ; `SettingsPressMonitor` n'ouvre le panneau que si
+  les deux dernières pressions sont espacées de < 0,9 s. Une pression isolée (parasite ou
+  accidentelle) est ignorée et loguée. Le chemin « Aura non lancée » applique la même règle
+  dans `default.py`, et `onInit` vérifie l'historique pour un double appui franchissant le
+  démarrage d'Aura. Alternative single-press : l'icône engrenage dans l'interface Aura.
+- **Long Home en plein écran → OSD vidéo** (`8acfa63`) : `browser_home mod="longpress"`
+  tombait sur la liaison globale → `script.akasha.guide` s'ouvrait par-dessus la vidéo et
+  ses entrées Accueil/Arrêt cassaient la lecture — incident complet observé : guide ouvert
+  à 05:15:39 pendant la lecture → navigation dans ses menus → arrêt propre de Kodi à 05:21.
+  La liaison plein écran pointe maintenant vers `ActivateWindow(videoosd)`.
+- **Court-circuit pendant toute la session vidéo** : `playback_started` reste vrai pendant
+  le démarrage du flux, la lecture, et le trou « not-playing » entre épisodes chaînés ;
+  l'engrenage est ignoré sur toute cette fenêtre (avant, un appui tombant dans le trou
+  entre deux épisodes ouvrait le panneau en pleine transition).
+

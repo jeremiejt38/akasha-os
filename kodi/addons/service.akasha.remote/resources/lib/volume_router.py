@@ -29,10 +29,13 @@ def mode_from_setting(raw):
         return VOLUME_MODES[index]
     return 'akasha'
 
+# VolumeUp/VolumeDown/Mute are keymap ACTIONS, not builtin functions, so a
+# bare executebuiltin('VolumeUp') is silently ignored. The Action() builtin
+# wraps them and produces the native behaviour (OSD bar, mute toggle).
 KODI_BUILTINS = {
-    VOLUME_UP: 'VolumeUp',
-    VOLUME_DOWN: 'VolumeDown',
-    VOLUME_MUTE: 'Mute',
+    VOLUME_UP: 'Action(volumeup)',
+    VOLUME_DOWN: 'Action(volumedown)',
+    VOLUME_MUTE: 'Action(mute)',
 }
 
 CEC_UI_CMDS = {
