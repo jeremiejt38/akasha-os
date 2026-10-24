@@ -757,6 +757,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                              else RECO_ON_DECK_LIST_ID)
         nav(DIVERT_SIDEBAR_ID, right=sidebar_right)
 
+        # Top bar: the gear's declared <ondown>9000</ondown> was a leftover
+        # milestone-1 placeholder -- an invisible 1x1 button whose only
+        # exit is Up, trapping focus off-screen on every Down press from
+        # the gear. Route Down from both top-bar buttons to the sub-tab
+        # the tab list's own Down reaches (_focus_first_subtab), and keep
+        # 9000 itself escapable in every direction in case anything still
+        # lands on it before the first sync. nav() pins unset directions
+        # to the control itself, so the XML-declared left/right targets
+        # must be repeated explicitly here.
+        first_sub = self._first_subtab_id()
+        escape = first_sub if first_sub is not None else TAB_LIST_ID
+        nav(GEAR_BUTTON_ID, up=GEAR_BUTTON_ID, down=escape,
+            left=TAB_LIST_ID, right=MODULE_SEARCH_ID)
+        nav(MODULE_SEARCH_ID, up=MODULE_SEARCH_ID, down=escape,
+            left=GEAR_BUTTON_ID, right=TAB_LIST_ID)
+        nav(9000, up=TAB_LIST_ID, down=escape,
+            left=escape, right=escape)
+
     def _focused_reco_item(self):
         """The item dict currently focused in a Recommande row slot."""
         try:
@@ -2087,18 +2105,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._update_hero()
         self._update_bar_focused()
 
+    def _first_subtab_id(self):
+        """Control id _focus_first_subtab() would target, or None."""
+        if self.active_tab == TAB_DIVERTISSEMENT:
+            if self._divert_view == 'library':
+                return DIVERT_SUBTAB_IDS[self._divert_library_tab]
+            return HOME_TAB_IDS[self._home_tab]
+        if self.active_tab == TAB_JEUX:
+            return JEUX_SUBTAB_IDS[self._jeux_active_subtab]
+        if self.active_tab == TAB_APP:
+            return APP_SUBTAB_IDS[self._app_subtab]
+        return None
+
     def _focus_first_subtab(self):
         """Move focus from the main tab to the first meaningful content control."""
         try:
-            if self.active_tab == TAB_DIVERTISSEMENT:
-                if self._divert_view == 'library':
-                    self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[self._divert_library_tab]))
-                else:
-                    self.setFocus(self.getControl(HOME_TAB_IDS[self._home_tab]))
-            elif self.active_tab == TAB_JEUX:
-                self.setFocus(self.getControl(JEUX_SUBTAB_IDS[self._jeux_active_subtab]))
-            elif self.active_tab == TAB_APP:
-                self.setFocus(self.getControl(APP_SUBTAB_IDS[self._app_subtab]))
+            target = self._first_subtab_id()
+            if target is not None:
+                self.setFocus(self.getControl(target))
         except Exception as e:
             xbmc.log('Akasha Aura: focus first subtab failed: {}'.format(e), xbmc.LOGERROR)
 

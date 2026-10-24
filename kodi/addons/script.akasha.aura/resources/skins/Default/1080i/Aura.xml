@@ -2269,9 +2269,11 @@
             </control>
         </control>
 
-        <!-- Placeholder focusable control so ondown from the tab bar has a target.
-             Kept off-screen: milestone 2+ will replace it with real row/tile
-             controls per tab (see docs/aura/roadmap.md). -->
+        <!-- Pre-sync fallback target for the gear's declared ondown: before
+             _sync_navigation() rewires the top bar, Down from 2004 lands
+             here. Every direction is rewired at runtime (up -> tab bar,
+             others -> active sub-tab), so focus can never stay trapped on
+             this invisible control. -->
         <control type="button" id="9000">
             <left>-100</left>
             <top>-100</top>
