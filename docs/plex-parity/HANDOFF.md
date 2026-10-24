@@ -102,6 +102,35 @@ pas de reboot/poweroff/CEC sans confirmation ; préférer « Redémarrer Akasha 
 5. Mode Ambiant : reculés volontaires — crédit photo, fond flou non-16:9,
    appariement portrait, luminosité nocturne.
 
+## Contexte opérationnel (endpoints, préférences, emplacements)
+
+- **Source Plex d'Aura** : `https://plex.akasha.ing` (endpoint public
+  Cloudflare→Traefik Hetzner→Unraid:32400, pas de VPN). **Cloudflare bloque
+  le User-Agent `urllib` par défaut (erreur 1010)** → les clients Python
+  envoient `User-Agent: AkashaOSAura/1.0` (`plex_client._headers()`).
+- **Connector Akasha** (`connector.akasha.ing`) : métadonnées/auth
+  multi-utilisateurs seulement — **pas de mutations** ; les actions type
+  `removeFromContinueWatching`, `scrobble`, `rate` ne fonctionnent que via
+  le client Plex direct. Les clients ont un disjoncteur par hôte (fail-fast
+  30 s) + cache lecture 30 s pour ne jamais geler le GUI.
+- **Emplacements de réglages non évidents** : l'activation du Mode Ambiant
+  (`ambient.enabled`, bool, défaut `true`) vit dans `script.akasha.settings`,
+  lue par `service.akasha.ambient` ; l'historique de recherche dans
+  `search.recent` (réglage addon Aura, JSON, 8 entrées, fallback sur
+  corruption) ; le délai/dim/sleep ambiant dans `script.akasha.ambient`.
+- **Préférence utilisateur** : UI **français d'abord** ; les autres langues
+  viendront après — `LANGUAGES` dans `i18n.py` est prêt pour en ajouter.
+  Noms propres non traduits (Plex, Moonlight…), titres serveur inchangés,
+  options Kodi affichées dans la langue de Kodi.
+- **`ARIANE.md`** à la racine : fichier généré par la synchro ariane
+  (`http://latitude-9430:8420`) — le laisser **non suivi** par git.
+- Réglages Kodi vérifiés : les 21 IDs utilisés par `settings_catalog.py`
+  existent tous dans Kodi 21/Omega (`displaysoff`, `shutdowntime`,
+  `screensaver.time` n'ont pas d'options → fallback picker `range` prévu).
+- **Historique de conversation** : les résumés automatiques Devin vivent
+  dans `~/.local/share/devin/cli/summaries/` (`history_*.md`) si jamais la
+  nouvelle session veut recouper un détail.
+
 ## Contexte hors repo
 
 - **Atlas** (mémoire persistante, `~/workspace/atlas`) : journal de session
