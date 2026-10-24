@@ -67,15 +67,14 @@ ACTION_CONTEXT_MENU = 117
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
-# Plex's expanded rail puts fixed entries above the libraries: profile,
-# My Lists, Search, Home -- then a divider, the library sections,
-# Playlists and Plus.
-DIVERT_SIDEBAR_PROFILE_INDEX = 0
-DIVERT_SIDEBAR_MYLIST_INDEX = 1
-DIVERT_SIDEBAR_SEARCH_INDEX = 2
-DIVERT_SIDEBAR_HOME_INDEX = 3
-DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 4
-DIVERT_SIDEBAR_LIBS_OFFSET = 5
+# Plex's expanded rail puts fixed entries above the libraries: Search,
+# Home -- then a divider, the library sections and Plus. Plex cloud-only
+# entries (profile, My Lists, playlists, On Plex) are hidden: they only
+# surfaced "unavailable" notifications.
+DIVERT_SIDEBAR_SEARCH_INDEX = 0
+DIVERT_SIDEBAR_HOME_INDEX = 1
+DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 2
+DIVERT_SIDEBAR_LIBS_OFFSET = 3
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 # Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
@@ -116,10 +115,9 @@ RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
 # (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
 # private GraphQL API on community.plex.tv), so it shows an honest
 # empty-state instead of fake rows.
-HOME_TAB_IDS = (3070, 3071, 3072)
+HOME_TAB_IDS = (3070, 3071)
 HOME_TAB_FOR_YOU = 0
 HOME_TAB_TRENDING = 1
-HOME_TAB_ACTIVITY = 2
 RECO_CACHE_TTL_SECONDS = 120
 RECO_ON_DECK_FETCH_LIMIT = 50  # over-fetch before client-side section filtering
 RECO_MAX_ITEMS_PER_ROW = 100
@@ -136,13 +134,12 @@ DIVERT_SORT_BUTTON_ID = 3212
 DIVERT_GENRE_BUTTON_ID = 3213
 DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
-DIVERT_PLAYLIST_BUTTON_ID = 3217
 DIVERT_RESET_BUTTON_ID = 3218
 DIVERT_AZ_RAIL_ID = 3250
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
     DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
-    DIVERT_PLAYLIST_BUTTON_ID, DIVERT_RESET_BUTTON_ID,
+    DIVERT_RESET_BUTTON_ID,
 )
 
 # Mirrors aura_library.py's SORT_OPTIONS so both list the exact same choices
@@ -522,11 +519,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _reco_hub_rows(self, section):
         """Build row descriptors from real Plex hubs, or None if unavailable.
 
-        Returns [] (empty viewport, never the legacy fallback) for the
-        Activité tab -- its social feed has no public endpoint -- and for
+        Returns [] (empty viewport, never the legacy fallback) for
         Tendances when there is no direct-Plex client."""
-        if section is None and self._home_tab == HOME_TAB_ACTIVITY:
-            return []
         if not self._plex_client:
             if section is None and self._home_tab != HOME_TAB_FOR_YOU:
                 return []
@@ -788,13 +782,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         currently focused in a Recommande row -- Plex repaints the whole
         header every time the focused card changes, including while
         scrolling horizontally inside one row."""
-        if self._divert_view == 'home' and self._home_tab == HOME_TAB_ACTIVITY:
-            self._schedule_hero_fanart(None)
-            for prop in ('AuraHeroFanart', 'AuraHeroLogo', 'AuraHeroTitle',
-                         'AuraHeroSubtitle', 'AuraHeroMeta', 'AuraHeroRating',
-                         'AuraHeroPlot', 'AuraHeroCast'):
-                self.setProperty(prop, '')
-            return
         item = self._focused_reco_item()
         if item is None:
             # Nothing focused yet (fresh load, focus still on the top bar):
@@ -1275,17 +1262,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         sidebar.reset()
 
-        # Plex profile row: circular avatar + account name + chevron
-        # (is_profile restyles it in the itemlayout).
-        profile_item = xbmcgui.ListItem('Akasha')
-        profile_item.setProperty('is_profile', '1')
-        profile_item.setArt({'icon': 'avatar-plex.png'})
-        sidebar.addItem(profile_item)
-
-        mylist_item = xbmcgui.ListItem('Ma liste')
-        mylist_item.setArt({'icon': 'icon-bookmark.png'})
-        sidebar.addItem(mylist_item)
-
         search_item = xbmcgui.ListItem('Recherche')
         search_item.setArt({'icon': 'icon-search.png'})
         sidebar.addItem(search_item)
@@ -1305,28 +1281,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             li.setArt({'icon': self._divert_section_icon(section)})
             sidebar.addItem(li)
 
-        playlists_item = xbmcgui.ListItem('Playlists')
-        playlists_item.setArt({'icon': 'icon-playlists.png'})
-        sidebar.addItem(playlists_item)
-
         more_item = xbmcgui.ListItem('Plus')
         more_item.setArt({'icon': 'icon-more.png'})
         sidebar.addItem(more_item)
-
-        # Plex's 'On Plex' section: cloud sources (Live TV, Discover) the
-        # private connector can't proxy -- kept for structural parity,
-        # selecting them surfaces a notification.
-        onplex_item = xbmcgui.ListItem('Sur Plex')
-        onplex_item.setProperty('is_header', '1')
-        sidebar.addItem(onplex_item)
-
-        livetv_item = xbmcgui.ListItem('TV en direct')
-        livetv_item.setArt({'icon': 'icon-livetv.png'})
-        sidebar.addItem(livetv_item)
-
-        discover_item = xbmcgui.ListItem('Découvrir')
-        discover_item.setArt({'icon': 'icon-discover.png'})
-        sidebar.addItem(discover_item)
 
     def _divert_section_icon(self, section):
         """Return a distinct icon name for a library section.
@@ -1530,7 +1487,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         actions = [
             ('Lire', self._divert_play_first),
             ('Aleatoire', self._divert_play_random),
-            ('Ajouter a une liste', self._divert_add_to_playlist),
             ('Reinitialiser les filtres', self._divert_reset_filters),
         ]
         idx = xbmcgui.Dialog().select('', [label for label, _ in actions])
@@ -1617,12 +1573,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_play_random(self):
         if self._divert_items:
             self._divert_play_item(random.choice(self._divert_items))
-
-    def _divert_add_to_playlist(self):
-        if self._divert_items:
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Playlists : pas encore disponible', xbmcgui.NOTIFICATION_INFO,
-                2000)
 
     def _sync_placeholders(self, control_id, current_placeholder_count, paged):
         """Skeleton loaders (plan a3f9c2e1 phase 5): replace whatever
@@ -2198,8 +2148,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_play_first()
         elif controlID == DIVERT_SHUFFLE_BUTTON_ID:
             self._divert_play_random()
-        elif controlID == DIVERT_PLAYLIST_BUTTON_ID:
-            self._divert_add_to_playlist()
         elif controlID == DIVERT_RESET_BUTTON_ID:
             self._divert_open_more_menu()
         elif controlID == DIVERT_AZ_RAIL_ID:
@@ -2233,20 +2181,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pos = self.getControl(DIVERT_SIDEBAR_ID).getSelectedPosition()
         except RuntimeError:
             return
-        if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
-            # Plex's profile entry opens the plex.tv account menu (switch
-            # user / sign out); the private connector doesn't proxy it.
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Profil Plex indisponible',
-                xbmcgui.NOTIFICATION_INFO, 1500)
-            return
-        if pos == DIVERT_SIDEBAR_MYLIST_INDEX:
-            # Plex 'My Lists' = watchlist/playlists -- a plex.tv cloud
-            # feature; surface it once the connector proxies it.
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Ma liste indisponible',
-                xbmcgui.NOTIFICATION_INFO, 1500)
-            return
         if pos == DIVERT_SIDEBAR_SEARCH_INDEX:
             self._open_search()
             return
@@ -2255,21 +2189,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if pos == DIVERT_SIDEBAR_LIBS_HEADER_INDEX:
             return
-        playlists_index = len(self._divert_sections) + DIVERT_SIDEBAR_LIBS_OFFSET
-        if pos == playlists_index:
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Playlists à venir',
-                xbmcgui.NOTIFICATION_INFO, 1500)
-            return
-        if pos == playlists_index + 1:
+        more_index = len(self._divert_sections) + DIVERT_SIDEBAR_LIBS_OFFSET
+        if pos == more_index:
             self._manage_libraries()
-            return
-        if pos == playlists_index + 2:
-            return  # 'Sur Plex' section header
-        if pos in (playlists_index + 3, playlists_index + 4):
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Contenu Plex.tv indisponible',
-                xbmcgui.NOTIFICATION_INFO, 1500)
             return
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
@@ -2722,7 +2644,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                             else 'Marquer comme vu',
                             lambda: self._ctx_toggle_watched(item, control_id)))
             entries.append(('Noter', lambda: self._ctx_rate(item)))
-        entries.append(('Ajouter à ma liste', self._ctx_list_notice))
         if item.get('video_label') or item.get('audio_label'):
             entries.append(('Infos fichier', lambda: self._ctx_file_info(item)))
 
@@ -2838,11 +2759,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmcgui.NOTIFICATION_INFO, 1500)
         except Exception as e:
             xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
-
-    def _ctx_list_notice(self):
-        xbmcgui.Dialog().notification(
-            'Akasha Aura', 'Listes indisponibles (fonction Plex cloud)',
-            xbmcgui.NOTIFICATION_INFO, 2500)
 
     def _ctx_file_info(self, item):
         lines = [item.get('title') or '']

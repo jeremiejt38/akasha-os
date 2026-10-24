@@ -85,8 +85,9 @@ MORE_MANAGE_ID = 7203
 MORE_FILE_INFO_ID = 7204
 MORE_WAYS_ID = 7205
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
-MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
-                  MORE_MANAGE_ID, MORE_FILE_INFO_ID, MORE_WAYS_ID)
+# Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
+# the skin; only Subtitles and File Info remain reachable.
+MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID)
 
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, WATCHLIST_BUTTON_ID,
                   RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID)
@@ -481,8 +482,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         restart = bool(self._playable_item() and
                        self._playable_item().get('view_offset_ms'))
         order = ([WATCH_BUTTON_ID] + ([RESTART_BUTTON_ID] if restart else [])
-                 + [WATCHLIST_BUTTON_ID, RATE_BUTTON_ID,
-                    WATCHED_BUTTON_ID, MORE_BUTTON_ID])
+                 + [RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID])
+        # Plex watchlist sync is a plex.tv cloud feature -- the button stays
+        # hidden rather than surfacing an "unavailable" notification.
+        for cid in (WATCHLIST_BUTTON_ID,) + ACTION_ICON_OVERLAYS.get(
+                WATCHLIST_BUTTON_ID, ()):
+            try:
+                self.getControl(cid).setVisible(False)
+            except RuntimeError:
+                pass
         try:
             focused = self.getFocusId()
         except RuntimeError:

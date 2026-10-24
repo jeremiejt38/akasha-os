@@ -629,10 +629,9 @@
                 </control>
             </control>
 
-            <!-- Home tab strip: Plex's "For You / Trending / Activity" row.
-                 Same dark pill container + white focused pill as the library
-                 strip. Activite shows an empty state (Plex's friend-activity
-                 feed is a private GraphQL API, no usable endpoint). -->
+            <!-- Home tab strip: Plex's "For You / Trending" row. The
+                 Activite tab is hidden; its social feed is a private
+                 GraphQL API with no usable endpoint. -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
@@ -640,7 +639,7 @@
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
-                    <width>502</width>
+                    <width>354</width>
                     <height>52</height>
                     <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
                 </control>
@@ -662,14 +661,6 @@
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
-                </control>
-                <control type="image">
-                    <left>473</left>
-                    <top>118</top>
-                    <width>140</width>
-                    <height>40</height>
-                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
-                    <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>127</left>
@@ -698,23 +689,6 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
-                    <onright>3072</onright>
-                    <onup>2007</onup>
-                    <ondown>5110</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
-                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
-                </control>
-                <control type="button" id="3072">
-                    <left>473</left>
-                    <top>118</top>
-                    <width>140</width>
-                    <height>40</height>
-                    <label>Activité</label>
-                    <font>font_tiny_bold</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>3071</onleft>
                     <onright>5110</onright>
                     <onup>2007</onup>
                     <ondown>5110</ondown>
@@ -722,18 +696,6 @@
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
-            </control>
-
-            <!-- Activite empty state -->
-            <control type="label">
-                <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),2)</visible>
-                <left>127</left>
-                <top>400</top>
-                <width>1600</width>
-                <height>40</height>
-                <font>font_main</font>
-                <textcolor>AAFFFFFF</textcolor>
-                <label>Aucune activité d'amis à afficher.</label>
             </control>
 
             <!-- Bibliotheque toolbar: type (info), quick filter, sort, genre,

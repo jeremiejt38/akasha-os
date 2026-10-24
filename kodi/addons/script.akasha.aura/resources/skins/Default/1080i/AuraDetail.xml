@@ -983,7 +983,7 @@
                 <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
                 <texturenofocus>-</texturenofocus>
                 <onup>7200</onup>
-                <ondown>7201</ondown>
+                <ondown>7204</ondown>
                 <onleft>7102</onleft>
             </control>
             <control type="image">
@@ -1002,111 +1002,12 @@
                 <texture>icon-subs-dark.png</texture>
                 <visible>Control.HasFocus(7200)</visible>
             </control>
-            <control type="button" id="7201">
-                <left>1396</left>
-                <top>228</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_tiny_bold</font>
-                <label>Ajouter à une liste</label>
-                <align>left</align>
-                <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
-                <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <onup>7200</onup>
-                <ondown>7202</ondown>
-                <onleft>7102</onleft>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>248</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-bookmark.png</texture>
-                <visible>!Control.HasFocus(7201)</visible>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>248</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-bookmark-dark.png</texture>
-                <visible>Control.HasFocus(7201)</visible>
-            </control>
-            <control type="button" id="7202">
-                <left>1396</left>
-                <top>316</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_tiny_bold</font>
-                <label>Ajouter à une playlist</label>
-                <align>left</align>
-                <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
-                <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <onup>7201</onup>
-                <ondown>7203</ondown>
-                <onleft>7102</onleft>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>336</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-playlists.png</texture>
-                <visible>!Control.HasFocus(7202)</visible>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>336</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-playlists-dark.png</texture>
-                <visible>Control.HasFocus(7202)</visible>
-            </control>
-            <control type="button" id="7203">
-                <left>1396</left>
-                <top>404</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_tiny_bold</font>
-                <label>Gérer</label>
-                <align>left</align>
-                <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
-                <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <onup>7202</onup>
-                <ondown>7204</ondown>
-                <onleft>7102</onleft>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>424</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-gear.png</texture>
-                <visible>!Control.HasFocus(7203)</visible>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>424</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-gear-dark.png</texture>
-                <visible>Control.HasFocus(7203)</visible>
-            </control>
+            <!-- Cloud-only Plex entries (list, playlist, manage, other
+                 ways) are hidden: they only produced "unavailable"
+                 notifications. -->
             <control type="button" id="7204">
                 <left>1396</left>
-                <top>492</top>
+                <top>228</top>
                 <width>470</width>
                 <height>80</height>
                 <font>font_tiny_bold</font>
@@ -1118,13 +1019,13 @@
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
                 <texturenofocus>-</texturenofocus>
-                <onup>7203</onup>
-                <ondown>7205</ondown>
+                <onup>7200</onup>
+                <ondown>7204</ondown>
                 <onleft>7102</onleft>
             </control>
             <control type="image">
                 <left>1422</left>
-                <top>512</top>
+                <top>248</top>
                 <width>40</width>
                 <height>40</height>
                 <texture>icon-info.png</texture>
@@ -1132,45 +1033,11 @@
             </control>
             <control type="image">
                 <left>1422</left>
-                <top>512</top>
+                <top>248</top>
                 <width>40</width>
                 <height>40</height>
                 <texture>icon-info-dark.png</texture>
                 <visible>Control.HasFocus(7204)</visible>
-            </control>
-            <control type="button" id="7205">
-                <left>1396</left>
-                <top>580</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_tiny_bold</font>
-                <label>Autres façons de regarder</label>
-                <align>left</align>
-                <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
-                <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <onup>7204</onup>
-                <ondown>7205</ondown>
-                <onleft>7102</onleft>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>600</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-discover.png</texture>
-                <visible>!Control.HasFocus(7205)</visible>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>600</top>
-                <width>40</width>
-                <height>40</height>
-                <texture>icon-discover-dark.png</texture>
-                <visible>Control.HasFocus(7205)</visible>
             </control>
         </control>
         </control>
