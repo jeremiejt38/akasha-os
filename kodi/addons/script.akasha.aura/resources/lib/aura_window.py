@@ -132,6 +132,18 @@ RECO_MAX_ITEMS_PER_ROW = 100
 CATEGORY_STATUS_ID = 6020
 CATEGORY_PANEL_ID = 6010
 
+# Divertissement state view (B17, Plex's "server unreachable" pattern):
+# centered icon + title + message + one contextual action button over the
+# content area, declared in Aura.xml and driven through
+# Window.Property(DivertState)/_set_divert_state(). Transport-level
+# failures (dead host or offline-breaker fast fail) get the dedicated
+# "offline" copy; other load errors get the generic "error" one.
+DIVERT_STATE_TITLE_ID = 6301
+DIVERT_STATE_MESSAGE_ID = 6302
+DIVERT_STATE_BUTTON_ID = 6303
+OFFLINE_ERROR_TYPES = (plex_client.PlexOfflineError,
+                       connector_client.ConnectorOfflineError)
+
 # Bibliotheque toolbar (plan f41ce1ad phase A).
 DIVERT_TYPE_LABEL_ID = 3210
 DIVERT_FILTER_BUTTON_ID = 3211
@@ -290,6 +302,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # on every activation), so state/data refresh exactly like before.
         self._sub_windows = {}
         self._divert_load_attempted = False
+        # Divertissement state overlay (B17): active kind
+        # ('offline'|'error'|'empty'|'config'|None) plus the thunk bound to
+        # its single action button (retry of the failed load, or a
+        # navigation like "Effacer les filtres").
+        self._divert_state = None
+        self._divert_state_action = None
         # Listen for repeated Home presses while Aura is already open so we can
         # distinguish simple press (return to Divertissement tab) from double
         # press (open app switcher). See docs/remote/decisions.md.
@@ -359,6 +377,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     settings_press_handler.double_press_just_happened()):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
+            # Startup loads that failed surfaced the state view: its action
+            # button takes over focus once the initial focus pass is done.
+            if self._divert_state and self._divert_state_action:
+                try:
+                    self.setFocusId(DIVERT_STATE_BUTTON_ID)
+                except RuntimeError:
+                    pass
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
 
@@ -498,6 +523,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # on its <ondown> to reach the grid avoids the race entirely, since
         # that next input is a separate, later action -- see
         # docs/aura/decisions.md.
+        self._apply_browse_restate(section)
         self._sync_navigation()
 
     def _load_recommendations(self, section):
@@ -511,11 +537,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         previous hand-built 3-row layout as a fallback; all rows bind
         through the same slot mechanism either way.
         """
-        self._hub_rows = self._reco_hub_rows(section)
-        if self._hub_rows is None:
-            self._hub_rows = self._reco_legacy_rows(section)
+        rows, fatal = self._reco_hub_rows(section)
+        if rows is None:
+            if fatal is None or not isinstance(fatal, OFFLINE_ERROR_TYPES):
+                rows = self._reco_legacy_rows(section)
+            else:
+                # Offline hub failure: the legacy fallback would hit the
+                # same dead host -- keep a synthetic error row instead so
+                # _apply_reco_state() surfaces the Plex-style offline
+                # state without burning more timeouts.
+                rows = [{'title': '', 'paged': None, 'error': fatal}]
+        self._hub_rows = rows
         self._hub_offset = 0
         self._reco_rows = {}
+        self._apply_reco_state(section)
         self._rebind_reco_slots()
         self._update_hero()
 
@@ -530,14 +565,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._sync_navigation()
 
     def _reco_hub_rows(self, section):
-        """Build row descriptors from real Plex hubs, or None if unavailable.
+        """Build row descriptors from real Plex hubs.
 
-        Returns [] (empty viewport, never the legacy fallback) for
-        Tendances when there is no direct-Plex client."""
+        Returns (rows, fatal): rows=None means "fall back to the legacy
+        rows" (hub source unusable for a non-fatal reason); fatal carries
+        the exception when the hub list itself failed, so the caller can
+        skip the fallback on transport errors. ([], None) -- empty
+        viewport, never the legacy fallback -- is returned for Tendances
+        when there is no direct-Plex client."""
         if not self._plex_client:
             if section is None and self._home_tab != HOME_TAB_FOR_YOU:
-                return []
-            return None
+                return [], None
+            return None, None
         try:
             if section:
                 hubs = self._plex_client.section_hubs(section['key'])
@@ -548,7 +587,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: hubs load failed, falling back to legacy rows: {}'
                      .format(e), xbmc.LOGWARNING)
-            return None
+            return None, e
         rows = []
         seen_keys = set()
         for hub in hubs:
@@ -575,7 +614,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if not row['paged'].items and not row.get('error'):
                 continue
             rows.append(row)
-        return rows or None
+        return rows or None, None
 
     def _reco_init_hub_row(self, hub):
         """Wrap one hub in a PagedList: the first page is served from the
@@ -757,6 +796,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                   else (list_id if self._hub_offset > 0 else strip_up))
             down = after[0] if after else list_id
             nav(list_id, up=up, down=down, left=DIVERT_SIDEBAR_ID)
+
+        # State view's action button (B17): Up reaches whichever contextual
+        # strip is active, Left exits to the sidebar like every content
+        # edge; Down/Right stay on itself.
+        nav(DIVERT_STATE_BUTTON_ID, up=strip_up, down=DIVERT_STATE_BUTTON_ID,
+            left=DIVERT_SIDEBAR_ID, right=DIVERT_STATE_BUTTON_ID)
 
         # Sidebar rail: Right must land on whatever content the active
         # view actually shows -- the XML's static 5110 target is a dead
@@ -1112,6 +1157,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if status:
                 status.setLabel(i18n.tr(33067))
             return
+        error = None
         try:
             if self._connector_client:
                 genres = divert_source.parse_genres(
@@ -1121,6 +1167,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: categories load failed: {}'.format(e), xbmc.LOGERROR)
             genres = []
+            error = e
         # Kept untranslated for _on_category_genre_selected() -- the Plex/
         # connector genre filter API expects the original (English) tag,
         # only the on-screen label is translated (Plex's metadata agents
@@ -1136,6 +1183,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 panel.addItem(xbmcgui.ListItem(divert_source.display_genre(genre)))
         except RuntimeError:
             pass
+        if error is not None:
+            self._state_for_error(
+                error, lambda: self._load_categories(section))
+        elif not genres:
+            self._set_divert_state(
+                'empty', title=i18n.tr(33560), message='',
+                action_label=i18n.tr(33020), action=self._focus_sidebar)
+        else:
+            self._set_divert_state(None)
 
     def _collections_paged(self, section):
         """PagedList over the section's Plex collections (Directory items)."""
@@ -1147,6 +1203,184 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # an empty tab rather than failing hard.
             return [], 0
         return paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+
+    def _set_divert_state(self, kind, title=None, message=None,
+                          action_label=None, action=None):
+        """Show or hide the centered Divertissement state overlay (B17).
+
+        kind: None clears the overlay; 'offline' (server unreachable),
+        'error' (generic load failure), 'empty' (loaded, nothing to show)
+        or 'config' (no Plex/connector source configured). `action` is the
+        thunk bound to the single state button -- typically a retry of the
+        failed load or a navigation ("Effacer les filtres", settings).
+        """
+        self._divert_state = kind
+        self._divert_state_action = action
+        if kind is None:
+            self.setProperty('DivertState', '')
+            self.setProperty('DivertStateAction', '')
+            try:
+                self.getControl(DIVERT_STATE_TITLE_ID).setLabel('')
+                self.getControl(DIVERT_STATE_MESSAGE_ID).setLabel('')
+                self.getControl(DIVERT_STATE_BUTTON_ID).setLabel('')
+            except RuntimeError:
+                pass
+            return
+        if kind == 'offline':
+            title = title or i18n.tr(33550)
+            message = message or i18n.tr(33551)
+            if action_label is None:
+                action_label = i18n.tr(33552)
+        elif kind == 'config':
+            title = title or i18n.tr(33558)
+            message = message or i18n.tr(33559)
+            if action_label is None:
+                action_label = i18n.tr(33019)
+        elif kind == 'empty':
+            title = title or i18n.tr(33556)
+        else:
+            title = title or i18n.tr(33553)
+            message = message or i18n.tr(33554)
+            if action_label is None:
+                action_label = i18n.tr(33552)
+        self.setProperty('DivertState', kind)
+        self.setProperty('DivertStateAction', action_label or '')
+        try:
+            self.getControl(DIVERT_STATE_TITLE_ID).setLabel(title)
+            self.getControl(DIVERT_STATE_MESSAGE_ID).setLabel(message or '')
+            if action_label:
+                self.getControl(DIVERT_STATE_BUTTON_ID).setLabel(action_label)
+        except RuntimeError:
+            pass
+        if action_label:
+            # Plex puts the default focus on the state's primary action.
+            try:
+                self.setFocusId(DIVERT_STATE_BUTTON_ID)
+            except RuntimeError:
+                pass
+
+    def _state_for_error(self, error, retry):
+        """Map a load exception to the right state kind."""
+        kind = ('offline' if isinstance(error, OFFLINE_ERROR_TYPES)
+                else 'error')
+        self._set_divert_state(kind, action=retry)
+
+    def _apply_reco_state(self, section):
+        """Terminal DivertState decision for the Recommande/Accueil rows.
+
+        Plex drops silently failed hubs; but when *everything* failed (or
+        the hub list itself did) it shows the full-panel server state --
+        mirrored here. Partial failures keep the per-row
+        "erreur de chargement" labels.
+        """
+        if not self._plex_client and not self._connector_client:
+            self._hub_rows = []
+            self._set_divert_state('config', action=self._open_settings_menu)
+            return
+        retry = (self._retry_divertissement if not self._divert_sections
+                 else lambda: self._load_recommendations(section))
+        rows = self._hub_rows
+        # Some rows never touch the network on Accueil (recent releases is
+        # a client-side filter returning an empty page with no error):
+        # "everything failed" must mean "every row that produced anything
+        # failed", so [error, error, empty-no-error] still maps to the
+        # full-panel state like Plex's unreachable-server screen.
+        filled = [row for row in rows
+                  if not row.get('error')
+                  and row['paged'] is not None and row['paged'].items]
+        failed = [row for row in rows if row.get('error')]
+        if failed and not filled:
+            offline = any(isinstance(row['error'], OFFLINE_ERROR_TYPES)
+                          for row in failed)
+            self._hub_rows = []
+            self._set_divert_state('offline' if offline else 'error',
+                                   action=retry)
+            return
+        if not rows:
+            self._set_divert_state('empty', title=i18n.tr(33560), message='',
+                                   action_label=i18n.tr(33552), action=retry)
+            return
+        self._set_divert_state(None)
+
+    def _apply_grid_empty_state(self, section):
+        """Empty-state variants for the Bibliotheque grid: Plex's
+        "No Results" + clear-filters action when filters are active,
+        "Your library is empty" + Back otherwise."""
+        filtered = bool(self._divert_search_query or self._divert_filter_genre
+                        or self._divert_filter_unwatched is not None)
+        if filtered:
+            self._set_divert_state(
+                'empty', title=i18n.tr(33556), message='',
+                action_label=i18n.tr(33557),
+                action=lambda: self._divert_clear_filters_and_reload(section))
+        else:
+            self._set_divert_state(
+                'empty', title=i18n.tr(33555), message='',
+                action_label=i18n.tr(33020), action=self._focus_sidebar)
+
+    def _apply_browse_restate(self, section):
+        """Re-derive the state for the already-loaded Bibliotheque grid on
+        a tab switch that reloads nothing -- otherwise an 'empty'/'error'
+        state set by another tab would linger over valid content. An
+        error state set by the grid's own failed load is kept as-is."""
+        if self._divert_items:
+            self._set_divert_state(None)
+        elif self._divert_state not in ('offline', 'error'):
+            self._apply_grid_empty_state(section)
+
+    def _divert_clear_filters_and_reload(self, section):
+        self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
+        self._divert_filter_genre = None
+        self._divert_filter_unwatched = None
+        self._divert_search_query = ''
+        self._load_divert_section_items(section)
+
+    def _retry_divertissement(self):
+        """State-view "Réessayer" when no library loaded at all: re-run the
+        whole source init (sections AND content), not just the failed
+        view -- a server that just came back would otherwise stay on the
+        error screen because sections were never fetched again."""
+        self._load_divertissement()
+        self._restore_divert_view(focus=False)
+
+    def _focus_sidebar(self):
+        try:
+            self.setFocus(self.getControl(DIVERT_SIDEBAR_ID))
+        except RuntimeError:
+            pass
+
+    def _focus_divert_content(self):
+        """Focus hand-back after a state action succeeded: the content
+        surface of the current view, or the sidebar as last resort."""
+        target = None
+        if self._divert_view == 'library' \
+                and self._divert_library_tab != DIVERT_SUBTAB_RECOMMANDE:
+            target = (CATEGORY_PANEL_ID
+                      if self._divert_library_tab == DIVERT_SUBTAB_CATEGORIES
+                      else DIVERT_PANEL_ID)
+        else:
+            target = next((lid for _, lid in RECO_SLOT_IDS
+                           if self._reco_list_has_items(lid)), None)
+        if target is None:
+            target = DIVERT_SIDEBAR_ID
+        try:
+            self.setFocus(self.getControl(target))
+        except RuntimeError:
+            pass
+
+    def _on_state_action(self):
+        """Click on the state view's single action button."""
+        action = self._divert_state_action
+        self._divert_state_action = None
+        if action is None:
+            return
+        action()
+        self._sync_navigation()
+        # The thunk decided the new state itself: on success the overlay
+        # cleared and focus returns to the content; on failure a fresh
+        # state is shown and focus stays on its button.
+        if self._divert_state is None:
+            self._focus_divert_content()
 
     def _fill_divert_panel(self):
         try:
@@ -1173,6 +1407,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_items = self._divert_paged.items
         self._render_divert_status(section, error)
         self._fill_divert_panel()
+        if error is not None:
+            self._state_for_error(
+                error, lambda: self._load_collections(section))
+        elif not self._divert_items:
+            self._set_divert_state(
+                'empty', title=i18n.tr(33560), message='',
+                action_label=i18n.tr(33020), action=self._focus_sidebar)
+        else:
+            self._set_divert_state(None)
 
     def _open_collection(self, item):
         """Drill into a Plex collection: the grid shows its children until
@@ -1192,6 +1435,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_items = self._divert_paged.items
         self._divert_collection_key = item['rating_key']
         self._fill_divert_panel()
+        self._set_divert_state(None)
         try:
             self.getControl(DIVERT_STATUS_ID).setLabel(
                 '{} — {}'.format(item['title'],
@@ -1264,11 +1508,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             token = self.addon.getSetting('plex.token')
             if not config.is_plex_configured(server_url, token):
                 xbmc.log('Akasha Aura: Plex not configured, skipping Divertissement', xbmc.LOGINFO)
-                try:
-                    self.getControl(DIVERT_STATUS_ID).setLabel(
-                        'Plex non configure — renseignez plex.server_url et plex.token')
-                except RuntimeError:
-                    pass
+                # Keep the fixed sidebar entries usable and surface the
+                # config state instead of the old bare status label.
+                self._populate_sidebar()
+                self._set_divert_state('config',
+                                       action=self._open_settings_menu)
                 return
             try:
                 self._plex_client = plex_client.PlexClient(server_url, token, timeout=5)
@@ -1433,6 +1677,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
         self._divert_placeholder_count = self._sync_placeholders(
             DIVERT_PANEL_ID, 0, self._divert_paged)
+
+        if error is not None:
+            self._state_for_error(
+                error, lambda: self._load_divert_section_items(section))
+        elif not self._divert_items:
+            self._apply_grid_empty_state(section)
+        else:
+            self._set_divert_state(None)
 
     def _render_divert_toolbar(self, section):
         try:
@@ -2218,6 +2470,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_open_more_menu()
         elif controlID == DIVERT_AZ_RAIL_ID:
             self._divert_az_jump()
+        elif controlID == DIVERT_STATE_BUTTON_ID:
+            self._on_state_action()
         elif controlID == MODULE_SEARCH_ID:
             self._open_search()
         elif controlID == GEAR_BUTTON_ID:

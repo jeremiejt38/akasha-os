@@ -1499,3 +1499,58 @@ msgstr "Ethernet"
 msgctxt "#33549"
 msgid "Hidden"
 msgstr "Masqué"
+
+# Serveur inaccessible
+msgctxt "#33550"
+msgid "Server unreachable"
+msgstr "Serveur inaccessible"
+
+# Vérifiez que votre serveur est allumé et connecté au réseau.
+msgctxt "#33551"
+msgid "Check that your server is powered on and connected to the network."
+msgstr "Vérifiez que votre serveur est allumé et connecté au réseau."
+
+# Réessayer
+msgctxt "#33552"
+msgid "Retry"
+msgstr "Réessayer"
+
+# Impossible de charger le contenu
+msgctxt "#33553"
+msgid "Unable to load content"
+msgstr "Impossible de charger le contenu"
+
+# Une erreur est survenue. Réessayez dans un instant.
+msgctxt "#33554"
+msgid "Something went wrong. Try again in a moment."
+msgstr "Une erreur est survenue. Réessayez dans un instant."
+
+# Votre bibliothèque est vide
+msgctxt "#33555"
+msgid "Your library is empty"
+msgstr "Votre bibliothèque est vide"
+
+# Aucun résultat
+msgctxt "#33556"
+msgid "No results"
+msgstr "Aucun résultat"
+
+# Effacer les filtres
+msgctxt "#33557"
+msgid "Clear filters"
+msgstr "Effacer les filtres"
+
+# Plex n’est pas configuré
+msgctxt "#33558"
+msgid "Plex is not configured"
+msgstr "Plex n’est pas configuré"
+
+# Renseignez le serveur et le jeton Plex dans les réglages.
+msgctxt "#33559"
+msgid "Set the Plex server and token in Settings."
+msgstr "Renseignez le serveur et le jeton Plex dans les réglages."
+
+# Aucun contenu à afficher
+msgctxt "#33560"
+msgid "Nothing to show"
+msgstr "Aucun contenu à afficher"

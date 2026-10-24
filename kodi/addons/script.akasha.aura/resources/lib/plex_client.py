@@ -66,6 +66,13 @@ class PlexAPIError(Exception):
     """Raised when a Plex API call fails or returns an unexpected shape."""
 
 
+class PlexOfflineError(PlexAPIError):
+    """Raised when the server could not be reached at all (transport
+    failure or offline-breaker fast fail), as opposed to an API-level
+    error where the server answered. Lets the UI distinguish Plex's
+    "server unreachable" full-screen state from ordinary load errors."""
+
+
 class PlexClient:
     """Minimal JSON client for a local Plex Media Server."""
 
@@ -101,8 +108,8 @@ class PlexClient:
         url = self._url(path, params)
         host = urllib.parse.urlparse(url).netloc
         if _is_offline(host):
-            raise PlexAPIError('Plex server {} unreachable '
-                               '(offline backoff)'.format(host))
+            raise PlexOfflineError('Plex server {} unreachable '
+                                   '(offline backoff)'.format(host))
         # Mutation endpoints (/:/scrobble, /:/rate, /actions/...) must
         # never be served from cache.
         cacheable = not path.startswith('/:') and method is None
@@ -130,7 +137,7 @@ class PlexClient:
         except OSError as e:
             _mark_offline(host)
             reason = getattr(e, 'reason', e)
-            raise PlexAPIError('Plex URL error for {}: {}'.format(path, reason)) from e
+            raise PlexOfflineError('Plex URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise PlexAPIError('Plex JSON decode error for {}: {}'.format(path, e)) from e
 
