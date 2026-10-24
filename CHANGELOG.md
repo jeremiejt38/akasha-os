@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.59.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.58.0...akasha-os-v0.59.0) (2026-10-24)
+
+
+### Features
+
+* performance analyzer service + native-menu loading overlay ([#155](https://github.com/jeremiejt38/akasha-os/issues/155)) ([4944279](https://github.com/jeremiejt38/akasha-os/commit/4944279a8ae5fe6a57f35f23dec9f31102d271fa))
+
 ## [0.58.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.57.1...akasha-os-v0.58.0) (2026-10-24)
 
 
