@@ -83,6 +83,18 @@ def resolve_slideshow_path(configured_path, fallback_folder):
     return fallback_folder
 
 
+def resolve_image_paths(configured_path, fallback_folder):
+    """Return the absolute paths of the images the slideshow should cycle.
+
+    The configured folder wins when it contains at least one image;
+    otherwise the bundled fallback folder is used (it always contains at
+    least the shipped fallback image) so the screen never stays blank.
+    """
+    if has_images(configured_path):
+        return [os.path.join(configured_path, name) for name in list_images(configured_path)]
+    return [os.path.join(fallback_folder, name) for name in list_images(fallback_folder)]
+
+
 def resolve_media(configured_path, fallback_folder):
     """Decide whether the Ambient window should play images or videos.
 

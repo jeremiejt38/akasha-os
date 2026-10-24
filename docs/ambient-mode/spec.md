@@ -65,7 +65,11 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
 
 - **Images et vidéos locales**. Le module `content_manager.resolve_media()` détecte
   automatiquement le type de contenu du dossier configuré :
-  - **Photos** : affichage par le contrôle natif Kodi `multiimage` (rotation, fondu, aléatoire).
+  - **Photos** : diaporama piloté par `ambient_window._slideshow_loop()` — deux contrôles `image`
+    alternés via la propriété `ambient.slot` (fondu enchaîné 3 s, 45 s/photo, ordre mélangé sans
+    répétition immédiate, voir `slideshow.PhotoCycler`), chaque photo recevant une variante
+    d'effet Ken Burns (zoom/dérive lent) via `ambient.kb{slot}`, comme le Mode Ambiant de
+    Google TV. Remplace l'ancien contrôle `multiimage` (voir `decisions.md`).
   - **Vidéos** : lecture en boucle via `xbmc.Player().play(..., windowed=False)` (plein écran).
     Un thread surveille `isPlaying()` et ferme le Mode Ambiant quand l'utilisateur appuie sur `Back`
     ou `Stop` (renforcé par un keymap `FullscreenVideo` qui mappe `Back`/`Escape`/`B` à `Stop`).
@@ -82,7 +86,7 @@ sauf `usedimonpause`). Pas de logique additionnelle nécessaire en v0.12.
   "Dossier de contenu (photos ou videos)").
 - **Contenu de secours** : si le dossier est vide et le téléchargement a échoué, repli sur un dossier
   dédié livré avec l'addon (`resources/media/fallback/`, contenant une copie de `splash.png`) —
-  jamais d'écran vide. Le contrôle `multiimage` de Kodi exige un dossier, pas un fichier isolé.
+  jamais d'écran vide.
 
 ## 7. Horloge et météo
 

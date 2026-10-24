@@ -116,5 +116,30 @@ class ResolveMediaTests(unittest.TestCase):
             self.assertEqual(content_out, fallback)
 
 
+class ResolveImagePathsTests(unittest.TestCase):
+    def test_returns_absolute_paths_from_configured_folder(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            open(os.path.join(content, 'a.jpg'), 'w').close()
+            open(os.path.join(content, 'b.png'), 'w').close()
+            open(os.path.join(fallback, 'fb.png'), 'w').close()
+            self.assertEqual(
+                content_manager.resolve_image_paths(content, fallback),
+                [os.path.join(content, 'a.jpg'), os.path.join(content, 'b.png')],
+            )
+
+    def test_falls_back_when_configured_folder_has_no_images(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            open(os.path.join(content, 'clip.mp4'), 'w').close()
+            open(os.path.join(fallback, 'fb.png'), 'w').close()
+            self.assertEqual(
+                content_manager.resolve_image_paths(content, fallback),
+                [os.path.join(fallback, 'fb.png')],
+            )
+
+    def test_empty_when_neither_folder_has_images(self):
+        with tempfile.TemporaryDirectory() as content, tempfile.TemporaryDirectory() as fallback:
+            self.assertEqual(content_manager.resolve_image_paths(content, fallback), [])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -56,13 +56,17 @@ def should_sleep(elapsed_seconds, sleep_after_seconds):
 # Anti burn-in (spec section 16): cycle the clock/weather widget group through
 # four corner presets on a fixed interval, mirroring Guide.xml's preset
 # pattern rather than computing continuous pixel offsets (see decisions.md).
+# The cycle starts on preset 3 (bottom-left in Ambient.xml), the position
+# Google TV uses for its own Ambient Mode clock, then rotates through the
+# other corners: BL -> TL -> TR -> BR.
 WIDGET_PRESET_COUNT = 4
 WIDGET_PRESET_INTERVAL_SECONDS = 10 * 60
+WIDGET_PRESET_OFFSET = 3
 
 
 def widget_preset_for_elapsed(elapsed_seconds, interval_seconds=WIDGET_PRESET_INTERVAL_SECONDS,
                                preset_count=WIDGET_PRESET_COUNT):
     """Return which corner preset (0..preset_count-1) should be active."""
     if interval_seconds <= 0 or preset_count <= 0:
-        return 0
-    return int(elapsed_seconds // interval_seconds) % preset_count
+        return WIDGET_PRESET_OFFSET
+    return (int(elapsed_seconds // interval_seconds) + WIDGET_PRESET_OFFSET) % preset_count
