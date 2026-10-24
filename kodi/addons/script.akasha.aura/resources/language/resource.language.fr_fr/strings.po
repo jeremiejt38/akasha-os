@@ -964,3 +964,458 @@ msgstr "Applications"
 msgctxt "#33320"
 msgid "Manage apps"
 msgstr "Gérer les applications"
+
+# État du réseau
+msgctxt "#33401"
+msgid "Network status"
+msgstr "État du réseau"
+
+# Adresse IP
+msgctxt "#33402"
+msgid "IP address"
+msgstr "Adresse IP"
+
+# Wi-Fi
+msgctxt "#33403"
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+# Activer ou désactiver la carte Wi-Fi
+msgctxt "#33404"
+msgid "Turn the Wi-Fi adapter on or off"
+msgstr "Activer ou désactiver la carte Wi-Fi"
+
+# Réseaux Wi-Fi et connexions…
+msgctxt "#33405"
+msgid "Wi-Fi networks & connections…"
+msgstr "Réseaux Wi-Fi et connexions…"
+
+# Liste des réseaux, mot de passe, IP statique (LibreELEC)
+msgctxt "#33406"
+msgid "Network list, password, static IP (LibreELEC)"
+msgstr "Liste des réseaux, mot de passe, IP statique (LibreELEC)"
+
+# Résolution
+msgctxt "#33410"
+msgid "Resolution"
+msgstr "Résolution"
+
+# Résolution et fréquence de sortie vidéo
+msgctxt "#33411"
+msgid "Video output resolution and rate"
+msgstr "Résolution et fréquence de sortie vidéo"
+
+# Adapter la fréquence au contenu
+msgctxt "#33412"
+msgid "Match content frame rate"
+msgstr "Adapter la fréquence au contenu"
+
+# Bascule la fréquence de la TV pendant la lecture
+msgctxt "#33413"
+msgid "Switches the TV rate during playback"
+msgstr "Bascule la fréquence de la TV pendant la lecture"
+
+# Sortie audio
+msgctxt "#33414"
+msgid "Audio output"
+msgstr "Sortie audio"
+
+# Périphérique de sortie du son
+msgctxt "#33415"
+msgid "Sound output device"
+msgstr "Périphérique de sortie du son"
+
+# Configuration des canaux
+msgctxt "#33416"
+msgid "Channel configuration"
+msgstr "Configuration des canaux"
+
+# Nombre de canaux annoncé au récepteur
+msgctxt "#33417"
+msgid "Channel count reported to the receiver"
+msgstr "Nombre de canaux annoncé au récepteur"
+
+# Passthrough
+msgctxt "#33418"
+msgid "Passthrough"
+msgstr "Passthrough"
+
+# Envoie le son brut à la TV/ampli (AC3, DTS…)
+msgctxt "#33419"
+msgid "Sends raw audio to the TV/receiver (AC3, DTS…)"
+msgstr "Envoie le son brut à la TV/ampli (AC3, DTS…)"
+
+# Passthrough AC3
+msgctxt "#33420"
+msgid "AC3 passthrough"
+msgstr "Passthrough AC3"
+
+# Passthrough DTS
+msgctxt "#33421"
+msgid "DTS passthrough"
+msgstr "Passthrough DTS"
+
+# Calibration de l'écran
+msgctxt "#33422"
+msgid "Screen calibration"
+msgstr "Calibration de l'écran"
+
+# Ajuster les bords et le rapport de pixel
+msgctxt "#33423"
+msgid "Adjust edges and pixel ratio"
+msgstr "Ajuster les bords et le rapport de pixel"
+
+# Plex
+msgctxt "#33430"
+msgid "Plex"
+msgstr "Plex"
+
+# Compte et bibliothèque Plex
+msgctxt "#33431"
+msgid "Plex account and library"
+msgstr "Compte et bibliothèque Plex"
+
+# Jellyfin
+msgctxt "#33432"
+msgid "Jellyfin"
+msgstr "Jellyfin"
+
+# YouTube Music
+msgctxt "#33433"
+msgid "YouTube Music"
+msgstr "YouTube Music"
+
+# URL du serveur Plex
+msgctxt "#33434"
+msgid "Plex server URL"
+msgstr "URL du serveur Plex"
+
+# Token Plex (X-Plex-Token)
+msgctxt "#33435"
+msgid "Plex token (X-Plex-Token)"
+msgstr "Token Plex (X-Plex-Token)"
+
+# Clé API Steam
+msgctxt "#33436"
+msgid "Steam API key"
+msgstr "Clé API Steam"
+
+# SteamID64
+msgctxt "#33437"
+msgid "SteamID64"
+msgstr "SteamID64"
+
+# URL du serveur Sunshine
+msgctxt "#33438"
+msgid "Sunshine server URL"
+msgstr "URL du serveur Sunshine"
+
+# Utilisateur Sunshine
+msgctxt "#33439"
+msgid "Sunshine username"
+msgstr "Utilisateur Sunshine"
+
+# Mot de passe Sunshine
+msgctxt "#33440"
+msgid "Sunshine password"
+msgstr "Mot de passe Sunshine"
+
+# Appareils Bluetooth
+msgctxt "#33450"
+msgid "Bluetooth devices"
+msgstr "Appareils Bluetooth"
+
+# Appareils appairés : connecter ou oublier
+msgctxt "#33451"
+msgid "Paired devices: connect or forget"
+msgstr "Appareils appairés : connecter ou oublier"
+
+# Appairer un appareil…
+msgctxt "#33452"
+msgid "Pair a device…"
+msgstr "Appairer un appareil…"
+
+# Recherche et appairage Bluetooth (LibreELEC)
+msgctxt "#33453"
+msgid "Bluetooth discovery and pairing (LibreELEC)"
+msgstr "Recherche et appairage Bluetooth (LibreELEC)"
+
+# Télécommande Akasha
+msgctxt "#33454"
+msgid "Akasha remote"
+msgstr "Télécommande Akasha"
+
+# Langue audio préférée
+msgctxt "#33460"
+msgid "Preferred audio language"
+msgstr "Langue audio préférée"
+
+# Langue choisie en priorité à la lecture
+msgctxt "#33461"
+msgid "Language picked first during playback"
+msgstr "Langue choisie en priorité à la lecture"
+
+# Langue des sous-titres
+msgctxt "#33462"
+msgid "Subtitle language"
+msgstr "Langue des sous-titres"
+
+# Langue de sous-titres préférée
+msgctxt "#33463"
+msgid "Preferred subtitle language"
+msgstr "Langue de sous-titres préférée"
+
+# Réglages de lecture avancés…
+msgctxt "#33464"
+msgid "Advanced playback settings…"
+msgstr "Réglages de lecture avancés…"
+
+# Langue de l'interface
+msgctxt "#33470"
+msgid "Interface language"
+msgstr "Langue de l'interface"
+
+# Langue des menus d'Akasha OS
+msgctxt "#33471"
+msgid "Akasha OS menu language"
+msgstr "Langue des menus d'Akasha OS"
+
+# Région
+msgctxt "#33472"
+msgid "Region"
+msgstr "Région"
+
+# Format de date
+msgctxt "#33473"
+msgid "Date format"
+msgstr "Format de date"
+
+# Format de l'heure
+msgctxt "#33474"
+msgid "Time format"
+msgstr "Format de l'heure"
+
+# Pays du fuseau horaire
+msgctxt "#33475"
+msgid "Time zone country"
+msgstr "Pays du fuseau horaire"
+
+# Fuseau horaire
+msgctxt "#33476"
+msgid "Time zone"
+msgstr "Fuseau horaire"
+
+# Délai de l'écran de veille
+msgctxt "#33477"
+msgid "Screensaver delay"
+msgstr "Délai de l'écran de veille"
+
+# Minutes d'inactivité avant l'écran de veille
+msgctxt "#33478"
+msgid "Idle minutes before the screensaver"
+msgstr "Minutes d'inactivité avant l'écran de veille"
+
+# Mode Ambiant
+msgctxt "#33479"
+msgid "Ambient Mode"
+msgstr "Mode Ambiant"
+
+# Écran de veille photo Akasha en veille
+msgctxt "#33480"
+msgid "Akasha photo screensaver when idle"
+msgstr "Écran de veille photo Akasha en veille"
+
+# Overlay système
+msgctxt "#33481"
+msgid "System overlay"
+msgstr "Overlay système"
+
+# Extinction de l'écran
+msgctxt "#33490"
+msgid "Screen power-off"
+msgstr "Extinction de l'écran"
+
+# Délai avant mise en veille de l'écran
+msgctxt "#33491"
+msgid "Delay before the screen sleeps"
+msgstr "Délai avant mise en veille de l'écran"
+
+# Arrêt automatique
+msgctxt "#33492"
+msgid "Auto shutdown"
+msgstr "Arrêt automatique"
+
+# Délai avant arrêt du système
+msgctxt "#33493"
+msgid "Delay before system shutdown"
+msgstr "Délai avant arrêt du système"
+
+# Mode d'extinction
+msgctxt "#33494"
+msgid "Shutdown behaviour"
+msgstr "Mode d'extinction"
+
+# Nom du système
+msgctxt "#33500"
+msgid "System name"
+msgstr "Nom du système"
+
+# Version Akasha OS
+msgctxt "#33501"
+msgid "Akasha OS version"
+msgstr "Version Akasha OS"
+
+# Version LibreELEC
+msgctxt "#33502"
+msgid "LibreELEC version"
+msgstr "Version LibreELEC"
+
+# Température CPU
+msgctxt "#33503"
+msgid "CPU temperature"
+msgstr "Température CPU"
+
+# Mémoire disponible
+msgctxt "#33504"
+msgid "Available memory"
+msgstr "Mémoire disponible"
+
+# Mises à jour des extensions
+msgctxt "#33505"
+msgid "Addon updates"
+msgstr "Mises à jour des extensions"
+
+# Mode de mise à jour des extensions Kodi
+msgctxt "#33506"
+msgid "How Kodi addons are updated"
+msgstr "Mode de mise à jour des extensions Kodi"
+
+# Sources inconnues
+msgctxt "#33507"
+msgid "Unknown sources"
+msgstr "Sources inconnues"
+
+# Autoriser l'installation d'extensions hors store
+msgctxt "#33508"
+msgid "Allow installing addons outside the store"
+msgstr "Autoriser l'installation d'extensions hors store"
+
+# Mises à jour Akasha OS…
+msgctxt "#33509"
+msgid "Akasha OS updates…"
+msgstr "Mises à jour Akasha OS…"
+
+# Sauvegarde et restauration…
+msgctxt "#33510"
+msgid "Backup & restore…"
+msgstr "Sauvegarde et restauration…"
+
+# Sauvegarde du système (LibreELEC)
+msgctxt "#33511"
+msgid "System backup (LibreELEC)"
+msgstr "Sauvegarde du système (LibreELEC)"
+
+# Gestionnaire de fichiers
+msgctxt "#33520"
+msgid "File manager"
+msgstr "Gestionnaire de fichiers"
+
+# Activé
+msgctxt "#33530"
+msgid "On"
+msgstr "Activé"
+
+# Désactivé
+msgctxt "#33531"
+msgid "Off"
+msgstr "Désactivé"
+
+# Connecté : {}
+msgctxt "#33532"
+msgid "Connected: {}"
+msgstr "Connecté : {}"
+
+# Non configuré
+msgctxt "#33533"
+msgid "Not configured"
+msgstr "Non configuré"
+
+# Connecté
+msgctxt "#33534"
+msgid "Connected"
+msgstr "Connecté"
+
+# Déconnecté
+msgctxt "#33535"
+msgid "Disconnected"
+msgstr "Déconnecté"
+
+# Connecter
+msgctxt "#33536"
+msgid "Connect"
+msgstr "Connecter"
+
+# Déconnecter
+msgctxt "#33537"
+msgid "Disconnect"
+msgstr "Déconnecter"
+
+# Oublier
+msgctxt "#33538"
+msgid "Forget"
+msgstr "Oublier"
+
+# {} appareil(s) appairé(s)
+msgctxt "#33539"
+msgid "{} paired device(s)"
+msgstr "{} appareil(s) appairé(s)"
+
+# Aucun appareil appairé
+msgctxt "#33540"
+msgid "No paired device"
+msgstr "Aucun appareil appairé"
+
+# {} °C
+msgctxt "#33541"
+msgid "{} °C"
+msgstr "{} °C"
+
+# {} Mo
+msgctxt "#33542"
+msgid "{} MB"
+msgstr "{} Mo"
+
+# Jamais
+msgctxt "#33543"
+msgid "Never"
+msgstr "Jamais"
+
+# {} min
+msgctxt "#33544"
+msgid "{} min"
+msgstr "{} min"
+
+# Non connecté
+msgctxt "#33545"
+msgid "Not connected"
+msgstr "Non connecté"
+
+# Valeur inchangée
+msgctxt "#33546"
+msgid "Value unchanged"
+msgstr "Valeur inchangée"
+
+# Échec de l'enregistrement
+msgctxt "#33547"
+msgid "Failed to save"
+msgstr "Échec de l'enregistrement"
+
+# Ethernet
+msgctxt "#33548"
+msgid "Ethernet"
+msgstr "Ethernet"
+
+# Masqué
+msgctxt "#33549"
+msgid "Hidden"
+msgstr "Masqué"
