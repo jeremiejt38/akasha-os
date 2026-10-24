@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.53.0...akasha-os-v0.54.0) (2026-10-24)
+
+
+### Features
+
+* **aura:** boot veil hides the native Home until Aura opens ([#137](https://github.com/jeremiejt38/akasha-os/issues/137)) ([dee1f31](https://github.com/jeremiejt38/akasha-os/commit/dee1f318b3ca17c809f0c3c117d23c4fa8fb88b4))
+
 ## [0.53.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.52.0...akasha-os-v0.53.0) (2026-10-24)
 
 
