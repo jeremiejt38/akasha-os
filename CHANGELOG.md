@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.0...akasha-os-v0.54.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* **aura:** fade leaving recommendation rows instead of popping them ([#139](https://github.com/jeremiejt38/akasha-os/issues/139)) ([4b46b59](https://github.com/jeremiejt38/akasha-os/commit/4b46b591402977dc8b750a6a70b3463231810acd))
+
 ## [0.54.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.53.0...akasha-os-v0.54.0) (2026-10-24)
 
 
