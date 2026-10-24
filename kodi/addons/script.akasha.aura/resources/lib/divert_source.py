@@ -278,7 +278,7 @@ def build_video_item(raw_item, image_resolver):
 
     view_count = raw_item.get('viewCount') or 0
     return {
-        'title': raw_item.get('title') or 'Sans titre',
+        'title': raw_item.get('title') or i18n.tr(33328),
         'type': item_type,
         'rating_key': raw_item.get('ratingKey'),
         'parent_rating_key': raw_item.get('parentRatingKey'),

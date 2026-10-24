@@ -1005,6 +1005,46 @@ msgctxt "#33320"
 msgid "Manage apps"
 msgstr ""
 
+# Application web
+msgctxt "#33321"
+msgid "Web app"
+msgstr ""
+
+# Web
+msgctxt "#33322"
+msgid "Web"
+msgstr ""
+
+# Version : {}
+msgctxt "#33323"
+msgid "Version: {}"
+msgstr ""
+
+# Type d'installation : {}
+msgctxt "#33324"
+msgid "Install type: {}"
+msgstr ""
+
+# Source : {}
+msgctxt "#33325"
+msgid "Source: {}"
+msgstr ""
+
+# Lien profond : {}
+msgctxt "#33326"
+msgid "Deep link: {}"
+msgstr ""
+
+# Se connecter (Connector Akasha OS)
+msgctxt "#33327"
+msgid "Sign in (Akasha OS Connector)"
+msgstr ""
+
+# Sans titre
+msgctxt "#33328"
+msgid "Untitled"
+msgstr ""
+
 # État du réseau
 msgctxt "#33401"
 msgid "Network status"

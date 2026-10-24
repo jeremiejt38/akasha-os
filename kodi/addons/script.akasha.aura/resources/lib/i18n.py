@@ -370,6 +370,15 @@ STRINGS = {
     33318: ('Rafraîchir le catalogue', 'Refresh catalog'),
     33319: ('Applications', 'Applications'),
     33320: ('Gérer les applications', 'Manage apps'),
+    33321: ('Application web', 'Web app'),
+    33322: ('Web', 'Web'),
+    33323: ('Version : {}', 'Version: {}'),
+    33324: ("Type d'installation : {}", 'Install type: {}'),
+    33325: ('Source : {}', 'Source: {}'),
+    33326: ('Lien profond : {}', 'Deep link: {}'),
+    33327: ('Se connecter (Connector Akasha OS)',
+            'Sign in (Akasha OS Connector)'),
+    33328: ('Sans titre', 'Untitled'),
 }
 
 MONTH_ABBRS = {
@@ -443,10 +452,16 @@ def _po_lines(language, index):
     yield ''
 
 
-def _write_po(path, language):
+# Shipped languages, in STRINGS tuple order: (french, english, ...).
+# Adding a language = append its resource.language.<code> name here and
+# grow every STRINGS tuple with one more entry -- the generator below
+# then emits resources/language/<code>/strings.po automatically.
+LANGUAGES = ('fr_fr', 'en_gb')
+
+
+def _write_po(path, language, index):
     import os
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    index = 0 if language == 'fr_fr' else 1
     with open(path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(_po_lines(language, index)))
 
@@ -455,8 +470,8 @@ if __name__ == '__main__':
     import os.path
     base = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '..', 'language')
-    _write_po(os.path.join(base, 'resource.language.fr_fr', 'strings.po'),
-              'fr_fr')
-    _write_po(os.path.join(base, 'resource.language.en_gb', 'strings.po'),
-              'en_gb')
+    for index, language in enumerate(LANGUAGES):
+        _write_po(os.path.join(
+            base, 'resource.language.{}'.format(language), 'strings.po'),
+            language, index)
     print('wrote', len(STRINGS), 'strings to', base)
