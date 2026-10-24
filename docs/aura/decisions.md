@@ -872,3 +872,31 @@ Les appels Plex sont synchrones sur le thread GUI. Quand le serveur devient injo
 abaissé à 5 s dans `plex_client.py` et `connector_client.py` (`32d4a63`). Une vraie
 solution (fetch asynchrone avec état « hors-ligne ») resterait préférable à terme.
 
+
+## Profils Plex Home — investigation (2026-10-24)
+
+Le compte Plex lié possède un **Plex Home actif** (« jeremiejt38 » ) avec
+2 utilisateurs, tous deux `protected` (PIN requis au switch) :
+
+- `.Akasha` — admin, `hasPassword`, **token actuellement utilisé par Aura**
+- `jeremy carlier` — utilisateur managé, PIN seul (`hasPassword: false`)
+- Invité (`guestUserID`) présent mais `guestEnabled: false`
+
+Endpoints confirmés en direct :
+
+- `GET https://plex.tv/api/v2/home/users` (token compte + `X-Plex-Client-Identifier`)
+  → liste les utilisateurs du foyer (id, titre, avatar, flags admin/protected).
+- `POST https://plex.tv/api/v2/home/users/<id>/switch?pin=<PIN>` → nouveau
+  `authToken` (non testé : action avec effet réel, à implémenter derrière un
+  pavé PIN dédié).
+- `GET /api/v2/home/users` **côté serveur** → 403 : l'endpoint vit sur plex.tv,
+  pas sur le serveur.
+
+Conséquence : l'entrée « Profil » masquée en P2 correspondait à une vraie
+capacité — le switch est implémentable (fenêtre de sélection de profil +
+pavé PIN + swap du `plex.token` en settings + rebuild `PlexClient` + flush
+`_read_cache`/`_people_cache`/cache local + reload sections/hubs). Les états
+« vu », « continuer à regarder » et bibliothèques visibles changent alors par
+utilisateur, comme dans l'app Plex TV. À planifier en phase dédiée — le PIN
+est saisi à la télécommande et le nouveau token persiste en settings, comme
+sur Plex.
