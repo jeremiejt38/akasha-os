@@ -93,7 +93,11 @@ RECO_RECENT_LABEL_ID = 5200
 RECO_RECENT_LIST_ID = 5210
 RECO_RELEASES_LABEL_ID = 5300
 RECO_RELEASES_LIST_ID = 5310
-# The 3 visible row slots form a sliding viewport over the hub list returned
+RECO_ROW4_LABEL_ID = 5400
+RECO_ROW4_LIST_ID = 5410
+RECO_ROW5_LABEL_ID = 5500
+RECO_ROW5_LIST_ID = 5510
+# The 5 visible row slots form a sliding viewport over the hub list returned
 # by /hubs/promoted (Plex "For You"): Plex keeps the focused row pinned at a
 # fixed screen position and scrolls the rows above off the top, which Kodi
 # can't clip natively -- so slot contents are re-bound when focus reaches an
@@ -103,6 +107,8 @@ RECO_SLOT_IDS = (
     (RECO_ON_DECK_LABEL_ID, RECO_ON_DECK_LIST_ID),
     (RECO_RECENT_LABEL_ID, RECO_RECENT_LIST_ID),
     (RECO_RELEASES_LABEL_ID, RECO_RELEASES_LIST_ID),
+    (RECO_ROW4_LABEL_ID, RECO_ROW4_LIST_ID),
+    (RECO_ROW5_LABEL_ID, RECO_ROW5_LIST_ID),
 )
 RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
 # Home tab strip (Plex "For You" / "Trending" / "Activity"), only on the
@@ -537,7 +543,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                      .format(e), xbmc.LOGWARNING)
             return None
         rows = []
-        seen_titles = set()
+        seen_keys = set()
         for hub in hubs:
             # Discover emits non-shelf hubs (genre buttons, service pills)
             # that have no poster content to render.
@@ -545,14 +551,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 continue
             if not hub['items'] and not hub['key']:
                 continue
+            # Distinct sections can emit same-titled hubs ("Oh, The Horror!"
+            # in Movies and TV): dedup on the hub's continuation key (or its
+            # hubIdentifier for inline-only hubs), never on the title -- the
+            # Android TV client renders each of them.
+            hub_id = hub.get('key') or hub.get('identifier') or ''
+            if hub_id and hub_id in seen_keys:
+                continue
+            if hub_id:
+                seen_keys.add(hub_id)
             row = self._reco_init_hub_row(hub)
             if not row:
                 continue
-            # Plex can emit both 'home.continue' and 'home.ondeck' with
-            # (nearly) identical content -- don't render the same title twice.
-            if row['title'] in seen_titles:
+            # Empty hubs (key present but zero items server-side) render as
+            # a bare label -- Plex drops them, so do we.
+            if not row['paged'].items and not row.get('error'):
                 continue
-            seen_titles.add(row['title'])
             rows.append(row)
         return rows or None
 
