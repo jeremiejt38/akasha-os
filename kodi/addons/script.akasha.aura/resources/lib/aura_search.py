@@ -44,13 +44,16 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self.sections = []
         self.on_select = None
         self.on_person = None
+        self.addon = None
         self.query = ''
         self.recent = []
         self._results = []
         self._filter_index = 0
+        self._recent_loaded = False
 
     def onInit(self):
         try:
+            self._load_recent()
             self._render_keyboard()
             self._render_pills()
             self._render_recent()
@@ -175,6 +178,39 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                      xbmc.LOGWARNING)
             return []
 
+    def _load_recent(self):
+        """Restore past queries persisted in the addon settings so the
+        history survives an Aura restart, like Plex's search screen."""
+        if self._recent_loaded:
+            return
+        self._recent_loaded = True
+        if self.addon is None:
+            return
+        import json
+        try:
+            self.recent = json.loads(
+                self.addon.getSetting('search.recent') or '[]')
+            if not isinstance(self.recent, list):
+                self.recent = []
+        except Exception:
+            self.recent = []
+
+    def _save_recent(self):
+        if self.addon is None:
+            return
+        import json
+        try:
+            self.addon.setSetting('search.recent',
+                                  json.dumps(self.recent[:8]))
+        except Exception:
+            pass
+
+    def _push_recent(self, query):
+        if query and query not in self.recent:
+            self.recent.insert(0, query)
+            del self.recent[8:]
+            self._save_recent()
+
     # -------------------------------------------------------------- input
 
     def onClick(self, controlID):
@@ -217,8 +253,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def onAction(self, action):
         if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
-            if self.query and self.query not in self.recent:
-                self.recent.insert(0, self.query)
+            self._push_recent(self.query)
             self.close()
             return
         super().onAction(action)
@@ -235,8 +270,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             if self.on_person:
                 self.on_person(item)
             return
-        if self.query and self.query not in self.recent:
-            self.recent.insert(0, self.query)
+        self._push_recent(self.query)
         if self.on_select:
             self.on_select(item)
 
