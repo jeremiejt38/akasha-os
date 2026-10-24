@@ -55,6 +55,10 @@ TAB_APP = 2
 MODULE_SEARCH_ID = 2000
 GEAR_BUTTON_ID = 2004
 
+# Home-window property the boot veil (skin-patches/patch_home_boot_veil.py)
+# watches: set as soon as Aura owns the screen so the loading screen lifts.
+HOME_READY_PROPERTY = 'Akasha.AuraReady'
+
 ACTION_MOVE_LEFT = 1
 ACTION_MOVE_RIGHT = 2
 ACTION_MOVE_UP = 3
@@ -315,6 +319,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._hero_fanart_current = None
 
     def onInit(self):
+        # Lift the Home boot veil (skin-patches/patch_home_boot_veil.py):
+        # Aura now owns the screen so the loading screen can fade out.
+        try:
+            xbmcgui.Window(10000).setProperty(HOME_READY_PROPERTY, '1')
+        except RuntimeError:
+            pass
         try:
             self._populate_tab_list()
             self._show_tab(self.active_tab)

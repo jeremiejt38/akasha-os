@@ -645,6 +645,11 @@ msgctxt "#33171"
 msgid "Your services"
 msgstr ""
 
+# Chargement…
+msgctxt "#33180"
+msgid "Loading…"
+msgstr ""
+
 # Pistes
 msgctxt "#33200"
 msgid "Tracks"

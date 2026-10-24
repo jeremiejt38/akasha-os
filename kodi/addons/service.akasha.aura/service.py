@@ -36,6 +36,14 @@ HOME_WINDOW_WAIT_SECONDS = 30
 # addon's resources/lib for a single path constant, to keep this launcher
 # self-contained.
 QUICKSTART_MARKER_PATH = '/storage/.config/akasha-os/quickstart-completed'
+# Window(Home).Property set by script.akasha.aura's onInit once Aura owns
+# the screen; the skin's boot veil (patch_home_boot_veil.py) hides the
+# native Home window until then so it never flashes between intro and Aura.
+AURA_READY_PROPERTY = 'Akasha.AuraReady'
+# Bounded wait for Aura to claim the screen before force-lifting the veil:
+# if the script crashed, the native Home is the documented safety net and
+# must become visible again.
+AURA_READY_WAIT_SECONDS = 60
 
 monitor = xbmc.Monitor()
 
@@ -55,12 +63,33 @@ def _wait_for_home_window():
     return False
 
 
+def _release_home_veil():
+    """Wait for Aura (or the Quick Start wizard's chained Aura launch) to
+    claim the screen, then always lift the Home boot veil. If the window
+    never opened, revealing the native Home is the documented safety net."""
+    home = xbmcgui.Window(10000)
+    waited = 0
+    while waited < AURA_READY_WAIT_SECONDS and not monitor.abortRequested():
+        if home.getProperty(AURA_READY_PROPERTY):
+            xbmc.log('Akasha Aura Launcher: boot veil lifted', xbmc.LOGINFO)
+            return
+        if monitor.waitForAbort(1):
+            return
+        waited += 1
+    if not monitor.abortRequested():
+        home.setProperty(AURA_READY_PROPERTY, '1')
+        xbmc.log('Akasha Aura Launcher: Aura did not claim the screen within '
+                 '{}s, lifting boot veil on native Home'.format(
+                     AURA_READY_WAIT_SECONDS), xbmc.LOGWARNING)
+
+
 def main():
     if monitor.abortRequested():
         return
     if not os.path.exists(QUICKSTART_MARKER_PATH):
         xbmc.log('Akasha Aura Launcher: first run, opening Quick Start', xbmc.LOGINFO)
         xbmc.executebuiltin('RunScript(script.akasha.quickstart)')
+        _release_home_veil()
         return
     if not _wait_for_home_window():
         if monitor.abortRequested():
@@ -70,6 +99,7 @@ def main():
                  xbmc.LOGWARNING)
     xbmc.log('Akasha Aura Launcher: opening Akasha Aura', xbmc.LOGINFO)
     xbmc.executebuiltin('RunScript(script.akasha.aura)')
+    _release_home_veil()
 
 
 if __name__ == '__main__':

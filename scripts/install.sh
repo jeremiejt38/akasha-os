@@ -320,6 +320,10 @@ if [ -d "$SKIN_DIR" ]; then
     # Plex-parity OSD: replace VideoOSD.xml with the minimal Plex layout
     # (original kept as VideoOSD.xml.ah2-orig).
     python3 "$SCRIPT_DIR/skin-patches/patch_plex_osd.py" "$SKIN_DIR"
+
+    # Boot veil: keep the AH2 loading screen on top of Home until Aura
+    # opens, so the native home is never visible between intro and Aura.
+    python3 "$SCRIPT_DIR/skin-patches/patch_home_boot_veil.py" "$SKIN_DIR"
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi

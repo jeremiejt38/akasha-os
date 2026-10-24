@@ -158,6 +158,7 @@ STRINGS = {
     33169: ("Cette semaine dans l'histoire", 'This week in history'),
     33170: ('Blockbusters à venir', 'Upcoming blockbusters'),
     33171: ('Vos services', 'Your services'),
+    33180: ('Chargement…', 'Loading…'),
 
     # --- search ----------------------------------------------------------
     33150: ('Séries', 'Shows'),
