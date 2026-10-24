@@ -81,3 +81,69 @@ class PagedList:
             if self.total is None:
                 self.total = len(self.items)
         return page
+
+
+def series_dedup_key(item):
+    """Identity key that collapses a show's episodes/seasons into one card.
+
+    Plex recommendation rows can be episode- or season-level (recently
+    added TV, on-deck), so one added season floods the row with 15
+    identical show posters. Plex's own clients group these by series --
+    this key yields the same card identity for every item of the show,
+    and also merges exact duplicates (same rating_key) Plex sometimes
+    emits in mixed hubs. Items without a key stay unique.
+    """
+    if item.get('type') == 'episode':
+        return item.get('grandparent_rating_key') or item.get('rating_key')
+    if item.get('type') == 'season':
+        return item.get('parent_rating_key') or item.get('rating_key')
+    return item.get('rating_key') or id(item)
+
+
+def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
+    """Wrap `fetch_page` so each series appears once in the paged row.
+
+    The wrapper owns the raw stream position: PagedList offsets count
+    deduped items, so the raw offset must be tracked separately. It keeps
+    fetching raw pages until it has `limit` unique items (or the raw
+    stream ends), so a short returned page still means "exhausted" to
+    PagedList semantics.
+
+    Raw exhaustion: a *short page is not* the end -- a hub's inline page
+    is shorter than the raw page size yet continues through its `key`
+    endpoint. The stream is done when the source reports a total we've
+    reached, or a raw page comes back empty. `total` is dropped -- the
+    true deduped count cannot be known without draining the stream.
+    `max_raw_fetches` caps requests per call on pathological hubs.
+    """
+    seen = set()
+    state = {'offset': 0, 'done': False, 'total': None}
+
+    def fetch(offset, limit):
+        batch = []
+        fetches = 0
+        while len(batch) < limit and not state['done'] \
+                and fetches < max_raw_fetches:
+            result = fetch_page(state['offset'], raw_page_size)
+            fetches += 1
+            page, total = (result if isinstance(result, tuple)
+                           else (result, None))
+            page = page or []
+            state['offset'] += len(page)
+            if total is not None:
+                state['total'] = total
+            if not page or (total is not None and state['offset'] >= total):
+                state['done'] = True
+            for item in page:
+                key = series_dedup_key(item)
+                if key in seen:
+                    continue
+                seen.add(key)
+                batch.append(item)
+                if len(batch) >= limit:
+                    break
+        # The raw total is an upper bound for the deduped count -- enough
+        # for end-of-row placeholders (extras drop when the stream ends).
+        return batch, state['total']
+
+    return fetch
