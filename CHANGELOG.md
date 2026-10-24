@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.56.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.55.0...akasha-os-v0.56.0) (2026-10-24)
+
+
+### Features
+
+* **aura:** functional audit pass -- CW removal, search history, i18n, nav fix ([#147](https://github.com/jeremiejt38/akasha-os/issues/147)) ([0cde2d1](https://github.com/jeremiejt38/akasha-os/commit/0cde2d151dd9a9a7a41a8126253e048d334aa4eb))
+
 ## [0.55.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.3...akasha-os-v0.55.0) (2026-10-24)
 
 
