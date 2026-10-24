@@ -184,5 +184,41 @@ class TestConnectorClient(unittest.TestCase):
         self.assertEqual(self.client.image_url(''), '')
 
 
+class TestConnectorErrorClassification(unittest.TestCase):
+    """Same offline/API split as plex_client (B17 state view)."""
+
+    def setUp(self):
+        self.client = connector_client.ConnectorClient('http://connector.local:8300')
+        self.client.token = 'tok'
+
+    @patch('urllib.request.urlopen')
+    def test_transport_error_raises_offline_error(self, mock_urlopen):
+        mock_urlopen.side_effect = OSError('connection refused')
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        with self.assertRaises(connector_client.ConnectorAPIError):
+            self.client.sections()
+
+    @patch('urllib.request.urlopen')
+    def test_offline_backoff_raises_offline_error(self, mock_urlopen):
+        mock_urlopen.side_effect = OSError('no route to host')
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        mock_urlopen.side_effect = None
+        mock_urlopen.reset_mock()
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        self.assertEqual(mock_urlopen.call_count, 0)
+
+    @patch('urllib.request.urlopen')
+    def test_http_error_is_not_offline(self, mock_urlopen):
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            'http://x', 500, 'Server Error', {}, io.BytesIO(b'boom'))
+        with self.assertRaises(connector_client.ConnectorAPIError) as ctx:
+            self.client.sections()
+        self.assertNotIsInstance(
+            ctx.exception, connector_client.ConnectorOfflineError)
+
+
 if __name__ == '__main__':
     unittest.main()

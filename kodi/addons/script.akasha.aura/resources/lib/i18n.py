@@ -379,6 +379,22 @@ STRINGS = {
     33327: ('Se connecter (Connector Akasha OS)',
             'Sign in (Akasha OS Connector)'),
     33328: ('Sans titre', 'Untitled'),
+
+    # --- divertissement state view (B17): offline / error / empty ---------
+    33550: ('Serveur inaccessible', 'Server unreachable'),
+    33551: ('Vérifiez que votre serveur est allumé et connecté au réseau.',
+            'Check that your server is powered on and connected to the network.'),
+    33552: ('Réessayer', 'Retry'),
+    33553: ('Impossible de charger le contenu', 'Unable to load content'),
+    33554: ('Une erreur est survenue. Réessayez dans un instant.',
+            'Something went wrong. Try again in a moment.'),
+    33555: ('Votre bibliothèque est vide', 'Your library is empty'),
+    33556: ('Aucun résultat', 'No results'),
+    33557: ('Effacer les filtres', 'Clear filters'),
+    33558: ('Plex n’est pas configuré', 'Plex is not configured'),
+    33559: ('Renseignez le serveur et le jeton Plex dans les réglages.',
+            'Set the Plex server and token in Settings.'),
+    33560: ('Aucun contenu à afficher', 'Nothing to show'),
 }
 
 MONTH_ABBRS = {

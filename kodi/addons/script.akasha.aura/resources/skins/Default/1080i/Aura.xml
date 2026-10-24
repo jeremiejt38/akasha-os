@@ -1911,6 +1911,76 @@
                 </control>
             </control>
 
+            <!-- Divertissement state view (B17): Plex's centered
+                 empty/offline state: icon + title + message + one
+                 contextual action button, over the whole content area.
+                 aura_window._set_divert_state() drives it through
+                 Window.Property(DivertState) ('offline'|'error'|'empty'|
+                 'config') and fills the labels; the action button only
+                 renders when DivertStateAction is non-empty. Placed before
+                 the sidebar group so the rail still draws over it. -->
+            <control type="group">
+                <visible>!String.IsEmpty(Window.Property(DivertState))</visible>
+                <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
+                <control type="image">
+                    <left>912</left>
+                    <top>330</top>
+                    <width>96</width>
+                    <height>96</height>
+                    <texture>icon-offline.png</texture>
+                    <visible>!String.IsEqual(Window.Property(DivertState),empty)</visible>
+                </control>
+                <control type="image">
+                    <left>912</left>
+                    <top>330</top>
+                    <width>96</width>
+                    <height>96</height>
+                    <texture>icon-empty.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertState),empty)</visible>
+                </control>
+                <control type="label" id="6301">
+                    <left>460</left>
+                    <top>448</top>
+                    <width>1000</width>
+                    <height>48</height>
+                    <font>font16</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>-</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control>
+                <control type="label" id="6302">
+                    <left>460</left>
+                    <top>506</top>
+                    <width>1000</width>
+                    <height>64</height>
+                    <font>font_tiny</font>
+                    <align>center</align>
+                    <label>-</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                </control>
+                <control type="button" id="6303">
+                    <left>820</left>
+                    <top>610</top>
+                    <width>280</width>
+                    <height>48</height>
+                    <label>-</label>
+                    <font>font_tiny_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3310</onleft>
+                    <onup>6303</onup>
+                    <ondown>6303</ondown>
+                    <onright>6303</onright>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <texturenofocus colordiffuse="2EFFFFFF" border="18">rounded-solid.png</texturenofocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
+                    <visible>!String.IsEmpty(Window.Property(DivertStateAction))</visible>
+                </control>
+            </control>
+
             <!-- Sidebar: Plex-style rail. Collapsed = the icon column stays
                  visible over the backdrop (never fully hidden, cahier
                  950e65d3); focused = floating dark panel + labels + profile

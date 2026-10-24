@@ -64,7 +64,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 | B14 | **Chapitres** | `Player.Chapters` Kodi / chapitres dans la métadonnée Plex → liste dans OSD ou fiche | mécanisme | P4 |
 | B15 | **Continuité audio/sous-titres par série** | Plex mémorise les pistes choisies ; équivalent : mémoriser par `grandparent_rating_key` en profil addon | mécanisme local | P4 |
 | B16 | **Bibliothèques non-vidéo (Musique)** dans la sidebar | section `type=artist` confirmée (id 6) ; actuellement dans le launcher, absent du rail Plex | ✅ section présente | P4 |
-| B17 | **Écran d'erreur serveur** propre | Plex affiche « server unreachable » + retry ; Aura montre « erreur de chargement » par ligne | mécanisme | P4 |
+| B17 | **Écran d'erreur serveur** propre | Brique d'état centrée réutilisable (`DivertState` : `offline`/`error`/`empty`/`config`) — icône + titre + message + bouton d'action contextuel (Réessayer / Effacer les filtres / Retour / Paramètres), sidebar conservée. Les rangées partiellement en échec gardent leur label inline ; l'écran global n'apparaît que si tout a échoué | implémenté, **à vérifier à l'écran** | P4 |
 
 ### Vraies limitations (cloud / plateforme)
 

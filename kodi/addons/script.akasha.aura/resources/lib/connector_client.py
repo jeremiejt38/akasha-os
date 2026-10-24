@@ -49,6 +49,12 @@ class ConnectorAPIError(Exception):
     """Raised when a connector API call fails or returns an unexpected shape."""
 
 
+class ConnectorOfflineError(ConnectorAPIError):
+    """Raised when the connector could not be reached at all (transport
+    failure or offline-breaker fast fail). Same split as
+    plex_client.PlexOfflineError -- see the Divertissement offline state."""
+
+
 class ConnectorClient:
     """Minimal JSON client for the akasha-os-connector service."""
 
@@ -77,8 +83,8 @@ class ConnectorClient:
         url = self.server_url + path
         host = urllib.parse.urlparse(url).netloc
         if _is_offline(host):
-            raise ConnectorAPIError('Connector {} unreachable '
-                                    '(offline backoff)'.format(host))
+            raise ConnectorOfflineError('Connector {} unreachable '
+                                        '(offline backoff)'.format(host))
         cacheable = method == 'GET'
         key = (host, method, path,
                json.dumps(json_body, sort_keys=True) if json_body else '')
@@ -102,7 +108,7 @@ class ConnectorClient:
         except OSError as e:
             _mark_offline(host)
             reason = getattr(e, 'reason', e)
-            raise ConnectorAPIError('Connector URL error for {}: {}'.format(path, reason)) from e
+            raise ConnectorOfflineError('Connector URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise ConnectorAPIError('Connector JSON decode error for {}: {}'.format(path, e)) from e
 

@@ -443,5 +443,45 @@ class TestPlexClientPeople(unittest.TestCase):
         self.assertEqual(mock_urlopen.call_count, 0)
 
 
+class TestPlexErrorClassification(unittest.TestCase):
+    """Transport failures must be distinguishable from API-level errors so
+    the UI can show Plex's "server unreachable" state (B17)."""
+
+    def setUp(self):
+        self.client = plex_client.PlexClient(
+            'http://192.168.100.133:32400', 'tok123')
+
+    @patch('urllib.request.urlopen')
+    def test_transport_error_raises_offline_error(self, mock_urlopen):
+        mock_urlopen.side_effect = OSError('connection refused')
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        # Still a PlexAPIError subclass: existing handlers keep working.
+        with self.assertRaises(plex_client.PlexAPIError):
+            self.client.on_deck(limit=1)
+
+    @patch('urllib.request.urlopen')
+    def test_offline_backoff_raises_offline_error(self, mock_urlopen):
+        mock_urlopen.side_effect = OSError('no route to host')
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        # Second call fast-fails on the breaker -- still an OfflineError,
+        # and no new HTTP attempt was made.
+        mock_urlopen.side_effect = None
+        mock_urlopen.reset_mock()
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        self.assertEqual(mock_urlopen.call_count, 0)
+
+    @patch('urllib.request.urlopen')
+    def test_http_error_is_not_offline(self, mock_urlopen):
+        import urllib.error
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            'http://x', 500, 'Server Error', {}, io.BytesIO(b'boom'))
+        with self.assertRaises(plex_client.PlexAPIError) as ctx:
+            self.client.on_deck(limit=1)
+        self.assertNotIsInstance(ctx.exception, plex_client.PlexOfflineError)
+
+
 if __name__ == '__main__':
     unittest.main()
