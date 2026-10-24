@@ -12,8 +12,12 @@ salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
 - **Version livrée** : `0.59.0` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.54.2` — le Pi est **éteint depuis
-  ~2 jours** et 7 versions attendent le déploiement (v0.54.3 → v0.59.0).
+- **Version réellement sur le Pi** : `0.54.2` — 7 versions attendent le
+  déploiement (v0.54.3 → v0.59.0). **Le Pi est allumé et joignable** :
+  `root@192.168.3.77` (WiFi `Freebox-37FD5E`, LAN `192.168.3.0/24`, up 1 j,
+  SSH par clé OK). L'IP `192.168.1.88` citée dans `AGENTS.md` est
+  **obsolète** — migration réseau du 2026-10-23, source de vérité :
+  `atlas/docs/hosts.md`.
 - Fonctionne : lecture Plex (reprise, notes, watched), fiches détail
   films/séries/épisodes/personnes, recherche, bibliothèque A-Z, Store +
   apps externes, OSD minimaliste Plex, menu Paramètres unifié façon
@@ -58,10 +62,12 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le
   cycle tant que tout n'est pas identique… polish visuel le plus parfait
   possible »). Audit complet dans `docs/plex-parity/PARITY.md`.
-- **Prochaine étape prévue** : déployer les 7 versions en attente dès que
-  le Pi est allumé, vérifier visuellement (vague de chargement, drift
-  ambiant, top-bar, dedup, menu Paramètres), puis reprendre le backlog :
-  B17 (écran erreur serveur) → B1 (On Deck) → B14 (chapitres OSD).
+- **Prochaine étape prévue** : **déployer les 7 versions en attente** (le
+  Pi est joignable, le blocage n'existe plus — voir Contexte machine),
+  vérifier visuellement (vague de chargement, drift ambiant, top-bar,
+  dedup, menu Paramètres, `analyser-de-performances`), puis reprendre le
+  backlog : B17 (écran erreur serveur) → B1 (On Deck) → B14 (chapitres
+  OSD). Corriger aussi l'IP obsolète dans `AGENTS.md` (`.88` → `.77`).
 - **Travail non commité** : aucun dans le repo (`git status` propre sauf
   `ARIANE.md` régénérable).
 - **Stash orphelin** : `stash@{0}` « wip-fix-aura-interruptions » (guide/
@@ -94,9 +100,12 @@ type Plex Android TV (modules Divertissement / Jeux / App).
 
 ## Blocages / points d'attention
 
-- **Pi éteint** (`192.168.1.88`, pas de route) — tout déploiement/vérif
-  visuelle bloqué tant qu'il n'est pas allumé. SSH **par clé** fonctionne
-  (pas besoin du mot de passe attendu par `apply.sh`).
+- **Deux IPs circulent pour le Pi** : `192.168.3.77` = la vraie (Atlas
+  `docs/hosts.md`, testée 2026-10-24) ; `192.168.1.88` = obsolète (encore
+  dans `AGENTS.md` et de vieux docs — toujours vérifier `docs/hosts.md`
+  d'Atlas avant de déployer).
+- SSH **par clé** fonctionne (pas besoin du mot de passe attendu par
+  `apply.sh`).
 - GUI Kodi ~**25 fps en animation** sur Pi4 (~40 ms/frame même en governor
   performance) — optimiser en réduisant les animations concurrentes.
 - `System.FPS` lissé = inutilisable ; mesurer via `drm_prof.py` (hash des
@@ -131,8 +140,9 @@ type Plex Android TV (modules Divertissement / Jeux / App).
 
 ## Contexte machine
 
-- **Pi** : `root@192.168.1.88` (LibreELEC, SSH par clé OK). TV = écran via
-  CEC/HDMI ; Pi allumé + TV éteinte = SSH joignable quand même.
+- **Pi** : `root@192.168.3.77` (LibreELEC, SSH par clé OK, WiFi
+  Freebox-37FD5E). ~~192.168.1.88~~ obsolète. TV = écran via CEC/HDMI ;
+  Pi allumé + TV éteinte = SSH joignable quand même.
 - **Déploiement** : `apply.sh` exige un mot de passe → reproduire ses
   étapes en key-auth : tarball (`scripts/install.sh` + addons + media) →
   scp → `install.sh` sur le Pi → restart Kodi.
