@@ -18,6 +18,7 @@ jobs:
           - script.akasha.aura
           - script.akasha.ambient
           - service.akasha.remote
+          - service.akasha.perfanalyzer
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
