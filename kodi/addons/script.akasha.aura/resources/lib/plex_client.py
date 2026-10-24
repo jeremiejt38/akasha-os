@@ -95,7 +95,7 @@ class PlexClient:
             'User-Agent': 'AkashaOSAura/1.0',
         }
 
-    def _request(self, path, params=None):
+    def _request(self, path, params=None, method=None):
         if not self.server_url or not self.token:
             raise PlexAPIError('Plex server URL and token are required')
         url = self._url(path, params)
@@ -103,15 +103,16 @@ class PlexClient:
         if _is_offline(host):
             raise PlexAPIError('Plex server {} unreachable '
                                '(offline backoff)'.format(host))
-        # Mutation endpoints (/:/scrobble, /:/rate...) must never be
-        # served from cache.
-        cacheable = not path.startswith('/:')
+        # Mutation endpoints (/:/scrobble, /:/rate, /actions/...) must
+        # never be served from cache.
+        cacheable = not path.startswith('/:') and method is None
         key = (host, path, tuple(sorted((params or {}).items())))
         if cacheable:
             entry = _read_cache.get(key)
             if entry and time.time() < entry[0]:
                 return entry[1]
-        req = urllib.request.Request(url, headers=self._headers())
+        req = urllib.request.Request(url, headers=self._headers(),
+                                     method=method or 'GET')
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 body = resp.read().decode('utf-8')
@@ -526,6 +527,13 @@ class PlexClient:
             'key': rating_key,
             'identifier': 'com.plexapp.plugins.library',
         })
+
+    def remove_from_continue_watching(self, rating_key):
+        """Drop the card from the Continue Watching hub without touching
+        the watched state (Plex `PUT /actions/removeFromContinueWatching`,
+        unlike unscrobble which also clears viewCount)."""
+        self._request('/actions/removeFromContinueWatching',
+                      {'ratingKey': rating_key}, method='PUT')
 
     def unscrobble(self, rating_key):
         """Mark an item unwatched."""

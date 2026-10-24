@@ -1027,7 +1027,7 @@ def _age_label(content_rating):
     raw = (content_rating or '').strip()
     mapped = _AGE_RATINGS.get(raw.lower())
     if mapped == 'age 0+':
-        return 'Tous publics'
+        return i18n.tr(33145)
     return mapped or raw
 
 

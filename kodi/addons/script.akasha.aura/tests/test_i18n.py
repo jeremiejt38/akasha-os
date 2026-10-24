@@ -59,6 +59,41 @@ class PoGenerationTests(unittest.TestCase):
         self.assertIn('(La TV sera aussi éteinte via CEC)', text)
         self.assertNotIn('\n(La TV', text)
 
+    def test_committed_po_files_are_in_sync_with_table(self):
+        """strings.po are generated from STRINGS; committers must re-run
+        `python3 resources/lib/i18n.py` after touching the table."""
+        lib_dir = os.path.join(os.path.dirname(__file__), '..', 'resources')
+        for lang, index in (('fr_fr', 0), ('en_gb', 1)):
+            path = os.path.join(
+                lib_dir, 'language', 'resource.language.{}'.format(lang),
+                'strings.po')
+            with open(path, encoding='utf-8') as f:
+                committed = f.read()
+            expected = '\n'.join(i18n._po_lines(lang, index))
+            self.assertEqual(committed, expected,
+                             '{} is stale — regenerate with i18n.py'
+                             .format(path))
+
+    def test_every_tr_call_uses_a_known_id(self):
+        """Scan lib/*.py for i18n.tr(<id>) literals and require each id to
+        exist in STRINGS -- catches typos and forgotten table entries."""
+        import re
+        lib_dir = os.path.join(
+            os.path.dirname(__file__), '..', 'resources', 'lib')
+        pattern = re.compile(r'\bi18n\.tr\((\d{5})\)')
+        missing = []
+        for name in os.listdir(lib_dir):
+            if not name.endswith('.py'):
+                continue
+            path = os.path.join(lib_dir, name)
+            with open(path, encoding='utf-8') as f:
+                for lineno, line in enumerate(f, 1):
+                    for msgid in pattern.findall(line):
+                        if int(msgid) not in i18n.STRINGS:
+                            missing.append('{}:{} -> {}'.format(
+                                name, lineno, msgid))
+        self.assertEqual(missing, [])
+
 
 if __name__ == '__main__':
     unittest.main()

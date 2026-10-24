@@ -160,8 +160,8 @@ DIVERT_SORT_OPTIONS = [
 DIVERT_SORT_SHORT_LABELS = {
     'addedAt:desc': i18n.tr(33060),
     'titleSort': i18n.tr(33057),
-    'originallyAvailableAt:desc': 'Sortie',
-    'rating:desc': 'Note',
+    'originallyAvailableAt:desc': i18n.tr(33160),
+    'rating:desc': i18n.tr(33059),
 }
 
 # Quick filter: only "Tout"/"Non vus"/"Vus" are wired to a real Plex/connector
@@ -629,8 +629,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
              lambda offset, limit: self._reco_fetch_recently_added_page(section, offset, limit)),
         ]
         releases_section = section or self._reco_get_first_video_section()
-        releases_title = 'Sorties recentes dans {}'.format(releases_section['title']) \
-            if releases_section else 'Sorties recentes'
+        releases_title = '{} · {}'.format(
+            i18n.tr(33139), releases_section['title']) \
+            if releases_section else i18n.tr(33139)
         rows.append((
             releases_title,
             lambda offset, limit: self._reco_fetch_recent_releases_page(
@@ -1130,7 +1131,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel = self.getControl(CATEGORY_PANEL_ID)
             panel.reset()
             for genre in genres:
-                panel.addItem(xbmcgui.ListItem(divert_source.translate_genre_fr(genre)))
+                panel.addItem(xbmcgui.ListItem(divert_source.display_genre(genre)))
         except RuntimeError:
             pass
 
@@ -2097,18 +2098,27 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self.setFocus(self.getControl(HOME_TAB_IDS[self._home_tab]))
             self._update_bar_focused()
             return
-        # NOTE (known issue, see docs/aura/decisions.md): pressing Up from
+        # NOTE (see docs/aura/decisions.md): pressing Up from
         # DIVERT_PANEL_ID's grid lands on the module tab list (2007)
         # instead of the Bibliotheque tab button (3100), even though the
         # grid's XML declares <onup>3100</onup> and 3100 is confirmed
-        # visible/enabled at that moment (verified on-device with a
-        # System.CurrentControlID debug label). Neither an explicit
-        # Python-side focused== DIVERT_PANEL_ID interception nor
-        # per-control <visible> duplication changed this -- Kodi's native
-        # navigation appears to resolve Up geometrically for this
-        # horizontal list rather than honouring the explicit onup. Not a
-        # dead end (2007 is a perfectly navigable state), so left as a
-        # documented quirk rather than blocking this release.
+        # visible/enabled at that moment -- Kodi's native navigation
+        # resolves Up geometrically for this horizontal list rather than
+        # honouring the explicit onup. Redirect Up *before* Kodi sees it:
+        # on the grid's top row (6 columns of 283 px inside 1698 px),
+        # focus the declared subtab and swallow the action so no
+        # super()-driven hop to 2007 ever happens. Deeper rows still
+        # delegate to super(), which moves Up a row inside the grid.
+        if aid == ACTION_MOVE_UP and focused == DIVERT_PANEL_ID \
+                and self._divert_view == 'library':
+            try:
+                pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+            except RuntimeError:
+                pos = -1
+            if 0 <= pos < 6:
+                self.setFocus(self.getControl(3100))
+                self._update_bar_focused()
+                return
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             focused = self.getFocusId()
@@ -2246,6 +2256,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """Module 0: Plex-style live search screen (AuraSearch.xml)."""
         search = self._get_sub_window(
             'search', aura_search.AuraSearchWindow, 'AuraSearch.xml')
+        search.addon = self.addon
         search.client = self._connector_client or self._plex_client
         search.sections = self._divert_sections
         search.on_select = self._open_detail
@@ -2277,10 +2288,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _run_unified_search(self, query):
         groups = []  # list of (category_label, [(result_label, callback), ...])
 
-        groups.append(('Films et series', self._search_divert(query)))
-        groups.append(('Jeux', self._search_games(query)))
-        groups.append(('Applications', self._search_apps(query)))
-        groups.append(('Parametres', self._search_settings(query)))
+        groups.append((i18n.tr(33159), self._search_divert(query)))
+        groups.append((i18n.tr(33003), self._search_games(query)))
+        groups.append((i18n.tr(33319), self._search_apps(query)))
+        groups.append((i18n.tr(33019), self._search_settings(query)))
 
         flat_labels = []
         flat_callbacks = []
@@ -2423,11 +2434,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         (see docs/settings/decisions.md) -- the action items below stay
         unchanged, they are not "settings" per that plan's own wording."""
         return [
-            ('Parametres', self._open_settings_panel),
+            (i18n.tr(33019), self._open_settings_panel),
             ('Se connecter (Connector Akasha OS)', self._reconnect_connector),
-            ('Mise en veille', self._settings_sleep),
-            ('Redemarrer', self._settings_restart_menu),
-            ('Arret du systeme', self._settings_shutdown),
+            (i18n.tr(33157), self._settings_sleep),
+            (i18n.tr(33090), self._settings_restart_menu),
+            (i18n.tr(33158), self._settings_shutdown),
         ]
 
     def _reconnect_connector(self):
@@ -2701,15 +2712,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         entries = []
         if typ in ('movie', 'episode') and item.get('part_key'):
-            entries.append(('Reprendre' if offset else 'Regarder',
+            entries.append((i18n.tr(33156) if offset else i18n.tr(33104),
                             lambda: self._ctx_play(item)))
             if offset:
-                entries.append(('Recommencer',
+                entries.append((i18n.tr(33107),
                                 lambda: self._ctx_play(item, start_over=True)))
-        entries.append(('Ouvrir', open_default))
+        entries.append((i18n.tr(33155), open_default))
+        if offset and hasattr(client, 'remove_from_continue_watching'):
+            entries.append((i18n.tr(33161),
+                            lambda: self._ctx_remove_continue_watching(
+                                item, control_id)))
         if rateable:
-            entries.append(('Marquer comme non vu' if watched
-                            else 'Marquer comme vu',
+            entries.append((i18n.tr(33113) if watched
+                            else i18n.tr(33112),
                             lambda: self._ctx_toggle_watched(item, control_id)))
             entries.append((i18n.tr(33111), lambda: self._ctx_rate(item)))
         if item.get('video_label') or item.get('audio_label'):
@@ -2810,6 +2825,35 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         xbmcgui.Dialog().notification(
             'Akasha Aura',
             i18n.tr(33119) if watched else i18n.tr(33118),
+            xbmcgui.NOTIFICATION_INFO, 1500)
+
+    def _ctx_remove_continue_watching(self, item, control_id):
+        """Plex 'Remove from Continue Watching': dedicated endpoint, then
+        drop the card from the row locally so the hub visually matches."""
+        client = self._connector_client or self._plex_client
+        if not client or not item.get('rating_key'):
+            return
+        try:
+            client.remove_from_continue_watching(item['rating_key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: removeFromContinueWatching failed: {}'
+                     .format(e), xbmc.LOGERROR)
+            return
+        item['view_offset_ms'] = 0
+        try:
+            ctrl = self.getControl(control_id)
+            pos = ctrl.getSelectedPosition()
+            row = self._reco_rows.get(control_id)
+            if row and 0 <= pos < len(row[2].items):
+                del row[2].items[pos]
+            elif control_id == DIVERT_PANEL_ID \
+                    and 0 <= pos < len(self._divert_items):
+                del self._divert_items[pos]
+            ctrl.removeItem(pos)
+        except (RuntimeError, IndexError):
+            pass
+        xbmcgui.Dialog().notification(
+            'Akasha Aura', i18n.tr(33146),
             xbmcgui.NOTIFICATION_INFO, 1500)
 
     def _ctx_rate(self, item):

@@ -302,7 +302,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         if installed:
             options = [i18n.tr(33021), i18n.tr(33315), i18n.tr(33023)]
         else:
-            options = ['Installer', 'Voir les details']
+            options = [i18n.tr(33144), i18n.tr(33315)]
 
         choice = xbmcgui.Dialog().contextmenu(options)
         if choice < 0:
@@ -312,7 +312,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             self._launch_external(entry)
         elif options[choice] == i18n.tr(33315):
             self._show_detail(entry)
-        elif options[choice] == 'Installer':
+        elif options[choice] == i18n.tr(33144):
             self._install_external(entry)
             self._reload()
         elif options[choice] == i18n.tr(33023):

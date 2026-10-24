@@ -104,6 +104,15 @@ def translate_genre_fr(name):
     return GENRE_TRANSLATIONS_FR.get(name, name)
 
 
+def display_genre(name):
+    """Genre label in the UI language: Plex serves English genre names,
+    which only need translating when the interface runs in French."""
+    import i18n
+    if i18n._lang() == 'en':
+        return name
+    return translate_genre_fr(name)
+
+
 def parse_total_size(raw_json):
     """Return the total item count of a paginated Plex payload, or None.
 

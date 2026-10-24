@@ -144,6 +144,18 @@ STRINGS = {
     33140: ('Vus récemment', 'Recently Watched'),
     33141: ('dans {}', 'in {}'),
     33154: ('Réalisateur', 'Director'),
+    33155: ('Ouvrir', 'Open'),
+    33156: ('Reprendre', 'Resume'),
+    33157: ('Mise en veille', 'Sleep'),
+    33158: ('Arrêter le système', 'Shut down the system'),
+    33159: ('Films et séries', 'Movies & Shows'),
+    33160: ('Sortie', 'Release'),
+    33161: ('Retirer de Continuer à regarder',
+            'Remove from Continue Watching'),
+    33146: ('Retiré de Continuer à regarder',
+            'Removed from Continue Watching'),
+    33144: ('Installer', 'Install'),
+    33145: ('Tous publics', 'All audiences'),
 
     # Discover/provider hub titles (Plex "Tendances" rows)
     33160: ('Nouvelles bandes-annonces', 'New trailers'),

@@ -565,6 +565,21 @@ msgctxt "#33141"
 msgid "in {}"
 msgstr "dans {}"
 
+# Installer
+msgctxt "#33144"
+msgid "Install"
+msgstr "Installer"
+
+# Tous publics
+msgctxt "#33145"
+msgid "All audiences"
+msgstr "Tous publics"
+
+# Retiré de Continuer à regarder
+msgctxt "#33146"
+msgid "Removed from Continue Watching"
+msgstr "Retiré de Continuer à regarder"
+
 # Séries
 msgctxt "#33150"
 msgid "Shows"
@@ -584,6 +599,31 @@ msgstr "Personnes"
 msgctxt "#33154"
 msgid "Director"
 msgstr "Réalisateur"
+
+# Ouvrir
+msgctxt "#33155"
+msgid "Open"
+msgstr "Ouvrir"
+
+# Reprendre
+msgctxt "#33156"
+msgid "Resume"
+msgstr "Reprendre"
+
+# Mise en veille
+msgctxt "#33157"
+msgid "Sleep"
+msgstr "Mise en veille"
+
+# Arrêter le système
+msgctxt "#33158"
+msgid "Shut down the system"
+msgstr "Arrêter le système"
+
+# Films et séries
+msgctxt "#33159"
+msgid "Movies & Shows"
+msgstr "Films et séries"
 
 # Nouvelles bandes-annonces
 msgctxt "#33160"
