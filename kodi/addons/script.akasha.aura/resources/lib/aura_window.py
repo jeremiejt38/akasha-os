@@ -604,7 +604,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return [], None
 
         paged = paged_list.PagedList(
-            fetch_page, page_size=page_size, max_items=RECO_MAX_ITEMS_PER_ROW)
+            paged_list.dedup_fetch(fetch_page), page_size=page_size,
+            max_items=RECO_MAX_ITEMS_PER_ROW)
         try:
             paged.load_initial()
         except Exception as e:  # defensive: never crash the tab on a row failure
@@ -636,7 +637,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 releases_section, offset, limit)))
         built = []
         for title, fetch_page in rows:
-            paged = paged_list.PagedList(fetch_page, max_items=RECO_MAX_ITEMS_PER_ROW)
+            paged = paged_list.PagedList(
+                paged_list.dedup_fetch(fetch_page),
+                max_items=RECO_MAX_ITEMS_PER_ROW)
             error = None
             try:
                 paged.load_initial()

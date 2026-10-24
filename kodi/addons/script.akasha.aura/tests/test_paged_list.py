@@ -2,7 +2,7 @@
 
 import unittest
 
-from paged_list import PagedList
+from paged_list import PagedList, dedup_fetch, series_dedup_key
 
 
 def make_fetcher(total_items, calls_log=None):
@@ -156,6 +156,114 @@ class TestPagedListTotal(unittest.TestCase):
         pl.load_initial()
         self.assertFalse(pl.exhausted)
         self.assertIsNone(pl.total)
+
+
+def ep(show_key, ep_key):
+    return {'type': 'episode', 'rating_key': ep_key,
+            'grandparent_rating_key': show_key}
+
+
+def show(key):
+    return {'type': 'show', 'rating_key': key}
+
+
+class TestSeriesDedupKey(unittest.TestCase):
+    """Episodes and seasons collapse to their show's card identity."""
+
+    def test_episodes_of_one_show_share_a_key(self):
+        self.assertEqual(series_dedup_key(ep('100', 'e1')),
+                         series_dedup_key(ep('100', 'e2')))
+
+    def test_different_shows_differ(self):
+        self.assertNotEqual(series_dedup_key(ep('100', 'e1')),
+                            series_dedup_key(ep('200', 'e1')))
+
+    def test_season_collapses_to_show(self):
+        item = {'type': 'season', 'rating_key': 's1',
+                'parent_rating_key': '100'}
+        self.assertEqual(series_dedup_key(item), '100')
+
+    def test_movie_and_show_keep_their_own_key(self):
+        self.assertEqual(series_dedup_key(show('100')), '100')
+        self.assertEqual(
+            series_dedup_key({'type': 'movie', 'rating_key': 'm1'}), 'm1')
+
+    def test_episode_matches_its_show(self):
+        # A hub emitting both the show and its episodes collapses to one
+        # card: grandparent_rating_key == show rating_key.
+        self.assertEqual(series_dedup_key(ep('100', 'e1')),
+                         series_dedup_key(show('100')))
+
+
+class TestDedupFetch(unittest.TestCase):
+    def test_collapses_a_season_dump_to_one_card(self):
+        dataset = [ep('100', 'e%d' % i) for i in range(12)] + \
+                  [show('200'), ep('300', 'e1')]
+        calls = []
+
+        def fetch(offset, limit):
+            calls.append((offset, limit))
+            return dataset[offset:offset + limit], len(dataset)
+
+        wrapped = dedup_fetch(fetch)
+        page, _ = wrapped(0, 10)
+        self.assertEqual([series_dedup_key(i) for i in page],
+                         ['100', '200', '300'])
+
+    def test_stream_continues_past_inline_page(self):
+        # A short inline page (25 < 32 raw size) is NOT the end when the
+        # source keeps returning items -- the real hub fetch_page behaves
+        # this way for keyed hubs.
+        dataset = ([ep('100', 'e%d' % i) for i in range(25)] +
+                   [show('s%d' % i) for i in range(40)])
+
+        def fetch(offset, limit):
+            page = dataset[offset:offset + limit]
+            return page, (len(dataset) if offset >= 25 else None)
+
+        wrapped = dedup_fetch(fetch, raw_page_size=32)
+        page, _ = wrapped(0, 10)
+        # 1 unique episode + 9 shows -> stream continued past the inline.
+        self.assertEqual(len(page), 10)
+        self.assertEqual(page[0]['rating_key'], 'e0')
+
+    def test_exhaustion_on_empty_raw_page(self):
+        dataset = [show('s1'), ep('100', 'e1'), ep('100', 'e2')]
+
+        def fetch(offset, limit):
+            return dataset[offset:offset + limit], len(dataset)
+
+        wrapped = dedup_fetch(fetch, raw_page_size=8)
+        page, _ = wrapped(0, 10)
+        self.assertEqual(len(page), 2)
+
+    def test_max_raw_fetches_caps_requests(self):
+        calls = []
+
+        def fetch(offset, limit):
+            calls.append(offset)
+            return [ep('100', 'e%d' % offset)], None  # infinite dupes
+
+        wrapped = dedup_fetch(fetch, raw_page_size=32, max_raw_fetches=3)
+        page, _ = wrapped(0, 10)
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(page), 1)
+
+    def test_integrates_with_paged_list(self):
+        dataset = [ep('100', 'e%d' % i) for i in range(20)] + \
+                  [show('s%d' % i) for i in range(60)]
+
+        def fetch(offset, limit):
+            page = dataset[offset:offset + limit]
+            return page, len(dataset)
+
+        pl = PagedList(dedup_fetch(fetch), page_size=10, prefetch_margin=3)
+        pl.load_initial()
+        keys = [series_dedup_key(i) for i in pl.items]
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertEqual(len(pl.items), 10)
+        # One episode card + nine show cards.
+        self.assertEqual(keys, ['100'] + ['s%d' % i for i in range(9)])
 
 
 if __name__ == '__main__':
