@@ -130,6 +130,11 @@ pas de reboot/poweroff/CEC sans confirmation ; préférer « Redémarrer Akasha 
 - **Historique de conversation** : les résumés automatiques Devin vivent
   dans `~/.local/share/devin/cli/summaries/` (`history_*.md`) si jamais la
   nouvelle session veut recouper un détail.
+- **Stash résiduel** : `git stash` contient `stash@{0}` (WIP
+  « prevent-aura-app-interruptions » sur `akasha-guide.py`, `akasha-sleep.py`,
+  keymaps, `install.sh`). Presque certainement **obsolète** — le sleep-timer
+  qu'il introduisait est déjà mergé sur `main` (PR #133). Vérifier le diff
+  puis le supprimer plutôt que de le transporter indéfiniment.
 
 ## Contexte hors repo
 
