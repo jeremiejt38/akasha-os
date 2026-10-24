@@ -43,7 +43,8 @@ DRM_IOCTL_MODE_GETPLANE = _IOWR(0xB6, ctypes.sizeof(get_plane))
 DRM_IOCTL_MODE_GETFB2 = _IOWR(0xCE, ctypes.sizeof(fb_cmd2))
 DRM_IOCTL_PRIME_HANDLE_TO_FD = _IOWR(0x2D, ctypes.sizeof(prime_handle))
 
-Y0, Y1 = 300, 820   # crop zone: row titles + posters
+Y0, Y1 = int(os.environ.get("DRM_Y0", 300)), int(os.environ.get("DRM_Y1", 820))
+X0, X1 = int(os.environ.get("DRM_X0", 0)), int(os.environ.get("DRM_X1", 1920))
 
 def grab(fd):
     pres = get_plane_res()
@@ -68,9 +69,16 @@ def grab(fd):
             continue
         mm = mmap.mmap(ph.fd, fb.pitches[0] * fb.height,
                        mmap.MAP_SHARED, mmap.PROT_READ)
-        data = mm[Y0 * fb.pitches[0]: Y1 * fb.pitches[0]]
+        row_bytes = (X1 - X0) * 4
+        if X0 == 0 and X1 >= fb.width:
+            data = mm[Y0 * fb.pitches[0]: Y1 * fb.pitches[0]]
+        else:
+            data = b''.join(
+                mm[y * fb.pitches[0] + X0 * 4:
+                   y * fb.pitches[0] + X0 * 4 + row_bytes]
+                for y in range(Y0, Y1))
         mm.close(); os.close(ph.fd)
-        return fb.width, Y1 - Y0, fb.pitches[0], data
+        return X1 - X0 if row_bytes else fb.width, Y1 - Y0, (X1 - X0) * 4, data
     return None
 
 def main():

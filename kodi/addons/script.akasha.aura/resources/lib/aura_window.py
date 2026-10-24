@@ -835,8 +835,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             subtitle = ''
 
         cast = ', '.join(c['name'] for c in (item.get('cast') or [])[:4])
-        self._schedule_hero_fanart(
-            item.get('fanart_url') or item.get('art_url') or '')
+        fanart = item.get('fanart_url') or item.get('art_url') or ''
+        # Warm the texture cache through a hidden 1px image NOW so the
+        # debounced backdrop swap below hits a ready texture instead of
+        # stalling the renderer ~200ms mid-settle on decode+upload.
+        self.setProperty('AuraHeroFanartPreload', fanart)
+        self.setProperty('AuraHeroLogoPreload', item.get('logo_url') or '')
+        self._schedule_hero_fanart(fanart)
         self.setProperty('AuraHeroLogo', item.get('logo_url') or '')
         self.setProperty('AuraHeroTitle', title)
         self.setProperty('AuraHeroSubtitle', subtitle)
