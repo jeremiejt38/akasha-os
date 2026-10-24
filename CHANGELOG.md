@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.57.1...akasha-os-v0.58.0) (2026-10-24)
+
+
+### Features
+
+* **ambient:** Google TV-style Ken Burns slideshow and clock placement ([#153](https://github.com/jeremiejt38/akasha-os/issues/153)) ([2730c2e](https://github.com/jeremiejt38/akasha-os/commit/2730c2eb9095d39e5e157eef044cffa8d775747c))
+
 ## [0.57.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.57.0...akasha-os-v0.57.1) (2026-10-24)
 
 
