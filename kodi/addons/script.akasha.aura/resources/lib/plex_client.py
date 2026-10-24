@@ -31,6 +31,13 @@ _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
 _read_cache = {}
 
+# People directories (/library/sections/<k>/actor|director) hold thousands
+# of entries that barely change; a longer-lived cache keeps people search
+# instant after the first query (the 30s read cache would refetch per
+# search session).
+_PEOPLE_CACHE_TTL_SECONDS = 600.0
+_people_cache = {}
+
 
 def _mark_offline(host):
     _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
@@ -436,6 +443,67 @@ class PlexClient:
                 items.append(item)
         items.sort(key=lambda i: i.get('year') or 0, reverse=True)
         return items
+
+    def people_directory(self, section_key, kind='actor'):
+        """Every person tagged in a section ('actor' or 'director').
+
+        The Plex hub search reports matching people counts but never the
+        items themselves, so people search is done client-side over this
+        directory -- cached for a few minutes since it is huge.
+        """
+        cache_key = (section_key, kind)
+        entry = _people_cache.get(cache_key)
+        if entry and time.time() < entry[0]:
+            return entry[1]
+        data = self._request(
+            '/library/sections/{}/{}'.format(section_key, kind))
+        mc = self._media_container(data)
+        people = []
+        for d in mc.get('Directory', []):
+            name = d.get('title') or d.get('tag')
+            person_id = d.get('key')
+            if not name or not person_id:
+                continue
+            thumb = d.get('thumb') or ''
+            if thumb and not thumb.startswith('http'):
+                thumb = '{}{}?X-Plex-Token={}'.format(
+                    self.server_url, thumb, self.token)
+            people.append({'id': str(person_id), 'name': name,
+                           'thumb_url': thumb, 'kind': kind})
+        _people_cache[cache_key] = (
+            time.time() + _PEOPLE_CACHE_TTL_SECONDS, people)
+        return people
+
+    def search_people(self, query, kinds=('actor',)):
+        """Client-side people search over the per-section directories.
+
+        Returns AuraSearch-ready dicts flagged '_person' with a
+        'person_filter' ('actor=ID') usable by person_filmography."""
+        q = (query or '').strip().lower()
+        if len(q) < 2:
+            return []
+        seen = set()
+        out = []
+        for section in self.video_sections():
+            for kind in kinds:
+                try:
+                    people = self.people_directory(section['key'], kind)
+                except PlexAPIError:
+                    continue
+                for person in people:
+                    if q not in person['name'].lower() \
+                            or person['id'] in seen:
+                        continue
+                    seen.add(person['id'])
+                    out.append({
+                        'name': person['name'],
+                        'thumb_url': person['thumb_url'],
+                        'role': ('Réalisateur' if kind == 'director'
+                                 else 'Acteur'),
+                        'person_filter': '{}={}'.format(kind, person['id']),
+                        '_person': True,
+                    })
+        return out[:20]
 
     def item_extras(self, rating_key):
         """Bonus clips attached to an item (trailers, deleted scenes...).

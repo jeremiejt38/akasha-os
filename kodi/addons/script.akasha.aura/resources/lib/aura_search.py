@@ -32,6 +32,7 @@ _FILTERS = (
     ('Films', 'movie'),
     ('Séries', 'show'),
     ('Épisodes', 'episode'),
+    ('Personnes', 'person'),
 )
 
 
@@ -41,6 +42,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self.client = None
         self.sections = []
         self.on_select = None
+        self.on_person = None
         self.query = ''
         self.recent = []
         self._results = []
@@ -111,11 +113,19 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             panel = self.getControl(RESULTS_PANEL_ID)
             panel.reset()
             for item in self._results:
-                li = xbmcgui.ListItem(item.get('title') or '', _result_sub(item))
-                thumb = item.get('poster_url') or item.get('landscape_url') \
-                    or item.get('thumb_url') or 'DefaultVideo.png'
-                li.setArt({'poster': thumb})
-                li.setProperty('server', item.get('_source') or 'Akasha')
+                if item.get('_person'):
+                    li = xbmcgui.ListItem(item.get('name') or '',
+                                          item.get('role') or 'Personne')
+                    li.setArt({'poster': item.get('thumb_url')
+                                       or 'actor-fallback.png'})
+                    li.setProperty('person', '1')
+                else:
+                    li = xbmcgui.ListItem(item.get('title') or '',
+                                          _result_sub(item))
+                    thumb = item.get('poster_url') or item.get('landscape_url') \
+                        or item.get('thumb_url') or 'DefaultVideo.png'
+                    li.setArt({'poster': thumb})
+                    li.setProperty('server', item.get('_source') or 'Akasha')
                 panel.addItem(li)
         except RuntimeError:
             pass
@@ -123,8 +133,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
     # ------------------------------------------------------------- search
 
     def _run_search(self):
-        results = []
         wanted = _FILTERS[self._filter_index][1]
+        if wanted == 'person':
+            self._results = self._search_people()[:24]
+            self._render_results()
+            return
+        results = []
         for section in self.sections:
             try:
                 items, _total = self.client.search_with_total(
@@ -142,8 +156,23 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         q = self.query.lower()
         results.sort(key=lambda r: 0 if (r.get('title') or '').lower()
                      .startswith(q) else 1)
+        # 'Tout' merges matching people first, like Plex's People section.
+        if wanted is None:
+            results = self._search_people()[:8] + results
         self._results = results[:24]
         self._render_results()
+
+    def _search_people(self):
+        """People matching the query (client-side over the per-section
+        actor directories -- the hub search reports counts but no items)."""
+        if not self.client or not hasattr(self.client, 'search_people'):
+            return []
+        try:
+            return self.client.search_people(self.query)
+        except Exception as e:
+            xbmc.log('Akasha Aura Search: people failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            return []
 
     # -------------------------------------------------------------- input
 
@@ -200,10 +229,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             return
         if not (0 <= pos < len(self._results)):
             return
+        item = self._results[pos]
+        if item.get('_person'):
+            if self.on_person:
+                self.on_person(item)
+            return
         if self.query and self.query not in self.recent:
             self.recent.insert(0, self.query)
         if self.on_select:
-            self.on_select(self._results[pos])
+            self.on_select(item)
 
 
 def _set(window, prop, value):

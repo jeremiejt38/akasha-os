@@ -2228,7 +2228,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.client = self._connector_client or self._plex_client
         search.sections = self._divert_sections
         search.on_select = self._open_detail
+        search.on_person = self._open_person_page
         search.doModal()
+
+    def _open_person_page(self, person):
+        """People search hit -> person page (photo + filmography)."""
+        client = self._plex_client
+        if not client or not person.get('person_filter'):
+            return
+        try:
+            filmography = client.person_filmography(
+                person['person_filter'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: filmography failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            filmography = []
+        import aura_person
+        page = aura_person.AuraPersonWindow(
+            'AuraPerson.xml', self.addon.getAddonInfo('path'),
+            'Default', '1080i')
+        page.client = client
+        page.addon_path = self.addon.getAddonInfo('path')
+        page.person = person
+        page.items = filmography
+        page.doModal()
 
     def _run_unified_search(self, query):
         groups = []  # list of (category_label, [(result_label, callback), ...])

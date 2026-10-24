@@ -376,5 +376,72 @@ class TestPlexClientWithTotal(unittest.TestCase):
         self.assertIsNone(total)
 
 
+class TestPlexClientPeople(unittest.TestCase):
+    def setUp(self):
+        self.client = plex_client.PlexClient(
+            'http://192.168.100.133:32400', 'tok123')
+        plex_client._people_cache.clear()
+
+    def tearDown(self):
+        plex_client._people_cache.clear()
+
+    _SECTIONS = {
+        'MediaContainer': {
+            'Directory': [
+                {'key': '1', 'title': 'Films', 'type': 'movie'},
+                {'key': '6', 'title': 'Musique', 'type': 'artist'},
+                {'key': '2', 'title': 'Séries', 'type': 'show'},
+            ]
+        }
+    }
+    _ACTORS = {
+        'MediaContainer': {
+            'Directory': [
+                {'key': '11550', 'title': 'Omar Sy',
+                 'thumb': 'https://metadata-static.plex.tv/x/p.jpg'},
+                {'key': '999', 'title': 'Nathan Fillion',
+                 'thumb': '/:/resources/actor-icon.png'},
+            ]
+        }
+    }
+
+    @patch('urllib.request.urlopen')
+    def test_people_directory_normalizes_and_caches(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(self._ACTORS)
+        people = self.client.people_directory('2')
+        self.assertEqual(len(people), 2)
+        self.assertEqual(people[0]['id'], '11550')
+        self.assertEqual(people[0]['name'], 'Omar Sy')
+        self.assertEqual(people[0]['thumb_url'],
+                         'https://metadata-static.plex.tv/x/p.jpg')
+        # Server-relative thumbs get the base URL + token
+        self.assertTrue(people[1]['thumb_url'].startswith(
+            'http://192.168.100.133:32400/:/resources/actor-icon.png'))
+        # Second call served from cache: still one HTTP request
+        self.client.people_directory('2')
+        self.assertEqual(mock_urlopen.call_count, 1)
+
+    @patch('urllib.request.urlopen')
+    def test_search_people_filters_and_builds_filter(self, mock_urlopen):
+        def fake_urlopen(req, *args, **kwargs):
+            url = req.full_url
+            if url.endswith('/library/sections'):
+                return MockHTTPResponse(self._SECTIONS)
+            return MockHTTPResponse(self._ACTORS)
+        mock_urlopen.side_effect = fake_urlopen
+        results = self.client.search_people('nathan')
+        self.assertEqual(len(results), 1)  # same id deduped across sections
+        p = results[0]
+        self.assertEqual(p['name'], 'Nathan Fillion')
+        self.assertEqual(p['person_filter'], 'actor=999')
+        self.assertEqual(p['role'], 'Acteur')
+        self.assertTrue(p['_person'])
+
+    @patch('urllib.request.urlopen')
+    def test_search_people_short_query(self, mock_urlopen):
+        self.assertEqual(self.client.search_people('a'), [])
+        self.assertEqual(mock_urlopen.call_count, 0)
+
+
 if __name__ == '__main__':
     unittest.main()
