@@ -14,6 +14,7 @@ Caller sets before doModal():
 """
 import xbmc
 import xbmcgui
+import i18n
 
 ACTION_MOVE_LEFT = 1
 ACTION_PREVIOUS_MENU = 10
@@ -59,7 +60,7 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
         try:
             count = len(self.items)
             self.getControl(ROW_TITLE_ID).setLabel(
-                'Filmographie ({} titre{})'.format(
+                i18n.tr(33125).format(
                     count, 's' if count != 1 else ''))
             _set(self, 'AuraPersonRowTitle', '1' if count else '')
             _set(self, 'AuraPersonEmpty',

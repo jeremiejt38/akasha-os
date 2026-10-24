@@ -33,7 +33,7 @@
                 <width>1380</width>
                 <height>50</height>
                 <font>font16</font>
-                <label>Parametres</label>
+                <label>$ADDON[script.akasha.aura 33019]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
             <control type="label">

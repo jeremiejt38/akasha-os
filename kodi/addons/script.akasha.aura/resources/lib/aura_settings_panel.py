@@ -20,6 +20,7 @@ cosmetic placeholder.
 """
 import xbmc
 import xbmcgui
+import i18n
 
 CATEGORY_LIST_ID = 100
 DETAIL_LIST_ID = 200
@@ -40,27 +41,27 @@ def _run(builtin):
 # real audit in docs/settings/decisions.md.
 def _build_categories():
     return [
-        ('network', 'Reseau & Connectivite', [
-            ('Wi-Fi, Ethernet, VPN (LibreELEC)',
+        ('network', i18n.tr(33250), [
+            (i18n.tr(33251),
              _run('RunAddon(service.libreelec.settings)')),
-            ('Proxy et bande passante (Kodi)',
+            (i18n.tr(33252),
              _run('ActivateWindow(systemsettings)')),
         ]),
-        ('accounts', 'Comptes & Services', [
+        ('accounts', i18n.tr(33253), [
             ('Plex', _run('RunAddon(script.plexmod)')),
             ('Jellyfin', _run('RunAddon(plugin.video.jellyfin)')),
             ('YouTube Music', _run('RunAddon(plugin.video.youtube)')),
-            ('Cloud gaming (Steam, Sunshine/Moonlight)',
+            (i18n.tr(33254),
              _run('Addon.OpenSettings(script.akasha.aura)')),
         ]),
-        ('display', 'Affichage & Son', [
-            ('Resolution, HDR, HDMI-CEC, sortie audio (Kodi)',
+        ('display', i18n.tr(33255), [
+            (i18n.tr(33256),
              _run('ActivateWindow(systemsettings)')),
         ]),
-        ('controllers', 'Manettes & Telecommandes', [
-            ('Appairage Bluetooth (LibreELEC)',
+        ('controllers', i18n.tr(33257), [
+            (i18n.tr(33258),
              _run('RunAddon(service.libreelec.settings)')),
-            ('Batterie et destination des touches volume',
+            (i18n.tr(33259),
              _run('Addon.OpenSettings(service.akasha.remote)')),
             # Deliberately NOT ActivateWindow(peripheralsettings): reliably
             # crashes Kodi (SIGSEGV in CVariant::CVariant, native engine
@@ -68,44 +69,44 @@ def _build_categories():
             # via a bare JSON-RPC GUI.ActivateWindow call) on this device.
             # See docs/settings/decisions.md.
         ]),
-        ('library', 'Bibliotheque & Lecture', [
-            ('Langue audio et sous-titres par defaut (Kodi)',
+        ('library', i18n.tr(33260), [
+            (i18n.tr(33261),
              _run('ActivateWindow(playersettings)')),
-            ('Reglages de bibliotheque/lecture video (Kodi)',
+            (i18n.tr(33262),
              _run('ActivateWindow(mediasettings)')),
         ]),
-        ('appearance', 'Apparence & Interface', [
-            ('Langue de l\'interface, region, ecran de veille (Kodi)',
+        ('appearance', i18n.tr(33263), [
+            (i18n.tr(33264),
              _run('ActivateWindow(interfacesettings)')),
-            ('Habillage du skin (Kodi)',
+            (i18n.tr(33265),
              _run('ActivateWindow(skinsettings)')),
-            ('Overlay systeme, Mode Ambiant (Akasha)',
+            (i18n.tr(33266),
              _run('RunScript(script.akasha.settings)')),
         ]),
-        ('storage', 'Stockage', [
-            ('Sources et gestionnaire de fichiers (Kodi)',
+        ('storage', i18n.tr(33267), [
+            (i18n.tr(33268),
              _run('ActivateWindow(filemanager)')),
         ]),
-        ('power', 'Energie', [
-            ('Veille ecran, extinction auto (Kodi)',
+        ('power', i18n.tr(33269), [
+            (i18n.tr(33270),
              _run('ActivateWindow(systemsettings)')),
-            ('Delai veille/extinction, ventilateur (Akasha)',
+            (i18n.tr(33271),
              _run('RunScript(script.akasha.settings)')),
         ]),
-        ('system', 'Systeme & Mises a jour', [
-            ('Nom systeme, sauvegarde, MAJ LibreELEC',
+        ('system', i18n.tr(33272), [
+            (i18n.tr(33273),
              _run('RunAddon(service.libreelec.settings)')),
-            ('Verifier les mises a jour Akasha OS',
+            (i18n.tr(33274),
              _run('RunScript(script.akasha.settings)')),
-            ('Mises a jour et sources des extensions (Kodi)',
+            (i18n.tr(33275),
              _run('ActivateWindow(systemsettings)')),
         ]),
-        ('profiles', 'Profils & Utilisateurs', [
-            ('Gerer les profils (Kodi)', _run('ActivateWindow(profilesettings)')),
+        ('profiles', i18n.tr(33276), [
+            (i18n.tr(33277), _run('ActivateWindow(profilesettings)')),
         ]),
-        ('advanced', 'Avance', [
-            ('Tous les parametres Kodi', _run('ActivateWindow(settings)')),
-            ('Tous les parametres LibreELEC',
+        ('advanced', i18n.tr(33207), [
+            (i18n.tr(33278), _run('ActivateWindow(settings)')),
+            (i18n.tr(33279),
              _run('RunAddon(service.libreelec.settings)')),
         ]),
     ]

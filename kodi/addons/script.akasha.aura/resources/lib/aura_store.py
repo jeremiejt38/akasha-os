@@ -38,6 +38,7 @@ import urllib.request
 import xbmc
 import xbmcaddon
 import xbmcgui
+import i18n
 
 import paged_list
 import store_client
@@ -131,7 +132,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         try:
             status = self.getControl(STATUS_LABEL_ID)
             total = self._paged.total if self._paged else len(self.entries)
-            status.setLabel('{} application(s) proposee(s)'.format(total))
+            status.setLabel(i18n.tr(33301).format(total))
         except RuntimeError:
             pass
 
@@ -139,7 +140,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             lst = self.getControl(LIST_ID)
             lst.reset()
             for entry in self.entries:
-                state = 'Installe' if entry['installed'] else 'Non installe'
+                state = i18n.tr(33302) if entry['installed'] else i18n.tr(33303)
                 category = entry.get('category', '')
                 li = xbmcgui.ListItem(entry['name'], entry.get('description', ''))
                 li.setProperty('installed', '1' if entry['installed'] else '0')
@@ -164,7 +165,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         lines = [
             entry.get('description', ''),
             '',
-            'Categorie : {}'.format(entry.get('category', '-')),
+            i18n.tr(33304).format(entry.get('category', '-')),
             'Version : {}'.format(entry.get('version', '-')),
             'Type d\'installation : {}'.format(install.get('type', '-')),
             'Source : {}'.format(install.get('source_url', '-')),
@@ -186,7 +187,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             else:
                 if xbmcgui.Dialog().yesno(
                         'Akasha Store',
-                        '{} est deja installe. Le desinstaller ?'.format(entry['name'])):
+                        i18n.tr(33306).format(entry['name'])):
                     self._uninstall(entry)
             return
 
@@ -205,11 +206,11 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
                 store_registry.record_install(
                     entry['id'], entry.get('version', ''), _now_iso(), addon_id=addon_id)
                 xbmcgui.Dialog().notification(
-                    'Akasha Store', '{} installe'.format(entry['name']),
+                    'Akasha Store', i18n.tr(33307).format(entry['name']),
                     xbmcgui.NOTIFICATION_INFO, 3000)
             else:
                 xbmcgui.Dialog().notification(
-                    'Akasha Store', 'Installation non confirmee : {}'.format(entry['name']),
+                    'Akasha Store', i18n.tr(33310).format(entry['name']),
                     xbmcgui.NOTIFICATION_ERROR, 4000)
         elif itype == 'zip-url':
             self._install_from_zip(entry, install)
@@ -237,7 +238,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Store: zip download failed for {}: {}'
                       .format(entry['id'], e), xbmc.LOGERROR)
             xbmcgui.Dialog().notification(
-                'Akasha Store', 'Telechargement echoue pour {}'.format(entry['name']),
+                'Akasha Store', i18n.tr(33311).format(entry['name']),
                 xbmcgui.NOTIFICATION_ERROR, 3000)
             return
 
@@ -246,7 +247,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Store: sha256 mismatch for {} (expected {}, got {})'
                       .format(entry['id'], expected_sha256, actual_sha256), xbmc.LOGERROR)
             xbmcgui.Dialog().notification(
-                'Akasha Store', 'Verification echouee pour {}'.format(entry['name']),
+                'Akasha Store', i18n.tr(33313).format(entry['name']),
                 xbmcgui.NOTIFICATION_ERROR, 4000)
             return
 
@@ -273,7 +274,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         xbmc.log('Akasha Aura Store: verified zip for {} saved to {}'
                   .format(entry['id'], zip_path), xbmc.LOGINFO)
         xbmcgui.Dialog().notification(
-            'Akasha Store', 'Paquet verifie pour {}'.format(entry['name']),
+            'Akasha Store', i18n.tr(33312).format(entry['name']),
             xbmcgui.NOTIFICATION_INFO, 3000)
         store_registry.record_install(
             entry['id'], entry.get('version', ''), _now_iso(), addon_id=addon_id)
@@ -299,7 +300,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         """
         installed = entry['installed']
         if installed:
-            options = ['Lancer', 'Voir les details', 'Desinstaller']
+            options = [i18n.tr(33021), i18n.tr(33315), i18n.tr(33023)]
         else:
             options = ['Installer', 'Voir les details']
 
@@ -307,14 +308,14 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         if choice < 0:
             return
 
-        if options[choice] == 'Lancer':
+        if options[choice] == i18n.tr(33021):
             self._launch_external(entry)
-        elif options[choice] == 'Voir les details':
+        elif options[choice] == i18n.tr(33315):
             self._show_detail(entry)
         elif options[choice] == 'Installer':
             self._install_external(entry)
             self._reload()
-        elif options[choice] == 'Desinstaller':
+        elif options[choice] == i18n.tr(33023):
             self._uninstall_external(entry)
             self._reload()
 
@@ -327,7 +328,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Store: invalid external app {}: {}'
                      .format(entry['id'], err), xbmc.LOGERROR)
             xbmcgui.Dialog().notification(
-                'Akasha Store', 'URL invalide : {}'.format(entry['name']),
+                'Akasha Store', i18n.tr(33123).format(entry['name']),
                 xbmcgui.NOTIFICATION_ERROR, 4000)
             return
 
@@ -339,7 +340,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             name=entry.get('name', ''), install=persisted_install,
             icon=store_external.resolve_icon_url(entry['id'], entry.get('icon', '')))
         xbmcgui.Dialog().notification(
-            'Akasha Store', '{} enregistre'.format(entry['name']),
+            'Akasha Store', i18n.tr(33309).format(entry['name']),
             xbmcgui.NOTIFICATION_INFO, 3000)
 
     def _launch_external(self, entry):
@@ -353,7 +354,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Store: cannot launch {}: {}'
                      .format(entry['id'], err), xbmc.LOGERROR)
             xbmcgui.Dialog().notification(
-                'Akasha Store', 'URL invalide : {}'.format(name),
+                'Akasha Store', i18n.tr(33123).format(name),
                 xbmcgui.NOTIFICATION_ERROR, 4000)
             return
 
@@ -370,14 +371,14 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
     def _uninstall_external(self, entry):
         store_registry.record_uninstall(entry['id'])
         xbmcgui.Dialog().notification(
-            'Akasha Store', '{} retire'.format(entry['name']),
+            'Akasha Store', i18n.tr(33308).format(entry['name']),
             xbmcgui.NOTIFICATION_INFO, 3000)
 
     def onClick(self, controlID):
         if controlID == INSTALL_BUTTON_ID:
             self._reload(force_refresh=True)
             xbmcgui.Dialog().notification(
-                'Akasha Store', 'Catalogue actualise', xbmcgui.NOTIFICATION_INFO, 2000)
+                'Akasha Store', i18n.tr(33314), xbmcgui.NOTIFICATION_INFO, 2000)
         elif controlID == LIST_ID:
             entry = self._selected_entry()
             if entry:
@@ -405,7 +406,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         try:
             lst = self.getControl(LIST_ID)
             for entry in new_items:
-                state = 'Installe' if entry['installed'] else 'Non installe'
+                state = i18n.tr(33302) if entry['installed'] else i18n.tr(33303)
                 category = entry.get('category', '')
                 li = xbmcgui.ListItem(entry['name'], entry.get('description', ''))
                 li.setProperty('installed', '1' if entry['installed'] else '0')

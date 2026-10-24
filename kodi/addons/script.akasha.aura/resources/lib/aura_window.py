@@ -17,6 +17,7 @@ import time
 import xbmc
 import xbmcaddon
 import xbmcgui
+import i18n
 
 import addons_inventory
 import aura_app
@@ -147,14 +148,14 @@ DIVERT_TOOLBAR_BUTTON_IDS = (
 # the abbreviated captions shown directly on the toolbar button, which has
 # much less room than a full-screen dialog.
 DIVERT_SORT_OPTIONS = [
-    ('addedAt:desc', "Date d'ajout"),
-    ('titleSort', 'Titre'),
-    ('originallyAvailableAt:desc', 'Date de sortie'),
-    ('rating:desc', 'Note'),
+    ('addedAt:desc', i18n.tr(33056)),
+    ('titleSort', i18n.tr(33057)),
+    ('originallyAvailableAt:desc', i18n.tr(33058)),
+    ('rating:desc', i18n.tr(33059)),
 ]
 DIVERT_SORT_SHORT_LABELS = {
-    'addedAt:desc': 'Ajout',
-    'titleSort': 'Titre',
+    'addedAt:desc': i18n.tr(33060),
+    'titleSort': i18n.tr(33057),
     'originallyAvailableAt:desc': 'Sortie',
     'rating:desc': 'Note',
 }
@@ -164,9 +165,9 @@ DIVERT_SORT_SHORT_LABELS = {
 # original cahier des charges are not exposed by either source today -- see
 # docs/aura/decisions.md.
 DIVERT_FILTER_OPTIONS = [
-    (None, 'Tout'),
-    (True, 'Non vus'),
-    (False, 'Vus'),
+    (None, i18n.tr(33052)),
+    (True, i18n.tr(33054)),
+    (False, i18n.tr(33055)),
 ]
 
 GAME_BUTTON_IDS = (2010, 2011, 2012)
@@ -605,11 +606,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _reco_legacy_rows(self, section):
         """Connector mode: the connector has no hubs endpoint, so rebuild the
         original 3 hand-picked rows through the same slot mechanism."""
-        on_deck_title = 'Continuer à regarder'
-        recent_title = 'Ajoutés récemment'
+        on_deck_title = i18n.tr(33137)
+        recent_title = i18n.tr(33138)
         if section:
-            on_deck_title += ' dans {}'.format(section['title'])
-            recent_title += ' dans {}'.format(section['title'])
+            on_deck_title += ' ' + i18n.tr(33141).format(section['title'])
+            recent_title += ' ' + i18n.tr(33141).format(section['title'])
         rows = [
             (on_deck_title,
              lambda offset, limit: self._reco_fetch_on_deck_page(section, offset, limit)),
@@ -1088,7 +1089,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             status = None
         if not section:
             if status:
-                status.setLabel('Aucune bibliotheque video disponible')
+                status.setLabel(i18n.tr(33067))
             return
         try:
             if self._connector_client:
@@ -1106,7 +1107,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # regardless of Akasha's own French interface).
         self._category_genres = genres
         if status:
-            status.setLabel('{} — {} categorie(s)'.format(section['title'], len(genres)))
+            status.setLabel(i18n.tr(33071).format(section['title'], len(genres)))
         try:
             panel = self.getControl(CATEGORY_PANEL_ID)
             panel.reset()
@@ -1172,7 +1173,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._fill_divert_panel()
         try:
             self.getControl(DIVERT_STATUS_ID).setLabel(
-                '{} — {} élément(s)'.format(item['title'], len(self._divert_items)))
+                '{} — {}'.format(item['title'],
+                            i18n.tr(33069).format(len(self._divert_items))))
             self.getControl(DIVERT_PANEL_ID).selectItem(0)
         except RuntimeError:
             pass
@@ -1280,17 +1282,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         sidebar.reset()
 
-        search_item = xbmcgui.ListItem('Recherche')
+        search_item = xbmcgui.ListItem(i18n.tr(33001))
         search_item.setArt({'icon': 'icon-search.png'})
         sidebar.addItem(search_item)
 
-        home_item = xbmcgui.ListItem('Accueil')
+        home_item = xbmcgui.ListItem(i18n.tr(33005))
         home_item.setArt({'icon': 'icon-home.png'})
         sidebar.addItem(home_item)
 
         # Plex's 'Libraries' divider label (is_header restyles it in the
         # itemlayout and keeps the white focus pill off it).
-        header_item = xbmcgui.ListItem('Bibliothèques')
+        header_item = xbmcgui.ListItem(i18n.tr(33006))
         header_item.setProperty('is_header', '1')
         sidebar.addItem(header_item)
 
@@ -1299,7 +1301,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             li.setArt({'icon': self._divert_section_icon(section)})
             sidebar.addItem(li)
 
-        more_item = xbmcgui.ListItem('Plus')
+        more_item = xbmcgui.ListItem(i18n.tr(33007))
         more_item.setArt({'icon': 'icon-more.png'})
         sidebar.addItem(more_item)
 
@@ -1413,7 +1415,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _render_divert_toolbar(self, section):
         try:
-            type_label = 'Series TV' if section.get('type') == 'show' else 'Films'
+            type_label = (i18n.tr(33050) if section.get('type') == 'show'
+                          else i18n.tr(33051))
             self.getControl(DIVERT_TYPE_LABEL_ID).setLabel(type_label)
         except RuntimeError:
             pass
@@ -1434,13 +1437,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         try:
             status = self.getControl(DIVERT_STATUS_ID)
             if error:
-                status.setLabel('{} — erreur de chargement'.format(section['title']))
+                status.setLabel(i18n.tr(33068).format(section['title']))
             else:
                 count = self._divert_paged.total if self._divert_paged.total is not None \
                     else len(self._divert_items)
-                label = '{} élément(s)'.format(count)
+                label = i18n.tr(33069).format(count)
                 if self._divert_search_query:
-                    label += ' pour "{}"'.format(self._divert_search_query)
+                    label += ' ' + i18n.tr(33070).format(self._divert_search_query)
                 if self._divert_filter_genre:
                     label += ' ({})'.format(self._divert_filter_genre)
                 status.setLabel(label)
@@ -1451,7 +1454,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not self._divert_sections:
             return
         idx = xbmcgui.Dialog().select(
-            'Filtre', [label for _, label in DIVERT_FILTER_OPTIONS])
+            i18n.tr(33061), [label for _, label in DIVERT_FILTER_OPTIONS])
         if idx < 0:
             return
         self._divert_filter_unwatched = DIVERT_FILTER_OPTIONS[idx][0]
@@ -1461,7 +1464,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not self._divert_sections:
             return
         idx = xbmcgui.Dialog().select(
-            'Trier par', [label for _, label in DIVERT_SORT_OPTIONS])
+            i18n.tr(33062), [label for _, label in DIVERT_SORT_OPTIONS])
         if idx < 0:
             return
         self._divert_sort = DIVERT_SORT_OPTIONS[idx][0]
@@ -1482,7 +1485,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             genres = []
         if not genres:
             return
-        idx = xbmcgui.Dialog().select('Genre', ['Tous'] + genres)
+        idx = xbmcgui.Dialog().select(i18n.tr(33063), [i18n.tr(33053)] + genres)
         if idx < 0:
             return
         self._divert_filter_genre = None if idx == 0 else genres[idx - 1]
@@ -1503,9 +1506,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """The trailing "..." pill of the Browse toolbar: hosts the quick
         actions Plex keeps in its overflow menu."""
         actions = [
-            ('Lire', self._divert_play_first),
-            ('Aleatoire', self._divert_play_random),
-            ('Reinitialiser les filtres', self._divert_reset_filters),
+            (i18n.tr(33064), self._divert_play_first),
+            (i18n.tr(33065), self._divert_play_random),
+            (i18n.tr(33066), self._divert_reset_filters),
         ]
         idx = xbmcgui.Dialog().select('', [label for label, _ in actions])
         if idx < 0:
@@ -1688,7 +1691,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if index == JEUX_SUBTAB_OTHERS:
             self._load_other_games()
             try:
-                self.getControl(JEUX_STATUS_ID).setLabel('Autres applications de jeu')
+                self.getControl(JEUX_STATUS_ID).setLabel(i18n.tr(33082))
             except RuntimeError:
                 pass
             return
@@ -1696,37 +1699,37 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if index == JEUX_SUBTAB_STEAMLINK:
             client = self._get_steam_client(prompt_if_missing=interactive)
             if not client or not client.is_configured():
-                self._set_jeux_panel([], 'SteamLink non configure — cle API et SteamID64 requis')
+                self._set_jeux_panel([], i18n.tr(33083))
                 return
             try:
                 games = client.owned_games_sorted_by_recent()
             except steam_client.SteamAPIError as e:
                 xbmc.log('Akasha Aura: Steam load failed: {}'.format(e), xbmc.LOGERROR)
-                self._set_jeux_panel([], 'Erreur de chargement de la bibliotheque Steam')
+                self._set_jeux_panel([], i18n.tr(33084))
                 return
             self._jeux_items = [
                 {'title': g['name'], 'thumb_url': g['box_art_url'], 'source': 'steam'}
                 for g in games
             ]
-            self._set_jeux_panel(self._jeux_items, '{} jeu(x) Steam'.format(len(games)))
+            self._set_jeux_panel(self._jeux_items, i18n.tr(33085).format(len(games)))
             return
 
         if index == JEUX_SUBTAB_MOONLIGHT:
             client = self._get_sunshine_client(prompt_if_missing=interactive)
             if not client or not client.is_configured():
-                self._set_jeux_panel([], 'Sunshine non configure — URL, utilisateur et mot de passe requis')
+                self._set_jeux_panel([], i18n.tr(33086))
                 return
             try:
                 apps = client.apps()
             except sunshine_client.SunshineAPIError as e:
                 xbmc.log('Akasha Aura: Sunshine load failed: {}'.format(e), xbmc.LOGERROR)
-                self._set_jeux_panel([], 'Erreur de chargement des applications Sunshine')
+                self._set_jeux_panel([], i18n.tr(33087))
                 return
             self._jeux_items = [
                 {'title': a['name'], 'thumb_url': a['box_art_url'], 'source': 'sunshine'}
                 for a in apps
             ]
-            self._set_jeux_panel(self._jeux_items, '{} application(s) Sunshine'.format(len(apps)))
+            self._set_jeux_panel(self._jeux_items, i18n.tr(33088).format(len(apps)))
 
     def _select_app_subtab(self, index):
         self._app_subtab = index
@@ -1819,7 +1822,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         if not pinned_ids:
             if status:
-                status.setLabel('Aucune application epinglee — utilisez "Gerer les applications"')
+                status.setLabel(i18n.tr(33316))
             for control_id in APP_TILE_IDS:
                 try:
                     self.getControl(control_id).setLabel('')
@@ -1839,7 +1842,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._pinned_apps = [by_id[aid] for aid in pinned_ids if aid in by_id]
 
         if status:
-            status.setLabel('Applications epinglees')
+            status.setLabel(i18n.tr(33317))
 
         for i, control_id in enumerate(APP_TILE_IDS):
             try:
@@ -2274,12 +2277,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         if not flat_callbacks:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Aucun resultat pour "{}"'.format(query),
+                'Akasha Aura', i18n.tr(33072).format(query),
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
 
         choice = xbmcgui.Dialog().select(
-            'Resultats pour "{}"'.format(query), flat_labels)
+            i18n.tr(33097).format(query), flat_labels)
         if choice < 0 or flat_callbacks[choice] is None:
             return
         flat_callbacks[choice]()
@@ -2423,12 +2426,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura: connector reconnect failed: {}'.format(e), xbmc.LOGWARNING)
             self.addon.setSetting('connector.session_token', '')
             xbmcgui.Dialog().notification(
-                'Akasha', 'Connexion au Connector echouee', xbmcgui.NOTIFICATION_ERROR, 3000)
+                'Akasha', i18n.tr(33074), xbmcgui.NOTIFICATION_ERROR, 3000)
             return
         self._connector_client = connector
         self._plex_client = None
         xbmcgui.Dialog().notification(
-            'Akasha', 'Connecte au Connector Akasha OS', xbmcgui.NOTIFICATION_INFO, 3000)
+            'Akasha', i18n.tr(33073), xbmcgui.NOTIFICATION_INFO, 3000)
         self._restore_divert_view(focus=False)
 
     def _open_settings_menu(self):
@@ -2491,7 +2494,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # by script.akasha.guide's "Mise en veille" entry, rather than
         # duplicating it -- see docs/aura/decisions.md.
         if not xbmcgui.Dialog().yesno(
-                'Akasha', "Mettre l'appareil et le televiseur en veille ?"):
+                'Akasha', i18n.tr(33089)):
             return
         script = '/storage/.kodi/scripts/akasha-sleep.py'
         try:
@@ -2502,7 +2505,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _settings_restart_menu(self):
         choice = xbmcgui.Dialog().select(
-            'Redemarrer', ['Redemarrer Akasha', 'Redemarrer le systeme'])
+            i18n.tr(33090), [i18n.tr(33091), i18n.tr(33093)])
         if choice == 0:
             self._settings_restart_akasha()
         elif choice == 1:
@@ -2514,7 +2517,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # available today (there is no app-level relaunch separate from
         # the Kodi process) -- flagged as an assumption in the recette
         # report per the plan's own instruction (section 8).
-        if not xbmcgui.Dialog().yesno('Akasha', 'Redemarrer Akasha maintenant ?'):
+        if not xbmcgui.Dialog().yesno('Akasha', i18n.tr(33092)):
             return
         try:
             with open('/tmp/.kodi-restart', 'w') as f:
@@ -2524,7 +2527,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
 
     def _settings_restart_system(self):
-        if not xbmcgui.Dialog().yesno('Akasha', 'Redemarrer le systeme maintenant ?'):
+        if not xbmcgui.Dialog().yesno('Akasha', i18n.tr(33094)):
             return
         subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
 
@@ -2532,7 +2535,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Same splash + CEC-TV-off sequence as script.akasha.guide/
         # script.akasha.settings' shutdown action.
         if not xbmcgui.Dialog().yesno(
-                'Akasha', 'Eteindre le systeme maintenant ?\n(La TV sera aussi eteinte via CEC)'):
+                'Akasha', i18n.tr(33095)):
             return
         subprocess.run(['/storage/.kodi/scripts/show-splash.sh',
                          '/storage/.kodi/media/splash-shutdown.png', '1'])
@@ -2552,18 +2555,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             key = section['key']
             pinned = key in pinned_set
             options.append(
-                '{} {}'.format('Desepingler' if pinned else 'Epingler', section['title']))
+                i18n.tr(33078 if pinned else 33079).format(section['title']))
             actions.append(('toggle', key))
             idx = all_sections.index(section)
             if idx > 0:
-                options.append('Monter {}'.format(section['title']))
+                options.append(i18n.tr(33080).format(section['title']))
                 actions.append(('up', key))
             if idx < len(all_sections) - 1:
-                options.append('Descendre {}'.format(section['title']))
+                options.append(i18n.tr(33081).format(section['title']))
                 actions.append(('down', key))
 
         dialog = xbmcgui.Dialog()
-        idx = dialog.select('Gerer les bibliotheques', options)
+        idx = dialog.select(i18n.tr(33077), options)
         if idx < 0:
             return
 
@@ -2690,9 +2693,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             entries.append(('Marquer comme non vu' if watched
                             else 'Marquer comme vu',
                             lambda: self._ctx_toggle_watched(item, control_id)))
-            entries.append(('Noter', lambda: self._ctx_rate(item)))
+            entries.append((i18n.tr(33111), lambda: self._ctx_rate(item)))
         if item.get('video_label') or item.get('audio_label'):
-            entries.append(('Infos fichier', lambda: self._ctx_file_info(item)))
+            entries.append((i18n.tr(33116), lambda: self._ctx_file_info(item)))
 
         idx = xbmcgui.Dialog().contextmenu([label for label, _ in entries])
         if 0 <= idx < len(entries):
@@ -2710,7 +2713,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                if base and token and item.get('part_key') else None)
         if not url:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Lecture indisponible (flux introuvable)',
+                'Akasha Aura', i18n.tr(33075),
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
         li = xbmcgui.ListItem(item.get('title') or '')
@@ -2788,7 +2791,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pass
         xbmcgui.Dialog().notification(
             'Akasha Aura',
-            'Marqué comme non vu' if watched else 'Marqué comme vu',
+            i18n.tr(33119) if watched else i18n.tr(33118),
             xbmcgui.NOTIFICATION_INFO, 1500)
 
     def _ctx_rate(self, item):
@@ -2796,13 +2799,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not client or not item.get('rating_key'):
             return
         choices = ['{} / 10'.format(i) for i in range(1, 11)]
-        pos = xbmcgui.Dialog().select('Noter', choices)
+        pos = xbmcgui.Dialog().select(i18n.tr(33111), choices)
         if pos < 0:
             return
         try:
             client.rate(item['rating_key'], pos + 1)
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Note enregistrée : {}'.format(choices[pos]),
+                'Akasha Aura', i18n.tr(33120).format(choices[pos]),
                 xbmcgui.NOTIFICATION_INFO, 1500)
         except Exception as e:
             xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
@@ -2814,12 +2817,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 if x]
         if meta:
             lines.append(' · '.join(str(m) for m in meta))
-        for label, key in (('Vidéo', 'video_label'),
-                           ('Audio', 'audio_label'),
-                           ('Sous-titres', 'subtitle_label')):
+        for label, key in ((i18n.tr(33132), 'video_label'),
+                           (i18n.tr(33201), 'audio_label'),
+                           (i18n.tr(33115), 'subtitle_label')):
             if item.get(key):
                 lines.append('{} : {}'.format(label, item[key]))
-        xbmcgui.Dialog().ok('Infos fichier', '[CR]'.join(lines))
+        xbmcgui.Dialog().ok(i18n.tr(33116), '[CR]'.join(lines))
 
     def _on_home_press_action(self, action):
         """React to a repeated Home press while Aura is already open.
@@ -2904,34 +2907,34 @@ def _hub_title_fr(hub):
     suffix = False
 
     if standard:
-        base = 'Continuer à regarder'
+        base = i18n.tr(33137)
     elif 'recentlyadded' in identifier or 'recently added' in title_lc:
-        base = 'Ajoutés récemment'
+        base = i18n.tr(33138)
         if ' in ' in title:
-            base += ' dans {}'.format(title.rsplit(' in ', 1)[-1])
+            base += ' ' + i18n.tr(33141).format(title.rsplit(' in ', 1)[-1])
     elif 'recentlyreleased' in identifier or 'recently released' in title_lc:
-        base = 'Sorties récentes'
+        base = i18n.tr(33139)
         if 'Movies' in title:
-            base += ' dans Films'
+            base += ' ' + i18n.tr(33141).format(i18n.tr(33051))
     elif 'recentlyviewed' in identifier or 'recentlywatched' in identifier \
             or 'recently viewed' in title_lc or 'recently watched' in title_lc:
-        base = 'Vus récemment'
+        base = i18n.tr(33140)
     else:
         suffix = True
         # Discover ("Tendances") provider hub identifiers.
         discover_titles = {
-            'home.recently-released-trailers': 'Nouvelles bandes-annonces',
-            'home.trending-trailers': 'Bandes-annonces en vogue',
-            'home.recommended-on-services': 'Recommandé sur vos services',
-            'home.top_watchlisted': 'Les plus suivis cette semaine',
-            'home.new-trailers': 'Bandes-annonces de votre Watchlist',
-            'home.watchlist-available': 'Disponibles sur vos services',
-            'home.coming-soon': 'Bientôt disponible',
-            'home.available-rentals': 'Disponibles à la location',
-            'home.genres': 'Parcourir par genre',
-            'home.historical-week': 'Cette semaine dans l\'histoire',
-            'home.blockbuster-trailers': 'Blockbusters à venir',
-            'home.preferred-services': 'Vos services',
+            'home.recently-released-trailers': i18n.tr(33160),
+            'home.trending-trailers': i18n.tr(33161),
+            'home.recommended-on-services': i18n.tr(33162),
+            'home.top_watchlisted': i18n.tr(33163),
+            'home.new-trailers': i18n.tr(33164),
+            'home.watchlist-available': i18n.tr(33165),
+            'home.coming-soon': i18n.tr(33166),
+            'home.available-rentals': i18n.tr(33167),
+            'home.genres': i18n.tr(33168),
+            'home.historical-week': i18n.tr(33169),
+            'home.blockbuster-trailers': i18n.tr(33170),
+            'home.preferred-services': i18n.tr(33171),
         }
         base = discover_titles.get(identifier, title)
 

@@ -27,6 +27,7 @@ import uuid
 import xbmc
 import xbmcaddon
 import xbmcgui
+import i18n
 
 try:
     ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
@@ -45,7 +46,7 @@ PROP_QUALITY = 'AuraPlaybackQuality'
 PROP_SWITCHING = 'AuraSwitchingPlayback'
 
 QUALITY_PRESETS = [
-    ('original', 'Originale', None, None),
+    ('original', i18n.tr(33210), None, None),
     ('1080p8', '1080p - 8 Mbps', 8000, '1920x1080'),
     ('720p4', '720p - 4 Mbps', 4000, '1280x720'),
     ('720p2', '720p - 2 Mbps', 2000, '1280x720'),
@@ -198,10 +199,10 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         lst = self.getControl(1000)
         lst.reset()
         if self.mode == 'quality':
-            self.getControl(10).setLabel('Paramètres')
+            self.getControl(10).setLabel(i18n.tr(33019))
             self._build_quality(lst)
         else:
-            self.getControl(10).setLabel('Pistes')
+            self.getControl(10).setLabel(i18n.tr(33200))
             self._build_streams(lst)
         self.setFocusId(1000)
 
@@ -226,10 +227,10 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         current_sub = (props.get('currentsubtitle') or {}).get('index')
         subs_on = bool(props.get('subtitleenabled'))
 
-        self._add(lst, 'Audio', header=True)
+        self._add(lst, i18n.tr(33201), header=True)
         for stream in props.get('audiostreams') or []:
             idx = stream.get('index')
-            name = stream.get('name') or 'Piste {}'.format(idx + 1)
+            name = stream.get('name') or i18n.tr(33204).format(idx + 1)
             lang = (stream.get('language') or '').upper()
             extra = stream.get('codec') or ''
             if stream.get('channels'):
@@ -240,35 +241,35 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
             self._add(lst, label, selected=(idx == current_audio),
                       action=('audio', idx))
 
-        self._add(lst, 'Sous-titres', header=True)
-        self._add(lst, 'Désactivés', selected=not subs_on,
+        self._add(lst, i18n.tr(33115), header=True)
+        self._add(lst, i18n.tr(33202), selected=not subs_on,
                   action=('sub', 'off'))
         for sub in props.get('subtitles') or []:
             idx = sub.get('index')
-            name = sub.get('name') or sub.get('language') or 'Piste {}'.format(idx + 1)
+            name = sub.get('name') or sub.get('language') or i18n.tr(33204).format(idx + 1)
             self._add(lst, name,
                       selected=(subs_on and idx == current_sub),
                       action=('sub', idx))
         if not props.get('audiostreams') and not props.get('subtitles'):
-            self._add(lst, 'Aucune piste détectée', header=True)
+            self._add(lst, i18n.tr(33203), header=True)
 
     def _build_quality(self, lst):
         current = _home().getProperty(PROP_QUALITY) or 'original'
         _, _, rating_key, _ = _playback_context()
 
-        self._add(lst, 'Qualité', header=True)
+        self._add(lst, i18n.tr(33205), header=True)
         for pid, label, kbps, res in QUALITY_PRESETS:
             self._add(lst, label, selected=(pid == current),
                       action=('quality', pid, kbps, res))
         if not rating_key:
-            self._add(lst, 'Qualité indisponible hors lecture Plex', header=True)
+            self._add(lst, i18n.tr(33206), header=True)
 
-        self._add(lst, 'Avancé', header=True)
-        self._add(lst, 'Pistes audio et sous-titres…',
+        self._add(lst, i18n.tr(33207), header=True)
+        self._add(lst, i18n.tr(33208),
                   action=('builtin', 'osdsubtitlesettings'))
-        self._add(lst, 'Paramètres vidéo Kodi…',
+        self._add(lst, i18n.tr(33209),
                   action=('builtin', 'osdvideosettings'))
-        self._add(lst, 'Paramètres audio Kodi…',
+        self._add(lst, i18n.tr(33211),
                   action=('builtin', 'osdaudiosettings'))
 
     # -- actions ----------------------------------------------------------
@@ -307,7 +308,7 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         server, token, rating_key, part_key = _playback_context()
         if not server or not token or not rating_key:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Qualité indisponible sur ce flux',
+                'Akasha Aura', i18n.tr(33130),
                 xbmcgui.NOTIFICATION_INFO, 2500)
             return
         win = _home()
@@ -332,7 +333,7 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
                 li.setMimeType('application/vnd.apple.mpegurl')
             if not url:
                 xbmcgui.Dialog().notification(
-                    'Akasha Aura', 'Transcodage refusé par le serveur',
+                    'Akasha Aura', i18n.tr(33122),
                     xbmcgui.NOTIFICATION_INFO, 2500)
                 return
             player.play(url, li)

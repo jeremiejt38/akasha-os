@@ -11,6 +11,7 @@ import subprocess
 import xbmc
 import xbmcaddon
 import xbmcgui
+import i18n
 
 import addons_inventory
 import aura_store
@@ -101,7 +102,7 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         try:
             status = self.getControl(5020)
             total = self._paged.total if self._paged else len(self.addons)
-            status.setLabel('{} application(s) installee(s)'.format(total))
+            status.setLabel(i18n.tr(33300).format(total))
         except RuntimeError:
             pass
 
@@ -183,7 +184,7 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
                 if addon.get('is_external'):
                     if xbmcgui.Dialog().yesno(
                             'Applications',
-                            'Desinstaller {} ?'.format(addon['name'])):
+                            i18n.tr(33305).format(addon['name'])):
                         store_registry.record_uninstall(addon['store_id'])
                         self._reload()
                 else:

@@ -12,6 +12,7 @@ Caller sets before doModal():
 """
 import xbmc
 import xbmcgui
+import i18n
 
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
@@ -28,11 +29,11 @@ EMPTY_LABEL_ID = 8201
 
 _KEYS = list('abcdefghijklmnopqrstuvwxyz') + list('1234567890')
 _FILTERS = (
-    ('Tout', None),
-    ('Films', 'movie'),
-    ('Séries', 'show'),
-    ('Épisodes', 'episode'),
-    ('Personnes', 'person'),
+    (i18n.tr(33052), None),
+    (i18n.tr(33051), 'movie'),
+    (i18n.tr(33150), 'show'),
+    (i18n.tr(33151), 'episode'),
+    (i18n.tr(33152), 'person'),
 )
 
 
@@ -106,7 +107,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
              '1' if self.query and not self._results else '')
         try:
             self.getControl(EMPTY_LABEL_ID).setLabel(
-                'Aucun résultat pour « {} »'.format(self.query))
+                i18n.tr(33072).format(self.query))
         except RuntimeError:
             pass
         try:
@@ -115,7 +116,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             for item in self._results:
                 if item.get('_person'):
                     li = xbmcgui.ListItem(item.get('name') or '',
-                                          item.get('role') or 'Personne')
+                                          item.get('role') or i18n.tr(33127))
                     li.setArt({'poster': item.get('thumb_url')
                                        or 'actor-fallback.png'})
                     li.setProperty('person', '1')
@@ -246,8 +247,9 @@ def _set(window, prop, value):
 
 def _result_sub(item):
     """Plex-style subtitle: '2018 • Show', 'S5 E1 • Episode'."""
-    kind = {'movie': 'Film', 'show': 'Show', 'season': 'Saison',
-            'episode': 'Épisode'}.get(item.get('type'), 'Vidéo')
+    kind = {'movie': i18n.tr(33133), 'show': i18n.tr(33101),
+            'season': i18n.tr(33135), 'episode': i18n.tr(33136)}.get(
+            item.get('type'), i18n.tr(33132))
     if item.get('type') == 'episode' and item.get('season') is not None:
         return 'S{} E{} • {}'.format(item.get('season'), item.get('index'), kind)
     if item.get('year'):

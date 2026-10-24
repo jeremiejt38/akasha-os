@@ -18,6 +18,7 @@ import urllib.parse
 import urllib.request
 
 import divert_source
+import i18n
 
 # A dead server used to burn the full socket timeout on EVERY fetch --
 # Aura loads rows sequentially on the GUI thread, so the interface froze
@@ -498,8 +499,8 @@ class PlexClient:
                     out.append({
                         'name': person['name'],
                         'thumb_url': person['thumb_url'],
-                        'role': ('Réalisateur' if kind == 'director'
-                                 else 'Acteur'),
+                        'role': (i18n.tr(33154) if kind == 'director'
+                                 else i18n.tr(33127)),
                         'person_filter': '{}={}'.format(kind, person['id']),
                         '_person': True,
                     })
@@ -580,15 +581,15 @@ class PlexClient:
             }
 
         rows = [
-            {'label': 'Continuer à regarder', 'items': self.on_deck(limits['on_deck'])},
-            {'label': 'Ajoutés récemment', 'items': self.recently_added(limits['recently_added'])},
+            {'label': i18n.tr(33137), 'items': self.on_deck(limits['on_deck'])},
+            {'label': i18n.tr(33138), 'items': self.recently_added(limits['recently_added'])},
         ]
 
         for section in self.movie_sections():
             rr = self.recently_released(section['key'], limits['recently_released'])
             if rr:
                 rows.append({
-                    'label': '{} — Sorties récentes'.format(section['title']),
+                    'label': '{} — {}'.format(section['title'], i18n.tr(33139)),
                     'items': rr,
                 })
 

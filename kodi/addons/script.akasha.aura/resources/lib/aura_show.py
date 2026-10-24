@@ -11,6 +11,7 @@ calling doModal().
 """
 import xbmc
 import xbmcgui
+import i18n
 
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
@@ -71,8 +72,8 @@ class AuraShowWindow(xbmcgui.WindowXMLDialog):
         items = self._current_items()
         try:
             status = self.getControl(7020)
-            noun = 'saison(s)' if self.level == LEVEL_SEASONS else 'episode(s)'
-            status.setLabel('{} {}'.format(len(items), noun))
+            noun = i18n.tr(33128) if self.level == LEVEL_SEASONS else i18n.tr(33129)
+            status.setLabel(i18n.tr(33069).format(len(items)))
         except RuntimeError:
             pass
 

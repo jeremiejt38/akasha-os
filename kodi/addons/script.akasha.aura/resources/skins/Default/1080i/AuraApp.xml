@@ -19,7 +19,7 @@
             <width>1200</width>
             <height>60</height>
             <font>font16</font>
-            <label>Applications</label>
+            <label>$ADDON[script.akasha.aura 33319]</label>
             <textcolor>FF6C8CFF</textcolor>
         </control>
 
@@ -30,7 +30,7 @@
             <width>160</width>
             <height>50</height>
             <font>font12</font>
-            <label>Retour</label>
+            <label>$ADDON[script.akasha.aura 33020]</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
@@ -45,7 +45,7 @@
             <width>260</width>
             <height>50</height>
             <font>font12</font>
-            <label>Lancer</label>
+            <label>$ADDON[script.akasha.aura 33021]</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
@@ -59,7 +59,7 @@
             <width>260</width>
             <height>50</height>
             <font>font12</font>
-            <label>Epingler / Desepingler</label>
+            <label>$ADDON[script.akasha.aura 33022]</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
@@ -74,7 +74,7 @@
             <width>260</width>
             <height>50</height>
             <font>font12</font>
-            <label>Desinstaller</label>
+            <label>$ADDON[script.akasha.aura 33023]</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
             <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>

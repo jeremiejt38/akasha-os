@@ -1,0 +1,961 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: script.akasha.aura\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fr_fr\n"
+
+
+# Recherche
+msgctxt "#33001"
+msgid "Search"
+msgstr "Recherche"
+
+# Divertissement
+msgctxt "#33002"
+msgid "Entertainment"
+msgstr "Divertissement"
+
+# Jeux
+msgctxt "#33003"
+msgid "Games"
+msgstr "Jeux"
+
+# App
+msgctxt "#33004"
+msgid "Apps"
+msgstr "App"
+
+# Accueil
+msgctxt "#33005"
+msgid "Home"
+msgstr "Accueil"
+
+# Bibliothèques
+msgctxt "#33006"
+msgid "Libraries"
+msgstr "Bibliothèques"
+
+# Plus
+msgctxt "#33007"
+msgid "More"
+msgstr "Plus"
+
+# Recommandé
+msgctxt "#33008"
+msgid "Recommended"
+msgstr "Recommandé"
+
+# Catégories
+msgctxt "#33009"
+msgid "Categories"
+msgstr "Catégories"
+
+# Bibliothèque
+msgctxt "#33010"
+msgid "Library"
+msgstr "Bibliothèque"
+
+# Collections
+msgctxt "#33011"
+msgid "Collections"
+msgstr "Collections"
+
+# Mes Apps
+msgctxt "#33012"
+msgid "My Apps"
+msgstr "Mes Apps"
+
+# Store
+msgctxt "#33013"
+msgid "Store"
+msgstr "Store"
+
+# Tendances
+msgctxt "#33014"
+msgid "Trending"
+msgstr "Tendances"
+
+# Pour vous
+msgctxt "#33015"
+msgid "For You"
+msgstr "Pour vous"
+
+# Autres
+msgctxt "#33016"
+msgid "Other"
+msgstr "Autres"
+
+# Applications récentes
+msgctxt "#33017"
+msgid "Recent apps"
+msgstr "Applications récentes"
+
+# Double Home pour ouvrir
+msgctxt "#33018"
+msgid "Double-press Home to open"
+msgstr "Double Home pour ouvrir"
+
+# Paramètres
+msgctxt "#33019"
+msgid "Settings"
+msgstr "Paramètres"
+
+# Retour
+msgctxt "#33020"
+msgid "Back"
+msgstr "Retour"
+
+# Lancer
+msgctxt "#33021"
+msgid "Launch"
+msgstr "Lancer"
+
+# Épingler / Désépingler
+msgctxt "#33022"
+msgid "Pin / Unpin"
+msgstr "Épingler / Désépingler"
+
+# Désinstaller
+msgctxt "#33023"
+msgid "Uninstall"
+msgstr "Désinstaller"
+
+# Séries TV
+msgctxt "#33050"
+msgid "TV Shows"
+msgstr "Séries TV"
+
+# Films
+msgctxt "#33051"
+msgid "Movies"
+msgstr "Films"
+
+# Tout
+msgctxt "#33052"
+msgid "All"
+msgstr "Tout"
+
+# Tous
+msgctxt "#33053"
+msgid "All"
+msgstr "Tous"
+
+# Non vus
+msgctxt "#33054"
+msgid "Unwatched"
+msgstr "Non vus"
+
+# Vus
+msgctxt "#33055"
+msgid "Watched"
+msgstr "Vus"
+
+# Date d'ajout
+msgctxt "#33056"
+msgid "Date added"
+msgstr "Date d'ajout"
+
+# Titre
+msgctxt "#33057"
+msgid "Title"
+msgstr "Titre"
+
+# Date de sortie
+msgctxt "#33058"
+msgid "Release date"
+msgstr "Date de sortie"
+
+# Note
+msgctxt "#33059"
+msgid "Rating"
+msgstr "Note"
+
+# Ajout
+msgctxt "#33060"
+msgid "Added"
+msgstr "Ajout"
+
+# Filtre
+msgctxt "#33061"
+msgid "Filter"
+msgstr "Filtre"
+
+# Trier par
+msgctxt "#33062"
+msgid "Sort by"
+msgstr "Trier par"
+
+# Genre
+msgctxt "#33063"
+msgid "Genre"
+msgstr "Genre"
+
+# Lire
+msgctxt "#33064"
+msgid "Play"
+msgstr "Lire"
+
+# Aléatoire
+msgctxt "#33065"
+msgid "Shuffle"
+msgstr "Aléatoire"
+
+# Réinitialiser les filtres
+msgctxt "#33066"
+msgid "Reset filters"
+msgstr "Réinitialiser les filtres"
+
+# Aucune bibliothèque vidéo disponible
+msgctxt "#33067"
+msgid "No video library available"
+msgstr "Aucune bibliothèque vidéo disponible"
+
+# {} — erreur de chargement
+msgctxt "#33068"
+msgid "{} — loading error"
+msgstr "{} — erreur de chargement"
+
+# {} élément(s)
+msgctxt "#33069"
+msgid "{} item(s)"
+msgstr "{} élément(s)"
+
+# pour « {} »
+msgctxt "#33070"
+msgid "for \"{}\""
+msgstr "pour « {} »"
+
+# {} — {} catégorie(s)
+msgctxt "#33071"
+msgid "{} — {} categories"
+msgstr "{} — {} catégorie(s)"
+
+# Aucun résultat pour « {} »
+msgctxt "#33072"
+msgid "No results for \"{}\""
+msgstr "Aucun résultat pour « {} »"
+
+# Connecté au Connector Akasha OS
+msgctxt "#33073"
+msgid "Connected to Akasha OS Connector"
+msgstr "Connecté au Connector Akasha OS"
+
+# Connexion au Connector échouée
+msgctxt "#33074"
+msgid "Connector connection failed"
+msgstr "Connexion au Connector échouée"
+
+# Lecture indisponible (flux introuvable)
+msgctxt "#33075"
+msgid "Playback unavailable (stream not found)"
+msgstr "Lecture indisponible (flux introuvable)"
+
+# Section
+msgctxt "#33076"
+msgid "Section"
+msgstr "Section"
+
+# Gérer les bibliothèques
+msgctxt "#33077"
+msgid "Manage libraries"
+msgstr "Gérer les bibliothèques"
+
+# Désépingler {}
+msgctxt "#33078"
+msgid "Unpin {}"
+msgstr "Désépingler {}"
+
+# Épingler {}
+msgctxt "#33079"
+msgid "Pin {}"
+msgstr "Épingler {}"
+
+# Monter {}
+msgctxt "#33080"
+msgid "Move {} up"
+msgstr "Monter {}"
+
+# Descendre {}
+msgctxt "#33081"
+msgid "Move {} down"
+msgstr "Descendre {}"
+
+# Autres applications de jeu
+msgctxt "#33082"
+msgid "Other game apps"
+msgstr "Autres applications de jeu"
+
+# SteamLink non configuré — clé API et SteamID64 requis
+msgctxt "#33083"
+msgid "SteamLink not configured — API key and SteamID64 required"
+msgstr "SteamLink non configuré — clé API et SteamID64 requis"
+
+# Erreur de chargement de la bibliothèque Steam
+msgctxt "#33084"
+msgid "Failed to load the Steam library"
+msgstr "Erreur de chargement de la bibliothèque Steam"
+
+# {} jeu(x) Steam
+msgctxt "#33085"
+msgid "{} Steam game(s)"
+msgstr "{} jeu(x) Steam"
+
+# Sunshine non configuré — URL, utilisateur et mot de passe requis
+msgctxt "#33086"
+msgid "Sunshine not configured — URL, username and password required"
+msgstr "Sunshine non configuré — URL, utilisateur et mot de passe requis"
+
+# Erreur de chargement des applications Sunshine
+msgctxt "#33087"
+msgid "Failed to load Sunshine apps"
+msgstr "Erreur de chargement des applications Sunshine"
+
+# {} application(s) Sunshine
+msgctxt "#33088"
+msgid "{} Sunshine app(s)"
+msgstr "{} application(s) Sunshine"
+
+# Mettre l'appareil et le téléviseur en veille ?
+msgctxt "#33089"
+msgid "Put the device and TV to sleep?"
+msgstr "Mettre l'appareil et le téléviseur en veille ?"
+
+# Redémarrer
+msgctxt "#33090"
+msgid "Restart"
+msgstr "Redémarrer"
+
+# Redémarrer Akasha
+msgctxt "#33091"
+msgid "Restart Akasha"
+msgstr "Redémarrer Akasha"
+
+# Redémarrer Akasha maintenant ?
+msgctxt "#33092"
+msgid "Restart Akasha now?"
+msgstr "Redémarrer Akasha maintenant ?"
+
+# Redémarrer le système
+msgctxt "#33093"
+msgid "Reboot the system"
+msgstr "Redémarrer le système"
+
+# Redémarrer le système maintenant ?
+msgctxt "#33094"
+msgid "Reboot the system now?"
+msgstr "Redémarrer le système maintenant ?"
+
+# Éteindre le système maintenant ? (La TV sera aussi éteinte via CEC)
+msgctxt "#33095"
+msgid "Power off now?\n(The TV will also turn off via CEC)"
+msgstr "Éteindre le système maintenant ?\n(La TV sera aussi éteinte via CEC)"
+
+# par
+msgctxt "#33096"
+msgid "by"
+msgstr "par"
+
+# Résultats pour « {} »
+msgctxt "#33097"
+msgid "Results for \"{}\""
+msgstr "Résultats pour « {} »"
+
+# Cast & Crew
+msgctxt "#33100"
+msgid "Cast & Crew"
+msgstr "Cast & Crew"
+
+# Série
+msgctxt "#33101"
+msgid "Show"
+msgstr "Série"
+
+# Saison {}
+msgctxt "#33102"
+msgid "Season {}"
+msgstr "Saison {}"
+
+# {} Saison{}
+msgctxt "#33103"
+msgid "{} Season{}"
+msgstr "{} Saison{}"
+
+# Regarder
+msgctxt "#33104"
+msgid "Watch"
+msgstr "Regarder"
+
+# Reprendre S{} E{}
+msgctxt "#33105"
+msgid "Resume S{} E{}"
+msgstr "Reprendre S{} E{}"
+
+# Reprendre · {} restantes
+msgctxt "#33106"
+msgid "Resume · {} left"
+msgstr "Reprendre · {} restantes"
+
+# Recommencer
+msgctxt "#33107"
+msgid "Restart"
+msgstr "Recommencer"
+
+# Bande-annonce
+msgctxt "#33108"
+msgid "Trailer"
+msgstr "Bande-annonce"
+
+# Bonus
+msgctxt "#33109"
+msgid "Extras"
+msgstr "Bonus"
+
+# Ajouter à ma liste
+msgctxt "#33110"
+msgid "Add to my list"
+msgstr "Ajouter à ma liste"
+
+# Noter
+msgctxt "#33111"
+msgid "Rate"
+msgstr "Noter"
+
+# Marquer comme vu
+msgctxt "#33112"
+msgid "Mark as watched"
+msgstr "Marquer comme vu"
+
+# Marquer comme non vu
+msgctxt "#33113"
+msgid "Mark as unwatched"
+msgstr "Marquer comme non vu"
+
+# Plus d'actions
+msgctxt "#33114"
+msgid "More actions"
+msgstr "Plus d'actions"
+
+# Sous-titres
+msgctxt "#33115"
+msgid "Subtitles"
+msgstr "Sous-titres"
+
+# Infos fichier
+msgctxt "#33116"
+msgid "File info"
+msgstr "Infos fichier"
+
+# Réalisé par {}
+msgctxt "#33117"
+msgid "Directed by {}"
+msgstr "Réalisé par {}"
+
+# Marqué comme vu
+msgctxt "#33118"
+msgid "Marked as watched"
+msgstr "Marqué comme vu"
+
+# Marqué comme non vu
+msgctxt "#33119"
+msgid "Marked as unwatched"
+msgstr "Marqué comme non vu"
+
+# Note enregistrée : {}
+msgctxt "#33120"
+msgid "Rating saved: {}"
+msgstr "Note enregistrée : {}"
+
+# Aucun épisode lisible
+msgctxt "#33121"
+msgid "No playable episode"
+msgstr "Aucun épisode lisible"
+
+# Transcodage refusé par le serveur
+msgctxt "#33122"
+msgid "Transcoding refused by the server"
+msgstr "Transcodage refusé par le serveur"
+
+# URL invalide : {}
+msgctxt "#33123"
+msgid "Invalid URL: {}"
+msgstr "URL invalide : {}"
+
+# Watchlist indisponible
+msgctxt "#33124"
+msgid "Watchlist unavailable"
+msgstr "Watchlist indisponible"
+
+# Filmographie ({} titre{})
+msgctxt "#33125"
+msgid "Filmography ({} title{})"
+msgstr "Filmographie ({} titre{})"
+
+# Aucun titre de cette personne dans les bibliothèques.
+msgctxt "#33126"
+msgid "No titles for this person in your libraries."
+msgstr "Aucun titre de cette personne dans les bibliothèques."
+
+# Acteur
+msgctxt "#33127"
+msgid "Actor"
+msgstr "Acteur"
+
+# saison(s)
+msgctxt "#33128"
+msgid "season(s)"
+msgstr "saison(s)"
+
+# épisode(s)
+msgctxt "#33129"
+msgid "episode(s)"
+msgstr "épisode(s)"
+
+# Qualité indisponible sur ce flux
+msgctxt "#33130"
+msgid "Quality unavailable on this stream"
+msgstr "Qualité indisponible sur ce flux"
+
+# {} restantes
+msgctxt "#33131"
+msgid "{} left"
+msgstr "{} restantes"
+
+# Vidéo
+msgctxt "#33132"
+msgid "Video"
+msgstr "Vidéo"
+
+# Film
+msgctxt "#33133"
+msgid "Movie"
+msgstr "Film"
+
+# Saison
+msgctxt "#33135"
+msgid "Season"
+msgstr "Saison"
+
+# Épisode
+msgctxt "#33136"
+msgid "Episode"
+msgstr "Épisode"
+
+# Continuer à regarder
+msgctxt "#33137"
+msgid "Continue Watching"
+msgstr "Continuer à regarder"
+
+# Ajoutés récemment
+msgctxt "#33138"
+msgid "Recently Added"
+msgstr "Ajoutés récemment"
+
+# Sorties récentes
+msgctxt "#33139"
+msgid "Recently Released"
+msgstr "Sorties récentes"
+
+# Vus récemment
+msgctxt "#33140"
+msgid "Recently Watched"
+msgstr "Vus récemment"
+
+# dans {}
+msgctxt "#33141"
+msgid "in {}"
+msgstr "dans {}"
+
+# Séries
+msgctxt "#33150"
+msgid "Shows"
+msgstr "Séries"
+
+# Épisodes
+msgctxt "#33151"
+msgid "Episodes"
+msgstr "Épisodes"
+
+# Personnes
+msgctxt "#33152"
+msgid "People"
+msgstr "Personnes"
+
+# Réalisateur
+msgctxt "#33154"
+msgid "Director"
+msgstr "Réalisateur"
+
+# Nouvelles bandes-annonces
+msgctxt "#33160"
+msgid "New trailers"
+msgstr "Nouvelles bandes-annonces"
+
+# Bandes-annonces en vogue
+msgctxt "#33161"
+msgid "Trending trailers"
+msgstr "Bandes-annonces en vogue"
+
+# Recommandé sur vos services
+msgctxt "#33162"
+msgid "Recommended on your services"
+msgstr "Recommandé sur vos services"
+
+# Les plus suivis cette semaine
+msgctxt "#33163"
+msgid "Most watchlisted this week"
+msgstr "Les plus suivis cette semaine"
+
+# Bandes-annonces de votre Watchlist
+msgctxt "#33164"
+msgid "Trailers from your Watchlist"
+msgstr "Bandes-annonces de votre Watchlist"
+
+# Disponibles sur vos services
+msgctxt "#33165"
+msgid "Available on your services"
+msgstr "Disponibles sur vos services"
+
+# Bientôt disponible
+msgctxt "#33166"
+msgid "Coming soon"
+msgstr "Bientôt disponible"
+
+# Disponibles à la location
+msgctxt "#33167"
+msgid "Available to rent"
+msgstr "Disponibles à la location"
+
+# Parcourir par genre
+msgctxt "#33168"
+msgid "Browse by genre"
+msgstr "Parcourir par genre"
+
+# Cette semaine dans l'histoire
+msgctxt "#33169"
+msgid "This week in history"
+msgstr "Cette semaine dans l'histoire"
+
+# Blockbusters à venir
+msgctxt "#33170"
+msgid "Upcoming blockbusters"
+msgstr "Blockbusters à venir"
+
+# Vos services
+msgctxt "#33171"
+msgid "Your services"
+msgstr "Vos services"
+
+# Pistes
+msgctxt "#33200"
+msgid "Tracks"
+msgstr "Pistes"
+
+# Audio
+msgctxt "#33201"
+msgid "Audio"
+msgstr "Audio"
+
+# Désactivés
+msgctxt "#33202"
+msgid "Off"
+msgstr "Désactivés"
+
+# Aucune piste détectée
+msgctxt "#33203"
+msgid "No track detected"
+msgstr "Aucune piste détectée"
+
+# Piste {}
+msgctxt "#33204"
+msgid "Track {}"
+msgstr "Piste {}"
+
+# Qualité
+msgctxt "#33205"
+msgid "Quality"
+msgstr "Qualité"
+
+# Qualité indisponible hors lecture Plex
+msgctxt "#33206"
+msgid "Quality unavailable outside Plex playback"
+msgstr "Qualité indisponible hors lecture Plex"
+
+# Avancé
+msgctxt "#33207"
+msgid "Advanced"
+msgstr "Avancé"
+
+# Pistes audio et sous-titres…
+msgctxt "#33208"
+msgid "Audio & subtitle tracks…"
+msgstr "Pistes audio et sous-titres…"
+
+# Paramètres vidéo Kodi…
+msgctxt "#33209"
+msgid "Kodi video settings…"
+msgstr "Paramètres vidéo Kodi…"
+
+# Originale
+msgctxt "#33210"
+msgid "Original"
+msgstr "Originale"
+
+# Paramètres audio Kodi…
+msgctxt "#33211"
+msgid "Kodi audio settings…"
+msgstr "Paramètres audio Kodi…"
+
+# Réseau & Connectivité
+msgctxt "#33250"
+msgid "Network & Connectivity"
+msgstr "Réseau & Connectivité"
+
+# Wi-Fi, Ethernet, VPN (LibreELEC)
+msgctxt "#33251"
+msgid "Wi-Fi, Ethernet, VPN (LibreELEC)"
+msgstr "Wi-Fi, Ethernet, VPN (LibreELEC)"
+
+# Proxy et bande passante (Kodi)
+msgctxt "#33252"
+msgid "Proxy and bandwidth (Kodi)"
+msgstr "Proxy et bande passante (Kodi)"
+
+# Comptes & Services
+msgctxt "#33253"
+msgid "Accounts & Services"
+msgstr "Comptes & Services"
+
+# Cloud gaming (Steam, Sunshine/Moonlight)
+msgctxt "#33254"
+msgid "Cloud gaming (Steam, Sunshine/Moonlight)"
+msgstr "Cloud gaming (Steam, Sunshine/Moonlight)"
+
+# Affichage & Son
+msgctxt "#33255"
+msgid "Display & Sound"
+msgstr "Affichage & Son"
+
+# Résolution, HDR, HDMI-CEC, sortie audio (Kodi)
+msgctxt "#33256"
+msgid "Resolution, HDR, HDMI-CEC, audio output (Kodi)"
+msgstr "Résolution, HDR, HDMI-CEC, sortie audio (Kodi)"
+
+# Manettes & Télécommandes
+msgctxt "#33257"
+msgid "Controllers & Remotes"
+msgstr "Manettes & Télécommandes"
+
+# Appairage Bluetooth (LibreELEC)
+msgctxt "#33258"
+msgid "Bluetooth pairing (LibreELEC)"
+msgstr "Appairage Bluetooth (LibreELEC)"
+
+# Batterie et destination des touches volume
+msgctxt "#33259"
+msgid "Battery and volume-key routing"
+msgstr "Batterie et destination des touches volume"
+
+# Bibliothèque & Lecture
+msgctxt "#33260"
+msgid "Library & Playback"
+msgstr "Bibliothèque & Lecture"
+
+# Langue audio et sous-titres par défaut (Kodi)
+msgctxt "#33261"
+msgid "Default audio & subtitle language (Kodi)"
+msgstr "Langue audio et sous-titres par défaut (Kodi)"
+
+# Réglages de bibliothèque/lecture vidéo (Kodi)
+msgctxt "#33262"
+msgid "Video library/playback settings (Kodi)"
+msgstr "Réglages de bibliothèque/lecture vidéo (Kodi)"
+
+# Apparence & Interface
+msgctxt "#33263"
+msgid "Appearance & Interface"
+msgstr "Apparence & Interface"
+
+# Langue de l'interface, région, écran de veille (Kodi)
+msgctxt "#33264"
+msgid "Interface language, region, screensaver (Kodi)"
+msgstr "Langue de l'interface, région, écran de veille (Kodi)"
+
+# Habillage du skin (Kodi)
+msgctxt "#33265"
+msgid "Skin settings (Kodi)"
+msgstr "Habillage du skin (Kodi)"
+
+# Overlay système, Mode Ambiant (Akasha)
+msgctxt "#33266"
+msgid "System overlay, Ambient Mode (Akasha)"
+msgstr "Overlay système, Mode Ambiant (Akasha)"
+
+# Stockage
+msgctxt "#33267"
+msgid "Storage"
+msgstr "Stockage"
+
+# Sources et gestionnaire de fichiers (Kodi)
+msgctxt "#33268"
+msgid "Sources & file manager (Kodi)"
+msgstr "Sources et gestionnaire de fichiers (Kodi)"
+
+# Énergie
+msgctxt "#33269"
+msgid "Power"
+msgstr "Énergie"
+
+# Veille écran, extinction auto (Kodi)
+msgctxt "#33270"
+msgid "Screen idle, auto power-off (Kodi)"
+msgstr "Veille écran, extinction auto (Kodi)"
+
+# Délai veille/extinction, ventilateur (Akasha)
+msgctxt "#33271"
+msgid "Sleep/shutdown delay, fan (Akasha)"
+msgstr "Délai veille/extinction, ventilateur (Akasha)"
+
+# Système & Mises à jour
+msgctxt "#33272"
+msgid "System & Updates"
+msgstr "Système & Mises à jour"
+
+# Nom système, sauvegarde, MAJ LibreELEC
+msgctxt "#33273"
+msgid "System name, backup, LibreELEC updates"
+msgstr "Nom système, sauvegarde, MAJ LibreELEC"
+
+# Vérifier les mises à jour Akasha OS
+msgctxt "#33274"
+msgid "Check for Akasha OS updates"
+msgstr "Vérifier les mises à jour Akasha OS"
+
+# Mises à jour et sources des extensions (Kodi)
+msgctxt "#33275"
+msgid "Addon updates & sources (Kodi)"
+msgstr "Mises à jour et sources des extensions (Kodi)"
+
+# Profils & Utilisateurs
+msgctxt "#33276"
+msgid "Profiles & Users"
+msgstr "Profils & Utilisateurs"
+
+# Gérer les profils (Kodi)
+msgctxt "#33277"
+msgid "Manage profiles (Kodi)"
+msgstr "Gérer les profils (Kodi)"
+
+# Tous les paramètres Kodi
+msgctxt "#33278"
+msgid "All Kodi settings"
+msgstr "Tous les paramètres Kodi"
+
+# Tous les paramètres LibreELEC
+msgctxt "#33279"
+msgid "All LibreELEC settings"
+msgstr "Tous les paramètres LibreELEC"
+
+# {} application(s) installée(s)
+msgctxt "#33300"
+msgid "{} app(s) installed"
+msgstr "{} application(s) installée(s)"
+
+# {} application(s) proposée(s)
+msgctxt "#33301"
+msgid "{} app(s) available"
+msgstr "{} application(s) proposée(s)"
+
+# Installé
+msgctxt "#33302"
+msgid "Installed"
+msgstr "Installé"
+
+# Non installé
+msgctxt "#33303"
+msgid "Not installed"
+msgstr "Non installé"
+
+# Catégorie : {}
+msgctxt "#33304"
+msgid "Category: {}"
+msgstr "Catégorie : {}"
+
+# Désinstaller {} ?
+msgctxt "#33305"
+msgid "Uninstall {}?"
+msgstr "Désinstaller {} ?"
+
+# {} est déjà installé. Le désinstaller ?
+msgctxt "#33306"
+msgid "{} is already installed. Uninstall it?"
+msgstr "{} est déjà installé. Le désinstaller ?"
+
+# {} installé
+msgctxt "#33307"
+msgid "{} installed"
+msgstr "{} installé"
+
+# {} retiré
+msgctxt "#33308"
+msgid "{} removed"
+msgstr "{} retiré"
+
+# {} enregistré
+msgctxt "#33309"
+msgid "{} registered"
+msgstr "{} enregistré"
+
+# Installation non confirmée : {}
+msgctxt "#33310"
+msgid "Install not confirmed: {}"
+msgstr "Installation non confirmée : {}"
+
+# Téléchargement échoué pour {}
+msgctxt "#33311"
+msgid "Download failed for {}"
+msgstr "Téléchargement échoué pour {}"
+
+# Paquet vérifié pour {}
+msgctxt "#33312"
+msgid "Package verified for {}"
+msgstr "Paquet vérifié pour {}"
+
+# Vérification échouée pour {}
+msgctxt "#33313"
+msgid "Verification failed for {}"
+msgstr "Vérification échouée pour {}"
+
+# Catalogue actualisé
+msgctxt "#33314"
+msgid "Catalog refreshed"
+msgstr "Catalogue actualisé"
+
+# Voir les détails
+msgctxt "#33315"
+msgid "View details"
+msgstr "Voir les détails"
+
+# Aucune application épinglée — utilisez « Gérer les applications »
+msgctxt "#33316"
+msgid "No pinned app — use \"Manage apps\""
+msgstr "Aucune application épinglée — utilisez « Gérer les applications »"
+
+# Applications épinglées
+msgctxt "#33317"
+msgid "Pinned apps"
+msgstr "Applications épinglées"
+
+# Rafraîchir le catalogue
+msgctxt "#33318"
+msgid "Refresh catalog"
+msgstr "Rafraîchir le catalogue"
+
+# Applications
+msgctxt "#33319"
+msgid "Applications"
+msgstr "Applications"
+
+# Gérer les applications
+msgctxt "#33320"
+msgid "Manage apps"
+msgstr "Gérer les applications"
