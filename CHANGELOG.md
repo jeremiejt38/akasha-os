@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.2...akasha-os-v0.54.3) (2026-10-24)
+
+
+### Bug Fixes
+
+* **aura:** deduplicate recommendation rows by series ([#143](https://github.com/jeremiejt38/akasha-os/issues/143)) ([6bfebd9](https://github.com/jeremiejt38/akasha-os/commit/6bfebd925191c26af17769684b540e356463fc38))
+
 ## [0.54.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.54.1...akasha-os-v0.54.2) (2026-10-24)
 
 
