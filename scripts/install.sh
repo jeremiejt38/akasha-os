@@ -172,6 +172,14 @@ log "  Installing Akasha Remote addon..."
 rm -rf /storage/.kodi/addons/service.akasha.remote
 cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.remote" /storage/.kodi/addons/
 
+log "  Installing Akasha Performance Analyzer..."
+rm -rf /storage/.kodi/addons/service.akasha.perfanalyzer
+cp -r "$SCRIPT_DIR/kodi/addons/service.akasha.perfanalyzer" /storage/.kodi/addons/
+mkdir -p /storage/.config/akasha-os/perf /storage/.config/akasha-os/bin
+cp "$SCRIPT_DIR/kodi/scripts/analyser-de-performances.py" /storage/.kodi/scripts/analyser-de-performances.py
+chmod +x /storage/.kodi/scripts/analyser-de-performances.py
+ln -sf /storage/.kodi/scripts/analyser-de-performances.py /storage/.config/akasha-os/bin/analyser-de-performances
+
 # Remove any default video pack left over from an older install: the
 # default Ambient content is photos (see decisions.md), videos are opt-in
 # only (user drops their own files in /storage/ambient/photos). Manifests
@@ -324,6 +332,11 @@ if [ -d "$SKIN_DIR" ]; then
     # Boot veil: keep the AH2 loading screen on top of Home until Aura
     # opens, so the native home is never visible between intro and Aura.
     python3 "$SCRIPT_DIR/skin-patches/patch_home_boot_veil.py" "$SKIN_DIR"
+
+    # Loading overlay: permanent Akasha loading screen over every native
+    # navigation window, so transitions (boot, playback handoff) never
+    # flash the Kodi menus.
+    python3 "$SCRIPT_DIR/skin-patches/patch_native_loading.py" "$SKIN_DIR"
 else
     log "WARNING: Arctic Horizon 2 skin not installed; skipping skin patches."
 fi
