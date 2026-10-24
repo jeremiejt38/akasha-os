@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.57.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.57.0...akasha-os-v0.57.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* **aura:** route remaining literals through i18n ([#151](https://github.com/jeremiejt38/akasha-os/issues/151)) ([367e261](https://github.com/jeremiejt38/akasha-os/commit/367e2616ec5e9300f9931776e7070db7d6b5f951))
+
 ## [0.57.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.56.0...akasha-os-v0.57.0) (2026-10-24)
 
 
