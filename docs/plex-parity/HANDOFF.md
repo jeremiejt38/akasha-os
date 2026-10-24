@@ -30,9 +30,14 @@ sont taguées mais JAMAIS déployées :**
 | v0.57.0 | Top-bar rétractable : elle fond à 0% quand le focus descend, sous-onglets recentrés, hook `onFocus` |
 | v0.57.1 | Couverture i18n complétée + générateur multi-langue (`LANGUAGES` dans `i18n.py`) |
 | v0.58.0 | Mode Ambiant Ken Burns façon Google TV : 2 slots `image` alternés (`ambient.slot`/`kb{0,1}`/`img{0,1}`), 45 s/photo, crossfade 3 s, preload 1,5 s, horloge démarre bas-gauche + scrims dégradés |
+| v0.59.0 | **`service.akasha.perfanalyzer`** (collecteur perf en fond, JSONL borné, boot marker autostart) + CLI **`analyser-de-performances`** ; **overlay de chargement permanent** sur les fenêtres natives (Home + menus nav : logo, « Chargement… », vague organique) — fini les flashs du menu Kodi au boot et au lancement vidéo |
 
 **Première action d'une nouvelle session : vérifier si le Pi est joignable
-(`ping -c1 -W3 192.168.1.88`) et déployer dès qu'il l'est.**
+(`ping -c1 -W3 192.168.1.88`) et déployer dès qu'il l'est** — 7 versions
+en attente (v0.54.3 → v0.59.0). Après déploiement, valider spécifiquement :
+la vague de l'écran de chargement natif, la commande
+`analyser-de-performances` en SSH (rapport lisible), le drift Ken Burns de
+l'ambiant, la top-bar rétractable, le dedup séries et le menu Paramètres.
 
 ## Déploiement
 
