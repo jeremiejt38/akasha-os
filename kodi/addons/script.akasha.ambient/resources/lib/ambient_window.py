@@ -27,12 +27,20 @@ import xbmcgui
 import config
 import content_manager
 import energy
+import slideshow
 import weather_client
 
 ADDON_ID = 'script.akasha.ambient'
 SLEEP_SCRIPT = 'RunScript(/storage/.kodi/scripts/akasha-sleep.py)'
 WEATHER_REFRESH_SECONDS = weather_client.DEFAULT_CACHE_MAX_AGE_SECONDS
 TICK_SECONDS = 1.0
+# Google TV Ambient Mode paces its photos in tens of seconds; 45s per photo
+# with a 3s skin-side crossfade (see Ambient.xml) matches that feel.
+PHOTO_SECONDS = 45.0
+# Delay between pointing the hidden slot at the next photo and toggling the
+# visibility property: the texture loads in the background so the crossfade
+# never shows a black frame.
+PHOTO_PRELOAD_SECONDS = 1.5
 # Touched on start and refreshed periodically so service.akasha.ambient can
 # tell this window is already open and avoid triggering a second one.
 LOCK_FILE = '/tmp/akasha-ambient.lock'
@@ -100,6 +108,7 @@ class AmbientWindow(xbmcgui.WindowXML):
         self._active = False
         self._player = None
         self._is_video_mode = False
+        self._cycler = None
 
     def is_active(self):
         """Return True until exit() has been called."""
@@ -168,9 +177,58 @@ class AmbientWindow(xbmcgui.WindowXML):
                 self._player = None
                 self._is_video_mode = False
                 self.setProperty('has_videos', '')
-                self.setProperty('content_path', self.cfg.fallback_folder)
+                self._start_slideshow(
+                    content_manager.resolve_image_paths(
+                        self.cfg.fallback_folder, self.cfg.fallback_folder))
         else:
-            self.setProperty('content_path', content)
+            self._start_slideshow(
+                content_manager.resolve_image_paths(content, self.cfg.fallback_folder))
+
+    def _start_slideshow(self, image_paths):
+        """Start the two-slot crossfade slideshow thread.
+
+        The skin (Ambient.xml) owns two fullscreen `image` controls whose
+        visibility follows `ambient.slot`; each slot runs a Ken Burns zoom
+        variant picked per photo via `ambient.kb{slot}`. This thread only
+        preloads the next photo onto the hidden slot then flips the
+        property — the crossfade itself is a skin animation.
+        """
+        self._cycler = slideshow.PhotoCycler(image_paths)
+        self.setProperty('ambient.slot', '')
+        threading.Thread(target=self._slideshow_loop, daemon=True).start()
+
+    def _slideshow_loop(self):
+        slot = None
+        while self._active and self._cycler is not None:
+            photo = self._cycler.next_photo()
+            if photo is None:
+                return
+            target = 0 if slot is None else 1 - slot
+            try:
+                self.setProperty('ambient.kb{}'.format(target), self._cycler.next_variant())
+                self.setProperty('ambient.img{}'.format(target), photo)
+            except Exception:
+                # Window already closed.
+                return
+            if not self._sleep_chunked(PHOTO_PRELOAD_SECONDS):
+                return
+            try:
+                self.setProperty('ambient.slot', str(target))
+            except Exception:
+                return
+            slot = target
+            if not self._sleep_chunked(PHOTO_SECONDS):
+                return
+
+    def _sleep_chunked(self, seconds):
+        """Sleep up to `seconds` in 1s chunks; False when exit() ran meanwhile."""
+        deadline = time.time() + seconds
+        while self._active:
+            remaining = deadline - time.time()
+            if remaining <= 0:
+                return True
+            time.sleep(min(TICK_SECONDS, remaining))
+        return False
 
     def _video_monitor_loop(self):
         """For fullscreen video mode, exit the ambient window once the user

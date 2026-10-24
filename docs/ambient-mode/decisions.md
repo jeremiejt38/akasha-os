@@ -58,18 +58,29 @@ l'appareil réellement tranquille pendant toute la durée du délai, sans requê
 qui pourraient elles-mêmes fausser l'observation (même si elles ne réinitialisent pas le
 compteur, elles empêchent de distinguer un vrai calme d'un calme interrompu par le test lui-même).
 
-## Rotation d'images via le contrôle natif `multiimage`
+## Rotation d'images : `multiimage` remplacé par deux slots `image` (Ken Burns)
 
-**Choix** : le fond du Mode Ambiant est un contrôle skin `<control type="multiimage">` pointant
-vers le dossier configuré, avec fondu enchaîné et ordre aléatoire natifs.
+**Choix initial** : le fond du Mode Ambiant était un contrôle skin `<control type="multiimage">`
+pointant vers le dossier configuré, avec fondu enchaîné et ordre aléatoire natifs.
 
-**Alternative écartée** : une classe `ContentManager` Python qui construirait elle-même la playlist
-et appellerait `setImage()` sur un timer.
+**Évolution** : pour se rapprocher du Mode Ambiant de Google TV — chaque photo subit un lent
+zoom/déplacement (effet Ken Burns) — le `multiimage` a été remplacé par **deux contrôles `image`
+alternés** (`ambient.slot`, `ambient.img{0,1}`, `ambient.kb{0,1}`), pilotés par
+`ambient_window._slideshow_loop()`. Le `multiimage` ne permet aucune animation *par photo* : une
+animation `zoom` posée dessus s'applique au contrôle entier et bouclée, elle produisait soit un
+aller-retour, soit un snap-back visible hors du fondu. Avec deux slots, l'animation `Visible` du
+contrôle repart à zéro à chaque photo : pas de dérive de timer, pas de saut.
 
-**Raison** : `multiimage` fait déjà tout ce dont le MVP a besoin (rotation, anti-répétition
-immédiate, fondu) sans code Python, ce qui réduit la surface de bug sur un composant visible en
-continu. Un `ContentManager` Python reste utile pour la logique testable indépendamment du skin
-(validation de dossier, repli sur le contenu de secours) : voir `resources/lib/content_manager.py`.
+**Détails** : quatre variantes de zoom conditionnées par `ambient.kb{slot}` (zoom avant centre,
+zoom arrière centre, dérive haut-gauche, dérive bas-droite — les start/end d'animation Kodi ne
+peuvent pas être dynamiques) ; une animation `Hidden` poursuit la dérive pendant le fondu de
+sortie pour éviter le retour sec à la transform de base ; la photo suivante est pointée sur le
+slot caché ~1,5 s avant la bascule pour masquer le chargement de la texture ; `slideshow.PhotoCycler`
+garde l'ordre mélangé sans répétition dos-à-dos à travers les cycles.
+
+Le widget horloge/météo démarre désormais en **bas à gauche** (position Google TV) avant de tourner
+dans les quatre coins (`energy.WIDGET_PRESET_OFFSET`), et chaque coin gagne un léger dégradé sombre
+(`scrim-top.png` / `scrim-bottom.png`) pour la lisibilité, comme sur Google TV.
 
 ## Pack de photos par défaut téléchargé (Wikimedia Commons "Featured pictures")
 

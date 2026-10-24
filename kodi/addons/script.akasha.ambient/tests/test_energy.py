@@ -56,6 +56,14 @@ class WidgetPresetTests(unittest.TestCase):
         seen = {energy.widget_preset_for_elapsed(i * interval) for i in range(8)}
         self.assertEqual(seen, {0, 1, 2, 3})
 
+    def test_starts_on_bottom_left_preset(self):
+        # Preset 3 is the bottom-left corner in Ambient.xml, matching the
+        # Google TV Ambient Mode clock position.
+        interval = energy.WIDGET_PRESET_INTERVAL_SECONDS
+        self.assertEqual(energy.widget_preset_for_elapsed(0), 3)
+        self.assertEqual(energy.widget_preset_for_elapsed(interval - 1), 3)
+        self.assertEqual(energy.widget_preset_for_elapsed(interval), 0)
+
     def test_stays_within_bounds(self):
         for elapsed in (0, 1, 599, 600, 601, 10**7):
             preset = energy.widget_preset_for_elapsed(elapsed)

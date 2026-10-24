@@ -23,25 +23,57 @@
             <ondown>9000</ondown>
         </control>
 
-        <!-- Background slideshow. Kodi's native multiimage control handles
-             rotation, randomization and crossfade on its own; the Python
-             side only decides which path it points at (see
-             content_manager.resolve_media). Hidden when a video pack is being
-             played. -->
-        <control type="multiimage">
-            <visible>String.IsEmpty(Window.Property(has_videos))</visible>
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
-            <imagepath background="true">$INFO[Window.Property(content_path)]</imagepath>
-            <timeperimage>60000</timeperimage>
-            <fadetime>3000</fadetime>
-            <randomize>true</randomize>
-            <!-- scale keeps aspect ratio and fills the screen, cropping excess -->
-            <aspectratio aligny="center" alignx="center">scale</aspectratio>
-            <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
-            <animation effect="fade" start="100" end="0" time="400">WindowClose</animation>
+        <!-- Background slideshow: two image slots alternating on
+             `ambient.slot`, driven by ambient_window._slideshow_loop. Each
+             slot carries its photo path in `ambient.img{slot}` and a Ken
+             Burns variant in `ambient.kb{slot}` (see slideshow.py). The
+             Visible zoom animation restarts every time a slot fades in, so
+             each photo gets its own slow drift — Google TV Ambient Mode
+             style — with no timer drift and no snap-back mid-photo (unlike
+             looping an animation on a single multiimage control). The
+             conditioned Hidden zoom keeps drifting during fade-out so the
+             outgoing photo does not jump back to its base transform. -->
+        <control type="group" id="9400">
+            <animation effect="fade" start="0" end="100" time="1500">WindowOpen</animation>
+            <animation effect="fade" start="100" end="0" time="800">WindowClose</animation>
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(ambient.slot),0)</visible>
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <texture background="true">$INFO[Window.Property(ambient.img0)]</texture>
+                <aspectratio aligny="center" alignx="center">scale</aspectratio>
+                <animation effect="fade" start="0" end="100" time="3000" tween="sine" easing="inout">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="3000" tween="sine" easing="inout">Hidden</animation>
+                <animation effect="zoom" start="100" end="108" center="960,540" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),1)">Visible</animation>
+                <animation effect="zoom" start="108" end="100" center="960,540" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),2)">Visible</animation>
+                <animation effect="zoom" start="100" end="109" center="620,330" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),3)">Visible</animation>
+                <animation effect="zoom" start="100" end="109" center="1300,750" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),4)">Visible</animation>
+                <animation effect="zoom" start="108" end="111" center="960,540" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),1)">Hidden</animation>
+                <animation effect="zoom" start="100" end="97" center="960,540" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),2)">Hidden</animation>
+                <animation effect="zoom" start="109" end="112" center="620,330" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),3)">Hidden</animation>
+                <animation effect="zoom" start="109" end="112" center="1300,750" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),4)">Hidden</animation>
+            </control>
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(ambient.slot),1)</visible>
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <texture background="true">$INFO[Window.Property(ambient.img1)]</texture>
+                <aspectratio aligny="center" alignx="center">scale</aspectratio>
+                <animation effect="fade" start="0" end="100" time="3000" tween="sine" easing="inout">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="3000" tween="sine" easing="inout">Hidden</animation>
+                <animation effect="zoom" start="100" end="108" center="960,540" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),1)">Visible</animation>
+                <animation effect="zoom" start="108" end="100" center="960,540" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),2)">Visible</animation>
+                <animation effect="zoom" start="100" end="109" center="620,330" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),3)">Visible</animation>
+                <animation effect="zoom" start="100" end="109" center="1300,750" time="48000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),4)">Visible</animation>
+                <animation effect="zoom" start="108" end="111" center="960,540" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),1)">Hidden</animation>
+                <animation effect="zoom" start="100" end="97" center="960,540" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),2)">Hidden</animation>
+                <animation effect="zoom" start="109" end="112" center="620,330" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),3)">Hidden</animation>
+                <animation effect="zoom" start="109" end="112" center="1300,750" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),4)">Hidden</animation>
+            </control>
         </control>
 
         <!-- Progressive dimming overlay (energy.dim_overlay_color). No local
@@ -71,6 +103,14 @@
                 <width>360</width>
                 <height>132</height>
                 <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="image">
+                    <left>-60</left>
+                    <top>-60</top>
+                    <width>480</width>
+                    <height>210</height>
+                    <texture colordiffuse="FF000000">scrim-top.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
@@ -112,6 +152,14 @@
                 <width>360</width>
                 <height>132</height>
                 <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="image">
+                    <left>-60</left>
+                    <top>-60</top>
+                    <width>480</width>
+                    <height>210</height>
+                    <texture colordiffuse="FF000000">scrim-top.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
@@ -156,6 +204,14 @@
                 <width>360</width>
                 <height>132</height>
                 <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="image">
+                    <left>-60</left>
+                    <top>-20</top>
+                    <width>480</width>
+                    <height>212</height>
+                    <texture colordiffuse="FF000000">scrim-bottom.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
@@ -200,6 +256,14 @@
                 <width>360</width>
                 <height>132</height>
                 <animation effect="fade" start="0" end="100" time="600">WindowOpen</animation>
+                <control type="image">
+                    <left>-60</left>
+                    <top>-20</top>
+                    <width>480</width>
+                    <height>212</height>
+                    <texture colordiffuse="FF000000">scrim-bottom.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
