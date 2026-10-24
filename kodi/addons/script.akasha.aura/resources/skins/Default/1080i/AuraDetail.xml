@@ -665,7 +665,7 @@
             <width>800</width>
             <height>44</height>
             <font>font_mini_bold</font>
-            <label>Cast &amp; Crew</label>
+            <label>$ADDON[script.akasha.aura 33100]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraDetailSectionTitle))</visible>
         </control>
@@ -1004,7 +1004,7 @@
                 <height>40</height>
                 <font>font_tiny</font>
                 <textcolor>99FFFFFF</textcolor>
-                <label>Plus d'actions</label>
+                <label>$ADDON[script.akasha.aura 33114]</label>
             </control>
             <control type="button" id="7200">
                 <left>1396</left>
@@ -1012,7 +1012,7 @@
                 <width>470</width>
                 <height>80</height>
                 <font>font_tiny_bold</font>
-                <label>Sous-titres</label>
+                <label>$ADDON[script.akasha.aura 33115]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>
@@ -1049,7 +1049,7 @@
                 <width>470</width>
                 <height>80</height>
                 <font>font_tiny_bold</font>
-                <label>Infos fichier</label>
+                <label>$ADDON[script.akasha.aura 33116]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>

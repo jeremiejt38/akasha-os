@@ -174,7 +174,7 @@
                 <top>20</top>
                 <width>80</width>
                 <height>60</height>
-                <label>Recherche</label>
+                <label>$ADDON[script.akasha.aura 33001]</label>
                 <font>font10</font>
                 <textcolor>00FFFFFF</textcolor>
                 <focusedcolor>00FFFFFF</focusedcolor>
@@ -395,7 +395,7 @@
                 <top>145</top>
                 <width>195</width>
                 <height>60</height>
-                <label>Autres</label>
+                <label>$ADDON[script.akasha.aura 33016]</label>
                 <font>font12</font>
                 <align>center</align>
                 <aligny>center</aligny>
@@ -417,7 +417,7 @@
                 <top>145</top>
                 <width>195</width>
                 <height>60</height>
-                <label>Mes Apps</label>
+                <label>$ADDON[script.akasha.aura 33012]</label>
                 <font>font12</font>
                 <align>center</align>
                 <aligny>center</aligny>
@@ -434,7 +434,7 @@
                 <top>145</top>
                 <width>195</width>
                 <height>60</height>
-                <label>Store</label>
+                <label>$ADDON[script.akasha.aura 33013]</label>
                 <font>font12</font>
                 <align>center</align>
                 <aligny>center</aligny>
@@ -538,7 +538,7 @@
                     <top>118</top>
                     <width>195</width>
                     <height>40</height>
-                    <label>Recommandé</label>
+                    <label>$ADDON[script.akasha.aura 33008]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -556,7 +556,7 @@
                     <top>118</top>
                     <width>185</width>
                     <height>40</height>
-                    <label>Bibliothèque</label>
+                    <label>$ADDON[script.akasha.aura 33010]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -575,7 +575,7 @@
                     <top>118</top>
                     <width>175</width>
                     <height>40</height>
-                    <label>Collections</label>
+                    <label>$ADDON[script.akasha.aura 33011]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -593,7 +593,7 @@
                     <top>118</top>
                     <width>170</width>
                     <height>40</height>
-                    <label>Catégories</label>
+                    <label>$ADDON[script.akasha.aura 33009]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -667,7 +667,7 @@
                     <top>118</top>
                     <width>160</width>
                     <height>40</height>
-                    <label>Pour vous</label>
+                    <label>$ADDON[script.akasha.aura 33015]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -684,7 +684,7 @@
                     <top>118</top>
                     <width>170</width>
                     <height>40</height>
-                    <label>Tendances</label>
+                    <label>$ADDON[script.akasha.aura 33014]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -719,7 +719,7 @@
                     <top>168</top>
                     <width>130</width>
                     <height>36</height>
-                    <label>Tous</label>
+                    <label>$ADDON[script.akasha.aura 33053]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -761,7 +761,7 @@
                     <width>46</width>
                     <height>36</height>
                     <font>font_tiny</font>
-                    <label>par</label>
+                    <label>$ADDON[script.akasha.aura 33096]</label>
                     <align>center</align>
                     <aligny>center</aligny>
                     <textcolor>77FFFFFF</textcolor>
@@ -772,7 +772,7 @@
                     <top>168</top>
                     <width>170</width>
                     <height>36</height>
-                    <label>Titre</label>
+                    <label>$ADDON[script.akasha.aura 33057]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -791,7 +791,7 @@
                     <top>168</top>
                     <width>140</width>
                     <height>36</height>
-                    <label>Genre</label>
+                    <label>$ADDON[script.akasha.aura 33063]</label>
                     <font>font_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>

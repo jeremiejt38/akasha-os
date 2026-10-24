@@ -9,6 +9,8 @@ directly — the whole point of routing through the connector.
 No dependency on xbmc*, testable with plain `python3 -m unittest`.
 """
 
+import i18n
+
 
 def _media_container(data):
     if not isinstance(data, dict):
@@ -22,7 +24,7 @@ def parse_sections(raw_json, section_types=('movie', 'show')):
     return [
         {
             'key': str(item.get('key')),
-            'title': item.get('title') or 'Section',
+            'title': item.get('title') or i18n.tr(33076),
             'type': item.get('type'),
         }
         for item in mc.get('Directory', [])

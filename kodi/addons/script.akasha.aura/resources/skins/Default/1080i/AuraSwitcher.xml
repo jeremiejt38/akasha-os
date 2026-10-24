@@ -18,7 +18,7 @@
                 <width>1780</width>
                 <height>55</height>
                 <font>font16</font>
-                <label>Applications recentes</label>
+                <label>$ADDON[script.akasha.aura 33017]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
             <control type="label">
@@ -27,7 +27,7 @@
                 <width>1780</width>
                 <height>30</height>
                 <font>font11</font>
-                <label>Double Home pour ouvrir</label>
+                <label>$ADDON[script.akasha.aura 33018]</label>
                 <textcolor>77FFFFFF</textcolor>
             </control>
             <control type="panel" id="100">

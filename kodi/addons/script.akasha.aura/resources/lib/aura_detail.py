@@ -16,6 +16,7 @@ The caller must set `item` (a divert_source normalised dict) and `client`
 """
 import xbmc
 import xbmcgui
+import i18n
 
 import osd_menu
 
@@ -208,7 +209,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             pass
         director = ''
         if item.get('directors'):
-            director = 'Réalisé par ' + ', '.join(item['directors'][:2])
+            director = i18n.tr(33117).format(', '.join(item['directors'][:2]))
         elif item.get('type') == 'episode' and item.get('show_title') \
                 and not item.get('logo_url'):
             director = item['show_title']
@@ -279,7 +280,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraDetailSectionTitle',
                  '1' if item.get('cast') else '')
             try:
-                self.getControl(7060).setLabel('Cast & Crew')
+                self.getControl(7060).setLabel(i18n.tr(33100))
             except RuntimeError:
                 pass
         elif self.mode == 'show':
@@ -379,7 +380,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _render_seasons(self):
         try:
-            self.getControl(7060).setLabel('{} Saison{}'.format(
+            self.getControl(7060).setLabel(i18n.tr(33103).format(
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         except RuntimeError:
             pass
@@ -388,10 +389,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         try:
             strip = self.getControl(SEASON_STRIP_ID)
             strip.reset()
-            strip.addItem(xbmcgui.ListItem('Série'))
+            strip.addItem(xbmcgui.ListItem(i18n.tr(33101)))
             for season in self._seasons:
                 idx = season.get('index')
-                strip.addItem(xbmcgui.ListItem('Saison {}'.format(
+                strip.addItem(xbmcgui.ListItem(i18n.tr(33102).format(
                     idx if idx is not None else season.get('title', '?'))))
         except RuntimeError:
             pass
@@ -474,20 +475,20 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if control_id == WATCH_BUTTON_ID:
             return self._watch_label()
         return {
-            RESTART_BUTTON_ID: 'Recommencer',
+            RESTART_BUTTON_ID: i18n.tr(33107),
             EXTRAS_BUTTON_ID: self._extras_label(),
-            WATCHLIST_BUTTON_ID: 'Ajouter à ma liste',
-            RATE_BUTTON_ID: 'Noter',
-            WATCHED_BUTTON_ID: ('Marquer comme non vu' if self.watched
-                                else 'Marquer comme vu'),
-            MORE_BUTTON_ID: 'Plus',
+            WATCHLIST_BUTTON_ID: i18n.tr(33110),
+            RATE_BUTTON_ID: i18n.tr(33111),
+            WATCHED_BUTTON_ID: (i18n.tr(33113) if self.watched
+                                else i18n.tr(33112)),
+            MORE_BUTTON_ID: i18n.tr(33007),
         }[control_id]
 
     def _extras_label(self):
         """'Bande-annonce' when a trailer clip exists, 'Bonus' otherwise."""
         if any(e.get('subtype') == 'trailer' for e in self._extras):
-            return 'Bande-annonce'
-        return 'Bonus'
+            return i18n.tr(33108)
+        return i18n.tr(33109)
 
     def _set_action_labels(self):
         for cid in ACTION_ROW_IDS:
@@ -586,7 +587,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # Plex watchlist sync is an online-account feature; surface it
             # once the connector proxies it.
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Watchlist indisponible', xbmcgui.NOTIFICATION_INFO, 1500)
+                'Akasha Aura', i18n.tr(33124), xbmcgui.NOTIFICATION_INFO, 1500)
         elif controlID == EXTRAS_BUTTON_ID:
             self._play_extra()
         elif controlID == RATE_BUTTON_ID:
@@ -714,18 +715,18 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if self.mode in ('show', 'season'):
             nxt = self._find_next_episode()
             if nxt:
-                label = 'Reprendre S{} E{}'.format(
+                label = i18n.tr(33105).format(
                     nxt.get('season') or '?', nxt.get('index') or '?')
                 if nxt.get('view_offset_ms') and nxt.get('duration_ms'):
                     left = _fmt_duration(
                         nxt['duration_ms'] - nxt['view_offset_ms'])
-                    label += ' · {} restantes'.format(left)
+                    label += ' · ' + i18n.tr(33131).format(left)
                 return label
-            return 'Regarder'
+            return i18n.tr(33104)
         if item.get('view_offset_ms'):
             left_ms = (item.get('duration_ms') or 0) - item['view_offset_ms']
-            return 'Reprendre · {} restantes'.format(_fmt_duration(left_ms))
-        return 'Regarder'
+            return i18n.tr(33106).format(_fmt_duration(left_ms))
+        return i18n.tr(33104)
 
     def _find_next_episode(self):
         if self._next_episode:
@@ -811,14 +812,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                   if e.get('subtype') != 'trailer']
             pos = xbmcgui.Dialog().select(
                 self._extras_label(),
-                [e.get('title') or 'Bonus' for e in ordered])
+                [e.get('title') or i18n.tr(33109) for e in ordered])
             if pos < 0:
                 return
             pick = ordered[pos]
         url = self._stream_url(pick)
         if not url:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Lecture indisponible (flux introuvable)',
+                'Akasha Aura', i18n.tr(33075),
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
         li = xbmcgui.ListItem(pick.get('title') or '')
@@ -838,13 +839,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 item = self._episodes[0] if self._episodes else None
             if not item:
                 xbmcgui.Dialog().notification(
-                    'Akasha Aura', 'Aucun épisode lisible',
+                    'Akasha Aura', i18n.tr(33121),
                     xbmcgui.NOTIFICATION_INFO, 2000)
                 return
         url = self._stream_url(item)
         if not url:
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Lecture indisponible (flux introuvable)',
+                'Akasha Aura', i18n.tr(33075),
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
         li = xbmcgui.ListItem(item.get('title') or '')
@@ -989,24 +990,24 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 if x]
         if meta:
             lines.append(' · '.join(str(m) for m in meta))
-        for label, key in (('Vidéo', 'video_label'),
-                           ('Audio', 'audio_label'),
-                           ('Sous-titres', 'subtitle_label')):
+        for label, key in ((i18n.tr(33132), 'video_label'),
+                           (i18n.tr(33201), 'audio_label'),
+                           (i18n.tr(33115), 'subtitle_label')):
             if item.get(key):
                 lines.append('{} : {}'.format(label, item[key]))
-        xbmcgui.Dialog().ok('Infos fichier', '[CR]'.join(lines))
+        xbmcgui.Dialog().ok(i18n.tr(33116), '[CR]'.join(lines))
 
     def _rate(self):
         if not self.client or not self.item.get('rating_key'):
             return
         choices = ['{} / 10'.format(i) for i in range(1, 11)]
-        pos = xbmcgui.Dialog().select('Noter', choices)
+        pos = xbmcgui.Dialog().select(i18n.tr(33111), choices)
         if pos < 0:
             return
         try:
             self.client.rate(self.item['rating_key'], pos + 1)
             xbmcgui.Dialog().notification(
-                'Akasha Aura', 'Note enregistrée : {}'.format(choices[pos]),
+                'Akasha Aura', i18n.tr(33120).format(choices[pos]),
                 xbmcgui.NOTIFICATION_INFO, 1500)
         except Exception as e:
             xbmc.log('Akasha Aura Detail: rate failed: {}'.format(e), xbmc.LOGERROR)
@@ -1077,16 +1078,7 @@ def _season_episode_label(item):
 
 
 def _fmt_air_date(iso_date):
-    """'2025-10-19' -> '19 oct. 2025' (short French month names)."""
-    if not iso_date:
-        return ''
-    months = ('janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.',
-              'août', 'sept.', 'oct.', 'nov.', 'déc.')
-    try:
-        year, month, day = iso_date[:10].split('-')
-        return '{} {} {}'.format(int(day), months[int(month) - 1], year)
-    except (ValueError, IndexError):
-        return ''
+    return i18n.fmt_air_date(iso_date)
 
 
 def _fmt_duration(duration_ms):

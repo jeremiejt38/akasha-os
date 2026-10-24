@@ -69,7 +69,7 @@
                 <height>44</height>
                 <font>font_mini</font>
                 <textcolor>AAFFFFFF</textcolor>
-                <label>Aucun titre de cette personne dans les bibliothèques.</label>
+                <label>$ADDON[script.akasha.aura 33126]</label>
                 <visible>!String.IsEmpty(Window.Property(AuraPersonEmpty))</visible>
             </control>
 

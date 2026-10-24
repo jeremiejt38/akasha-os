@@ -33,7 +33,7 @@
                 <width>680</width>
                 <height>44</height>
                 <font>font_midi</font>
-                <label>Pistes</label>
+                <label>$ADDON[script.akasha.aura 33200]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
             <control type="list" id="1000">

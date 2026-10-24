@@ -2,10 +2,13 @@
 
 No dependency on xbmc/xbmcgui/xbmcaddon so this module can be unit tested
 with plain python3 -m unittest, and safely delegated to Talos (see
-docs/talos-strategy.md).
+docs/talos-strategy.md). i18n is equally Kodi-free at import time: tr()
+resolves through xbmcaddon when it exists and falls back to the French
+entry otherwise.
 """
+import i18n
 
-TABS = ('Divertissement', 'Jeux', 'App')
+TABS = (i18n.tr(33002), i18n.tr(33003), i18n.tr(33004))
 
 DIVERT_SUBTABS = ('Recommande', 'Bibliotheques', 'Categories')
 DIVERT_SUBTAB_RECOMMANDE = 0
