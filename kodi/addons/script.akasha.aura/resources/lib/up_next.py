@@ -71,10 +71,13 @@ def peek_queue():
 
 def pop_queue():
     """Drop and return the episode about to play so the prop always
-    holds *what comes after the currently playing item*."""
+    holds *what comes after the currently playing item*. AuraPlaybackItem
+    follows the new head (B15 stream prefs key off it)."""
     queue = _read_queue()
     item = queue.pop(0) if queue else None
     _home().setProperty(osd_menu.PROP_QUEUE, json.dumps(queue))
+    if item:
+        _home().setProperty(osd_menu.PROP_ITEM, json.dumps(item))
     return item
 
 

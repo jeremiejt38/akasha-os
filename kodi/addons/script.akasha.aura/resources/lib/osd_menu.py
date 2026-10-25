@@ -44,6 +44,7 @@ PROP_QUALITY = 'AuraPlaybackQuality'
 # Serialized remaining-episode queue for the Up Next card (B1) --
 # items after the one currently playing. up_next.py owns the read side.
 PROP_QUEUE = 'AuraUpNextQueue'
+PROP_ITEM = 'AuraPlaybackItem'
 QUEUE_ITEM_FIELDS = (
     'rating_key', 'part_key', 'type', 'title', 'show_title', 'season',
     'index', 'duration_ms', 'view_offset_ms', 'thumb_url', 'art_url',
@@ -112,6 +113,9 @@ def store_playback_context(client, items):
     win.setProperty(PROP_QUEUE, json.dumps([
         {k: it.get(k) for k in QUEUE_ITEM_FIELDS if it.get(k) is not None}
         for it in (items or [])[1:]]))
+    win.setProperty(PROP_ITEM, json.dumps(
+        {k: (items or [{}])[0].get(k)
+         for k in QUEUE_ITEM_FIELDS if (items or [{}])[0].get(k) is not None}))
     store_markers(client, (items or [None])[0])
 
 
