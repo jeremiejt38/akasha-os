@@ -14,6 +14,8 @@ into episode mode; Back restores the show view.
 The caller must set `item` (a divert_source normalised dict) and `client`
 (a plex_client.PlexClient, or None) before doModal().
 """
+import time
+
 import xbmc
 import xbmcgui
 import i18n
@@ -130,6 +132,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._episodes = []
         self._extras = []
         self._extras_key = None
+        self._activity_key = None
+        self._activity_date = ''
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
         self._pending_season_index = None  # season card entry point
@@ -232,6 +236,28 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     xbmc.log('Akasha Aura Detail: extras failed: {}'.format(e),
                              xbmc.LOGWARNING)
         _set(self, 'AuraDetailExtras', '1' if self._extras else '')
+
+        # "Vous l'avez regarde le..." (B6): Plex's "Activity by you" hint
+        # from the server watch history -- one fetch per item.
+        if self._activity_key != item.get('rating_key'):
+            self._activity_key = item.get('rating_key')
+            self._activity_date = ''
+            watch_history = getattr(self.client, 'watch_history', None)
+            if watch_history and item.get('rating_key'):
+                try:
+                    for entry in watch_history(limit=50):
+                        if str(entry.get('rating_key')) == str(item['rating_key']) \
+                                and entry.get('viewed_at'):
+                            self._activity_date = i18n.fmt_air_date(
+                                time.strftime('%Y-%m-%d',
+                                              time.localtime(entry['viewed_at'])))
+                            break
+                except Exception as e:
+                    xbmc.log('Akasha Aura Detail: watch history failed: {}'
+                             .format(e), xbmc.LOGWARNING)
+        _set(self, 'AuraDetailActivity',
+             i18n.tr(33578).format(self._activity_date)
+             if self._activity_date else '')
 
         # Action row: labels live on the buttons themselves (invisible
         # while unfocused via transparent textcolor, dark on the white

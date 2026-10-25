@@ -120,9 +120,10 @@ RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
 # (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
 # private GraphQL API on community.plex.tv), so it shows an honest
 # empty-state instead of fake rows.
-HOME_TAB_IDS = (3070, 3071)
+HOME_TAB_IDS = (3070, 3071, 3072)
 HOME_TAB_FOR_YOU = 0
 HOME_TAB_TRENDING = 1
+HOME_TAB_ACTIVITY = 2
 RECO_CACHE_TTL_SECONDS = 120
 RECO_ON_DECK_FETCH_LIMIT = 50  # over-fetch before client-side section filtering
 RECO_MAX_ITEMS_PER_ROW = 100
@@ -583,6 +584,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 hubs = self._plex_client.section_hubs(section['key'])
             elif self._home_tab == HOME_TAB_TRENDING:
                 hubs = self._plex_client.discover_hubs()
+            elif self._home_tab == HOME_TAB_ACTIVITY:
+                # Plex's Activité tab is a friend feed on a private API;
+                # the honest local equivalent is the own watch history
+                # (/status/sessions/history/all) rendered as one hub row.
+                hubs = [{
+                    'title': i18n.tr(33577), 'key': '',
+                    'identifier': 'aura.activity', 'context': '',
+                    'type': '', 'style': 'shelf', 'more': False,
+                    'items': self._plex_client.watch_history(limit=50),
+                }]
             else:
                 hubs = self._plex_client.home_hubs()
         except Exception as e:

@@ -1629,3 +1629,18 @@ msgstr "Titres similaires"
 msgctxt "#33575"
 msgid "No similar titles"
 msgstr "Aucun titre similaire"
+
+# Activité
+msgctxt "#33576"
+msgid "Activity"
+msgstr "Activité"
+
+# Votre activité
+msgctxt "#33577"
+msgid "Your activity"
+msgstr "Votre activité"
+
+# Vous l'avez regardé le {}
+msgctxt "#33578"
+msgid "You watched it on {}"
+msgstr "Vous l'avez regardé le {}"

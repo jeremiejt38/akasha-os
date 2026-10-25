@@ -662,9 +662,10 @@
                 </control>
             </control>
 
-            <!-- Home tab strip: Plex's "For You / Trending" row. The
-                 Activite tab is hidden; its social feed is a private
-                 GraphQL API with no usable endpoint. -->
+            <!-- Home tab strip: Plex's "For You / Trending / Activity" row.
+                 The Activite tab carries the own watch history (server
+                 /status/sessions/history/all); the friend feed itself stays
+                 on Plex's private GraphQL API and is not reproduced. -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),home)</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
@@ -677,7 +678,7 @@
                 <control type="image">
                     <left>119</left>
                     <top>112</top>
-                    <width>354</width>
+                    <width>522</width>
                     <height>52</height>
                     <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
                 </control>
@@ -699,6 +700,14 @@
                     <height>40</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
+                </control>
+                <control type="image">
+                    <left>473</left>
+                    <top>118</top>
+                    <width>160</width>
+                    <height>40</height>
+                    <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>127</left>
@@ -727,6 +736,23 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
+                    <onright>3072</onright>
+                    <onup>2007</onup>
+                    <ondown>5110</ondown>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
+                </control>
+                <control type="button" id="3072">
+                    <left>473</left>
+                    <top>118</top>
+                    <width>160</width>
+                    <height>40</height>
+                    <label>$ADDON[script.akasha.aura 33576]</label>
+                    <font>font_tiny_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3071</onleft>
                     <onright>5110</onright>
                     <onup>2007</onup>
                     <ondown>5110</ondown>
