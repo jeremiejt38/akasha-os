@@ -1644,3 +1644,8 @@ msgstr ""
 msgctxt "#33578"
 msgid "You watched it on {}"
 msgstr ""
+
+# Aller à la série
+msgctxt "#33579"
+msgid "Go to Show"
+msgstr ""

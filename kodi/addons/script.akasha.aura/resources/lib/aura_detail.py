@@ -89,10 +89,12 @@ MORE_MANAGE_ID = 7203
 MORE_FILE_INFO_ID = 7204
 MORE_WAYS_ID = 7205
 MORE_RELATED_ID = 7206
+MORE_GO_SHOW_ID = 7208
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
 # the skin; only Subtitles, File Info and Similar Titles remain reachable.
-MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID)
+MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
+                  MORE_GO_SHOW_ID)
 
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
                   WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
@@ -258,6 +260,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailActivity',
              i18n.tr(33578).format(self._activity_date)
              if self._activity_date else '')
+
+        # Plex's 'Go to Show' entry (B11): episodes only.
+        _set(self, 'AuraDetailGoToShow',
+             '1' if (item.get('type') == 'episode'
+                     and item.get('grandparent_rating_key')) else '')
 
         # Action row: labels live on the buttons themselves (invisible
         # while unfocused via transparent textcolor, dark on the white
@@ -983,6 +990,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if control_id == MORE_RELATED_ID:
             self._open_related()
             return
+        if control_id == MORE_GO_SHOW_ID:
+            self._go_to_show()
+            return
         msg = {
             MORE_SUBTITLES_ID: 'Choix des sous-titres pendant la lecture',
             MORE_LIST_ID: 'Listes indisponibles (fonction Plex cloud)',
@@ -1021,6 +1031,28 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         }
         related.items = items
         related.doModal()
+
+    def _go_to_show(self):
+        """Plex's 'Go to Show' (B11): from an episode fiche, open the
+        parent show's page on top of the current detail."""
+        item = self._playable_item() or self.item
+        show_key = item.get('grandparent_rating_key')
+        if not (self.client and show_key):
+            return
+        try:
+            show = self.client.metadata_item(show_key)
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: show fetch failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            return
+        if not show:
+            return
+        detail = AuraDetailWindow(
+            'AuraDetail.xml', self.addon_path, 'Default', '1080i')
+        detail.client = self.client
+        detail.item = show
+        detail.mode = 'show'
+        detail.doModal()
 
     def _show_file_info(self):
         item = self._playable_item() or self.item

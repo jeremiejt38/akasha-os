@@ -58,7 +58,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 | B8 | **Recherche enrichie** | ~~historique persisté~~ **fait** (`search.recent`, 8 entrées) ; reste : bouton « Effacer l'historique », résultats personnes/genres via `/hubs/search`, état vide avec suggestions | `/hubs/search` ⚠️ | P2 |
 | B9 | **Extras / bandes-annonces** | `/library/metadata/{id}/extras` → trailer/making-of jouables (dégrade à vide si absent) | ✅ endpoint, 0 extra sur item testé | P3 |
 | B10 | **Playlists locales serveur** | `/playlists` est server-local (pas cloud !) ; la sidebar peut les lister/lire | ✅ endpoint OK (vide actuellement) | P3 |
-| B11 | **« Go to Show / Season »** depuis une fiche épisode | `grandparent_rating_key` déjà disponible | mécanisme | P3 |
+| B11 | **« Go to Show »** depuis une fiche épisode | Entrée « Aller à la série » (7208, icône tv) du panneau Plus, visible uniquement sur les épisodes → `metadata_item(grandparent_rating_key)` → fiche série en mode `show` empilée (Back revient à l'épisode) | implémenté, **à vérifier à l'écran** | P3 |
 | B12 | **Sélecteur de version** (fichiers multi-part) | plusieurs `Media`/`Part` par item → choix dans le menu Plus | mécanisme | P3 |
 | B13 | **UltraBlurColors** — teinte du fond de fiche | champ `ultraBlurColors` de la métadonnée → fond coloré comme Plex au lieu du scrim générique | ⚠️ champ à confirmer | P3 |
 | B14 | **Chapitres** | Cercle dédié dans l'OSD (`osdmenu,chapters`, visible si `Player.ChapterCount > 1`) → liste titre + timecode, chapitre courant sélectionné, `seekTime` au choix. Les marqueurs sur la seekbar et les marqueurs Plex intro/credits (autre mécanisme) restent à faire | implémenté, **à vérifier à l'écran** | P4 |
@@ -88,8 +88,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 
 
 
-- **Flux « Activité »** : feed social (GraphQL privé) → empty state explicite.
-- **Ligne « Activity by you… » sur les fiches** : même raison.
+- **Flux « Activité » (entrées amis)** : feed social (GraphQL privé) → l'onglet montre l'historique personnel serveur (B6) ; les entrées amis ne peuvent pas être reproduites.
 - **Watchlist** : synchronisation compte Plex en ligne — notification « Watchlist indisponible » en attendant le connector.
 - **Multi-utilisateurs / PIN (« Who's watching? »)** : fonction compte plex.tv — `profil/*` ; hors périmètre du connecteur privé.
 - **Onboarding Plex** (`onboarding/*`) : parcours de première ouverture de l'app Plex elle-même — hors périmètre Aura.

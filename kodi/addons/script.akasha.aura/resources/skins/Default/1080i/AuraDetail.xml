@@ -1105,7 +1105,7 @@
                 <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
                 <texturenofocus>-</texturenofocus>
                 <onup>7204</onup>
-                <ondown>7206</ondown>
+                <ondown>7208</ondown>
                 <onleft>7102</onleft>
             </control>
             <control type="image">
@@ -1123,6 +1123,41 @@
                 <height>40</height>
                 <texture>icon-discover-dark.png</texture>
                 <visible>Control.HasFocus(7206)</visible>
+            </control>
+            <control type="button" id="7208">
+                <left>1396</left>
+                <top>396</top>
+                <width>470</width>
+                <height>80</height>
+                <font>font_tiny_bold</font>
+                <label>$ADDON[script.akasha.aura 33579]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>84</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <onup>7206</onup>
+                <ondown>7208</ondown>
+                <onleft>7102</onleft>
+                <visible>!String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible>
+            </control>
+            <control type="image">
+                <left>1422</left>
+                <top>416</top>
+                <width>40</width>
+                <height>40</height>
+                <texture>icon-tv.png</texture>
+                <visible>!Control.HasFocus(7208) + !String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible>
+            </control>
+            <control type="image">
+                <left>1422</left>
+                <top>416</top>
+                <width>40</width>
+                <height>40</height>
+                <texture>icon-tv-dark.png</texture>
+                <visible>Control.HasFocus(7208)</visible>
             </control>
         </control>
         </control>
