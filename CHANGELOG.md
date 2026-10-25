@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.0...akasha-os-v0.69.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* **aura:** keep focus anchored when scrolling the reco viewport up ([#197](https://github.com/jeremiejt38/akasha-os/issues/197)) ([d4e568f](https://github.com/jeremiejt38/akasha-os/commit/d4e568f8afa45a27f02b7efa54e9720907ff9375))
+
 ## [0.69.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.68.1...akasha-os-v0.69.0) (2026-10-25)
 
 
