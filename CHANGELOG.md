@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.64.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.63.0...akasha-os-v0.64.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** "Titres similaires" row via /related hubs (B7) ([#168](https://github.com/jeremiejt38/akasha-os/issues/168)) ([0dacb83](https://github.com/jeremiejt38/akasha-os/commit/0dacb839506d1aef555ac585a8b31ff921e71a53))
+* **aura:** dynamic server-driven library filters (B4) ([#166](https://github.com/jeremiejt38/akasha-os/issues/166)) ([859f6db](https://github.com/jeremiejt38/akasha-os/commit/859f6db58353211b6041f426c495bdd0788a1263))
+* **aura:** own watch history in Activity tab and detail page (B6) ([#169](https://github.com/jeremiejt38/akasha-os/issues/169)) ([28acee6](https://github.com/jeremiejt38/akasha-os/commit/28acee6c26d9bdfd575e6c938a16fbee5eeaa838))
+
 ## [0.63.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.62.0...akasha-os-v0.63.0) (2026-10-25)
 
 
