@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.67.0...akasha-os-v0.68.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** Popular Searches heading on empty search query ([#188](https://github.com/jeremiejt38/akasha-os/issues/188)) ([3a796b7](https://github.com/jeremiejt38/akasha-os/commit/3a796b7a787a55101002d3da64d3be3078c28c9b))
+
 ## [0.67.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.66.0...akasha-os-v0.67.0) (2026-10-25)
 
 
