@@ -142,6 +142,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
         self._pending_season_index = None  # season card entry point
+        self._restore_episode_pos = None   # episode pos to restore on Back
         self.exit_to_sidebar = False
 
     def onInit(self):
@@ -352,9 +353,24 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._render_episodes()
 
         self._sync_navigation()
+        # Plex lands focus on the most meaningful content: the season the
+        # user is currently watching, the next episode to watch inside a
+        # season, the Watch button otherwise -- never the tab strip.
         try:
-            if self.mode in ('show', 'season'):
-                self.setFocus(self.getControl(SEASON_STRIP_ID))
+            if self.mode == 'show':
+                pos = self._preferred_season_pos()
+                lst = self.getControl(SEASONS_LIST_ID)
+                lst.selectItem(pos)
+                self.setFocus(lst)
+            elif self.mode == 'season':
+                pos = (self._restore_episode_pos
+                       if self._restore_episode_pos is not None
+                       else self._preferred_episode_pos())
+                self._restore_episode_pos = None
+                lst = self.getControl(EPISODES_LIST_ID)
+                if self._episodes:
+                    lst.selectItem(pos)
+                self.setFocus(lst)
             else:
                 self.setFocus(self.getControl(WATCH_BUTTON_ID))
         except RuntimeError:
@@ -656,15 +672,54 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif controlID == CAST_LIST_ID:
             self._open_person()
 
+    def _preferred_season_pos(self):
+        """Season card to focus on the overview row: the season carrying
+        the On Deck episode, else the first unwatched one, else the first.
+        """
+        nxt = self._find_next_episode()
+        if nxt and nxt.get('parent_rating_key'):
+            for i, season in enumerate(self._seasons):
+                if season.get('rating_key') == nxt['parent_rating_key']:
+                    return i
+        for i, season in enumerate(self._seasons):
+            if not season.get('watched'):
+                return i
+        return 0
+
+    def _preferred_episode_pos(self):
+        """Episode to focus inside a season: in-progress or first
+        unwatched (the one Plex would highlight next), else the first."""
+        for i, ep in enumerate(self._episodes):
+            if ep.get('progress') or not ep.get('watched'):
+                return i
+        return 0
+
     def _on_strip_selected(self):
         try:
             pos = self.getControl(SEASON_STRIP_ID).getSelectedPosition()
         except RuntimeError:
             return
         if pos == 0:
-            self.mode = 'show'
+            self._show_overview()
         else:
             self._show_season(pos)
+
+    def _show_overview(self):
+        """Back to the seasons overview: restore the seasons row and land
+        on the season just left -- navigation stays centred on the
+        content, never bouncing back up to the tab strip."""
+        self.mode = 'show'
+        _set(self, 'AuraDetailSeasonsRow', '1')
+        _set(self, 'AuraDetailEpisodesRow', '')
+        self._render_seasons()
+        self._sync_navigation()
+        try:
+            lst = self.getControl(SEASONS_LIST_ID)
+            lst.selectItem(self._active_season)
+            self.setFocus(lst)
+            self.getControl(SEASON_STRIP_ID).selectItem(0)
+        except RuntimeError:
+            pass
 
     def _show_season(self, strip_pos):
         season_pos = strip_pos - 1
@@ -677,6 +732,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailEpisodesRow', '1')
         self._render_episodes()
         self._sync_navigation()
+        # Landing on the next episode to watch, like Plex's season pages.
+        try:
+            lst = self.getControl(EPISODES_LIST_ID)
+            if self._episodes:
+                lst.selectItem(self._preferred_episode_pos())
+            self.setFocus(lst)
+            self.getControl(SEASON_STRIP_ID).selectItem(strip_pos)
+        except RuntimeError:
+            pass
 
     def _episode_sheet(self):
         try:
@@ -701,6 +765,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         # Swap into episode mode (same hero, playable item); Back returns here.
         self._show_item = self.item
+        self._restore_episode_pos = pos
         self.item = self._episodes[pos]
         self.mode = 'item'
         self._render()
@@ -727,6 +792,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self._panel_nav(action.getId() == ACTION_MOVE_DOWN)
                 return
         elif action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
+            if self.mode == 'season':
+                # Episodes -> seasons overview, focus back on the season
+                # card (Plex keeps navigation centred on the content).
+                self._show_overview()
+                return
             if not self._back_to_show():
                 self.close()
             return
