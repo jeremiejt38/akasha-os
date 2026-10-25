@@ -1649,3 +1649,13 @@ msgstr ""
 msgctxt "#33579"
 msgid "Go to Show"
 msgstr ""
+
+# Effacer l'historique
+msgctxt "#33580"
+msgid "Clear history"
+msgstr ""
+
+# Genre
+msgctxt "#33581"
+msgid "Genre"
+msgstr ""

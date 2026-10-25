@@ -9,6 +9,8 @@ Caller sets before doModal():
 - `client`       — PlexClient (or connector client with `search`)
 - `sections`     — list of Divertissement section dicts to search across
 - `on_select`    — callback(item) invoked when a result card is picked
+- `on_person`    — callback(person dict) for people results
+- `on_genre`     — callback(genre dict) for genre results
 """
 import xbmc
 import xbmcgui
@@ -44,12 +46,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self.sections = []
         self.on_select = None
         self.on_person = None
+        self.on_genre = None
         self.addon = None
         self.query = ''
         self.recent = []
         self._results = []
         self._filter_index = 0
         self._recent_loaded = False
+        self._genres = None
+        self._suggested = None
 
     def onInit(self):
         try:
@@ -91,6 +96,10 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             lst.reset()
             for query in self.recent[:8]:
                 lst.addItem(xbmcgui.ListItem(query))
+            if self.recent:
+                clear = xbmcgui.ListItem(i18n.tr(33580))
+                clear.setProperty('clear', '1')
+                lst.addItem(clear)
         except RuntimeError:
             pass
 
@@ -102,7 +111,8 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if self.query:
             self._run_search()
         else:
-            self._results = []
+            # Plex fills the empty results zone with suggested content.
+            self._results = self._suggestions()
             self._render_results()
 
     def _render_results(self):
@@ -117,7 +127,14 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             panel = self.getControl(RESULTS_PANEL_ID)
             panel.reset()
             for item in self._results:
-                if item.get('_person'):
+                if item.get('_genre'):
+                    import divert_source
+                    li = xbmcgui.ListItem(
+                        divert_source.display_genre(item.get('name') or ''),
+                        item.get('section_title') or i18n.tr(33581))
+                    li.setArt({'poster': 'DefaultGenre.png'})
+                    li.setProperty('genre', '1')
+                elif item.get('_person'):
                     li = xbmcgui.ListItem(item.get('name') or '',
                                           item.get('role') or i18n.tr(33127))
                     li.setArt({'poster': item.get('thumb_url')
@@ -160,11 +177,55 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         q = self.query.lower()
         results.sort(key=lambda r: 0 if (r.get('title') or '').lower()
                      .startswith(q) else 1)
-        # 'Tout' merges matching people first, like Plex's People section.
+        # 'Tout' merges matching people and genres first, like Plex's
+        # People/genre result cards.
         if wanted is None:
-            results = self._search_people()[:8] + results
+            results = (self._search_people()[:8]
+                       + self._search_genres()[:4] + results)
         self._results = results[:24]
         self._render_results()
+
+    def _search_genres(self):
+        """Genre-name matches, client-side over the per-section genre
+        directories (/hubs/search reports genre counts but no items)."""
+        if self._genres is None:
+            self._genres = []
+            if self.client and getattr(self.client, 'section_genres', None):
+                import divert_source
+                for section in self.sections:
+                    try:
+                        raw = self.client.section_genres(section['key'])
+                        names = (divert_source.parse_genres(raw)
+                                 if isinstance(raw, dict) else raw)
+                    except Exception as e:
+                        xbmc.log('Akasha Aura Search: genres failed for {}: {}'
+                                 .format(section.get('title'), e),
+                                 xbmc.LOGWARNING)
+                        continue
+                    for name in names or []:
+                        self._genres.append({
+                            '_genre': True, 'name': name,
+                            'section_key': section['key'],
+                            'section_title': section.get('title') or ''})
+        q = self.query.lower()
+        return [g for g in self._genres if q in (g['name'] or '').lower()]
+
+    def _suggestions(self):
+        """Suggested content for the empty-query zone (B8): the first
+        discover hubs' items, Plex's trending-style fill."""
+        if self._suggested is None:
+            self._suggested = []
+            fetch = getattr(self.client, 'discover_hubs', None)
+            if fetch:
+                try:
+                    for hub in fetch(hub_count=4, per_hub=8):
+                        self._suggested.extend(hub.get('items') or [])
+                        if len(self._suggested) >= 12:
+                            break
+                except Exception as e:
+                    xbmc.log('Akasha Aura Search: suggestions failed: {}'
+                             .format(e), xbmc.LOGWARNING)
+        return self._suggested[:12]
 
     def _search_people(self):
         """People matching the query (client-side over the per-section
@@ -236,7 +297,11 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 pos = self.getControl(RECENT_LIST_ID).getSelectedPosition()
             except RuntimeError:
                 return
-            if 0 <= pos < len(self.recent):
+            if pos == len(self.recent[:8]) and self.recent:
+                self.recent = []
+                self._save_recent()
+                self._render_recent()
+            elif 0 <= pos < len(self.recent):
                 self.query = self.recent[pos]
                 self._refresh_query()
         elif controlID == PILLS_LIST_ID:
@@ -269,6 +334,11 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if item.get('_person'):
             if self.on_person:
                 self.on_person(item)
+            return
+        if item.get('_genre'):
+            self._push_recent(self.query)
+            if self.on_genre:
+                self.on_genre(item)
             return
         self._push_recent(self.query)
         if self.on_select:

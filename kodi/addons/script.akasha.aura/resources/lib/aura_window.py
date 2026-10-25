@@ -2619,7 +2619,26 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.sections = self._divert_sections
         search.on_select = self._open_detail
         search.on_person = self._open_person_page
+        search.on_genre = self._open_genre_result
         search.doModal()
+
+    def _open_genre_result(self, genre):
+        """Genre search hit -> library view pre-filtered to that genre,
+        same in-place navigation as the Categories tiles."""
+        index = next(
+            (i for i, s in enumerate(self._divert_sections)
+             if s['key'] == genre.get('section_key')), None)
+        if index is None:
+            return
+        self._divert_active_section = index
+        self._divert_filter_genre = genre.get('name') or ''
+        self._divert_search_query = ''
+        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
+        self._load_divert_section_items(self._divert_sections[index])
+        try:
+            self.setFocus(self.getControl(3100))  # Bibliotheque tab button
+        except RuntimeError:
+            pass
 
     def _open_person_page(self, person):
         """People search hit -> person page (photo + filmography)."""
