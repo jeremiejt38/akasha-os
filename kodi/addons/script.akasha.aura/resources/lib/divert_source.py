@@ -276,6 +276,32 @@ def build_video_item(raw_item, image_resolver):
     if parts:
         part_key = parts[0].get('key') or ''
 
+    # Multi-version items (B12): one playable version per Media entry,
+    # labelled "1080p HEVC — film.1080p.mkv" like Plex's version picker.
+    versions = []
+    for m in raw_item.get('Media') or []:
+        if not isinstance(m, dict):
+            continue
+        m_parts = m.get('Part') or []
+        if not m_parts or not isinstance(m_parts[0], dict):
+            continue
+        res = str(m.get('videoResolution') or '').lower()
+        if res in ('4k', '2160', '2160p'):
+            base = '4K'
+        elif res in ('1080', '1080p'):
+            base = '1080p'
+        elif res in ('720', '720p'):
+            base = '720p'
+        else:
+            base = res.upper()
+        codec = str(m.get('videoCodec') or '').upper()
+        fname = str(m_parts[0].get('file') or '').rsplit('/', 1)[-1]
+        label = ' '.join(x for x in (base, codec) if x)
+        if fname:
+            label = '{} — {}'.format(label, fname) if label else fname
+        versions.append({'label': label or fname or 'Version',
+                         'part_key': m_parts[0].get('key') or ''})
+
     view_count = raw_item.get('viewCount') or 0
     return {
         'title': raw_item.get('title') or i18n.tr(33328),
@@ -328,6 +354,7 @@ def build_video_item(raw_item, image_resolver):
         'audio_label': _audio_label(raw_item),
         'subtitle_label': _subtitle_label(raw_item),
         'part_key': part_key,
+        'versions': versions,
         'section_id': str(section_id) if section_id is not None else None,
         # Plex's per-item blur palette (corner hex colors, no alpha) --
         # used to tint the detail-page backdrop like the reference client.

@@ -1139,7 +1139,7 @@
                 <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
                 <texturenofocus>-</texturenofocus>
                 <onup>7206</onup>
-                <ondown>7208</ondown>
+                <ondown>7209</ondown>
                 <onleft>7102</onleft>
                 <visible>!String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible>
             </control>
@@ -1158,6 +1158,41 @@
                 <height>40</height>
                 <texture>icon-tv-dark.png</texture>
                 <visible>Control.HasFocus(7208)</visible>
+            </control>
+            <control type="button" id="7209">
+                <left>1396</left>
+                <top>476</top>
+                <width>470</width>
+                <height>80</height>
+                <font>font_tiny_bold</font>
+                <label>$ADDON[script.akasha.aura 33583]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>84</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <onup>7208</onup>
+                <ondown>7209</ondown>
+                <onleft>7102</onleft>
+                <visible>!String.IsEmpty(Window.Property(AuraDetailVersions))</visible>
+            </control>
+            <control type="image">
+                <left>1422</left>
+                <top>496</top>
+                <width>40</width>
+                <height>40</height>
+                <texture>icon-play.png</texture>
+                <visible>!Control.HasFocus(7209) + !String.IsEmpty(Window.Property(AuraDetailVersions))</visible>
+            </control>
+            <control type="image">
+                <left>1422</left>
+                <top>496</top>
+                <width>40</width>
+                <height>40</height>
+                <texture>icon-play-dark.png</texture>
+                <visible>Control.HasFocus(7209)</visible>
             </control>
         </control>
         </control>

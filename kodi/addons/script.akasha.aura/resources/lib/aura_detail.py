@@ -23,6 +23,8 @@ import i18n
 import osd_menu
 
 ACTION_MOVE_LEFT = 1
+ACTION_MOVE_UP = 3
+ACTION_MOVE_DOWN = 4
 ACTION_PREVIOUS_MENU = 10
 ACTION_CONTEXT_MENU = 117
 ACTION_NAV_BACK = 92
@@ -90,11 +92,12 @@ MORE_FILE_INFO_ID = 7204
 MORE_WAYS_ID = 7205
 MORE_RELATED_ID = 7206
 MORE_GO_SHOW_ID = 7208
+MORE_VERSION_ID = 7209
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
 # the skin; only Subtitles, File Info and Similar Titles remain reachable.
 MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
-                  MORE_GO_SHOW_ID)
+                  MORE_GO_SHOW_ID, MORE_VERSION_ID)
 
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
                   WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
@@ -274,6 +277,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailGoToShow',
              '1' if (item.get('type') == 'episode'
                      and item.get('grandparent_rating_key')) else '')
+        # Plex's 'Play Version' entry (B12): multi-version items only.
+        _set(self, 'AuraDetailVersions',
+             '1' if len(item.get('versions') or []) > 1 else '')
 
         # Action row: labels live on the buttons themselves (invisible
         # while unfocused via transparent textcolor, dark on the white
@@ -703,6 +709,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                   ACTION_MOVE_LEFT):
                 self._close_more_menu()
                 return
+            if action.getId() in (ACTION_MOVE_DOWN, ACTION_MOVE_UP):
+                self._panel_nav(action.getId() == ACTION_MOVE_DOWN)
+                return
         elif action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
             if not self._back_to_show():
                 self.close()
@@ -885,6 +894,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     'Akasha Aura', i18n.tr(33121),
                     xbmcgui.NOTIFICATION_INFO, 2000)
                 return
+        self._start_playback(item, start_over)
+
+    def _start_playback(self, item, start_over=False):
         url = self._stream_url(item)
         if not url:
             xbmcgui.Dialog().notification(
@@ -991,6 +1003,33 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _more_menu_open(self):
         return self.getProperty('AuraDetailMore') == '1'
 
+    def _panel_entry_visible(self, cid):
+        """Conditional More-panel entries (props set in _render)."""
+        if cid == MORE_GO_SHOW_ID:
+            return self.getProperty('AuraDetailGoToShow') == '1'
+        if cid == MORE_VERSION_ID:
+            return self.getProperty('AuraDetailVersions') == '1'
+        return True
+
+    def _panel_nav(self, down):
+        """MOVE_UP/DOWN inside the More panel: skip entries hidden by
+        props -- static XML navigation cannot express that."""
+        order = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
+                 MORE_GO_SHOW_ID, MORE_VERSION_ID)
+        try:
+            focused = self.getFocusId()
+        except RuntimeError:
+            return
+        visible = [c for c in order if self._panel_entry_visible(c)]
+        if focused not in visible:
+            return
+        i = visible.index(focused) + (1 if down else -1)
+        if 0 <= i < len(visible):
+            try:
+                self.setFocus(self.getControl(visible[i]))
+            except RuntimeError:
+                pass
+
     def _on_more_entry(self, control_id):
         self._close_more_menu()
         if control_id == MORE_FILE_INFO_ID:
@@ -1001,6 +1040,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         if control_id == MORE_GO_SHOW_ID:
             self._go_to_show()
+            return
+        if control_id == MORE_VERSION_ID:
+            self._pick_version()
             return
         msg = {
             MORE_SUBTITLES_ID: 'Choix des sous-titres pendant la lecture',
@@ -1062,6 +1104,22 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         detail.item = show
         detail.mode = 'show'
         detail.doModal()
+
+    def _pick_version(self):
+        """Plex's 'Play Version' (B12): pick among the item's Media
+        versions and play the chosen part."""
+        item = self._playable_item() or self.item
+        versions = [v for v in (item.get('versions') or [])
+                    if v.get('part_key')]
+        if len(versions) < 2:
+            return
+        pos = xbmcgui.Dialog().select(
+            i18n.tr(33583), [v['label'] for v in versions])
+        if pos < 0:
+            return
+        versioned = dict(item)
+        versioned['part_key'] = versions[pos]['part_key']
+        self._start_playback(versioned)
 
     def _show_file_info(self):
         item = self._playable_item() or self.item
