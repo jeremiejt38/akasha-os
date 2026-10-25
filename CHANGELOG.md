@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.61.0...akasha-os-v0.62.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** report playback progress to Plex via /:/timeline (B3) ([#162](https://github.com/jeremiejt38/akasha-os/issues/162)) ([645a107](https://github.com/jeremiejt38/akasha-os/commit/645a107ab7c4f3174e94d28cec8d60691ed1166f))
+
 ## [0.61.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.60.0...akasha-os-v0.61.0) (2026-10-25)
 
 
