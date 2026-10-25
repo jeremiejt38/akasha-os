@@ -259,6 +259,7 @@ sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
         ('script.akasha.aura', 1, datetime('now')),
         ('service.akasha.aura', 1, datetime('now')),
         ('service.akasha.remote', 1, datetime('now')),
+        ('service.akasha.perfanalyzer', 1, datetime('now')),
         ('script.cloud.gaming', 1, datetime('now'))" 2>/dev/null || true
 cp "$SCRIPT_DIR/kodi/scripts/cloud-gaming/guide_watchdog.py" /storage/.kodi/scripts/cloud-gaming/
 chmod +x /storage/.kodi/scripts/cloud-gaming/launch.sh \
