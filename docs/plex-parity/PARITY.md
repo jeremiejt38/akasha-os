@@ -83,8 +83,15 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 
 - ~~**Clavier recherche** : touches `_`, `←`, `X` en texte brut~~ → icônes `key-space`/`key-backspace`/`key-clear` (+ variants dark) overlay ; reste : touches plus petites.
 - **Recherche** : ~~pas de rangée « Popular Searches » dédiée~~ → en-tête « Recherches populaires » (33584) affiché à la place des pills tant que la requête est vide (suggestions `discover_hubs` en dessous, comme Plex) ; reste le rail gauche.
-- **Accueil** : ~~rangée coupée net à x≈1823~~ → fade `scrim-row-right.png` sur les 5 rangées + la grille bibliothèque (à vérifier à l'écran) ; trou ~90 px entre titre et méta quand pas de clearlogo, icône « maison » fantôme près du titre (à investiguer).
-- **Hero** : suit le focus (vérifié) — le hub `home.continue` porte `style: 'hero'` (vérifié sur le serveur) : Plex le rend en **cartes paysage**. Implémenté : chaque slot reco a un jumeau paysage (`5x11`, cartes 448×252 avec titre/sous-titre, barre de progression, focus-ring) rendu via la prop `AuraRowStyle{slot}` ; binding/nav/scroll pilotés par `_reco_slot_list_id`. Géométrie/captions **à vérifier à l'écran** — l'habillage exact Plex (overlay vs texte sous la carte) reste à confirmer sur capture.
+- **Accueil** : ~~rangée coupée net à x≈1823~~ → fade `scrim-row-right.png` régénéré en alpha blanc, teinté `#0D1017` et étendu jusqu'à x=1920 sur les 5 rangées + la grille bibliothèque (**vérifié à l'écran** v0.69.5 : les cartes se dissolvent dans le fanart) ; trou ~90 px entre titre et méta quand pas de clearlogo (reste à investiguer).
+- **Icône « maison » fantôme** : ~~à investiguer~~ → corrigée en v0.69.5 — l'icône de l'item sélectionné dans la `focusedlayout` sidebar (3112) n'avait pas `Control.HasFocus(3310)` et se rendait hors focus.
+- **Hero** : suit le focus (vérifié). ~~Plex rend `home.continue` en cartes paysage~~ → **correction audit v0.69.5** : la référence rend Continue Watching en **posters** avec barres de progression — le jumeau paysage est neutralisé (`style='hero'` → shelf dans `_rebind_reco_slots`), et le hub `home.ondeck` est filtré de l'accueil (Plex le fusionne dans Continue Watching ; sa rangée dédiée doublait « Continuer à regarder »).
+- **Fiche — chips de notes** : ~~1 pilule unique~~ → v0.69.5 : chips **nues** multi-providers depuis le tableau `Rating[]` serveur (pilule âge + IMDb / RT critique / RT audience / TMDB, icônes + valeurs — 4 chips max + âge).
+- **Fiche — pilule d'action vide** : v0.69.5 — `_watch_label()` peut résoudre après `_populate` (lookup épisode suivant) : l'overlay label est re-synchronisé dans `_sync_action_row`, fini la pilule « Regarder » blanche vide.
+- **Avatar rail** : ~~disque générique~~ → v0.69.5 : vrai avatar plex.tv (`/api/v2/user`, fond dans un thread, clip circulaire via `cast-mask`), fallback `avatar-plex.png`.
+- **Suffixe serveur** : v0.69.5 — « · Akasha » grisé appliqué à **tous** les hubs section-scopés (recentlyadded/released inclus, pas seulement les curated).
+- **Saisons** : ~~« Season 7 » brut~~ → v0.69.5 : cartes saison + en-tête épisodes via i18n « Saison N » (tests de garde ajoutés).
+- **Anneau de focus** : ~~équerres~~ → v0.69.5 : `focus-ring.png` régénéré, bordure continue 4 px arrondie (vérifié sur la grille saisons).
 
 
 
