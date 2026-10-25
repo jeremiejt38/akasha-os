@@ -1619,3 +1619,13 @@ msgstr "Aucun filtre disponible"
 msgctxt "#33573"
 msgid "Filter by {}"
 msgstr "Filtrer par {}"
+
+# Titres similaires
+msgctxt "#33574"
+msgid "Similar Titles"
+msgstr "Titres similaires"
+
+# Aucun titre similaire
+msgctxt "#33575"
+msgid "No similar titles"
+msgstr "Aucun titre similaire"

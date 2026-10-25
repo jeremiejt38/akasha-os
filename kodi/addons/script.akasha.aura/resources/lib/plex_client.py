@@ -555,6 +555,24 @@ class PlexClient:
                     })
         return out[:20]
 
+    def related_items(self, rating_key, limit=16):
+        """'More Like This' titles (`/library/metadata/{id}/related`, B7).
+
+        The endpoint returns curated hubs of similar items; flattened
+        and deduped by ratingKey like Plex's single row."""
+        data = self._request(
+            '/library/metadata/{}/related'.format(rating_key))
+        items = []
+        seen = set()
+        for hub in self._hub_list(data):
+            for item in hub['items']:
+                rk = item.get('rating_key')
+                if rk in seen:
+                    continue
+                seen.add(rk)
+                items.append(item)
+        return items[:limit]
+
     def item_extras(self, rating_key):
         """Bonus clips attached to an item (trailers, deleted scenes...).
 
