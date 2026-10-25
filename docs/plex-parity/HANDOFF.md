@@ -17,11 +17,11 @@ l'écran — en boucle. Claude (`claude-bridge` MCP, **session `plex-parity`
 obligatoire**) sert de partenaire design pour tout doute sur le comportement
 Plex/Google TV.
 
-## État des releases (au tag `akasha-os-v0.69.0`)
+## État des releases (au tag `akasha-os-v0.69.2`)
 
 **Déployé sur le Pi le 2026-10-25** (`root@192.168.3.77` — vraie IP,
 `192.168.1.88` obsolète depuis la migration réseau du 23/10). Toute la
-parité fonctionnelle livrée jusqu'à v0.69.0 reste **« à vérifier à
+parité fonctionnelle livrée jusqu'à v0.69.2 reste **« à vérifier à
 l'écran »**.
 
 Depuis le 2026-10-24/25, le backlog serveur est quasiment épuisé :
@@ -44,11 +44,11 @@ Back à deux niveaux, fade bord droit rangées/grille, icônes clavier.
 | v0.59.0 | **`service.akasha.perfanalyzer`** (collecteur perf en fond, JSONL borné, boot marker autostart) + CLI **`analyser-de-performances`** ; **overlay de chargement permanent** sur les fenêtres natives (Home + menus nav : logo, « Chargement… », vague organique) — fini les flashs du menu Kodi au boot et au lancement vidéo |
 | v0.60.0–v0.66.0 | Tout le backlog serveur de parité (voir la liste ci-dessus + `PARITY.md`) |
 | v0.68.1 | Fix overlay de chargement (insertion avant `</controls>` au lieu d'un tail exact — seul Home.xml était patché), activation de `service.akasha.perfanalyzer` dans `install.sh` (restait désactivé), conditions Aura réécrites en DNF (Kodi ignore les parenthèses : « unmatched parentheses » dans kodi.log) |
-| v0.69.0 | **Flux de focus façon Plex** : Down barre → premier contenu (rangée/grille/tuile) au lieu des sous-onglets (Up les rejoint), clic onglet → focus grille via `_defer_focus` (thread 0,3 s + garde de génération — `setFocus` en même tick qu'un `<visible>` est annulé par Kodi), fiche série → saison en cours / saison → prochain épisode / Back centré sur la carte quittée ; animation de sortie de rangée adoucie (moitié distance +236 + fade + ease-in, réversible) ; anneau de focus 4 px (était 8), `B3FFFFFF` semi-opaque, zoomé avec la carte + masque de coins zoomé → coins arrondis conservés |
+| v0.69.0–v0.69.2 | **Flux de focus façon Plex** ; v0.69.1 : focus restauré après rebind au scroll-up ; v0.69.2 : nav Up/Down entre slots chaînée en Python (le contre-slide d'animation inverse l'ordre géométrique perçu par Kodi) : Down barre → premier contenu (rangée/grille/tuile) au lieu des sous-onglets (Up les rejoint), clic onglet → focus grille via `_defer_focus` (thread 0,3 s + garde de génération — `setFocus` en même tick qu'un `<visible>` est annulé par Kodi), fiche série → saison en cours / saison → prochain épisode / Back centré sur la carte quittée ; animation de sortie de rangée adoucie (moitié distance +236 + fade + ease-in, réversible) ; anneau de focus 4 px (était 8), `B3FFFFFF` semi-opaque, zoomé avec la carte + masque de coins zoomé → coins arrondis conservés |
 
 **Première action d'une nouvelle session : vérification visuelle à l'écran**
-— le Pi tourne v0.69.0. Valider spécifiquement : tout le paragraphe
-« à vérifier à l'écran » de `PARITY.md`, **le flux de focus v0.69.0**
+— le Pi tourne v0.69.2. Valider spécifiquement : tout le paragraphe
+« à vérifier à l'écran » de `PARITY.md`, **le flux de focus v0.69.x**
 (bascule barre→contenu, onglet→grille, saison/épisode en cours, retour
 centré, anneau fin/opaque/zoomé, animation rangée), la vague de l'écran
 de chargement natif, `analyser-de-performances` en SSH, le pic mémoire
