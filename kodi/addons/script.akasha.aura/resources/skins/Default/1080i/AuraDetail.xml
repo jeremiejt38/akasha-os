@@ -741,13 +741,15 @@
                     <width>200</width>
                     <height>300</height>
                     <texture>poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
                     <left>-4</left>
                     <top>-4</top>
                     <width>208</width>
                     <height>308</height>
-                    <texture border="20">focus-ring.png</texture>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
                     <left>150</left>
@@ -843,13 +845,15 @@
                     <width>320</width>
                     <height>180</height>
                     <texture>poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
                     <left>-4</left>
                     <top>-4</top>
                     <width>328</width>
                     <height>188</height>
-                    <texture border="20">focus-ring.png</texture>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="progress">
                     <left>4</left>

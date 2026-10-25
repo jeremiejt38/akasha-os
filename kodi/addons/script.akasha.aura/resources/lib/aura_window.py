@@ -325,6 +325,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # navigation like "Effacer les filtres").
         self._divert_state = None
         self._divert_state_action = None
+        self._focus_generation = 0
         # Listen for repeated Home presses while Aura is already open so we can
         # distinguish simple press (return to Divertissement tab) from double
         # press (open app switcher). See docs/remote/decisions.md.
@@ -504,6 +505,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._select_library_tab(
             self._divert_library_tab if tab is None else tab, focus=focus)
 
+    def _defer_focus(self, control_id, delay=0.3):
+        """Focus a control a beat later instead of right now.
+
+        A same-tick setFocus() on a control whose <visible> condition was
+        toggled by setProperty() in the same handler silently reverts once
+        Kodi re-validates visibility (see _select_library_tab's note in
+        docs/aura/decisions.md). A delayed focus lands after the
+        revalidation, which is what Plex's "selecting a tab moves focus
+        into the content" needs. The generation guard makes only the
+        latest scheduled focus apply, so rapid tab clicks don't queue
+        yanks, and a press that already left the strip wins over a stale
+        target.
+        """
+        self._focus_generation += 1
+        generation = self._focus_generation
+
+        def worker():
+            time.sleep(delay)
+            if generation != self._focus_generation:
+                return
+            try:
+                xbmc.executebuiltin('SetFocus({})'.format(control_id))
+            except Exception:
+                pass
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def _select_library_tab(self, index, focus=True):
         """Switch the contextual tab (Recommande/Bibliotheque/Categories) of the
         currently selected library. No-op if no library is selected."""
@@ -517,31 +545,34 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if index == DIVERT_SUBTAB_RECOMMANDE:
             self._load_recommendations(section)
             self._sync_navigation()
+            if focus:
+                self._defer_focus(self._first_content_id())
             return
 
         if index == DIVERT_SUBTAB_COLLECTIONS:
             self._load_collections(section)
             self._sync_navigation()
+            if focus:
+                self._defer_focus(self._first_content_id())
             return
 
         if index == DIVERT_SUBTAB_CATEGORIES:
             self._load_categories(section)
             self._sync_navigation()
+            if focus:
+                self._defer_focus(self._first_content_id())
             return
 
         # Bibliotheque: inline grid, already populated by _select_divert_section.
-        # Deliberately NOT auto-focusing the grid here: setFocus() on a
-        # control gated by a <visible> condition toggled via setProperty()
-        # a moment earlier, in the same onClick handler, is unreliable --
-        # it can report success (getFocusId() briefly matches) yet silently
-        # revert once Kodi's engine re-validates it on a later frame (seen
-        # in practice: a subsequent Up press behaved as if focus had never
-        # left the tab button). Leaving focus on the tab button and relying
-        # on its <ondown> to reach the grid avoids the race entirely, since
-        # that next input is a separate, later action -- see
+        # Focus goes to the grid's first element like Plex, but deferred
+        # past Kodi's <visible>-condition revalidation -- a same-tick
+        # setFocus() silently reverts (seen in practice: a subsequent Up
+        # press behaved as if focus had never left the tab button) -- see
         # docs/aura/decisions.md.
         self._apply_browse_restate(section)
         self._sync_navigation()
+        if focus:
+            self._defer_focus(self._first_content_id())
 
     def _load_recommendations(self, section):
         """Populate the Recommande rows, scoped to `section` or unscoped
@@ -580,6 +611,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('DivertHomeTab', str(index))
         self._load_recommendations(None)
         self._sync_navigation()
+        self._defer_focus(self._first_content_id())
 
     def _reco_hub_rows(self, section):
         """Build row descriptors from real Plex hubs.
@@ -890,13 +922,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Top bar: the gear's declared <ondown>9000</ondown> was a leftover
         # milestone-1 placeholder -- an invisible 1x1 button whose only
         # exit is Up, trapping focus off-screen on every Down press from
-        # the gear. Route Down from both top-bar buttons to the sub-tab
-        # the tab list's own Down reaches (_focus_first_subtab), and keep
+        # the gear. Route Down from both top-bar buttons to the content
+        # the tab list's own Down reaches (_first_content_id), and keep
         # 9000 itself escapable in every direction in case anything still
         # lands on it before the first sync. nav() pins unset directions
         # to the control itself, so the XML-declared left/right targets
         # must be repeated explicitly here.
-        first_sub = self._first_subtab_id()
+        first_sub = self._first_content_id()
         escape = first_sub if first_sub is not None else TAB_LIST_ID
         nav(GEAR_BUTTON_ID, up=GEAR_BUTTON_ID, down=escape,
             left=TAB_LIST_ID, right=MODULE_SEARCH_ID)
@@ -1634,7 +1666,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_active_section = index
         self._divert_filter_genre = genre
         self._divert_search_query = ''
-        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
+        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES, focus=False)
         self._load_divert_section_items(self._category_section)
         try:
             self.setFocus(self.getControl(3100))  # Bibliotheque tab button
@@ -2257,6 +2289,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 for g in games
             ]
             self._set_jeux_panel(self._jeux_items, i18n.tr(33085).format(len(games)))
+            if interactive and self._jeux_items:
+                self._defer_focus(JEUX_PANEL_ID)
             return
 
         if index == JEUX_SUBTAB_MOONLIGHT:
@@ -2275,6 +2309,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 for a in apps
             ]
             self._set_jeux_panel(self._jeux_items, i18n.tr(33088).format(len(apps)))
+            if interactive and self._jeux_items:
+                self._defer_focus(JEUX_PANEL_ID)
 
     def _select_app_subtab(self, index):
         self._app_subtab = index
@@ -2495,6 +2531,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def onAction(self, action):
         aid = action.getId()
+        if aid in (ACTION_MOVE_UP, ACTION_MOVE_DOWN, ACTION_MOVE_LEFT,
+                   ACTION_MOVE_RIGHT, ACTION_SELECT_ITEM,
+                   ACTION_CONTEXT_MENU):
+            # A real keypress cancels any pending deferred focus -- the
+            # user's own navigation always wins over a stale target.
+            self._focus_generation += 1
         if aid == ACTION_MENU:
             self._open_settings_panel()
             return
@@ -2681,7 +2723,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._update_bar_focused()
 
     def _first_subtab_id(self):
-        """Control id _focus_first_subtab() would target, or None."""
+        """Control id of the contextual strip entry for the active module."""
         if self.active_tab == TAB_DIVERTISSEMENT:
             if self._divert_view == 'library':
                 return DIVERT_SUBTAB_IDS[self._divert_library_tab]
@@ -2692,14 +2734,43 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return APP_SUBTAB_IDS[self._app_subtab]
         return None
 
+    def _first_content_id(self):
+        """Control id focused by Down from the top bar.
+
+        Plex lands the user straight on the most obvious content
+        ("Continuer à regarder", the library grid's first card, a game
+        tile...) rather than the contextual sub-tab strip -- the strip is
+        still reachable by pressing Up from the first row.
+        """
+        if self.active_tab == TAB_DIVERTISSEMENT:
+            if self._divert_state is not None:
+                return DIVERT_STATE_BUTTON_ID
+            if self._divert_view == 'library' \
+                    and self._divert_library_tab != DIVERT_SUBTAB_RECOMMANDE:
+                return (CATEGORY_PANEL_ID
+                        if self._divert_library_tab == DIVERT_SUBTAB_CATEGORIES
+                        else DIVERT_PANEL_ID)
+            return next((self._reco_slot_list_id(i)
+                         for i in range(len(RECO_SLOT_IDS))
+                         if self._reco_list_has_items(
+                             self._reco_slot_list_id(i))),
+                        DIVERT_SIDEBAR_ID)
+        if self.active_tab == TAB_JEUX:
+            return (JEUX_PANEL_ID if self._jeux_items
+                    else JEUX_SUBTAB_IDS[self._jeux_active_subtab])
+        if self.active_tab == TAB_APP:
+            return (APP_TILE_IDS[0] if self._pinned_apps
+                    else APP_SUBTAB_IDS[self._app_subtab])
+        return None
+
     def _focus_first_subtab(self):
-        """Move focus from the main tab to the first meaningful content control."""
+        """Move focus from the main tab to the first content element."""
         try:
-            target = self._first_subtab_id()
+            target = self._first_content_id()
             if target is not None:
                 self.setFocus(self.getControl(target))
         except Exception as e:
-            xbmc.log('Akasha Aura: focus first subtab failed: {}'.format(e), xbmc.LOGERROR)
+            xbmc.log('Akasha Aura: focus first content failed: {}'.format(e), xbmc.LOGERROR)
 
     def onClick(self, controlID):
         if controlID == TAB_LIST_ID:
@@ -2843,7 +2914,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_active_section = index
         self._divert_filter_genre = genre.get('name') or ''
         self._divert_search_query = ''
-        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
+        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES, focus=False)
         self._load_divert_section_items(self._divert_sections[index])
         try:
             self.setFocus(self.getControl(3100))  # Bibliotheque tab button

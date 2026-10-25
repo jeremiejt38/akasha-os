@@ -1143,6 +1143,7 @@
                         <height>360</height>
                         <texture>poster-corners.png</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        <animation effect="zoom" start="100" end="108" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="progress">
                         <left>8</left>
@@ -1260,7 +1261,8 @@
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                     </control>
                     <control type="list" id="5110">
@@ -1274,7 +1276,8 @@
                         <onleft>3310</onleft>
                         <ondown>5210</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                         <itemlayout width="272" height="372">
@@ -1346,6 +1349,7 @@
                                 <height>360</height>
                                 <texture>poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -1365,8 +1369,9 @@
                                 <top>-4</top>
                                 <width>248</width>
                                 <height>368</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5110) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5111) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -1381,7 +1386,8 @@
                         <onleft>3310</onleft>
                         <ondown>5210</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                         <itemlayout width="472" height="372">
@@ -1493,6 +1499,7 @@
                                 <height>252</height>
                                 <texture>landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                                            <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -1532,8 +1539,9 @@
                                 <top>-4</top>
                                 <width>456</width>
                                 <height>260</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5111) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -1547,7 +1555,8 @@
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                     </control>
                     <control type="list" id="5210">
@@ -1561,7 +1570,8 @@
                         <onleft>3310</onleft>
                         <ondown>5310</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                         <itemlayout width="272" height="372">
@@ -1633,6 +1643,7 @@
                                 <height>360</height>
                                 <texture>poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -1652,8 +1663,9 @@
                                 <top>-4</top>
                                 <width>248</width>
                                 <height>368</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5210) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5211) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -1668,7 +1680,8 @@
                         <onleft>3310</onleft>
                         <ondown>5310</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                         <itemlayout width="472" height="372">
@@ -1780,6 +1793,7 @@
                                 <height>252</height>
                                 <texture>landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                                            <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -1819,8 +1833,9 @@
                                 <top>-4</top>
                                 <width>456</width>
                                 <height>260</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5211) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -1834,7 +1849,8 @@
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <!-- Only rendered while reachable: when focus is on
                              5210 the row peeks at y=1040, on itself at 568;
@@ -1853,7 +1869,8 @@
                         <onleft>3310</onleft>
                         <ondown>5410</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5210) | !String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
                         <itemlayout width="272" height="372">
@@ -1925,6 +1942,7 @@
                                 <height>360</height>
                                 <texture>poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -1944,8 +1962,9 @@
                                 <top>-4</top>
                                 <width>248</width>
                                 <height>368</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5310) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5311) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -1960,7 +1979,8 @@
                         <onleft>3310</onleft>
                         <ondown>5410</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5210) | String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
                         <itemlayout width="472" height="372">
@@ -2072,6 +2092,7 @@
                                 <height>252</height>
                                 <texture>landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                                            <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -2111,8 +2132,9 @@
                                 <top>-4</top>
                                 <width>456</width>
                                 <height>260</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5311) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -2126,7 +2148,8 @@
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
@@ -2141,7 +2164,8 @@
                         <onleft>3310</onleft>
                         <ondown>5510</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5310) | !String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                         <itemlayout width="272" height="372">
@@ -2213,6 +2237,7 @@
                                 <height>360</height>
                                 <texture>poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -2232,8 +2257,9 @@
                                 <top>-4</top>
                                 <width>248</width>
                                 <height>368</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5410) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5411) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -2248,7 +2274,8 @@
                         <onleft>3310</onleft>
                         <ondown>5510</ondown>
                         <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
-                            <effect type="fade" start="100" end="0" time="160"/>
+                            <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                            <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                         <visible>String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5310) | String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                         <itemlayout width="472" height="372">
@@ -2360,6 +2387,7 @@
                                 <height>252</height>
                                 <texture>landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                                            <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -2399,8 +2427,9 @@
                                 <top>-4</top>
                                 <width>456</width>
                                 <height>260</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5411) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -2501,6 +2530,7 @@
                                 <height>360</height>
                                 <texture>poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -2520,8 +2550,9 @@
                                 <top>-4</top>
                                 <width>248</width>
                                 <height>368</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5510) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5511) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
@@ -2645,6 +2676,7 @@
                                 <height>252</height>
                                 <texture>landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                                            <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
                                 <left>8</left>
@@ -2684,8 +2716,9 @@
                                 <top>-4</top>
                                 <width>456</width>
                                 <height>260</height>
-                                <texture border="20">focus-ring.png</texture>
+                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5511) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
                     </control>
