@@ -37,7 +37,7 @@
                 <top>120</top>
                 <width>220</width>
                 <height>220</height>
-                <texture>poster-corners.png</texture>
+                <texture colordiffuse="FF10131A">poster-corners.png</texture>
             </control>
 
             <!-- Item title -->
@@ -97,7 +97,7 @@
                         <top>0</top>
                         <width>200</width>
                         <height>300</height>
-                        <texture>poster-corners.png</texture>
+                        <texture colordiffuse="FF10131A">poster-corners.png</texture>
                     </control>
                     <control type="image">
                         <left>150</left>
@@ -140,7 +140,7 @@
                         <top>0</top>
                         <width>200</width>
                         <height>300</height>
-                        <texture>poster-corners.png</texture>
+                        <texture colordiffuse="FF10131A">poster-corners.png</texture>
                         <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="image">
