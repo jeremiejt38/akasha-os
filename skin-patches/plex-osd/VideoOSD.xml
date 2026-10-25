@@ -177,7 +177,7 @@
             <height>44</height>
             <font>font_mini</font>
             <aligny>center</aligny>
-            <label>$INFO[Player.Time]</label>
+            <label>$INFO[Player.Time(h)]:$INFO[Player.Time(mm)]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
         <!-- Seek visuals: a passive progress draws the gray track + amber
@@ -225,7 +225,7 @@
             <font>font_mini</font>
             <align>right</align>
             <aligny>center</aligny>
-            <label>$INFO[Player.TimeRemaining,-]</label>
+            <label>-$INFO[Player.TimeRemaining(h)]:$INFO[Player.TimeRemaining(mm)]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
 

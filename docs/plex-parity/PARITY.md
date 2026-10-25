@@ -97,5 +97,5 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - **Portraits d'acteurs** : le serveur renvoie souvent `thumb=NONE` → fallback `actor-fallback.png`.
 - **Backdrop** : couleur de fondu légèrement différente (scrim proche mais pas pixel-perfect).
 - **Typographie** : Aura utilise `RobotoCondensed` (skin) vs le sans-serif standard de Plex — écart mineur, un changement de police casserait les métriques de toute la skin.
-- **Format des timecodes OSD** : `hh:mm:ss` via infolabels Kodi (`Player.Time`) vs `h:mm` chez Plex — pas de formatage disponible côté skin.
+- **Format des timecodes OSD** : ~~`hh:mm:ss` via infolabels Kodi (`Player.Time`) vs `h:mm` chez Plex~~ → les sous-formats Kodi `(h)`/`(mm)` existent : `Player.Time(h):Player.Time(mm)` dans `VideoOSD.xml` + `DialogSeekBar.xml` — **à vérifier à l'écran**.
 - **`ReloadSkin` pendant une lecture active** : peut faire planter Kodi (SIGSEGV observé en test au teardown du player) — opération dev uniquement, pas un chemin utilisateur.
