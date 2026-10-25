@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.68.1...akasha-os-v0.69.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** Plex-style focus flow + softer animations ([#194](https://github.com/jeremiejt38/akasha-os/issues/194)) ([3880e9b](https://github.com/jeremiejt38/akasha-os/commit/3880e9bcd9c872b6d8b66fba7489a613245037dc))
+
 ## [0.68.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.68.0...akasha-os-v0.68.1) (2026-10-25)
 
 
