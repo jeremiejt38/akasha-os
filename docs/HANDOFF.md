@@ -12,8 +12,8 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `0.69.2` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.69.2` — **déployée le 2026-10-25**
+- **Version livrée** : `0.69.3` (tags `akasha-os-vX.Y.Z`, Release Please).
+- **Version réellement sur le Pi** : `0.69.3` — **déployée le 2026-10-25**
   (push ciblé de `script.akasha.aura` + restart Kodi ; le flux complet
   reste tarball → `install.sh`). v0.68.1 :
   (le déploiement a d'abord poussé 0.59.0 depuis un `main` local périmé,
@@ -73,15 +73,28 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   → le navigateur géométrique Kodi lit un ordre inversé (Down rebouclait
   sur la rangée du dessus, Up sautait une rangée / les sous-onglets).
   Chaînage explicite vers le slot rempli le plus proche (v0.69.2).
-
-## En cours
+- **Labels des pilules d'action via overlays `label`** :
+  `ControlButton.setLabel` écrit un champ que ce build Kodi 21.3 ne rend
+  jamais (le `<label>` XML est figé au parsing) → les labels dynamiques
+  vivent sur des contrôles `label` frères (7150-7156), positionnés par
+  `_sync_action_row()` comme les overlays d'icônes (v0.69.3).
+- **`border="32"` sur `rounded-solid.png` (source 64 px) = artefact de
+  couture** : le milieu étirable tombe à 0 px → utiliser `border="16"`
+  sur toutes les textures 9-slice étirées (v0.69.3).
+- **Kebab `⋯` par bibliothèque dans la sidebar** : Left sur un item
+  bibliothèque (marqué `is_library`) ouvre le menu Épingler/Désépingler
+  + Monter/Descendre ; réutilise `divert.pinned_libraries` /
+  `divert.library_order` existants (v0.69.3).
 
 - **Mission active** : boucle de parité visuelle/comportementale
   Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le
   cycle tant que tout n'est pas identique… polish visuel le plus parfait
   possible »). Audit complet dans `docs/plex-parity/PARITY.md`.
 - **Prochaine étape prévue** : **vérification visuelle sur la TV** —
-  v0.69.0 déployée, à valider à l'écran : flux de focus Plex (barre →
+  v0.69.3 déployée : pilules d'action labelisées (overlay + police
+  28 px, coins stade propres), panneau latéral en police 32 px,
+  kebab `⋯` sidebar (Left → épingler/désépingler/réordonner,
+  vérifié à l'écran). Reste à valider : flux de focus Plex (barre →
   contenu, onglet → grille, saison/épisode en cours, retour centré),
   animation de sortie de rangée adoucie (moitié distance + fade +
   ease-in/out), cadre de focus plus fin (4 px), semi-opaque (`B3FFFFFF`)
