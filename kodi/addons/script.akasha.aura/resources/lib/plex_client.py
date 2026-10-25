@@ -149,27 +149,36 @@ class PlexClient:
         return data.get('MediaContainer', data)
 
     @staticmethod
+    def _resolve_image(path, server_url, token, width=None, height=None):
+        if not path:
+            return ''
+        # Cloud provider metadata (Discover/Trending hubs) carries
+        # absolute image URLs -- just attach the token to them.
+        if path.startswith('http'):
+            sep = '&' if '?' in path else '?'
+            if 'X-Plex-Token' not in path:
+                path += sep + 'X-Plex-Token=' + token
+            return path
+        # Sized requests go through Plex's own photo transcoder: a
+        # 240px card used to pull the full 2000x3000 JPEG and make
+        # the Pi4 decode it (visible scroll stutter). Server-side
+        # downscale is what official Plex clients do anyway.
+        if width and height:
+            return ('{}/photo/:/transcode?url={}&width={}&height={}'
+                    '&minSize=1&upscale=0&X-Plex-Token={}'.format(
+                        server_url, urllib.parse.quote(path),
+                        width, height, token))
+        return '{}?X-Plex-Token={}'.format(server_url + path, token)
+
+    def image_url(self, path, width=None, height=None):
+        return self._resolve_image(
+            path, self.server_url, self.token, width, height)
+
+    @staticmethod
     def _video_dict(item, server_url, token):
         def image_url(path, width=None, height=None):
-            if not path:
-                return ''
-            # Cloud provider metadata (Discover/Trending hubs) carries
-            # absolute image URLs -- just attach the token to them.
-            if path.startswith('http'):
-                sep = '&' if '?' in path else '?'
-                if 'X-Plex-Token' not in path:
-                    path += sep + 'X-Plex-Token=' + token
-                return path
-            # Sized requests go through Plex's own photo transcoder: a
-            # 240px card used to pull the full 2000x3000 JPEG and make
-            # the Pi4 decode it (visible scroll stutter). Server-side
-            # downscale is what official Plex clients do anyway.
-            if width and height:
-                return ('{}/photo/:/transcode?url={}&width={}&height={}'
-                        '&minSize=1&upscale=0&X-Plex-Token={}'.format(
-                            server_url, urllib.parse.quote(path),
-                            width, height, token))
-            return '{}?X-Plex-Token={}'.format(server_url + path, token)
+            return PlexClient._resolve_image(
+                path, server_url, token, width, height)
 
         # Shared normaliser keeps connector and direct-Plex payloads identical
         # (see divert_source.build_video_item).
@@ -554,6 +563,36 @@ class PlexClient:
                         '_person': True,
                     })
         return out[:20]
+
+    def playlists(self):
+        """Server-local playlists (`/playlists`, B10).
+
+        Directory entries normalised to card dicts (`type`='playlist')
+        carrying a `count` of leaf items and the composite artwork."""
+        data = self._request('/playlists', {'playlistType': 'video'})
+        mc = self._media_container(data)
+        out = []
+        for raw in mc.get('Metadata', []):
+            out.append({
+                'type': 'playlist',
+                'title': raw.get('title') or '',
+                'rating_key': raw.get('ratingKey'),
+                'count': raw.get('leafCount') or 0,
+                'smart': bool(raw.get('smart')),
+                'summary': raw.get('summary') or '',
+                'thumb_url': self.image_url(raw.get('composite'), 640, 360)
+                if raw.get('composite') else '',
+            })
+        return out
+
+    def playlist_items_with_total(self, rating_key, limit=50, offset=0):
+        """Items of a playlist (`/playlists/{key}/items`) + total."""
+        data = self._request(
+            '/playlists/{}/items'.format(rating_key), {
+                'X-Plex-Container-Size': limit,
+                'X-Plex-Container-Start': offset,
+            })
+        return self._metadata_list_with_total(data)
 
     def watch_history(self, limit=50):
         """Own watch history (`/status/sessions/history/all`, B6).

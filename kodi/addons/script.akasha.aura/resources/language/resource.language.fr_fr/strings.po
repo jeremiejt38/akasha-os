@@ -1659,3 +1659,8 @@ msgstr "Effacer l'historique"
 msgctxt "#33581"
 msgid "Genre"
 msgstr "Genre"
+
+# Playlists
+msgctxt "#33582"
+msgid "Playlists"
+msgstr "Playlists"

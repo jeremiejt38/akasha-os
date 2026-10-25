@@ -432,6 +432,9 @@ STRINGS = {
     # --- Enriched search (B8) ----------------------------------------------
     33580: ("Effacer l'historique", 'Clear history'),
     33581: ('Genre', 'Genre'),
+
+    # --- Server playlists (B10) --------------------------------------------
+    33582: ('Playlists', 'Playlists'),
 }
 
 MONTH_ABBRS = {
