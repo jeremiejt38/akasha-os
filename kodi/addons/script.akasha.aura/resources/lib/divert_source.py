@@ -329,6 +329,9 @@ def build_video_item(raw_item, image_resolver):
         'subtitle_label': _subtitle_label(raw_item),
         'part_key': part_key,
         'section_id': str(section_id) if section_id is not None else None,
+        # Plex's per-item blur palette (corner hex colors, no alpha) --
+        # used to tint the detail-page backdrop like the reference client.
+        'blur_colors': raw_item.get('UltraBlurColors') or {},
     }
 
 

@@ -1,6 +1,10 @@
 """Unit tests for divert_source.py — no xbmc dependency."""
 
+import os
+import sys
 import unittest
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
 
 import divert_source
 
@@ -272,6 +276,14 @@ class TestDivertSource(unittest.TestCase):
         items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
         self.assertEqual(len(items), 2)
         self.assertEqual(items[0]['title'], 'Sans titre')
+
+    def test_blur_colors_normalised(self):
+        raw = {'MediaContainer': {'Metadata': [
+            {'title': 'A', 'UltraBlurColors': {'topLeft': '5f3b2a'}},
+            {'title': 'B'}]}}
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        self.assertEqual(items[0]['blur_colors'], {'topLeft': '5f3b2a'})
+        self.assertEqual(items[1]['blur_colors'], {})
 
 
 if __name__ == '__main__':
