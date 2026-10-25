@@ -147,6 +147,7 @@ def _make_window():
     w._divert_sort = None
     w._divert_filter_genre = None
     w._divert_filter_unwatched = None
+    w._divert_filters = {}
     w._divert_search_query = ''
     w._divert_state = None
     w._divert_state_action = None

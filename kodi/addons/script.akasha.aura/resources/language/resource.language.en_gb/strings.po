@@ -1604,3 +1604,18 @@ msgstr ""
 msgctxt "#33570"
 msgid "Skip"
 msgstr ""
+
+# Filtres avancés…
+msgctxt "#33571"
+msgid "Advanced filters…"
+msgstr ""
+
+# Aucun filtre disponible
+msgctxt "#33572"
+msgid "No filters available"
+msgstr ""
+
+# Filtrer par {}
+msgctxt "#33573"
+msgid "Filter by {}"
+msgstr ""

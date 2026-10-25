@@ -510,6 +510,44 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertIn('state=stopped', url)
 
     @patch('urllib.request.urlopen')
+    def test_section_filters_lists_directory(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Directory': [
+                {'filter': 'genre', 'title': 'Genre', 'filterType': 'tag'},
+                {'filter': 'year', 'title': 'Année', 'filterType': 'integer'},
+                {'title': 'Sans clé'},  # no 'filter' attr -> skipped
+            ]}})
+        filters = self.client.section_filters('1')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/library/sections/1/filters', url)
+        self.assertEqual(filters, [
+            {'key': 'genre', 'title': 'Genre', 'type': 'tag'},
+            {'key': 'year', 'title': 'Année', 'type': 'integer'}])
+
+    @patch('urllib.request.urlopen')
+    def test_filter_values_lists_directory(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Directory': [
+                {'key': 1999, 'title': '1999'},
+                {'key': '2020', 'title': '2020'}]}})
+        values = self.client.filter_values('1', 'year')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/library/sections/1/year', url)
+        self.assertEqual(values, [
+            {'key': '1999', 'title': '1999'},
+            {'key': '2020', 'title': '2020'}])
+
+    @patch('urllib.request.urlopen')
+    def test_section_items_merges_dynamic_filters(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(
+            {'MediaContainer': {'Metadata': [], 'totalSize': 0}})
+        self.client.section_items_with_total(
+            '1', filters={'year': '1999', 'studio': '42'})
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('year=1999', url)
+        self.assertIn('studio=42', url)
+
+    @patch('urllib.request.urlopen')
     def test_item_markers_normalises_windows(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {'Metadata': [{'Marker': [
