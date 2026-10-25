@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.62.0...akasha-os-v0.63.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** Plex-style Skip Intro / Skip Credits chip (B2) ([#164](https://github.com/jeremiejt38/akasha-os/issues/164)) ([4ecece5](https://github.com/jeremiejt38/akasha-os/commit/4ecece549cf37e613da948e8d66aae2fe9f4ca1c))
+
 ## [0.62.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.61.0...akasha-os-v0.62.0) (2026-10-25)
 
 
