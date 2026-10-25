@@ -12,8 +12,8 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `0.69.3` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.69.3` — **déployée le 2026-10-25**
+- **Version livrée** : `0.69.4` (tags `akasha-os-vX.Y.Z`, Release Please).
+- **Version réellement sur le Pi** : `0.69.4` — **déployée le 2026-10-25**
   (push ciblé de `script.akasha.aura` + restart Kodi ; le flux complet
   reste tarball → `install.sh`). v0.68.1 :
   (le déploiement a d'abord poussé 0.59.0 depuis un `main` local périmé,
@@ -85,6 +85,12 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   bibliothèque (marqué `is_library`) ouvre le menu Épingler/Désépingler
   + Monter/Descendre ; réutilise `divert.pinned_libraries` /
   `divert.library_order` existants (v0.69.3).
+- **Masks de coins = teintes par `colordiffuse`, jamais de couleur
+  figée** : `poster/landscape-corners.png` et `cast-mask.png` étaient
+  cuits en `#0A0C10` → blocs noirs sur les fonds réels (`#0D1017`
+  fenêtre, `#10131A` fiches/sheets). Textures régénérées en blanc +
+  `colordiffuse` par surface ; Kodi ne clippe pas nativement, le mask
+  doit épouser le fond local (v0.69.4).
 
 - **Mission active** : boucle de parité visuelle/comportementale
   Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le
