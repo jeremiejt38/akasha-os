@@ -17,11 +17,12 @@ l'écran — en boucle. Claude (`claude-bridge` MCP, **session `plex-parity`
 obligatoire**) sert de partenaire design pour tout doute sur le comportement
 Plex/Google TV.
 
-## État des releases (au tag `akasha-os-v0.66.0`)
+## État des releases (au tag `akasha-os-v0.68.1`)
 
-**Le Pi (`root@192.168.1.88`) est toujours éteint — ~13 releases sont taguées
-mais JAMAIS déployées ni vérifiées à l'écran** (v0.54.3 → v0.66.0). Toute la
-parité fonctionnelle livrée reste « à vérifier à l'écran ».
+**Déployé sur le Pi le 2026-10-25** (`root@192.168.3.77` — vraie IP,
+`192.168.1.88` obsolète depuis la migration réseau du 23/10). Toute la
+parité fonctionnelle livrée jusqu'à v0.68.1 reste **« à vérifier à
+l'écran »**.
 
 Depuis le 2026-10-24/25, le backlog serveur est quasiment épuisé :
 v0.60→v0.66 couvrent B17 (états erreur), B1 (Up Next), B14 (chapitres OSD),
@@ -42,10 +43,10 @@ Back à deux niveaux, fade bord droit rangées/grille, icônes clavier.
 | v0.58.0 | Mode Ambiant Ken Burns façon Google TV : 2 slots `image` alternés (`ambient.slot`/`kb{0,1}`/`img{0,1}`), 45 s/photo, crossfade 3 s, preload 1,5 s, horloge démarre bas-gauche + scrims dégradés |
 | v0.59.0 | **`service.akasha.perfanalyzer`** (collecteur perf en fond, JSONL borné, boot marker autostart) + CLI **`analyser-de-performances`** ; **overlay de chargement permanent** sur les fenêtres natives (Home + menus nav : logo, « Chargement… », vague organique) — fini les flashs du menu Kodi au boot et au lancement vidéo |
 | v0.60.0–v0.66.0 | Tout le backlog serveur de parité (voir la liste ci-dessus + `PARITY.md`) |
+| v0.68.1 | Fix overlay de chargement (insertion avant `</controls>` au lieu d'un tail exact — seul Home.xml était patché), activation de `service.akasha.perfanalyzer` dans `install.sh` (restait désactivé), conditions Aura réécrites en DNF (Kodi ignore les parenthèses : « unmatched parentheses » dans kodi.log) |
 
-**Première action d'une nouvelle session : vérifier si le Pi est joignable
-(`ping -c1 -W3 192.168.1.88`) et déployer dès qu'il l'est** — ~13 versions
-en attente. Après déploiement, valider spécifiquement : tout le paragraphe
+**Première action d'une nouvelle session : vérification visuelle à l'écran**
+— le Pi tourne v0.68.1. Valider spécifiquement : tout le paragraphe
 « à vérifier à l'écran » de `PARITY.md`, la vague de l'écran de chargement
 natif, `analyser-de-performances` en SSH, le pic mémoire retour hub
 (perfanalyzer), le Back à deux niveaux, les feuilles d'options sur
@@ -55,10 +56,11 @@ pistes (B15).
 ## Déploiement
 
 `./scripts/apply.sh <ip> <password>` attend un mot de passe — **l'auth SSH
-fonctionne par clé** (`ssh -o BatchMode=yes root@192.168.1.88` passe sans mot
-de passe). Méthode utilisée la dernière fois : reconstituer les étapes
-d'`apply.sh` en key-auth (tarball `./scripts/install.sh` → scp → exécution
-`install.sh` sur le Pi → restart Kodi). Le Pi est une vraie TV de salon :
+fonctionne par clé** (`ssh -o BatchMode=yes root@192.168.3.77` passe sans mot
+de passe). Méthode utilisée : reconstituer les étapes d'`apply.sh` en
+key-auth (tarball du repo → scp → extraction → `install.sh` sur le Pi →
+`systemctl restart kodi`). **Toujours `git pull` avant de construire le
+tarball** — le repo avance vite. Le Pi est une vraie TV de salon :
 pas de reboot/poweroff/CEC sans confirmation ; préférer « Redémarrer Akasha »
 (Kodi seul).
 
