@@ -243,6 +243,21 @@
             </focusedlayout>
         </control>
 
+        <!-- "Popular Searches" heading: Plex shows it over the suggestion
+             grid while the query is empty; the filter pills take the same
+             spot once a query is typed. -->
+        <control type="label">
+            <left>560</left>
+            <top>44</top>
+            <width>1350</width>
+            <height>52</height>
+            <font>font_mini_bold</font>
+            <aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33584]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
+        </control>
+
         <!-- Filter pills: Tout | Films | Series | Episodes -->
         <control type="list" id="8120">
             <left>560</left>
@@ -253,6 +268,7 @@
             <scrolltime>120</scrolltime>
             <onleft>8100</onleft>
             <ondown>8130</ondown>
+            <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
             <itemlayout width="150" height="52">
                 <control type="image">
                     <left>0</left>

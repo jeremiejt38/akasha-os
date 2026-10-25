@@ -438,6 +438,9 @@ STRINGS = {
 
     # --- Version picker (B12) ----------------------------------------------
     33583: ('Lire la version…', 'Play Version'),
+
+    # --- Search Popular Searches heading ------------------------------------
+    33584: ('Recherches populaires', 'Popular Searches'),
 }
 
 MONTH_ABBRS = {

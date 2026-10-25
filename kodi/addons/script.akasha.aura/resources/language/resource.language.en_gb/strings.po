@@ -1669,3 +1669,8 @@ msgstr ""
 msgctxt "#33583"
 msgid "Play Version"
 msgstr ""
+
+# Recherches populaires
+msgctxt "#33584"
+msgid "Popular Searches"
+msgstr ""

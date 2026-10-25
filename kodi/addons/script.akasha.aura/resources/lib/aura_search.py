@@ -117,6 +117,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._render_results()
 
     def _render_results(self):
+        _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
         _set(self, 'AuraSearchEmpty',
              '1' if self.query and not self._results else '')
         try:
