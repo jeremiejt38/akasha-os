@@ -425,6 +425,9 @@ STRINGS = {
     33576: ('Activité', 'Activity'),
     33577: ('Votre activité', 'Your activity'),
     33578: ("Vous l'avez regardé le {}", 'You watched it on {}'),
+
+    # --- Go to Show from an episode (B11) ----------------------------------
+    33579: ('Aller à la série', 'Go to Show'),
 }
 
 MONTH_ABBRS = {

@@ -1644,3 +1644,8 @@ msgstr "Votre activité"
 msgctxt "#33578"
 msgid "You watched it on {}"
 msgstr "Vous l'avez regardé le {}"
+
+# Aller à la série
+msgctxt "#33579"
+msgid "Go to Show"
+msgstr "Aller à la série"
