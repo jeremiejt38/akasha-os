@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.5...akasha-os-v0.69.6) (2026-10-25)
+
+
+### Performance Improvements
+
+* **aura:** parallelize detail-page fetches and fix OOM from unscoped history ([#210](https://github.com/jeremiejt38/akasha-os/issues/210)) ([cb6914a](https://github.com/jeremiejt38/akasha-os/commit/cb6914a909c522fe28ca790689185ce0eb95e924))
+
 ## [0.69.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.4...akasha-os-v0.69.5) (2026-10-25)
 
 
