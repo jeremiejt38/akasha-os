@@ -18,6 +18,7 @@ import i18n
 
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
+ACTION_CONTEXT_MENU = 117
 
 KEYS_PANEL_ID = 8100
 RECENT_LIST_ID = 8110
@@ -321,7 +322,40 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._push_recent(self.query)
             self.close()
             return
+        if action.getId() == ACTION_CONTEXT_MENU:
+            # Plex long-press: media result cards open the option
+            # sheet; keyboard/pills/recent entries keep the
+            # long-press == click parity.
+            try:
+                if self.getFocusId() == RESULTS_PANEL_ID:
+                    self._result_sheet()
+                    return
+            except RuntimeError:
+                pass
+            try:
+                self.onClick(self.getFocusId())
+            except Exception:
+                pass
+            return
         super().onAction(action)
+
+    def _result_sheet(self):
+        try:
+            pos = self.getControl(RESULTS_PANEL_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self._results)):
+            return
+        item = self._results[pos]
+        if item.get('_person') or item.get('_genre'):
+            self._pick_result()
+            return
+        import context_sheet
+        context_sheet.open_sheet(
+            self, self.client, item, RESULTS_PANEL_ID,
+            self._pick_result,
+            on_removed=lambda p: self._results.pop(p)
+            if p < len(self._results) else None)
 
     def _pick_result(self):
         try:
