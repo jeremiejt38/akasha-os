@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.2...akasha-os-v0.69.3) (2026-10-25)
+
+
+### Bug Fixes
+
+* **aura:** button polish + sidebar kebab menu ([#202](https://github.com/jeremiejt38/akasha-os/issues/202)) ([42d9d7f](https://github.com/jeremiejt38/akasha-os/commit/42d9d7ff7b3cb1adb29106d7126a8265417c7421))
+
 ## [0.69.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.1...akasha-os-v0.69.2) (2026-10-25)
 
 
