@@ -81,9 +81,9 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 
 ### Écarts visuels restants (revue Claude sur captures)
 
-- **Clavier recherche** : touches `_`, `←`, `X` en texte brut vs icônes chez Plex ; touches plus petites.
-- **Recherche** : pas de rail, pas d'historique visible, pas de rangée « Popular Searches », zone droite vide avant saisie.
-- **Accueil** : rangée coupée net à x≈1823 (dernier poster rogné vs fade Plex), trou ~90 px entre titre et méta quand pas de clearlogo, icône « maison » fantôme près du titre (à investiguer).
+- ~~**Clavier recherche** : touches `_`, `←`, `X` en texte brut~~ → icônes `key-space`/`key-backspace`/`key-clear` (+ variants dark) overlay ; reste : touches plus petites.
+- **Recherche** : pas de rail, pas de rangée « Popular Searches » dédiée (suggestions `discover_hubs` dans la grille à la place).
+- **Accueil** : ~~rangée coupée net à x≈1823~~ → fade `scrim-row-right.png` sur les 5 rangées + la grille bibliothèque (à vérifier à l'écran) ; trou ~90 px entre titre et méta quand pas de clearlogo, icône « maison » fantôme près du titre (à investiguer).
 - **Hero** : suit le focus (vérifié) — mais seed au premier item de la première rangée, pas un carrousel vedette comme Plex.
 
 
