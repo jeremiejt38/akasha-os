@@ -984,6 +984,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._reco_open(paged.items[pos])
 
     def _reco_open(self, item):
+        if item['type'] == 'collection':
+            self._open_collection(item)
+            return
+        if item['type'] == 'playlist':
+            self._open_playlist(item)
+            return
         if item['type'] in ('artist', 'album'):
             self._open_music_node(item)
             return
