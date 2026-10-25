@@ -112,10 +112,24 @@ ACTION_ICON_OVERLAYS = {
     WATCHED_BUTTON_ID: (7094, 7095, 7096),
     MORE_BUTTON_ID: (7097, 7098),
 }
+# label overlay per action button: ControlButton.setLabel is not rendered
+# on this Kodi build (XML <label> bakes at parse time), so the pill text
+# lives on a sibling label control, visible only while the action has focus
+ACTION_LABEL_OVERLAYS = {
+    WATCH_BUTTON_ID: 7150,
+    RESTART_BUTTON_ID: 7151,
+    EXTRAS_BUTTON_ID: 7152,
+    WATCHLIST_BUTTON_ID: 7153,
+    RATE_BUTTON_ID: 7154,
+    WATCHED_BUTTON_ID: 7155,
+    MORE_BUTTON_ID: 7156,
+}
 ACTION_ROW_TOP = 576
 ACTION_ROW_LEFT = 105
 ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
+ACTION_LABEL_X = 66      # label zone offset inside the expanded pill
+ACTION_LABEL_PAD = 36    # right padding inside the pill
 
 
 def _set(window, prop, value):
@@ -556,9 +570,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         return i18n.tr(33109)
 
     def _set_action_labels(self):
+        # The pill text is drawn by the label overlay controls
+        # (ACTION_LABEL_OVERLAYS): ControlButton.setLabel writes a field
+        # this Kodi build never renders, so setting it is pointless.
         for cid in ACTION_ROW_IDS:
             try:
-                self.getControl(cid).setLabel(self._action_label(cid))
+                self.getControl(ACTION_LABEL_OVERLAYS[cid]).setLabel(
+                    self._action_label(cid))
             except (RuntimeError, KeyError):
                 pass
 
@@ -566,13 +584,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if control_id != focused_id:
             return ACTION_CIRCLE_W
         label = self._action_label(control_id)
-        # Rough text measure for RobotoCondensed-Bold 24 (font_tiny_bold):
-        # narrow glyphs ~12px, average ~16px, wide ones ~22px -- Kodi has
-        # no text-metrics API and clips overflowing labels into a scroll.
-        text_w = sum(22 if c in 'mwMWÉÈÊ' else
-                     (12 if c.isdigit() or c in ' ilj.,:;·\'()-–' else 16)
+        # Rough text measure for RobotoCondensed-Bold 28 (font_mini_bold):
+        # narrow glyphs ~14px, average ~19px, wide ones ~26px -- Kodi has
+        # no text-metrics API and clips overflowing labels.
+        text_w = sum(26 if c in 'mwMWÉÈÊ' else
+                     (14 if c.isdigit() or c in ' ilj.,:;·\'()-–' else 19)
                      for c in label)
-        return max(96, 110 + text_w)
+        return max(96, ACTION_LABEL_X + text_w + ACTION_LABEL_PAD)
 
     def _sync_action_row(self):
         """Plex layout: unfocused actions are 64px circles; the focused
@@ -611,6 +629,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     # 28px glyphs centred in the 64px circle, like Plex.
                     self.getControl(ov_id).setPosition(x + 18,
                                                        ACTION_ROW_TOP + 18)
+                except RuntimeError:
+                    pass
+            lb = ACTION_LABEL_OVERLAYS.get(cid)
+            if lb and w > ACTION_CIRCLE_W:
+                try:
+                    lbl = self.getControl(lb)
+                    lbl.setPosition(x + ACTION_LABEL_X, ACTION_ROW_TOP)
+                    lbl.setWidth(w - ACTION_LABEL_X - ACTION_LABEL_PAD + 8)
                 except RuntimeError:
                     pass
             x += w + ACTION_ROW_GAP
@@ -1067,7 +1093,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
         # 'Mark as watched/unwatched' label flips with the state
         try:
-            self.getControl(WATCHED_BUTTON_ID).setLabel(
+            self.getControl(ACTION_LABEL_OVERLAYS[WATCHED_BUTTON_ID]).setLabel(
                 self._action_label(WATCHED_BUTTON_ID))
         except RuntimeError:
             pass
