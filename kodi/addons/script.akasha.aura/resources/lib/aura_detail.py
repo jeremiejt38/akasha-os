@@ -112,6 +112,10 @@ ACTION_ICON_OVERLAYS = {
     WATCHED_BUTTON_ID: (7094, 7095, 7096),
     MORE_BUTTON_ID: (7097, 7098),
 }
+# Chip label ids per slot (7030 is the synopsis textbox -- the 5th label
+# jumps to 7032).
+CHIP_LABEL_IDS = (7022, 7024, 7026, 7028, 7032)
+
 # label overlay per action button: ControlButton.setLabel is not rendered
 # on this Kodi build (XML <label> bakes at parse time), so the pill text
 # lives on a sibling label control, visible only while the action has focus
@@ -396,21 +400,37 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # prefixes are only the fallback when no icon is known.
         chips = []
         if item.get('content_rating'):
-            chips.append((_age_label(item['content_rating']), ''))
-        if item.get('rating'):
-            chips.append(self._rating_chip(item['rating'],
-                                           item.get('rating_image')))
-        if item.get('audience_rating'):
-            chips.append(self._rating_chip(item['audience_rating'],
-                                           item.get('audience_rating_image'),
-                                           audience=True))
+            chips.append((_age_label(item['content_rating']), '', True))
+        # Plex draws up to 4 bare provider chips (icon + value, no pill)
+        # from the Ratings array; the legacy scalar fields are the
+        # fallback when the array is absent.
+        ratings = item.get('ratings') or []
+        if ratings:
+            for r in ratings[:4]:
+                chips.append((self._rating_chip(r.get('value'),
+                                               r.get('image'),
+                                               audience=r.get('type') == 'audience')
+                              + (False,)))
+        else:
+            if item.get('rating'):
+                chips.append((self._rating_chip(item['rating'],
+                                               item.get('rating_image'))
+                              + (False,)))
+            if item.get('audience_rating'):
+                chips.append((self._rating_chip(item['audience_rating'],
+                                               item.get('audience_rating_image'),
+                                               audience=True)
+                              + (False,)))
         chip_x = 105
-        for slot in range(3):
+        for slot in range(5):
             _set(self, 'AuraDetailChip{}'.format(slot), '')
             _set(self, 'AuraDetailChipIcon{}'.format(slot), '')
-        for slot, (text, icon) in enumerate(chips[:3]):
+            _set(self, 'AuraDetailChipBg{}'.format(slot), '')
+        for slot, (text, icon, pill) in enumerate(chips[:5]):
             width = 34 + len(text) * 11 + (30 if icon else 0)
             _set(self, 'AuraDetailChip{}'.format(slot), '1')
+            if pill:
+                _set(self, 'AuraDetailChipBg{}'.format(slot), '1')
             try:
                 self.getControl(7021 + slot * 2).setPosition(chip_x, 356)
                 self.getControl(7021 + slot * 2).setWidth(width)
@@ -420,12 +440,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     lbl_x, lbl_w = chip_x + 34, width - 40
                 else:
                     lbl_x, lbl_w = chip_x, width
-                self.getControl(7022 + slot * 2).setPosition(lbl_x, 356)
-                self.getControl(7022 + slot * 2).setWidth(lbl_w)
-                self.getControl(7022 + slot * 2).setLabel(text)
+                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 356)
+                self.getControl(CHIP_LABEL_IDS[slot]).setWidth(lbl_w)
+                self.getControl(CHIP_LABEL_IDS[slot]).setLabel(text)
             except RuntimeError:
                 pass
-            chip_x += width + 12
+            chip_x += width + (12 if pill else 26)
 
     @staticmethod
     def _rating_chip(value, rating_image, audience=False):
@@ -479,13 +499,22 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             lst = self.getControl(SEASONS_LIST_ID)
             lst.reset()
             for season in self._seasons:
-                li = xbmcgui.ListItem(season.get('title') or '')
+                li = xbmcgui.ListItem(self._season_label(season))
                 li.setArt({'poster': season.get('poster_url')
                                        or season.get('thumb_url') or ''})
                 li.setProperty('watched', '1' if season.get('watched') else '0')
                 lst.addItem(li)
         except RuntimeError:
             pass
+
+    @staticmethod
+    def _season_label(season):
+        """UI label for a season row card / episodes header -- the server
+        title is in the server locale ('Season 7'), so rebuild it through
+        i18n like the strip pills do (33102 'Saison {}')."""
+        idx = season.get('index')
+        return i18n.tr(33102).format(
+            idx if idx is not None else (season.get('title') or '?'))
 
     def _load_episodes(self, season_pos):
         season = self._seasons[season_pos]
@@ -498,7 +527,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _render_episodes(self):
         season = self._seasons[self._active_season]
         try:
-            self.getControl(7060).setLabel(season.get('title') or '')
+            self.getControl(7060).setLabel(self._season_label(season))
         except RuntimeError:
             pass
         _set(self, 'AuraDetailSectionTitle', '1')
@@ -637,6 +666,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     lbl = self.getControl(lb)
                     lbl.setPosition(x + ACTION_LABEL_X, ACTION_ROW_TOP)
                     lbl.setWidth(w - ACTION_LABEL_X - ACTION_LABEL_PAD + 8)
+                    # _set_action_labels() runs at populate time, when the
+                    # resume/next-episode lookup can still be empty -- the
+                    # pill then stays blank until re-set (observed on the
+                    # Pi: empty 648px 'Reprendre' pill). Re-sync the text
+                    # here so late-resolving labels always render.
+                    text = self._action_label(cid)
+                    if lbl.getLabel() != text:
+                        lbl.setLabel(text)
                 except RuntimeError:
                     pass
             x += w + ACTION_ROW_GAP

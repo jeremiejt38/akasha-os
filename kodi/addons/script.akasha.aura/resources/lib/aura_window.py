@@ -374,6 +374,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # rule as the connector token -- docs/aura/decisions.md).
             self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK, interactive=False)
             self._load_pinned_apps()
+            self._load_avatar()
             self._focus_tab(self.active_tab)
             self._sync_navigation()
             self._update_bar_focused()
@@ -404,6 +405,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     pass
         except Exception as e:
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
+
+    def _load_avatar(self):
+        """Fetch the plex.tv account avatar in the background.
+
+        Plex TV renders the user's real picture (orange disc in the
+        reference captures) instead of a generic placeholder. One shot
+        per window open; a blank result keeps the bundled avatar-plex.png
+        via the String.IsEmpty fallback in the XML."""
+        def worker():
+            try:
+                client = self._plex_client
+                if client is None:
+                    server_url = self.addon.getSetting('plex.server_url')
+                    token = self.addon.getSetting('plex.token')
+                    if not config.is_plex_configured(server_url, token):
+                        return
+                    client = plex_client.PlexClient(server_url, token, timeout=5)
+                thumb = client.user_thumb()
+                if thumb:
+                    self.setProperty('AuraAvatar', thumb)
+            except Exception as e:
+                xbmc.log('Akasha Aura: avatar fetch failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+        threading.Thread(target=worker, daemon=True).start()
 
     def _get_connector_client(self, prompt_if_missing=False):
         """Return an authenticated ConnectorClient, or None if unavailable.
@@ -656,6 +681,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # that have no poster content to render.
             if hub.get('style') in ('button', 'availabilityPlatforms'):
                 continue
+            # 'On Deck' is the server's pre-merged continue queue: Plex
+            # folds it into 'Continue Watching' and never renders a second
+            # same-titled row on home (reference first_load/row2-7).
+            if section is None and \
+                    (hub.get('identifier') or '').lower() == 'home.ondeck':
+                continue
             if not hub['items'] and not hub['key']:
                 continue
             # Distinct sections can emit same-titled hubs ("Oh, The Horror!"
@@ -762,12 +793,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         return -1
 
     def _reco_slot_list_id(self, slot_index):
-        """The list id actually visible in slot `slot_index`: the landscape
-        twin when the bound hub has style='hero', the poster list else."""
-        index = self._hub_offset + slot_index
-        row = self._hub_rows[index] if index < len(self._hub_rows) else None
-        if row and row.get('style') == 'hero':
-            return RECO_LANDSCAPE_IDS[slot_index]
+        """The list id actually visible in slot `slot_index`.
+
+        Plex Android TV renders Continue Watching (the only style='hero'
+        hub) as a poster shelf like every other row -- the landscape twin
+        lists stay bound but permanently hidden (neutralised in
+        _rebind_reco_slots), so this always resolves to the poster id."""
         return RECO_LIST_IDS[slot_index]
 
     def _rebind_reco_slots(self):
@@ -798,6 +829,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     pass
                 continue
             style = row.get('style') or 'shelf'
+            # Plex TV renders the 'hero' hub (Continue Watching) as a
+            # poster shelf with progress bars (reference captures) -- the
+            # server style hint does not map to landscape cards here.
+            if style == 'hero':
+                style = 'shelf'
             self.setProperty('AuraRowStyle{}'.format(i), style)
             effective_id = land_id if style == 'hero' else list_id
             hidden_id, hidden_lst = (list_id, poster_lst) \
@@ -3613,11 +3649,6 @@ def _hub_title_fr(hub):
         'continue' in identifier or 'ondeck' in identifier
         or 'inprogress' in identifier or 'continue watching' in title_lc
         or 'on deck' in title_lc)
-    # Standard Plex hubs ("Continue Watching", "Recently Added"...) carry
-    # no server suffix in the reference client; only curated hubs do
-    # ("Top Movies in Mystère · Akasha").
-    suffix = False
-
     if standard:
         base = i18n.tr(33137)
     elif 'recentlyadded' in identifier or 'recently added' in title_lc:
@@ -3632,7 +3663,6 @@ def _hub_title_fr(hub):
             or 'recently viewed' in title_lc or 'recently watched' in title_lc:
         base = i18n.tr(33140)
     else:
-        suffix = True
         # Discover ("Tendances") provider hub identifiers.
         discover_titles = {
             'home.recently-released-trailers': i18n.tr(33160),
@@ -3650,9 +3680,11 @@ def _hub_title_fr(hub):
         }
         base = discover_titles.get(identifier, title)
 
-    # Plex suffixes section-scoped rows with the server name (" · Akasha"),
-    # home-scoped hubs (identifier 'home.*', context 'hub.home.*') get none.
-    scoped = suffix and bool(identifier) and not identifier.startswith('home.') \
+    # Plex suffixes every section-scoped row with the server name
+    # ("Recently Added in Films · Akasha", "Top Movies in Mystère ·
+    # Akasha" -- standard hubs included); home-scoped hubs (identifier
+    # 'home.*', context 'hub.home.*') get none.
+    scoped = bool(identifier) and not identifier.startswith('home.') \
         and 'hub.home' not in context
     if scoped and '·' not in base:
         # Plex renders the server suffix smaller and grey; Kodi labels
