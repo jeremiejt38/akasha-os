@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.1...akasha-os-v0.69.2) (2026-10-25)
+
+
+### Bug Fixes
+
+* **aura:** chain reco slot up/down navigation explicitly ([#199](https://github.com/jeremiejt38/akasha-os/issues/199)) ([7c84f8f](https://github.com/jeremiejt38/akasha-os/commit/7c84f8f39e2b8d9f4e36ed6daf95a97e4dc8578a))
+
 ## [0.69.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.0...akasha-os-v0.69.1) (2026-10-25)
 
 
