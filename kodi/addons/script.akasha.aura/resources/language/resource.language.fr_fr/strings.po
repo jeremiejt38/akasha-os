@@ -1649,3 +1649,13 @@ msgstr "Vous l'avez regardé le {}"
 msgctxt "#33579"
 msgid "Go to Show"
 msgstr "Aller à la série"
+
+# Effacer l'historique
+msgctxt "#33580"
+msgid "Clear history"
+msgstr "Effacer l'historique"
+
+# Genre
+msgctxt "#33581"
+msgid "Genre"
+msgstr "Genre"

@@ -428,6 +428,10 @@ STRINGS = {
 
     # --- Go to Show from an episode (B11) ----------------------------------
     33579: ('Aller à la série', 'Go to Show'),
+
+    # --- Enriched search (B8) ----------------------------------------------
+    33580: ("Effacer l'historique", 'Clear history'),
+    33581: ('Genre', 'Genre'),
 }
 
 MONTH_ABBRS = {
