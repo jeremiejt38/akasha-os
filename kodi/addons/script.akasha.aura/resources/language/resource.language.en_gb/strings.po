@@ -1574,3 +1574,18 @@ msgstr ""
 msgctxt "#33564"
 msgid "Cancel"
 msgstr ""
+
+# Chapitres
+msgctxt "#33565"
+msgid "Chapters"
+msgstr ""
+
+# Chapitre {}
+msgctxt "#33566"
+msgid "Chapter {}"
+msgstr ""
+
+# Aucun chapitre
+msgctxt "#33567"
+msgid "No chapters"
+msgstr ""

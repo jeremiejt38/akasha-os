@@ -401,6 +401,11 @@ STRINGS = {
     33562: ('Lecture dans {} s', 'Playing in {} s'),
     33563: ('Lire maintenant', 'Play now'),
     33564: ('Annuler', 'Cancel'),
+
+    # --- OSD chapters list (B14) ------------------------------------------
+    33565: ('Chapitres', 'Chapters'),
+    33566: ('Chapitre {}', 'Chapter {}'),
+    33567: ('Aucun chapitre', 'No chapters'),
 }
 
 MONTH_ABBRS = {

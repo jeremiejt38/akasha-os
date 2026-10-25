@@ -203,6 +203,47 @@ def _transcode_playlist(server, token, rating_key, kbps, resolution,
     return '{}{}X-Plex-Token={}'.format(playlist, sep, token)
 
 
+def _chapter_time_seconds(value):
+    """JSON-RPC reports chapter times in plain seconds; Player 'time'
+    fields are {hours,minutes,seconds,milliseconds} dicts. Accept both."""
+    if isinstance(value, dict):
+        return (value.get('hours', 0) * 3600 + value.get('minutes', 0) * 60
+                + value.get('seconds', 0))
+    return float(value or 0)
+
+
+def _fmt_chapter_time(seconds):
+    """'42:17' / '1:02:17' -- Plex-style chapter timestamp."""
+    total = int(seconds)
+    hours, rem = divmod(total, 3600)
+    minutes, secs = divmod(rem, 60)
+    if hours:
+        return '{}:{:02d}:{:02d}'.format(hours, minutes, secs)
+    return '{}:{:02d}'.format(minutes, secs)
+
+
+def _chapter_label(chapter, index):
+    name = chapter.get('name') or i18n.tr(33566).format(index + 1)
+    return '{} — {}'.format(
+        name, _fmt_chapter_time(_chapter_time_seconds(chapter.get('time'))))
+
+
+def chapter_entries(chapters, position_s):
+    """(label, seconds, is_current) rows for the OSD chapters list.
+    Current chapter = the last one starting at or before `position_s`
+    (Plex highlights where you are in the chapter list)."""
+    rows = [(ch, _chapter_time_seconds(ch.get('time')))
+            for ch in chapters or []]
+    current_idx = -1
+    for i, (_, t) in enumerate(rows):
+        if t <= position_s:
+            current_idx = i
+        else:
+            break
+    return [(_chapter_label(ch, i), t, i == current_idx)
+            for i, (ch, t) in enumerate(rows)]
+
+
 class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
     """The floating picker. `mode` selects which Plex circle invoked it."""
 
@@ -215,6 +256,9 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         if self.mode == 'quality':
             self.getControl(10).setLabel(i18n.tr(33019))
             self._build_quality(lst)
+        elif self.mode == 'chapters':
+            self.getControl(10).setLabel(i18n.tr(33565))
+            self._build_chapters(lst)
         else:
             self.getControl(10).setLabel(i18n.tr(33200))
             self._build_streams(lst)
@@ -286,6 +330,24 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         self._add(lst, i18n.tr(33211),
                   action=('builtin', 'osdaudiosettings'))
 
+    def _build_chapters(self, lst):
+        """Chapters of the playing file (B14): title + timestamp rows,
+        current chapter selected -- seek on pick like Plex's list."""
+        props = _jsonrpc('Player.GetProperties', {
+            'playerid': 1,
+            'properties': ['chapters', 'time']})
+        try:
+            position = xbmc.Player().getTime()
+        except RuntimeError:
+            position = _chapter_time_seconds(props.get('time'))
+        entries = chapter_entries(props.get('chapters'), position)
+        if not entries:
+            self._add(lst, i18n.tr(33567), header=True)
+            return
+        for label, seconds, current in entries:
+            self._add(lst, label, selected=current,
+                      action=('chapter', seconds))
+
     # -- actions ----------------------------------------------------------
 
     def onClick(self, control_id):
@@ -308,6 +370,12 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
             self.close()
             xbmc.executebuiltin(
                 'ActivateWindow({})'.format(self._actions[pos][1]))
+        elif kind == 'chapter':
+            self.close()
+            try:
+                xbmc.Player().seekTime(float(self._actions[pos][1]))
+            except RuntimeError:
+                pass
         elif kind == 'quality':
             _, pid, kbps, res = self._actions[pos]
             self.close()
