@@ -2,7 +2,7 @@
 
 > Passation pour une nouvelle session Devin, au `2026-10-24` (tag
 > `akasha-os-v0.59.0`), **actualisée au 2026-10-25** (tag
-> `akasha-os-v0.68.1`, déployée sur le Pi). Complète
+> `akasha-os-v0.69.0`, déployée sur le Pi). Complète
 > `docs/plex-parity/HANDOFF.md` (focus parité Plex, détails outils/pièges) et
 > `docs/plex-parity/PARITY.md` (audit d'écrans + backlog).
 
@@ -12,8 +12,10 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `0.68.1` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.68.1` — **déployée le 2026-10-25**
+- **Version livrée** : `0.69.0` (tags `akasha-os-vX.Y.Z`, Release Please).
+- **Version réellement sur le Pi** : `0.69.0` — **déployée le 2026-10-25**
+  (push ciblé de `script.akasha.aura` + restart Kodi ; le flux complet
+  reste tarball → `install.sh`). v0.68.1 :
   (le déploiement a d'abord poussé 0.59.0 depuis un `main` local périmé,
   puis 0.68.0, puis le fix aura → refaire `git pull` avant tout déploiement,
   le repo avance vite : une session parallèle a livré 0.60 → 0.68 pendant la
@@ -58,6 +60,14 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   removeFromContinueWatching) — le connector n'a pas de mutations.
 - **Dedup par série** dans les rangées de reco (épisode→série via
   `grandparent_rating_key`).
+- **Focus « Plex » au premier contenu** : Down depuis la barre atterrit
+  sur la première rangée/grille (pas les sous-onglets), sélection d'un
+  onglet focus la grille, fiche série → saison en cours, saison → prochain
+  épisode, Back centré sur la carte quittée (v0.69.0).
+- **Focus différé par thread + génération** plutôt que `setFocus` au clic :
+  un `setFocus` dans le même tick qu'un toggle `<visible>` est annulé par
+  la revalidation Kodi → délai 0,3 s + compteur de génération (toute
+  action utilisateur invalide le focus en attente) (v0.69.0).
 
 ## En cours
 
@@ -65,13 +75,16 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le
   cycle tant que tout n'est pas identique… polish visuel le plus parfait
   possible »). Audit complet dans `docs/plex-parity/PARITY.md`.
-- **Prochaine étape prévue** : **vérification visuelle sur la TV** (v0.68.1
-  déployée : vague de chargement sur les fenêtres natives, Ken Burns
-  ambiant, top-bar escamotable, état d'erreur B17, playlists B10/B15/B16,
-  `analyser-de-performances` actif et collectant). Puis reprendre le
+- **Prochaine étape prévue** : **vérification visuelle sur la TV** —
+  v0.69.0 déployée, à valider à l'écran : flux de focus Plex (barre →
+  contenu, onglet → grille, saison/épisode en cours, retour centré),
+  animation de sortie de rangée adoucie (moitié distance + fade +
+  ease-in/out), cadre de focus plus fin (4 px), semi-opaque (`B3FFFFFF`)
+  et zoomé avec la carte + coins arrondis conservés. Puis reprendre le
   backlog dans `docs/plex-parity/PARITY.md` — attention, il avance vite
   (session parallèle : B8, B10, B12, B15, B16, B17 livrés entre 0.60 et
-  0.68). Corriger aussi l'IP obsolète dans `AGENTS.md` (`.88` → `.77`).
+  0.68 ; le flux de focus v0.69.0 couvre l'item « restauration du focus »
+  partiellement). L'IP dans `AGENTS.md` est corrigée (`.77`).
 - **Travail non commité** : aucun dans le repo (`git status` propre sauf
   `ARIANE.md` régénérable).
 - **Stash orphelin** : `stash@{0}` « wip-fix-aura-interruptions » (guide/
@@ -95,7 +108,12 @@ type Plex Android TV (modules Divertissement / Jeux / App).
 3. **B1** — comportement « On Deck / Up Next » Plex (si non livré).
 4. **B14** — chapitres dans l'OSD (si non livré).
 5. Restauration du focus au retour de fiche/recherche/sheet ; refresh de
-   rangée après action ; threads touchant l'UI après fermeture de fenêtre.
+   rangée après action ; threads touchant l'UI après fermeture de fenêtre
+   — **partiellement couvert par le flux de focus v0.69.0** ; à revérifier
+   sur device (le focus différé tourne dans un thread Python — vérifier
+   qu'il ne subsiste pas d'erreur « asked to focus, but it can't » liée à
+   notre code ; celle de `defaultcontrol 2007` au chargement est
+   préexistante et bénigne).
 6. Appuis longs : personnes, résultats recherche, tuiles app, store,
    épisodes de la fiche.
 7. États vides/erreur/chargement sur device ; Back à la racine (sortie
@@ -128,6 +146,11 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   enabled` d'`install.sh` doit inclure tout nouvel addon service sinon il
   reste désactivé dans Addons33.db et ne démarre jamais (bug trouvé sur
   perfanalyzer, corrigé v0.68.1).
+- **Focus et `<visible>` en même tick** : `setFocus` juste après avoir
+  rendu un contrôle visible est annulé par la revalidation Kodi → pattern
+  focus différé dans `aura_window.py::_defer_focus` (thread 0,3 s +
+  garde de génération ; `AlarmClock` inadapté, granularité `hh:mm`).
+  Vérifier sur device que le thread ne viole pas la règle UI-thread.
 - `tail -1`-style de matching fragile dans les patchs skin : les fenêtres
   AH2 finissent par `</controls>\n\n</window>` (ligne vide) — insérer avant
   le dernier `</controls>` plutôt que de matcher une fin exacte.
