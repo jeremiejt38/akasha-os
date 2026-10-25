@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.67.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.66.0...akasha-os-v0.67.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** render hero-style hubs as Plex landscape cards ([#187](https://github.com/jeremiejt38/akasha-os/issues/187)) ([85a9df8](https://github.com/jeremiejt38/akasha-os/commit/85a9df8572137a2c199caa268048ffd27a0aaa3a))
+* **osd:** Plex-style h:mm timecodes on seek bar ([#186](https://github.com/jeremiejt38/akasha-os/issues/186)) ([0a920a6](https://github.com/jeremiejt38/akasha-os/commit/0a920a6a513ff2e9f513e79fa3b327082beadadf))
+
+
+### Bug Fixes
+
+* **aura:** route collection/playlist cards opened from reco rows ([#183](https://github.com/jeremiejt38/akasha-os/issues/183)) ([f4891dd](https://github.com/jeremiejt38/akasha-os/commit/f4891ddc8ca59db71628c6da74167ec94377615b))
+
 ## [0.66.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.65.0...akasha-os-v0.66.0) (2026-10-25)
 
 
