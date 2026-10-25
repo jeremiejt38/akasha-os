@@ -89,7 +89,7 @@
                 <top>256</top>
                 <width>224</width>
                 <height>56</height>
-                <font>font_tiny_bold</font>
+                <font>font_mini_bold</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onright>6405</onright>
@@ -106,7 +106,7 @@
                 <top>256</top>
                 <width>224</width>
                 <height>56</height>
-                <font>font_tiny_bold</font>
+                <font>font_mini_bold</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>6404</onleft>

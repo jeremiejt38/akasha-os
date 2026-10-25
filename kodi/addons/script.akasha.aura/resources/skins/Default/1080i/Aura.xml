@@ -3064,6 +3064,15 @@
                             <texture colordiffuse="AAFFFFFF">icon-chevron-right.png</texture>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
+                        <control type="image">
+                            <left>352</left>
+                            <top>16</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="73FFFFFF">icon-dots.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_library))</visible>
+                        </control>
                         <control type="label">
                             <left>30</left>
                             <top>0</top>
@@ -3121,6 +3130,15 @@
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="FF1A1A1A">icon-chevron-right.png</texture>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>352</left>
+                            <top>16</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="FF1A1A1A">icon-dots-dark.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_library))</visible>
                         </control>
                         <control type="label">
                             <left>30</left>

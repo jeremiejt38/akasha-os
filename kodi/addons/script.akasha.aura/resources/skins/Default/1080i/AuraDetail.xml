@@ -260,7 +260,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onright>7106</onright>
         <ondown>7110</ondown>
     </control>
@@ -313,7 +313,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7100</onleft>
         <onright>7109</onright>
         <ondown>7110</ondown>
@@ -351,7 +351,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7106</onleft>
         <onright>7103</onright>
         <ondown>7110</ondown>
@@ -388,7 +388,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7109</onleft>
         <onright>7104</onright>
         <ondown>7110</ondown>
@@ -424,7 +424,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7103</onleft>
         <onright>7101</onright>
         <ondown>7110</ondown>
@@ -460,7 +460,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7104</onleft>
         <onright>7102</onright>
         <ondown>7110</ondown>
@@ -504,7 +504,7 @@
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
         <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
-        <texturefocus colordiffuse="FFFFFFFF" border="32">rounded-solid.png</texturefocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7101</onleft>
         <ondown>7110</ondown>
     </control>
@@ -524,6 +524,95 @@
         <height>24</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-dots-dark.png</texture>
+        <visible>Control.HasFocus(7102)</visible>
+    </control>
+    <!-- Action label overlays: ControlButton.setLabel is not rendered on
+         this Kodi build (button labels bake at parse time), so the pill
+         text lives on sibling label controls positioned over the expanded
+         button by _sync_action_row(), shown only while that action holds
+         focus: same pattern as the icon overlays above. -->
+    <control type="label" id="7150">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7100)</visible>
+    </control>
+    <control type="label" id="7151">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7106)</visible>
+    </control>
+    <control type="label" id="7152">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7109)</visible>
+    </control>
+    <control type="label" id="7153">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7103)</visible>
+    </control>
+    <control type="label" id="7154">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7104)</visible>
+    </control>
+    <control type="label" id="7155">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7101)</visible>
+    </control>
+    <control type="label" id="7156">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_mini_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
         <visible>Control.HasFocus(7102)</visible>
     </control>
 
@@ -1028,15 +1117,15 @@
                 <top>140</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_tiny_bold</font>
+                <font>font_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33115]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7200</onup>
                 <ondown>7204</ondown>
                 <onleft>7102</onleft>
@@ -1065,15 +1154,15 @@
                 <top>228</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_tiny_bold</font>
+                <font>font_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33116]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7200</onup>
                 <ondown>7206</ondown>
                 <onleft>7102</onleft>
@@ -1099,15 +1188,15 @@
                 <top>316</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_tiny_bold</font>
+                <font>font_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33574]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7204</onup>
                 <ondown>7208</ondown>
                 <onleft>7102</onleft>
@@ -1133,15 +1222,15 @@
                 <top>396</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_tiny_bold</font>
+                <font>font_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33579]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7206</onup>
                 <ondown>7209</ondown>
                 <onleft>7102</onleft>
@@ -1168,15 +1257,15 @@
                 <top>476</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_tiny_bold</font>
+                <font>font_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33583]</label>
                 <align>left</align>
                 <aligny>center</aligny>
                 <textoffsetx>84</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
-                <texturefocus colordiffuse="FFFFFFFF">rounded-solid.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7208</onup>
                 <ondown>7209</ondown>
                 <onleft>7102</onleft>

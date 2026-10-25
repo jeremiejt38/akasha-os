@@ -1792,6 +1792,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         for section in self._divert_sections:
             li = xbmcgui.ListItem(section['title'])
             li.setArt({'icon': self._divert_section_icon(section)})
+            # Real sections get the '...' kebab on the focused row --
+            # Left opens _sidebar_item_menu (pin/reorder). The playlists
+            # pseudo-entry has no pin semantics, so no affordance.
+            if section.get('type') != 'playlist':
+                li.setProperty('is_library', '1')
             sidebar.addItem(li)
 
         more_item = xbmcgui.ListItem(i18n.tr(33007))
@@ -2573,6 +2578,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             elif focused == DIVERT_SIDEBAR_ID:
                 self._on_sidebar_item_selected()
             return
+        # Sidebar kebab: Plex-style per-library '...' menu, reachable by
+        # pressing Left on a sidebar library item (Left is otherwise a
+        # dead key on the rail). Offers pin/unpin plus move up/down when
+        # the library is pinned.
+        if aid == ACTION_MOVE_LEFT and focused == DIVERT_SIDEBAR_ID:
+            self._sidebar_item_menu()
+            self._update_bar_focused()
+            return
         # The A-Z rail's static <content> items carry no <onclick>, so Kodi
         # treats them as dead items and never dispatches GUI_MSG_CLICKED to
         # onClick() -- Select must be routed manually, like a long-press.
@@ -3272,6 +3285,83 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         subprocess.run(['/storage/.kodi/scripts/show-splash.sh',
                          '/storage/.kodi/media/splash-shutdown.png', '1'])
         subprocess.Popen(['systemctl', 'poweroff'], start_new_session=True)
+
+    def _sidebar_item_menu(self):
+        """Per-library '...' menu, opened by pressing Left on a sidebar
+        library item: pin/unpin from favorites, plus move up/down when
+        the item is pinned -- the two options Plex groups under the
+        item's kebab."""
+        try:
+            sidebar = self.getControl(DIVERT_SIDEBAR_ID)
+            pos = sidebar.getSelectedPosition()
+        except RuntimeError:
+            return
+        section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
+        if not (0 <= section_index < len(self._divert_sections)):
+            return
+        section = self._divert_sections[section_index]
+        # The playlists pseudo-entry has no pin/reorder semantics.
+        if section.get('type') == 'playlist':
+            return
+        key = section['key']
+        title = section['title']
+        pinned_set = set(self._divert_pinned_libraries)
+        pinned = key in pinned_set
+
+        options = [i18n.tr(33078 if pinned else 33079).format(title)]
+        actions = ['toggle']
+        pinned_order = [s['key'] for s in self._all_divert_sections
+                        if s['key'] in pinned_set]
+        if pinned:
+            i = pinned_order.index(key)
+            if i > 0:
+                options.append(i18n.tr(33080).format(title))
+                actions.append('up')
+            if i < len(pinned_order) - 1:
+                options.append(i18n.tr(33081).format(title))
+                actions.append('down')
+
+        idx = xbmcgui.Dialog().contextmenu(options)
+        if idx < 0 or idx >= len(actions):
+            return
+
+        if actions[idx] == 'toggle':
+            if pinned:
+                pinned_set.discard(key)
+            else:
+                pinned_set.add(key)
+            self._divert_pinned_libraries = list(pinned_set)
+            self.addon.setSetting(
+                'divert.pinned_libraries',
+                config.serialize_pinned(self._divert_pinned_libraries))
+        else:
+            # Swap inside the global order so unpinned entries keep
+            # their slots.
+            order = [s['key'] for s in self._all_divert_sections]
+            i = pinned_order.index(key)
+            other = pinned_order[i - 1 if actions[idx] == 'up'
+                                 else i + 1]
+            ai, bi = order.index(key), order.index(other)
+            order[ai], order[bi] = order[bi], order[ai]
+            self._divert_library_order = order
+            self.addon.setSetting(
+                'divert.library_order', config.serialize_pinned(order))
+
+        self._load_divertissement()
+        # Keep focus on the sidebar where the user was; when the item
+        # just vanished (unpinned while the rail shows favorites only),
+        # clamp to the same row index rather than jumping to Accueil.
+        try:
+            sidebar = self.getControl(DIVERT_SIDEBAR_ID)
+            new_index = next(
+                (i for i, s in enumerate(self._divert_sections)
+                 if s['key'] == key), None)
+            new_pos = (DIVERT_SIDEBAR_LIBS_OFFSET + new_index
+                       if new_index is not None else pos)
+            sidebar.selectItem(min(new_pos, sidebar.size() - 1))
+            self.setFocus(sidebar)
+        except RuntimeError:
+            pass
 
     def _manage_libraries(self):
         """Show a dialog to pin/unpin and reorder every library section."""
