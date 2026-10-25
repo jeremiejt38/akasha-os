@@ -510,6 +510,28 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertIn('state=stopped', url)
 
     @patch('urllib.request.urlopen')
+    def test_item_markers_normalises_windows(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [{'Marker': [
+                {'type': 'intro', 'startTimeOffset': 5000,
+                 'endTimeOffset': 90000},
+                {'type': 'credits', 'startTimeOffset': 2400000,
+                 'endTimeOffset': 2520000}]}]}})
+        markers = self.client.item_markers('42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('includeMarkers=1', url)
+        self.assertEqual(markers, [
+            {'type': 'intro', 'start_ms': 5000, 'end_ms': 90000},
+            {'type': 'credits', 'start_ms': 2400000,
+             'end_ms': 2520000}])
+
+    @patch('urllib.request.urlopen')
+    def test_item_markers_empty_when_absent(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(
+            {'MediaContainer': {'Metadata': [{'title': 'x'}]}})
+        self.assertEqual(self.client.item_markers('42'), [])
+
+    @patch('urllib.request.urlopen')
     def test_report_timeline_never_cached(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({})
         self.client.report_timeline('42', 1000, 2000)

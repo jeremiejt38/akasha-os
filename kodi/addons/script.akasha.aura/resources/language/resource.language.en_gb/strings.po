@@ -1589,3 +1589,18 @@ msgstr ""
 msgctxt "#33567"
 msgid "No chapters"
 msgstr ""
+
+# Passer l'intro
+msgctxt "#33568"
+msgid "Skip Intro"
+msgstr ""
+
+# Passer le générique de fin
+msgctxt "#33569"
+msgid "Skip Credits"
+msgstr ""
+
+# Passer
+msgctxt "#33570"
+msgid "Skip"
+msgstr ""

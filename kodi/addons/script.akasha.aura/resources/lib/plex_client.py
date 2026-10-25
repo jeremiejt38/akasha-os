@@ -529,6 +529,27 @@ class PlexClient:
             items.append(item)
         return items
 
+    def item_markers(self, rating_key):
+        """Playback markers (intro/credits) of an item.
+
+        Plex tags `Marker` entries on the metadata when asked with
+        `includeMarkers=1` -- official clients turn them into the "Skip
+        Intro"/"Skip Credits" buttons while the position sits inside a
+        marker window (parity backlog B2)."""
+        data = self._request('/library/metadata/{}'.format(rating_key),
+                             {'includeMarkers': 1})
+        mc = self._media_container(data)
+        meta = (mc.get('Metadata') or [{}])[0]
+        return [
+            {
+                'type': m.get('type') or '',
+                'start_ms': int(m.get('startTimeOffset') or 0),
+                'end_ms': int(m.get('endTimeOffset') or 0),
+            }
+            for m in meta.get('Marker') or []
+            if m.get('endTimeOffset') is not None
+        ]
+
     def report_timeline(self, rating_key, time_ms, duration_ms,
                         state='playing'):
         """Report playback progress (`/:/timeline`).

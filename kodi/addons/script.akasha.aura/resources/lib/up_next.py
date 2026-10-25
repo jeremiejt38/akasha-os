@@ -218,6 +218,14 @@ def advance_via_up_next(addon_path):
     url = _stream_url(item)
     if not url:
         return False
+    try:
+        # B2: the chained episode has its own intro/credits windows --
+        # refresh the stored markers before the supervision loop polls.
+        import plex_client
+        osd_menu.store_markers(
+            plex_client.PlexClient(server, token, timeout=5), item)
+    except Exception:
+        pass
     li = xbmcgui.ListItem(item.get('title') or '')
     try:
         import aura_detail

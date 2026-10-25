@@ -406,6 +406,11 @@ STRINGS = {
     33565: ('Chapitres', 'Chapters'),
     33566: ('Chapitre {}', 'Chapter {}'),
     33567: ('Aucun chapitre', 'No chapters'),
+
+    # --- Skip Intro / Skip Credits chip (B2) ------------------------------
+    33568: ("Passer l'intro", 'Skip Intro'),
+    33569: ('Passer le générique de fin', 'Skip Credits'),
+    33570: ('Passer', 'Skip'),
 }
 
 MONTH_ABBRS = {

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha Plex-style skip chip (B2): the labelled pill Plex floats at
+     the bottom right of the player while the position sits inside an
+     intro/credits marker. OK seeks to the marker end, Back dismisses;
+     the dialog auto-closes when the marker window ends. -->
+<window type="dialog" id="1206">
+    <defaultcontrol>6410</defaultcontrol>
+    <controls>
+        <control type="group">
+            <left>1400</left>
+            <top>960</top>
+            <animation effect="slide" start="0,40" end="0,0" time="200" tween="quadratic" easing="out" condition="true">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="180" condition="true">WindowOpen</animation>
+            <animation effect="fade" start="100" end="0" time="140" easing="in">WindowClose</animation>
+            <control type="button" id="6410">
+                <left>0</left>
+                <top>0</top>
+                <width>400</width>
+                <height>72</height>
+                <font>font_midi</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onup>6410</onup>
+                <ondown>6410</ondown>
+                <onleft>6410</onleft>
+                <onright>6410</onright>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FF1A1A1A</focusedcolor>
+                <texturenofocus colordiffuse="CC14161F" border="36">rounded-solid.png</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="36">rounded-solid.png</texturefocus>
+            </control>
+        </control>
+    </controls>
+</window>

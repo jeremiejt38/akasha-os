@@ -53,6 +53,9 @@ QUEUE_ITEM_FIELDS = (
 # Set around a quality-switch restart so default.py's silence detector does
 # not mistake the stop/start gap for end-of-playback and reopen Aura on top.
 PROP_SWITCHING = 'AuraSwitchingPlayback'
+# Intro/credits marker windows fetched at play time (B2), keyed by
+# ratingKey so a quality switch still resolves them after the restart.
+PROP_MARKERS = 'AuraPlaybackMarkers'
 
 QUALITY_PRESETS = [
     ('original', i18n.tr(33210), None, None),
@@ -109,6 +112,40 @@ def store_playback_context(client, items):
     win.setProperty(PROP_QUEUE, json.dumps([
         {k: it.get(k) for k in QUEUE_ITEM_FIELDS if it.get(k) is not None}
         for it in (items or [])[1:]]))
+    store_markers(client, (items or [None])[0])
+
+
+def store_markers(client, item):
+    """Fetch and persist the intro/credits markers of the item about to
+    play (B2). Best-effort: a server without marker support, an offline
+    host or a connector client simply stores an empty map -- playback
+    must never wait on this."""
+    win = _home()
+    markers = {}
+    rk = (item or {}).get('rating_key')
+    fetch = getattr(client, 'item_markers', None)
+    if rk and fetch:
+        try:
+            result = fetch(rk)
+            if isinstance(result, list) and result:
+                markers[rk] = result
+        except Exception as e:
+            getattr(xbmc, 'log', lambda *a, **k: None)(
+                'Akasha Aura OSD: marker fetch failed: {}'.format(e),
+                getattr(xbmc, 'LOGWARNING', 2))
+    win.setProperty(PROP_MARKERS, json.dumps(markers))
+
+
+def _current_markers():
+    """Marker list of the *currently* playing item, [] when unknown."""
+    _server, _token, rating_key, _part = _playback_context()
+    if not rating_key:
+        return []
+    try:
+        markers = json.loads(_home().getProperty(PROP_MARKERS) or '{}')
+    except (ValueError, TypeError):
+        return []
+    return markers.get(rating_key) or []
 
 
 def _playback_context():

@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 
 import home_press_handler  # noqa: E402
 import settings_press_handler  # noqa: E402
+import skip_marker  # noqa: E402
 import timeline_reporter  # noqa: E402
 import up_next  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
@@ -99,6 +100,13 @@ if __name__ == '__main__':
     # "osdmenu": invoked from the VideoOSD circles mid-playback, while the
     # Aura process below is parked in its wait-for-end loop -- handle it
     # BEFORE the already-running guard, as a standalone dialog.
+    if 'skipmarker' in sys.argv[1:]:
+        # The parked supervision loop spotted an intro/credits marker:
+        # show the Plex-style skip chip as a standalone dialog.
+        import skip_marker
+        skip_marker.AuraSkipMarkerWindow(
+            'AuraSkipMarker.xml', ADDON_PATH, 'Default', '1080i').doModal()
+        sys.exit(0)
     if 'osdmenu' in sys.argv[1:]:
         import osd_menu
         if 'quality' in sys.argv[1:]:
@@ -192,6 +200,7 @@ if __name__ == '__main__':
                 # user stop (straight back to Aura).
                 remaining_s = None
                 silent = 0
+                skip_shown_for = None
                 while silent < 4:
                     if xbmc.Player().isPlayingVideo():
                         silent = 0
@@ -201,6 +210,19 @@ if __name__ == '__main__':
                                 remaining_s = total - xbmc.Player().getTime()
                         except RuntimeError:
                             pass
+                        # B2: inside an intro/credits marker, float the
+                        # Plex-style skip chip -- once per marker window,
+                        # and never again after a Back-dismiss.
+                        marker = skip_marker.update_active_marker()
+                        skip_key = ((marker.get('type'),
+                                     marker.get('start_ms'))
+                                    if marker else None)
+                        if skip_key and skip_key != skip_shown_for:
+                            skip_shown_for = skip_key
+                            xbmc.executebuiltin(
+                                'RunScript(script.akasha.aura,skipmarker)')
+                        elif not skip_key:
+                            skip_shown_for = None
                     # A quality switch stop/starts the player; the OSD menu
                     # holds this property across the gap so the brief silence
                     # isn't read as end-of-playback.
