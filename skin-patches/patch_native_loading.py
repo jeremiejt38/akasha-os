@@ -42,6 +42,10 @@ WINDOWS = (
 
 MARKER = 'AkashaLoadingOverlay'
 
+# Inserted right before the closing </controls> tag so the overlay sits on
+# top of every other control in the window. Kept separate from the
+# </controls></window> tail because skins may add comments or blank lines
+# between them.
 OVERLAY = '''
         <!-- Akasha loading overlay: permanent opaque cover over the native
              menu. These windows are transitions surfaces only on Akasha OS;
@@ -82,8 +86,7 @@ OVERLAY = '''
                 <animation effect="slide" start="-960,0" end="0,0" time="14000" loop="true" tween="linear" condition="true">Conditional</animation>
             </control>
         </control>
-    </controls>
-</window>'''
+'''
 
 
 def patch(skin_dir):
@@ -107,14 +110,14 @@ def patch(skin_dir):
             print('{} already has the loading overlay; skipping'.format(name))
             skipped += 1
             continue
-        tail = '</controls>\n</window>'
-        if tail not in content:
-            print('{}: window tail not found; NOT patched'.format(name))
+        pos = content.rfind('</controls>')
+        if pos == -1:
+            print('{}: </controls> not found; NOT patched'.format(name))
             continue
         backup = path + '.ah2-orig'
         if not os.path.exists(backup):
             shutil.copy2(path, backup)
-        content = content.replace(tail, OVERLAY)
+        content = content[:pos] + OVERLAY + content[pos:]
         with open(path, 'w', encoding='utf-8') as f:
             f.write(content)
         patched += 1
