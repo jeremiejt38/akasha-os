@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.61.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.60.0...akasha-os-v0.61.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** chapters list in the video OSD (B14) ([#160](https://github.com/jeremiejt38/akasha-os/issues/160)) ([48e6d81](https://github.com/jeremiejt38/akasha-os/commit/48e6d81407350021dc6d94022e52c1d6a7341b76))
+
 ## [0.60.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.59.0...akasha-os-v0.60.0) (2026-10-25)
 
 
