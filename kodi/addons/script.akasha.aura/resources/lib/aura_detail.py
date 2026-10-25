@@ -167,6 +167,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 item.get('fanart_url') or item.get('art_url') or '', useCache=False)
         except RuntimeError:
             pass
+        # Plex tints the page field with the item's UltraBlurColors; reuse
+        # the top-left palette color for the dim layer, neutral fallback.
+        try:
+            dim = self.getControl(7002)
+            tint = str((item.get('blur_colors') or {}).get('topLeft') or '')
+            dim.setColorDiffuse('73' + tint.lstrip('#')[-6:].upper()
+                                if tint else '7310131A')
+        except (RuntimeError, AttributeError):
+            pass
         _set(self, 'AuraDetailLogo', item.get('logo_url') or '')
         if item.get('logo_url'):
             try:
