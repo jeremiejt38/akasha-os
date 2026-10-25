@@ -1554,3 +1554,23 @@ msgstr "Renseignez le serveur et le jeton Plex dans les réglages."
 msgctxt "#33560"
 msgid "Nothing to show"
 msgstr "Aucun contenu à afficher"
+
+# À suivre
+msgctxt "#33561"
+msgid "Up Next"
+msgstr "À suivre"
+
+# Lecture dans {} s
+msgctxt "#33562"
+msgid "Playing in {} s"
+msgstr "Lecture dans {} s"
+
+# Lire maintenant
+msgctxt "#33563"
+msgid "Play now"
+msgstr "Lire maintenant"
+
+# Annuler
+msgctxt "#33564"
+msgid "Cancel"
+msgstr "Annuler"

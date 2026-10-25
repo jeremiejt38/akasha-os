@@ -395,6 +395,12 @@ STRINGS = {
     33559: ('Renseignez le serveur et le jeton Plex dans les réglages.',
             'Set the Plex server and token in Settings.'),
     33560: ('Aucun contenu à afficher', 'Nothing to show'),
+
+    # --- up next card (B1): post-play chaining between episodes -----------
+    33561: ('À suivre', 'Up Next'),
+    33562: ('Lecture dans {} s', 'Playing in {} s'),
+    33563: ('Lire maintenant', 'Play now'),
+    33564: ('Annuler', 'Cancel'),
 }
 
 MONTH_ABBRS = {

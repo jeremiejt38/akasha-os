@@ -858,28 +858,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # video to activate, and Aura re-opens once playback ends.
         self.playback_started = True
         self.close()
+        # Single-item play + serialized season queue for the Up Next
+        # card (B1), like aura_window._ctx_play.
         queue = episode_queue_items(self.client, item)
-        if queue:
-            playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-            playlist.clear()
-            queued = 0
-            for i, ep in enumerate(queue):
-                ep_url = self._stream_url(ep)
-                if not ep_url:
-                    continue
-                ep_li = xbmcgui.ListItem(ep.get('title') or '')
-                self._apply_info_tags(ep_li, ep)
-                apply_resume_point(ep_li, ep, start_over=(start_over and i == 0))
-                ep_li.setMimeType('video/mp4')
-                playlist.add(ep_url, ep_li)
-                queued += 1
-            if queued > 1:
-                osd_menu.store_playback_context(
-                    self.client,
-                    [ep for ep in queue if ep.get('part_key')])
-                xbmc.Player().play(playlist)
-                return
-        osd_menu.store_playback_context(self.client, [item])
+        osd_menu.store_playback_context(self.client, queue or [item])
         xbmc.Player().play(url, li)
 
     @staticmethod

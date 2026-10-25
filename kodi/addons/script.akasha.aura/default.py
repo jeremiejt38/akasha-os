@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 
 import home_press_handler  # noqa: E402
 import settings_press_handler  # noqa: E402
+import up_next  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
 
 LOCK_FILE = '/tmp/akasha-aura.lock'
@@ -72,6 +73,9 @@ def _watch_external_playback(window, stop):
             if (xbmc.Player().isPlayingVideo()
                     and not getattr(window, 'playback_started', False)):
                 window.playback_started = True
+                # External play isn't Aura's episode queue: keep a stale
+                # Up Next prop from an earlier marathon out of the way.
+                xbmcgui.Window(10000).setProperty('AuraUpNextQueue', '')
                 window.close()
                 return
         except Exception:
@@ -171,13 +175,21 @@ if __name__ == '__main__':
                 while not xbmc.Player().isPlayingVideo() and waited < 15000:
                     xbmc.sleep(200)
                     waited += 200
-                # Queued episodes (Plex-style season chaining) go through a
-                # brief not-playing gap between playlist items; only reopen
-                # Aura after ~2s of real silence.
+                # Track how much video is left while it plays: when the
+                # item stops, the last polled remaining time tells a
+                # natural episode end (Up Next card, B1) apart from a
+                # user stop (straight back to Aura).
+                remaining_s = None
                 silent = 0
                 while silent < 4:
                     if xbmc.Player().isPlayingVideo():
                         silent = 0
+                        try:
+                            total = xbmc.Player().getTotalTime()
+                            if total:
+                                remaining_s = total - xbmc.Player().getTime()
+                        except RuntimeError:
+                            pass
                     # A quality switch stop/starts the player; the OSD menu
                     # holds this property across the gap so the brief silence
                     # isn't read as end-of-playback.
@@ -187,6 +199,13 @@ if __name__ == '__main__':
                     else:
                         silent += 1
                     xbmc.sleep(500)
+                if up_next.is_natural_end(remaining_s) \
+                        and not (xbmcgui.Window(10000)
+                                 .getProperty('AuraSwitchingPlayback')) \
+                        and up_next.advance_via_up_next(ADDON_PATH):
+                    # The card played the next episode: stay in playback
+                    # mode and keep supervising the new item.
+                    continue
                 window.playback_started = False
                 _run_window()
             del window
