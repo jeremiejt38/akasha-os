@@ -76,7 +76,31 @@
             <textcolor>FFFFFFFF</textcolor>
         </control>
 
-        <!-- Subtitle + settings circles, bottom-right -->
+        <!-- Chapters + subtitle + settings circles, bottom-right. The
+             chapters circle only renders when the playing file carries
+             more than one chapter (B14). -->
+        <control type="button" id="9112">
+            <left>1570</left>
+            <top>828</top>
+            <width>64</width>
+            <height>64</height>
+            <label></label>
+            <onclick>RunScript(script.akasha.aura,osdmenu,chapters)</onclick>
+            <onleft>9100</onleft>
+            <onright>9110</onright>
+            <ondown>9101</ondown>
+            <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
+            <visible>Integer.IsGreater(Player.ChapterCount,1)</visible>
+        </control>
+        <control type="image">
+            <left>1586</left>
+            <top>844</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>akasha-chapters.png</texture>
+            <visible>Integer.IsGreater(Player.ChapterCount,1)</visible>
+        </control>
         <control type="button" id="9110">
             <left>1650</left>
             <top>828</top>
@@ -84,7 +108,7 @@
             <height>64</height>
             <label></label>
             <onclick>RunScript(script.akasha.aura,osdmenu,streams)</onclick>
-            <onleft>9100</onleft>
+            <onleft>9112</onleft>
             <onright>9111</onright>
             <ondown>9101</ondown>
             <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>

@@ -100,7 +100,12 @@ if __name__ == '__main__':
     # BEFORE the already-running guard, as a standalone dialog.
     if 'osdmenu' in sys.argv[1:]:
         import osd_menu
-        mode = 'quality' if 'quality' in sys.argv[1:] else 'streams'
+        if 'quality' in sys.argv[1:]:
+            mode = 'quality'
+        elif 'chapters' in sys.argv[1:]:
+            mode = 'chapters'
+        else:
+            mode = 'streams'
         osd_menu.AuraOsdMenuWindow.mode = mode
         osd_menu.AuraOsdMenuWindow(
             'AuraOsdMenu.xml', ADDON_PATH, 'Default', '1080i').doModal()

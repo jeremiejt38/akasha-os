@@ -61,7 +61,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 | B11 | **« Go to Show / Season »** depuis une fiche épisode | `grandparent_rating_key` déjà disponible | mécanisme | P3 |
 | B12 | **Sélecteur de version** (fichiers multi-part) | plusieurs `Media`/`Part` par item → choix dans le menu Plus | mécanisme | P3 |
 | B13 | **UltraBlurColors** — teinte du fond de fiche | champ `ultraBlurColors` de la métadonnée → fond coloré comme Plex au lieu du scrim générique | ⚠️ champ à confirmer | P3 |
-| B14 | **Chapitres** | `Player.Chapters` Kodi / chapitres dans la métadonnée Plex → liste dans OSD ou fiche | mécanisme | P4 |
+| B14 | **Chapitres** | Cercle dédié dans l'OSD (`osdmenu,chapters`, visible si `Player.ChapterCount > 1`) → liste titre + timecode, chapitre courant sélectionné, `seekTime` au choix. Les marqueurs sur la seekbar et les marqueurs Plex intro/credits (autre mécanisme) restent à faire | implémenté, **à vérifier à l'écran** | P4 |
 | B15 | **Continuité audio/sous-titres par série** | Plex mémorise les pistes choisies ; équivalent : mémoriser par `grandparent_rating_key` en profil addon | mécanisme local | P4 |
 | B16 | **Bibliothèques non-vidéo (Musique)** dans la sidebar | section `type=artist` confirmée (id 6) ; actuellement dans le launcher, absent du rail Plex | ✅ section présente | P4 |
 | B17 | **Écran d'erreur serveur** propre | Brique d'état centrée réutilisable (`DivertState` : `offline`/`error`/`empty`/`config`) — icône + titre + message + bouton d'action contextuel (Réessayer / Effacer les filtres / Retour / Paramètres), sidebar conservée. Les rangées partiellement en échec gardent leur label inline ; l'écran global n'apparaît que si tout a échoué | implémenté, **à vérifier à l'écran** | P4 |
