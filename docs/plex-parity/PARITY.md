@@ -84,7 +84,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - ~~**Clavier recherche** : touches `_`, `←`, `X` en texte brut~~ → icônes `key-space`/`key-backspace`/`key-clear` (+ variants dark) overlay ; reste : touches plus petites.
 - **Recherche** : pas de rail, pas de rangée « Popular Searches » dédiée (suggestions `discover_hubs` dans la grille à la place).
 - **Accueil** : ~~rangée coupée net à x≈1823~~ → fade `scrim-row-right.png` sur les 5 rangées + la grille bibliothèque (à vérifier à l'écran) ; trou ~90 px entre titre et méta quand pas de clearlogo, icône « maison » fantôme près du titre (à investiguer).
-- **Hero** : suit le focus (vérifié) — mais seed au premier item de la première rangée, pas un carrousel vedette comme Plex.
+- **Hero** : suit le focus (vérifié) — mais le hub `home.continue` porte `style: 'hero'` (vérifié sur le serveur) : Plex le rend en **cartes paysage** (bannières 16:9 avec barre de progression), pas en posters. Aura le traite comme une rangée shelf standard ; passer à un itemlayout landscape demande des slots de rangée dédiés (viewport coulissant) — à faire avec la vérif écran.
 
 
 
