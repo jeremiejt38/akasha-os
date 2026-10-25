@@ -435,6 +435,9 @@ STRINGS = {
 
     # --- Server playlists (B10) --------------------------------------------
     33582: ('Playlists', 'Playlists'),
+
+    # --- Version picker (B12) ----------------------------------------------
+    33583: ('Lire la version…', 'Play Version'),
 }
 
 MONTH_ABBRS = {

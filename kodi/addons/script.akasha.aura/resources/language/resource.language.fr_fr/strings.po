@@ -1664,3 +1664,8 @@ msgstr "Genre"
 msgctxt "#33582"
 msgid "Playlists"
 msgstr "Playlists"
+
+# Lire la version…
+msgctxt "#33583"
+msgid "Play Version"
+msgstr "Lire la version…"

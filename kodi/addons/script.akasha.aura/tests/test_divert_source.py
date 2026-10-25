@@ -277,6 +277,29 @@ class TestDivertSource(unittest.TestCase):
         self.assertEqual(len(items), 2)
         self.assertEqual(items[0]['title'], 'Sans titre')
 
+    def test_versions_from_media_parts(self):
+        raw = {'MediaContainer': {'Metadata': [{
+            'title': 'A',
+            'Media': [
+                {'videoResolution': '1080', 'videoCodec': 'h264',
+                 'Part': [{'key': '/part/1', 'file': '/x/a.1080p.mkv'}]},
+                {'videoResolution': '4k', 'videoCodec': 'hevc',
+                 'Part': [{'key': '/part/2', 'file': '/x/a.4k.mkv'}]},
+            ]}]}}
+        item = divert_source.parse_metadata_list(
+            raw, lambda p, w=None, h=None: p)[0]
+        self.assertEqual(len(item['versions']), 2)
+        self.assertEqual(item['versions'][0]['part_key'], '/part/1')
+        self.assertIn('1080p', item['versions'][0]['label'])
+        self.assertIn('a.1080p.mkv', item['versions'][0]['label'])
+        self.assertIn('4K', item['versions'][1]['label'])
+
+    def test_no_media_gives_empty_versions(self):
+        raw = {'MediaContainer': {'Metadata': [{'title': 'B'}]}}
+        item = divert_source.parse_metadata_list(
+            raw, lambda p, w=None, h=None: p)[0]
+        self.assertEqual(item['versions'], [])
+
     def test_blur_colors_normalised(self):
         raw = {'MediaContainer': {'Metadata': [
             {'title': 'A', 'UltraBlurColors': {'topLeft': '5f3b2a'}},
