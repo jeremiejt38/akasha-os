@@ -678,6 +678,20 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._render_episodes()
         self._sync_navigation()
 
+    def _episode_sheet(self):
+        try:
+            pos = self.getControl(EPISODES_LIST_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self._episodes)):
+            return
+        import context_sheet
+        context_sheet.open_sheet(
+            self, self.client, self._episodes[pos], EPISODES_LIST_ID,
+            self._open_episode,
+            on_removed=lambda p: self._episodes.pop(p)
+            if p < len(self._episodes) else None)
+
     def _open_episode(self):
         try:
             pos = self.getControl(EPISODES_LIST_ID).getSelectedPosition()
@@ -717,10 +731,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.close()
             return
         if action.getId() == ACTION_CONTEXT_MENU:
-            # Plex long-press parity: a long press fires the same action
-            # as a plain click on the focused control (open the episode,
-            # the action button, ...) and never raises a context menu.
+            # Plex long-press: episode cards open the option sheet;
+            # everything else keeps long-press == click parity.
             try:
+                if self.getFocusId() == EPISODES_LIST_ID:
+                    self._episode_sheet()
+                    return
                 self.onClick(self.getFocusId())
             except Exception:
                 pass
@@ -850,6 +866,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         person.person = member
         person.items = filmography
         person.doModal()
+        if getattr(person, 'playback_started', False):
+            self.playback_started = True
+            self._playback_item = person._playback_item
+            self.close()
 
     def _play_extra(self):
         """Bande-annonce/Bonus button: a single extra plays straight
@@ -971,6 +991,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Detail: watched toggle failed: {}'.format(e), xbmc.LOGERROR)
             return
         self.watched = not self.watched
+        # The item dict is shared with the originating row card --
+        # _open_detail pushes the mutation onto its ListItem on return.
+        self.item['view_count'] = 1 if self.watched else 0
         _set(self, 'AuraDetailWatched', '1' if self.watched else '0')
         # 'Mark as watched/unwatched' label flips with the state
         try:
@@ -1082,6 +1105,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         }
         related.items = items
         related.doModal()
+        if getattr(related, 'playback_started', False):
+            self.playback_started = True
+            self._playback_item = related._playback_item
+            self.close()
 
     def _go_to_show(self):
         """Plex's 'Go to Show' (B11): from an episode fiche, open the

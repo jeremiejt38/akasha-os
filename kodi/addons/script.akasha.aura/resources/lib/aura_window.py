@@ -26,6 +26,7 @@ import aura_search
 import aura_settings_panel
 import aura_store
 import config
+import context_sheet
 import settings_press_handler
 import osd_menu
 import connector_client
@@ -154,6 +155,12 @@ DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
 DIVERT_RESET_BUTTON_ID = 3218
 DIVERT_AZ_RAIL_ID = 3250
+
+# Surfaces whose Back press re-roots focus on the sidebar instead of
+# closing the window (Plex two-level Back convention).
+_CONTENT_BACK_IDS = frozenset(
+    list(RECO_LIST_IDS)
+    + [DIVERT_PANEL_ID, CATEGORY_PANEL_ID, DIVERT_AZ_RAIL_ID])
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
     DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
@@ -1024,6 +1031,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         detail._pending_season_index = season_index
         detail.exit_to_sidebar = False
         detail.doModal()
+        # Detail-page mutations (watched toggle) live on the shared item
+        # dict; push them onto the originating card so the row badge
+        # matches on return, like Plex's live refresh.
+        self._sync_focused_card(item)
         # Plex behavior: Left on the detail page's left edge pops the
         # sidebar rail open -- mirrored by closing the detail and handing
         # the focus to the sidebar list.
@@ -2374,6 +2385,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._open_settings_panel()
             return
         if aid in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
+            # Plex two-level Back: from the content, Back moves focus to
+            # the nav rail; from the nav it exits the app.
+            if self.getFocusId() in _CONTENT_BACK_IDS:
+                self._focus_sidebar()
+                return
             self.close()
             return
         focused = self.getFocusId()
@@ -2675,6 +2691,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.on_person = self._open_person_page
         search.on_genre = self._open_genre_result
         search.doModal()
+        if getattr(search, 'playback_started', False):
+            self.playback_started = True
+            self._playback_item = search._playback_item
+            self.close()
 
     def _open_genre_result(self, genre):
         """Genre search hit -> library view pre-filtered to that genre,
@@ -2715,6 +2735,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         page.person = person
         page.items = filmography
         page.doModal()
+        # Playback launched from the page's option sheet closes it; the
+        # same flag cascade the detail page uses carries it through.
+        if getattr(page, 'playback_started', False):
+            self.playback_started = True
+            self._playback_item = page._playback_item
+            self.close()
 
     def _run_unified_search(self, query):
         groups = []  # list of (category_label, [(result_label, callback), ...])
@@ -3137,168 +3163,36 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     # (sidebar, genre cards) keep the plain long-press == click parity.
 
     def _open_item_context_menu(self, item, open_default, control_id):
-        typ = item.get('type')
         client = self._connector_client or self._plex_client
-        rateable = typ in ('movie', 'show', 'season', 'episode') \
-            and item.get('rating_key') and client is not None
-        offset = item.get('view_offset_ms') or 0
-        watched = (item.get('view_count') or 0) > 0
+        context_sheet.open_sheet(
+            self, client, item, control_id, open_default,
+            on_removed=lambda pos: self._drop_card(control_id, pos))
 
-        entries = []
-        if typ in ('movie', 'episode') and item.get('part_key'):
-            entries.append((i18n.tr(33156) if offset else i18n.tr(33104),
-                            lambda: self._ctx_play(item)))
-            if offset:
-                entries.append((i18n.tr(33107),
-                                lambda: self._ctx_play(item, start_over=True)))
-        entries.append((i18n.tr(33155), open_default))
-        if offset and hasattr(client, 'remove_from_continue_watching'):
-            entries.append((i18n.tr(33161),
-                            lambda: self._ctx_remove_continue_watching(
-                                item, control_id)))
-        if rateable:
-            entries.append((i18n.tr(33113) if watched
-                            else i18n.tr(33112),
-                            lambda: self._ctx_toggle_watched(item, control_id)))
-            entries.append((i18n.tr(33111), lambda: self._ctx_rate(item)))
-        if item.get('video_label') or item.get('audio_label'):
-            entries.append((i18n.tr(33116), lambda: self._ctx_file_info(item)))
+    def _drop_card(self, control_id, pos):
+        """Backing-store removal behind 'Remove from Continue
+        Watching' -- the shared sheet handles the control itself."""
+        row = self._reco_rows.get(control_id)
+        if row and 0 <= pos < len(row[2].items):
+            del row[2].items[pos]
+        elif control_id == DIVERT_PANEL_ID \
+                and 0 <= pos < len(self._divert_items):
+            del self._divert_items[pos]
 
-        idx = xbmcgui.Dialog().contextmenu([label for label, _ in entries])
-        if 0 <= idx < len(entries):
-            entries[idx][1]()
-
-    def _ctx_play(self, item, start_over=False):
-        """Direct playback from the option sheet -- same modal lifecycle
-        as the detail page: every dialog leaves the screen before the
-        video starts, and default.py re-opens Aura once it ends."""
-        item = self._hydrate_item(item)
-        client = self._connector_client or self._plex_client
-        base = getattr(client, 'server_url', None) if client else None
-        token = getattr(client, 'token', None) if client else None
-        url = ('{}{}?X-Plex-Token={}'.format(base, item['part_key'], token)
-               if base and token and item.get('part_key') else None)
-        if not url:
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', i18n.tr(33075),
-                xbmcgui.NOTIFICATION_INFO, 2000)
-            return
-        li = xbmcgui.ListItem(item.get('title') or '')
-        aura_detail.AuraDetailWindow._apply_info_tags(li, item)
-        if item.get('view_offset_ms') and not start_over:
-            _set_resume_point(li, item)
-        li.setMimeType('video/mp4')
-        self.playback_started = True
-        self._playback_item = item
-        self.close()
-        # Single-item play + serialized season queue: the Up Next card
-        # (B1) is the decision point between episodes instead of Kodi's
-        # silent playlist auto-advance.
-        queue = aura_detail.episode_queue_items(client, item)
-        osd_menu.store_playback_context(client, queue or [item])
-        xbmc.Player().play(url, li)
-
-    def _hydrate_item(self, item):
-        """Grid/row payloads usually carry part_key already; shallow hub
-        items get one fetch of full metadata, like _open_show does."""
-        if item.get('part_key') or not item.get('rating_key'):
-            return item
-        client = self._connector_client or self._plex_client
-        if not client:
-            return item
+    def _sync_focused_card(self, item):
+        """Refresh the focused card's watched/progress visuals from the
+        (mutated) item dict -- detail-page actions stay local until the
+        row reloads otherwise."""
         try:
-            full = client.metadata_item(item['rating_key'])
-            if isinstance(full, dict) and full:
-                full.setdefault('type', item.get('type'))
-                item = full
-        except Exception as e:
-            xbmc.log('Akasha Aura: item hydration failed: {}'.format(e),
-                     xbmc.LOGWARNING)
-        return item
-
-    def _ctx_toggle_watched(self, item, control_id):
-        client = self._connector_client or self._plex_client
-        if not client or not item.get('rating_key'):
-            return
-        watched = (item.get('view_count') or 0) > 0
-        try:
-            if watched:
-                client.unscrobble(item['rating_key'])
-            else:
-                client.scrobble(item['rating_key'])
-        except Exception as e:
-            xbmc.log('Akasha Aura: watched toggle failed: {}'.format(e),
-                     xbmc.LOGERROR)
-            return
-        item['view_count'] = 0 if watched else 1
-        try:
-            li = self.getControl(control_id).getSelectedItem()
-            li.getVideoInfoTag().setPlayCount(item['view_count'])
-        except Exception:
+            focused = self.getFocusId()
+            if focused != DIVERT_PANEL_ID and focused not in RECO_LIST_IDS:
+                return
+            li = self.getControl(focused).getSelectedItem()
+            if li is None:
+                return
+            li.getVideoInfoTag().setPlayCount(
+                int(item.get('view_count') or 0))
+        except (RuntimeError, TypeError):
             pass
-        xbmcgui.Dialog().notification(
-            'Akasha Aura',
-            i18n.tr(33119) if watched else i18n.tr(33118),
-            xbmcgui.NOTIFICATION_INFO, 1500)
-
-    def _ctx_remove_continue_watching(self, item, control_id):
-        """Plex 'Remove from Continue Watching': dedicated endpoint, then
-        drop the card from the row locally so the hub visually matches."""
-        client = self._connector_client or self._plex_client
-        if not client or not item.get('rating_key'):
-            return
-        try:
-            client.remove_from_continue_watching(item['rating_key'])
-        except Exception as e:
-            xbmc.log('Akasha Aura: removeFromContinueWatching failed: {}'
-                     .format(e), xbmc.LOGERROR)
-            return
-        item['view_offset_ms'] = 0
-        try:
-            ctrl = self.getControl(control_id)
-            pos = ctrl.getSelectedPosition()
-            row = self._reco_rows.get(control_id)
-            if row and 0 <= pos < len(row[2].items):
-                del row[2].items[pos]
-            elif control_id == DIVERT_PANEL_ID \
-                    and 0 <= pos < len(self._divert_items):
-                del self._divert_items[pos]
-            ctrl.removeItem(pos)
-        except (RuntimeError, IndexError):
-            pass
-        xbmcgui.Dialog().notification(
-            'Akasha Aura', i18n.tr(33146),
-            xbmcgui.NOTIFICATION_INFO, 1500)
-
-    def _ctx_rate(self, item):
-        client = self._connector_client or self._plex_client
-        if not client or not item.get('rating_key'):
-            return
-        choices = ['{} / 10'.format(i) for i in range(1, 11)]
-        pos = xbmcgui.Dialog().select(i18n.tr(33111), choices)
-        if pos < 0:
-            return
-        try:
-            client.rate(item['rating_key'], pos + 1)
-            xbmcgui.Dialog().notification(
-                'Akasha Aura', i18n.tr(33120).format(choices[pos]),
-                xbmcgui.NOTIFICATION_INFO, 1500)
-        except Exception as e:
-            xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
-
-    def _ctx_file_info(self, item):
-        lines = [item.get('title') or '']
-        meta = [x for x in (item.get('year'),
-                            _format_duration(item.get('duration_ms')))
-                if x]
-        if meta:
-            lines.append(' · '.join(str(m) for m in meta))
-        for label, key in ((i18n.tr(33132), 'video_label'),
-                           (i18n.tr(33201), 'audio_label'),
-                           (i18n.tr(33115), 'subtitle_label')):
-            if item.get(key):
-                lines.append('{} : {}'.format(label, item[key]))
-        xbmcgui.Dialog().ok(i18n.tr(33116), '[CR]'.join(lines))
 
     def _on_home_press_action(self, action):
         """React to a repeated Home press while Aura is already open.

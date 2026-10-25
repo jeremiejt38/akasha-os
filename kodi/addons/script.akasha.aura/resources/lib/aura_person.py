@@ -91,8 +91,12 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             self.close()
             return
         if action.getId() == ACTION_CONTEXT_MENU:
-            # Plex long-press parity: same as a plain click.
+            # Plex long-press: filmography cards open the option
+            # sheet, anything else keeps long-press == click parity.
             try:
+                if self.getFocusId() == FILMO_LIST_ID:
+                    self._filmography_sheet()
+                    return
                 self.onClick(self.getFocusId())
             except Exception:
                 pass
@@ -106,6 +110,20 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
         super().onAction(action)
+
+    def _filmography_sheet(self):
+        try:
+            pos = self.getControl(FILMO_LIST_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self.items)):
+            return
+        import context_sheet
+        context_sheet.open_sheet(
+            self, self.client, self.items[pos], FILMO_LIST_ID,
+            self._open_item,
+            on_removed=lambda p: self.items.pop(p)
+            if p < len(self.items) else None)
 
     def _open_item(self):
         try:
