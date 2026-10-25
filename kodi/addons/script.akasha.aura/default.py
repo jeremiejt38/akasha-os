@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 import home_press_handler  # noqa: E402
 import settings_press_handler  # noqa: E402
 import skip_marker  # noqa: E402
+import stream_prefs  # noqa: E402
 import timeline_reporter  # noqa: E402
 import up_next  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
@@ -201,6 +202,13 @@ if __name__ == '__main__':
                 remaining_s = None
                 silent = 0
                 skip_shown_for = None
+                # B15: per-show audio/subtitle continuity -- applied once
+                # the player has enumerated its streams, captured
+                # periodically and persisted per show.
+                prefs_applied_for = None
+                latest_selection = None
+                latest_item = None
+                last_capture = 0.0
                 while silent < 4:
                     if xbmc.Player().isPlayingVideo():
                         silent = 0
@@ -210,6 +218,35 @@ if __name__ == '__main__':
                                 remaining_s = total - xbmc.Player().getTime()
                         except RuntimeError:
                             pass
+                        item = stream_prefs.current_item()
+                        item_key = (item or {}).get('rating_key')
+                        if item_key and item_key != prefs_applied_for:
+                            # Episode boundary: commit the previous item's
+                            # last selection before applying the new one.
+                            try:
+                                stream_prefs.persist_selection(
+                                    xbmcaddon.Addon(), latest_item,
+                                    latest_selection)
+                            except Exception:
+                                pass
+                            # Streams enumerate ~1s after play() resolves.
+                            xbmc.sleep(1200)
+                            try:
+                                stream_prefs.apply_saved_streams(
+                                    xbmcaddon.Addon(), item)
+                            except Exception:
+                                pass
+                            prefs_applied_for = item_key
+                        if item_key:
+                            latest_item = item
+                        if time.time() - last_capture >= 10:
+                            last_capture = time.time()
+                            try:
+                                sel = stream_prefs.capture_selection()
+                                if sel:
+                                    latest_selection = sel
+                            except Exception:
+                                pass
                         # B2: inside an intro/credits marker, float the
                         # Plex-style skip chip -- once per marker window,
                         # and never again after a Back-dismiss.
@@ -241,8 +278,14 @@ if __name__ == '__main__':
                     continue
                 window.playback_started = False
                 _run_window()
-            # Playback session over: final state=stopped report commits
-            # the last position, then the reporter thread exits.
+            # Playback session over: commit the last stream selection
+            # (B15), then the final state=stopped report commits the
+            # last position before the reporter thread exits.
+            try:
+                stream_prefs.persist_selection(
+                    xbmcaddon.Addon(), latest_item, latest_selection)
+            except Exception:
+                pass
             reporter.finish()
             del window
         finally:
