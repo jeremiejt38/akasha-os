@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.68.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.68.0...akasha-os-v0.68.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* **aura:** Kodi-incompatible parens in skin conditions ([acab639](https://github.com/jeremiejt38/akasha-os/commit/acab639daff75ef505a547d4e904f7d91f275a9f))
+* **aura:** rewrite parenthesized skin conditions as Kodi DNF ([f7afd17](https://github.com/jeremiejt38/akasha-os/commit/f7afd1723fdfea274290355ad1e341186a2782e9))
+* loading overlay insertion + enable perfanalyzer ([ee876e7](https://github.com/jeremiejt38/akasha-os/commit/ee876e7b0188c5b5369394191776e5a9e5d6997d))
+* loading overlay insertion + enable perfanalyzer service ([bd7f763](https://github.com/jeremiejt38/akasha-os/commit/bd7f763087653eea2ad0db8fcc78225b40c27683))
+
 ## [0.68.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.67.0...akasha-os-v0.68.0) (2026-10-25)
 
 
