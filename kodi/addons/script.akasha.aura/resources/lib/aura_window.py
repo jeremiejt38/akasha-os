@@ -116,6 +116,13 @@ RECO_SLOT_IDS = (
     (RECO_ROW5_LABEL_ID, RECO_ROW5_LIST_ID),
 )
 RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
+# Landscape twin of each reco slot list: a hub carrying style='hero'
+# (e.g. home.continue "Continue Watching") renders as Plex's 16:9 banner
+# cards instead of posters. Both lists of a slot share geometry and row
+# data; the AuraRowStyle{slot} window property picks which is visible and
+# navigation resolves against the effective id (_reco_slot_list_id).
+RECO_LANDSCAPE_IDS = tuple(list_id + 1 for _, list_id in RECO_SLOT_IDS)
+RECO_ALL_LIST_IDS = RECO_LIST_IDS + RECO_LANDSCAPE_IDS
 # Home tab strip (Plex "For You" / "Trending" / "Activity"), only on the
 # Divertissement Accueil view -- the library view has its own strip
 # (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
@@ -159,7 +166,7 @@ DIVERT_AZ_RAIL_ID = 3250
 # Surfaces whose Back press re-roots focus on the sidebar instead of
 # closing the window (Plex two-level Back convention).
 _CONTENT_BACK_IDS = frozenset(
-    list(RECO_LIST_IDS)
+    list(RECO_ALL_LIST_IDS)
     + [DIVERT_PANEL_ID, CATEGORY_PANEL_ID, DIVERT_AZ_RAIL_ID])
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
@@ -674,8 +681,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:  # defensive: never crash the tab on a row failure
             xbmc.log('Akasha Aura: hub row "{}" failed: {}'.format(hub.get('title'), e),
                      xbmc.LOGWARNING)
-            return {'title': _hub_title_fr(hub), 'paged': paged, 'error': e}
-        return {'title': _hub_title_fr(hub), 'paged': paged, 'error': None}
+            return {'title': _hub_title_fr(hub), 'paged': paged, 'error': e,
+                    'style': 'shelf'}
+        return {'title': _hub_title_fr(hub), 'paged': paged, 'error': None,
+                'style': hub.get('style') or 'shelf'}
 
     def _reco_legacy_rows(self, section):
         """Connector mode: the connector has no hubs endpoint, so rebuild the
@@ -712,6 +721,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             built.append({'title': title, 'paged': paged, 'error': error})
         return built
 
+    def _reco_slot_index(self, list_control_id):
+        """Slot index (0..4) for either variant of a slot's list, else -1."""
+        if list_control_id in RECO_LIST_IDS:
+            return RECO_LIST_IDS.index(list_control_id)
+        if list_control_id in RECO_LANDSCAPE_IDS:
+            return RECO_LANDSCAPE_IDS.index(list_control_id)
+        return -1
+
+    def _reco_slot_list_id(self, slot_index):
+        """The list id actually visible in slot `slot_index`: the landscape
+        twin when the bound hub has style='hero', the poster list else."""
+        index = self._hub_offset + slot_index
+        row = self._hub_rows[index] if index < len(self._hub_rows) else None
+        if row and row.get('style') == 'hero':
+            return RECO_LANDSCAPE_IDS[slot_index]
+        return RECO_LIST_IDS[slot_index]
+
     def _rebind_reco_slots(self):
         """Bind each visible row slot to `_hub_rows[_hub_offset + i]`.
 
@@ -722,20 +748,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         for i, (label_id, list_id) in enumerate(RECO_SLOT_IDS):
             index = self._hub_offset + i
             row = self._hub_rows[index] if index < len(self._hub_rows) else None
+            land_id = RECO_LANDSCAPE_IDS[i]
             try:
-                lst = self.getControl(list_id)
+                poster_lst = self.getControl(list_id)
+                land_lst = self.getControl(land_id)
             except RuntimeError:
                 continue
             if row is None:
-                lst.reset()
+                poster_lst.reset()
+                land_lst.reset()
                 self._reco_rows.pop(list_id, None)
+                self._reco_rows.pop(land_id, None)
+                self.setProperty('AuraRowStyle{}'.format(i), '')
                 try:
                     self.getControl(label_id).setLabel('')
                 except RuntimeError:
                     pass
                 continue
-            self._reco_rows[list_id] = (label_id, row['title'], row['paged'])
-            self._render_reco_row_label(list_id, row.get('error'))
+            style = row.get('style') or 'shelf'
+            self.setProperty('AuraRowStyle{}'.format(i), style)
+            effective_id = land_id if style == 'hero' else list_id
+            hidden_id, hidden_lst = (list_id, poster_lst) \
+                if style == 'hero' else (land_id, land_lst)
+            lst = land_lst if style == 'hero' else poster_lst
+            hidden_lst.reset()
+            self._reco_rows.pop(hidden_id, None)
+            self._reco_rows[effective_id] = (label_id, row['title'], row['paged'])
+            self._render_reco_row_label(effective_id, row.get('error'))
             if row.get('error'):
                 lst.reset()
                 continue
@@ -746,8 +785,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except Exception as e:
                 xbmc.log('Akasha Aura: recommendations row render error for {}: {}'
                          .format(row['title'], e), xbmc.LOGERROR)
-            self._reco_placeholder_counts[list_id] = self._sync_placeholders(
-                list_id, 0, row['paged'])
+            self._reco_placeholder_counts[effective_id] = self._sync_placeholders(
+                effective_id, 0, row['paged'])
         self._sync_navigation()
 
     def _reco_scroll(self, delta):
@@ -807,17 +846,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         strip_up = (DIVERT_SUBTAB_IDS[self._divert_library_tab]
                     if self._divert_view == 'library'
                     else HOME_TAB_IDS[self._home_tab])
-        filled_slots = [list_id for _, list_id in RECO_SLOT_IDS
-                        if self._reco_list_has_items(list_id)]
+        effective = [self._reco_slot_list_id(i)
+                     for i in range(len(RECO_SLOT_IDS))]
+        filled_slots = [lid for lid in effective
+                        if self._reco_list_has_items(lid)]
         for i, (_, list_id) in enumerate(RECO_SLOT_IDS):
+            eff_id = effective[i]
             before = [l for l in filled_slots
-                      if RECO_LIST_IDS.index(l) < i]
+                      if effective.index(l) < i]
             after = [l for l in filled_slots
-                     if RECO_LIST_IDS.index(l) > i]
+                     if effective.index(l) > i]
             up = (before[-1] if before
-                  else (list_id if self._hub_offset > 0 else strip_up))
-            down = after[0] if after else list_id
-            nav(list_id, up=up, down=down, left=DIVERT_SIDEBAR_ID)
+                  else (eff_id if self._hub_offset > 0 else strip_up))
+            down = after[0] if after else eff_id
+            # Wire both variants of the slot: setNavigation() persists on
+            # the hidden twin too, so flipping a hub's style between
+            # poster and landscape needs no extra sync.
+            for lid in (list_id, RECO_LANDSCAPE_IDS[i]):
+                nav(lid, up=up, down=down, left=DIVERT_SIDEBAR_ID)
 
         # State view's action button (B17): Up reaches whichever contextual
         # strip is active, Left exits to the sidebar like every content
@@ -889,8 +935,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # Nothing focused yet (fresh load, focus still on the top bar):
             # seed the hero with the first item of the first row, matching
             # Plex's initial auto-highlight.
-            for _, list_id in RECO_SLOT_IDS:
-                row = self._reco_rows.get(list_id)
+            for i in range(len(RECO_SLOT_IDS)):
+                row = self._reco_rows.get(self._reco_slot_list_id(i))
                 if row and row[2].items:
                     item = row[2].items[0]
                     break
@@ -1401,8 +1447,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                       if self._divert_library_tab == DIVERT_SUBTAB_CATEGORIES
                       else DIVERT_PANEL_ID)
         else:
-            target = next((lid for _, lid in RECO_SLOT_IDS
-                           if self._reco_list_has_items(lid)), None)
+            target = next((self._reco_slot_list_id(i)
+                           for i in range(len(RECO_SLOT_IDS))
+                           if self._reco_list_has_items(
+                               self._reco_slot_list_id(i))), None)
         if target is None:
             target = DIVERT_SIDEBAR_ID
         try:
@@ -2464,7 +2512,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # _open_item_context_menu); navigation elements (sidebar, genre
         # cards) keep the long-press == click parity.
         if aid == ACTION_CONTEXT_MENU:
-            if focused in RECO_LIST_IDS:
+            if focused in RECO_ALL_LIST_IDS:
                 self._on_reco_context_menu(focused)
             elif focused == DIVERT_PANEL_ID:
                 self._on_divert_context_menu()
@@ -2564,13 +2612,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Recommande row viewport (see RECO_SLOT_IDS): Plex pins the focused
         # row at a fixed screen position -- focus stays on a slot while its
         # contents slide by one hub when scrolling past an edge.
-        if aid == ACTION_MOVE_DOWN and focused == RECO_LIST_IDS[-1] \
+        if aid == ACTION_MOVE_DOWN and \
+                focused in (RECO_LIST_IDS[-1], RECO_LANDSCAPE_IDS[-1]) \
                 and self._reco_slot_has_row(len(RECO_SLOT_IDS)):
             self._reco_scroll(+1)
             self._update_hero()
             self._update_bar_focused()
             return
-        if aid == ACTION_MOVE_UP and focused == RECO_LIST_IDS[0] \
+        if aid == ACTION_MOVE_UP and \
+                focused in (RECO_LIST_IDS[0], RECO_LANDSCAPE_IDS[0]) \
                 and self._hub_offset > 0:
             self._reco_scroll(-1)
             self._update_hero()
@@ -2579,11 +2629,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Prevent Down landing on an empty slot when fewer hubs remain than
         # slots, and Up from the top slot reaching the right header control
         # (contextual tabs in a library, main tab bar on Accueil).
-        if aid == ACTION_MOVE_DOWN and focused in RECO_LIST_IDS[:-1] \
-                and not self._reco_slot_has_row(RECO_LIST_IDS.index(focused) + 1):
+        slot = self._reco_slot_index(focused)
+        if aid == ACTION_MOVE_DOWN and 0 <= slot < len(RECO_SLOT_IDS) - 1 \
+                and not self._reco_slot_has_row(slot + 1):
             self._update_bar_focused()
             return
-        if aid == ACTION_MOVE_UP and focused == RECO_LIST_IDS[0]:
+        if aid == ACTION_MOVE_UP and \
+                focused in (RECO_LIST_IDS[0], RECO_LANDSCAPE_IDS[0]):
             if self._divert_view == 'library':
                 self.setFocus(self.getControl(DIVERT_SUBTAB_IDS[0]))
             else:
@@ -2620,7 +2672,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # here too in case a future layout changes column count.
             if focused == DIVERT_PANEL_ID:
                 self._maybe_load_more_divert()
-            elif focused in RECO_LIST_IDS:
+            elif focused in RECO_ALL_LIST_IDS:
                 if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT):
                     self._maybe_load_more_reco(focused)
                 # The Plex hero follows the focused card on every move --
@@ -2681,7 +2733,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._manage_libraries()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
-        elif controlID in RECO_LIST_IDS:
+        elif controlID in RECO_ALL_LIST_IDS:
             self._on_reco_item_selected(controlID)
         elif controlID == CATEGORY_PANEL_ID:
             self._on_category_genre_selected()
@@ -3274,7 +3326,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         row reloads otherwise."""
         try:
             focused = self.getFocusId()
-            if focused != DIVERT_PANEL_ID and focused not in RECO_LIST_IDS:
+            if focused != DIVERT_PANEL_ID and focused not in RECO_ALL_LIST_IDS:
                 return
             li = self.getControl(focused).getSelectedItem()
             if li is None:
@@ -3591,6 +3643,18 @@ def _build_divert_list_item(item):
         li.setProperty('AuraTagline', item['tagline'])
     if item.get('show_title'):
         li.setProperty('AuraShowTitle', item['show_title'])
+    # Landscape card captions (hero-style rows): Plex heads an episode card
+    # with the show title and details "S{s} · E{i} - {episode title}";
+    # other types keep their own title + item_subtitle.
+    land_title = item.get('show_title') or item['title']
+    if item.get('show_title') and item.get('season') is not None \
+            and item.get('index') is not None:
+        land_sub = 'S{} · E{} - {}'.format(
+            item['season'], item['index'], item['title'])
+    else:
+        land_sub = divert_source.item_subtitle(item)
+    li.setProperty('AuraLandTitle', land_title)
+    li.setProperty('AuraLandSubtitle', land_sub)
     li.setProperty('AuraDuration', _format_duration(item.get('duration_ms')))
     li.setProperty('AuraType', item.get('type') or 'video')
     return li
