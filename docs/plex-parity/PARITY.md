@@ -63,7 +63,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 | B13 | **UltraBlurColors** — teinte du fond de fiche | `UltraBlurColors` normalisé (`blur_colors`) → la couche de dim de la fiche (7002) est teintée via `setColorDiffuse('73'+topLeft)`, repli `7310131A` neutre | implémenté, **à vérifier à l'écran** | P3 |
 | B14 | **Chapitres** | Cercle dédié dans l'OSD (`osdmenu,chapters`, visible si `Player.ChapterCount > 1`) → liste titre + timecode, chapitre courant sélectionné, `seekTime` au choix. Les marqueurs sur la seekbar et les marqueurs Plex intro/credits (autre mécanisme) restent à faire | implémenté, **à vérifier à l'écran** | P4 |
 | B15 | **Continuité audio/sous-titres par série** | `AuraPlaybackItem` propage l'item courant (mise à jour à chaque avancée Up Next) ; JSON-RPC `Player.GetProperties` capture les pistes actives toutes les 10 s dans la boucle de supervision ; sélection persistée par `grandparent_rating_key` (repli `rating_key`) en setting addon `stream.pref.*` aux transitions d'épisode et en fin de session ; ré-application au démarrage par matching langue+nom (les index varient entre fichiers), sous-titres désactivés respectés | implémenté, **à vérifier à l'écran** | P4 |
-| B16 | **Bibliothèques non-vidéo (Musique)** dans la sidebar | section `type=artist` confirmée (id 6) ; actuellement dans le launcher, absent du rail Plex | ✅ section présente | P4 |
+| B16 | **Bibliothèques non-vidéo (Musique)** dans la sidebar | `library_sections()` (movie/show/artist) alimente la sidebar (icône `icon-music.png`) ; les onglets Recommandé/Collections/Catégories restent (Plex expose hubs/collections/genres pour la musique) ; clic artiste/album → drill-in `metadata_children` façon collections (grille albums → pistes), clic piste → lecture audio directe en arrière-plan ; résultats de recherche musicaux routés pareil | implémenté, **à vérifier à l'écran** | P4 |
 | B17 | **Écran d'erreur serveur** propre | Brique d'état centrée réutilisable (`DivertState` : `offline`/`error`/`empty`/`config`) — icône + titre + message + bouton d'action contextuel (Réessayer / Effacer les filtres / Retour / Paramètres), sidebar conservée. Les rangées partiellement en échec gardent leur label inline ; l'écran global n'apparaît que si tout a échoué | implémenté, **à vérifier à l'écran** | P4 |
 
 ### Vraies limitations (cloud / plateforme)
@@ -84,7 +84,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - ~~**Clavier recherche** : touches `_`, `←`, `X` en texte brut~~ → icônes `key-space`/`key-backspace`/`key-clear` (+ variants dark) overlay ; reste : touches plus petites.
 - **Recherche** : pas de rail, pas de rangée « Popular Searches » dédiée (suggestions `discover_hubs` dans la grille à la place).
 - **Accueil** : ~~rangée coupée net à x≈1823~~ → fade `scrim-row-right.png` sur les 5 rangées + la grille bibliothèque (à vérifier à l'écran) ; trou ~90 px entre titre et méta quand pas de clearlogo, icône « maison » fantôme près du titre (à investiguer).
-- **Hero** : suit le focus (vérifié) — mais seed au premier item de la première rangée, pas un carrousel vedette comme Plex.
+- **Hero** : suit le focus (vérifié) — mais le hub `home.continue` porte `style: 'hero'` (vérifié sur le serveur) : Plex le rend en **cartes paysage** (bannières 16:9 avec barre de progression), pas en posters. Aura le traite comme une rangée shelf standard ; passer à un itemlayout landscape demande des slots de rangée dédiés (viewport coulissant) — à faire avec la vérif écran.
 
 
 

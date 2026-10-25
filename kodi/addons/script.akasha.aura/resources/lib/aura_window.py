@@ -984,6 +984,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._reco_open(paged.items[pos])
 
     def _reco_open(self, item):
+        if item['type'] in ('artist', 'album'):
+            self._open_music_node(item)
+            return
+        if item['type'] == 'track':
+            self._play_track(item)
+            return
         if item['type'] in ('show', 'season'):
             self._open_show(item)
         elif item['type'] == 'episode' and item.get('grandparent_rating_key'):
@@ -1503,6 +1509,58 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
+    def _open_music_node(self, item):
+        """Drill into an artist/album (B16): the grid shows its children
+        (albums / tracks) until the tab is re-entered -- same pattern as
+        collections and playlists. Plex exposes them through the generic
+        /metadata/{key}/children endpoint."""
+        client = self._plex_client or self._connector_client
+        if not client or not item.get('rating_key') \
+                or not hasattr(client, 'metadata_children'):
+            return
+        try:
+            children = client.metadata_children(item['rating_key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: music children load failed: {}'.format(e),
+                     xbmc.LOGERROR)
+            return
+        children = children or []
+
+        def fetch(offset, limit):
+            return children[offset:offset + limit], len(children)
+        self._divert_paged = paged_list.PagedList(
+            fetch, page_size=50, prefetch_margin=50)
+        self._divert_paged.load_initial()
+        self._divert_items = self._divert_paged.items
+        self._divert_collection_key = item['rating_key']
+        self._fill_divert_panel()
+        self._set_divert_state(None)
+        try:
+            self.getControl(DIVERT_STATUS_ID).setLabel(
+                '{} — {}'.format(item['title'],
+                            i18n.tr(33069).format(len(self._divert_items))))
+            self.getControl(DIVERT_PANEL_ID).selectItem(0)
+        except RuntimeError:
+            pass
+
+    def _play_track(self, item):
+        """Audio track from a music library (B16): Kodi plays it in the
+        background -- no modal teardown needed unlike video playback."""
+        client = self._plex_client or self._connector_client
+        item = context_sheet.hydrate_item(client, item)
+        base = getattr(client, 'server_url', None) if client else None
+        token = getattr(client, 'token', None) if client else None
+        url = ('{}{}?X-Plex-Token={}'.format(base, item['part_key'], token)
+               if base and token and item.get('part_key') else None)
+        if not url:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', i18n.tr(33075),
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        li = xbmcgui.ListItem(item.get('title') or '')
+        li.setMimeType('audio/mpeg')
+        xbmc.Player().play(url, li)
+
     def _on_category_genre_selected(self):
         """A genre tile was picked: jump straight to Bibliotheque, pre-filtered
         to that genre, instead of the former separate AuraLibraryWindow --
@@ -1553,7 +1611,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         connector = self._get_connector_client(prompt_if_missing=False)
         if connector:
             try:
-                self._divert_sections = divert_source.parse_sections(connector.sections())
+                self._divert_sections = divert_source.parse_sections(connector.sections(), section_types=('movie', 'show', 'artist'))
                 self._connector_client = connector
                 self._plex_client = None
             except connector_client.ConnectorAPIError as e:
@@ -1575,7 +1633,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return
             try:
                 self._plex_client = plex_client.PlexClient(server_url, token, timeout=5)
-                self._divert_sections = self._plex_client.video_sections()
+                self._divert_sections = self._plex_client.library_sections()
             except Exception as e:
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
                 self._divert_sections = []
@@ -1652,6 +1710,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         convention `icon-<slug>.png`.
         """
         title = (section.get('title') or '').lower()
+        if section.get('type') == 'artist':
+            return 'icon-music.png'
         if 'anime' in title:
             return 'icon-anime.png'
         if 'documentaire' in title or 'documentary' in title:
@@ -2687,7 +2747,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.addon = self.addon
         search.client = self._connector_client or self._plex_client
         search.sections = self._divert_sections
-        search.on_select = self._open_detail
+        search.on_select = self._open_search_result
         search.on_person = self._open_person_page
         search.on_genre = self._open_genre_result
         search.doModal()
@@ -2695,6 +2755,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.playback_started = True
             self._playback_item = search._playback_item
             self.close()
+
+    def _open_search_result(self, item):
+        """Search hit dispatch (B16): music types route to the grid
+        drill-in / direct playback, everything else to the detail page."""
+        typ = item.get('type')
+        if typ in ('artist', 'album'):
+            self._open_music_node(item)
+            self._divert_view = 'library'
+            self.setProperty('DivertView', 'library')
+            self.setProperty('DivertLibraryTab',
+                             str(DIVERT_SUBTAB_BIBLIOTHEQUES))
+            self._divert_library_tab = DIVERT_SUBTAB_BIBLIOTHEQUES
+            self._sync_navigation()
+            return
+        if typ == 'track':
+            self._play_track(item)
+            return
+        self._open_detail(item)
 
     def _open_genre_result(self, genre):
         """Genre search hit -> library view pre-filtered to that genre,
@@ -2907,7 +2985,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not connector:
             return
         try:
-            self._divert_sections = divert_source.parse_sections(connector.sections())
+            self._divert_sections = divert_source.parse_sections(connector.sections(), section_types=('movie', 'show', 'artist'))
         except connector_client.ConnectorAPIError as e:
             xbmc.log('Akasha Aura: connector reconnect failed: {}'.format(e), xbmc.LOGWARNING)
             self.addon.setSetting('connector.session_token', '')
@@ -3134,6 +3212,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if item.get('type') == 'playlist':
             self._open_playlist(item)
+            return
+        if item.get('type') in ('artist', 'album'):
+            self._open_music_node(item)
+            return
+        if item.get('type') == 'track':
+            self._play_track(item)
             return
 
         section = self._divert_sections[self._divert_active_section]

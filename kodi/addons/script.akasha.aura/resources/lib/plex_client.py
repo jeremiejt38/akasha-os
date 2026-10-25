@@ -363,6 +363,21 @@ class PlexClient:
             if item.get('type') in ('movie', 'show')
         ]
 
+    def library_sections(self):
+        """Movie, show AND artist (music) sections -- Plex lists music
+        libraries in the same rail as the video ones (B16)."""
+        data = self._request('/library/sections')
+        mc = self._media_container(data)
+        return [
+            {
+                'key': str(item.get('key')),
+                'title': item.get('title') or 'Section',
+                'type': item.get('type'),
+            }
+            for item in mc.get('Directory', [])
+            if item.get('type') in ('movie', 'show', 'artist')
+        ]
+
     def section_items(self, section_key, sort='titleSort', limit=200, offset=0):
         """Return all items of a section, sorted.
 
@@ -725,15 +740,19 @@ class PlexClient:
         items = self._metadata_list(data)
         return items[0] if items else None
 
+    def metadata_children(self, rating_key):
+        """Generic /metadata/{key}/children fetch -- show seasons, season
+        episodes, artist albums and album tracks share the endpoint."""
+        data = self._request('/library/metadata/{}/children'.format(rating_key))
+        return self._metadata_list(data)
+
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
-        data = self._request('/library/metadata/{}/children'.format(show_rating_key))
-        return self._metadata_list(data)
+        return self.metadata_children(show_rating_key)
 
     def season_episodes(self, season_rating_key):
         """Return the episodes of a season, ordered by Plex's default index."""
-        data = self._request('/library/metadata/{}/children'.format(season_rating_key))
-        return self._metadata_list(data)
+        return self.metadata_children(season_rating_key)
 
     def entertainment_rows(self, limits=None):
         """Build the default Divertissement rows for the UI.

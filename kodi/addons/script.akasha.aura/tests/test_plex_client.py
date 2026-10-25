@@ -186,6 +186,34 @@ class TestPlexClient(unittest.TestCase):
         self.assertEqual(len(sections), 2)
 
     @patch('urllib.request.urlopen')
+    def test_library_sections_includes_artist(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {
+                'Directory': [
+                    {'key': '1', 'title': 'Films', 'type': 'movie'},
+                    {'key': '2', 'title': 'Séries', 'type': 'show'},
+                    {'key': '3', 'title': 'Musique', 'type': 'artist'},
+                    {'key': '4', 'title': 'Photos', 'type': 'photo'},
+                ]
+            }
+        })
+        sections = self.client.library_sections()
+        self.assertEqual([s['type'] for s in sections],
+                         ['movie', 'show', 'artist'])
+
+    @patch('urllib.request.urlopen')
+    def test_metadata_children_endpoint(self, mock_urlopen):
+        captured = {}
+
+        def fake_urlopen(req, *args, **kwargs):
+            captured['url'] = req.full_url
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        mock_urlopen.side_effect = fake_urlopen
+        self.client.metadata_children('42')
+        self.assertIn('/library/metadata/42/children', captured['url'])
+
+    @patch('urllib.request.urlopen')
     def test_section_items_uses_sort_param(self, mock_urlopen):
         captured = {}
 
