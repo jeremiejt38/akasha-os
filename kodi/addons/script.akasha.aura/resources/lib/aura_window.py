@@ -355,6 +355,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._hero_fanart_timer = None
         self._hero_fanart_lock = threading.Lock()
         self._hero_fanart_current = None
+        # Detail prefetch debounce (see _prefetch_detail): without it a
+        # fast scroll bursts one thread bundle per crossed card.
+        self._prefetch_timer = None
+        self._prefetch_lock = threading.Lock()
 
     def onInit(self):
         # Lift the Home boot veil (skin-patches/patch_home_boot_veil.py):
@@ -666,7 +670,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     'title': i18n.tr(33577), 'key': '',
                     'identifier': 'aura.activity', 'context': '',
                     'type': '', 'style': 'shelf', 'more': False,
-                    'items': self._plex_client.watch_history(limit=50),
+                    'items': self._plex_client.watch_history(
+                        limit=50, since_days=180),
                 }]
             else:
                 hubs = self._plex_client.home_hubs()
@@ -1003,6 +1008,61 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return None
         return paged.items[pos]
 
+    def _prefetch_detail(self, item):
+        """Debounce the detail prefetch: only fire once focus has dwelled
+        ~250ms on a card. Without this, holding Right across a row would
+        spawn a thread bundle per crossed card for pages never opened."""
+        rk = (item or {}).get('rating_key')
+        if not rk or getattr(self, '_prefetched_key', None) == rk:
+            return
+        with self._prefetch_lock:
+            if self._prefetch_timer is not None:
+                self._prefetch_timer.cancel()
+            self._prefetch_timer = threading.Timer(
+                0.25, self._prefetch_detail_now, args=(item,))
+            self._prefetch_timer.daemon = True
+            self._prefetch_timer.start()
+
+    def _prefetch_detail_now(self, item):
+        """Warm the clients' 30s GET cache for the endpoints the detail
+        page hits on open (extras, watch history, on-deck, seasons).
+        Runs on settled focus -- before the click -- so _render() usually
+        finds every payload already cached and the page stops
+        materialising its controls one network round-trip at a time.
+        Params must match _render()'s own calls exactly: the read cache
+        keys on (path, sorted params), so on_deck uses limit=60 like
+        _find_next_episode, not the home row's limit=20."""
+        rk = (item or {}).get('rating_key')
+        if not rk or getattr(self, '_prefetched_key', None) == rk:
+            return
+        self._prefetched_key = rk
+        client = self._connector_client or self._plex_client
+        if client is None:
+            return
+        show_key = rk if item.get('type') == 'show' \
+            else item.get('grandparent_rating_key')
+
+        def hit(name, *args, **kw):
+            fn = getattr(client, name, None)
+            if fn is None:
+                return
+            try:
+                fn(*args, **kw)
+            except Exception:
+                pass
+        # One thread per endpoint: the clients' read cache keys on the
+        # path, so parallel GETs warm distinct entries without a serial
+        # ~2s chain eating the focus-to-click window.
+        calls = [('item_extras', (rk,), {}),
+                 ('watch_history', (), {'limit': 50, 'rating_key': rk}),
+                 ('on_deck', (), {'limit': 60})]
+        if show_key:
+            calls.append(('show_seasons', (show_key,), {}))
+        for name, args, kw in calls:
+            threading.Thread(
+                target=hit, args=(name,) + args, kwargs=kw,
+                daemon=True).start()
+
     def _update_hero(self):
         """Sync the Plex hero (backdrop/logo/meta/plot/cast) with the item
         currently focused in a Recommande row -- Plex repaints the whole
@@ -1055,6 +1115,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 pass
         self.setProperty('AuraHeroPlot', _truncate_plot(item.get('summary') or ''))
         self.setProperty('AuraHeroCast', cast)
+        self._prefetch_detail(item)
 
     def _schedule_hero_fanart(self, url):
         """Debounce the 1080p backdrop swap while the user scrolls.
@@ -2543,6 +2604,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._update_bar_focused()
         except RuntimeError:
             pass
+        if controlID == DIVERT_PANEL_ID:
+            # Same cache pre-warm as the reco rows, for the library grid.
+            try:
+                pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+                items = (self._divert_paged.items
+                         if self._divert_paged else [])
+                if 0 <= pos < len(items):
+                    self._prefetch_detail(items[pos])
+            except RuntimeError:
+                pass
 
     def _update_bar_focused(self):
         """Update the top-bar focused property used by the retract animation."""
@@ -3567,8 +3638,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             li = self.getControl(focused).getSelectedItem()
             if li is None:
                 return
-            li.getVideoInfoTag().setPlayCount(
-                int(item.get('view_count') or 0))
+            tag = li.getVideoInfoTag()
+            set_playcount = getattr(tag, 'setPlaycount', None) \
+                or getattr(tag, 'setPlayCount', None)
+            if set_playcount is not None:
+                set_playcount(int(item.get('view_count') or 0))
         except (RuntimeError, TypeError):
             pass
 
@@ -3813,7 +3887,10 @@ def _build_divert_list_item(item):
             tag.setCast([xbmc.Actor(c['name'], c.get('role') or '')
                          for c in item['cast']])
         if item.get('view_count'):
-            tag.setPlayCount(int(item['view_count']))
+            set_playcount = getattr(tag, 'setPlaycount', None) \
+                or getattr(tag, 'setPlayCount', None)
+            if set_playcount is not None:
+                set_playcount(int(item['view_count']))
         if item.get('view_offset_ms') and item.get('duration_ms'):
             tag.setResumePoint(float(item['view_offset_ms']) / 1000.0,
                                float(item['duration_ms']) / 1000.0)

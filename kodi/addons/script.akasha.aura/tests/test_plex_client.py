@@ -2,6 +2,7 @@
 
 import io
 import json
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -11,8 +12,9 @@ import plex_client
 class MockHTTPResponse:
     """Minimal file-like stand-in for urllib.urlopen return value."""
 
-    def __init__(self, payload, status=200):
-        self._body = io.BytesIO(json.dumps(payload).encode('utf-8'))
+    def __init__(self, payload, status=200, raw=None):
+        body = raw if raw is not None else json.dumps(payload).encode('utf-8')
+        self._body = io.BytesIO(body)
         self.status = status
 
     def __enter__(self):
@@ -672,6 +674,69 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.client.report_timeline('42', 1000, 2000)
         self.client.report_timeline('42', 2000, 2000)
         self.assertEqual(mock_urlopen.call_count, 2)
+
+    @patch('urllib.request.urlopen')
+    def test_invalid_utf8_body_does_not_raise(self, mock_urlopen):
+        """Real-world regression: a library entry carried a Latin-1 byte
+        (0xf4) inside a title, the strict UTF-8 decode escaped every
+        except clause and watch_history failed on EVERY call -- so the
+        detail page refetched ~2MB of history on each open."""
+        raw = (b'{"MediaContainer": {"Metadata": [{"ratingKey": "1", '
+               b'"title": "Caf\xf4", "type": "movie"}]}}')
+        mock_urlopen.return_value = MockHTTPResponse(None, raw=raw)
+        items = self.client.on_deck(limit=1)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['rating_key'], '1')
+
+    @patch('urllib.request.urlopen')
+    def test_watch_history_scoped_by_rating_key(self, mock_urlopen):
+        """metadataItemID must travel to the server: unscoped history
+        ignores container limits and answers ~25MB (the OOM payload)."""
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [
+                {'ratingKey': '7', 'title': 'A', 'type': 'movie',
+                 'viewedAt': 1760000000}]}})
+        items = self.client.watch_history(limit=50, rating_key='7')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('metadataItemID=7', url)
+        self.assertEqual(len(items), 1)
+
+    @patch('urllib.request.urlopen')
+    def test_watch_history_slices_before_normalising(self, mock_urlopen):
+        # The endpoint ignores X-Plex-Container-Size, so the client must
+        # bound the normalisation itself or 7k+ dicts get built per call.
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [
+                {'ratingKey': str(i), 'title': 'T', 'type': 'movie',
+                 'viewedAt': 1} for i in range(100)]}})
+        items = self.client.watch_history(limit=10)
+        self.assertEqual(len(items), 10)
+
+    def test_inflight_dedup_single_fetch(self):
+        """Concurrent callers of the same URL join one fetch -- prefetch
+        + _render used to run it twice (double memory spike)."""
+        barrier = threading.Event()
+        calls = []
+
+        def slow_get(req, timeout=None):
+            calls.append(req.full_url)
+            barrier.wait(2)
+            return MockHTTPResponse({'MediaContainer': {'Metadata': []}})
+
+        results = []
+        with patch('urllib.request.urlopen', side_effect=slow_get):
+            t1 = threading.Thread(
+                target=lambda: results.append(self.client.on_deck(limit=1)))
+            t2 = threading.Thread(
+                target=lambda: results.append(self.client.on_deck(limit=1)))
+            t1.start()
+            t2.start()
+            barrier.set()
+            t1.join(5)
+            t2.join(5)
+        self.assertFalse(t1.is_alive() or t2.is_alive())
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(results, [[], []])
 
 
 if __name__ == '__main__':

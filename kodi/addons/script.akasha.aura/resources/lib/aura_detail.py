@@ -14,6 +14,7 @@ into episode mode; Back restores the show view.
 The caller must set `item` (a divert_source normalised dict) and `client`
 (a plex_client.PlexClient, or None) before doModal().
 """
+import threading
 import time
 
 import xbmc
@@ -162,18 +163,86 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._pending_season_index = None  # season card entry point
         self._restore_episode_pos = None   # episode pos to restore on Back
         self.exit_to_sidebar = False
+        # Background fetches kicked off at the top of _render() so the
+        # independent Plex calls overlap instead of serialising on the
+        # GUI thread (the "buttons appear one by one" root cause).
+        self._bg_done = {}
+        self._bg_results = {}
 
     def onInit(self):
+        # Reveal veil (bottom of AuraDetail.xml): drop it for this open --
+        # _render lifts it once populated. Reset here, not in _render:
+        # mode swaps (episode <-> show) re-render without re-veiling.
+        _set(self, 'AuraDetailReady', '')
+        _set(self, 'AuraDetailFanart',
+             self.item.get('fanart_url') or self.item.get('art_url') or '')
         try:
             self._render()
         except Exception as e:
             xbmc.log('Akasha Aura Detail: init error: {}'.format(e), xbmc.LOGERROR)
+            # Never leave the reveal veil down on a failed render -- a
+            # stuck 'empty' prop would mask the whole page as black.
+            _set(self, 'AuraDetailReady', '1')
 
     # ------------------------------------------------------------ render
+
+    def _bg_start(self, key, fn_name, *args, **kwargs):
+        """Fire one independent client call on a daemon thread; _bg_get()
+        joins it where the result is consumed. On a warm read cache the
+        call returns instantly -- on a cold one the requests overlap."""
+        fn = getattr(self.client, fn_name, None)
+        if fn is None:
+            return
+        done = threading.Event()
+        self._bg_done[key] = done
+        # Capture THIS render's result map: a late thread from a previous
+        # _render must not write stale data into the new item's map.
+        results = self._bg_results
+
+        def run():
+            try:
+                results[key] = fn(*args, **kwargs)
+            except Exception as e:
+                xbmc.log('Akasha Aura Detail: {} failed: {}'.format(
+                    fn_name, e), xbmc.LOGWARNING)
+                results[key] = None
+            finally:
+                done.set()
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def _bg_get(self, key, timeout=12.0):
+        """Join a _bg_start()ed call. Returns None when the fetch was
+        never started or failed -- callers treat both as 'no data'."""
+        done = self._bg_done.get(key)
+        if done is None:
+            return None
+        done.wait(timeout)
+        return self._bg_results.get(key)
 
     def _render(self):
         item = self.item
         self.watched = bool(item.get('watched'))
+
+        # Kick off the independent Plex calls in parallel FIRST: extras,
+        # watch history, on-deck and seasons each used to run serially
+        # here (~4.5s cold on the Pi), which is what made the page
+        # materialise control-by-control behind the reveal veil.
+        # Reset the maps: the window instance is reused, and a stale
+        # 'done' event would otherwise serve the PREVIOUS item's data.
+        self._bg_done = {}
+        self._bg_results = {}
+        if self.client and item.get('rating_key'):
+            rk = item['rating_key']
+            self._bg_start('extras', 'item_extras', rk)
+            if not item.get('last_viewed_at'):
+                # Scoped by metadataItemID: unscoped history answers the
+                # WHOLE log (~25MB) -- the OOM that killed Kodi.
+                self._bg_start('history', 'watch_history',
+                               limit=50, rating_key=rk)
+            self._bg_start('ondeck', 'on_deck', limit=60)
+            if self.mode == 'show':
+                self._bg_start('seasons', 'show_seasons', rk)
 
         _set(self, 'AuraDetailShowStrip',
              '1' if self.mode in ('show', 'season') else '')
@@ -262,32 +331,37 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._extras_key = item.get('rating_key')
             self._extras = []
             if self.client and item.get('rating_key'):
-                try:
-                    self._extras = self.client.item_extras(
-                        item['rating_key'])
-                except Exception as e:
-                    xbmc.log('Akasha Aura Detail: extras failed: {}'.format(e),
-                             xbmc.LOGWARNING)
+                if 'extras' in self._bg_done:
+                    self._extras = self._bg_get('extras') or []
+                else:
+                    try:
+                        self._extras = self.client.item_extras(
+                            item['rating_key'])
+                    except Exception as e:
+                        xbmc.log('Akasha Aura Detail: extras failed: {}'
+                                 .format(e), xbmc.LOGWARNING)
         _set(self, 'AuraDetailExtras', '1' if self._extras else '')
 
         # "Vous l'avez regarde le..." (B6): Plex's "Activity by you" hint
-        # from the server watch history -- one fetch per item.
+        # from the server watch history. The entry list (50 rows) is
+        # cached on the reused window for 5 min -- without it every
+        # detail open paid a full history fetch for a single line.
         if self._activity_key != item.get('rating_key'):
             self._activity_key = item.get('rating_key')
             self._activity_date = ''
-            watch_history = getattr(self.client, 'watch_history', None)
-            if watch_history and item.get('rating_key'):
-                try:
-                    for entry in watch_history(limit=50):
-                        if str(entry.get('rating_key')) == str(item['rating_key']) \
-                                and entry.get('viewed_at'):
-                            self._activity_date = i18n.fmt_air_date(
-                                time.strftime('%Y-%m-%d',
-                                              time.localtime(entry['viewed_at'])))
-                            break
-                except Exception as e:
-                    xbmc.log('Akasha Aura Detail: watch history failed: {}'
-                             .format(e), xbmc.LOGWARNING)
+            viewed_at = item.get('last_viewed_at')
+            if not viewed_at:
+                # Thin items (hub cards) lack lastViewedAt: fall back to
+                # the item-scoped history call (metadataItemID, ~1KB).
+                for entry in self._watch_history_entries(
+                        item.get('rating_key')):
+                    if entry.get('viewed_at'):
+                        viewed_at = entry['viewed_at']
+                        break
+            if viewed_at:
+                self._activity_date = i18n.fmt_air_date(
+                    time.strftime('%Y-%m-%d',
+                                  time.localtime(viewed_at)))
         _set(self, 'AuraDetailActivity',
              i18n.tr(33578).format(self._activity_date)
              if self._activity_date else '')
@@ -393,6 +467,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.setFocus(self.getControl(WATCH_BUTTON_ID))
         except RuntimeError:
             pass
+        # Everything is populated and focused: lift the reveal veil so the
+        # page materialises in a single paint instead of control-by-control.
+        _set(self, 'AuraDetailReady', '1')
 
     def _render_chips(self, item):
         # Each chip: (text, provider icon or ''). Plex draws a provider
@@ -472,7 +549,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if self._seasons or not self.client or not self.item.get('rating_key'):
             return
         try:
-            self._seasons = self.client.show_seasons(self.item['rating_key'])
+            if 'seasons' in self._bg_done:
+                self._seasons = self._bg_get('seasons') or []
+            else:
+                self._seasons = self.client.show_seasons(
+                    self.item['rating_key'])
         except Exception as e:
             xbmc.log('Akasha Aura Detail: seasons failed: {}'.format(e), xbmc.LOGERROR)
             self._seasons = []
@@ -929,13 +1010,47 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return i18n.tr(33106).format(_fmt_duration(left_ms))
         return i18n.tr(33104)
 
+    _WATCH_HISTORY_TTL = 300.0
+
+    def _watch_history_entries(self, rating_key):
+        """Item-scoped watch history for the 'Vous l'avez regarde le...'
+        line, cached on this (reused) window for 5 minutes per key."""
+        now = time.time()
+        cache = getattr(self, '_wh_cache', None)
+        if cache and cache[0] == rating_key \
+                and now - cache[1] < self._WATCH_HISTORY_TTL:
+            return cache[2]
+        entries = []
+        if 'history' in self._bg_done:
+            entries = list(self._bg_get('history') or [])
+        else:
+            fn = getattr(self.client, 'watch_history', None)
+            if fn and rating_key:
+                try:
+                    entries = list(fn(limit=50, rating_key=rating_key))
+                except TypeError:
+                    try:
+                        entries = list(fn(limit=50))
+                    except Exception as e:
+                        xbmc.log('Akasha Aura Detail: watch history '
+                                 'failed: {}'.format(e), xbmc.LOGWARNING)
+                except Exception as e:
+                    xbmc.log('Akasha Aura Detail: watch history failed: {}'
+                             .format(e), xbmc.LOGWARNING)
+        self._wh_cache = (rating_key, now, entries)
+        return entries
+
     def _find_next_episode(self):
         if self._next_episode:
             return self._next_episode
         if not self.client:
             return None
         try:
-            for ep in self.client.on_deck(limit=60):
+            if 'ondeck' in self._bg_done:
+                deck = self._bg_get('ondeck') or []
+            else:
+                deck = self.client.on_deck(limit=60)
+            for ep in deck:
                 if ep.get('grandparent_rating_key') == self.item.get('rating_key'):
                     self._next_episode = ep
                     return ep
