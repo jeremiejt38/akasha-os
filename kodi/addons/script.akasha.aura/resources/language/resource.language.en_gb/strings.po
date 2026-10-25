@@ -1659,3 +1659,8 @@ msgstr ""
 msgctxt "#33581"
 msgid "Genre"
 msgstr ""
+
+# Playlists
+msgctxt "#33582"
+msgid "Playlists"
+msgstr ""

@@ -232,6 +232,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._connector_client = None
         self._divert_sections = []
         self._all_divert_sections = []
+        self._divert_playlists = []
         self._divert_active_section = 0
         self._divert_items = []
         self._divert_paged = None
@@ -580,6 +581,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return [], None
             return None, None
         try:
+            if section and section.get('type') == 'playlist':
+                return [], None  # playlists have no recommendation hubs
             if section:
                 hubs = self._plex_client.section_hubs(section['key'])
             elif self._home_tab == HOME_TAB_TRENDING:
@@ -1171,7 +1174,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         error = None
         try:
-            if self._connector_client:
+            if section.get('type') == 'playlist':
+                genres = []  # no genre directory for playlists
+            elif self._connector_client:
                 genres = divert_source.parse_genres(
                     self._connector_client.section_genres(section['key']))
             else:
@@ -1458,6 +1463,35 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
+    def _open_playlist(self, item):
+        """Drill into a server playlist (B10): the grid shows its items
+        until the tab is re-entered -- same pattern as collections."""
+        if not self._plex_client or not item.get('rating_key'):
+            return
+
+        def fetch(offset, limit):
+            return self._plex_client.playlist_items_with_total(
+                item['rating_key'], limit=limit, offset=offset)
+        self._divert_paged = paged_list.PagedList(
+            fetch, page_size=50, prefetch_margin=50)
+        try:
+            self._divert_paged.load_initial()
+        except Exception as e:
+            xbmc.log('Akasha Aura: playlist items load failed: {}'.format(e),
+                     xbmc.LOGERROR)
+            return
+        self._divert_items = self._divert_paged.items
+        self._divert_collection_key = item['rating_key']
+        self._fill_divert_panel()
+        self._set_divert_state(None)
+        try:
+            self.getControl(DIVERT_STATUS_ID).setLabel(
+                '{} — {}'.format(item['title'],
+                            i18n.tr(33069).format(len(self._divert_items))))
+            self.getControl(DIVERT_PANEL_ID).selectItem(0)
+        except RuntimeError:
+            pass
+
     def _on_category_genre_selected(self):
         """A genre tile was picked: jump straight to Bibliotheque, pre-filtered
         to that genre, instead of the former separate AuraLibraryWindow --
@@ -1547,6 +1581,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._divert_sections = list(self._all_divert_sections)
         else:
             self._divert_sections = list(self._all_divert_sections)
+
+        # Server-local playlists (B10): Plex surfaces them as an extra
+        # sidebar entry, only when the user actually has some. Direct
+        # Plex only -- the connector exposes no /playlists proxy.
+        self._divert_playlists = []
+        if self._plex_client:
+            try:
+                self._divert_playlists = self._plex_client.playlists()
+            except Exception as e:
+                xbmc.log('Akasha Aura: playlists fetch failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+            if self._divert_playlists:
+                self._divert_sections.append({
+                    'key': 'playlists', 'type': 'playlist',
+                    'title': i18n.tr(33582)})
         self._populate_sidebar()
 
         # Which library (if any) becomes active is decided by the caller
@@ -1628,6 +1677,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             lambda: self._divert_section_page_uncached(section, offset, limit))
 
     def _divert_section_page_uncached(self, section, offset, limit):
+        if section.get('type') == 'playlist':
+            # The playlists pseudo-section pages over the prefetched
+            # list -- /playlists itself has no pagination.
+            return (self._divert_playlists[offset:offset + limit],
+                    len(self._divert_playlists))
         unwatched = self._divert_filter_unwatched
         if self._connector_client:
             raw = self._connector_client.section_items(
@@ -3051,6 +3105,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_open(self, item):
         if item.get('type') == 'collection':
             self._open_collection(item)
+            return
+        if item.get('type') == 'playlist':
+            self._open_playlist(item)
             return
 
         section = self._divert_sections[self._divert_active_section]

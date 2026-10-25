@@ -610,6 +610,35 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual(self.client.watch_history(), [])
 
     @patch('urllib.request.urlopen')
+    def test_playlists_normalises_directory(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [
+                {'ratingKey': '11', 'title': 'Soirée', 'leafCount': 12,
+                 'composite': '/playlist/11/composite'},
+                {'ratingKey': '12', 'title': 'Vide'},
+            ]}})
+        items = self.client.playlists()
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/playlists', url)
+        self.assertIn('playlistType=video', url)
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]['type'], 'playlist')
+        self.assertEqual(items[0]['count'], 12)
+        self.assertIn('transcode', items[0]['thumb_url'])
+        self.assertEqual(items[1]['thumb_url'], '')
+
+    @patch('urllib.request.urlopen')
+    def test_playlist_items_with_total(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'totalSize': 7, 'Metadata': [
+                {'ratingKey': '1', 'title': 'A', 'type': 'movie'}]}})
+        items, total = self.client.playlist_items_with_total('11')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/playlists/11/items', url)
+        self.assertEqual(total, 7)
+        self.assertEqual(items[0]['rating_key'], '1')
+
+    @patch('urllib.request.urlopen')
     def test_report_timeline_never_cached(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({})
         self.client.report_timeline('42', 1000, 2000)
