@@ -100,6 +100,7 @@ class PlexClient:
             # Cloudflare fronts the public plex.akasha.ing endpoint and
             # blocks Python-urllib's default UA (HTTP 403, error 1010).
             'User-Agent': 'AkashaOSAura/1.0',
+            'X-Plex-Client-Identifier': 'akasha-aura',
         }
 
     def _request(self, path, params=None, method=None):
@@ -527,6 +528,23 @@ class PlexClient:
             item['subtype'] = raw.get('subtype') or ''
             items.append(item)
         return items
+
+    def report_timeline(self, rating_key, time_ms, duration_ms,
+                        state='playing'):
+        """Report playback progress (`/:/timeline`).
+
+        Official Plex clients ping this every ~10s while playing (plus a
+        final ``state=stopped`` when playback ends); it is what keeps the
+        server-side viewOffset fresh for multi-device resume and the
+        "Continue Watching" hub -- without it the server only learns the
+        position on scrobble, i.e. never for an unfinished item."""
+        self._request('/:/timeline', {
+            'ratingKey': rating_key,
+            'key': '/library/metadata/{}'.format(rating_key),
+            'state': state,
+            'time': int(time_ms),
+            'duration': int(duration_ms),
+        })
 
     def scrobble(self, rating_key):
         """Mark an item watched (Plex `scrobble` endpoint)."""

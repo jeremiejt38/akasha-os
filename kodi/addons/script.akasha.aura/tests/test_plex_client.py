@@ -483,5 +483,39 @@ class TestPlexErrorClassification(unittest.TestCase):
         self.assertNotIsInstance(ctx.exception, plex_client.PlexOfflineError)
 
 
+class TestPlexClientTimeline(unittest.TestCase):
+    """B3: /:/timeline progress reports."""
+
+    def setUp(self):
+        self.client = plex_client.PlexClient(
+            'http://192.168.100.133:32400', 'tok123')
+
+    @patch('urllib.request.urlopen')
+    def test_report_timeline_params(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({})
+        self.client.report_timeline('42', 61000, 2520000, 'playing')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/:/timeline', url)
+        for expected in ('ratingKey=42',
+                         'key=%2Flibrary%2Fmetadata%2F42',
+                         'state=playing', 'time=61000',
+                         'duration=2520000'):
+            self.assertIn(expected, url)
+
+    @patch('urllib.request.urlopen')
+    def test_report_timeline_stopped_state(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({})
+        self.client.report_timeline('42', 2400000, 2520000, 'stopped')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('state=stopped', url)
+
+    @patch('urllib.request.urlopen')
+    def test_report_timeline_never_cached(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({})
+        self.client.report_timeline('42', 1000, 2000)
+        self.client.report_timeline('42', 2000, 2000)
+        self.assertEqual(mock_urlopen.call_count, 2)
+
+
 if __name__ == '__main__':
     unittest.main()

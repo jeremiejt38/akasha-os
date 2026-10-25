@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
 
 import home_press_handler  # noqa: E402
 import settings_press_handler  # noqa: E402
+import timeline_reporter  # noqa: E402
 import up_next  # noqa: E402
 from aura_window import AuraWindow  # noqa: E402
 
@@ -167,6 +168,11 @@ if __name__ == '__main__':
             # a modal dialog would otherwise cover the fullscreen video.
             # Wait for playback to end, then re-open Aura where the user
             # left it -- Plex-style "return to app" after watching.
+            # Meanwhile the reporter keeps the server-side viewOffset
+            # fresh (`/:/timeline`, parity B3) so resume works on any
+            # device, and it survives the Up Next episode chaining below.
+            reporter = timeline_reporter.TimelineReporter()
+            reporter.start()
             while getattr(window, 'playback_started', False):
                 # Player.play() is asynchronous: wait for the stream to
                 # actually start before watching for its end, otherwise
@@ -213,8 +219,17 @@ if __name__ == '__main__':
                     continue
                 window.playback_started = False
                 _run_window()
+            # Playback session over: final state=stopped report commits
+            # the last position, then the reporter thread exits.
+            reporter.finish()
             del window
         finally:
+            # The reporter is a daemon thread -- without this it would
+            # outlive the script and keep pinging for the Kodi session.
+            try:
+                reporter.finish()
+            except Exception:
+                pass
             heartbeat_stop.set()
             try:
                 os.remove(LOCK_FILE)
