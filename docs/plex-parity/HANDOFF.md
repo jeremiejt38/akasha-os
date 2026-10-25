@@ -1,7 +1,7 @@
 # HANDOFF — Reprise de session (parité Plex/Google TV × Aura)
 
 > Document de passation pour une nouvelle session Devin. Contient le contexte
-> exact, l'état réel au `2026-10-24`, les outils et les pièges connus.
+> exact, l'état réel au `2026-10-25`, les outils et les pièges connus.
 > Complète `PARITY.md` (audit d'écrans) et `SPEC.md`.
 
 ## Mission (consigne utilisateur, à préserver)
@@ -17,10 +17,20 @@ l'écran — en boucle. Claude (`claude-bridge` MCP, **session `plex-parity`
 obligatoire**) sert de partenaire design pour tout doute sur le comportement
 Plex/Google TV.
 
-## État des releases (au tag `akasha-os-v0.58.0`)
+## État des releases (au tag `akasha-os-v0.66.0`)
 
-**Le Pi (`root@192.168.1.88`) est éteint depuis plusieurs jours — 6 releases
-sont taguées mais JAMAIS déployées :**
+**Le Pi (`root@192.168.1.88`) est toujours éteint — ~13 releases sont taguées
+mais JAMAIS déployées ni vérifiées à l'écran** (v0.54.3 → v0.66.0). Toute la
+parité fonctionnelle livrée reste « à vérifier à l'écran ».
+
+Depuis le 2026-10-24/25, le backlog serveur est quasiment épuisé :
+v0.60→v0.66 couvrent B17 (états erreur), B1 (Up Next), B14 (chapitres OSD),
+B3 (`/:/timeline`), B2 (skip intro), B4 (filtres dynamiques), B7 (titres
+similaires), B6 (onglet Activité + historique), B8 (recherche enrichie),
+B10 (playlists), B11 (Go to Show), B12 (versions), B13 (UltraBlurColors),
+B15 (continuité pistes par série), B16 (musique dans la sidebar), feuille
+d'options partagée `context_sheet.py` sur toutes les surfaces de cartes,
+Back à deux niveaux, fade bord droit rangées/grille, icônes clavier.
 
 | Version | Contenu |
 |---------|---------|
@@ -31,13 +41,16 @@ sont taguées mais JAMAIS déployées :**
 | v0.57.1 | Couverture i18n complétée + générateur multi-langue (`LANGUAGES` dans `i18n.py`) |
 | v0.58.0 | Mode Ambiant Ken Burns façon Google TV : 2 slots `image` alternés (`ambient.slot`/`kb{0,1}`/`img{0,1}`), 45 s/photo, crossfade 3 s, preload 1,5 s, horloge démarre bas-gauche + scrims dégradés |
 | v0.59.0 | **`service.akasha.perfanalyzer`** (collecteur perf en fond, JSONL borné, boot marker autostart) + CLI **`analyser-de-performances`** ; **overlay de chargement permanent** sur les fenêtres natives (Home + menus nav : logo, « Chargement… », vague organique) — fini les flashs du menu Kodi au boot et au lancement vidéo |
+| v0.60.0–v0.66.0 | Tout le backlog serveur de parité (voir la liste ci-dessus + `PARITY.md`) |
 
 **Première action d'une nouvelle session : vérifier si le Pi est joignable
-(`ping -c1 -W3 192.168.1.88`) et déployer dès qu'il l'est** — 7 versions
-en attente (v0.54.3 → v0.59.0). Après déploiement, valider spécifiquement :
-la vague de l'écran de chargement natif, la commande
-`analyser-de-performances` en SSH (rapport lisible), le drift Ken Burns de
-l'ambiant, la top-bar rétractable, le dedup séries et le menu Paramètres.
+(`ping -c1 -W3 192.168.1.88`) et déployer dès qu'il l'est** — ~13 versions
+en attente. Après déploiement, valider spécifiquement : tout le paragraphe
+« à vérifier à l'écran » de `PARITY.md`, la vague de l'écran de chargement
+natif, `analyser-de-performances` en SSH, le pic mémoire retour hub
+(perfanalyzer), le Back à deux niveaux, les feuilles d'options sur
+recherche/filmographie/épisodes, la musique (B16) et la continuité des
+pistes (B15).
 
 ## Déploiement
 
@@ -95,17 +108,24 @@ pas de reboot/poweroff/CEC sans confirmation ; préférer « Redémarrer Akasha 
 
 ## Backlog audit (priorités Claude, détails dans `PARITY.md`)
 
-1. **B17** — écran erreur serveur propre (brique réutilisable états
-   vides/offline). *Prochaine tâche recommandée.*
-2. **B1** — comportement « On Deck / Up Next » Plex.
-3. **B14** — chapitres dans l'OSD.
-4. Restauration du focus au retour de fiche/recherche/sheet ; refresh de
-   rangée après action ; threads qui touchent l'UI après fermeture ;
-   appuis longs (personnes, résultats recherche, tuiles app, store,
-   épisodes) ; états vides/erreur/chargement ; Back à la racine ; mémoire
-   textures sur sessions longues.
+Tous les B1–B17 serveur sont implémentés (vérifiés au code, écran en
+attente). Restants :
+
+1. **Vérif écran de tout le backlog** — le vrai jalon restant.
+2. **Hub `style=hero`** (`home.continue` sur `/hubs/promoted`, constat
+   serveur 2026-10-25) : Plex le rend en **cartes paysage** (bannières 16:9
+   avec barre de progression), Aura le traite en rangée shelf posters.
+   Conversion à faire avec la vérif écran (slots de rangée dédiés ou
+   itemlayout paysage — le viewport coulissant complique le binding).
+3. Ghost icon près du hero (non identifié — les deux `icon-home.png` des
+   rails sont volontaires), trou ~90 px titre/méta sans clearlogo (corrigé,
+   à confirmer), couleur de fondu backdrop, typographie, format timecodes.
+4. Pic mémoire retour hub → `perfanalyzer` sur le Pi.
 5. Mode Ambiant : reculés volontaires — crédit photo, fond flou non-16:9,
    appariement portrait, luminosité nocturne.
+6. **Émulateur `google-tv`** : Plex bloqué sur l'écran PIN du profil
+   `.Akasha` — le PIN n'est pas dans le vault ; demander à Jérémie pour
+   reprendre l'audit capture.
 
 ## Contexte opérationnel (endpoints, préférences, emplacements)
 
