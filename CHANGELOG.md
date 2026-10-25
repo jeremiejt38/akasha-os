@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.4...akasha-os-v0.69.5) (2026-10-25)
+
+
+### Bug Fixes
+
+* **aura:** Plex parity batch — CW posters, rating chips, avatar, fades ([#208](https://github.com/jeremiejt38/akasha-os/issues/208)) ([dafdf45](https://github.com/jeremiejt38/akasha-os/commit/dafdf459c8b037ee4be19c12a1cd9bbec7170cc0))
+
 ## [0.69.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.3...akasha-os-v0.69.4) (2026-10-25)
 
 
