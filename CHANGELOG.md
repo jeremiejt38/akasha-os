@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.65.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.64.0...akasha-os-v0.65.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** "Go to Show" entry on episode fiches (B11) ([#170](https://github.com/jeremiejt38/akasha-os/issues/170)) ([f1cb3ac](https://github.com/jeremiejt38/akasha-os/commit/f1cb3acfc4656c44b21c258d13c2837a38196d59))
+* **aura:** "Play Version" picker for multi-version items (B12) ([#175](https://github.com/jeremiejt38/akasha-os/issues/175)) ([9a2f7f0](https://github.com/jeremiejt38/akasha-os/commit/9a2f7f0d210d5f7ecdb43b70906d79ddf43386df))
+* **aura:** enriched search — genres, suggestions, clear history (B8) ([#173](https://github.com/jeremiejt38/akasha-os/issues/173)) ([afa3564](https://github.com/jeremiejt38/akasha-os/commit/afa3564752802fdd0cb88f1cce96745416d90112))
+* **aura:** fade poster rows and library grid right edge like Plex ([#176](https://github.com/jeremiejt38/akasha-os/issues/176)) ([c1a713b](https://github.com/jeremiejt38/akasha-os/commit/c1a713b7f10286be52f581df0fd31f22bc188b11))
+* **aura:** icon glyphs for the search keyboard special keys ([#177](https://github.com/jeremiejt38/akasha-os/issues/177)) ([dbe2ede](https://github.com/jeremiejt38/akasha-os/commit/dbe2edee6cd4c0e39546d087a4e25ecae304fed9))
+* **aura:** server-local playlists in the sidebar (B10) ([#174](https://github.com/jeremiejt38/akasha-os/issues/174)) ([f5cdfbf](https://github.com/jeremiejt38/akasha-os/commit/f5cdfbfec9734e05953c00957125d6e8b93f6e0a))
+* **aura:** tint detail backdrop dim with UltraBlurColors (B3 parity B13) ([#172](https://github.com/jeremiejt38/akasha-os/issues/172)) ([5f82cb3](https://github.com/jeremiejt38/akasha-os/commit/5f82cb35ffc93378c1c8119bf49ad07a3a8391ff))
+
+
+### Bug Fixes
+
+* **aura:** bottom-anchor hero text title like the clearlogo baseline ([#178](https://github.com/jeremiejt38/akasha-os/issues/178)) ([87e7b13](https://github.com/jeremiejt38/akasha-os/commit/87e7b13e2b50f522d9f8e3a1adfe2e5fb1d7c495))
+
 ## [0.64.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.63.0...akasha-os-v0.64.0) (2026-10-25)
 
 
