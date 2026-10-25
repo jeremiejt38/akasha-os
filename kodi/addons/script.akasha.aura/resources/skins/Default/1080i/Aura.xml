@@ -1042,7 +1042,7 @@
                         <top>0</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture>poster-corners.png</texture>
+                        <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="progress">
@@ -1141,7 +1141,7 @@
                         <top>0</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture>poster-corners.png</texture>
+                        <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         <animation effect="zoom" start="100" end="108" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
@@ -1304,7 +1304,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1347,7 +1347,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -1424,7 +1424,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1497,7 +1497,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -1598,7 +1598,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1641,7 +1641,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -1718,7 +1718,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1791,7 +1791,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -1897,7 +1897,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1940,7 +1940,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2017,7 +2017,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2090,7 +2090,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2192,7 +2192,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2235,7 +2235,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2312,7 +2312,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2385,7 +2385,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2485,7 +2485,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2528,7 +2528,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture>poster-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2601,7 +2601,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2674,7 +2674,7 @@
                                 <top>0</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture>landscape-corners.png</texture>
+                                <texture colordiffuse="FF0D1017">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>

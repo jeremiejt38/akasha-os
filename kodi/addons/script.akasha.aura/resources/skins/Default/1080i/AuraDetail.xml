@@ -796,7 +796,7 @@
                     <top>0</top>
                     <width>200</width>
                     <height>300</height>
-                    <texture>poster-corners.png</texture>
+                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>150</left>
@@ -829,7 +829,7 @@
                     <top>0</top>
                     <width>200</width>
                     <height>300</height>
-                    <texture>poster-corners.png</texture>
+                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -883,7 +883,7 @@
                     <top>0</top>
                     <width>320</width>
                     <height>180</height>
-                    <texture>poster-corners.png</texture>
+                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
                 </control>
                 <control type="progress">
                     <left>4</left>
@@ -933,7 +933,7 @@
                     <top>0</top>
                     <width>320</width>
                     <height>180</height>
-                    <texture>poster-corners.png</texture>
+                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1002,7 +1002,7 @@
                     <top>0</top>
                     <width>160</width>
                     <height>160</height>
-                    <texture>cast-mask.png</texture>
+                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1041,7 +1041,7 @@
                     <top>0</top>
                     <width>160</width>
                     <height>160</height>
-                    <texture>cast-mask.png</texture>
+                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
                 </control>
                 <control type="image">
                     <left>18</left>
