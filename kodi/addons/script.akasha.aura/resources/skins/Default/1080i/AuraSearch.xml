@@ -94,12 +94,15 @@
         </control>
 
         <!-- Space / backspace / clear -->
+        <!-- Special keys as icons like Plex's on-screen keyboard (the
+             label-less button stays the focus target; the glyph is an
+             overlay swapped for its dark variant on focus). -->
         <control type="button" id="8115">
             <left>112</left>
             <top>552</top>
             <width>118</width>
             <height>52</height>
-            <label>_</label>
+            <label></label>
             <font>font_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -111,12 +114,28 @@
             <onright>8116</onright>
             <ondown>8110</ondown>
         </control>
+        <control type="image">
+            <left>155</left>
+            <top>562</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>key-space.png</texture>
+            <visible>!Control.HasFocus(8115)</visible>
+        </control>
+        <control type="image">
+            <left>155</left>
+            <top>562</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>key-space-dark.png</texture>
+            <visible>Control.HasFocus(8115)</visible>
+        </control>
         <control type="button" id="8116">
             <left>244</left>
             <top>552</top>
             <width>118</width>
             <height>52</height>
-            <label>&lt;-</label>
+            <label></label>
             <font>font_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -129,12 +148,28 @@
             <onright>8117</onright>
             <ondown>8110</ondown>
         </control>
+        <control type="image">
+            <left>287</left>
+            <top>562</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>key-backspace.png</texture>
+            <visible>!Control.HasFocus(8116)</visible>
+        </control>
+        <control type="image">
+            <left>287</left>
+            <top>562</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>key-backspace-dark.png</texture>
+            <visible>Control.HasFocus(8116)</visible>
+        </control>
         <control type="button" id="8117">
             <left>376</left>
             <top>552</top>
             <width>118</width>
             <height>52</height>
-            <label>X</label>
+            <label></label>
             <font>font_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -146,6 +181,22 @@
             <onleft>8116</onleft>
             <onright>8130</onright>
             <ondown>8110</ondown>
+        </control>
+        <control type="image">
+            <left>419</left>
+            <top>562</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>key-clear.png</texture>
+            <visible>!Control.HasFocus(8117)</visible>
+        </control>
+        <control type="image">
+            <left>419</left>
+            <top>562</top>
+            <width>32</width>
+            <height>32</height>
+            <texture>key-clear-dark.png</texture>
+            <visible>Control.HasFocus(8117)</visible>
         </control>
 
         <!-- Recent searches -->
