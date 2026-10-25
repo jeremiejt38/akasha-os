@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.60.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.59.0...akasha-os-v0.60.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** Plex-style state view for Divertissement failures (B17) ([#157](https://github.com/jeremiejt38/akasha-os/issues/157)) ([aa190c6](https://github.com/jeremiejt38/akasha-os/commit/aa190c6bd63c94b581e0795edc5869bd62663b8b))
+* **aura:** Plex-style Up Next card between episodes (B1) ([#159](https://github.com/jeremiejt38/akasha-os/issues/159)) ([a6c6e37](https://github.com/jeremiejt38/akasha-os/commit/a6c6e37705f4d85b26c1d0a875ae1ba7717459dd))
+
 ## [0.59.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.58.0...akasha-os-v0.59.0) (2026-10-24)
 
 
