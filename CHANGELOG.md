@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.3...akasha-os-v0.69.4) (2026-10-25)
+
+
+### Bug Fixes
+
+* **aura:** tint corner masks per surface instead of baked near-black ([#205](https://github.com/jeremiejt38/akasha-os/issues/205)) ([67b017e](https://github.com/jeremiejt38/akasha-os/commit/67b017ecedfb9bfaaf2f9ef04216b5f75592506c))
+
 ## [0.69.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.2...akasha-os-v0.69.3) (2026-10-25)
 
 
