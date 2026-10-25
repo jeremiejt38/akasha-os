@@ -2682,8 +2682,37 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # slots, and Up from the top slot reaching the right header control
         # (contextual tabs in a library, main tab bar on Accueil).
         slot = self._reco_slot_index(focused)
-        if aid == ACTION_MOVE_DOWN and 0 <= slot < len(RECO_SLOT_IDS) - 1 \
-                and not self._reco_slot_has_row(slot + 1):
+        # Between slots, Up/Down must be explicit: while a lower row holds
+        # focus the exited rows above play their counter-slide + fade and
+        # the viewport group slides up, so their *rendered* bounds sit
+        # below the focused row. Kodi's geometric resolver then reads an
+        # inverted order -- observed on-device: Down from slot 1 wrapped
+        # back onto the slid-down row 0, and Up skipped a row entirely.
+        # Chain both directions to filled neighbours deterministically.
+        if aid == ACTION_MOVE_UP and slot > 0:
+            prev = next((self._reco_slot_list_id(j)
+                         for j in range(slot - 1, -1, -1)
+                         if self._reco_list_has_items(
+                             self._reco_slot_list_id(j))), None)
+            if prev is not None:
+                try:
+                    self.setFocus(self.getControl(prev))
+                except RuntimeError:
+                    pass
+            self._update_hero()
+            self._update_bar_focused()
+            return
+        if aid == ACTION_MOVE_DOWN and 0 <= slot < len(RECO_SLOT_IDS) - 1:
+            nxt = next((self._reco_slot_list_id(j)
+                        for j in range(slot + 1, len(RECO_SLOT_IDS))
+                        if self._reco_list_has_items(
+                            self._reco_slot_list_id(j))), None)
+            if nxt is not None:
+                try:
+                    self.setFocus(self.getControl(nxt))
+                except RuntimeError:
+                    pass
+            self._update_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_UP and \
