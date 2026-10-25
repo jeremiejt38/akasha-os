@@ -65,9 +65,9 @@
                  by Window.Property(AuraHero*) from aura_window.py. -->
             <control type="image">
                 <left>127</left>
-                <top>160</top>
-                <width>720</width>
-                <height>128</height>
+                <top>180</top>
+                <width>560</width>
+                <height>100</height>
                 <aspectratio align="left" aligny="bottom">keep</aspectratio>
                 <fadetime>250</fadetime>
                 <texture background="true">$INFO[Window.Property(AuraHeroLogo)]</texture>
@@ -1215,9 +1215,9 @@
             <control type="image">
                 <left>1665</left>
                 <top>226</top>
-                <width>160</width>
+                <width>255</width>
                 <height>854</height>
-                <texture>scrim-row-right.png</texture>
+                <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
                 <visible>String.IsEqual(Window.Property(DivertView),library) + [String.IsEqual(Window.Property(DivertLibraryTab),1) | String.IsEqual(Window.Property(DivertLibraryTab),2)]</visible>
             </control>
 
@@ -2730,41 +2730,41 @@
                     <control type="image">
                         <left>1663</left>
                         <top>568</top>
-                        <width>160</width>
+                        <width>257</width>
                         <height>372</height>
-                        <texture>scrim-row-right.png</texture>
+                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
                         <visible>!Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                     </control>
                     <control type="image">
                         <left>1663</left>
                         <top>1040</top>
-                        <width>160</width>
+                        <width>257</width>
                         <height>372</height>
-                        <texture>scrim-row-right.png</texture>
+                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
                         <visible>!Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                     </control>
                     <control type="image">
                         <left>1663</left>
                         <top>1512</top>
-                        <width>160</width>
+                        <width>257</width>
                         <height>372</height>
-                        <texture>scrim-row-right.png</texture>
+                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
                         <visible>Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
                     </control>
                     <control type="image">
                         <left>1663</left>
                         <top>1984</top>
-                        <width>160</width>
+                        <width>257</width>
                         <height>372</height>
-                        <texture>scrim-row-right.png</texture>
+                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
                     <control type="image">
                         <left>1663</left>
                         <top>2456</top>
-                        <width>160</width>
+                        <width>257</width>
                         <height>372</height>
-                        <texture>scrim-row-right.png</texture>
+                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
                 </control>
@@ -2973,6 +2973,27 @@
                         <width>46</width>
                         <height>46</height>
                         <texture>avatar-plex.png</texture>
+                        <visible>String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                    </control>
+                    <!-- Real plex.tv account avatar (Plex TV shows the
+                         user's picture): fetched into AuraAvatar by
+                         _load_avatar, circle-clipped by the cast mask. -->
+                    <control type="image">
+                        <left>23</left>
+                        <top>450</top>
+                        <width>46</width>
+                        <height>46</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
+                        <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                    </control>
+                    <control type="image">
+                        <left>23</left>
+                        <top>450</top>
+                        <width>46</width>
+                        <height>46</height>
+                        <texture colordiffuse="B810131A">cast-mask.png</texture>
+                        <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
                         <left>30</left>
@@ -3109,7 +3130,7 @@
                             <height>34</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
-                            <visible>String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                         <control type="label">
                             <left>92</left>

@@ -136,14 +136,15 @@
         </control>
 
         <!-- Rating chips row (positions/widths computed in Python):
-             slot 0 = content rating, slot 1 = critic, slot 2 = audience -->
+             slot 0 = content rating pill, slots 1-4 = bare provider
+             chips (IMDb / RT critic / RT audience / TMDB) -->
         <control type="image" id="7021">
             <left>105</left>
             <top>356</top>
             <width>90</width>
             <height>36</height>
             <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
-            <visible>!String.IsEmpty(Window.Property(AuraDetailChip0))</visible>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg0))</visible>
         </control>
         <control type="image" id="7045">
             <left>105</left>
@@ -171,7 +172,7 @@
             <width>120</width>
             <height>36</height>
             <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
-            <visible>!String.IsEmpty(Window.Property(AuraDetailChip1))</visible>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg1))</visible>
         </control>
         <control type="image" id="7046">
             <left>205</left>
@@ -199,7 +200,7 @@
             <width>130</width>
             <height>36</height>
             <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
-            <visible>!String.IsEmpty(Window.Property(AuraDetailChip2))</visible>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg2))</visible>
         </control>
         <control type="image" id="7047">
             <left>335</left>
@@ -220,6 +221,62 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChip2))</visible>
+        </control>
+        <control type="image" id="7027">
+            <left>475</left>
+            <top>356</top>
+            <width>130</width>
+            <height>36</height>
+            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg3))</visible>
+        </control>
+        <control type="image" id="7048">
+            <left>475</left>
+            <top>362</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>$INFO[Window.Property(AuraDetailChipIcon3)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipIcon3))</visible>
+        </control>
+        <control type="label" id="7028">
+            <left>475</left>
+            <top>356</top>
+            <width>130</width>
+            <height>36</height>
+            <font>font_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip3))</visible>
+        </control>
+        <control type="image" id="7029">
+            <left>615</left>
+            <top>356</top>
+            <width>130</width>
+            <height>36</height>
+            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg4))</visible>
+        </control>
+        <control type="image" id="7049">
+            <left>615</left>
+            <top>362</top>
+            <width>24</width>
+            <height>24</height>
+            <aspectratio>keep</aspectratio>
+            <texture>$INFO[Window.Property(AuraDetailChipIcon4)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChipIcon4))</visible>
+        </control>
+        <control type="label" id="7032">
+            <left>615</left>
+            <top>356</top>
+            <width>130</width>
+            <height>36</height>
+            <font>font_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailChip4))</visible>
         </control>
 
         <!-- Synopsis (3 lines like Plex) -->

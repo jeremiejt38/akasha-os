@@ -321,6 +321,16 @@ def build_video_item(raw_item, image_resolver):
         'audience_rating': raw_item.get('audienceRating'),
         'rating_image': raw_item.get('ratingImage') or '',
         'audience_rating_image': raw_item.get('audienceRatingImage') or '',
+        # Plex detail pages draw up to 4 provider chips from the Ratings
+        # array (IMDb / RT critic / RT audience / TMDB); the legacy scalar
+        # fields above only ever carry one or two of them.
+        'ratings': [
+            {'image': str(r.get('image') or ''),
+             'type': str(r.get('type') or ''),
+             'value': r.get('value')}
+            for r in raw_item.get('Rating') or []
+            if r.get('value') is not None
+        ],
         'genres': _tags(raw_item, 'Genre'),
         'directors': _tags(raw_item, 'Director'),
         'writers': _tags(raw_item, 'Writer'),

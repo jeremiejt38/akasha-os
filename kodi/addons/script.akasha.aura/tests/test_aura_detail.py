@@ -51,6 +51,22 @@ class TestFormatRating(unittest.TestCase):
         self.assertEqual(aura_detail._fmt_rating('n/a', ''), '')
 
 
+class TestSeasonLabel(unittest.TestCase):
+    """Season cards/headers must render in the UI locale, never the raw
+    server title ('Season 7' comes back in the server locale)."""
+
+    def test_french_label_from_index(self):
+        season = {'index': 7, 'title': 'Season 7'}
+        self.assertEqual(
+            aura_detail.AuraDetailWindow._season_label(season), 'Saison 7')
+
+    def test_missing_index_falls_back_to_title(self):
+        season = {'title': 'Specials'}
+        self.assertEqual(
+            aura_detail.AuraDetailWindow._season_label(season),
+            'Saison Specials')
+
+
 class TestFormatDuration(unittest.TestCase):
     def test_minutes(self):
         self.assertEqual(aura_detail._fmt_duration(47 * 60000), '47m')

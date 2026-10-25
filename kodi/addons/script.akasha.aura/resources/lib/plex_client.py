@@ -733,6 +733,19 @@ class PlexClient:
             raise PlexAPIError('Plex rate failed for {}: {}'.format(
                 rating_key, getattr(e, 'reason', e))) from e
 
+    PLEX_TV_USER = 'https://plex.tv/api/v2/user'
+
+    def user_thumb(self):
+        """The account avatar URL shown in the sidebar rail -- Plex TV
+        renders the user's real plex.tv picture (orange disc in the
+        reference captures). The server token authenticates on plex.tv.
+        Returns '' when the endpoint is unreachable or has no thumb."""
+        try:
+            data = self._request(self.PLEX_TV_USER)
+        except PlexAPIError:
+            return ''
+        return str(data.get('thumb') or '')
+
     def metadata_item(self, rating_key):
         """Fetch and normalise a single item by rating key (used to hydrate
         thin items before opening the detail page)."""
