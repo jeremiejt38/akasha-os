@@ -12,8 +12,8 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `0.69.0` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.69.0` — **déployée le 2026-10-25**
+- **Version livrée** : `0.69.2` (tags `akasha-os-vX.Y.Z`, Release Please).
+- **Version réellement sur le Pi** : `0.69.2` — **déployée le 2026-10-25**
   (push ciblé de `script.akasha.aura` + restart Kodi ; le flux complet
   reste tarball → `install.sh`). v0.68.1 :
   (le déploiement a d'abord poussé 0.59.0 depuis un `main` local périmé,
@@ -68,6 +68,11 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   un `setFocus` dans le même tick qu'un toggle `<visible>` est annulé par
   la revalidation Kodi → délai 0,3 s + compteur de génération (toute
   action utilisateur invalide le focus en attente) (v0.69.0).
+- **Nav Up/Down entre slots reco chaînée en Python** : le contre-slide de
+  l'animation de sortie rend les rangées sorties *sous* la rangée focusée
+  → le navigateur géométrique Kodi lit un ordre inversé (Down rebouclait
+  sur la rangée du dessus, Up sautait une rangée / les sous-onglets).
+  Chaînage explicite vers le slot rempli le plus proche (v0.69.2).
 
 ## En cours
 
@@ -146,6 +151,10 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   enabled` d'`install.sh` doit inclure tout nouvel addon service sinon il
   reste désactivé dans Addons33.db et ne démarre jamais (bug trouvé sur
   perfanalyzer, corrigé v0.68.1).
+- **La navigation géométrique Kodi utilise les bornes animées** : une
+  animation slide qui déplace un contrôle au-delà de son voisin inverse
+  l'ordre Up/Down perçu — chaîner explicitement en `onAction` quand une
+  animation déplace des contrôles navigables (v0.69.2).
 - **Focus et `<visible>` en même tick** : `setFocus` juste après avoir
   rendu un contrôle visible est annulé par la revalidation Kodi → pattern
   focus différé dans `aura_window.py::_defer_focus` (thread 0,3 s +
