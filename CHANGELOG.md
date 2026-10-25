@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.66.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.65.0...akasha-os-v0.66.0) (2026-10-25)
+
+
+### Features
+
+* **aura:** music libraries in the sidebar (B16) ([#182](https://github.com/jeremiejt38/akasha-os/issues/182)) ([2fa2ee1](https://github.com/jeremiejt38/akasha-os/commit/2fa2ee1063fe60d59ddb4e3feb0e6bc0405ce2e7))
+* **aura:** per-show audio/subtitle stream continuity (B15) ([#179](https://github.com/jeremiejt38/akasha-os/issues/179)) ([0a94b13](https://github.com/jeremiejt38/akasha-os/commit/0a94b13b75e187ca05327378a1308fb52af92e99))
+* **aura:** two-level Back + shared option sheet on all card surfaces ([#181](https://github.com/jeremiejt38/akasha-os/issues/181)) ([243daec](https://github.com/jeremiejt38/akasha-os/commit/243daece23fbebc0ee22fa91edad943e5311f181))
+
 ## [0.65.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.64.0...akasha-os-v0.65.0) (2026-10-25)
 
 
