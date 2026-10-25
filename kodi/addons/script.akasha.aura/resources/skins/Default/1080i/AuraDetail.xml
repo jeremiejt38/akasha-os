@@ -1346,5 +1346,30 @@
             </control>
         </control>
         </control>
+
+        <!-- Reveal veil: covers the window while _render() performs its
+             serial fetches/positioning so the page materialises in one
+             paint instead of control-by-control. The item fanart is the
+             top layer (usually already texture-cached from the row card)
+             so the veil reads as the backdrop arriving first, same
+             impression as Plex's content fade-in. Lifted by
+             AuraDetailReady at the end of _render(). -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="FF10131A">white.png</texture>
+            <visible>String.IsEmpty(Window.Property(AuraDetailReady))</visible>
+        </control>
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true" colordiffuse="66FFFFFF">$INFO[Window.Property(AuraDetailFanart)]</texture>
+            <visible>String.IsEmpty(Window.Property(AuraDetailReady))</visible>
+        </control>
     </controls>
 </window>

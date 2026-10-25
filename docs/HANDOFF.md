@@ -85,6 +85,26 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   bibliothèque (marqué `is_library`) ouvre le menu Épingler/Désépingler
   + Monter/Descendre ; réutilise `divert.pinned_libraries` /
   `divert.library_order` existants (v0.69.3).
+- **`/status/sessions/history/all` ignore `X-Plex-Container-Size`** :
+  un appel non scopé répond **tout** l'historique (~25 Mo ici) → pic
+  `json.loads` qui a OOM-tué `kodi.bin` (Pi4, ~100 Mo libres). Toujours
+  scoper via `watch_history(rating_key=)` (`metadataItemID`, ~1 Ko) ou
+  borner `since_days=` (`viewedAt>=` marche, ~4 Mo/180 j) + trancher
+  AVANT normalisation. `lastViewedAt` sur l'item évite l'appel entier.
+- **Fetches détail en parallèle + dédup in-flight** : `_render` lance
+  extras/history/ondeck/seasons sur des threads daemon joints au point
+  de consommation (rendu 4,6-13 s → ~1-2 s) ; `_request` déduplique les
+  requêtes identiques en vol (prefetch focus 250 ms + render) pour ne
+  jamais fetcher 2× la même URL ; les params du prefetch DOIVENT égaler
+  ceux du render (clé de cache = path+params triés → `on_deck limit=60`).
+- **`InfoTagVideo.setPlaycount` (c minuscule)** : `setPlayCount` lève
+  AttributeError sur Kodi 21 → getattr avec fallback (v0.69.6).
+- **Décodage UTF-8 tolérant** (`errors='replace'`) : des titres Latin-1
+  font planter le décodage strict HORS de tout except → endpoint en
+  échec à chaque appel + refetch permanent.
+- **Voile de révélation fiche** (`AuraDetailReady`/`AuraDetailFanart`) :
+  masque le paint contrôle-par-contrôle ; reset dans `onInit` seulement
+  (les transitions internes saison↔épisode re-rendent sans re-voiler).
 
 - **Mission active** : boucle de parité visuelle/comportementale
   Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le

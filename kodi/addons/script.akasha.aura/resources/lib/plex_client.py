@@ -12,6 +12,7 @@ It mirrors the endpoints consumed by the official Plex/Fire TV clients:
 """
 
 import json
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -31,6 +32,13 @@ _CACHE_TTL_SECONDS = 30.0
 _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
 _read_cache = {}
+# In-flight request dedup: card-focus prefetch and the detail page's
+# parallel fetchers can ask for the same endpoint at the same time.
+# Without this the second caller misses the (still empty) cache and the
+# request runs twice -- doubling the memory spike that OOM-killed Kodi
+# on big payloads (watch history used to answer ~25MB unscoped).
+_inflight = {}
+_inflight_lock = threading.Lock()
 
 # People directories (/library/sections/<k>/actor|director) hold thousands
 # of entries that barely change; a longer-lived cache keeps people search
@@ -115,15 +123,37 @@ class PlexClient:
         # never be served from cache.
         cacheable = not path.startswith('/:') and method is None
         key = (host, path, tuple(sorted((params or {}).items())))
+        owner_ev = None
         if cacheable:
-            entry = _read_cache.get(key)
-            if entry and time.time() < entry[0]:
-                return entry[1]
+            while True:
+                entry = _read_cache.get(key)
+                if entry and time.time() < entry[0]:
+                    return entry[1]
+                with _inflight_lock:
+                    ev = _inflight.get(key)
+                    if ev is None:
+                        owner_ev = threading.Event()
+                        _inflight[key] = owner_ev
+                        break
+                # Another thread is already fetching this exact URL:
+                # join it and serve the result from the cache it fills.
+                if not ev.wait(15.0):
+                    # Owner stalled -- take over rather than hang.
+                    with _inflight_lock:
+                        if _inflight.get(key) is ev:
+                            owner_ev = threading.Event()
+                            _inflight[key] = owner_ev
+                            break
         req = urllib.request.Request(url, headers=self._headers(),
                                      method=method or 'GET')
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                body = resp.read().decode('utf-8')
+                # 'replace': some library entries carry invalid UTF-8
+                # bytes (Latin-1 titles); a strict decode would raise
+                # UnicodeDecodeError -- outside every except clause --
+                # and make the whole endpoint (notably watch_history)
+                # fail on every call, defeating the read cache.
+                body = resp.read().decode('utf-8', errors='replace')
                 _mark_online(host)
                 # Action endpoints (scrobble/unscrobble/rate) answer 200
                 # with an empty body -- a bare decode would JSON-decode
@@ -141,6 +171,12 @@ class PlexClient:
             raise PlexOfflineError('Plex URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise PlexAPIError('Plex JSON decode error for {}: {}'.format(path, e)) from e
+        finally:
+            if owner_ev is not None:
+                with _inflight_lock:
+                    if _inflight.get(key) is owner_ev:
+                        del _inflight[key]
+                owner_ev.set()
 
     @staticmethod
     def _media_container(data):
@@ -609,19 +645,34 @@ class PlexClient:
             })
         return self._metadata_list_with_total(data)
 
-    def watch_history(self, limit=50):
+    def watch_history(self, limit=50, rating_key=None, since_days=None):
         """Own watch history (`/status/sessions/history/all`, B6).
 
         Server-local (friend entries stay on Plex's private social API);
         entries are normalised like hub items plus a `viewed_at` unix
-        timestamp used for the 'Vous l'avez regardé le...' lines."""
-        data = self._request('/status/sessions/history/all', {
-            'sort': 'viewedAt:desc',
-            'X-Plex-Container-Size': limit,
-        })
+        timestamp used for the 'Vous l'avez regardé le...' lines.
+
+        IMPORTANT: this endpoint ignores X-Plex-Container-Size -- an
+        unscoped call answers the WHOLE history (~25MB on this server,
+        enough to OOM the Pi4 while Kodi renders). Always pass
+        `rating_key`: metadataItemID filters server-side down to ~1KB.
+        """
+        params = {'sort': 'viewedAt:desc',
+                  'X-Plex-Container-Size': limit}
+        if rating_key:
+            params['metadataItemID'] = rating_key
+        elif since_days:
+            # Bounding by recency shrinks the payload ~6x (25MB -> ~4MB
+            # on this server) while still covering the activity row.
+            params['viewedAt>={}'.format(
+                int(time.time() - since_days * 86400))] = ''
+        data = self._request('/status/sessions/history/all', params)
         mc = self._media_container(data)
         items = []
-        for raw in mc.get('Metadata', []):
+        # Slice BEFORE normalising: the endpoint ignores the container
+        # size, so without this an unscoped call would build a full
+        # video dict for every history entry ever recorded.
+        for raw in mc.get('Metadata', [])[:limit]:
             item = self._video_dict(raw, self.server_url, self.token)
             item['viewed_at'] = raw.get('viewedAt')
             items.append(item)

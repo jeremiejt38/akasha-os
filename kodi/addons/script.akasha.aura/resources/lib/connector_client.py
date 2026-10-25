@@ -6,6 +6,7 @@ docs/talos-strategy.md). Mirrors the style of plex_client.py.
 """
 
 import json
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -21,6 +22,10 @@ _CACHE_TTL_SECONDS = 30.0
 _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
 _read_cache = {}
+# In-flight request dedup (see plex_client): concurrent callers join the
+# same fetch instead of duplicating it.
+_inflight = {}
+_inflight_lock = threading.Lock()
 
 
 def _mark_offline(host):
@@ -88,15 +93,29 @@ class ConnectorClient:
         cacheable = method == 'GET'
         key = (host, method, path,
                json.dumps(json_body, sort_keys=True) if json_body else '')
+        owner_ev = None
         if cacheable:
-            entry = _read_cache.get(key)
-            if entry and time.time() < entry[0]:
-                return entry[1]
+            while True:
+                entry = _read_cache.get(key)
+                if entry and time.time() < entry[0]:
+                    return entry[1]
+                with _inflight_lock:
+                    ev = _inflight.get(key)
+                    if ev is None:
+                        owner_ev = threading.Event()
+                        _inflight[key] = owner_ev
+                        break
+                if not ev.wait(15.0):
+                    with _inflight_lock:
+                        if _inflight.get(key) is ev:
+                            owner_ev = threading.Event()
+                            _inflight[key] = owner_ev
+                            break
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
 
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                body = resp.read().decode('utf-8')
+                body = resp.read().decode('utf-8', errors='replace')
                 _mark_online(host)
                 result = json.loads(body) if body.strip() else {}
                 if cacheable:
@@ -111,6 +130,12 @@ class ConnectorClient:
             raise ConnectorOfflineError('Connector URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise ConnectorAPIError('Connector JSON decode error for {}: {}'.format(path, e)) from e
+        finally:
+            if owner_ev is not None:
+                with _inflight_lock:
+                    if _inflight.get(key) is owner_ev:
+                        del _inflight[key]
+                owner_ev.set()
 
     def login(self, username, password):
         """Authenticate against the connector and store the session token."""

@@ -352,6 +352,10 @@ def build_video_item(raw_item, image_resolver):
         'progress': progress,
         'view_count': view_count,
         'watched': bool(view_count),
+        # Plex stamps lastViewedAt on watched Metadata entries -- the
+        # detail page's "Vous l'avez regardé le..." line uses it for
+        # free instead of fetching the (unbounded) history endpoint.
+        'last_viewed_at': raw_item.get('lastViewedAt'),
         'thumb_url': image_resolver(thumb, 640, 360) if thumb else '',
         'art_url': image_resolver(art, 1920, 1080) if art else '',
         'poster_url': image_resolver(poster, 320, 480) if poster else '',
