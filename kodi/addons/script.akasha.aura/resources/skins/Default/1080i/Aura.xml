@@ -1208,6 +1208,16 @@
                     </control>
                 </focusedlayout>
             </control>
+            <!-- Same right-edge fade as the reco rows: the grid's partial
+                 last column dissolves into the page like on Plex. -->
+            <control type="image">
+                <left>1665</left>
+                <top>226</top>
+                <width>160</width>
+                <height>854</height>
+                <texture>scrim-row-right.png</texture>
+                <visible>String.IsEqual(Window.Property(DivertView),library) + [String.IsEqual(Window.Property(DivertLibraryTab),1) | String.IsEqual(Window.Property(DivertLibraryTab),2)]</visible>
+            </control>
 
             <!-- Recommande content: inline (Accueil, unscoped, or a library's own
                  Recommande tab), previously opened AuraRecommendations.xml as a
@@ -1845,6 +1855,51 @@
                                 <visible>Control.HasFocus(5510) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                         </focusedlayout>
+                    </control>
+
+                    <!-- Right-edge fades: Plex fades the last visible poster
+                         into the page instead of a hard cut at x=1823. One
+                         scrim per row slot, mirroring each list's visible
+                         condition; the parent group's slides carry them. -->
+                    <control type="image">
+                        <left>1663</left>
+                        <top>568</top>
+                        <width>160</width>
+                        <height>372</height>
+                        <texture>scrim-row-right.png</texture>
+                        <visible>!Control.HasFocus(5310) + !Control.HasFocus(5410) + !Control.HasFocus(5510)</visible>
+                    </control>
+                    <control type="image">
+                        <left>1663</left>
+                        <top>1040</top>
+                        <width>160</width>
+                        <height>372</height>
+                        <texture>scrim-row-right.png</texture>
+                        <visible>!Control.HasFocus(5410) + !Control.HasFocus(5510)</visible>
+                    </control>
+                    <control type="image">
+                        <left>1663</left>
+                        <top>1512</top>
+                        <width>160</width>
+                        <height>372</height>
+                        <texture>scrim-row-right.png</texture>
+                        <visible>Control.HasFocus(5210) | Control.HasFocus(5310) | Control.HasFocus(5410)</visible>
+                    </control>
+                    <control type="image">
+                        <left>1663</left>
+                        <top>1984</top>
+                        <width>160</width>
+                        <height>372</height>
+                        <texture>scrim-row-right.png</texture>
+                        <visible>Control.HasFocus(5310) | Control.HasFocus(5410) | Control.HasFocus(5510)</visible>
+                    </control>
+                    <control type="image">
+                        <left>1663</left>
+                        <top>2456</top>
+                        <width>160</width>
+                        <height>372</height>
+                        <texture>scrim-row-right.png</texture>
+                        <visible>Control.HasFocus(5310) | Control.HasFocus(5410) | Control.HasFocus(5510)</visible>
                     </control>
                 </control>
             </control>
