@@ -75,11 +75,12 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>206</top>
+                <top>226</top>
                 <width>1500</width>
                 <height>62</height>
                 <font>font_info_black_doublerow</font>
                 <textcolor>FFFFFFFF</textcolor>
+                <aligny>bottom</aligny>
                 <label>$INFO[Window.Property(AuraHeroTitle)]</label>
                 <visible>String.IsEmpty(Window.Property(AuraHeroLogo))</visible>
             </control>
