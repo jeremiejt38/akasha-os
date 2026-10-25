@@ -829,6 +829,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return False
         self._hub_offset = new_offset
         self._rebind_reco_slots()
+        # Rebinding resets the focused slot's list; if Kodi parked focus
+        # elsewhere during the empty window (observed: Up at offset>0
+        # landed on the sub-tab strip instead of the re-entered row),
+        # bring it back to the slot the scroll was anchored on.
+        slot = 0 if delta < 0 else len(RECO_SLOT_IDS) - 1
+        try:
+            if self.getFocusId() != self._reco_slot_list_id(slot):
+                self._defer_focus(self._reco_slot_list_id(slot))
+        except RuntimeError:
+            self._defer_focus(self._reco_slot_list_id(slot))
         return True
 
     def _reco_slot_has_row(self, slot_index):
