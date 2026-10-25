@@ -586,6 +586,30 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual(self.client.item_markers('42'), [])
 
     @patch('urllib.request.urlopen')
+    def test_watch_history_normalises_entries(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [
+                {'ratingKey': '7', 'title': 'Film A', 'type': 'movie',
+                 'viewedAt': 1760000000},
+                {'ratingKey': '9', 'title': 'Ep B', 'type': 'episode',
+                 'grandparentTitle': 'Show', 'viewedAt': 1759000000},
+            ]}})
+        items = self.client.watch_history(limit=25)
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/status/sessions/history/all', url)
+        self.assertIn('viewedAt', url)
+        self.assertIn('X-Plex-Container-Size=25', url)
+        self.assertEqual([i['rating_key'] for i in items], ['7', '9'])
+        self.assertEqual(items[0]['viewed_at'], 1760000000)
+        self.assertEqual(items[1]['viewed_at'], 1759000000)
+
+    @patch('urllib.request.urlopen')
+    def test_watch_history_empty(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(
+            {'MediaContainer': {}})
+        self.assertEqual(self.client.watch_history(), [])
+
+    @patch('urllib.request.urlopen')
     def test_report_timeline_never_cached(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({})
         self.client.report_timeline('42', 1000, 2000)

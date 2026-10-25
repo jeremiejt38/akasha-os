@@ -658,6 +658,19 @@
             </focusedlayout>
         </control>
 
+        <!-- "Vous l'avez regarde le..." line: Plex's "Activity by you"
+             hint under the action row, from the server watch history. -->
+        <control type="label" id="7207">
+            <left>105</left>
+            <top>648</top>
+            <width>1200</width>
+            <height>30</height>
+            <font>font_tiny</font>
+            <textcolor>99FFFFFF</textcolor>
+            <wrapmultiline>false</wrapmultiline>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
+        </control>
+
         <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
         <control type="label" id="7060">
             <left>105</left>

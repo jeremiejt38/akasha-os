@@ -420,6 +420,11 @@ STRINGS = {
     # --- More Like This (B7) -----------------------------------------------
     33574: ('Titres similaires', 'Similar Titles'),
     33575: ('Aucun titre similaire', 'No similar titles'),
+
+    # --- Own watch history (B6) --------------------------------------------
+    33576: ('Activité', 'Activity'),
+    33577: ('Votre activité', 'Your activity'),
+    33578: ("Vous l'avez regardé le {}", 'You watched it on {}'),
 }
 
 MONTH_ABBRS = {

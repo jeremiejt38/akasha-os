@@ -555,6 +555,24 @@ class PlexClient:
                     })
         return out[:20]
 
+    def watch_history(self, limit=50):
+        """Own watch history (`/status/sessions/history/all`, B6).
+
+        Server-local (friend entries stay on Plex's private social API);
+        entries are normalised like hub items plus a `viewed_at` unix
+        timestamp used for the 'Vous l'avez regardé le...' lines."""
+        data = self._request('/status/sessions/history/all', {
+            'sort': 'viewedAt:desc',
+            'X-Plex-Container-Size': limit,
+        })
+        mc = self._media_container(data)
+        items = []
+        for raw in mc.get('Metadata', []):
+            item = self._video_dict(raw, self.server_url, self.token)
+            item['viewed_at'] = raw.get('viewedAt')
+            items.append(item)
+        return items
+
     def related_items(self, rating_key, limit=16):
         """'More Like This' titles (`/library/metadata/{id}/related`, B7).
 
