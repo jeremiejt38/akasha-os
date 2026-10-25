@@ -86,10 +86,11 @@ MORE_PLAYLIST_ID = 7202
 MORE_MANAGE_ID = 7203
 MORE_FILE_INFO_ID = 7204
 MORE_WAYS_ID = 7205
+MORE_RELATED_ID = 7206
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
-# the skin; only Subtitles and File Info remain reachable.
-MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID)
+# the skin; only Subtitles, File Info and Similar Titles remain reachable.
+MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID)
 
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
                   WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
@@ -953,6 +954,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if control_id == MORE_FILE_INFO_ID:
             self._show_file_info()
             return
+        if control_id == MORE_RELATED_ID:
+            self._open_related()
+            return
         msg = {
             MORE_SUBTITLES_ID: 'Choix des sous-titres pendant la lecture',
             MORE_LIST_ID: 'Listes indisponibles (fonction Plex cloud)',
@@ -963,6 +967,34 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if msg:
             xbmcgui.Dialog().notification('Akasha Aura', msg,
                                           xbmcgui.NOTIFICATION_INFO, 2500)
+
+    def _open_related(self):
+        """Plex's 'More Like This' (B7): the /related hub flattened into
+        a poster row. Rendered through the person-page window -- same
+        layout, the item standing in for the person's photo/title."""
+        base_item = self._playable_item() or self.item
+        rating_key = base_item.get('rating_key')
+        items = []
+        if self.client and rating_key:
+            fetch = getattr(self.client, 'related_items', None)
+            if fetch:
+                try:
+                    items = fetch(rating_key)
+                except Exception as e:
+                    xbmc.log('Akasha Aura Detail: related fetch failed: {}'
+                             .format(e), xbmc.LOGWARNING)
+        import aura_person
+        related = aura_person.AuraPersonWindow(
+            'AuraRelated.xml', self.addon_path, 'Default', '1080i')
+        related.client = self.client
+        related.addon_path = self.addon_path
+        related.person = {
+            'name': base_item.get('title') or '',
+            'thumb_url': (base_item.get('poster_url')
+                          or base_item.get('thumb_url') or ''),
+        }
+        related.items = items
+        related.doModal()
 
     def _show_file_info(self):
         item = self._playable_item() or self.item

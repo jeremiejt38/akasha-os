@@ -548,6 +548,22 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertIn('studio=42', url)
 
     @patch('urllib.request.urlopen')
+    def test_related_items_flattens_and_dedupes_hubs(self, mock_urlopen):
+        def video(rk, title):
+            return {'ratingKey': rk, 'title': title, 'type': 'movie'}
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Hub': [
+                {'title': 'Similar', 'Metadata': [video('1', 'A'),
+                                                  video('2', 'B')]},
+                {'title': 'Same genre', 'Metadata': [video('2', 'B'),
+                                                     video('3', 'C')]},
+            ]}})
+        items = self.client.related_items('42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/library/metadata/42/related', url)
+        self.assertEqual([i['rating_key'] for i in items], ['1', '2', '3'])
+
+    @patch('urllib.request.urlopen')
     def test_item_markers_normalises_windows(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {'Metadata': [{'Marker': [

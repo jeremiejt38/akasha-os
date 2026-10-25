@@ -416,6 +416,10 @@ STRINGS = {
     33571: ('Filtres avancés…', 'Advanced filters…'),
     33572: ('Aucun filtre disponible', 'No filters available'),
     33573: ('Filtrer par {}', 'Filter by {}'),
+
+    # --- More Like This (B7) -----------------------------------------------
+    33574: ('Titres similaires', 'Similar Titles'),
+    33575: ('Aucun titre similaire', 'No similar titles'),
 }
 
 MONTH_ABBRS = {

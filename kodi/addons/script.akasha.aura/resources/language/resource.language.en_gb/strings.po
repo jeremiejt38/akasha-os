@@ -1619,3 +1619,13 @@ msgstr ""
 msgctxt "#33573"
 msgid "Filter by {}"
 msgstr ""
+
+# Titres similaires
+msgctxt "#33574"
+msgid "Similar Titles"
+msgstr ""
+
+# Aucun titre similaire
+msgctxt "#33575"
+msgid "No similar titles"
+msgstr ""
