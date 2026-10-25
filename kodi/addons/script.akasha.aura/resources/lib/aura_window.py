@@ -3022,31 +3022,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.playback_started = True
         self._playback_item = item
         self.close()
+        # Single-item play + serialized season queue: the Up Next card
+        # (B1) is the decision point between episodes instead of Kodi's
+        # silent playlist auto-advance.
         queue = aura_detail.episode_queue_items(client, item)
-        if queue:
-            playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-            playlist.clear()
-            queued = 0
-            for i, ep in enumerate(queue):
-                ep_key = ep.get('part_key')
-                if not ep_key:
-                    ep = self._hydrate_item(ep)
-                    ep_key = ep.get('part_key')
-                if not ep_key:
-                    continue
-                ep_li = xbmcgui.ListItem(ep.get('title') or '')
-                aura_detail.AuraDetailWindow._apply_info_tags(ep_li, ep)
-                if ep.get('view_offset_ms') and not (start_over and i == 0):
-                    _set_resume_point(ep_li, ep)
-                ep_li.setMimeType('video/mp4')
-                playlist.add('{}{}?X-Plex-Token={}'.format(base, ep_key, token),
-                             ep_li)
-                queued += 1
-            if queued > 1:
-                osd_menu.store_playback_context(client, queue)
-                xbmc.Player().play(playlist)
-                return
-        osd_menu.store_playback_context(client, [item])
+        osd_menu.store_playback_context(client, queue or [item])
         xbmc.Player().play(url, li)
 
     def _hydrate_item(self, item):

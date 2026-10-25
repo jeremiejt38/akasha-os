@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha Plex-style Up Next card (B1): the post-play screen Plex
+     shows between episodes. Next episode's art behind a scrim, a card
+     with the episode thumbnail, identity line, countdown and the two
+     actions. Play-now holds the default focus; Back cancels like the
+     Cancel button. Countdown/layout values are parameters in
+     up_next.py pending on-screen measurement against real Plex. -->
+<window type="dialog" id="1204">
+    <defaultcontrol>6404</defaultcontrol>
+    <controls>
+        <control type="image" id="6407">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>crop</aspectratio>
+            <colordiffuse>59FFFFFF</colordiffuse>
+        </control>
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="B8000000">white.png</texture>
+        </control>
+
+        <control type="group">
+            <left>96</left>
+            <top>640</top>
+            <animation effect="slide" start="0,60" end="0,0" time="220" tween="quadratic" easing="out" condition="true">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="200" condition="true">WindowOpen</animation>
+            <animation effect="fade" start="100" end="0" time="140" easing="in">WindowClose</animation>
+
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>980</width>
+                <height>344</height>
+                <texture colordiffuse="F214161F" border="28">rounded-solid.png</texture>
+            </control>
+            <control type="image" id="6406">
+                <left>24</left>
+                <top>24</top>
+                <width>448</width>
+                <height>252</height>
+                <aspectratio>keep</aspectratio>
+            </control>
+            <control type="label" id="6400">
+                <left>496</left>
+                <top>28</top>
+                <width>460</width>
+                <height>32</height>
+                <font>font_tiny</font>
+                <aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <label>-</label>
+            </control>
+            <control type="label" id="6402">
+                <left>496</left>
+                <top>66</top>
+                <width>460</width>
+                <height>36</height>
+                <font>font_tiny</font>
+                <aligny>center</aligny>
+                <textcolor>CCFFFFFF</textcolor>
+                <label>-</label>
+            </control>
+            <control type="label" id="6401">
+                <left>496</left>
+                <top>102</top>
+                <width>460</width>
+                <height>96</height>
+                <font>font_midi</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <label>-</label>
+            </control>
+            <control type="label" id="6403">
+                <left>496</left>
+                <top>204</top>
+                <width>460</width>
+                <height>36</height>
+                <font>font_tiny</font>
+                <aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <label>-</label>
+            </control>
+            <control type="button" id="6404">
+                <left>496</left>
+                <top>256</top>
+                <width>224</width>
+                <height>56</height>
+                <font>font_tiny_bold</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onright>6405</onright>
+                <onup>6404</onup>
+                <ondown>6404</ondown>
+                <onleft>6404</onleft>
+                <textcolor>FFFFFFFF</textcolor>
+                <focusedcolor>FF1A1A1A</focusedcolor>
+                <texturenofocus colordiffuse="2EFFFFFF" border="18">rounded-solid.png</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
+            </control>
+            <control type="button" id="6405">
+                <left>732</left>
+                <top>256</top>
+                <width>224</width>
+                <height>56</height>
+                <font>font_tiny_bold</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <onleft>6404</onleft>
+                <onup>6405</onup>
+                <ondown>6405</ondown>
+                <onright>6405</onright>
+                <textcolor>BBFFFFFF</textcolor>
+                <focusedcolor>FF1A1A1A</focusedcolor>
+                <texturenofocus colordiffuse="1AFFFFFF" border="18">rounded-solid.png</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
+            </control>
+        </control>
+    </controls>
+</window>

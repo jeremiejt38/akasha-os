@@ -48,7 +48,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 
 | # | Manque | Endpoint / mécanisme | Vérifié | Prio |
 |---|--------|----------------------|---------|------|
-| B1 | **Up Next** — autoplay épisode suivant avec compte à rebours Plex | Callbacks `Player` de Kodi à la fin d'épisode + fenêtre overlay compte à rebours + `next episode` via `/library/metadata/{show}/children` | mécanisme | **P1** |
+| B1 | **Up Next** — autoplay épisode suivant avec compte à rebours Plex | Carte post-lecture `AuraUpNext.xml` (backdrop épisode, miniature, `S# - E# · série`, compte à rebours 15 s, Lire maintenant/Annuler) pilotée par le superviseur de `default.py` : détection de fin naturelle par polling position (≤3 s), lecture unitaire + file d'épisodes sérialisée dans `AuraUpNextQueue`. Durée/focus/Back paramétrés dans `up_next.py` — **à vérifier à l'écran** | implémenté, réglages à confirmer | **P1** |
 | B2 | **Skip Intro / Skip Credits** — bouton OSD pendant les marqueurs | `includeMarkers=1` sur la métadonnée → `Marker type='intro'/'credits'` (start/endTimeOffset) ; bouton OSD + `Player.seekTime` | ✅ marker `credits` confirmé sur épisode réel | **P1** |
 | B3 | **`/:/timeline` reports** — progression envoyée au serveur pendant la lecture | `GET /:/timeline?ratingKey=…&time=…&state=playing` périodique ; améliore la fraîcheur de « Continuer à regarder » et le resume multi-appareils | endpoint documenté ⚠️ | **P1** |
 | B4 | **Filtres dynamiques serveur** | `/library/sections/{id}/filters` → 15 filtres (genre, year, contentRating, studio, resolution…) ; un dialog générique les couvre tous. Aura : seulement Tout/Non vus/Vus + genre + tri | ✅ 15 filtres confirmés | P2 |

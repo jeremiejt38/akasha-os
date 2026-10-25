@@ -41,6 +41,15 @@ PROP_SERVER = 'AuraPlaybackServer'
 PROP_TOKEN = 'AuraPlaybackToken'
 PROP_MAP = 'AuraPlaybackMap'
 PROP_QUALITY = 'AuraPlaybackQuality'
+# Serialized remaining-episode queue for the Up Next card (B1) --
+# items after the one currently playing. up_next.py owns the read side.
+PROP_QUEUE = 'AuraUpNextQueue'
+QUEUE_ITEM_FIELDS = (
+    'rating_key', 'part_key', 'type', 'title', 'show_title', 'season',
+    'index', 'duration_ms', 'view_offset_ms', 'thumb_url', 'art_url',
+    'fanart_url', 'parent_rating_key', 'grandparent_rating_key',
+    'video_label', 'audio_label', 'subtitle_label',
+)
 # Set around a quality-switch restart so default.py's silence detector does
 # not mistake the stop/start gap for end-of-playback and reopen Aura on top.
 PROP_SWITCHING = 'AuraSwitchingPlayback'
@@ -78,9 +87,11 @@ def _jsonrpc(method, params=None):
 def store_playback_context(client, items):
     """Persist what the OSD menus need to rebuild the playing item's URLs.
 
-    `items` is every item queued for playback (playlist included) -- keyed by
-    part_key so the currently playing file can be traced back to its
-    ratingKey when the user changes quality mid-season-marathon.
+    `items` is every item queued for playback (current item first) --
+    keyed by part_key so the currently playing file can be traced back
+    to its ratingKey when the user changes quality mid-season-marathon.
+    Everything after items[0] is serialized into PROP_QUEUE for the
+    Up Next card (B1).
     """
     server = getattr(client, 'server_url', '') or ''
     token = getattr(client, 'token', '') or ''
@@ -95,6 +106,9 @@ def store_playback_context(client, items):
     win.setProperty(PROP_TOKEN, token)
     win.setProperty(PROP_MAP, json.dumps(mapping))
     win.setProperty(PROP_QUALITY, 'original')
+    win.setProperty(PROP_QUEUE, json.dumps([
+        {k: it.get(k) for k in QUEUE_ITEM_FIELDS if it.get(k) is not None}
+        for it in (items or [])[1:]]))
 
 
 def _playback_context():
