@@ -258,6 +258,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None  # None=Tout, True=Non vus, False=Vus
+        self._divert_filters = {}  # B4 dynamic server filters {key: (value, title)}
         self._divert_search_query = ''
         # Recommande/Categories, rendered inline like Bibliotheque -- see
         # docs/aura/decisions.md ("recommandations et categories inlinees").
@@ -1307,7 +1308,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         "No Results" + clear-filters action when filters are active,
         "Your library is empty" + Back otherwise."""
         filtered = bool(self._divert_search_query or self._divert_filter_genre
-                        or self._divert_filter_unwatched is not None)
+                        or self._divert_filter_unwatched is not None
+                        or self._divert_filters)
         if filtered:
             self._set_divert_state(
                 'empty', title=i18n.tr(33556), message='',
@@ -1332,6 +1334,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None
+        self._divert_filters = {}
         self._divert_search_query = ''
         self._load_divert_section_items(section)
 
@@ -1603,7 +1606,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             base = ('genre', self._divert_filter_genre)
         else:
             base = ('all',)
-        return base + (self._divert_sort, self._divert_filter_unwatched)
+        return base + (self._divert_sort, self._divert_filter_unwatched,
+                       tuple(sorted(self._divert_filters.items())))
 
     def _divert_section_page(self, section, offset, limit):
         key = local_cache.page_cache_key(
@@ -1626,7 +1630,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 section['key'], self._divert_search_query, limit=limit, offset=offset)
         return self._plex_client.section_items_with_total(
             section['key'], sort=self._divert_sort, limit=limit, offset=offset,
-            genre=self._divert_filter_genre, unwatched=unwatched)
+            genre=self._divert_filter_genre, unwatched=unwatched,
+            filters=self._divert_filter_params())
 
     def _select_divert_section(self, index):
         if index >= len(self._divert_sections):
@@ -1641,6 +1646,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None
+        self._divert_filters = {}
         self._divert_search_query = ''
         self._load_divert_section_items(section)
 
@@ -1719,6 +1725,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     label += ' ' + i18n.tr(33070).format(self._divert_search_query)
                 if self._divert_filter_genre:
                     label += ' ({})'.format(self._divert_filter_genre)
+                if self._divert_filters:
+                    label += ' ({})'.format(', '.join(
+                        title for _v, title in self._divert_filters.values()))
                 status.setLabel(label)
         except RuntimeError:
             pass
@@ -1764,6 +1773,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_filter_genre = None if idx == 0 else genres[idx - 1]
         if self._divert_filter_genre:
             self._divert_search_query = ''
+            self._divert_filters = {}
         self._load_divert_section_items(section)
 
     def _divert_reset_filters(self):
@@ -1772,8 +1782,79 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None
+        self._divert_filters = {}
         self._divert_search_query = ''
         self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+
+    def _divert_filter_params(self):
+        """B4: {filter_key: value} params for the dynamic filters, only
+        meaningful on the direct Plex client (the connector proxy does
+        not expose /filters)."""
+        return {key: value for key, (value, _title)
+                in self._divert_filters.items()}
+
+    def _divert_open_advanced_filters(self):
+        """B4: generic server-driven filter picker -- Plex's filter
+        panel reduced to a two-step select (category, then value)."""
+        if not self._divert_sections:
+            return
+        section = self._divert_sections[self._divert_active_section]
+        client = self._plex_client
+        if client is None:
+            return  # connector path has no /filters endpoint
+        try:
+            filters = client.section_filters(section['key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: section filters load failed: {}'
+                     .format(e), xbmc.LOGERROR)
+            filters = []
+        if not filters:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', i18n.tr(33572),
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        # Active filters are marked with a check so the state is
+        # visible while browsing the categories.
+        labels = []
+        for f in filters:
+            label = f['title']
+            if f['key'] in self._divert_filters:
+                label += ' ✓'
+            labels.append(label)
+        idx = xbmcgui.Dialog().select(i18n.tr(33571), labels)
+        if idx < 0:
+            return
+        picked = filters[idx]
+        try:
+            values = client.filter_values(section['key'], picked['key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura: filter values load failed: {}'
+                     .format(e), xbmc.LOGERROR)
+            values = []
+        # Boolean filters carry no value list: they map to a plain
+        # yes/no parameter (unmatched, duplicates...).
+        if picked['type'] == 'boolean' and not values:
+            values = [{'key': '1', 'title': i18n.tr(33054)},
+                      {'key': '0', 'title': i18n.tr(33055)}]
+        if not values:
+            self._divert_filters.pop(picked['key'], None)
+            self._load_divert_section_items(section)
+            return
+        options = [i18n.tr(33052)] + [v['title'] for v in values]
+        vidx = xbmcgui.Dialog().select(
+            i18n.tr(33573).format(picked['title']), options)
+        if vidx < 0:
+            return
+        if vidx == 0:
+            self._divert_filters.pop(picked['key'], None)
+        else:
+            v = values[vidx - 1]
+            self._divert_filters[picked['key']] = (v['key'], v['title'])
+            # Like the genre pill: an active dynamic filter replaces the
+            # search/genre mode rather than silently mixing scopes.
+            self._divert_filter_genre = None
+            self._divert_search_query = ''
+        self._load_divert_section_items(section)
 
     def _divert_open_more_menu(self):
         """The trailing "..." pill of the Browse toolbar: hosts the quick
@@ -1781,6 +1862,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         actions = [
             (i18n.tr(33064), self._divert_play_first),
             (i18n.tr(33065), self._divert_play_random),
+            (i18n.tr(33571), self._divert_open_advanced_filters),
             (i18n.tr(33066), self._divert_reset_filters),
         ]
         idx = xbmcgui.Dialog().select('', [label for label, _ in actions])

@@ -411,6 +411,11 @@ STRINGS = {
     33568: ("Passer l'intro", 'Skip Intro'),
     33569: ('Passer le générique de fin', 'Skip Credits'),
     33570: ('Passer', 'Skip'),
+
+    # --- Dynamic library filters (B4) --------------------------------------
+    33571: ('Filtres avancés…', 'Advanced filters…'),
+    33572: ('Aucun filtre disponible', 'No filters available'),
+    33573: ('Filtrer par {}', 'Filter by {}'),
 }
 
 MONTH_ABBRS = {

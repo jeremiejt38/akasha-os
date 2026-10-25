@@ -368,7 +368,7 @@ class PlexClient:
         return self._metadata_list(data)
 
     def section_items_with_total(self, section_key, sort='titleSort', limit=200, offset=0,
-                                  genre=None, unwatched=None):
+                                  genre=None, unwatched=None, filters=None):
         params = {
             'sort': sort,
             'X-Plex-Container-Size': limit,
@@ -380,8 +380,48 @@ class PlexClient:
             params['unwatched'] = 1
         elif unwatched is False:
             params['unwatched'] = 0
+        # Dynamic server filters (B4): {filter_key: value} merged as-is --
+        # the server accepts any 'param=value' matching a filter from
+        # /library/sections/{id}/filters (year=1999, studio=123...).
+        for key, value in (filters or {}).items():
+            params[key] = value
         data = self._request('/library/sections/{}/all'.format(section_key), params)
         return self._metadata_list_with_total(data)
+
+    def section_filters(self, section_key):
+        """The filter categories the server exposes for a section
+        (`/library/sections/{id}/filters` -- parity backlog B4).
+
+        Each entry: {'key': 'genre', 'title': 'Genre', 'type': 'tag'} --
+        'tag' filters take a value picked from filter_values(), plain
+        ones (year, decade, resolution...) too; boolean filters
+        (unmatched/duplicates) take 1/0."""
+        data = self._request('/library/sections/{}/filters'.format(section_key))
+        mc = self._media_container(data)
+        out = []
+        for d in mc.get('Directory', []):
+            key = d.get('filter')
+            if not key:
+                continue
+            out.append({
+                'key': key,
+                'title': d.get('title') or key,
+                'type': d.get('filterType') or '',
+            })
+        return out
+
+    def filter_values(self, section_key, filter_key):
+        """Possible values for a section filter: `/library/sections/{id}/{filter}`
+        returns each allowed value as a Directory entry whose `key` is the
+        filter parameter value ('genre' -> tag id, 'year' -> 1999...)."""
+        data = self._request('/library/sections/{}/{}'.format(
+            section_key, filter_key))
+        mc = self._media_container(data)
+        return [
+            {'key': str(d.get('key')), 'title': d.get('title') or ''}
+            for d in mc.get('Directory', [])
+            if d.get('key') is not None and d.get('title')
+        ]
 
     def search(self, section_key, query, limit=50, offset=0):
         """Search items in a section by title (client-side filter)."""
