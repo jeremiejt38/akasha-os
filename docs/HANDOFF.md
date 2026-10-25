@@ -1,9 +1,10 @@
 # HANDOFF — Reprise de session (akasha-os)
 
 > Passation pour une nouvelle session Devin, au `2026-10-24` (tag
-> `akasha-os-v0.59.0`). Complète `docs/plex-parity/HANDOFF.md` (focus parité
-> Plex, détails outils/pièges) et `docs/plex-parity/PARITY.md` (audit
-> d'écrans + backlog).
+> `akasha-os-v0.59.0`), **actualisée au 2026-10-25** (tag
+> `akasha-os-v0.68.1`, déployée sur le Pi). Complète
+> `docs/plex-parity/HANDOFF.md` (focus parité Plex, détails outils/pièges) et
+> `docs/plex-parity/PARITY.md` (audit d'écrans + backlog).
 
 ## État du projet
 
@@ -11,13 +12,15 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `0.59.0` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.54.2` — 7 versions attendent le
-  déploiement (v0.54.3 → v0.59.0). **Le Pi est allumé et joignable** :
-  `root@192.168.3.77` (WiFi `Freebox-37FD5E`, LAN `192.168.3.0/24`, up 1 j,
-  SSH par clé OK). L'IP `192.168.1.88` citée dans `AGENTS.md` est
-  **obsolète** — migration réseau du 2026-10-23, source de vérité :
-  `atlas/docs/hosts.md`.
+- **Version livrée** : `0.68.1` (tags `akasha-os-vX.Y.Z`, Release Please).
+- **Version réellement sur le Pi** : `0.68.1` — **déployée le 2026-10-25**
+  (le déploiement a d'abord poussé 0.59.0 depuis un `main` local périmé,
+  puis 0.68.0, puis le fix aura → refaire `git pull` avant tout déploiement,
+  le repo avance vite : une session parallèle a livré 0.60 → 0.68 pendant la
+  passation). Pi joignable : `root@192.168.3.77` (WiFi `Freebox-37FD5E`,
+  LAN `192.168.3.0/24`, SSH par clé OK). L'IP `192.168.1.88` citée dans
+  `AGENTS.md` est **obsolète** — migration réseau du 2026-10-23, source de
+  vérité : `atlas/docs/hosts.md`.
 - Fonctionne : lecture Plex (reprise, notes, watched), fiches détail
   films/séries/épisodes/personnes, recherche, bibliothèque A-Z, Store +
   apps externes, OSD minimaliste Plex, menu Paramètres unifié façon
@@ -62,12 +65,13 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le
   cycle tant que tout n'est pas identique… polish visuel le plus parfait
   possible »). Audit complet dans `docs/plex-parity/PARITY.md`.
-- **Prochaine étape prévue** : **déployer les 7 versions en attente** (le
-  Pi est joignable, le blocage n'existe plus — voir Contexte machine),
-  vérifier visuellement (vague de chargement, drift ambiant, top-bar,
-  dedup, menu Paramètres, `analyser-de-performances`), puis reprendre le
-  backlog : B17 (écran erreur serveur) → B1 (On Deck) → B14 (chapitres
-  OSD). Corriger aussi l'IP obsolète dans `AGENTS.md` (`.88` → `.77`).
+- **Prochaine étape prévue** : **vérification visuelle sur la TV** (v0.68.1
+  déployée : vague de chargement sur les fenêtres natives, Ken Burns
+  ambiant, top-bar escamotable, état d'erreur B17, playlists B10/B15/B16,
+  `analyser-de-performances` actif et collectant). Puis reprendre le
+  backlog dans `docs/plex-parity/PARITY.md` — attention, il avance vite
+  (session parallèle : B8, B10, B12, B15, B16, B17 livrés entre 0.60 et
+  0.68). Corriger aussi l'IP obsolète dans `AGENTS.md` (`.88` → `.77`).
 - **Travail non commité** : aucun dans le repo (`git status` propre sauf
   `ARIANE.md` régénérable).
 - **Stash orphelin** : `stash@{0}` « wip-fix-aura-interruptions » (guide/
@@ -82,12 +86,14 @@ type Plex Android TV (modules Divertissement / Jeux / App).
 
 ## TODO / prochaines étapes
 
-1. Allumer/vérifier le Pi → déployer v0.54.3…v0.59.0, confirmer le label
-   de version à l'écran + vérif visuelle des nouveautés.
-2. **B17** — écran d'erreur serveur (brique réutilisable états vides/
-   offline).
-3. **B1** — comportement « On Deck / Up Next » Plex.
-4. **B14** — chapitres dans l'OSD.
+1. ~~Déployer~~ **fait 2026-10-25** (v0.68.1 sur le Pi). Reste :
+   vérification visuelle TV + `analyser-de-performances` après quelques
+   heures d'usage (rapport sur les stalls/erreurs réels).
+2. Backlog parité : se référer à `docs/plex-parity/PARITY.md` — **la
+   session parallèle a déjà livré B8, B10, B12, B15, B16, B17** (v0.60 →
+   v0.68) ; revérifier chaque item avant de l'attaquer.
+3. **B1** — comportement « On Deck / Up Next » Plex (si non livré).
+4. **B14** — chapitres dans l'OSD (si non livré).
 5. Restauration du focus au retour de fiche/recherche/sheet ; refresh de
    rangée après action ; threads touchant l'UI après fermeture de fenêtre.
 6. Appuis longs : personnes, résultats recherche, tuiles app, store,
@@ -96,7 +102,7 @@ type Plex Android TV (modules Divertissement / Jeux / App).
    confirmation façon Plex ?) ; mémoire textures sur sessions longues.
 8. Ambiant reculés (volontaire) : crédit photo, fond flou non-16:9,
    appariement portrait, luminosité nocturne.
-9. Ménage : stash orphelin, ~20 branches locales stale.
+9. Ménage : stash orphelin, ~20 branches locales stale, IP dans `AGENTS.md`.
 
 ## Blocages / points d'attention
 
@@ -113,6 +119,18 @@ type Plex Android TV (modules Divertissement / Jeux / App).
 - Kodi résout la navigation géométriquement malgré `<onup>` → intercepter
   avant `super().onAction()` + `setFocus`.
 - `NotifyAll` arrive en `onNotification` préfixé `Other.`.
+- **Pas de parenthèses dans les conditions skin Kodi** (`visible`,
+  `condition` d'animation) : le parseur coupe sur `|` et log « unmatched
+  parentheses », la règle est ignorée silencieusement. Écrire la forme DNF :
+  `(A|B)+C` → `A+C | B+C`, `!(A|B)` → `!A + !B` (corrigé dans Aura.xml,
+  v0.68.1).
+- **Nouveaux services à activer dans `install.sh`** : la liste `INSERT ...
+  enabled` d'`install.sh` doit inclure tout nouvel addon service sinon il
+  reste désactivé dans Addons33.db et ne démarre jamais (bug trouvé sur
+  perfanalyzer, corrigé v0.68.1).
+- `tail -1`-style de matching fragile dans les patchs skin : les fenêtres
+  AH2 finissent par `</controls>\n\n</window>` (ligne vide) — insérer avant
+  le dernier `</controls>` plutôt que de matcher une fin exacte.
 - **Ne jamais déclarer une parité visuelle** sans capture émulateur/Pi.
 - Le Pi est une vraie TV de salon : pas de reboot/poweroff/CEC sans
   confirmation ; préférer « Redémarrer Akasha » (Kodi seul).
