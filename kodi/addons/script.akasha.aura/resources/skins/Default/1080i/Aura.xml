@@ -826,7 +826,7 @@
                 <control type="image">
                     <left>127</left>
                     <top>120</top>
-                    <width>522</width>
+                    <width>586</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
                 </control>
@@ -836,21 +836,21 @@
                 <control type="image">
                     <left>135</left>
                     <top>120</top>
-                    <width>160</width>
+                    <width>190</width>
                     <height>48</height>
                     <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
-                    <left>295</left>
+                    <left>333</left>
                     <top>120</top>
-                    <width>170</width>
+                    <width>196</width>
                     <height>48</height>
                     <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
-                    <left>473</left>
+                    <left>537</left>
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
@@ -860,7 +860,7 @@
                 <control type="button" id="3070">
                     <left>135</left>
                     <top>120</top>
-                    <width>160</width>
+                    <width>190</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33015]</label>
                     <font>font_aura_mini</font>
@@ -875,9 +875,9 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
                 <control type="button" id="3071">
-                    <left>295</left>
+                    <left>333</left>
                     <top>120</top>
-                    <width>170</width>
+                    <width>196</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33014]</label>
                     <font>font_aura_mini</font>
@@ -892,7 +892,7 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
                 <control type="button" id="3072">
-                    <left>473</left>
+                    <left>537</left>
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
@@ -911,7 +911,7 @@
                 <control type="label">
                     <left>135</left>
                     <top>120</top>
-                    <width>160</width>
+                    <width>190</width>
                     <height>48</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -921,9 +921,9 @@
                     <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="label">
-                    <left>295</left>
+                    <left>333</left>
                     <top>120</top>
-                    <width>170</width>
+                    <width>196</width>
                     <height>48</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -933,7 +933,7 @@
                     <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="label">
-                    <left>473</left>
+                    <left>537</left>
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
