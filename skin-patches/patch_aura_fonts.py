@@ -18,16 +18,26 @@ import re
 import sys
 
 FONTS = [
-    ('font_aura_mini',                  'Inter-Unicode-Regular.ttf', 26),
-    ('font_aura_mini_bold',             'Inter-Unicode-Bold.ttf',   28),
-    ('font_aura_tiny',                  'Inter-Unicode-Regular.ttf', 22),
-    ('font_aura_tiny_bold',             'Inter-Unicode-Bold.ttf',   24),
-    ('font_aura_midi',                  'Inter-Unicode-Regular.ttf', 35),
-    ('font_aura_hint',                  'Inter-Unicode-Regular.ttf', 16),
-    ('font_aura_hint_bold',             'Inter-Unicode-Bold.ttf',   18),
-    ('font_aura_head_bold',             'Inter-Unicode-Bold.ttf',   42),
-    ('font_aura_main_bold',             'Inter-Unicode-Bold.ttf',   32),
-    ('font_aura_info_black_doublerow',  'Inter-Unicode-Bold.ttf',   56),
+    ('font_aura_mini',
+    'Inter-Unicode-Regular.ttf',22),
+    ('font_aura_mini_bold',
+    'Inter-Unicode-Bold.ttf',22),
+    ('font_aura_tiny',
+    'Inter-Unicode-Regular.ttf',19),
+    ('font_aura_tiny_bold',
+    'Inter-Unicode-Bold.ttf',19),
+    ('font_aura_midi',
+    'Inter-Unicode-Regular.ttf',29),
+    ('font_aura_hint',
+    'Inter-Unicode-Regular.ttf',14),
+    ('font_aura_hint_bold',
+    'Inter-Unicode-Bold.ttf',14),
+    ('font_aura_head_bold',
+    'Inter-Unicode-Bold.ttf',35),
+    ('font_aura_main_bold',
+    'Inter-Unicode-Bold.ttf',27),
+    ('font_aura_info_black_doublerow',
+    'Inter-Unicode-Bold.ttf',47),
 ]
 FONT_FILES = sorted({f[1] for f in FONTS})
 RESOURCE_ADDON = '/storage/.kodi/addons/resource.font.robotocjksc/resources'
@@ -59,17 +69,18 @@ def patch(path):
     with open(xml_path, 'r', encoding='utf-8') as f:
         data = f.read()
 
-    # Normalize stale resource:// filenames on previously registered faces
-    for name, filename, _size in FONTS:
+    # Normalize filenames AND sizes on previously registered faces so the
+    # patch stays idempotent when FONTS entries are re-tuned.
+    for name, filename, size in FONTS:
         data = re.sub(
-            r'(<name>' + re.escape(name) + r'</name>\s*<filename>)[^<]+(</filename>)',
-            r'\g<1>' + filename + r'\g<2>', data)
+            r'(<name>' + re.escape(name) + r'</name>\s*<filename>)[^<]+(</filename>\s*<size>)[^<]+(</size>)',
+            r'\g<1>' + filename + r'\g<2>' + str(size) + r'\g<3>', data)
 
     missing = [f for f in FONTS if '<name>{}</name>'.format(f[0]) not in data]
     if not missing:
         with open(xml_path, 'w', encoding='utf-8') as f:
             f.write(data)
-        print('Already patched with font_aura_* (filenames normalized).')
+        print('Already patched with font_aura_* (filenames/sizes normalized).')
         return 0
 
     block = ''.join(

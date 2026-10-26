@@ -182,6 +182,12 @@ if __name__ == '__main__':
             # device, and it survives the Up Next episode chaining below.
             reporter = timeline_reporter.TimelineReporter()
             reporter.start()
+            # Initialized out here too: when the window closes without any
+            # playback, the while body never runs and the post-loop cleanup
+            # still reads these names (reporter.finish / persist_selection).
+            last_pos_ms = None
+            latest_item = None
+            latest_selection = None
             while getattr(window, 'playback_started', False):
                 # Player.play() is asynchronous: wait for the stream to
                 # actually start before watching for its end, otherwise
