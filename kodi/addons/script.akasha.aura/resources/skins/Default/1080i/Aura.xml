@@ -1384,7 +1384,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>421</top>
+                        <top>414</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
@@ -1494,7 +1494,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>430</top>
+                        <top>423</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
