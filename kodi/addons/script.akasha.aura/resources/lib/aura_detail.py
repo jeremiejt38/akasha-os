@@ -135,7 +135,7 @@ ACTION_ROW_LEFT = 128
 ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
 ACTION_LABEL_X = 66      # label zone offset inside the expanded pill
-ACTION_LABEL_PAD = 36    # right padding inside the pill
+ACTION_LABEL_PAD = 22    # right padding inside the pill
 
 
 def _set(window, prop, value):
