@@ -752,20 +752,25 @@ class PlexClient:
         ]
 
     def report_timeline(self, rating_key, time_ms, duration_ms,
-                        state='playing'):
+                        state='playing', session=''):
         """Report playback progress (`/:/timeline`).
 
         Official Plex clients ping this every ~10s while playing (plus a
         final ``state=stopped`` when playback ends); it is what keeps the
         server-side viewOffset fresh for multi-device resume and the
         "Continue Watching" hub -- without it the server only learns the
-        position on scrobble, i.e. never for an unfinished item."""
+        position on scrobble, i.e. never for an unfinished item.
+
+        The `session` UUID is mandatory: Plex accepts reports without it
+        (HTTP 200) but only persists viewOffset when the report is tied
+        to a session id -- verified live on the reference server."""
         self._request('/:/timeline', {
             'ratingKey': rating_key,
             'key': '/library/metadata/{}'.format(rating_key),
             'state': state,
             'time': int(time_ms),
             'duration': int(duration_ms),
+            'session': session,
         })
 
     def scrobble(self, rating_key):

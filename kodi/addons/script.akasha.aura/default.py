@@ -200,7 +200,9 @@ if __name__ == '__main__':
                 # natural episode end (Up Next card, B1) apart from a
                 # user stop (straight back to Aura).
                 remaining_s = None
+                last_pos_ms = None
                 silent = 0
+                was_playing = False
                 skip_shown_for = None
                 # B15: per-show audio/subtitle continuity -- applied once
                 # the player has enumerated its streams, captured
@@ -212,10 +214,20 @@ if __name__ == '__main__':
                 while silent < 4:
                     if xbmc.Player().isPlayingVideo():
                         silent = 0
+                        if not was_playing:
+                            # Play-start transition: report now, Plex-style,
+                            # not at the next 10s tick -- a sub-10s play
+                            # still lands a viewOffset for the stop report.
+                            was_playing = True
+                            try:
+                                reporter.tick()
+                            except Exception:
+                                pass
                         try:
                             total = xbmc.Player().getTotalTime()
                             if total:
                                 remaining_s = total - xbmc.Player().getTime()
+                            last_pos_ms = int(xbmc.Player().getTime() * 1000)
                         except RuntimeError:
                             pass
                         item = stream_prefs.current_item()
@@ -266,9 +278,20 @@ if __name__ == '__main__':
                     elif (xbmcgui.Window(10000)
                           .getProperty('AuraSwitchingPlayback')):
                         silent = 0
+                        # Re-report on resume: the new stream starts at a
+                        # different position/quality.
+                        was_playing = False
                     else:
+                        was_playing = False
                         silent += 1
                     xbmc.sleep(500)
+                # Plex reports state=stopped the moment playback ends --
+                # before the Up Next card even decides -- so the server's
+                # viewOffset/Now Playing state lands while it matters.
+                try:
+                    reporter.stopped(last_pos_ms)
+                except Exception:
+                    pass
                 if up_next.is_natural_end(remaining_s) \
                         and not (xbmcgui.Window(10000)
                                  .getProperty('AuraSwitchingPlayback')) \
@@ -286,7 +309,7 @@ if __name__ == '__main__':
                     xbmcaddon.Addon(), latest_item, latest_selection)
             except Exception:
                 pass
-            reporter.finish()
+            reporter.finish(position_ms=last_pos_ms)
             del window
         finally:
             # The reporter is a daemon thread -- without this it would
