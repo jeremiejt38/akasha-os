@@ -17,6 +17,7 @@ import time
 import xbmc
 import xbmcaddon
 import xbmcgui
+import aura_menu
 import i18n
 
 import addons_inventory
@@ -2104,8 +2105,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_open_filter_menu(self):
         if not self._divert_sections:
             return
-        idx = xbmcgui.Dialog().select(
-            i18n.tr(33061), [label for _, label in DIVERT_FILTER_OPTIONS])
+        idx = aura_menu.select(
+            self, i18n.tr(33061), [label for _, label in DIVERT_FILTER_OPTIONS])
         if idx < 0:
             return
         self._divert_filter_unwatched = DIVERT_FILTER_OPTIONS[idx][0]
@@ -2114,8 +2115,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_open_sort_menu(self):
         if not self._divert_sections:
             return
-        idx = xbmcgui.Dialog().select(
-            i18n.tr(33062), [label for _, label in DIVERT_SORT_OPTIONS])
+        idx = aura_menu.select(
+            self, i18n.tr(33062), [label for _, label in DIVERT_SORT_OPTIONS])
         if idx < 0:
             return
         self._divert_sort = DIVERT_SORT_OPTIONS[idx][0]
@@ -2136,7 +2137,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             genres = []
         if not genres:
             return
-        idx = xbmcgui.Dialog().select(i18n.tr(33063), [i18n.tr(33053)] + genres)
+        idx = aura_menu.select(self, i18n.tr(33063), [i18n.tr(33053)] + genres)
         if idx < 0:
             return
         self._divert_filter_genre = None if idx == 0 else genres[idx - 1]
@@ -2190,7 +2191,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if f['key'] in self._divert_filters:
                 label += ' ✓'
             labels.append(label)
-        idx = xbmcgui.Dialog().select(i18n.tr(33571), labels)
+        idx = aura_menu.select(self, i18n.tr(33571), labels)
         if idx < 0:
             return
         picked = filters[idx]
@@ -2210,8 +2211,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._load_divert_section_items(section)
             return
         options = [i18n.tr(33052)] + [v['title'] for v in values]
-        vidx = xbmcgui.Dialog().select(
-            i18n.tr(33573).format(picked['title']), options)
+        vidx = aura_menu.select(
+            self, i18n.tr(33573).format(picked['title']), options)
         if vidx < 0:
             return
         if vidx == 0:
@@ -2234,7 +2235,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             (i18n.tr(33571), self._divert_open_advanced_filters),
             (i18n.tr(33066), self._divert_reset_filters),
         ]
-        idx = xbmcgui.Dialog().select('', [label for label, _ in actions])
+        idx = aura_menu.contextmenu(self, [label for label, _ in actions])
         if idx < 0:
             return
         actions[idx][1]()
@@ -3168,8 +3169,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
 
-        choice = xbmcgui.Dialog().select(
-            i18n.tr(33097).format(query), flat_labels)
+        choice = aura_menu.select(
+            self, i18n.tr(33097).format(query), flat_labels)
         if choice < 0 or flat_callbacks[choice] is None:
             return
         flat_callbacks[choice]()
@@ -3322,13 +3323,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._restore_divert_view(focus=False)
 
     def _open_settings_menu(self):
-        """Settings gear: context menu (plan 04bda1b4 phase 3). Uses the
-        native contextmenu() dialog -- same mechanism already relied on by
-        script.akasha.guide for its own quick-access menu -- rather than a
-        custom XML popup, so it inherits the skin's standard placement/
-        close-on-select/close-on-back behaviour for free."""
+        """Settings gear: context menu (plan 04bda1b4 phase 3), rendered
+        through the shared dark AuraMenu sheet for Plex parity."""
         options = self._settings_menu_options()
-        choice = xbmcgui.Dialog().contextmenu([label for label, _ in options])
+        choice = aura_menu.contextmenu(self, [label for label, _ in options])
         if choice < 0:
             return
         options[choice][1]()
@@ -3391,8 +3389,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura: sleep launch error: {}'.format(e), xbmc.LOGERROR)
 
     def _settings_restart_menu(self):
-        choice = xbmcgui.Dialog().select(
-            i18n.tr(33090), [i18n.tr(33091), i18n.tr(33093)])
+        choice = aura_menu.select(
+            self, i18n.tr(33090), [i18n.tr(33091), i18n.tr(33093)])
         if choice == 0:
             self._settings_restart_akasha()
         elif choice == 1:
@@ -3463,7 +3461,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 options.append(i18n.tr(33081).format(title))
                 actions.append('down')
 
-        idx = xbmcgui.Dialog().contextmenu(options)
+        idx = aura_menu.contextmenu(self, options)
         if idx < 0 or idx >= len(actions):
             return
 

@@ -39,25 +39,15 @@ class _Client:
 
 
 def _labels_shown(win, client, item, control_id=9999, **kw):
-    """Run open_sheet, capture the labels shown to contextmenu."""
+    """Run open_sheet, capture the labels shown to the Aura menu."""
     captured = {}
 
-    class FakeDialog:
-        def contextmenu(self, labels):
-            captured['labels'] = labels
-            return -1
+    def fake_menu(_win, labels):
+        captured['labels'] = labels
+        return -1
 
-        def notification(self, *a):
-            pass
-
-        def select(self, *a):
-            return -1
-
-        def ok(self, *a):
-            pass
-
-    with patch.object(context_sheet.xbmcgui, 'Dialog',
-                      return_value=FakeDialog()):
+    with patch.object(context_sheet.aura_menu, 'contextmenu',
+                      side_effect=fake_menu):
         context_sheet.open_sheet(win, client, item, control_id,
                                  lambda: None, **kw)
     return captured.get('labels', [])

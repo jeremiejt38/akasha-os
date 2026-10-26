@@ -16,6 +16,7 @@ the detail page does.
 
 import xbmc
 import xbmcgui
+import aura_menu
 import i18n
 import osd_menu
 
@@ -50,12 +51,12 @@ def open_sheet(win, client, item, control_id, open_default,
         entries.append((i18n.tr(33113) if watched else i18n.tr(33112),
                         lambda: toggle_watched(win, client, item,
                                                control_id)))
-        entries.append((i18n.tr(33111), lambda: rate(client, item)))
+        entries.append((i18n.tr(33111), lambda: rate(client, item, win)))
     if item.get('video_label') or item.get('audio_label'):
         entries.append((i18n.tr(33116), lambda: file_info(item)))
 
-    idx = xbmcgui.Dialog().contextmenu(
-        [label for label, _ in entries])
+    idx = aura_menu.contextmenu(win,
+                                [label for label, _ in entries])
     if 0 <= idx < len(entries):
         entries[idx][1]()
 
@@ -160,11 +161,11 @@ def remove_continue_watching(win, client, item, control_id,
         xbmcgui.NOTIFICATION_INFO, 1500)
 
 
-def rate(client, item):
+def rate(client, item, win):
     if not client or not item.get('rating_key'):
         return
     choices = ['{} / 10'.format(i) for i in range(1, 11)]
-    pos = xbmcgui.Dialog().select(i18n.tr(33111), choices)
+    pos = aura_menu.select(win, i18n.tr(33111), choices)
     if pos < 0:
         return
     try:
