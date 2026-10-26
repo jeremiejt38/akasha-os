@@ -558,7 +558,7 @@
                     <top>121</top>
                     <width>164</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
@@ -566,7 +566,7 @@
                     <top>121</top>
                     <width>164</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
@@ -574,7 +574,7 @@
                     <top>121</top>
                     <width>154</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
@@ -582,7 +582,7 @@
                     <top>121</top>
                     <width>144</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
 
@@ -838,7 +838,7 @@
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
@@ -846,7 +846,7 @@
                     <top>120</top>
                     <width>170</width>
                     <height>48</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
@@ -854,7 +854,7 @@
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
-                    <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
+                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
@@ -1294,9 +1294,9 @@
                      6 columns of 240x360 posters, cell pitch 283x460,
                      title + year centered under the poster. -->
                 <left>115</left>
-                <top>250</top>
+                <top>232</top>
                 <width>1710</width>
-                <height>924</height>
+                <height>942</height>
                 <scrolltime tween="quadratic" easing="out">200</scrolltime>
                 <onup>3211</onup>
                 <onleft>3310</onleft>
@@ -1309,7 +1309,7 @@
                          of showing an empty thumb/label. -->
                     <control type="image">
                         <left>12</left>
-                        <top>12</top>
+                        <top>30</top>
                         <width>240</width>
                         <height>360</height>
                         <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
@@ -1317,7 +1317,7 @@
                     </control>
                     <control type="image">
                         <left>12</left>
-                        <top>384</top>
+                        <top>402</top>
                         <width>180</width>
                         <height>20</height>
                         <texture colordiffuse="22FFFFFF" border="4">rounded-solid.png</texture>
@@ -1325,7 +1325,7 @@
                     </control>
                     <control type="image">
                         <left>12</left>
-                        <top>12</top>
+                        <top>30</top>
                         <width>240</width>
                         <height>360</height>
                         <aspectratio>scale</aspectratio>
@@ -1335,7 +1335,7 @@
                     </control>
                     <control type="image">
                         <left>12</left>
-                        <top>12</top>
+                        <top>30</top>
                         <width>240</width>
                         <height>360</height>
                         <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -1343,7 +1343,7 @@
                     </control>
                     <control type="progress">
                         <left>20</left>
-                        <top>360</top>
+                        <top>378</top>
                         <width>224</width>
                         <height>4</height>
                         <texturebg colordiffuse="59000000">white.png</texturebg>
@@ -1355,16 +1355,16 @@
                         <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                     </control>
                     <control type="image">
-                        <left>212</left>
-                        <top>12</top>
-                        <width>40</width>
-                        <height>40</height>
+                        <left>214</left>
+                        <top>32</top>
+                        <width>36</width>
+                        <height>36</height>
                         <texture colordiffuse="80000000">circle.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
                         <left>221</left>
-                        <top>24</top>
+                        <top>43</top>
                         <width>22</width>
                         <height>14</height>
                         <texture colordiffuse="FFD8D8D8">check-bold.png</texture>
@@ -1372,7 +1372,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>382</top>
+                        <top>400</top>
                         <width>240</width>
                         <height>32</height>
                         <font>font_mini</font>
@@ -1384,7 +1384,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>414</top>
+                        <top>432</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
@@ -1397,7 +1397,7 @@
                 
                             <control type="image">
                                 <left>1</left>
-                                <top>-2</top>
+                                <top>16</top>
                                 <width>262</width>
                                 <height>388</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -1407,7 +1407,7 @@
                 <focusedlayout width="283" height="460">
                     <control type="image">
                         <left>12</left>
-                        <top>12</top>
+                        <top>30</top>
                         <width>240</width>
                         <height>360</height>
                         <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
@@ -1415,7 +1415,7 @@
                     </control>
                     <control type="image">
                         <left>12</left>
-                        <top>384</top>
+                        <top>402</top>
                         <width>180</width>
                         <height>20</height>
                         <texture colordiffuse="22FFFFFF" border="4">rounded-solid.png</texture>
@@ -1423,7 +1423,7 @@
                     </control>
                     <control type="image">
                         <left>12</left>
-                        <top>12</top>
+                        <top>30</top>
                         <width>240</width>
                         <height>360</height>
                         <aspectratio>scale</aspectratio>
@@ -1434,7 +1434,7 @@
                     </control>
                     <control type="image">
                         <left>12</left>
-                        <top>12</top>
+                        <top>30</top>
                         <width>240</width>
                         <height>360</height>
                         <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -1443,7 +1443,7 @@
                     </control>
                     <control type="progress">
                         <left>20</left>
-                        <top>360</top>
+                        <top>378</top>
                         <width>224</width>
                         <height>4</height>
                         <texturebg colordiffuse="59000000">white.png</texturebg>
@@ -1455,16 +1455,16 @@
                         <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                     </control>
                     <control type="image">
-                        <left>212</left>
-                        <top>12</top>
-                        <width>40</width>
-                        <height>40</height>
+                        <left>214</left>
+                        <top>32</top>
+                        <width>36</width>
+                        <height>36</height>
                         <texture colordiffuse="80000000">circle.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
                         <left>221</left>
-                        <top>24</top>
+                        <top>43</top>
                         <width>22</width>
                         <height>14</height>
                         <texture colordiffuse="FFD8D8D8">check-bold.png</texture>
@@ -1473,16 +1473,16 @@
                     <!-- Plex focus: poster already zoomed ~8%, plus a thin
                          white outline sitting just outside the poster. -->
                     <control type="image">
-                        <left>-3</left>
-                        <top>-9</top>
-                        <width>267</width>
-                        <height>396</height>
+                        <left>0</left>
+                        <top>15</top>
+                        <width>264</width>
+                        <height>391</height>
                         <texture>poster-ring-thin.png</texture>
                         <visible>Control.HasFocus(3230) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>391</top>
+                        <top>409</top>
                         <width>240</width>
                         <height>32</height>
                         <font>font_mini</font>
@@ -1494,7 +1494,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>423</top>
+                        <top>441</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
