@@ -78,7 +78,7 @@
                 <top>226</top>
                 <width>1500</width>
                 <height>62</height>
-                <font>font_info_black_doublerow</font>
+                <font>font_aura_info_black_doublerow</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <aligny>bottom</aligny>
                 <label>$INFO[Window.Property(AuraHeroTitle)]</label>
@@ -89,7 +89,7 @@
                 <top>292</top>
                 <width>1500</width>
                 <height>44</height>
-                <font>font_midi</font>
+                <font>font_aura_midi</font>
                 <textcolor>FFF0F0F0</textcolor>
                 <label>$INFO[Window.Property(AuraHeroSubtitle)]</label>
                 <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
@@ -110,7 +110,7 @@
                     <width min="20" max="1350">auto</width>
                     <height>36</height>
                     <aligny>center</aligny>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <textcolor>DDFFFFFF</textcolor>
                     <label>$INFO[Window.Property(AuraHeroMeta)]</label>
                 </control>
@@ -132,7 +132,7 @@
                         <height>34</height>
                         <align>center</align>
                         <aligny>center</aligny>
-                        <font>font_hint_bold</font>
+                        <font>font_aura_hint_bold</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <label>$INFO[Window.Property(AuraHeroRating)]</label>
                     </control>
@@ -143,7 +143,7 @@
                 <top>380</top>
                 <width>880</width>
                 <height>70</height>
-                <font>font_mini</font>
+                <font>font_aura_mini</font>
                 <textcolor>CCFFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroPlot)]</label>
             </control>
@@ -152,7 +152,7 @@
                 <top>458</top>
                 <width>1100</width>
                 <height>26</height>
-                <font>font_tiny</font>
+                <font>font_aura_tiny</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroCast)]</label>
             </control>
@@ -266,7 +266,7 @@
                         <width>220</width>
                         <height>60</height>
                         <aligny>center</aligny>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <label>$INFO[ListItem.Label]</label>
                     </control>
@@ -291,7 +291,7 @@
                         <width>220</width>
                         <height>60</height>
                         <aligny>center</aligny>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <textcolor>B3FFFFFF</textcolor>
                         <label>$INFO[ListItem.Label]</label>
                     </control>
@@ -309,7 +309,7 @@
                 <width>378</width>
                 <height>34</height>
                 <align>right</align>
-                <font>font_mini</font>
+                <font>font_aura_mini</font>
                 <label>$INFO[System.Time(hh:mm)]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
@@ -379,7 +379,7 @@
                 <height>48</height>
                 <align>center</align>
                 <aligny>center</aligny>
-                <font>font_mini</font>
+                <font>font_aura_mini</font>
                 <label>$INFO[System.Time(hh:mm)]</label>
                 <textcolor>CCFFFFFF</textcolor>
             </control>
@@ -546,7 +546,7 @@
                 <control type="image">
                     <left>127</left>
                     <top>120</top>
-                    <width>684</width>
+                    <width>902</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
                 </control>
@@ -556,31 +556,31 @@
                 <control type="image">
                     <left>139</left>
                     <top>128</top>
-                    <width>164</width>
+                    <width>240</width>
                     <height>48</height>
                     <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
-                    <left>321</left>
+                    <left>397</left>
                     <top>128</top>
-                    <width>164</width>
+                    <width>205</width>
                     <height>48</height>
                     <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
-                    <left>496</left>
+                    <left>620</left>
                     <top>128</top>
-                    <width>154</width>
+                    <width>195</width>
                     <height>48</height>
                     <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
-                    <left>660</left>
+                    <left>833</left>
                     <top>128</top>
-                    <width>144</width>
+                    <width>180</width>
                     <height>48</height>
                     <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
@@ -589,10 +589,10 @@
                 <control type="button" id="3050">
                     <left>139</left>
                     <top>128</top>
-                    <width>164</width>
+                    <width>240</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33008]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -606,12 +606,12 @@
                 </control>
 
                 <control type="button" id="3100">
-                    <left>321</left>
+                    <left>397</left>
                     <top>128</top>
-                    <width>164</width>
+                    <width>205</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33010]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3050</onleft>
@@ -626,12 +626,12 @@
 
                 <!-- Plex "Collections" tab (4th contextual library tab). -->
                 <control type="button" id="3075">
-                    <left>496</left>
+                    <left>620</left>
                     <top>128</top>
-                    <width>154</width>
+                    <width>195</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33011]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3100</onleft>
@@ -645,12 +645,12 @@
                 </control>
 
                 <control type="button" id="3060">
-                    <left>660</left>
+                    <left>833</left>
                     <top>128</top>
-                    <width>144</width>
+                    <width>180</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33009]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3075</onleft>
@@ -667,9 +667,9 @@
                 <control type="label">
                     <left>139</left>
                     <top>129</top>
-                    <width>164</width>
+                    <width>240</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
@@ -677,11 +677,11 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
-                    <left>321</left>
+                    <left>397</left>
                     <top>129</top>
-                    <width>164</width>
+                    <width>205</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
@@ -689,11 +689,11 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>496</left>
+                    <left>620</left>
                     <top>129</top>
-                    <width>154</width>
+                    <width>195</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
@@ -701,11 +701,11 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>660</left>
+                    <left>833</left>
                     <top>129</top>
-                    <width>144</width>
+                    <width>180</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
@@ -715,9 +715,9 @@
                 <control type="label">
                     <left>139</left>
                     <top>129</top>
-                    <width>164</width>
+                    <width>240</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
@@ -727,9 +727,9 @@
                 <control type="label">
                     <left>139</left>
                     <top>129</top>
-                    <width>164</width>
+                    <width>240</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
@@ -737,11 +737,11 @@
                     <visible>Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
-                    <left>321</left>
+                    <left>397</left>
                     <top>129</top>
-                    <width>164</width>
+                    <width>205</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
@@ -749,11 +749,11 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>321</left>
+                    <left>397</left>
                     <top>129</top>
-                    <width>164</width>
+                    <width>205</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
@@ -761,11 +761,11 @@
                     <visible>Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>496</left>
+                    <left>620</left>
                     <top>129</top>
-                    <width>154</width>
+                    <width>195</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
@@ -773,11 +773,11 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>496</left>
+                    <left>620</left>
                     <top>129</top>
-                    <width>154</width>
+                    <width>195</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
@@ -785,11 +785,11 @@
                     <visible>Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>660</left>
+                    <left>833</left>
                     <top>129</top>
-                    <width>144</width>
+                    <width>180</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
@@ -797,11 +797,11 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
                 <control type="label">
-                    <left>660</left>
+                    <left>833</left>
                     <top>129</top>
-                    <width>144</width>
+                    <width>180</width>
                     <height>46</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
@@ -863,7 +863,7 @@
                     <width>160</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33015]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -880,7 +880,7 @@
                     <width>170</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33014]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
@@ -897,7 +897,7 @@
                     <width>160</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33576]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3071</onleft>
@@ -913,7 +913,7 @@
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33015]</label>
@@ -925,7 +925,7 @@
                     <top>120</top>
                     <width>170</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33014]</label>
@@ -937,7 +937,7 @@
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33576]</label>
@@ -971,7 +971,7 @@
                     <width>120</width>
                     <height>48</height>
                     <label>Tout</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3211</onleft>
@@ -999,7 +999,7 @@
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>-</label>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1011,7 +1011,7 @@
                     <top>190</top>
                     <width>36</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>$ADDON[script.akasha.aura 33096]</label>
                     <align>left</align>
                     <aligny>center</aligny>
@@ -1040,7 +1040,7 @@
                     <width>150</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33057]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3211</onleft>
@@ -1059,7 +1059,7 @@
                     <width>120</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33063]</label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3212</onleft>
@@ -1084,7 +1084,7 @@
                     <top>198</top>
                     <width>140</width>
                     <height>32</height>
-                    <font>font_tiny</font>
+                    <font>font_aura_tiny</font>
                     <label>-</label>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1097,7 +1097,7 @@
                     <width>48</width>
                     <height>48</height>
                     <label></label>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3213</onleft>
@@ -1132,7 +1132,7 @@
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3211)]</label>
@@ -1144,7 +1144,7 @@
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3211)]</label>
@@ -1156,7 +1156,7 @@
                     <top>190</top>
                     <width>90</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>left</align>
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3212)]</label>
@@ -1168,7 +1168,7 @@
                     <top>190</top>
                     <width>90</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>left</align>
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3212)]</label>
@@ -1180,7 +1180,7 @@
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3213)]</label>
@@ -1192,7 +1192,7 @@
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3213)]</label>
@@ -1218,7 +1218,7 @@
                         <top>6</top>
                         <width>70</width>
                         <height>32</height>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <align>center</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
@@ -1238,7 +1238,7 @@
                         <top>6</top>
                         <width>70</width>
                         <height>32</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <align>center</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
@@ -1375,7 +1375,7 @@
                         <top>400</top>
                         <width>240</width>
                         <height>32</height>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
@@ -1387,7 +1387,7 @@
                         <top>432</top>
                         <width>240</width>
                         <height>26</height>
-                        <font>font_tiny</font>
+                        <font>font_aura_tiny</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label2]</label>
                         <textcolor>A0FFFFFF</textcolor>
@@ -1485,7 +1485,7 @@
                         <top>409</top>
                         <width>240</width>
                         <height>32</height>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
@@ -1497,7 +1497,7 @@
                         <top>439</top>
                         <width>240</width>
                         <height>26</height>
-                        <font>font_tiny</font>
+                        <font>font_aura_tiny</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label2]</label>
                         <textcolor>A0FFFFFF</textcolor>
@@ -1542,7 +1542,7 @@
                         <top>504</top>
                         <width>1600</width>
                         <height>48</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -1730,7 +1730,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -1740,7 +1740,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -1804,7 +1804,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -1814,7 +1814,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -1836,7 +1836,7 @@
                         <top>976</top>
                         <width>1600</width>
                         <height>48</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -2024,7 +2024,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2034,7 +2034,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2098,7 +2098,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2108,7 +2108,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2130,7 +2130,7 @@
                         <top>1448</top>
                         <width>1600</width>
                         <height>48</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -2323,7 +2323,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2333,7 +2333,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2397,7 +2397,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2407,7 +2407,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2429,7 +2429,7 @@
                         <top>1920</top>
                         <width>1600</width>
                         <height>48</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -2618,7 +2618,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2628,7 +2628,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2692,7 +2692,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2702,7 +2702,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2724,7 +2724,7 @@
                         <top>2392</top>
                         <width>1600</width>
                         <height>48</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5110) | Control.HasFocus(5111) | Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
@@ -2907,7 +2907,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2917,7 +2917,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2981,7 +2981,7 @@
                                 <top>262</top>
                                 <width>440</width>
                                 <height>34</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandTitle)]</label>
                                 <textcolor>FFFFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -2991,7 +2991,7 @@
                                 <top>298</top>
                                 <width>440</width>
                                 <height>30</height>
-                                <font>font_mini</font>
+                                <font>font_aura_mini</font>
                                 <label>$INFO[ListItem.Property(AuraLandSubtitle)]</label>
                                 <textcolor>B3FFFFFF</textcolor>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
@@ -3098,7 +3098,7 @@
                             <top>0</top>
                             <width>252</width>
                             <height>84</height>
-                            <font>font_tiny_bold</font>
+                            <font>font_aura_tiny_bold</font>
                             <align>left</align>
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
@@ -3133,7 +3133,7 @@
                             <top>0</top>
                             <width>252</width>
                             <height>84</height>
-                            <font>font_tiny_bold</font>
+                            <font>font_aura_tiny_bold</font>
                             <align>left</align>
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
@@ -3187,7 +3187,7 @@
                     <top>506</top>
                     <width>1000</width>
                     <height>64</height>
-                    <font>font_tiny</font>
+                    <font>font_aura_tiny</font>
                     <align>center</align>
                     <label>-</label>
                     <textcolor>BBFFFFFF</textcolor>
@@ -3198,7 +3198,7 @@
                     <width>280</width>
                     <height>48</height>
                     <label>-</label>
-                    <font>font_tiny_bold</font>
+                    <font>font_aura_tiny_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -3355,7 +3355,7 @@
                             <width>290</width>
                             <height>56</height>
                             <aligny>center</aligny>
-                            <font>font_tiny_bold</font>
+                            <font>font_aura_tiny_bold</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
@@ -3384,7 +3384,7 @@
                             <width>120</width>
                             <height>56</height>
                             <aligny>center</aligny>
-                            <font>font_hint</font>
+                            <font>font_aura_hint</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
@@ -3422,7 +3422,7 @@
                             <width>290</width>
                             <height>56</height>
                             <aligny>center</aligny>
-                            <font>font_tiny_bold</font>
+                            <font>font_aura_tiny_bold</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FF1A1A1A</textcolor>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
@@ -3451,7 +3451,7 @@
                             <width>120</width>
                             <height>56</height>
                             <aligny>center</aligny>
-                            <font>font_hint</font>
+                            <font>font_aura_hint</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>99FFFFFF</textcolor>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>

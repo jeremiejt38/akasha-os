@@ -23,12 +23,12 @@
                 <texture colordiffuse="FF1F222B" border="26">rounded-solid.png</texture>
             </control>
             <control type="label" id="9005">
-                <font>font_mini_bold</font>
+                <font>font_aura_mini_bold</font>
                 <textcolor>CCFFFFFF</textcolor>
                 <wrapmultiline>false</wrapmultiline>
             </control>
             <control type="textbox" id="9006">
-                <font>font_mini</font>
+                <font>font_aura_mini</font>
                 <textcolor>CCFFFFFF</textcolor>
             </control>
             <control type="list" id="9010">
@@ -40,7 +40,7 @@
                         <width>560</width>
                         <height>64</height>
                         <aligny>center</aligny>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>DDFFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
@@ -60,7 +60,7 @@
                         <width>560</width>
                         <height>64</height>
                         <aligny>center</aligny>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FF10131A</textcolor>
                         <wrapmultiline>false</wrapmultiline>

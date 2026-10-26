@@ -32,7 +32,7 @@
                 <top>30</top>
                 <width>680</width>
                 <height>44</height>
-                <font>font_midi</font>
+                <font>font_aura_midi</font>
                 <label>$ADDON[script.akasha.aura 33200]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
@@ -48,7 +48,7 @@
                         <width>660</width>
                         <height>64</height>
                         <aligny>center</aligny>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>99FFFFFF</textcolor>
                         <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
@@ -67,7 +67,7 @@
                         <width>660</width>
                         <height>64</height>
                         <aligny>center</aligny>
-                        <font>font_tiny</font>
+                        <font>font_aura_tiny</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>66FFFFFF</textcolor>
                         <visible>String.IsEqual(ListItem.Property(header),1)</visible>
@@ -88,7 +88,7 @@
                         <width>660</width>
                         <height>64</height>
                         <aligny>center</aligny>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FF10131A</textcolor>
                         <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
@@ -107,7 +107,7 @@
                         <width>660</width>
                         <height>64</height>
                         <aligny>center</aligny>
-                        <font>font_tiny</font>
+                        <font>font_aura_tiny</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>AA10131A</textcolor>
                         <visible>String.IsEqual(ListItem.Property(header),1)</visible>

@@ -50,7 +50,7 @@
                 <top>24</top>
                 <width>436</width>
                 <height>32</height>
-                <font>font_tiny</font>
+                <font>font_aura_tiny</font>
                 <aligny>center</aligny>
                 <textcolor>BBFFFFFF</textcolor>
                 <label>-</label>
@@ -60,7 +60,7 @@
                 <top>62</top>
                 <width>436</width>
                 <height>34</height>
-                <font>font_tiny</font>
+                <font>font_aura_tiny</font>
                 <aligny>center</aligny>
                 <textcolor>CCFFFFFF</textcolor>
                 <label>-</label>
@@ -70,7 +70,7 @@
                 <top>100</top>
                 <width>436</width>
                 <height>84</height>
-                <font>font_midi</font>
+                <font>font_aura_midi</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <label>-</label>
             </control>
@@ -79,7 +79,7 @@
                 <top>192</top>
                 <width>436</width>
                 <height>36</height>
-                <font>font_tiny</font>
+                <font>font_aura_tiny</font>
                 <aligny>center</aligny>
                 <textcolor>FFE5A00D</textcolor>
                 <label>-</label>
@@ -89,7 +89,7 @@
                 <top>256</top>
                 <width>264</width>
                 <height>56</height>
-                <font>font_mini_bold</font>
+                <font>font_aura_mini_bold</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onright>6405</onright>
@@ -106,7 +106,7 @@
                 <top>256</top>
                 <width>160</width>
                 <height>56</height>
-                <font>font_mini_bold</font>
+                <font>font_aura_mini_bold</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>6404</onleft>

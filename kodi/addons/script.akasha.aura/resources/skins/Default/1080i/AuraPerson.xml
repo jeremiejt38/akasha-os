@@ -45,7 +45,7 @@
                 <top>180</top>
                 <width>1400</width>
                 <height>80</height>
-                <font>font_head_bold</font>
+                <font>font_aura_head_bold</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <wrapmultiline>false</wrapmultiline>
             </control>
@@ -56,7 +56,7 @@
                 <top>430</top>
                 <width>1000</width>
                 <height>44</height>
-                <font>font_mini_bold</font>
+                <font>font_aura_mini_bold</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <visible>!String.IsEmpty(Window.Property(AuraPersonRowTitle))</visible>
             </control>
@@ -67,7 +67,7 @@
                 <top>430</top>
                 <width>1400</width>
                 <height>44</height>
-                <font>font_mini</font>
+                <font>font_aura_mini</font>
                 <textcolor>AAFFFFFF</textcolor>
                 <label>$ADDON[script.akasha.aura 33126]</label>
                 <visible>!String.IsEmpty(Window.Property(AuraPersonEmpty))</visible>
@@ -119,7 +119,7 @@
                         <top>306</top>
                         <width>200</width>
                         <height>28</height>
-                        <font>font_mini</font>
+                        <font>font_aura_mini</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>DDFFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
@@ -171,7 +171,7 @@
                         <top>306</top>
                         <width>200</width>
                         <height>28</height>
-                        <font>font_mini_bold</font>
+                        <font>font_aura_mini_bold</font>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>

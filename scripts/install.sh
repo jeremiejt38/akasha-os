@@ -311,6 +311,10 @@ if [ -d "$SKIN_DIR" ]; then
     # support addon-scoped fonts yet).
     python3 "$SCRIPT_DIR/skin-patches/patch_akasha_fonts.py" "$SKIN_DIR"
 
+    # Register the Inter faces used by the Akasha Aura windows
+    # (font_aura_* names in the same Default fontset).
+    python3 "$SCRIPT_DIR/skin-patches/patch_aura_fonts.py" "$SKIN_DIR"
+
     # Force skinshortcuts rebuild
     rm -f /storage/.kodi/userdata/addon_data/script.skinshortcuts/skin.arctic.horizon.2.hash
 

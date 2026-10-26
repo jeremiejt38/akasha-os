@@ -78,7 +78,7 @@
             <top>200</top>
             <width>1100</width>
             <height>70</height>
-            <font>font_head_bold</font>
+            <font>font_aura_head_bold</font>
             <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
         </control>
@@ -131,7 +131,7 @@
             <top>310</top>
             <width>1100</width>
             <height>36</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <textcolor>EEFFFFFF</textcolor>
         </control>
 
@@ -160,7 +160,7 @@
             <top>356</top>
             <width>90</width>
             <height>36</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -188,7 +188,7 @@
             <top>356</top>
             <width>120</width>
             <height>36</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -216,7 +216,7 @@
             <top>356</top>
             <width>130</width>
             <height>36</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -244,7 +244,7 @@
             <top>356</top>
             <width>130</width>
             <height>36</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -272,7 +272,7 @@
             <top>356</top>
             <width>130</width>
             <height>36</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -285,7 +285,7 @@
             <top>412</top>
             <width>1150</width>
             <height>96</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <textcolor>DDFFFFFF</textcolor>
         </control>
 
@@ -295,7 +295,7 @@
             <top>518</top>
             <width>1100</width>
             <height>32</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <textcolor>99FFFFFF</textcolor>
         </control>
 
@@ -309,7 +309,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -362,7 +362,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -400,7 +400,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -437,7 +437,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -473,7 +473,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -509,7 +509,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -553,7 +553,7 @@
         <top>576</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
@@ -593,7 +593,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -605,7 +605,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -617,7 +617,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -629,7 +629,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -641,7 +641,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -653,7 +653,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -665,7 +665,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -687,7 +687,7 @@
             <top>584</top>
             <width>350</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -706,7 +706,7 @@
             <top>584</top>
             <width>220</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -725,7 +725,7 @@
             <top>584</top>
             <width>220</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -775,7 +775,7 @@
                     <top>0</top>
                     <width>200</width>
                     <height>56</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -795,7 +795,7 @@
                     <top>0</top>
                     <width>200</width>
                     <height>56</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -811,7 +811,7 @@
             <top>648</top>
             <width>1200</width>
             <height>30</height>
-            <font>font_tiny</font>
+            <font>font_aura_tiny</font>
             <textcolor>99FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
@@ -823,7 +823,7 @@
             <top>690</top>
             <width>800</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <label>$ADDON[script.akasha.aura 33100]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraDetailSectionTitle))</visible>
@@ -960,7 +960,7 @@
                     <top>190</top>
                     <width>320</width>
                     <height>28</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>DDFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
@@ -970,7 +970,7 @@
                     <top>218</top>
                     <width>320</width>
                     <height>26</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
@@ -1019,7 +1019,7 @@
                     <top>190</top>
                     <width>320</width>
                     <height>28</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_mini_bold</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
@@ -1029,7 +1029,7 @@
                     <top>218</top>
                     <width>320</width>
                     <height>26</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
@@ -1066,7 +1066,7 @@
                     <top>168</top>
                     <width>200</width>
                     <height>26</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>DDFFFFFF</textcolor>
@@ -1077,7 +1077,7 @@
                     <top>194</top>
                     <width>200</width>
                     <height>24</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
@@ -1113,7 +1113,7 @@
                     <top>168</top>
                     <width>200</width>
                     <height>26</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1124,7 +1124,7 @@
                     <top>194</top>
                     <width>200</width>
                     <height>24</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
@@ -1165,7 +1165,7 @@
                 <top>72</top>
                 <width>400</width>
                 <height>40</height>
-                <font>font_tiny</font>
+                <font>font_aura_tiny</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$ADDON[script.akasha.aura 33114]</label>
             </control>
@@ -1174,7 +1174,7 @@
                 <top>140</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_main_bold</font>
+                <font>font_aura_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33115]</label>
                 <align>left</align>
                 <aligny>center</aligny>
@@ -1211,7 +1211,7 @@
                 <top>228</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_main_bold</font>
+                <font>font_aura_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33116]</label>
                 <align>left</align>
                 <aligny>center</aligny>
@@ -1245,7 +1245,7 @@
                 <top>316</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_main_bold</font>
+                <font>font_aura_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33574]</label>
                 <align>left</align>
                 <aligny>center</aligny>
@@ -1279,7 +1279,7 @@
                 <top>396</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_main_bold</font>
+                <font>font_aura_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33579]</label>
                 <align>left</align>
                 <aligny>center</aligny>
@@ -1314,7 +1314,7 @@
                 <top>476</top>
                 <width>470</width>
                 <height>80</height>
-                <font>font_main_bold</font>
+                <font>font_aura_main_bold</font>
                 <label>$ADDON[script.akasha.aura 33583]</label>
                 <align>left</align>
                 <aligny>center</aligny>
