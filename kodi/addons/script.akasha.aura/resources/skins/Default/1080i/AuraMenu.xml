@@ -27,6 +27,10 @@
                 <textcolor>CCFFFFFF</textcolor>
                 <wrapmultiline>false</wrapmultiline>
             </control>
+            <control type="textbox" id="9006">
+                <font>font_mini</font>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
             <control type="list" id="9010">
                 <scrolltime>140</scrolltime>
                 <itemlayout height="64">

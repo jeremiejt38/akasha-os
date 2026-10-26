@@ -12,6 +12,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import i18n
+import aura_menu
 
 import addons_inventory
 import aura_store
@@ -182,8 +183,8 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             addon = self._selected_addon()
             if addon:
                 if addon.get('is_external'):
-                    if xbmcgui.Dialog().yesno(
-                            i18n.tr(33319),
+                    if aura_menu.confirm(
+                            self, i18n.tr(33319),
                             i18n.tr(33305).format(addon['name'])):
                         store_registry.record_uninstall(addon['store_id'])
                         self._reload()

@@ -448,6 +448,10 @@ STRINGS = {
     # Plex search hint line above Popular Searches
     33586: ('Titres, personnes, genres et plus encore…',
             'Search titles, people, genres and more…'),
+
+    # Dark confirm / message sheets (aura_menu.confirm / .message)
+    33587: ('Confirmer', 'Confirm'),
+    33588: ('OK', 'OK'),
 }
 
 MONTH_ABBRS = {

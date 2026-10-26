@@ -1694,3 +1694,13 @@ msgstr ""
 msgctxt "#33586"
 msgid "Search titles, people, genres and more…"
 msgstr ""
+
+# Confirmer
+msgctxt "#33587"
+msgid "Confirm"
+msgstr ""
+
+# OK
+msgctxt "#33588"
+msgid "OK"
+msgstr ""

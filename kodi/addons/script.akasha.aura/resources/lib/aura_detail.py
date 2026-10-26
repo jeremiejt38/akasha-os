@@ -1439,7 +1439,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                            (i18n.tr(33115), 'subtitle_label')):
             if item.get(key):
                 lines.append('{} : {}'.format(label, item[key]))
-        xbmcgui.Dialog().ok(i18n.tr(33116), '[CR]'.join(lines))
+        aura_menu.message(self, i18n.tr(33116), '[CR]'.join(lines))
 
     def _rate(self):
         if not self.client or not self.item.get('rating_key'):

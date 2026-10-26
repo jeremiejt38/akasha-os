@@ -53,7 +53,7 @@ def open_sheet(win, client, item, control_id, open_default,
                                                control_id)))
         entries.append((i18n.tr(33111), lambda: rate(client, item, win)))
     if item.get('video_label') or item.get('audio_label'):
-        entries.append((i18n.tr(33116), lambda: file_info(item)))
+        entries.append((i18n.tr(33116), lambda: file_info(win, item)))
 
     idx = aura_menu.contextmenu(win,
                                 [label for label, _ in entries])
@@ -177,7 +177,7 @@ def rate(client, item, win):
         xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
 
 
-def file_info(item):
+def file_info(win, item):
     def _fmt_duration(duration_ms):
         if not duration_ms:
             return ''
@@ -196,4 +196,4 @@ def file_info(item):
                        (i18n.tr(33115), 'subtitle_label')):
         if item.get(key):
             lines.append('{} : {}'.format(label, item[key]))
-    xbmcgui.Dialog().ok(i18n.tr(33116), '[CR]'.join(lines))
+    aura_menu.message(win, i18n.tr(33116), '[CR]'.join(lines))

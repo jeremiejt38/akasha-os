@@ -3382,8 +3382,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Reuses the exact same standby+wake-on-input script already used
         # by script.akasha.guide's "Mise en veille" entry, rather than
         # duplicating it -- see docs/aura/decisions.md.
-        if not xbmcgui.Dialog().yesno(
-                'Akasha', i18n.tr(33089)):
+        if not aura_menu.confirm(
+                self, 'Akasha', i18n.tr(33089)):
             return
         script = '/storage/.kodi/scripts/akasha-sleep.py'
         try:
@@ -3406,7 +3406,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # available today (there is no app-level relaunch separate from
         # the Kodi process) -- flagged as an assumption in the recette
         # report per the plan's own instruction (section 8).
-        if not xbmcgui.Dialog().yesno('Akasha', i18n.tr(33092)):
+        if not aura_menu.confirm(self, 'Akasha', i18n.tr(33092)):
             return
         try:
             with open('/tmp/.kodi-restart', 'w') as f:
@@ -3416,15 +3416,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         subprocess.Popen(['systemctl', 'restart', 'kodi'], start_new_session=True)
 
     def _settings_restart_system(self):
-        if not xbmcgui.Dialog().yesno('Akasha', i18n.tr(33094)):
+        if not aura_menu.confirm(self, 'Akasha', i18n.tr(33094)):
             return
         subprocess.Popen(['systemctl', 'reboot'], start_new_session=True)
 
     def _settings_shutdown(self):
         # Same splash + CEC-TV-off sequence as script.akasha.guide/
         # script.akasha.settings' shutdown action.
-        if not xbmcgui.Dialog().yesno(
-                'Akasha', i18n.tr(33095)):
+        if not aura_menu.confirm(
+                self, 'Akasha', i18n.tr(33095)):
             return
         subprocess.run(['/storage/.kodi/scripts/show-splash.sh',
                          '/storage/.kodi/media/splash-shutdown.png', '1'])
@@ -3531,8 +3531,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 options.append(i18n.tr(33081).format(section['title']))
                 actions.append(('down', key))
 
-        dialog = xbmcgui.Dialog()
-        idx = dialog.select(i18n.tr(33077), options)
+        idx = aura_menu.select(self, i18n.tr(33077), options)
         if idx < 0:
             return
 

@@ -186,8 +186,8 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             if itype == 'external-app':
                 self._manage_external(entry)
             else:
-                if xbmcgui.Dialog().yesno(
-                        'Akasha Store',
+                if aura_menu.confirm(
+                        self, 'Akasha Store',
                         i18n.tr(33306).format(entry['name'])):
                     self._uninstall(entry)
             return

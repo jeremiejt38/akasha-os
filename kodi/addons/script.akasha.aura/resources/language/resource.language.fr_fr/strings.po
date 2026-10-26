@@ -1694,3 +1694,13 @@ msgstr "minutes"
 msgctxt "#33586"
 msgid "Search titles, people, genres and more…"
 msgstr "Titres, personnes, genres et plus encore…"
+
+# Confirmer
+msgctxt "#33587"
+msgid "Confirm"
+msgstr "Confirmer"
+
+# OK
+msgctxt "#33588"
+msgid "OK"
+msgstr "OK"
