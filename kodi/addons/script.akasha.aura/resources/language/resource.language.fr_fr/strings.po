@@ -390,10 +390,10 @@ msgctxt "#33105"
 msgid "Resume S{} E{}"
 msgstr "Reprendre S{} E{}"
 
-# Reprendre · {} restantes
+# Reprendre • {} restantes
 msgctxt "#33106"
-msgid "Resume · {} left"
-msgstr "Reprendre · {} restantes"
+msgid "Resume • {} left"
+msgstr "Reprendre • {} restantes"
 
 # Recommencer
 msgctxt "#33107"

@@ -1350,19 +1350,11 @@
                         <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                     </control>
                     <control type="image">
-                        <left>214</left>
-                        <top>32</top>
-                        <width>36</width>
-                        <height>36</height>
-                        <texture colordiffuse="FF303030">circle.png</texture>
-                        <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
-                    </control>
-                    <control type="image">
-                        <left>221</left>
-                        <top>43</top>
-                        <width>22</width>
-                        <height>14</height>
-                        <texture colordiffuse="FFD8D8D8">check-bold.png</texture>
+                        <left>212</left>
+                        <top>30</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture>watched-tab.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
@@ -1450,19 +1442,11 @@
                         <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                     </control>
                     <control type="image">
-                        <left>214</left>
-                        <top>32</top>
-                        <width>36</width>
-                        <height>36</height>
-                        <texture colordiffuse="FF303030">circle.png</texture>
-                        <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
-                    </control>
-                    <control type="image">
-                        <left>221</left>
-                        <top>43</top>
-                        <width>22</width>
-                        <height>14</height>
-                        <texture colordiffuse="FFD8D8D8">check-bold.png</texture>
+                        <left>212</left>
+                        <top>30</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture>watched-tab.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <!-- Plex focus: poster already zoomed ~8%, plus a thin

@@ -113,7 +113,7 @@ STRINGS = {
     33103: ('{} Saison{}', '{} Season{}'),
     33104: ('Regarder', 'Watch'),
     33105: ('Reprendre S{} E{}', 'Resume S{} E{}'),
-    33106: ('Reprendre · {} restantes', 'Resume · {} left'),
+    33106: ('Reprendre • {} restantes', 'Resume • {} left'),
     33107: ('Recommencer', 'Restart'),
     33108: ('Bande-annonce', 'Trailer'),
     33109: ('Bonus', 'Extras'),

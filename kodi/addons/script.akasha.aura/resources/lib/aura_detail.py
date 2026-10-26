@@ -309,7 +309,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             parts.append('{} saison{}'.format(
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         if item.get('genres'):
-            parts.append(', '.join(item['genres'][:3]))
+            parts.append(', '.join(item['genres'][:2]))
         meta_text = '   '.join(parts)
         try:
             self.getControl(7020).setLabel(meta_text)
@@ -320,11 +320,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         rating = (item.get('content_rating') or '').strip()
         _set(self, 'AuraDetailMetaRating', '1' if rating else '')
         if rating:
-            # PIL under-measures Inter vs Kodi ~1.2x (see i18n.ellipsize)
-            box_x = 128 + int((i18n.text_width(meta_text, 22) or 0)
-                              * 1.2) + 16
+            # PIL under-measures Kodi's Inter ~1.0x here (see i18n.ellipsize)
+            box_x = 128 + int(i18n.text_width(meta_text, 22) or 0) + 16
             box_w = max(40, int((i18n.text_width(rating, 19) or 20)
-                                * 1.2) + 20)
+                                * 0.96) + 20)
             try:
                 self.getControl(7190).setPosition(box_x, 294)
                 self.getControl(7190).setWidth(box_w)
@@ -533,14 +532,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         t = self._flow_top
         for cid in (7180, 7181, 7182):
             try:
-                self.getControl(cid).setPosition(128, t + 91)
+                self.getControl(cid).setPosition(128, t + 94)
             except RuntimeError:
                 pass
         try:
-            self.getControl(7207).setPosition(192, t + 112)
+            self.getControl(7207).setPosition(196, t + 105)
             self.getControl(7060).setPosition(128, t + 202)
             for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
-                self.getControl(cid).setPosition(121, t + 264)
+                self.getControl(cid).setPosition(128, t + 264)
         except RuntimeError:
             pass
 
@@ -552,7 +551,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if item.get('content_rating'):
             # Plex: shield glyph + "age N+" + chevron inside the pill.
             chips.append((_age_label(item['content_rating']) + ' ›',
-                          'age-shield.png', True))
+                          'age-shield.png', 24, True))
         # Plex draws up to 4 bare provider chips (icon + value, no pill)
         # from the Ratings array; the legacy scalar fields are the
         # fallback when the array is absent.
@@ -578,35 +577,45 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraDetailChip{}'.format(slot), '')
             _set(self, 'AuraDetailChipIcon{}'.format(slot), '')
             _set(self, 'AuraDetailChipBg{}'.format(slot), '')
-        for slot, (text, icon, pill) in enumerate(chips[:5]):
-            width = 34 + len(text) * 11 + (30 if icon else 0)
+        for slot, (text, icon, icon_w, pill) in enumerate(chips[:5]):
+            text_w = int((i18n.text_width(text, 22) or len(text) * 11)
+                         * 0.96)
+            width = (text_w + (icon_w + 16 if icon else 0)
+                     + (24 if pill else 0))
             _set(self, 'AuraDetailChip{}'.format(slot), '1')
             if pill:
                 _set(self, 'AuraDetailChipBg{}'.format(slot), '1')
             try:
-                self.getControl(7021 + slot * 2).setPosition(chip_x, 350)
+                self.getControl(7021 + slot * 2).setPosition(chip_x, 344)
                 self.getControl(7021 + slot * 2).setWidth(width)
                 if icon:
-                    self.getControl(7045 + slot).setPosition(chip_x + 8, 356)
+                    ic = self.getControl(7045 + slot)
+                    ic.setPosition(chip_x + (10 if pill else 0), 348)
+                    ic.setWidth(icon_w)
+                    ic.setHeight(28)
                     _set(self, 'AuraDetailChipIcon{}'.format(slot), icon)
-                    lbl_x, lbl_w = chip_x + 34, width - 40
+                    lbl_x = chip_x + icon_w + (16 if pill else 6)
+                    lbl_w = width - (lbl_x - chip_x)
                 else:
                     lbl_x, lbl_w = chip_x, width
-                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 350)
+                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 344)
                 self.getControl(CHIP_LABEL_IDS[slot]).setWidth(lbl_w)
                 self.getControl(CHIP_LABEL_IDS[slot]).setLabel(text)
             except RuntimeError:
                 pass
-            chip_x += width + (12 if pill else 26)
+            chip_x += width + (14 if pill else 20)
 
     @staticmethod
     def _rating_chip(value, rating_image, audience=False):
         icon = _provider_icon(rating_image, audience)
+        # IMDb/TMDB are pill badges (64x32 texture at 48x24); the tomato
+        # splat and popcorn stay bare glyphs.
+        icon_w = {'prov-imdb.png': 48, 'prov-tmdb.png': 60}.get(icon, 24)
         text = _fmt_rating(value, rating_image)
         if not icon:
             text = '{} {}'.format(_provider_label(rating_image),
                                   text).strip()
-        return (text, icon)
+        return (text, icon, icon_w)
 
     def _render_cast(self):
         cast = self.item.get('cast') or []
@@ -661,7 +670,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # Plex wraps the tab row in a translucent container sized to
             # the tabs (150px pitch, ~16px trailing pad).
             self.getControl(7135).setWidth(
-                (len(self._seasons) + 1) * 150 + 16)
+                (len(self._seasons) + 1) * 135 + 16)
         except RuntimeError:
             pass
         try:
@@ -801,12 +810,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if control_id != focused_id and control_id != WATCH_BUTTON_ID:
             return ACTION_CIRCLE_W
         label = self._action_label(control_id)
-        # Rough text measure for RobotoCondensed-Bold 28 (font_mini_bold):
-        # narrow glyphs ~14px, average ~19px, wide ones ~26px -- Kodi has
-        # no text-metrics API and clips overflowing labels.
-        text_w = sum(26 if c in 'mwMWÉÈÊ' else
-                     (14 if c.isdigit() or c in ' ilj.,:;·\'()-–' else 19)
-                     for c in label)
+        # Real text measure (Inter Bold 22 = font_aura_mini_bold); PIL
+        # over-measures Kodi ~0.96x. Fallback = the old char heuristic.
+        text_w = i18n.text_width(label, 22)
+        if text_w is not None:
+            text_w = int(text_w)
+        else:
+            text_w = sum(26 if c in 'mwMWÉÈÊ' else
+                         (14 if c.isdigit() or c in ' ilj.,:;·\'()-–'
+                          else 19) for c in label)
         return max(96, ACTION_LABEL_X + text_w + ACTION_LABEL_PAD)
 
     def _sync_action_row(self):
@@ -815,16 +827,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         of the row right."""
         restart = bool(self._playable_item() and
                        self._playable_item().get('view_offset_ms'))
+        # Plex ATV row order: Watch | restart? | extras? | watchlist |
+        # rate | watched | more. The watchlist bookmark stays visible
+        # like Plex even though cloud sync is unavailable (click surfaces
+        # the "unavailable" notification).
         order = ([WATCH_BUTTON_ID]
                  + ([RESTART_BUTTON_ID] if restart else [])
                  + ([EXTRAS_BUTTON_ID] if self._extras else [])
-                 + [RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID])
-        # Plex watchlist sync is a plex.tv cloud feature -- the button stays
-        # hidden rather than surfacing an "unavailable" notification.
+                 + [WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
+                    MORE_BUTTON_ID])
         for cid in (WATCHLIST_BUTTON_ID,) + ACTION_ICON_OVERLAYS.get(
                 WATCHLIST_BUTTON_ID, ()):
             try:
-                self.getControl(cid).setVisible(False)
+                self.getControl(cid).setVisible(True)
             except RuntimeError:
                 pass
         try:
@@ -853,7 +868,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 try:
                     lbl = self.getControl(lb)
                     lbl.setPosition(x + ACTION_LABEL_X, self._flow_top)
-                    lbl.setWidth(w - ACTION_LABEL_X - ACTION_LABEL_PAD + 8)
+                    # Kodi insets label text ~10px: keep a generous zone
+                    # so 'Reprendre S# E# · Nm restantes' never ellipsizes.
+                    lbl.setWidth(w - ACTION_LABEL_X - 12)
                     # _set_action_labels() runs at populate time, when the
                     # resume/next-episode lookup can still be empty -- the
                     # pill then stays blank until re-set (observed on the
@@ -1109,7 +1126,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 if nxt.get('view_offset_ms') and nxt.get('duration_ms'):
                     left = _fmt_duration(
                         nxt['duration_ms'] - nxt['view_offset_ms'])
-                    label += ' · ' + i18n.tr(33131).format(left)
+                    label += ' • ' + i18n.tr(33131).format(left)
                 return label
             return i18n.tr(33104)
         if item.get('view_offset_ms'):
@@ -1588,9 +1605,9 @@ def _fmt_rating(value, rating_image):
     except (TypeError, ValueError):
         return ''
     if 'rottentomatoes' in (rating_image or ''):
-        return '{:.0f}%'.format(v)
+        return '{:g}%'.format(v * 10 if v <= 10 else v)
     if v > 10:
-        return '{:.0f}%'.format(v)
+        return '{:g}%'.format(v)
     return '{:.1f}'.format(v)
 
 
