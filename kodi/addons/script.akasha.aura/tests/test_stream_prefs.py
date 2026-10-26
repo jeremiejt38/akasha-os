@@ -55,7 +55,7 @@ PROPS = {
         {'index': 1, 'language': 'eng', 'name': 'SDH'},
     ],
     'currentsubtitle': {'index': 0, 'language': 'fra', 'name': 'Forced'},
-    'subtitlesenabled': True,
+    'subtitleenabled': True,
 }
 
 

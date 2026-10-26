@@ -8,7 +8,7 @@ selection is persisted by language+name and re-matched against the new
 file's stream list on every playback start.
 
 Streams are read through JSON-RPC `Player.GetProperties` (audiostreams /
-currentaudiostream / subtitles / currentsubtitle / subtitlesenabled) —
+currentaudiostream / subtitles / currentsubtitle / subtitleenabled) —
 the only Kodi API exposing the active selection. Preference key is the
 grandparent rating key (whole show) falling back to the item's own
 rating key (movies).
@@ -25,7 +25,7 @@ PROP_ITEM = 'AuraPlaybackItem'
 _STREAM_PROPS = {
     'playerid': 1,
     'properties': ['audiostreams', 'currentaudiostream',
-                   'subtitles', 'currentsubtitle', 'subtitlesenabled'],
+                   'subtitles', 'currentsubtitle', 'subtitleenabled'],
 }
 
 
@@ -79,7 +79,7 @@ def capture_selection():
         'sub': {k: sub.get(k)
                 for k in ('index', 'language', 'name')
                 if sub.get(k) is not None},
-        'sub_enabled': bool(props.get('subtitlesenabled')),
+        'sub_enabled': bool(props.get('subtitleenabled')),
     }
 
 
