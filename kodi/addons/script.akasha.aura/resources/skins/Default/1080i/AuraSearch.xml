@@ -21,14 +21,14 @@
              Home/More leaves the dialog to the main window's rail. -->
         <control type="image">
             <left>14</left>
-            <top>435</top>
+            <top>426</top>
             <width>64</width>
             <height>228</height>
             <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
         </control>
         <control type="list" id="8140">
             <left>14</left>
-            <top>435</top>
+            <top>426</top>
             <width>64</width>
             <height>228</height>
             <itemgap>7</itemgap>
@@ -130,7 +130,7 @@
         <!-- Typed query -->
         <control type="label" id="8200">
             <left>133</left>
-            <top>40</top>
+            <top>46</top>
             <width>320</width>
             <height>56</height>
             <font>font_mini_bold</font>
@@ -139,14 +139,14 @@
         <!-- Mic + filter-tune icons (visual parity, non functional) -->
         <control type="image">
             <left>477</left>
-            <top>56</top>
+            <top>58</top>
             <width>32</width>
             <height>32</height>
             <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
         </control>
         <control type="image">
             <left>525</left>
-            <top>56</top>
+            <top>58</top>
             <width>32</width>
             <height>32</height>
             <texture colordiffuse="CCFFFFFF">search-tune.png</texture>
@@ -227,7 +227,7 @@
              label-less button stays the focus target; the glyph is an
              overlay swapped for its dark variant on focus). -->
         <control type="button" id="8115">
-            <left>129</left>
+            <left>133</left>
             <top>560</top>
             <width>136</width>
             <height>64</height>
@@ -245,7 +245,7 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>181</left>
+            <left>185</left>
             <top>576</top>
             <width>32</width>
             <height>32</height>
@@ -253,7 +253,7 @@
             <visible>!Control.HasFocus(8115)</visible>
         </control>
         <control type="image">
-            <left>181</left>
+            <left>185</left>
             <top>576</top>
             <width>32</width>
             <height>32</height>
@@ -295,7 +295,7 @@
             <visible>Control.HasFocus(8116)</visible>
         </control>
         <control type="button" id="8117">
-            <left>425</left>
+            <left>421</left>
             <top>560</top>
             <width>136</width>
             <height>64</height>
@@ -313,7 +313,7 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>477</left>
+            <left>473</left>
             <top>576</top>
             <width>32</width>
             <height>32</height>
@@ -321,7 +321,7 @@
             <visible>!Control.HasFocus(8117)</visible>
         </control>
         <control type="image">
-            <left>477</left>
+            <left>473</left>
             <top>576</top>
             <width>32</width>
             <height>32</height>
@@ -331,9 +331,9 @@
 
         <!-- Recent searches -->
         <control type="list" id="8110">
-            <left>162</left>
+            <left>129</left>
             <top>640</top>
-            <width>473</width>
+            <width>432</width>
             <height>440</height>
             <orientation>vertical</orientation>
             <scrolltime>120</scrolltime>
@@ -343,7 +343,7 @@
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
                         <itemlayout width="473" height="80">
                 <control type="image">
-                    <left>2</left>
+                    <left>24</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -351,7 +351,7 @@
                     <visible>String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="image">
-                    <left>2</left>
+                    <left>24</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -359,9 +359,9 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>42</left>
+                    <left>66</left>
                     <top>0</top>
-                    <width>430</width>
+                    <width>360</width>
                     <height>80</height>
                     <font>font_mini</font>
                     <aligny>center</aligny>
@@ -370,14 +370,14 @@
                 </control></itemlayout>
             <focusedlayout width="473" height="80" condition="Control.HasFocus(8110)">
                 <control type="image">
-                    <left>-6</left>
+                    <left>0</left>
                     <top>6</top>
-                    <width>485</width>
+                    <width>432</width>
                     <height>68</height>
                     <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>2</left>
+                    <left>24</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -385,7 +385,7 @@
                     <visible>String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="image">
-                    <left>2</left>
+                    <left>24</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -393,18 +393,18 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>42</left>
+                    <left>66</left>
                     <top>0</top>
-                    <width>430</width>
+                    <width>360</width>
                     <height>80</height>
-                    <font>font_mini_bold</font>
+                    <font>font_mini</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control></focusedlayout>
             <focusedlayout width="473" height="80" condition="!Control.HasFocus(8110)">
                 <control type="image">
-                    <left>2</left>
+                    <left>24</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -412,7 +412,7 @@
                     <visible>String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="image">
-                    <left>2</left>
+                    <left>24</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -420,9 +420,9 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>42</left>
+                    <left>66</left>
                     <top>0</top>
-                    <width>430</width>
+                    <width>360</width>
                     <height>80</height>
                     <font>font_mini</font>
                     <aligny>center</aligny>
@@ -436,7 +436,7 @@
              empty. -->
         <control type="label">
             <left>686</left>
-            <top>48</top>
+            <top>57</top>
             <width>1234</width>
             <height>34</height>
             <font>font_mini</font>
@@ -502,7 +502,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
                 </control>
             </itemlayout>
@@ -536,7 +536,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
                 </control>
             </focusedlayout>
@@ -570,7 +570,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
                 </control>
             </focusedlayout>
@@ -589,7 +589,7 @@
             <onleft>8100</onleft>
             <onup>8120</onup>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-                        <itemlayout width="584" height="315">
+                        <itemlayout width="584" height="300">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -641,6 +641,18 @@
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>99</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
                     <left>220</left>
@@ -651,6 +663,18 @@
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>137</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
                     <left>220</left>
@@ -659,11 +683,11 @@
                     <height>30</height>
                     <font>font_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
                 </control></itemlayout>
-            <focusedlayout width="584" height="315" condition="Control.HasFocus(8130)">
+            <focusedlayout width="584" height="300" condition="Control.HasFocus(8130)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -715,6 +739,18 @@
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>99</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
                     <left>220</left>
@@ -725,6 +761,18 @@
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>BBFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>137</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
                     <left>220</left>
@@ -733,7 +781,7 @@
                     <height>30</height>
                     <font>font_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
@@ -746,7 +794,7 @@
                     <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control></focusedlayout>
-            <focusedlayout width="584" height="315" condition="!Control.HasFocus(8130)">
+            <focusedlayout width="584" height="300" condition="!Control.HasFocus(8130)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -798,6 +846,18 @@
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>99</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
                     <left>220</left>
@@ -808,6 +868,18 @@
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>137</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
                     <left>220</left>
@@ -816,7 +888,7 @@
                     <height>30</height>
                     <font>font_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
                 </control></focusedlayout>
@@ -829,14 +901,14 @@
         <control type="panel" id="8131">
             <left>686</left>
             <top>192</top>
-            <width>1172</width>
+            <width>1196</width>
             <height>960</height>
             <itemgap>0</itemgap>
             <scrolltime>200</scrolltime>
             <onleft>8100</onleft>
             <onup>8131</onup>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-                        <itemlayout width="293" height="440">
+                        <itemlayout width="299" height="450">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -855,9 +927,9 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>368</top>
+                    <top>380</top>
                     <width>240</width>
-                    <height>30</height>
+                    <height>28</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
@@ -866,16 +938,16 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>400</top>
+                    <top>410</top>
                     <width>240</width>
-                    <height>26</height>
+                    <height>24</height>
                     <font>font_tiny</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control></itemlayout>
-            <focusedlayout width="293" height="440" condition="Control.HasFocus(8131)">
+            <focusedlayout width="299" height="450" condition="Control.HasFocus(8131)">
                 <control type="image">
                     <left>-6</left>
                     <top>-6</top>
@@ -902,9 +974,9 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>368</top>
+                    <top>380</top>
                     <width>240</width>
-                    <height>30</height>
+                    <height>28</height>
                     <font>font_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
@@ -913,16 +985,16 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>400</top>
+                    <top>410</top>
                     <width>240</width>
-                    <height>26</height>
+                    <height>24</height>
                     <font>font_tiny</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control></focusedlayout>
-            <focusedlayout width="293" height="440" condition="!Control.HasFocus(8131)">
+            <focusedlayout width="299" height="450" condition="!Control.HasFocus(8131)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -941,9 +1013,9 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>368</top>
+                    <top>380</top>
                     <width>240</width>
-                    <height>30</height>
+                    <height>28</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
@@ -952,9 +1024,9 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>400</top>
+                    <top>410</top>
                     <width>240</width>
-                    <height>26</height>
+                    <height>24</height>
                     <font>font_tiny</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
