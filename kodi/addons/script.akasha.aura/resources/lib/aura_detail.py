@@ -270,15 +270,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 item.get('fanart_url') or item.get('art_url') or '', useCache=False)
         except RuntimeError:
             pass
-        # Plex tints the page field with the item's UltraBlurColors; reuse
-        # the top-left palette color for the dim layer, neutral fallback.
-        try:
-            dim = self.getControl(7002)
-            tint = str((item.get('blur_colors') or {}).get('topLeft') or '')
-            dim.setColorDiffuse('73' + tint.lstrip('#')[-6:].upper()
-                                if tint else '7310131A')
-        except (RuntimeError, AttributeError):
-            pass
+        # Plex tints the page field with the item's UltraBlurColors: the
+        # flat dim layer and the (now white) bottom gradient both pick up
+        # the topLeft palette color, neutral navy fallback.
+        tint = str((item.get('blur_colors') or {}).get('topLeft') or '')
+        tint = tint.lstrip('#')[-6:].upper() if tint else '10131A'
+        for cid, alpha in ((7002, '73'), (7003, 'FF')):
+            try:
+                self.getControl(cid).setColorDiffuse(alpha + tint)
+            except (RuntimeError, AttributeError):
+                pass
         _set(self, 'AuraDetailLogo', item.get('logo_url') or '')
         if item.get('logo_url'):
             try:
@@ -322,7 +323,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailMetaRating', '1' if rating else '')
         if rating:
             # PIL under-measures Kodi's Inter ~1.0x here (see i18n.ellipsize)
-            box_x = 128 + int(i18n.text_width(meta_text, 22) or 0) + 16
+            box_x = 128 + int(i18n.text_width(meta_text, 22) or 0) + 24
             box_w = max(40, int((i18n.text_width(rating, 19) or 20)
                                 * 0.96) + 20)
             try:

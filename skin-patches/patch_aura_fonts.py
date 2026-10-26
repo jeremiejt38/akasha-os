@@ -31,7 +31,7 @@ FONTS = [
     ('font_aura_small',
     'Inter-Unicode-Regular.ttf',24),
     ('font_aura_plot',
-    'Inter-Unicode-Regular.ttf',26),
+    'Inter-Unicode-Regular.ttf',24),
     ('font_aura_hint',
     'Inter-Unicode-Regular.ttf',14),
     ('font_aura_hint_bold',
