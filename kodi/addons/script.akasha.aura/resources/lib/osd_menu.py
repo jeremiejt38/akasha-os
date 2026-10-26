@@ -201,7 +201,12 @@ def _playback_context():
     token = win.getProperty(PROP_TOKEN)
     playing = ''
     try:
-        playing = xbmc.Player().getPlayingFile() or ''
+        player = xbmc.Player()
+        # getPlayingFile() raises "Kodi is not playing any file" when
+        # idle; even caught, Kodi logs every raise -- isPlaying() keeps
+        # the timeline reporter's 10s ticks out of kodi.log.
+        if player.isPlaying():
+            playing = player.getPlayingFile() or ''
     except RuntimeError:
         pass
     rating_key = part_key = ''
