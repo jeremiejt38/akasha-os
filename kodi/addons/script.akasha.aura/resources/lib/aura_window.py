@@ -2637,6 +2637,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._sync_navigation()
 
     def onFocus(self, controlID):
+        self._last_focus_change = time.monotonic()
         # Focus changes that bypass onAction (programmatic setFocus,
         # Kodi restoring focus when a modal sub-window closes) must still
         # drive the bar retract/return animations.
@@ -2730,7 +2731,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # dead key on the rail). Offers pin/unpin plus move up/down when
         # the library is pinned.
         if aid == ACTION_MOVE_LEFT and focused == DIVERT_SIDEBAR_ID:
-            self._sidebar_item_menu()
+            # A LEFT re-delivered to the sidebar right after a hop into it
+            # (grid Left / chip Left / rail Left) must not pop the kebab.
+            if (time.monotonic() -
+                    getattr(self, '_last_focus_change', 0)) >= 0.05:
+                self._sidebar_item_menu()
+            self._update_bar_focused()
+            return
+        # A-Z rail: Left is self-pinned in the XML (a declared hop would
+        # re-deliver the press into the grid, which would hop again to the
+        # sidebar) -- the interception owns the exit.
+        if aid == ACTION_MOVE_LEFT and focused == DIVERT_AZ_RAIL_ID:
+            self._defer_focus(DIVERT_PANEL_ID)
             self._update_bar_focused()
             return
         # The A-Z rail's static <content> items carry no <onclick>, so Kodi
@@ -2894,6 +2906,36 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # focus the declared subtab and swallow the action so no
         # super()-driven hop to 2007 ever happens. Deeper rows still
         # delegate to super(), which moves Up a row inside the grid.
+        # Chips sit between the tab strip and the grid; Up from the grid's
+        # top row lands on the first chip, Up from any chip lands on the
+        # Bibliotheque tab, Down goes back to the grid, Left on the first
+        # chip exits to the sidebar rail. All four directions are self-pinned
+        # in the XML: a declared hop moves focus mid-action and Kodi then
+        # re-delivers the SAME press to the newly focused control, cascading
+        # grid -> chip -> tab -> bar in a single Up (observed on-device).
+        # The interception owns the hop via _defer_focus, and the
+        # _last_focus_change guard swallows the re-delivered press itself:
+        # it arrives ~0ms after the hop's onFocus, a real keypress never
+        # lands that soon after a focus change.
+        chip_ids = (DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID,
+                    DIVERT_GENRE_BUTTON_ID, DIVERT_RESET_BUTTON_ID)
+        if focused in chip_ids and aid in (ACTION_MOVE_UP,
+                                         ACTION_MOVE_DOWN,
+                                         ACTION_MOVE_LEFT):
+            redelivered = (time.monotonic() -
+                           getattr(self, '_last_focus_change', 0)) < 0.05
+            if redelivered:
+                return
+            if aid == ACTION_MOVE_UP:
+                self._defer_focus(3100)
+            elif aid == ACTION_MOVE_DOWN:
+                self._defer_focus(DIVERT_PANEL_ID)
+            elif focused == DIVERT_FILTER_BUTTON_ID:
+                self._defer_focus(DIVERT_SIDEBAR_ID)
+            else:
+                super().onAction(action)
+            self._update_bar_focused()
+            return
         if aid == ACTION_MOVE_UP and focused == DIVERT_PANEL_ID \
                 and self._divert_view == 'library':
             try:
@@ -2901,7 +2943,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pos = -1
             if 0 <= pos < 6:
-                self.setFocus(self.getControl(3100))
+                target = (DIVERT_FILTER_BUTTON_ID
+                          if self._divert_library_tab ==
+                          DIVERT_SUBTAB_BIBLIOTHEQUES
+                          else DIVERT_SUBTAB_IDS[self._divert_library_tab])
+                self._defer_focus(target)
                 self._update_bar_focused()
                 return
         super().onAction(action)
@@ -2966,8 +3012,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """Move focus from the main tab to the first content element."""
         try:
             target = self._first_content_id()
+            # Immediate setFocus AND a deferred re-apply: a same-tick
+            # setFocus races Kodi's own post-action resolution of the source
+            # control's undeclared direction and loses intermittently
+            # (observed on-device: Down from the bar sometimes landed on the
+            # chips row instead of the grid). When the immediate focus wins
+            # the race the deferred apply is a silent no-op.
             if target is not None:
                 self.setFocus(self.getControl(target))
+                self._defer_focus(target)
         except Exception as e:
             xbmc.log('Akasha Aura: focus first content failed: {}'.format(e), xbmc.LOGERROR)
 
