@@ -2176,7 +2176,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         for cid in (DIVERT_GENRE_BUTTON_ID, 3245, 3246):
             put(cid, x, y, w)
         x += w + 16
-        w = max(44, int(round(11 * len(label_of(3220)))) + 16)
+        w = max(44, int(round(11 * len(label_of(3220)))) + 18)
         put(3225, x, 198, w)
         put(3220, x, 198, w)
         x += w + 16

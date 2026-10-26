@@ -546,7 +546,7 @@
                 <control type="image">
                     <left>127</left>
                     <top>120</top>
-                    <width>711</width>
+                    <width>695</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
                 </control>
@@ -1372,10 +1372,10 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>400</top>
+                        <top>402</top>
                         <width>240</width>
                         <height>32</height>
-                        <font>font_aura_mini_bold</font>
+                        <font>font_aura_mini</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
@@ -1485,8 +1485,9 @@
                         <top>409</top>
                         <width>240</width>
                         <height>32</height>
-                        <font>font_aura_mini_bold</font>
+                        <font>font_aura_mini</font>
                         <align>center</align>
+                        <scroll>false</scroll>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <wrapmultiline>false</wrapmultiline>
