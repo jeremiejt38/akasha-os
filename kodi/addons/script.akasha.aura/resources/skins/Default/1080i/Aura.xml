@@ -601,6 +601,7 @@
                     <ondown>5110</ondown>
                     <textcolor>00FFFFFF</textcolor>
                     <focusedcolor>00FFFFFF</focusedcolor>
+                    <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
 
@@ -619,6 +620,7 @@
                     <ondown>3211</ondown>
                     <textcolor>00FFFFFF</textcolor>
                     <focusedcolor>00FFFFFF</focusedcolor>
+                    <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
 
@@ -638,6 +640,7 @@
                     <ondown>3211</ondown>
                     <textcolor>00FFFFFF</textcolor>
                     <focusedcolor>00FFFFFF</focusedcolor>
+                    <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
 
@@ -656,6 +659,7 @@
                     <ondown>6010</ondown>
                     <textcolor>00FFFFFF</textcolor>
                     <focusedcolor>00FFFFFF</focusedcolor>
+                    <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
 
@@ -1070,16 +1074,16 @@
 
                 <control type="image" id="3225">
                     <left>783</left>
-                    <top>198</top>
+                    <top>190</top>
                     <width>140</width>
-                    <height>32</height>
-                    <texture colordiffuse="B8000000" border="16">cap-r16.png</texture>
+                    <height>48</height>
+                    <texture colordiffuse="B8000000" border="24">cap-r24.png</texture>
                 </control>
                 <control type="label" id="3220">
                     <left>783</left>
-                    <top>198</top>
+                    <top>190</top>
                     <width>140</width>
-                    <height>32</height>
+                    <height>48</height>
                     <font>font_tiny</font>
                     <label>-</label>
                     <align>center</align>
