@@ -1338,7 +1338,7 @@
                         <top>12</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                        <texture colordiffuse="FF242424">poster-corners.png</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="progress">
@@ -1437,7 +1437,7 @@
                         <top>12</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                        <texture colordiffuse="FF242424">poster-corners.png</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
@@ -1473,10 +1473,10 @@
                     <!-- Plex focus: poster already zoomed ~8%, plus a thin
                          white outline sitting just outside the poster. -->
                     <control type="image">
-                        <left>0</left>
-                        <top>-3</top>
-                        <width>264</width>
-                        <height>390</height>
+                        <left>-3</left>
+                        <top>-9</top>
+                        <width>267</width>
+                        <height>396</height>
                         <texture>poster-ring-thin.png</texture>
                         <visible>Control.HasFocus(3230) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
@@ -1589,7 +1589,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1632,7 +1632,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -1883,7 +1883,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -1926,7 +1926,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2182,7 +2182,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2225,7 +2225,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2477,7 +2477,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2520,7 +2520,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2770,7 +2770,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
@@ -2813,7 +2813,7 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF1C1C1C">poster-corners.png</texture>
+                                <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -3253,10 +3253,10 @@
                         <texture colordiffuse="FF1A1A1A" border="36">cap-r36.png</texture>
                     </control>
                     <control type="image">
-                        <left>47</left>
-                        <top>449</top>
-                        <width>35</width>
-                        <height>34</height>
+                        <left>46</left>
+                        <top>447</top>
+                        <width>38</width>
+                        <height>38</height>
                         <texture>avatar-plex.png</texture>
                         <visible>String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
@@ -3264,19 +3264,19 @@
                          user's picture): fetched into AuraAvatar by
                          _load_avatar, circle-clipped by the cast mask. -->
                     <control type="image">
-                        <left>47</left>
-                        <top>449</top>
-                        <width>35</width>
-                        <height>34</height>
+                        <left>46</left>
+                        <top>447</top>
+                        <width>38</width>
+                        <height>38</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
-                        <left>47</left>
-                        <top>449</top>
-                        <width>35</width>
-                        <height>34</height>
+                        <left>46</left>
+                        <top>447</top>
+                        <width>38</width>
+                        <height>38</height>
                         <texture colordiffuse="B8262626">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
