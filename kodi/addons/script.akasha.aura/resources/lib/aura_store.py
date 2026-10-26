@@ -38,6 +38,7 @@ import urllib.request
 import xbmc
 import xbmcaddon
 import xbmcgui
+import aura_menu
 import i18n
 
 import paged_list
@@ -304,7 +305,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         else:
             options = [i18n.tr(33144), i18n.tr(33315)]
 
-        choice = xbmcgui.Dialog().contextmenu(options)
+        choice = aura_menu.contextmenu(self, options)
         if choice < 0:
             return
 

@@ -19,6 +19,7 @@ import time
 
 import xbmc
 import xbmcgui
+import aura_menu
 import i18n
 
 import osd_menu
@@ -1156,8 +1157,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                         if e.get('subtype') == 'trailer']
             ordered = trailers + [e for e in self._extras
                                   if e.get('subtype') != 'trailer']
-            pos = xbmcgui.Dialog().select(
-                self._extras_label(),
+            pos = aura_menu.select(
+                self, self._extras_label(),
                 [e.get('title') or i18n.tr(33109) for e in ordered])
             if pos < 0:
                 return
@@ -1417,8 +1418,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     if v.get('part_key')]
         if len(versions) < 2:
             return
-        pos = xbmcgui.Dialog().select(
-            i18n.tr(33583), [v['label'] for v in versions])
+        pos = aura_menu.select(
+            self, i18n.tr(33583), [v['label'] for v in versions])
         if pos < 0:
             return
         versioned = dict(item)
@@ -1444,7 +1445,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if not self.client or not self.item.get('rating_key'):
             return
         choices = ['{} / 10'.format(i) for i in range(1, 11)]
-        pos = xbmcgui.Dialog().select(i18n.tr(33111), choices)
+        pos = aura_menu.select(self, i18n.tr(33111), choices)
         if pos < 0:
             return
         try:
