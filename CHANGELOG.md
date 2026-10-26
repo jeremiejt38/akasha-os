@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.9](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.8...akasha-os-v0.69.9) (2026-10-26)
+
+
+### Bug Fixes
+
+* **aura-detail:** hydrate cast thumbs from full metadata ([#217](https://github.com/jeremiejt38/akasha-os/issues/217)) ([ff29b7e](https://github.com/jeremiejt38/akasha-os/commit/ff29b7ee217433393e8645f9700a3e4dd7a7cbed))
+
 ## [0.69.8](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.7...akasha-os-v0.69.8) (2026-10-26)
 
 
