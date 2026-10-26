@@ -1120,7 +1120,7 @@
                 <width>1698</width>
                 <height>854</height>
                 <scrolltime tween="quadratic" easing="out">200</scrolltime>
-                <onup>3230</onup>
+                <onup>3211</onup>
                 <onleft>3310</onleft>
                 <onright>3250</onright>
                 <itemlayout width="283" height="460">

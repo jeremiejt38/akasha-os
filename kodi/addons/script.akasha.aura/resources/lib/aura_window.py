@@ -970,6 +970,40 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         nav(DIVERT_STATE_BUTTON_ID, up=strip_up, down=DIVERT_STATE_BUTTON_ID,
             left=DIVERT_SIDEBAR_ID, right=DIVERT_STATE_BUTTON_ID)
 
+        first_sub = self._first_content_id()
+
+        # Library grid: declared nav only applies at a container edge --
+        # interior Up/Down stay inside the panel, which is exactly Plex's
+        # "Up leaves the grid only from the top row" rule. On the
+        # Bibliotheque tab the row above is the filter chips; on
+        # Collections/Categories it is the contextual tab itself. Right
+        # edge reaches the A-Z rail only where it is rendered (tab 1).
+        grid_up = (DIVERT_FILTER_BUTTON_ID
+                   if self._divert_library_tab == DIVERT_SUBTAB_BIBLIOTHEQUES
+                   else strip_up)
+        grid_right = (DIVERT_AZ_RAIL_ID
+                      if self._divert_library_tab == DIVERT_SUBTAB_BIBLIOTHEQUES
+                      else DIVERT_PANEL_ID)
+        nav(DIVERT_PANEL_ID, up=grid_up, down=DIVERT_PANEL_ID,
+            left=DIVERT_SIDEBAR_ID, right=grid_right)
+
+        # Library subtabs: Down lands on the chips when they are rendered
+        # (Bibliotheque), straight on the content otherwise -- the XML's
+        # static 3211 target is invisible on Collections/Categories and
+        # would swallow the press entirely.
+        subtab_down = (DIVERT_FILTER_BUTTON_ID
+                       if self._divert_library_tab == DIVERT_SUBTAB_BIBLIOTHEQUES
+                       else first_sub) \
+            if self._divert_view == 'library' else None
+        if subtab_down is not None:
+            subtab_lr = ((3050, DIVERT_SIDEBAR_ID, 3100),
+                         (3100, 3050, 3075),
+                         (3075, 3100, 3060),
+                         (3060, 3075, 5110))
+            for tid, tleft, tright in subtab_lr:
+                nav(tid, up=TAB_LIST_ID, down=subtab_down,
+                    left=tleft, right=tright)
+
         # Sidebar rail: Right must land on whatever content the active
         # view actually shows -- the XML's static 5110 target is a dead
         # end in library Browse/Collections/Categories (the reco rows are
@@ -995,7 +1029,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # lands on it before the first sync. nav() pins unset directions
         # to the control itself, so the XML-declared left/right targets
         # must be repeated explicitly here.
-        first_sub = self._first_content_id()
         escape = first_sub if first_sub is not None else TAB_LIST_ID
         nav(GEAR_BUTTON_ID, up=GEAR_BUTTON_ID, down=escape,
             left=TAB_LIST_ID, right=MODULE_SEARCH_ID)
@@ -1657,6 +1690,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel.reset()
             for item in self._divert_items:
                 panel.addItem(_build_divert_list_item(item))
+            # Kodi keeps a stale "selected" marker across reset() (observed
+            # on-device: getSelectedPosition() returned a deep index like 96
+            # while the visible cursor sat on the first poster, until the
+            # first real move resynced it). Anchor the marker at the top so
+            # the very first Up can exit to the filter chips.
+            if self._divert_items:
+                panel.selectItem(0)
         except Exception as e:
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
         self._divert_placeholder_count = self._sync_placeholders(
@@ -2053,6 +2093,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel.reset()
             for item in self._divert_items:
                 panel.addItem(_build_divert_list_item(item))
+            # Same stale-marker resync as _fill_divert_panel.
+            if self._divert_items:
+                panel.selectItem(0)
         except Exception as e:
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
         self._divert_placeholder_count = self._sync_placeholders(
@@ -2830,6 +2873,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._update_bar_focused()
                 return
         if aid == ACTION_MOVE_UP and focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS + APP_SUBTAB_IDS + HOME_TAB_IDS):
+            # A native hop INTO the strip (e.g. the grid's edge-exit onup
+            # on the Collections/Categories tab) makes Kodi re-deliver the
+            # same press to the landed control; without the recency guard
+            # a single Up would cascade grid -> tab -> bar.
+            if (time.monotonic() -
+                    getattr(self, '_last_focus_change', 0)) < 0.05:
+                return
             self._focus_tab(self.active_tab)
             self._update_bar_focused()
             return
@@ -2936,20 +2986,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 super().onAction(action)
             self._update_bar_focused()
             return
-        if aid == ACTION_MOVE_UP and focused == DIVERT_PANEL_ID \
-                and self._divert_view == 'library':
-            try:
-                pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
-            except RuntimeError:
-                pos = -1
-            if 0 <= pos < 6:
-                target = (DIVERT_FILTER_BUTTON_ID
-                          if self._divert_library_tab ==
-                          DIVERT_SUBTAB_BIBLIOTHEQUES
-                          else DIVERT_SUBTAB_IDS[self._divert_library_tab])
-                self._defer_focus(target)
-                self._update_bar_focused()
-                return
+        # Grid top-edge exit is fully native: _sync_navigation() points the
+        # panel's declared onup at the chips row (Bibliotheque tab) or the
+        # active subtab, and Kodi only applies it at the top edge while
+        # interior moves stay inside the panel. Kodi's selected-position
+        # marker is stale after refill/refocus (observed 96 with the cursor
+        # on item 1), so no Python-side row check can be trusted here.
         super().onAction(action)
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             focused = self.getFocusId()
