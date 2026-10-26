@@ -97,8 +97,25 @@
             <top>446</top>
             <width>38</width>
             <height>38</height>
-            <aspectratio>keep</aspectratio>
-            <texture colordiffuse="FFE5A00D">circle.png</texture>
+            <texture>avatar-plex.png</texture>
+            <visible>String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>45</left>
+            <top>446</top>
+            <width>38</width>
+            <height>38</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window(10000).Property(AuraAvatar)]</texture>
+            <visible>!String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>45</left>
+            <top>446</top>
+            <width>38</width>
+            <height>38</height>
+            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
         </control>
         <control type="image">
             <left>54</left>
@@ -797,9 +814,34 @@
         </control>
 
         <!-- "Vous l'avez regarde le..." line: Plex's "Activity by you"
-             hint under the action row, from the server watch history. -->
-        <control type="label" id="7207">
+             row shows overlapping circular avatars before the text. -->
+        <control type="image">
             <left>128</left>
+            <top>660</top>
+            <width>46</width>
+            <height>46</height>
+            <texture>avatar-plex.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>128</left>
+            <top>660</top>
+            <width>46</width>
+            <height>46</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window(10000).Property(AuraAvatar)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + !String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>128</left>
+            <top>660</top>
+            <width>46</width>
+            <height>46</height>
+            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
+        </control>
+        <control type="label" id="7207">
+            <left>192</left>
             <top>668</top>
             <width>1200</width>
             <height>30</height>
