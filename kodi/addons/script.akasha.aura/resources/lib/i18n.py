@@ -12,6 +12,12 @@ prefers the Kodi-resolved string and falls back to the French entry so
 the addon stays usable (and unit-testable) without a live Kodi runtime.
 """
 
+import os
+
+try:
+    import xbmc
+except ImportError:
+    xbmc = None
 try:
     import xbmcaddon
 except ImportError:  # unit tests / generation outside Kodi
@@ -463,6 +469,23 @@ MONTH_ABBRS = {
 
 _addon = None
 
+# msgid -> (fr singular, fr plural, en singular, en plural) for 'N noun'
+# labels Plex renders with proper agreement ('3 saisons', not '(s)').
+_PLURALS = {
+    33069: ('{} élément', '{} éléments', '{} item', '{} items'),
+    33128: ('{} saison', '{} saisons', '{} season', '{} seasons'),
+    33129: ('{} épisode', '{} épisodes', '{} episode', '{} episodes'),
+}
+
+
+def tr_count(count, msgid):
+    """Localized 'count noun' with proper singular/plural agreement.
+    French pluralizes only above 1; English pluralizes everything != 1."""
+    fr_one, fr_many, en_one, en_many = _PLURALS[msgid]
+    if _lang() == 'en':
+        return (en_one if count == 1 else en_many).format(count)
+    return (fr_one if count <= 1 else fr_many).format(count)
+
 
 def tr(msgid):
     """Localized string for `msgid`; French fallback outside Kodi/tests."""
@@ -484,6 +507,63 @@ def _lang():
     if xbmcaddon is None:
         return 'fr'
     return 'en' if tr(33001) == STRINGS[33001][1] else 'fr'
+
+
+_MEASURE_FONTS = {}
+
+
+def _measure_font(size):
+    """PIL font matching the skin's Inter faces for text-width checks."""
+    if size in _MEASURE_FONTS:
+        return _MEASURE_FONTS[size]
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        return None
+    candidates = []
+    try:
+        if xbmc is not None:
+            candidates.append(os.path.join(
+                xbmc.translatePath('special://skin/fonts'),
+                'Inter-Unicode-Regular.ttf'))
+    except Exception:
+        pass
+    try:
+        if xbmcaddon is not None:
+            candidates.append(os.path.join(
+                xbmcaddon.Addon('skin.arctic.horizon.2').getAddonInfo('path'),
+                'fonts', 'Inter-Unicode-Regular.ttf'))
+    except Exception:
+        pass
+    for path in candidates:
+        if os.path.exists(path):
+            _MEASURE_FONTS[size] = ImageFont.truetype(path, size)
+            return _MEASURE_FONTS[size]
+    return None
+
+
+def ellipsize(text, size, budget_px=190):
+    """Trim `text` to fit a card caption with a true '…' ellipsis, like
+    Plex -- Kodi's own truncation appends '...' plus a stray space.
+    Kodi renders Inter ~1.2x wider than PIL, so the PIL budget is 190px
+    for a 240px label. Returns the input untouched when measuring fails.
+    """
+    if not text:
+        return text
+    try:
+        font = _measure_font(size)
+        if font is None or font.getbbox(text)[2] <= budget_px:
+            return text
+        lo, hi = 0, len(text)
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if font.getbbox(text[:mid] + '…')[2] <= budget_px:
+                lo = mid
+            else:
+                hi = mid - 1
+        return text[:lo].rstrip() + '…'
+    except Exception:
+        return text
 
 
 def fmt_air_date(iso_date):

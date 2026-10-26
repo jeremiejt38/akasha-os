@@ -12,7 +12,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF16171A">white.png</texture>
+            <texture colordiffuse="FF1A1A1A">white.png</texture>
         </control>
 
         <!-- Collapsed icon rail: Plex keeps it on the search page too
@@ -20,111 +20,195 @@
              the keyboard lands on it like the Plex sidebar; picking
              Home/More leaves the dialog to the main window's rail. -->
         <control type="image">
-            <left>14</left>
-            <top>426</top>
-            <width>64</width>
-            <height>228</height>
-            <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+            <left>28</left>
+            <top>432</top>
+            <width>72</width>
+            <height>216</height>
+            <texture colordiffuse="FF1A1A1A" border="36">cap-r36.png</texture>
         </control>
         <control type="list" id="8140">
-            <left>14</left>
-            <top>426</top>
-            <width>64</width>
-            <height>228</height>
-            <itemgap>7</itemgap>
+            <left>28</left>
+            <top>432</top>
+            <width>72</width>
+            <height>216</height>
+            <itemgap>0</itemgap>
             <scrolltime>0</scrolltime>
             <onleft>8140</onleft>
             <onright>8100</onright>
             <onup>8140</onup>
             <ondown>8140</ondown>
-                        <itemlayout width="64" height="52">
+            <itemlayout width="72" height="54">
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
-                    <visible>String.IsEmpty(ListItem.Property(avatar))</visible>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(icon)]</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(avatar))</visible>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
-                    <texture colordiffuse="B810131A">cast-mask.png</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(avatar))</visible>
-                </control></itemlayout>
-            <focusedlayout width="64" height="52" condition="Control.HasFocus(8140)">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>22</top>
+                    <width>32</width>
+                    <height>32</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>22</top>
+                    <width>22</width>
+                    <height>20</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
+                </control>
+                <control type="image">
+                    <left>27</left>
+                    <top>20</top>
+                    <width>18</width>
+                    <height>14</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
+                </control>
+            </itemlayout>
+            <focusedlayout width="72" height="54" condition="Control.HasFocus(8140)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>64</width>
-                    <height>52</height>
-                    <texture colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texture>
+                    <width>72</width>
+                    <height>54</height>
+                    <texture colordiffuse="FFFFFFFF" border="27">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
-                    <visible>String.IsEmpty(ListItem.Property(avatar))</visible>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(icon)]</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(avatar))</visible>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <texture colordiffuse="FFFFFFFF">cast-mask.png</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(avatar))</visible>
-                </control></focusedlayout>
-            <focusedlayout width="64" height="52" condition="!Control.HasFocus(8140)">
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>20</left>
+                    <top>22</top>
+                    <width>32</width>
+                    <height>32</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>22</top>
+                    <width>22</width>
+                    <height>20</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
+                </control>
+                <control type="image">
+                    <left>27</left>
+                    <top>20</top>
+                    <width>18</width>
+                    <height>14</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
+                </control>
+            </focusedlayout>
+            <focusedlayout width="72" height="54" condition="!Control.HasFocus(8140)">
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
-                    <visible>String.IsEmpty(ListItem.Property(avatar))</visible>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(icon)]</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(avatar))</visible>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>9</left>
-                    <top>3</top>
-                    <width>46</width>
-                    <height>46</height>
-                    <texture colordiffuse="B810131A">cast-mask.png</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(avatar))</visible>
-                </control></focusedlayout>
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>22</top>
+                    <width>32</width>
+                    <height>32</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>22</top>
+                    <width>22</width>
+                    <height>20</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
+                </control>
+                <control type="image">
+                    <left>27</left>
+                    <top>20</top>
+                    <width>18</width>
+                    <height>14</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
+                </control>
+            </focusedlayout>
         </control>
 
         <!-- Typed query -->
@@ -138,18 +222,41 @@
         </control>
         <!-- Mic + filter-tune icons (visual parity, non functional) -->
         <control type="image">
-            <left>477</left>
-            <top>58</top>
-            <width>32</width>
-            <height>32</height>
+            <left>453</left>
+            <top>66</top>
+            <width>18</width>
+            <height>27</height>
+            <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
         </control>
         <control type="image">
-            <left>525</left>
-            <top>58</top>
-            <width>32</width>
-            <height>32</height>
+            <left>512</left>
+            <top>66</top>
+            <width>28</width>
+            <height>27</height>
+            <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-tune.png</texture>
+        </control>
+
+        <!-- Clock: Plex keeps the top-right clock pill on the search
+             page too (same geometry as the main window's recessed one). -->
+        <control type="image">
+            <left>1708</left>
+            <top>36</top>
+            <width>126</width>
+            <height>48</height>
+            <texture colordiffuse="33000000" border="22">cap-r22.png</texture>
+        </control>
+        <control type="label">
+            <left>1708</left>
+            <top>36</top>
+            <width>126</width>
+            <height>48</height>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font_aura_mini</font>
+            <label>$INFO[System.Time(hh:mm)]</label>
+            <textcolor>CCFFFFFF</textcolor>
         </control>
 
         <!-- Letter grid: a-z then 1-0, 6 columns -->
@@ -436,13 +543,13 @@
              empty. -->
         <control type="label">
             <left>686</left>
-            <top>57</top>
+            <top>49</top>
             <width>1234</width>
             <height>34</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_head_bold</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33586]</label>
-            <textcolor>99FFFFFF</textcolor>
+            <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
         </control>
 
@@ -923,7 +1030,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -970,7 +1077,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1009,7 +1116,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>

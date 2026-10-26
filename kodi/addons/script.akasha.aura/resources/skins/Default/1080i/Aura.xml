@@ -123,7 +123,7 @@
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture border="14">chip-outline.png</texture>
+                        <texture colordiffuse="99FFFFFF" border="8">chip-rect.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
@@ -305,8 +305,8 @@
                  activating native Settings directly. -->
             <control type="label" id="2005">
                 <left>1420</left>
-                <top>36</top>
-                <width>378</width>
+                <top>43</top>
+                <width>360</width>
                 <height>34</height>
                 <align>right</align>
                 <font>font_aura_mini</font>
@@ -367,14 +367,14 @@
             <visible>String.IsEqual(Window.Property(AuraBarFocused),false)</visible>
             <control type="image">
                 <left>1708</left>
-                <top>39</top>
+                <top>36</top>
                 <width>126</width>
                 <height>48</height>
                 <texture colordiffuse="33000000" border="22">cap-r22.png</texture>
             </control>
             <control type="label">
                 <left>1708</left>
-                <top>39</top>
+                <top>36</top>
                 <width>126</width>
                 <height>48</height>
                 <align>center</align>
@@ -1072,13 +1072,8 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
 
-                <control type="image" id="3225">
-                    <left>783</left>
-                    <top>198</top>
-                    <width>140</width>
-                    <height>32</height>
-                    <texture colordiffuse="B8000000" border="8">cap-r8.png</texture>
-                </control>
+                <!-- Item counter: Plex shows it as bare text in the pills
+                     row, no capsule behind it. -->
                 <control type="label" id="3220">
                     <left>783</left>
                     <top>198</top>

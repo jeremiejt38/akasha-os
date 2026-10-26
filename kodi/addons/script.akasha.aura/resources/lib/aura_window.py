@@ -1750,7 +1750,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         try:
             self.getControl(DIVERT_STATUS_ID).setLabel(
                 '{} — {}'.format(item['title'],
-                            i18n.tr(33069).format(len(self._divert_items))))
+                            i18n.tr_count(len(self._divert_items), 33069)))
             self.getControl(DIVERT_PANEL_ID).selectItem(0)
         except RuntimeError:
             pass
@@ -1779,7 +1779,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         try:
             self.getControl(DIVERT_STATUS_ID).setLabel(
                 '{} — {}'.format(item['title'],
-                            i18n.tr(33069).format(len(self._divert_items))))
+                            i18n.tr_count(len(self._divert_items), 33069)))
             self.getControl(DIVERT_PANEL_ID).selectItem(0)
         except RuntimeError:
             pass
@@ -1813,7 +1813,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         try:
             self.getControl(DIVERT_STATUS_ID).setLabel(
                 '{} — {}'.format(item['title'],
-                            i18n.tr(33069).format(len(self._divert_items))))
+                            i18n.tr_count(len(self._divert_items), 33069)))
             self.getControl(DIVERT_PANEL_ID).selectItem(0)
         except RuntimeError:
             pass
@@ -2179,7 +2179,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             put(cid, x, y, w)
         x += w + 16
         w = max(44, int(round(9.7 * len(label_of(3220)))) + 16)
-        put(3225, x, 198, w)
         put(3220, x, 198, w)
         x += w + 16
         put(3218, x, y)
@@ -2194,7 +2193,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 count = self._divert_paged.total if self._divert_paged.total is not None \
                     else len(self._divert_items)
-                label = i18n.tr(33069).format(count)
+                label = i18n.tr_count(count, 33069)
                 if self._divert_search_query:
                     label += ' ' + i18n.tr(33070).format(self._divert_search_query)
                 if self._divert_filter_genre:
@@ -4076,7 +4075,8 @@ def _build_divert_list_item(item):
     # Plex home rows carry no per-card text: the hero (driven by the focused
     # item, see Aura.xml "Plex hero" group) shows title/meta/plot. Labels are
     # still filled so grid-type views keep their two-line caption.
-    li = xbmcgui.ListItem(item['title'], divert_source.item_subtitle(item))
+    li = xbmcgui.ListItem(i18n.ellipsize(item['title'], 22),
+                          i18n.ellipsize(divert_source.item_subtitle(item), 19))
     art = {}
     if item.get('poster_url') or item.get('thumb_url'):
         art['poster'] = item.get('poster_url') or item.get('thumb_url')

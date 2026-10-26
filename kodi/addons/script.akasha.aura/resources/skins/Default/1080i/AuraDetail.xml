@@ -316,28 +316,10 @@
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onright>7106</onright>
         <ondown>7110</ondown>
-    </control>
-    <control type="image" id="7089">
-        <left>125</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
-        <aspectratio>keep</aspectratio>
-        <texture>icon-play.png</texture>
-        <visible>!Control.HasFocus(7100) + !String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
-    </control>
-    <control type="image" id="7087">
-        <left>125</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
-        <aspectratio>keep</aspectratio>
-        <texture>icon-resume.png</texture>
-        <visible>!Control.HasFocus(7100) + String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
     </control>
     <control type="image" id="7090">
         <left>125</left>
@@ -346,7 +328,7 @@
         <height>24</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-play-dark.png</texture>
-        <visible>Control.HasFocus(7100) + !String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+        <visible>!String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
     </control>
     <control type="image" id="7088">
         <left>125</left>
@@ -355,7 +337,7 @@
         <height>24</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-resume-dark.png</texture>
-        <visible>Control.HasFocus(7100) + String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+        <visible>String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
     </control>
     <control type="button" id="7106">
         <left>375</left>
@@ -598,7 +580,6 @@
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
         <label></label>
-        <visible>Control.HasFocus(7100)</visible>
     </control>
     <control type="label" id="7151">
         <left>0</left>

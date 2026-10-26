@@ -13,6 +13,7 @@ Caller sets before doModal():
 - `on_genre`     — callback(genre dict) for genre results
 """
 import datetime
+import threading
 
 import xbmc
 import xbmcgui
@@ -61,8 +62,14 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self._genres = None
         self._suggested = None
         self._server_name = None
+        self._yield_stop = threading.Event()
 
     def onInit(self):
+        # Same yield-to-playback rule as the main window's
+        # _watch_external_playback watchdog: a modal dialog would
+        # otherwise keep rendering over the fullscreen video when
+        # playback starts from the detail window stacked on top.
+        threading.Thread(target=self._watch_playback, daemon=True).start()
         try:
             self._load_recent()
             self._render_rail()
@@ -73,6 +80,20 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(self.getControl(KEYS_PANEL_ID))
         except Exception as e:
             xbmc.log('Akasha Aura Search: init error: {}'.format(e), xbmc.LOGERROR)
+
+    def close(self):
+        self._yield_stop.set()
+        super().close()
+
+    def _watch_playback(self):
+        while not self._yield_stop.is_set():
+            try:
+                if xbmc.Player().isPlayingVideo():
+                    self.close()
+                    return
+            except Exception:
+                return
+            self._yield_stop.wait(1.0)
 
     # ----------------------------------------------------------- rendering
 
@@ -88,9 +109,11 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                      'icon-home.png', 'icon-more.png']
             if avatar:
                 icons[0] = avatar
+            kinds = ('avatar', 'search', 'home', 'menu')
             for i, icon in enumerate(icons):
                 li = xbmcgui.ListItem('')
                 li.setArt({'icon': icon})
+                li.setProperty('iconkind', kinds[i])
                 if i == 0 and avatar:
                     li.setProperty('avatar', '1')
                 rail.addItem(li)
@@ -176,9 +199,9 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                     li.setProperty('person', '1')
                 else:
                     li = xbmcgui.ListItem(
-                        item.get('title') or '',
-                        _result_sub(item) if self.query
-                        else _suggest_sub(item))
+                        i18n.ellipsize(item.get('title') or '', 22),
+                        i18n.ellipsize(_result_sub(item) if self.query
+                                       else _suggest_sub(item), 19))
                     thumb = item.get('poster_url') or item.get('landscape_url') \
                         or item.get('thumb_url') or 'DefaultVideo.png'
                     li.setArt({'poster': thumb})
@@ -504,7 +527,7 @@ def _suggest_sub(item):
     saison(s)' for a show, the full release date when it is still in
     the future, otherwise the bare year -- never 'year • type'."""
     if item.get('type') == 'show' and item.get('child_count'):
-        return '{} {}'.format(item['child_count'], i18n.tr(33128))
+        return i18n.tr_count(item['child_count'], 33128)
     avail = str(item.get('originally_available_at') or '')[:10]
     if avail > datetime.date.today().isoformat():
         return i18n.fmt_air_date(avail)

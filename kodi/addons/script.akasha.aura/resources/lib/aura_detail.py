@@ -106,7 +106,7 @@ ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
                   MORE_BUTTON_ID)
 # light/dark icon overlay pairs that ride on top of each action button
 ACTION_ICON_OVERLAYS = {
-    WATCH_BUTTON_ID: (7087, 7088, 7089, 7090),
+    WATCH_BUTTON_ID: (7088, 7090),
     RESTART_BUTTON_ID: (7107, 7108),
     EXTRAS_BUTTON_ID: (7111, 7112),
     WATCHLIST_BUTTON_ID: (7092, 7093),
@@ -718,7 +718,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 pass
 
     def _action_width(self, control_id, focused_id):
-        if control_id != focused_id:
+        # Plex keeps the primary 'Watch'/'Resume' CTA expanded at all
+        # times; only secondary actions collapse into circles.
+        if control_id != focused_id and control_id != WATCH_BUTTON_ID:
             return ACTION_CIRCLE_W
         label = self._action_label(control_id)
         # Rough text measure for RobotoCondensed-Bold 28 (font_mini_bold):

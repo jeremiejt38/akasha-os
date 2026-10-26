@@ -37,65 +37,149 @@
             <label>$INFO[VideoPlayer.Title]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
-        <control type="label">
+        <control type="grouplist">
             <left>105</left>
             <top>96</top>
-            <width>1400</width>
+            <width>1600</width>
             <height>34</height>
-            <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585] • $INFO[VideoPlayer.VideoResolution]</label>
-            <textcolor>DDFFFFFF</textcolor>
+            <orientation>horizontal</orientation>
+            <itemgap>10</itemgap>
+            <aligny>center</aligny>
             <visible>VideoPlayer.Content(episodes) + !Integer.IsGreater(Player.Duration(h),0)</visible>
+            <control type="label">
+                <width>auto</width>
+                <height>34</height>
+                <font>font_mini</font>
+                <aligny>center</aligny>
+                <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
+                <textcolor>DDFFFFFF</textcolor>
+            </control>
+            <control type="image">
+                <width>40</width>
+                <height>24</height>
+                <aspectratio>keep</aspectratio>
+                <texture>$INFO[VideoPlayer.VideoResolution,osd-tag-,.png]</texture>
+            </control>
         </control>
-        <control type="label">
+        <control type="grouplist">
             <left>105</left>
             <top>96</top>
-            <width>1400</width>
+            <width>1600</width>
             <height>34</height>
-            <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min • $INFO[VideoPlayer.VideoResolution]</label>
-            <textcolor>DDFFFFFF</textcolor>
+            <orientation>horizontal</orientation>
+            <itemgap>10</itemgap>
+            <aligny>center</aligny>
             <visible>VideoPlayer.Content(episodes) + Integer.IsGreater(Player.Duration(h),0)</visible>
+            <control type="label">
+                <width>auto</width>
+                <height>34</height>
+                <font>font_mini</font>
+                <aligny>center</aligny>
+                <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
+                <textcolor>DDFFFFFF</textcolor>
+            </control>
+            <control type="image">
+                <width>40</width>
+                <height>24</height>
+                <aspectratio>keep</aspectratio>
+                <texture>$INFO[VideoPlayer.VideoResolution,osd-tag-,.png]</texture>
+            </control>
         </control>
-        <control type="label">
+        <control type="grouplist">
             <left>105</left>
             <top>96</top>
-            <width>1400</width>
+            <width>1600</width>
             <height>34</height>
-            <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585] • $INFO[VideoPlayer.VideoResolution]</label>
-            <textcolor>DDFFFFFF</textcolor>
+            <orientation>horizontal</orientation>
+            <itemgap>10</itemgap>
+            <aligny>center</aligny>
             <visible>VideoPlayer.Content(movies) + !Integer.IsGreater(Player.Duration(h),0)</visible>
+            <control type="label">
+                <width>auto</width>
+                <height>34</height>
+                <font>font_mini</font>
+                <aligny>center</aligny>
+                <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
+                <textcolor>DDFFFFFF</textcolor>
+            </control>
+            <control type="image">
+                <width>40</width>
+                <height>24</height>
+                <aspectratio>keep</aspectratio>
+                <texture>$INFO[VideoPlayer.VideoResolution,osd-tag-,.png]</texture>
+            </control>
         </control>
-        <control type="label">
+        <control type="grouplist">
             <left>105</left>
             <top>96</top>
-            <width>1400</width>
+            <width>1600</width>
             <height>34</height>
-            <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min • $INFO[VideoPlayer.VideoResolution]</label>
-            <textcolor>DDFFFFFF</textcolor>
+            <orientation>horizontal</orientation>
+            <itemgap>10</itemgap>
+            <aligny>center</aligny>
             <visible>VideoPlayer.Content(movies) + Integer.IsGreater(Player.Duration(h),0)</visible>
+            <control type="label">
+                <width>auto</width>
+                <height>34</height>
+                <font>font_mini</font>
+                <aligny>center</aligny>
+                <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
+                <textcolor>DDFFFFFF</textcolor>
+            </control>
+            <control type="image">
+                <width>40</width>
+                <height>24</height>
+                <aspectratio>keep</aspectratio>
+                <texture>$INFO[VideoPlayer.VideoResolution,osd-tag-,.png]</texture>
+            </control>
         </control>
-        <control type="label">
+        <control type="grouplist">
             <left>105</left>
             <top>96</top>
-            <width>1400</width>
+            <width>1600</width>
             <height>34</height>
-            <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585] • $INFO[VideoPlayer.VideoResolution]</label>
-            <textcolor>DDFFFFFF</textcolor>
+            <orientation>horizontal</orientation>
+            <itemgap>10</itemgap>
+            <aligny>center</aligny>
             <visible>!VideoPlayer.Content(episodes) + !VideoPlayer.Content(movies) + !Integer.IsGreater(Player.Duration(h),0)</visible>
+            <control type="label">
+                <width>auto</width>
+                <height>34</height>
+                <font>font_mini</font>
+                <aligny>center</aligny>
+                <label>$INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
+                <textcolor>DDFFFFFF</textcolor>
+            </control>
+            <control type="image">
+                <width>40</width>
+                <height>24</height>
+                <aspectratio>keep</aspectratio>
+                <texture>$INFO[VideoPlayer.VideoResolution,osd-tag-,.png]</texture>
+            </control>
         </control>
-        <control type="label">
+        <control type="grouplist">
             <left>105</left>
             <top>96</top>
-            <width>1400</width>
+            <width>1600</width>
             <height>34</height>
-            <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min • $INFO[VideoPlayer.VideoResolution]</label>
-            <textcolor>DDFFFFFF</textcolor>
+            <orientation>horizontal</orientation>
+            <itemgap>10</itemgap>
+            <aligny>center</aligny>
             <visible>!VideoPlayer.Content(episodes) + !VideoPlayer.Content(movies) + Integer.IsGreater(Player.Duration(h),0)</visible>
+            <control type="label">
+                <width>auto</width>
+                <height>34</height>
+                <font>font_mini</font>
+                <aligny>center</aligny>
+                <label>$INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
+                <textcolor>DDFFFFFF</textcolor>
+            </control>
+            <control type="image">
+                <width>40</width>
+                <height>24</height>
+                <aspectratio>keep</aspectratio>
+                <texture>$INFO[VideoPlayer.VideoResolution,osd-tag-,.png]</texture>
+            </control>
         </control>
 
         <!-- Clock, top-right -->
