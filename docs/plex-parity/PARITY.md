@@ -101,7 +101,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - **Onboarding Plex** (`onboarding/*`) : parcours de première ouverture de l'app Plex elle-même — hors périmètre Aura.
 - **Contenus « Sur Plex »** (TV en direct, Découvrir) : sources cloud Plex, notification explicite en attendant un proxy éventuel.
 - **Écran « Plus »** : Plex liste des sources supplémentaires (souvent vide) ; Aura ouvre « Gérer les bibliothèques » (épinglage) — équivalent fonctionnel.
-- **Portraits d'acteurs** : le serveur renvoie souvent `thumb=NONE` → fallback `actor-fallback.png`.
+- ~~**Portraits d'acteurs** : le serveur renvoie souvent `thumb=NONE` → fallback `actor-fallback.png`~~ → corrigé (v0.69.9) : les hubs ne portent pas les `thumb` des `Role`, la fiche réhydrate `metadata_item` en tâche de fond et la rangée cast affiche les vraies photos (vérifié sur films et épisodes) ; le fallback ne sert que pour les rôles réellement sans photo.
 - **Backdrop** : couleur de fondu légèrement différente (scrim proche mais pas pixel-perfect).
 - **Typographie** : Aura utilise `RobotoCondensed` (skin) vs le sans-serif standard de Plex — écart mineur, un changement de police casserait les métriques de toute la skin.
 - **Format des timecodes OSD** : ~~`hh:mm:ss`~~ → **vérifié à l'écran** : écoulé/restant en `m:ss` non paddé sous 1 h (`0:19` / `-38:58`), `h:mm:ss` au-delà (variantes conditionnelles sur `Player.Duration(h)`) ; méta durée en texte localisé « 39 minutes » / « N h MM min » (33585). Reste : Plex affiche la qualité en chip `HD` encadrée, Aura en texte `1080` (pas de positionnement de texture en flux Kodi).
