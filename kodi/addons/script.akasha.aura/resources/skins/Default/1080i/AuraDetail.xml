@@ -199,7 +199,7 @@
             <top>344</top>
             <width>90</width>
             <height>40</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -227,7 +227,7 @@
             <top>344</top>
             <width>120</width>
             <height>40</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -255,7 +255,7 @@
             <top>344</top>
             <width>130</width>
             <height>40</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -283,7 +283,7 @@
             <top>344</top>
             <width>130</width>
             <height>40</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -311,7 +311,7 @@
             <top>344</top>
             <width>130</width>
             <height>40</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -323,7 +323,7 @@
             <left>128</left>
             <top>400</top>
             <width>800</width>
-            <height>112</height>
+            <height>90</height>
             <font>font_aura_plot</font>
             <textcolor>DDFFFFFF</textcolor>
         </control>
@@ -780,7 +780,7 @@
             <top>32</top>
             <width>216</width>
             <height>64</height>
-            <texture colordiffuse="B30D1017" border="32">rounded-solid.png</texture>
+            <texture colordiffuse="CC0D1017" border="32">rounded-solid.png</texture>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
         </control>
         <control type="list" id="7120">
@@ -893,7 +893,7 @@
             <top>666</top>
             <width>1200</width>
             <height>30</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_meta</font>
             <label>$INFO[Window.Property(AuraDetailActivity)]</label>
             <textcolor>D9FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>

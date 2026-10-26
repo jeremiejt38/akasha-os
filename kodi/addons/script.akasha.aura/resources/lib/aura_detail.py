@@ -134,7 +134,7 @@ ACTION_LABEL_OVERLAYS = {
 ACTION_ROW_LEFT = 128
 ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
-ACTION_LABEL_X = 66      # label zone offset inside the expanded pill
+ACTION_LABEL_X = 62      # label zone offset inside the expanded pill
 ACTION_LABEL_PAD = 22    # right padding inside the pill
 
 
@@ -534,7 +534,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         t = self._flow_top
         for cid in (7180, 7181, 7182):
             try:
-                self.getControl(cid).setPosition(128, t + 94)
+                self.getControl(cid).setPosition(132, t + 92)
             except RuntimeError:
                 pass
         try:
@@ -580,7 +580,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraDetailChipIcon{}'.format(slot), '')
             _set(self, 'AuraDetailChipBg{}'.format(slot), '')
         for slot, (text, icon, icon_w, pill) in enumerate(chips[:5]):
-            text_w = int((i18n.text_width(text, 22) or len(text) * 11)
+            text_w = int((i18n.text_width(text, 19) or len(text) * 10)
                          * 0.96)
             width = (text_w + (icon_w + 8 if icon else 0)
                      + (14 if pill else 0))
@@ -603,7 +603,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                         ic.setWidth(icon_w)
                         ic.setHeight(24)
                     _set(self, 'AuraDetailChipIcon{}'.format(slot), icon)
-                    lbl_x = chip_x + icon_w + (8 if pill else 6)
+                    lbl_x = chip_x + icon_w + (4 if pill else 6)
                     lbl_w = width - (lbl_x - chip_x)
                 else:
                     lbl_x, lbl_w = chip_x, width
@@ -612,14 +612,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.getControl(CHIP_LABEL_IDS[slot]).setLabel(text)
             except RuntimeError:
                 pass
-            chip_x += width + 24
+            chip_x += width + 20
 
     @staticmethod
     def _rating_chip(value, rating_image, audience=False):
         icon = _provider_icon(rating_image, audience)
         # IMDb/TMDB are pill badges (64x32 texture at 48x24); the tomato
         # splat and popcorn stay bare glyphs.
-        icon_w = {'prov-imdb.png': 34, 'prov-tmdb.png': 38}.get(icon, 24)
+        icon_w = {'prov-imdb.png': 34, 'prov-tmdb.png': 42}.get(icon, 24)
         text = _fmt_rating(value, rating_image)
         if not icon:
             text = '{} {}'.format(_provider_label(rating_image),
