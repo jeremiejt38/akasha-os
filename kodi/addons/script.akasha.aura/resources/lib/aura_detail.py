@@ -420,7 +420,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if not text:
                 continue
             ic_w = 36 if ic_id else 0
-            w = 34 + len(text) * 11 + ic_w
+            w = 34 + len(text) * 14 + ic_w
             badge_x -= w
             try:
                 self.getControl(bg_id).setPosition(badge_x, 584)
