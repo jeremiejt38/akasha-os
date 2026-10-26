@@ -21,12 +21,12 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="B8000000">white.png</texture>
+            <texture colordiffuse="CC000000">white.png</texture>
         </control>
 
         <control type="group">
             <left>844</left>
-            <top>640</top>
+            <top>648</top>
             <animation effect="slide" start="0,60" end="0,0" time="220" tween="quadratic" easing="out" condition="true">WindowOpen</animation>
             <animation effect="fade" start="0" end="100" time="200" condition="true">WindowOpen</animation>
             <animation effect="fade" start="100" end="0" time="140" easing="in">WindowClose</animation>
@@ -34,21 +34,21 @@
             <control type="image">
                 <left>0</left>
                 <top>0</top>
-                <width>980</width>
-                <height>344</height>
+                <width>1020</width>
+                <height>336</height>
                 <texture colordiffuse="F214161F" border="28">rounded-solid.png</texture>
             </control>
             <control type="image" id="6406">
                 <left>24</left>
                 <top>24</top>
-                <width>448</width>
-                <height>252</height>
+                <width>512</width>
+                <height>288</height>
                 <aspectratio>keep</aspectratio>
             </control>
             <control type="label" id="6400">
-                <left>496</left>
-                <top>28</top>
-                <width>460</width>
+                <left>560</left>
+                <top>24</top>
+                <width>436</width>
                 <height>32</height>
                 <font>font_tiny</font>
                 <aligny>center</aligny>
@@ -56,28 +56,28 @@
                 <label>-</label>
             </control>
             <control type="label" id="6402">
-                <left>496</left>
-                <top>66</top>
-                <width>460</width>
-                <height>36</height>
+                <left>560</left>
+                <top>62</top>
+                <width>436</width>
+                <height>34</height>
                 <font>font_tiny</font>
                 <aligny>center</aligny>
                 <textcolor>CCFFFFFF</textcolor>
                 <label>-</label>
             </control>
             <control type="label" id="6401">
-                <left>496</left>
-                <top>102</top>
-                <width>460</width>
-                <height>96</height>
+                <left>560</left>
+                <top>100</top>
+                <width>436</width>
+                <height>84</height>
                 <font>font_midi</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <label>-</label>
             </control>
             <control type="label" id="6403">
-                <left>496</left>
-                <top>204</top>
-                <width>460</width>
+                <left>560</left>
+                <top>192</top>
+                <width>436</width>
                 <height>36</height>
                 <font>font_tiny</font>
                 <aligny>center</aligny>
@@ -85,9 +85,9 @@
                 <label>-</label>
             </control>
             <control type="button" id="6404">
-                <left>496</left>
+                <left>560</left>
                 <top>256</top>
-                <width>252</width>
+                <width>264</width>
                 <height>56</height>
                 <font>font_mini_bold</font>
                 <align>center</align>
@@ -102,9 +102,9 @@
                 <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
             </control>
             <control type="button" id="6405">
-                <left>760</left>
+                <left>836</left>
                 <top>256</top>
-                <width>196</width>
+                <width>160</width>
                 <height>56</height>
                 <font>font_mini_bold</font>
                 <align>center</align>

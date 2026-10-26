@@ -14,6 +14,7 @@ import xbmcaddon
 import xbmcgui
 import os
 import json
+import re
 import subprocess
 import time
 
@@ -25,6 +26,27 @@ UPDATER = "/storage/.kodi/scripts/update-akasha-os.py"
 
 addon = xbmcaddon.Addon()
 monitor = xbmc.Monitor()
+
+
+def format_changelog(text):
+    """Release-notes markdown -> plain text for Kodi dialogs.
+
+    The changelog stored in update-status.json is the raw GitHub release
+    body (markdown: '### Features', '* feat: ...', '[0.69.10](url)',
+    '**Full Changelog**: ...'). Kodi's ok/textviewer dialogs render none
+    of it, so viewers got literal '##' and URLs. """
+    out = []
+    for raw in (text or '').splitlines():
+        line = raw.rstrip()
+        line = re.sub(r'^#{1,6}\s*', '', line)                 # headings
+        line = re.sub(r'^(\s*)[-*+]\s+', r'\1• ', line)        # bullets
+        line = re.sub(r'\*\*([^*]+)\*\*', r'\1', line)         # bold
+        line = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', line)   # [t](url)
+        line = re.sub(r'\s*by @\S+ in https?://\S+\s*$', '', line)
+        if re.match(r'(?i)^full changelog', line):
+            continue  # bare release-compare link, noise on the TV
+        out.append(line)
+    return re.sub(r'\n{3,}', '\n\n', '\n'.join(out)).strip()
 
 
 def _wait_for_network(timeout=90):
@@ -194,7 +216,7 @@ def check_for_updates_at_boot():
             if changelog:
                 dialog.textviewer(
                     'Akasha OS - Changelog v{}'.format(new_version),
-                    changelog
+                    format_changelog(changelog)
                 )
             else:
                 dialog.ok('Akasha OS - Changelog', 'Aucun changelog disponible.')
@@ -241,7 +263,7 @@ def show_update_success():
     if changelog:
         dialog.ok(
             'Akasha OS - Changelog v{}'.format(new_version),
-            changelog
+            format_changelog(changelog)
         )
 
     # Delete the status file so the dialogs are not shown again

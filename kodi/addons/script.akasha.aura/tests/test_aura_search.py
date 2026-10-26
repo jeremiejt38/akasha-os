@@ -62,6 +62,8 @@ class FakeWindowXMLDialog:
         self._props = {}
         self._controls = {}
         self.closed = False
+        self.focused = -1
+        self.action_dispatched = []
 
     def setProperty(self, key, value):
         self._props[key] = value
@@ -73,6 +75,15 @@ class FakeWindowXMLDialog:
         if cid not in self._controls:
             self._controls[cid] = FakeControl(cid)
         return self._controls[cid]
+
+    def getFocusId(self):
+        return self.focused
+
+    def setFocusId(self, cid):
+        self.focused = cid
+
+    def onAction(self, action):
+        self.action_dispatched.append(action.getId())
 
     def close(self):
         self.closed = True
@@ -181,6 +192,51 @@ class TestClearHistory(unittest.TestCase):
         win.client = None
         win.onClick(aura_search.RECENT_LIST_ID)
         self.assertEqual(win.query, 'matrix')
+
+
+class _Action:
+    def __init__(self, aid):
+        self._id = aid
+
+    def getId(self):
+        return self._id
+
+
+class TestKeyboardRightEdge(unittest.TestCase):
+    """Regression: MOVE_RIGHT on the keys panel with an empty query used
+    to jump to the suggestions grid from ANY key, so first letters past
+    column 0 ('b'...) were unreachable. Only the last column should
+    leave the keyboard."""
+
+    def test_mid_row_right_moves_within_grid(self):
+        win = _window()
+        win.query = ''
+        win.focused = aura_search.KEYS_PANEL_ID
+        win.getControl(aura_search.KEYS_PANEL_ID).getSelectedPosition = \
+            lambda: 0  # 'a', column 0
+        win.onAction(_Action(2))
+        self.assertNotEqual(win.focused, aura_search.SUGGEST_PANEL_ID)
+        self.assertIn(2, win.action_dispatched)  # delegated to Kodi
+
+    def test_last_column_right_jumps_to_suggestions(self):
+        win = _window()
+        win.query = ''
+        win.focused = aura_search.KEYS_PANEL_ID
+        win.getControl(aura_search.KEYS_PANEL_ID).getSelectedPosition = \
+            lambda: 5  # 'f', last column
+        win.onAction(_Action(2))
+        self.assertEqual(win.focused, aura_search.SUGGEST_PANEL_ID)
+        self.assertNotIn(2, win.action_dispatched)
+
+    def test_right_with_query_untouched(self):
+        win = _window()
+        win.query = 'b'
+        win.focused = aura_search.KEYS_PANEL_ID
+        win.getControl(aura_search.KEYS_PANEL_ID).getSelectedPosition = \
+            lambda: 5
+        win.onAction(_Action(2))
+        self.assertNotEqual(win.focused, aura_search.SUGGEST_PANEL_ID)
+        self.assertIn(2, win.action_dispatched)
 
 
 if __name__ == '__main__':
