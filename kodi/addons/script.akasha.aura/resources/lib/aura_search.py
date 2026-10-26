@@ -30,6 +30,7 @@ BACKSPACE_BUTTON_ID = 8116
 CLEAR_BUTTON_ID = 8117
 QUERY_LABEL_ID = 8200
 EMPTY_LABEL_ID = 8201
+RAIL_LIST_ID = 8140
 
 _KEYS = list('abcdefghijklmnopqrstuvwxyz') + list('1234567890')
 _FILTERS = (
@@ -61,6 +62,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
     def onInit(self):
         try:
             self._load_recent()
+            self._render_rail()
             self._render_keyboard()
             self._render_pills()
             self._render_recent()
@@ -70,6 +72,21 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Search: init error: {}'.format(e), xbmc.LOGERROR)
 
     # ----------------------------------------------------------- rendering
+
+    def _render_rail(self):
+        """The collapsed 4-icon rail Plex keeps on the search page.
+        Icons mirror the main window's sidebar shortcuts; avatar and
+        search are informational here, Home/More leave the dialog."""
+        try:
+            rail = self.getControl(RAIL_LIST_ID)
+            rail.reset()
+            for icon in ('avatar-plex.png', 'icon-search.png',
+                         'icon-home.png', 'icon-more.png'):
+                li = xbmcgui.ListItem('')
+                li.setArt({'icon': icon})
+                rail.addItem(li)
+        except RuntimeError:
+            pass
 
     def _render_keyboard(self):
         try:
@@ -337,6 +354,16 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 self._run_search()
         elif controlID in (RESULTS_PANEL_ID, SUGGEST_PANEL_ID):
             self._pick_result()
+        elif controlID == RAIL_LIST_ID:
+            # Plex rail over search: the active (search) entry and the
+            # avatar do nothing; Home/More leave to the main window.
+            try:
+                pos = self.getControl(RAIL_LIST_ID).getSelectedPosition()
+            except RuntimeError:
+                return
+            if pos in (2, 3):
+                self._push_recent(self.query)
+                self.close()
 
     def onAction(self, action):
         if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):

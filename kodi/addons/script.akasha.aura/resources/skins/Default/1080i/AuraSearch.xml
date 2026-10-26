@@ -15,6 +15,57 @@
             <texture colordiffuse="FF16171A">white.png</texture>
         </control>
 
+        <!-- Collapsed icon rail: Plex keeps it on the search page too
+             (reference/recherche/search_open_003). Focusable so Left off
+             the keyboard lands on it like the Plex sidebar; picking
+             Home/More leaves the dialog to the main window's rail. -->
+        <control type="image">
+            <left>14</left>
+            <top>435</top>
+            <width>64</width>
+            <height>228</height>
+            <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+        </control>
+        <control type="list" id="8140">
+            <left>14</left>
+            <top>435</top>
+            <width>64</width>
+            <height>228</height>
+            <itemgap>7</itemgap>
+            <scrolltime>0</scrolltime>
+            <onleft>8140</onleft>
+            <onright>8100</onright>
+            <onup>8140</onup>
+            <ondown>8140</ondown>
+            <itemlayout width="64" height="52">
+                <control type="image">
+                    <left>9</left>
+                    <top>3</top>
+                    <width>46</width>
+                    <height>46</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                </control>
+            </itemlayout>
+            <focusedlayout width="64" height="52">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>64</width>
+                    <height>52</height>
+                    <texture colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>9</left>
+                    <top>3</top>
+                    <width>46</width>
+                    <height>46</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                </control>
+            </focusedlayout>
+        </control>
+
         <!-- Typed query -->
         <control type="label" id="8200">
             <left>105</left>
@@ -48,6 +99,7 @@
             <height>440</height>
             <itemgap>0</itemgap>
             <scrolltime>120</scrolltime>
+            <onleft>8140</onleft>
             <onright>8130</onright>
             <ondown>8115</ondown>
             <itemlayout width="66" height="72">
@@ -111,6 +163,7 @@
             <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
+            <onleft>8140</onleft>
             <onright>8116</onright>
             <ondown>8110</ondown>
         </control>
@@ -208,6 +261,7 @@
             <orientation>vertical</orientation>
             <scrolltime>120</scrolltime>
             <onup>8115</onup>
+            <onleft>8140</onleft>
             <onright>8130</onright>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
             <itemlayout width="390" height="56">
