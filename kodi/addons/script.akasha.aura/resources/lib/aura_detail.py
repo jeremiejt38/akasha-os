@@ -243,6 +243,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._bg_start('ondeck', 'on_deck', limit=60)
             if self.mode == 'show':
                 self._bg_start('seasons', 'show_seasons', rk)
+            cast = item.get('cast') or []
+            if self.mode == 'item' and cast \
+                    and not any(m.get('thumb_url') for m in cast):
+                # List/hub responses carry Role entries with names only;
+                # the full metadata record adds the portrait thumbs the
+                # Cast & Crew row needs. Fetch overlaps the rest of the
+                # synchronous render, joined in _render_cast.
+                self._bg_start('meta', 'metadata_item', rk)
 
         _set(self, 'AuraDetailShowStrip',
              '1' if self.mode in ('show', 'season') else '')
@@ -535,6 +543,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _render_cast(self):
         cast = self.item.get('cast') or []
+        if 'meta' in self._bg_done:
+            full = self._bg_get('meta') or {}
+            full_cast = full.get('cast') or []
+            if any(m.get('thumb_url') for m in full_cast):
+                cast = full_cast
+                self.item['cast'] = cast
         try:
             lst = self.getControl(CAST_LIST_ID)
             lst.reset()
