@@ -1365,6 +1365,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             'thumb_url': (base_item.get('poster_url')
                           or base_item.get('thumb_url') or ''),
         }
+        # Plex labels the row 'More Like This', not 'Filmographie' --
+        # the person window's default title only fits real people.
+        related.row_title = i18n.tr(33574)
         related.items = items
         related.doModal()
         if getattr(related, 'playback_started', False):
