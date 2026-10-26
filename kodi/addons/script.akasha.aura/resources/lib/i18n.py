@@ -444,6 +444,10 @@ STRINGS = {
 
     # Plex-style OSD meta duration ("43 minutes", "1 h 15 min")
     33585: ('minutes', 'minutes'),
+
+    # Plex search hint line above Popular Searches
+    33586: ('Titres, personnes, genres et plus encore…',
+            'Search titles, people, genres and more…'),
 }
 
 MONTH_ABBRS = {

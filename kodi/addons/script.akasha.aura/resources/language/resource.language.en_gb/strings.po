@@ -1679,3 +1679,8 @@ msgstr ""
 msgctxt "#33585"
 msgid "minutes"
 msgstr ""
+
+# Titres, personnes, genres et plus encore…
+msgctxt "#33586"
+msgid "Search titles, people, genres and more…"
+msgstr ""
