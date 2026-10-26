@@ -542,6 +542,18 @@ def _measure_font(size):
     return None
 
 
+def text_width(text, size):
+    """Rendered pixel width of `text` in the skin's Inter face at `size`
+    -- or None when PIL/the TTF is unavailable (tests, stripped builds)."""
+    if not text:
+        return 0
+    try:
+        font = _measure_font(size)
+        return font.getbbox(text)[2] if font else None
+    except Exception:
+        return None
+
+
 def ellipsize(text, size, budget_px=190):
     """Trim `text` to fit a card caption with a true '…' ellipsis, like
     Plex -- Kodi's own truncation appends '...' plus a stray space.

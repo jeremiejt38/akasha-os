@@ -130,7 +130,6 @@ ACTION_LABEL_OVERLAYS = {
     WATCHED_BUTTON_ID: 7155,
     MORE_BUTTON_ID: 7156,
 }
-ACTION_ROW_TOP = 564
 ACTION_ROW_LEFT = 128
 ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
@@ -164,6 +163,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._pending_season_index = None  # season card entry point
         self._restore_episode_pos = None   # episode pos to restore on Back
         self.exit_to_sidebar = False
+        # Vertical rhythm of the lower block (see _apply_flow): the Plex
+        # action pill sits at y564 under a director line, y524 without.
+        self._flow_top = 564
         # Background fetches kicked off at the top of _render() so the
         # independent Plex calls overlap instead of serialising on the
         # GUI thread (the "buttons appear one by one" root cause).
@@ -308,10 +310,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         if item.get('genres'):
             parts.append(', '.join(item['genres'][:3]))
+        meta_text = '   '.join(parts)
         try:
-            self.getControl(7020).setLabel('   '.join(parts))
+            self.getControl(7020).setLabel(meta_text)
         except RuntimeError:
             pass
+        # Plex trails the meta line with a small bordered box holding the
+        # content rating ("12" / "10" / "TV-MA"), ~16px after the text.
+        rating = (item.get('content_rating') or '').strip()
+        _set(self, 'AuraDetailMetaRating', '1' if rating else '')
+        if rating:
+            # PIL under-measures Inter vs Kodi ~1.2x (see i18n.ellipsize)
+            box_x = 128 + int((i18n.text_width(meta_text, 22) or 0)
+                              * 1.2) + 16
+            box_w = max(40, int((i18n.text_width(rating, 19) or 20)
+                                * 1.2) + 20)
+            try:
+                self.getControl(7190).setPosition(box_x, 294)
+                self.getControl(7190).setWidth(box_w)
+                self.getControl(7191).setPosition(box_x, 294)
+                self.getControl(7191).setWidth(box_w)
+                self.getControl(7191).setLabel(rating)
+            except RuntimeError:
+                pass
 
         # Thin items get hydrated by the 'meta' fetch started above:
         # merge the fields the full record fills in (cast thumbs, stream
@@ -345,6 +366,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self.getControl(7040).setLabel(director)
         except RuntimeError:
             pass
+        # Plex flows the whole lower block up 40px when the page has no
+        # director/creator line (shows, director-less items): measured on
+        # the Plex ATV refs -- action pill y564 with director, y524
+        # without. The reused window re-applies every offset each render.
+        self._flow_top = 564 if director else 524
+        self._apply_flow()
 
         # Bonus clips (trailer, deleted scenes...): Plex shows a trailer
         # button whenever /extras answers -- fetched once per item.
@@ -423,13 +450,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             w = 34 + len(text) * 14 + ic_w
             badge_x -= w
             try:
-                self.getControl(bg_id).setPosition(badge_x, 672)
+                self.getControl(bg_id).setPosition(badge_x,
+                                                  self._flow_top + 108)
                 self.getControl(bg_id).setWidth(w)
-                self.getControl(lb_id).setPosition(badge_x + ic_w, 672)
+                self.getControl(lb_id).setPosition(badge_x + ic_w,
+                                                  self._flow_top + 108)
                 self.getControl(lb_id).setWidth(w - ic_w)
                 self.getControl(lb_id).setLabel(text)
                 if ic_id:
-                    self.getControl(ic_id).setPosition(badge_x + 12, 680)
+                    self.getControl(ic_id).setPosition(badge_x + 12,
+                                                       self._flow_top + 116)
             except RuntimeError:
                 pass
             badge_x -= 14
@@ -443,9 +473,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraDetailSectionTitle',
                  '1' if item.get('cast') else '')
             try:
-                # Plex seats the Cast & Crew heading lower on movie pages
-                # (the Activity line occupies the space above it).
-                self.getControl(7060).setPosition(128, 770)
+                self.getControl(7060).setPosition(128,
+                                                self._flow_top + 202)
                 self.getControl(7060).setLabel(i18n.tr(33100))
             except RuntimeError:
                 pass
@@ -494,6 +523,26 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # Everything is populated and focused: lift the reveal veil so the
         # page materialises in a single paint instead of control-by-control.
         _set(self, 'AuraDetailReady', '1')
+
+    def _apply_flow(self):
+        """Seat the lower block on Plex's vertical rhythm, measured on the
+        Plex ATV refs: activity avatars at T+91, media badges at T+108,
+        the section heading at T+202 and the bottom row at T+264 -- all
+        pinned to the action pill top (T). The window is reused across
+        modes so every offset is re-applied on each render."""
+        t = self._flow_top
+        for cid in (7180, 7181, 7182):
+            try:
+                self.getControl(cid).setPosition(128, t + 91)
+            except RuntimeError:
+                pass
+        try:
+            self.getControl(7207).setPosition(192, t + 112)
+            self.getControl(7060).setPosition(128, t + 202)
+            for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
+                self.getControl(cid).setPosition(121, t + 264)
+        except RuntimeError:
+            pass
 
     def _render_chips(self, item):
         # Each chip: (text, provider icon or ''). Plex draws a provider
@@ -593,8 +642,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _render_seasons(self):
         try:
             # The window is reused across modes: always re-seat the
-            # heading (movie mode parks it lower under the activity row).
-            self.getControl(7060).setPosition(128, 726)
+            # heading on the current vertical rhythm.
+            self.getControl(7060).setPosition(128, self._flow_top + 202)
             self.getControl(7060).setLabel(i18n.tr(33103).format(
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         except RuntimeError:
@@ -647,7 +696,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _render_episodes(self):
         season = self._seasons[self._active_season]
         try:
-            self.getControl(7060).setPosition(128, 726)
+            self.getControl(7060).setPosition(128, self._flow_top + 202)
             self.getControl(7060).setLabel(self._season_label(season))
         except RuntimeError:
             pass
@@ -659,12 +708,28 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 num = ep.get('index')
                 label = '{}. {}'.format(num, ep.get('title') or '') if num \
                     else (ep.get('title') or '')
+                # Plex truncates the caption with a true '…' rather than
+                # letting the focused card marquee-scroll.
+                label = i18n.ellipsize(label, 22, budget_px=253)
                 meta2 = _fmt_duration(ep.get('duration_ms'))
                 li = xbmcgui.ListItem(label, meta2)
                 li.setArt({'thumb': ep.get('landscape_url')
                                     or ep.get('thumb_url') or ''})
+                if ep.get('view_offset_ms') and ep.get('duration_ms'):
+                    # Resume point -> ListItem.IsResumable + the orange
+                    # progress bar under the landscape card, Plex-style.
+                    try:
+                        li.getVideoInfoTag().setResumePoint(
+                            float(ep['view_offset_ms']) / 1000.0,
+                            float(ep['duration_ms']) / 1000.0)
+                    except Exception:
+                        li.setProperty('resumetime', str(
+                            float(ep['view_offset_ms']) / 1000.0))
+                        li.setProperty('totaltime', str(
+                            float(ep['duration_ms']) / 1000.0))
                 if ep.get('progress'):
-                    li.setProperty('PercentPlayed', str(int(ep['progress'] * 100)))
+                    li.setProperty('PercentPlayed',
+                                   str(int(ep['progress'] * 100)))
                 li.setProperty('watched', '1' if ep.get('watched') else '0')
                 lst.addItem(li)
         except RuntimeError:
@@ -772,7 +837,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         for cid in order:
             w = self._action_width(cid, focused)
             try:
-                self.getControl(cid).setPosition(x, ACTION_ROW_TOP)
+                self.getControl(cid).setPosition(x, self._flow_top)
                 self.getControl(cid).setWidth(w)
             except RuntimeError:
                 pass
@@ -780,14 +845,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 try:
                     # 28px glyphs centred in the 64px circle, like Plex.
                     self.getControl(ov_id).setPosition(x + 18,
-                                                       ACTION_ROW_TOP + 18)
+                                                       self._flow_top + 18)
                 except RuntimeError:
                     pass
             lb = ACTION_LABEL_OVERLAYS.get(cid)
             if lb and w > ACTION_CIRCLE_W:
                 try:
                     lbl = self.getControl(lb)
-                    lbl.setPosition(x + ACTION_LABEL_X, ACTION_ROW_TOP)
+                    lbl.setPosition(x + ACTION_LABEL_X, self._flow_top)
                     lbl.setWidth(w - ACTION_LABEL_X - ACTION_LABEL_PAD + 8)
                     # _set_action_labels() runs at populate time, when the
                     # resume/next-episode lookup can still be empty -- the

@@ -151,6 +151,28 @@
             <font>font_aura_mini</font>
             <textcolor>EEFFFFFF</textcolor>
         </control>
+        <!-- Content-rating box trailing the meta line, like Plex's small
+             bordered square ("2018 43m Crime, Drame [10]"). Position and
+             width are computed in Python from the rendered meta width. -->
+        <control type="image" id="7190">
+            <left>0</left>
+            <top>294</top>
+            <width>40</width>
+            <height>36</height>
+            <texture border="10">meta-rating-box.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailMetaRating))</visible>
+        </control>
+        <control type="label" id="7191">
+            <left>0</left>
+            <top>294</top>
+            <width>40</width>
+            <height>36</height>
+            <font>font_aura_tiny_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailMetaRating))</visible>
+        </control>
 
         <!-- Rating chips row (positions/widths computed in Python):
              slot 0 = content rating pill, slots 1-4 = bare provider
@@ -792,12 +814,25 @@
                 </control>
             </itemlayout>
             <focusedlayout width="150" height="56">
+                <!-- Kodi draws the selected item with the focused layout
+                     even when the strip isn't focused: the unfocused
+                     selected tab keeps Plex's thin outline, the truly
+                     focused one inverts to a filled white pill. -->
                 <control type="image">
                     <left>8</left>
                     <top>4</top>
                     <width>134</width>
                     <height>48</height>
                     <texture colordiffuse="99FFFFFF" border="24">chip-outline.png</texture>
+                    <visible>!Control.HasFocus(7120)</visible>
+                </control>
+                <control type="image">
+                    <left>8</left>
+                    <top>4</top>
+                    <width>134</width>
+                    <height>48</height>
+                    <texture colordiffuse="FFFFFFFF" border="24">rounded-solid.png</texture>
+                    <visible>Control.HasFocus(7120)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -809,13 +844,26 @@
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
+                    <visible>!Control.HasFocus(7120)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>150</width>
+                    <height>56</height>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(7120)</visible>
                 </control>
             </focusedlayout>
         </control>
 
         <!-- "Vous l'avez regarde le..." line: Plex's "Activity by you"
              row shows overlapping circular avatars before the text. -->
-        <control type="image">
+        <control type="image" id="7180">
             <left>128</left>
             <top>660</top>
             <width>46</width>
@@ -823,7 +871,7 @@
             <texture>avatar-plex.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
         </control>
-        <control type="image">
+        <control type="image" id="7181">
             <left>128</left>
             <top>660</top>
             <width>46</width>
@@ -832,7 +880,7 @@
             <texture background="true">$INFO[Window(10000).Property(AuraAvatar)]</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + !String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
         </control>
-        <control type="image">
+        <control type="image" id="7182">
             <left>128</left>
             <top>660</top>
             <width>46</width>
@@ -846,6 +894,7 @@
             <width>1200</width>
             <height>30</height>
             <font>font_aura_tiny</font>
+            <label>$INFO[Window.Property(AuraDetailActivity)]</label>
             <textcolor>99FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
@@ -976,6 +1025,22 @@
                     <height>180</height>
                     <texture colordiffuse="FF10131A">poster-corners.png</texture>
                 </control>
+                <control type="image">
+                    <left>272</left>
+                    <top>10</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="CC10131A">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="image">
+                    <left>280</left>
+                    <top>18</top>
+                    <width>24</width>
+                    <height>24</height>
+                    <texture>check.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
                 <control type="progress">
                     <left>4</left>
                     <top>170</top>
@@ -1034,6 +1099,22 @@
                     <height>188</height>
                     <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>272</left>
+                    <top>10</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="CC10131A">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="image">
+                    <left>280</left>
+                    <top>18</top>
+                    <width>24</width>
+                    <height>24</height>
+                    <texture>check.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="progress">
                     <left>4</left>
