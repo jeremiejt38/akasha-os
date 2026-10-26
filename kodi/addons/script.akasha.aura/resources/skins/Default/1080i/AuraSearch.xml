@@ -95,26 +95,26 @@
         <control type="panel" id="8100">
             <left>105</left>
             <top>110</top>
-            <width>396</width>
+            <width>432</width>
             <height>440</height>
             <itemgap>0</itemgap>
             <scrolltime>120</scrolltime>
             <onleft>8140</onleft>
             <onright>8130</onright>
             <ondown>8115</ondown>
-            <itemlayout width="66" height="72">
+            <itemlayout width="72" height="72">
                 <control type="image">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
+                    <left>4</left>
+                    <top>6</top>
+                    <width>64</width>
+                    <height>60</height>
                     <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
+                    <left>4</left>
+                    <top>6</top>
+                    <width>64</width>
+                    <height>60</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -122,20 +122,20 @@
                     <textcolor>FFFFFFFF</textcolor>
                 </control>
             </itemlayout>
-            <focusedlayout width="66" height="72">
+            <focusedlayout width="72" height="72">
                 <control type="image">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
+                    <left>4</left>
+                    <top>6</top>
+                    <width>64</width>
+                    <height>60</height>
                     <texture colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texture>
                     <visible>Control.HasFocus(8100)</visible>
                 </control>
                 <control type="label">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
+                    <left>4</left>
+                    <top>6</top>
+                    <width>64</width>
+                    <height>60</height>
                     <font>font_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -152,7 +152,7 @@
         <control type="button" id="8115">
             <left>112</left>
             <top>552</top>
-            <width>118</width>
+            <width>136</width>
             <height>52</height>
             <label></label>
             <font>font_mini_bold</font>
@@ -168,7 +168,7 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>155</left>
+            <left>164</left>
             <top>562</top>
             <width>32</width>
             <height>32</height>
@@ -176,7 +176,7 @@
             <visible>!Control.HasFocus(8115)</visible>
         </control>
         <control type="image">
-            <left>155</left>
+            <left>164</left>
             <top>562</top>
             <width>32</width>
             <height>32</height>
@@ -184,9 +184,9 @@
             <visible>Control.HasFocus(8115)</visible>
         </control>
         <control type="button" id="8116">
-            <left>244</left>
+            <left>256</left>
             <top>552</top>
-            <width>118</width>
+            <width>136</width>
             <height>52</height>
             <label></label>
             <font>font_mini_bold</font>
@@ -202,7 +202,7 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>287</left>
+            <left>308</left>
             <top>562</top>
             <width>32</width>
             <height>32</height>
@@ -210,7 +210,7 @@
             <visible>!Control.HasFocus(8116)</visible>
         </control>
         <control type="image">
-            <left>287</left>
+            <left>308</left>
             <top>562</top>
             <width>32</width>
             <height>32</height>
@@ -218,9 +218,9 @@
             <visible>Control.HasFocus(8116)</visible>
         </control>
         <control type="button" id="8117">
-            <left>376</left>
+            <left>400</left>
             <top>552</top>
-            <width>118</width>
+            <width>136</width>
             <height>52</height>
             <label></label>
             <font>font_mini_bold</font>
@@ -236,7 +236,7 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>419</left>
+            <left>452</left>
             <top>562</top>
             <width>32</width>
             <height>32</height>
@@ -244,7 +244,7 @@
             <visible>!Control.HasFocus(8117)</visible>
         </control>
         <control type="image">
-            <left>419</left>
+            <left>452</left>
             <top>562</top>
             <width>32</width>
             <height>32</height>
@@ -256,7 +256,7 @@
         <control type="list" id="8110">
             <left>105</left>
             <top>630</top>
-            <width>390</width>
+            <width>432</width>
             <height>400</height>
             <orientation>vertical</orientation>
             <scrolltime>120</scrolltime>
@@ -264,11 +264,19 @@
             <onleft>8140</onleft>
             <onright>8130</onright>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
-            <itemlayout width="390" height="56">
+            <itemlayout width="432" height="56">
+                <control type="image">
+                    <left>8</left>
+                    <top>16</top>
+                    <width>24</width>
+                    <height>24</height>
+                    <texture colordiffuse="80FFFFFF">icon-recent.png</texture>
+                    <visible>String.IsEmpty(ListItem.Property(clear))</visible>
+                </control>
                 <control type="label">
-                    <left>0</left>
+                    <left>44</left>
                     <top>0</top>
-                    <width>390</width>
+                    <width>388</width>
                     <height>56</height>
                     <font>font_mini</font>
                     <aligny>center</aligny>
@@ -276,7 +284,7 @@
                     <textcolor>CCFFFFFF</textcolor>
                 </control>
             </itemlayout>
-            <focusedlayout width="390" height="56">
+            <focusedlayout width="432" height="56">
                 <control type="image">
                     <left>-14</left>
                     <top>4</top>
@@ -284,10 +292,18 @@
                     <height>48</height>
                     <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
                 </control>
+                <control type="image">
+                    <left>8</left>
+                    <top>16</top>
+                    <width>24</width>
+                    <height>24</height>
+                    <texture colordiffuse="CCFFFFFF">icon-recent.png</texture>
+                    <visible>String.IsEmpty(ListItem.Property(clear))</visible>
+                </control>
                 <control type="label">
-                    <left>0</left>
+                    <left>44</left>
                     <top>0</top>
-                    <width>390</width>
+                    <width>388</width>
                     <height>56</height>
                     <font>font_mini_bold</font>
                     <aligny>center</aligny>
