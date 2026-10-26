@@ -1704,3 +1704,7 @@ msgstr "Confirmer"
 msgctxt "#33588"
 msgid "OK"
 msgstr "OK"
+
+msgctxt "#33589"
+msgid "Trailers & Extras"
+msgstr "Bandes-annonces et bonus"

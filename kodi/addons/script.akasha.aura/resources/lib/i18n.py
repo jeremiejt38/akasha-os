@@ -458,6 +458,7 @@ STRINGS = {
     # Dark confirm / message sheets (aura_menu.confirm / .message)
     33587: ('Confirmer', 'Confirm'),
     33588: ('OK', 'OK'),
+    33589: ('Bandes-annonces et bonus', 'Trailers & Extras'),
 }
 
 MONTH_ABBRS = {

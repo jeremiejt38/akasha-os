@@ -95,11 +95,12 @@ MORE_WAYS_ID = 7205
 MORE_RELATED_ID = 7206
 MORE_GO_SHOW_ID = 7208
 MORE_VERSION_ID = 7209
+MORE_EXTRAS_ID = 7210
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
 # the skin; only Subtitles, File Info and Similar Titles remain reachable.
 MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
-                  MORE_GO_SHOW_ID, MORE_VERSION_ID)
+                  MORE_GO_SHOW_ID, MORE_VERSION_ID, MORE_EXTRAS_ID)
 
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
                   WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
@@ -590,9 +591,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.getControl(7021 + slot * 2).setWidth(width)
                 if icon:
                     ic = self.getControl(7045 + slot)
-                    ic.setPosition(chip_x + (10 if pill else 0), 348)
-                    ic.setWidth(icon_w)
-                    ic.setHeight(28)
+                    if icon == 'age-shield.png':
+                        # Plex's green shield-check overshoots the pill
+                        # edge (~36px tall on a 48px pill).
+                        ic.setPosition(chip_x + 6, 344)
+                        ic.setWidth(30)
+                        ic.setHeight(36)
+                    else:
+                        ic.setPosition(chip_x + (10 if pill else 0), 348)
+                        ic.setWidth(icon_w)
+                        ic.setHeight(28)
                     _set(self, 'AuraDetailChipIcon{}'.format(slot), icon)
                     lbl_x = chip_x + icon_w + (16 if pill else 6)
                     lbl_w = width - (lbl_x - chip_x)
@@ -603,7 +611,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.getControl(CHIP_LABEL_IDS[slot]).setLabel(text)
             except RuntimeError:
                 pass
-            chip_x += width + (14 if pill else 20)
+            chip_x += width + 56
 
     @staticmethod
     def _rating_chip(value, rating_image, audience=False):
@@ -659,20 +667,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             pass
         _set(self, 'AuraDetailSectionTitle', '1' if self._seasons else '')
         # Top strip: Show | Saison 1 | Saison 2 | ...
-        try:
-            strip = self.getControl(SEASON_STRIP_ID)
-            strip.reset()
-            strip.addItem(xbmcgui.ListItem(i18n.tr(33101)))
-            for season in self._seasons:
-                idx = season.get('index')
-                strip.addItem(xbmcgui.ListItem(i18n.tr(33102).format(
-                    idx if idx is not None else season.get('title', '?'))))
-            # Plex wraps the tab row in a translucent container sized to
-            # the tabs (150px pitch, ~16px trailing pad).
-            self.getControl(7135).setWidth(
-                (len(self._seasons) + 1) * 135 + 16)
-        except RuntimeError:
-            pass
+        self._refresh_strip()
         try:
             lst = self.getControl(SEASONS_LIST_ID)
             lst.reset()
@@ -682,6 +677,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                        or season.get('thumb_url') or ''})
                 li.setProperty('watched', '1' if season.get('watched') else '0')
                 lst.addItem(li)
+        except RuntimeError:
+            pass
+
+    def _refresh_strip(self):
+        """(Re)build the tab strip. Re-adding items is also the only
+        reliable way to make Kodi re-evaluate Control.HasFocus(7120)
+        inside the layout, so the selected tab switches between Plex's
+        outline (unfocused) and filled (focused) states."""
+        try:
+            strip = self.getControl(SEASON_STRIP_ID)
+            pos = strip.getSelectedPosition()
+            strip.reset()
+            strip.addItem(xbmcgui.ListItem(i18n.tr(33101)))
+            for season in self._seasons:
+                idx = season.get('index')
+                strip.addItem(xbmcgui.ListItem(i18n.tr(33102).format(
+                    idx if idx is not None else season.get('title', '?'))))
+            # Plex wraps the tab row in a translucent container sized to
+            # the tabs (160px pitch, ~16px trailing pad).
+            self.getControl(7135).setWidth(
+                (len(self._seasons) + 1) * 160 + 16)
+            if pos >= 0:
+                strip.selectItem(pos)
         except RuntimeError:
             pass
 
@@ -758,9 +776,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     right_id = (
                         RESTART_BUTTON_ID
                         if self.getProperty('AuraDetailRestart')
-                        else (EXTRAS_BUTTON_ID
-                              if self.getProperty('AuraDetailExtras')
-                              else RATE_BUTTON_ID))
+                        else WATCHLIST_BUTTON_ID)
                     watch.setNavigation(strip, row, watch,
                                         self.getControl(right_id))
                     row.setNavigation(watch, row, row, row)
@@ -827,19 +843,27 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         of the row right."""
         restart = bool(self._playable_item() and
                        self._playable_item().get('view_offset_ms'))
-        # Plex ATV row order: Watch | restart? | extras? | watchlist |
-        # rate | watched | more. The watchlist bookmark stays visible
-        # like Plex even though cloud sync is unavailable (click surfaces
-        # the "unavailable" notification).
+        # Plex ATV row order: Watch | restart? | watchlist | rate |
+        # watched | more -- trailers/extras live in the More panel like
+        # Plex's "Trailers & Extras" entry, not in the action row. The
+        # watchlist bookmark stays visible like Plex even though cloud
+        # sync is unavailable (click surfaces the notification).
         order = ([WATCH_BUTTON_ID]
                  + ([RESTART_BUTTON_ID] if restart else [])
-                 + ([EXTRAS_BUTTON_ID] if self._extras else [])
                  + [WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
                     MORE_BUTTON_ID])
         for cid in (WATCHLIST_BUTTON_ID,) + ACTION_ICON_OVERLAYS.get(
                 WATCHLIST_BUTTON_ID, ()):
             try:
                 self.getControl(cid).setVisible(True)
+            except RuntimeError:
+                pass
+        # The extras circle left the row for the More panel: hide it on
+        # this reused window no matter what a previous render did.
+        for cid in (EXTRAS_BUTTON_ID,) + ACTION_ICON_OVERLAYS.get(
+                EXTRAS_BUTTON_ID, ()):
+            try:
+                self.getControl(cid).setVisible(False)
             except RuntimeError:
                 pass
         try:
@@ -908,6 +932,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def onFocus(self, controlID):
         self._sync_action_row()
+        # Kodi never re-evaluates Control.HasFocus(7120) inside a list
+        # layout when focus moves elsewhere -- the selected tab would
+        # keep whichever state was painted last (filled or outline).
+        # Repopulating the (tiny) strip on every focus change forces a
+        # re-draw against the real focus state.
+        if controlID != SEASON_STRIP_ID and self.mode in ('show', 'season'):
+            self._refresh_strip()
 
     def onClick(self, controlID):
         if controlID == WATCH_BUTTON_ID:
@@ -1404,13 +1435,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return self.getProperty('AuraDetailGoToShow') == '1'
         if cid == MORE_VERSION_ID:
             return self.getProperty('AuraDetailVersions') == '1'
+        if cid == MORE_EXTRAS_ID:
+            return self.getProperty('AuraDetailExtras') == '1'
         return True
 
     def _panel_nav(self, down):
         """MOVE_UP/DOWN inside the More panel: skip entries hidden by
         props -- static XML navigation cannot express that."""
         order = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
-                 MORE_GO_SHOW_ID, MORE_VERSION_ID)
+                 MORE_GO_SHOW_ID, MORE_VERSION_ID, MORE_EXTRAS_ID)
         try:
             focused = self.getFocusId()
         except RuntimeError:
@@ -1438,6 +1471,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         if control_id == MORE_VERSION_ID:
             self._pick_version()
+            return
+        if control_id == MORE_EXTRAS_ID:
+            self._play_extra()
             return
         msg = {
             MORE_SUBTITLES_ID: 'Choix des sous-titres pendant la lecture',

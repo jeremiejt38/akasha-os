@@ -780,7 +780,7 @@
             <top>32</top>
             <width>216</width>
             <height>64</height>
-            <texture colordiffuse="730D1017" border="32">rounded-solid.png</texture>
+            <texture colordiffuse="B30D1017" border="32">rounded-solid.png</texture>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
         </control>
         <control type="list" id="7120">
@@ -792,7 +792,7 @@
             <scrolltime>150</scrolltime>
             <ondown>7100</ondown>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
-            <itemlayout width="135" height="56">
+            <itemlayout width="160" height="56">
                 <control type="image">
                     <left>8</left>
                     <top>4</top>
@@ -804,7 +804,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>135</width>
+                    <width>160</width>
                     <height>56</height>
                     <font>font_aura_small</font>
                     <align>center</align>
@@ -813,7 +813,7 @@
                     <textcolor>CCFFFFFF</textcolor>
                 </control>
             </itemlayout>
-            <focusedlayout width="135" height="56">
+            <focusedlayout width="160" height="56">
                 <!-- Kodi draws the selected item with the focused layout
                      even when the strip isn't focused: the unfocused
                      selected tab keeps Plex's thin outline, the truly
@@ -837,7 +837,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>135</width>
+                    <width>160</width>
                     <height>56</height>
                     <font>font_aura_small_bold</font>
                     <align>center</align>
@@ -849,7 +849,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>135</width>
+                    <width>160</width>
                     <height>56</height>
                     <font>font_aura_small_bold</font>
                     <align>center</align>
@@ -1426,6 +1426,41 @@
                 <height>40</height>
                 <texture>icon-play-dark.png</texture>
                 <visible>Control.HasFocus(7209)</visible>
+            </control>
+            <control type="button" id="7210">
+                <left>1396</left>
+                <top>556</top>
+                <width>470</width>
+                <height>80</height>
+                <font>font_aura_main_bold</font>
+                <label>$ADDON[script.akasha.aura 33589]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>84</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onup>7209</onup>
+                <ondown>7210</ondown>
+                <onleft>7102</onleft>
+                <visible>!String.IsEmpty(Window.Property(AuraDetailExtras))</visible>
+            </control>
+            <control type="image">
+                <left>1422</left>
+                <top>576</top>
+                <width>40</width>
+                <height>40</height>
+                <texture>icon-film.png</texture>
+                <visible>!Control.HasFocus(7210) + !String.IsEmpty(Window.Property(AuraDetailExtras))</visible>
+            </control>
+            <control type="image">
+                <left>1422</left>
+                <top>576</top>
+                <width>40</width>
+                <height>40</height>
+                <texture>icon-film-dark.png</texture>
+                <visible>Control.HasFocus(7210)</visible>
             </control>
         </control>
         </control>
