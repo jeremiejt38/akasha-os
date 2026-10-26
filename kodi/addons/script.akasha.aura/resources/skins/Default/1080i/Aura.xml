@@ -8,7 +8,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF0D1017">white.png</texture>
+            <texture colordiffuse="FF1C1C1C">white.png</texture>
         </control>
 
         <!-- Plex-style hero backdrop + text, behind everything else
@@ -184,7 +184,7 @@
                 <top>0</top>
                 <width>1920</width>
                 <height>120</height>
-                <texture colordiffuse="FF0D1017">white.png</texture>
+                <texture colordiffuse="FF1C1C1C">white.png</texture>
                 <visible>!String.IsEqual(Window.Property(AuraActiveTab),0) | ![String.IsEqual(Window.Property(DivertView),home) | [String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0)]]</visible>
             </control>
 
@@ -376,7 +376,7 @@
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraBarFocused),false)</visible>
             <control type="image">
-                <left>1680</left>
+                <left>1700</left>
                 <top>42</top>
                 <width>120</width>
                 <height>44</height>
@@ -385,7 +385,7 @@
             <control type="label">
                 <left>1400</left>
                 <top>42</top>
-                <width>388</width>
+                <width>400</width>
                 <height>44</height>
                 <align>right</align>
                 <aligny>center</aligny>
@@ -556,9 +556,9 @@
                 <control type="image">
                     <left>127</left>
                     <top>112</top>
-                    <width>826</width>
+                    <width>660</width>
                     <height>64</height>
-                    <texture colordiffuse="B81A1A1A" border="26">rounded-solid.png</texture>
+                    <texture colordiffuse="B8262626" border="26">rounded-solid.png</texture>
                 </control>
 
                 <!-- Active-tab outline (visible when the strip is not
@@ -566,31 +566,31 @@
                 <control type="image">
                     <left>127</left>
                     <top>120</top>
-                    <width>205</width>
+                    <width>160</width>
                     <height>48</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
-                    <left>340</left>
+                    <left>295</left>
                     <top>120</top>
-                    <width>210</width>
+                    <width>165</width>
                     <height>48</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
-                    <left>558</left>
+                    <left>468</left>
                     <top>120</top>
-                    <width>190</width>
+                    <width>150</width>
                     <height>48</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
-                    <left>756</left>
+                    <left>626</left>
                     <top>120</top>
-                    <width>185</width>
+                    <width>150</width>
                     <height>48</height>
                     <texture colordiffuse="CCFFFFFF" border="18">chip-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
@@ -599,7 +599,7 @@
                 <control type="button" id="3050">
                     <left>127</left>
                     <top>120</top>
-                    <width>205</width>
+                    <width>160</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33008]</label>
                     <font>font_mini</font>
@@ -609,15 +609,15 @@
                     <onright>3100</onright>
                     <onup>2007</onup>
                     <ondown>5110</ondown>
-                    <textcolor>88FFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3100">
-                    <left>340</left>
+                    <left>295</left>
                     <top>120</top>
-                    <width>210</width>
+                    <width>165</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33010]</label>
                     <font>font_mini</font>
@@ -627,16 +627,16 @@
                     <onright>3075</onright>
                     <onup>2007</onup>
                     <ondown>3211</ondown>
-                    <textcolor>88FFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <!-- Plex "Collections" tab (4th contextual library tab). -->
                 <control type="button" id="3075">
-                    <left>558</left>
+                    <left>468</left>
                     <top>120</top>
-                    <width>190</width>
+                    <width>150</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <font>font_mini</font>
@@ -646,15 +646,15 @@
                     <onright>3060</onright>
                     <onup>2007</onup>
                     <ondown>3211</ondown>
-                    <textcolor>88FFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3060">
-                    <left>756</left>
+                    <left>626</left>
                     <top>120</top>
-                    <width>185</width>
+                    <width>150</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33009]</label>
                     <font>font_mini</font>
@@ -664,8 +664,8 @@
                     <onright>5110</onright>
                     <onup>2007</onup>
                     <ondown>6010</ondown>
-                    <textcolor>88FFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
@@ -673,7 +673,7 @@
                 <control type="label">
                     <left>127</left>
                     <top>120</top>
-                    <width>205</width>
+                    <width>160</width>
                     <height>48</height>
                     <font>font_mini</font>
                     <align>center</align>
@@ -683,9 +683,9 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
-                    <left>340</left>
+                    <left>295</left>
                     <top>120</top>
-                    <width>210</width>
+                    <width>165</width>
                     <height>48</height>
                     <font>font_mini</font>
                     <align>center</align>
@@ -695,9 +695,9 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>558</left>
+                    <left>468</left>
                     <top>120</top>
-                    <width>190</width>
+                    <width>150</width>
                     <height>48</height>
                     <font>font_mini</font>
                     <align>center</align>
@@ -707,9 +707,9 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>756</left>
+                    <left>626</left>
                     <top>120</top>
-                    <width>185</width>
+                    <width>150</width>
                     <height>48</height>
                     <font>font_mini</font>
                     <align>center</align>
@@ -717,6 +717,102 @@
                     <label>$ADDON[script.akasha.aura 33009]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
+                </control>
+                <control type="label">
+                    <left>127</left>
+                    <top>120</top>
+                    <width>160</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33008]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
+                </control>
+                <control type="label">
+                    <left>127</left>
+                    <top>120</top>
+                    <width>160</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33008]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3050)</visible>
+                </control>
+                <control type="label">
+                    <left>295</left>
+                    <top>120</top>
+                    <width>165</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33010]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
+                </control>
+                <control type="label">
+                    <left>295</left>
+                    <top>120</top>
+                    <width>165</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33010]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3100)</visible>
+                </control>
+                <control type="label">
+                    <left>468</left>
+                    <top>120</top>
+                    <width>150</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33011]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
+                </control>
+                <control type="label">
+                    <left>468</left>
+                    <top>120</top>
+                    <width>150</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33011]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3075)</visible>
+                </control>
+                <control type="label">
+                    <left>626</left>
+                    <top>120</top>
+                    <width>150</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33009]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
+                </control>
+                <control type="label">
+                    <left>626</left>
+                    <top>120</top>
+                    <width>150</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33009]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3060)</visible>
                 </control>
 </control>
 
@@ -878,7 +974,7 @@
                 <control type="button" id="3211">
                     <left>127</left>
                     <top>190</top>
-                    <width>130</width>
+                    <width>120</width>
                     <height>48</height>
                     <label>Tout</label>
                     <font>font_mini</font>
@@ -888,8 +984,8 @@
                     <onright>3212</onright>
                     <onup>3211</onup>
                     <ondown>3211</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="2EFFFFFF" border="18">rounded-solid.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
@@ -898,14 +994,14 @@
                      always a single fixed type (movie or show), so there is
                      nothing to actually choose here; see docs/aura/decisions.md. -->
                 <control type="image">
-                    <left>265</left>
+                    <left>263</left>
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
                     <texture colordiffuse="2EFFFFFF" border="18">rounded-solid.png</texture>
                 </control>
                 <control type="label" id="3210">
-                    <left>265</left>
+                    <left>263</left>
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
@@ -917,7 +1013,7 @@
                 </control>
 
                 <control type="label">
-                    <left>393</left>
+                    <left>399</left>
                     <top>190</top>
                     <width>46</width>
                     <height>48</height>
@@ -928,10 +1024,28 @@
                     <textcolor>77FFFFFF</textcolor>
                 </control>
 
+                <control type="image">
+                    <left>471</left>
+                    <top>202</top>
+                    <width>24</width>
+                    <height>24</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">icon-sort.png</texture>
+                    <visible>!Control.HasFocus(3212)</visible>
+                </control>
+                <control type="image">
+                    <left>471</left>
+                    <top>202</top>
+                    <width>24</width>
+                    <height>24</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">icon-sort.png</texture>
+                    <visible>Control.HasFocus(3212)</visible>
+                </control>
                 <control type="button" id="3212">
-                    <left>447</left>
+                    <left>461</left>
                     <top>190</top>
-                    <width>120</width>
+                    <width>150</width>
                     <height>48</height>
                     <label>$ADDON[script.akasha.aura 33057]</label>
                     <font>font_mini</font>
@@ -941,14 +1055,14 @@
                     <onright>3213</onright>
                     <onup>3212</onup>
                     <ondown>3212</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="2EFFFFFF" border="18">rounded-solid.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="button" id="3213">
-                    <left>575</left>
+                    <left>627</left>
                     <top>190</top>
                     <width>120</width>
                     <height>48</height>
@@ -960,24 +1074,24 @@
                     <onright>3218</onright>
                     <onup>3213</onup>
                     <ondown>3213</ondown>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FF1A1A1A</focusedcolor>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="2EFFFFFF" border="18">rounded-solid.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
                 </control>
 
                 <control type="image">
-                    <left>703</left>
-                    <top>190</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>763</left>
+                    <top>198</top>
+                    <width>140</width>
+                    <height>32</height>
                     <texture colordiffuse="40000000" border="16">rounded-solid.png</texture>
                 </control>
                 <control type="label" id="3220">
-                    <left>703</left>
-                    <top>190</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>763</left>
+                    <top>198</top>
+                    <width>140</width>
+                    <height>32</height>
                     <font>font_tiny</font>
                     <label>-</label>
                     <align>center</align>
@@ -986,7 +1100,7 @@
                 </control>
 
                 <control type="button" id="3218">
-                    <left>861</left>
+                    <left>919</left>
                     <top>190</top>
                     <width>48</width>
                     <height>48</height>
@@ -1004,7 +1118,7 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">rounded-solid.png</texturefocus>
                 </control>
                 <control type="image">
-                    <left>873</left>
+                    <left>931</left>
                     <top>202</top>
                     <width>24</width>
                     <height>24</height>
@@ -1013,13 +1127,85 @@
                     <visible>!Control.HasFocus(3218)</visible>
                 </control>
                 <control type="image">
-                    <left>873</left>
+                    <left>931</left>
                     <top>202</top>
                     <width>24</width>
                     <height>24</height>
                     <aspectratio>keep</aspectratio>
                     <texture>icon-dots-dark.png</texture>
                     <visible>Control.HasFocus(3218)</visible>
+                </control>
+                <control type="label">
+                    <left>127</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3211)]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <visible>!Control.HasFocus(3211)</visible>
+                </control>
+                <control type="label">
+                    <left>127</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3211)]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3211)</visible>
+                </control>
+                <control type="label">
+                    <left>499</left>
+                    <top>190</top>
+                    <width>112</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3212)]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <visible>!Control.HasFocus(3212)</visible>
+                </control>
+                <control type="label">
+                    <left>499</left>
+                    <top>190</top>
+                    <width>112</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3212)]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3212)</visible>
+                </control>
+                <control type="label">
+                    <left>627</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3213)]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <visible>!Control.HasFocus(3213)</visible>
+                </control>
+                <control type="label">
+                    <left>627</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3213)]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3213)</visible>
                 </control>
             </control>
 
@@ -1029,7 +1215,7 @@
             <control type="list" id="3250">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
                 <left>1820</left>
-                <top>100</top>
+                <top>102</top>
                 <width>70</width>
                 <height>864</height>
                 <orientation>vertical</orientation>
@@ -1177,16 +1363,8 @@
                         <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                     </control>
                     <control type="image">
-                        <left>196</left>
-                        <top>12</top>
-                        <width>32</width>
-                        <height>32</height>
-                        <texture colordiffuse="B3000000">circle.png</texture>
-                        <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
-                    </control>
-                    <control type="image">
-                        <left>202</left>
-                        <top>18</top>
+                        <left>209</left>
+                        <top>10</top>
                         <width>20</width>
                         <height>20</height>
                         <texture>check.png</texture>
@@ -1194,10 +1372,10 @@
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>378</top>
+                        <top>370</top>
                         <width>240</width>
                         <height>32</height>
-                        <font>font_mini_bold</font>
+                        <font>font_mini</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>CCFFFFFF</textcolor>
@@ -1206,7 +1384,7 @@
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>412</top>
+                        <top>402</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
@@ -1218,10 +1396,10 @@
                     </control>
                 
                             <control type="image">
-                                <left>-16</left>
-                                <top>-22</top>
-                                <width>272</width>
-                                <height>404</height>
+                                <left>-10</left>
+                                <top>-11</top>
+                                <width>260</width>
+                                <height>384</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
                                 <visible>!Control.HasFocus(3230) + ListItem.IsSelected + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
@@ -1277,16 +1455,8 @@
                         <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                     </control>
                     <control type="image">
-                        <left>196</left>
-                        <top>12</top>
-                        <width>32</width>
-                        <height>32</height>
-                        <texture colordiffuse="B3000000">circle.png</texture>
-                        <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
-                    </control>
-                    <control type="image">
-                        <left>202</left>
-                        <top>18</top>
+                        <left>209</left>
+                        <top>10</top>
                         <width>20</width>
                         <height>20</height>
                         <texture>check.png</texture>
@@ -1295,19 +1465,19 @@
                     <!-- Plex focus: poster already zoomed ~8%, plus a thin
                          white outline sitting just outside the poster. -->
                     <control type="image">
-                        <left>-16</left>
-                        <top>-22</top>
-                        <width>272</width>
-                        <height>404</height>
+                        <left>-10</left>
+                        <top>-11</top>
+                        <width>260</width>
+                        <height>384</height>
                         <texture>poster-ring-thin.png</texture>
                         <visible>Control.HasFocus(3230) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>387</top>
+                        <top>379</top>
                         <width>240</width>
                         <height>32</height>
-                        <font>font_mini_bold</font>
+                        <font>font_mini</font>
                         <align>center</align>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
@@ -1316,7 +1486,7 @@
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>421</top>
+                        <top>411</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
@@ -1338,7 +1508,7 @@
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                     <effect type="slide" start="0,0" end="0,-58" time="250" tween="quadratic" easing="out"/>
                 </animation>
-                <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
+                <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
                 <visible>String.IsEqual(Window.Property(DivertView),library) + [String.IsEqual(Window.Property(DivertLibraryTab),1) | String.IsEqual(Window.Property(DivertLibraryTab),2)]</visible>
             </control>
 
@@ -2853,7 +3023,7 @@
                         <top>568</top>
                         <width>257</width>
                         <height>372</height>
-                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
+                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
                         <visible>!Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                     </control>
                     <control type="image">
@@ -2861,7 +3031,7 @@
                         <top>1040</top>
                         <width>257</width>
                         <height>372</height>
-                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
+                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
                         <visible>!Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
                     </control>
                     <control type="image">
@@ -2869,7 +3039,7 @@
                         <top>1512</top>
                         <width>257</width>
                         <height>372</height>
-                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
+                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
                         <visible>Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
                     </control>
                     <control type="image">
@@ -2877,7 +3047,7 @@
                         <top>1984</top>
                         <width>257</width>
                         <height>372</height>
-                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
+                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
                     <control type="image">
@@ -2885,7 +3055,7 @@
                         <top>2456</top>
                         <width>257</width>
                         <height>372</height>
-                        <texture colordiffuse="FF0D1017">scrim-row-right.png</texture>
+                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
                 </control>
@@ -3086,13 +3256,13 @@
                         <top>432</top>
                         <width>72</width>
                         <height>216</height>
-                        <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
+                        <texture colordiffuse="B8262626" border="30">rounded-solid.png</texture>
                     </control>
                     <control type="image">
-                        <left>45</left>
-                        <top>445</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>44</left>
+                        <top>446</top>
+                        <width>40</width>
+                        <height>40</height>
                         <texture>avatar-plex.png</texture>
                         <visible>String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
@@ -3100,25 +3270,25 @@
                          user's picture): fetched into AuraAvatar by
                          _load_avatar, circle-clipped by the cast mask. -->
                     <control type="image">
-                        <left>45</left>
-                        <top>445</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>44</left>
+                        <top>446</top>
+                        <width>40</width>
+                        <height>40</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
-                        <left>45</left>
-                        <top>445</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>44</left>
+                        <top>446</top>
+                        <width>40</width>
+                        <height>40</height>
                         <texture colordiffuse="B810131A">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
                         <left>48</left>
-                        <top>500</top>
+                        <top>508</top>
                         <width>32</width>
                         <height>32</height>
                         <aspectratio>keep</aspectratio>
@@ -3126,7 +3296,7 @@
                     </control>
                     <control type="image">
                         <left>48</left>
-                        <top>552</top>
+                        <top>556</top>
                         <width>32</width>
                         <height>32</height>
                         <aspectratio>keep</aspectratio>
@@ -3280,7 +3450,7 @@
                             <height>24</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="FF1A1A1A">icon-dots-dark.png</texture>
-                            <visible>!String.IsEmpty(ListItem.Property(is_library))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_library))</visible>
                         </control>
                         <control type="label">
                             <left>30</left>
