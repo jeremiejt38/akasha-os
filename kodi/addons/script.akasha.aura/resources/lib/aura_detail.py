@@ -243,13 +243,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._bg_start('ondeck', 'on_deck', limit=60)
             if self.mode == 'show':
                 self._bg_start('seasons', 'show_seasons', rk)
-            cast = item.get('cast') or []
-            if self.mode == 'item' and cast \
-                    and not any(m.get('thumb_url') for m in cast):
-                # List/hub responses carry Role entries with names only;
-                # the full metadata record adds the portrait thumbs the
-                # Cast & Crew row needs. Fetch overlaps the rest of the
-                # synchronous render, joined in _render_cast.
+            if self.mode == 'item':
+                # Hub/list records are thin: Role entries have no thumbs
+                # and Media streams often lack audio/subtitle detail, so
+                # the Cast & Crew row and the audio/sub badges would
+                # render empty where Plex shows them. The full metadata
+                # record has both -- fetch overlaps the synchronous
+                # render, joined just before the badge block.
                 self._bg_start('meta', 'metadata_item', rk)
 
         _set(self, 'AuraDetailShowStrip',
@@ -311,6 +311,18 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self.getControl(7020).setLabel('   '.join(parts))
         except RuntimeError:
             pass
+
+        # Thin items get hydrated by the 'meta' fetch started above:
+        # merge the fields the full record fills in (cast thumbs, stream
+        # badges, richer ratings) before chips/badges/cast render.
+        if 'meta' in self._bg_done:
+            full = self._bg_get('meta') or {}
+            if full:
+                for key in ('cast', 'ratings', 'rating', 'audience_rating',
+                            'rating_image', 'audience_rating_image',
+                            'video_label', 'audio_label', 'subtitle_label'):
+                    if full.get(key):
+                        item[key] = full[key]
 
         self._render_chips(item)
 
