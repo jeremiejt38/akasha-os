@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.6...akasha-os-v0.69.7) (2026-10-26)
+
+
+### Bug Fixes
+
+* **aura-osd:** Plex chapters source, m:ss timecodes, skip chip label ([#213](https://github.com/jeremiejt38/akasha-os/issues/213)) ([da1f940](https://github.com/jeremiejt38/akasha-os/commit/da1f940fd505a6beb66e93d49aa99d0e5eb7491c))
+
 ## [0.69.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.5...akasha-os-v0.69.6) (2026-10-25)
 
 
