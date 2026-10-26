@@ -107,7 +107,7 @@ ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
                   MORE_BUTTON_ID)
 # light/dark icon overlay pairs that ride on top of each action button
 ACTION_ICON_OVERLAYS = {
-    WATCH_BUTTON_ID: (7088, 7090),
+    WATCH_BUTTON_ID: (7088, 7089, 7090, 7091),
     RESTART_BUTTON_ID: (7107, 7108),
     EXTRAS_BUTTON_ID: (7111, 7112),
     WATCHLIST_BUTTON_ID: (7092, 7093),
@@ -467,6 +467,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailVideoBadge', '1' if video else '')
         _set(self, 'AuraDetailAudioBadge', '1' if audio else '')
         _set(self, 'AuraDetailSubsBadge', '1' if subs else '')
+        _set(self, 'AuraDetailSubsValue', subs or i18n.tr(33202))
 
         # Bottom section
         if self.mode == 'item':
@@ -822,9 +823,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 pass
 
     def _action_width(self, control_id, focused_id):
-        # Plex keeps the primary 'Watch'/'Resume' CTA expanded at all
-        # times; only secondary actions collapse into circles.
-        if control_id != focused_id and control_id != WATCH_BUTTON_ID:
+        # Plex expands only the focused action into a label pill; every
+        # unfocused action (including the primary CTA) is a plain circle.
+        if control_id != focused_id:
             return ACTION_CIRCLE_W
         label = self._action_label(control_id)
         # Real text measure (Inter Bold 22 = font_aura_mini_bold); PIL
@@ -889,6 +890,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 except RuntimeError:
                     pass
             lb = ACTION_LABEL_OVERLAYS.get(cid)
+            if lb:
+                try:
+                    lbl = self.getControl(lb)
+                    # Collapsed actions must not leave their pill label
+                    # floating over the row (dark text, but it lands on
+                    # whatever pill slides underneath it).
+                    lbl.setVisible(w > ACTION_CIRCLE_W)
+                except RuntimeError:
+                    pass
             if lb and w > ACTION_CIRCLE_W:
                 try:
                     lbl = self.getControl(lb)
