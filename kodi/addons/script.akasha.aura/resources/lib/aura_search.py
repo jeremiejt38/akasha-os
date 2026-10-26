@@ -355,7 +355,18 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 KEYS_PANEL_ID, RECENT_LIST_ID, SPACE_BUTTON_ID,
                 BACKSPACE_BUTTON_ID, CLEAR_BUTTON_ID) \
                 and not self.query:
-            # MOVE_RIGHT off the keyboard with an empty query.
+            # MOVE_RIGHT off the keyboard with an empty query -- only
+            # when the key grid's Right would leave it (last column);
+            # mid-row Rights still move between letters.
+            if focused == KEYS_PANEL_ID:
+                try:
+                    pos = self.getControl(KEYS_PANEL_ID) \
+                        .getSelectedPosition()
+                except RuntimeError:
+                    pos = -1
+                if pos >= 0 and pos % 6 != 5:
+                    super().onAction(action)
+                    return
             try:
                 self.setFocusId(SUGGEST_PANEL_ID)
             except RuntimeError:
