@@ -2163,12 +2163,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         put(3221, x, y, w)
         put(3210, x, y, w)
         x += w + 16
-        put(3222, x, y, 30)
-        x += 46
+        put(3222, x, y, 36)
+        x += 50
         w = pill_w(label_of(DIVERT_SORT_BUTTON_ID), pad=73)
         put(DIVERT_SORT_BUTTON_ID, x, y, w)
-        put(3223, x + 17, 205)
-        put(3224, x + 17, 205)
+        put(3223, x + 17, 204)
+        put(3224, x + 17, 204)
         put(3243, x + 56, y, w - 56)
         put(3244, x + 56, y, w - 56)
         x += w + 16
@@ -2177,8 +2177,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             put(cid, x, y, w)
         x += w + 16
         w = max(44, int(round(9.5 * len(label_of(3220)))) + 16)
-        put(3225, x, y, w)
-        put(3220, x, y, w)
+        put(3225, x, 198, w)
+        put(3220, x, 198, w)
         x += w + 16
         put(3218, x, y)
         put(3226, x + 12, 202)

@@ -366,14 +366,14 @@
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraBarFocused),false)</visible>
             <control type="image">
-                <left>1694</left>
+                <left>1708</left>
                 <top>39</top>
                 <width>126</width>
                 <height>48</height>
                 <texture colordiffuse="33000000" border="22">cap-r22.png</texture>
             </control>
             <control type="label">
-                <left>1694</left>
+                <left>1708</left>
                 <top>39</top>
                 <width>126</width>
                 <height>48</height>
@@ -546,7 +546,7 @@
                 <control type="image">
                     <left>127</left>
                     <top>112</top>
-                    <width>668</width>
+                    <width>684</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
                 </control>
@@ -554,43 +554,43 @@
                 <!-- Active-tab outline (visible when the strip is not
                      focused; white focus fill covers it otherwise). -->
                 <control type="image">
-                    <left>141</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>139</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
-                    <left>323</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>321</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
-                    <left>498</left>
-                    <top>120</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>496</left>
+                    <top>121</top>
+                    <width>154</width>
+                    <height>46</height>
                     <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
-                    <left>662</left>
-                    <top>120</top>
-                    <width>140</width>
-                    <height>48</height>
+                    <left>660</left>
+                    <top>121</top>
+                    <width>144</width>
+                    <height>46</height>
                     <texture colordiffuse="63FFFFFF" border="24">cap-outline-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
 
                 <control type="button" id="3050">
-                    <left>141</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>139</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <label>$ADDON[script.akasha.aura 33008]</label>
                     <font>font_mini</font>
                     <align>center</align>
@@ -606,10 +606,10 @@
                 </control>
 
                 <control type="button" id="3100">
-                    <left>323</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>321</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <label>$ADDON[script.akasha.aura 33010]</label>
                     <font>font_mini</font>
                     <align>center</align>
@@ -626,10 +626,10 @@
 
                 <!-- Plex "Collections" tab (4th contextual library tab). -->
                 <control type="button" id="3075">
-                    <left>498</left>
-                    <top>120</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>496</left>
+                    <top>121</top>
+                    <width>154</width>
+                    <height>46</height>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <font>font_mini</font>
                     <align>center</align>
@@ -645,10 +645,10 @@
                 </control>
 
                 <control type="button" id="3060">
-                    <left>662</left>
-                    <top>120</top>
-                    <width>140</width>
-                    <height>48</height>
+                    <left>660</left>
+                    <top>121</top>
+                    <width>144</width>
+                    <height>46</height>
                     <label>$ADDON[script.akasha.aura 33009]</label>
                     <font>font_mini</font>
                     <align>center</align>
@@ -665,10 +665,10 @@
 
             
                 <control type="label">
-                    <left>141</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>139</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -677,10 +677,10 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
-                    <left>323</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>321</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -689,10 +689,10 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>498</left>
-                    <top>120</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>496</left>
+                    <top>121</top>
+                    <width>154</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -701,10 +701,10 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>662</left>
-                    <top>120</top>
-                    <width>140</width>
-                    <height>48</height>
+                    <left>660</left>
+                    <top>121</top>
+                    <width>144</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -713,10 +713,10 @@
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
                 <control type="label">
-                    <left>141</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>139</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -725,10 +725,10 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
-                    <left>141</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>139</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -737,10 +737,10 @@
                     <visible>Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
-                    <left>323</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>321</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -749,10 +749,10 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>323</left>
-                    <top>120</top>
-                    <width>160</width>
-                    <height>48</height>
+                    <left>321</left>
+                    <top>121</top>
+                    <width>164</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -761,10 +761,10 @@
                     <visible>Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
-                    <left>498</left>
-                    <top>120</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>496</left>
+                    <top>121</top>
+                    <width>154</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -773,10 +773,10 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>498</left>
-                    <top>120</top>
-                    <width>150</width>
-                    <height>48</height>
+                    <left>496</left>
+                    <top>121</top>
+                    <width>154</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -785,10 +785,10 @@
                     <visible>Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
-                    <left>662</left>
-                    <top>120</top>
-                    <width>140</width>
-                    <height>48</height>
+                    <left>660</left>
+                    <top>121</top>
+                    <width>144</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -797,10 +797,10 @@
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
                 <control type="label">
-                    <left>662</left>
-                    <top>120</top>
-                    <width>140</width>
-                    <height>48</height>
+                    <left>660</left>
+                    <top>121</top>
+                    <width>144</width>
+                    <height>46</height>
                     <font>font_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1009,9 +1009,9 @@
                 <control type="label" id="3222">
                     <left>407</left>
                     <top>190</top>
-                    <width>30</width>
+                    <width>36</width>
                     <height>48</height>
-                    <font>font_tiny</font>
+                    <font>font_mini</font>
                     <label>$ADDON[script.akasha.aura 33096]</label>
                     <align>left</align>
                     <aligny>center</aligny>
@@ -1020,17 +1020,17 @@
 
                 <control type="image" id="3223">
                     <left>489</left>
-                    <top>205</top>
+                    <top>204</top>
                     <width>22</width>
-                    <height>18</height>
+                    <height>20</height>
                     <texture colordiffuse="CCFFFFFF">icon-sort.png</texture>
                     <visible>!Control.HasFocus(3212)</visible>
                 </control>
                 <control type="image" id="3224">
                     <left>489</left>
-                    <top>205</top>
+                    <top>204</top>
                     <width>22</width>
-                    <height>18</height>
+                    <height>20</height>
                     <texture colordiffuse="FF1A1A1A">icon-sort.png</texture>
                     <visible>Control.HasFocus(3212)</visible>
                 </control>
@@ -1074,16 +1074,16 @@
 
                 <control type="image" id="3225">
                     <left>783</left>
-                    <top>190</top>
+                    <top>198</top>
                     <width>140</width>
-                    <height>48</height>
-                    <texture colordiffuse="B8000000" border="24">cap-r24.png</texture>
+                    <height>32</height>
+                    <texture colordiffuse="B8000000" border="8">cap-r8.png</texture>
                 </control>
                 <control type="label" id="3220">
                     <left>783</left>
-                    <top>190</top>
+                    <top>198</top>
                     <width>140</width>
-                    <height>48</height>
+                    <height>32</height>
                     <font>font_tiny</font>
                     <label>-</label>
                     <align>center</align>
@@ -1359,7 +1359,7 @@
                         <top>12</top>
                         <width>40</width>
                         <height>40</height>
-                        <texture colordiffuse="70000000">circle.png</texture>
+                        <texture colordiffuse="80000000">circle.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
@@ -1384,7 +1384,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>414</top>
+                        <top>421</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
@@ -1459,7 +1459,7 @@
                         <top>12</top>
                         <width>40</width>
                         <height>40</height>
-                        <texture colordiffuse="70000000">circle.png</texture>
+                        <texture colordiffuse="80000000">circle.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
@@ -1494,7 +1494,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>423</top>
+                        <top>430</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
