@@ -13,6 +13,8 @@ import subprocess
 import sys
 import threading
 import time
+import unicodedata
+import urllib.parse
 
 import xbmc
 import xbmcaddon
@@ -2359,12 +2361,62 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         letter = letters[pos]
 
+        # Server ground truth for the letter boundary: raw-title matching
+        # is unreliable (this server sorts 'The Amateur' under 'A' but
+        # 'The Tower' under 'T'), so ask Plex which item opens the letter
+        # section -- /firstCharacter applies the same sort + filters as the
+        # grid -- then locate THAT item in the loaded window by ratingKey.
+        target_key = None
+        try:
+            section = self._divert_sections[self._divert_active_section]
+        except (AttributeError, IndexError, TypeError):
+            section = None
+        if (self._plex_client and section
+                and section.get('type') in ('movie', 'show', 'artist')
+                and not self._divert_search_query
+                and str(self._divert_sort).startswith('titleSort')):
+            try:
+                params = {
+                    'sort': self._divert_sort,
+                    'X-Plex-Container-Size': 1,
+                }
+                if self._divert_filter_genre:
+                    params['genre'] = self._divert_filter_genre
+                unwatched = self._divert_filter_unwatched
+                if unwatched is True:
+                    params['unwatched'] = 1
+                elif unwatched is False:
+                    params['unwatched'] = 0
+                for key, value in (self._divert_filter_params() or {}).items():
+                    params[key] = value
+                data = self._plex_client._request(
+                    '/library/sections/{}/firstCharacter/{}'.format(
+                        section['key'], urllib.parse.quote(letter)),
+                    params)
+                md = plex_client.PlexClient._media_container(data).get(
+                    'Metadata') or []
+                if md:
+                    target_key = str(md[0].get('ratingKey') or '')
+            except Exception as e:
+                xbmc.log('Akasha Aura: AZ firstCharacter failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+                target_key = None
+
         def find_index():
             for i, item in enumerate(self._divert_items):
-                title = (item.get('title') or '').strip().upper()
+                if target_key is not None:
+                    if str(item.get('rating_key') or '') == target_key:
+                        return i
+                    continue
+                # Plex sorts by titleSort (articles stripped, diacritics
+                # folded): 'The Amateur' lives under 'A', 'À contre-sens'
+                # under 'A' too -- the rail must match that sort key or
+                # it lands on raw-title false positives.
+                title = (item.get('sort_title') or item.get('title') or '')
+                title = title.strip()
                 if not title:
                     continue
-                first = title[0]
+                first = unicodedata.normalize('NFKD', title)[0].upper()
                 if letter == '#' and first.isdigit():
                     return i
                 if first == letter:
