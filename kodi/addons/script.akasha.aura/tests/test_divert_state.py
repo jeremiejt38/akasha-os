@@ -293,5 +293,63 @@ class GridStateTests(unittest.TestCase):
         self.assertEqual(w._controls[BUTTON_ID].label, '')
 
 
+class EmptyHubRowsTests(unittest.TestCase):
+    """A section whose hubs are all empty (e.g. a music library with no
+    scrobbles) must render the empty state, not the video-centric legacy
+    rows, and must not keep the previous view's hero."""
+
+    def _hub(self, items, key=''):
+        return {'title': 'hub', 'key': key, 'identifier': 'h',
+                'context': '', 'type': '', 'style': 'shelf',
+                'more': False, 'items': items}
+
+    def test_empty_hubs_return_empty_not_fallback(self):
+        w = _make_window()
+        w._plex_client.section_hubs = lambda key: [self._hub([])]
+        rows, fatal = w._reco_hub_rows({'key': '6', 'type': 'artist'})
+        self.assertEqual(rows, [])
+        self.assertIsNone(fatal)
+
+    def test_no_hubs_still_falls_back_to_legacy(self):
+        w = _make_window()
+        w._plex_client.section_hubs = lambda key: []
+        rows, fatal = w._reco_hub_rows({'key': '6', 'type': 'artist'})
+        self.assertIsNone(rows)
+        self.assertIsNone(fatal)
+
+    def test_legacy_rows_drop_empty_pages(self):
+        w = _make_window()
+        w._plex_client = None
+        w._connector_client = MagicMock()
+        w._reco_fetch_on_deck_page = lambda s, o, l: ([], 0)
+        w._reco_fetch_recently_added_page = lambda s, o, l: ([], 0)
+        w._reco_fetch_recent_releases_page = lambda s, o, l: ([], 0)
+        w._reco_get_first_video_section = lambda: {'key': '1', 'title': 'F'}
+        self.assertEqual(w._reco_legacy_rows(None), [])
+
+    def test_hero_cleared_when_reload_has_no_items(self):
+        import threading
+        w = _make_window()
+        w._hero_fanart_timer = None
+        w._hero_fanart_lock = threading.Lock()
+        w._hero_fanart_current = 'fanart.jpg'
+        w._props['AuraHeroTitle'] = 'Stale Title'
+        w._props['AuraHeroFanart'] = 'fanart.jpg'
+        w._update_hero(clear_if_empty=True)
+        self.assertEqual(w._props['AuraHeroTitle'], '')
+        self.assertEqual(w._props['AuraHeroFanart'], '')
+        self.assertIsNone(w._hero_fanart_current)
+
+    def test_hero_kept_when_focus_leaves_rows(self):
+        import threading
+        w = _make_window()
+        w._hero_fanart_timer = None
+        w._hero_fanart_lock = threading.Lock()
+        w._hero_fanart_current = 'fanart.jpg'
+        w._props['AuraHeroTitle'] = 'Kept Title'
+        w._update_hero()  # focus-time call: hero must not blank
+        self.assertEqual(w._props['AuraHeroTitle'], 'Kept Title')
+
+
 if __name__ == '__main__':
     unittest.main()
