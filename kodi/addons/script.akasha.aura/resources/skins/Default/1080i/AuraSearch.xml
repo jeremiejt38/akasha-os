@@ -243,6 +243,21 @@
             </focusedlayout>
         </control>
 
+        <!-- Plex hint line ("You can search titles, people, genres and
+             more…") sitting above Popular Searches while the query is
+             empty. -->
+        <control type="label">
+            <left>560</left>
+            <top>4</top>
+            <width>1350</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33586]</label>
+            <textcolor>99FFFFFF</textcolor>
+            <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
+        </control>
+
         <!-- "Popular Searches" heading: Plex shows it over the suggestion
              grid while the query is empty; the filter pills take the same
              spot once a query is typed. -->
@@ -313,7 +328,9 @@
             </focusedlayout>
         </control>
 
-        <!-- Results: 2-column card grid -->
+        <!-- Results: 2-column card grid (typed query only — the empty
+             query shows the poster-grid suggestions panel below instead,
+             matching Plex's Popular Searches layout swap). -->
         <control type="panel" id="8130">
             <left>560</left>
             <top>120</top>
@@ -323,6 +340,7 @@
             <scrolltime>200</scrolltime>
             <onleft>8100</onleft>
             <onup>8120</onup>
+            <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
             <itemlayout width="680" height="220">
                 <control type="image">
                     <left>0</left>
@@ -422,6 +440,110 @@
                     <font>font_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
                     <textcolor>FFFF9D00</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Popular Suggestions poster grid (empty query): Plex renders
+             Popular Searches as portrait posters with title + year
+             centered underneath, not the media-card list used for
+             typed results. -->
+        <control type="panel" id="8131">
+            <left>560</left>
+            <top>120</top>
+            <width>1360</width>
+            <height>960</height>
+            <itemgap>0</itemgap>
+            <scrolltime>200</scrolltime>
+            <onleft>8100</onleft>
+            <onup>8131</onup>
+            <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
+            <itemlayout width="340" height="560">
+                <control type="image">
+                    <left>20</left>
+                    <top>10</top>
+                    <width>300</width>
+                    <height>450</height>
+                    <aspectratio>scale</aspectratio>
+                    <fadetime>150</fadetime>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>10</top>
+                    <width>300</width>
+                    <height>450</height>
+                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                </control>
+                <control type="label">
+                    <left>20</left>
+                    <top>466</top>
+                    <width>300</width>
+                    <height>32</height>
+                    <font>font_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>20</left>
+                    <top>502</top>
+                    <width>300</width>
+                    <height>28</height>
+                    <font>font_tiny</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="340" height="560">
+                <control type="image">
+                    <left>14</left>
+                    <top>4</top>
+                    <width>312</width>
+                    <height>462</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                    <animation effect="zoom" start="100" end="103" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>10</top>
+                    <width>300</width>
+                    <height>450</height>
+                    <aspectratio>scale</aspectratio>
+                    <fadetime>150</fadetime>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>10</top>
+                    <width>300</width>
+                    <height>450</height>
+                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                </control>
+                <control type="label">
+                    <left>20</left>
+                    <top>466</top>
+                    <width>300</width>
+                    <height>32</height>
+                    <font>font_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>20</left>
+                    <top>502</top>
+                    <width>300</width>
+                    <height>28</height>
+                    <font>font_tiny</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>

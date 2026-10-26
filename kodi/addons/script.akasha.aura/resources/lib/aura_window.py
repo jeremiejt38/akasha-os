@@ -629,7 +629,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._reco_rows = {}
         self._apply_reco_state(section)
         self._rebind_reco_slots()
-        self._update_hero()
+        self._update_hero(clear_if_empty=True)
 
     def _set_home_tab(self, index):
         """Switch the Accueil tab (Pour vous / Tendances / Activité) and
@@ -711,7 +711,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if not row['paged'].items and not row.get('error'):
                 continue
             rows.append(row)
-        return rows or None, None
+        if hubs:
+            # The server answered with hubs but every one was filtered out
+            # as empty -- the honest render is the empty state, not the
+            # video-centric legacy rows (observed on a music section:
+            # "Continuer a regarder"/"Ajoutes recemment" labels with no
+            # cards underneath).
+            return rows, None
+        return None, None
 
     def _reco_init_hub_row(self, hub):
         """Wrap one hub in a PagedList: the first page is served from the
@@ -786,6 +793,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 paged.load_initial()
             except Exception as e:
                 error = e
+            # Plex drops empty rows -- a bare label with no cards reads as
+            # broken (seen on empty libraries via the legacy path).
+            if not paged.items and error is None:
+                continue
             built.append({'title': title, 'paged': paged, 'error': error})
         return built
 
@@ -1063,7 +1074,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 target=hit, args=(name,) + args, kwargs=kw,
                 daemon=True).start()
 
-    def _update_hero(self):
+    def _update_hero(self, clear_if_empty=False):
         """Sync the Plex hero (backdrop/logo/meta/plot/cast) with the item
         currently focused in a Recommande row -- Plex repaints the whole
         header every time the focused card changes, including while
@@ -1079,6 +1090,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     item = row[2].items[0]
                     break
         if item is None:
+            # A reload that yields zero items must not keep the previous
+            # view's hero painted (seen entering a music section: AHS hero
+            # text over the album-art backdrop). Focus-time calls keep the
+            # last hero so hopping to the tab strip does not blank it.
+            if clear_if_empty:
+                self._clear_hero()
             return
 
         is_episode = item.get('type') == 'episode'
@@ -1116,6 +1133,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('AuraHeroPlot', _truncate_plot(item.get('summary') or ''))
         self.setProperty('AuraHeroCast', cast)
         self._prefetch_detail(item)
+
+    def _clear_hero(self):
+        """Blank every hero property -- used when a (re)load produces no
+        items at all so the previous view's title/plot does not linger
+        over the new section's backdrop."""
+        with self._hero_fanart_lock:
+            if self._hero_fanart_timer is not None:
+                self._hero_fanart_timer.cancel()
+                self._hero_fanart_timer = None
+            self._hero_fanart_current = None
+        for prop in ('AuraHeroFanart', 'AuraHeroFanartPreload',
+                     'AuraHeroLogo', 'AuraHeroLogoPreload',
+                     'AuraHeroTitle', 'AuraHeroSubtitle', 'AuraHeroMeta',
+                     'AuraHeroRating', 'AuraHeroPlot', 'AuraHeroCast'):
+            try:
+                self.setProperty(prop, '')
+            except RuntimeError:
+                pass
 
     def _schedule_hero_fanart(self, url):
         """Debounce the 1080p backdrop swap while the user scrolls.
@@ -3739,18 +3774,18 @@ def _hub_title_fr(hub):
     else:
         # Discover ("Tendances") provider hub identifiers.
         discover_titles = {
-            'home.recently-released-trailers': i18n.tr(33160),
-            'home.trending-trailers': i18n.tr(33161),
-            'home.recommended-on-services': i18n.tr(33162),
-            'home.top_watchlisted': i18n.tr(33163),
-            'home.new-trailers': i18n.tr(33164),
-            'home.watchlist-available': i18n.tr(33165),
-            'home.coming-soon': i18n.tr(33166),
-            'home.available-rentals': i18n.tr(33167),
-            'home.genres': i18n.tr(33168),
-            'home.historical-week': i18n.tr(33169),
-            'home.blockbuster-trailers': i18n.tr(33170),
-            'home.preferred-services': i18n.tr(33171),
+            'home.recently-released-trailers': i18n.tr(33185),
+            'home.trending-trailers': i18n.tr(33186),
+            'home.recommended-on-services': i18n.tr(33187),
+            'home.top_watchlisted': i18n.tr(33188),
+            'home.new-trailers': i18n.tr(33189),
+            'home.watchlist-available': i18n.tr(33190),
+            'home.coming-soon': i18n.tr(33191),
+            'home.available-rentals': i18n.tr(33192),
+            'home.genres': i18n.tr(33193),
+            'home.historical-week': i18n.tr(33194),
+            'home.blockbuster-trailers': i18n.tr(33195),
+            'home.preferred-services': i18n.tr(33196),
         }
         base = discover_titles.get(identifier, title)
 

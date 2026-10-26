@@ -24,6 +24,7 @@ KEYS_PANEL_ID = 8100
 RECENT_LIST_ID = 8110
 PILLS_LIST_ID = 8120
 RESULTS_PANEL_ID = 8130
+SUGGEST_PANEL_ID = 8131
 SPACE_BUTTON_ID = 8115
 BACKSPACE_BUTTON_ID = 8116
 CLEAR_BUTTON_ID = 8117
@@ -106,7 +107,9 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _refresh_query(self):
         try:
-            self.getControl(QUERY_LABEL_ID).setLabel(self.query or ' ')
+            # Plex shows the word "Search" as the field placeholder.
+            self.getControl(QUERY_LABEL_ID).setLabel(
+                self.query or i18n.tr(33001))
         except RuntimeError:
             pass
         if self.query:
@@ -126,7 +129,10 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
         try:
-            panel = self.getControl(RESULTS_PANEL_ID)
+            # Plex swaps the results zone layout with the query state:
+            # poster grid for Popular Searches, media cards once typed.
+            panel = self.getControl(
+                RESULTS_PANEL_ID if self.query else SUGGEST_PANEL_ID)
             panel.reset()
             for item in self._results:
                 if item.get('_genre'):
@@ -214,14 +220,28 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _suggestions(self):
         """Suggested content for the empty-query zone (B8): the first
-        discover hubs' items, Plex's trending-style fill."""
+        discover hubs' items, Plex's trending-style fill.
+
+        Discover returns placeholder hubs with no inline Metadata --
+        the posters live behind each hub's `key` continuation, so pull
+        one page per hub when `items` is empty (seen on-screen: the
+        "Recherches populaires" heading rendered with a blank grid)."""
         if self._suggested is None:
             self._suggested = []
             fetch = getattr(self.client, 'discover_hubs', None)
             if fetch:
                 try:
                     for hub in fetch(hub_count=4, per_hub=8):
-                        self._suggested.extend(hub.get('items') or [])
+                        items = list(hub.get('items') or [])
+                        key = hub.get('key') or ''
+                        if not items and key and \
+                                hasattr(self.client, 'hub_items_with_total'):
+                            try:
+                                items, _ = self.client.hub_items_with_total(
+                                    key, limit=8)
+                            except Exception:
+                                items = []
+                        self._suggested.extend(items)
                         if len(self._suggested) >= 12:
                             break
                 except Exception as e:
@@ -315,7 +335,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._render_pills()
             if self.query:
                 self._run_search()
-        elif controlID == RESULTS_PANEL_ID:
+        elif controlID in (RESULTS_PANEL_ID, SUGGEST_PANEL_ID):
             self._pick_result()
 
     def onAction(self, action):
@@ -323,26 +343,55 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._push_recent(self.query)
             self.close()
             return
-        if action.getId() == ACTION_CONTEXT_MENU:
+        aid = action.getId()
+        try:
+            focused = self.getFocusId()
+        except RuntimeError:
+            focused = -1
+        # The right zone swaps panels with the query state (poster grid
+        # vs media cards) and Kodi happily focuses a hidden list, so the
+        # keyboard's Right and the grids' Left are re-aimed here.
+        if aid == 2 and focused in (
+                KEYS_PANEL_ID, RECENT_LIST_ID, SPACE_BUTTON_ID,
+                BACKSPACE_BUTTON_ID, CLEAR_BUTTON_ID) \
+                and not self.query:
+            # MOVE_RIGHT off the keyboard with an empty query.
+            try:
+                self.setFocusId(SUGGEST_PANEL_ID)
+            except RuntimeError:
+                pass
+            return
+        if aid == 1 and focused == SUGGEST_PANEL_ID:
+            # MOVE_LEFT off the suggestions grid back to the keyboard.
+            try:
+                self.setFocusId(KEYS_PANEL_ID)
+            except RuntimeError:
+                pass
+            return
+        if aid == ACTION_CONTEXT_MENU:
             # Plex long-press: media result cards open the option
             # sheet; keyboard/pills/recent entries keep the
             # long-press == click parity.
             try:
-                if self.getFocusId() == RESULTS_PANEL_ID:
+                if focused in (RESULTS_PANEL_ID, SUGGEST_PANEL_ID):
                     self._result_sheet()
                     return
             except RuntimeError:
                 pass
             try:
-                self.onClick(self.getFocusId())
+                self.onClick(focused)
             except Exception:
                 pass
             return
         super().onAction(action)
 
+    def _results_panel_id(self):
+        return RESULTS_PANEL_ID if self.query else SUGGEST_PANEL_ID
+
     def _result_sheet(self):
         try:
-            pos = self.getControl(RESULTS_PANEL_ID).getSelectedPosition()
+            pos = self.getControl(
+                self._results_panel_id()).getSelectedPosition()
         except RuntimeError:
             return
         if not (0 <= pos < len(self._results)):
@@ -353,14 +402,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             return
         import context_sheet
         context_sheet.open_sheet(
-            self, self.client, item, RESULTS_PANEL_ID,
+            self, self.client, item, self._results_panel_id(),
             self._pick_result,
             on_removed=lambda p: self._results.pop(p)
             if p < len(self._results) else None)
 
     def _pick_result(self):
         try:
-            pos = self.getControl(RESULTS_PANEL_ID).getSelectedPosition()
+            pos = self.getControl(
+                self._results_panel_id()).getSelectedPosition()
         except RuntimeError:
             return
         if not (0 <= pos < len(self._results)):

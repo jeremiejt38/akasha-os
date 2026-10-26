@@ -731,6 +731,26 @@ class PlexClient:
             if m.get('endTimeOffset') is not None
         ]
 
+    def item_chapters(self, rating_key):
+        """Chapter list of an item (Plex `Chapter` entries).
+
+        Kodi exposes no chapter enumeration over JSON-RPC, so the OSD
+        chapter list reads the *server-side* chapters instead -- the same
+        titles and offsets Plex clients show."""
+        data = self._request('/library/metadata/{}'.format(rating_key),
+                             {'includeChapters': 1})
+        mc = self._media_container(data)
+        meta = (mc.get('Metadata') or [{}])[0]
+        return [
+            {
+                'name': ch.get('tag') or ch.get('title') or '',
+                'start_ms': int(ch.get('startTimeOffset') or 0),
+                'end_ms': int(ch.get('endTimeOffset') or 0),
+            }
+            for ch in meta.get('Chapter') or []
+            if ch.get('startTimeOffset') is not None
+        ]
+
     def report_timeline(self, rating_key, time_ms, duration_ms,
                         state='playing'):
         """Report playback progress (`/:/timeline`).

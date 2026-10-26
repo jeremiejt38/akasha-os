@@ -625,69 +625,79 @@ msgctxt "#33159"
 msgid "Movies & Shows"
 msgstr ""
 
-# Nouvelles bandes-annonces
+# Sortie
 msgctxt "#33160"
-msgid "New trailers"
+msgid "Release"
 msgstr ""
 
-# Bandes-annonces en vogue
+# Retirer de Continuer à regarder
 msgctxt "#33161"
-msgid "Trending trailers"
-msgstr ""
-
-# Recommandé sur vos services
-msgctxt "#33162"
-msgid "Recommended on your services"
-msgstr ""
-
-# Les plus suivis cette semaine
-msgctxt "#33163"
-msgid "Most watchlisted this week"
-msgstr ""
-
-# Bandes-annonces de votre Watchlist
-msgctxt "#33164"
-msgid "Trailers from your Watchlist"
-msgstr ""
-
-# Disponibles sur vos services
-msgctxt "#33165"
-msgid "Available on your services"
-msgstr ""
-
-# Bientôt disponible
-msgctxt "#33166"
-msgid "Coming soon"
-msgstr ""
-
-# Disponibles à la location
-msgctxt "#33167"
-msgid "Available to rent"
-msgstr ""
-
-# Parcourir par genre
-msgctxt "#33168"
-msgid "Browse by genre"
-msgstr ""
-
-# Cette semaine dans l'histoire
-msgctxt "#33169"
-msgid "This week in history"
-msgstr ""
-
-# Blockbusters à venir
-msgctxt "#33170"
-msgid "Upcoming blockbusters"
-msgstr ""
-
-# Vos services
-msgctxt "#33171"
-msgid "Your services"
+msgid "Remove from Continue Watching"
 msgstr ""
 
 # Chargement…
 msgctxt "#33180"
 msgid "Loading…"
+msgstr ""
+
+# Nouvelles bandes-annonces
+msgctxt "#33185"
+msgid "New trailers"
+msgstr ""
+
+# Bandes-annonces en vogue
+msgctxt "#33186"
+msgid "Trending trailers"
+msgstr ""
+
+# Recommandé sur vos services
+msgctxt "#33187"
+msgid "Recommended on your services"
+msgstr ""
+
+# Les plus suivis cette semaine
+msgctxt "#33188"
+msgid "Most watchlisted this week"
+msgstr ""
+
+# Bandes-annonces de votre Watchlist
+msgctxt "#33189"
+msgid "Trailers from your Watchlist"
+msgstr ""
+
+# Disponibles sur vos services
+msgctxt "#33190"
+msgid "Available on your services"
+msgstr ""
+
+# Bientôt disponible
+msgctxt "#33191"
+msgid "Coming soon"
+msgstr ""
+
+# Disponibles à la location
+msgctxt "#33192"
+msgid "Available to rent"
+msgstr ""
+
+# Parcourir par genre
+msgctxt "#33193"
+msgid "Browse by genre"
+msgstr ""
+
+# Cette semaine dans l'histoire
+msgctxt "#33194"
+msgid "This week in history"
+msgstr ""
+
+# Blockbusters à venir
+msgctxt "#33195"
+msgid "Upcoming blockbusters"
+msgstr ""
+
+# Vos services
+msgctxt "#33196"
+msgid "Your services"
 msgstr ""
 
 # Pistes
@@ -1595,7 +1605,7 @@ msgctxt "#33568"
 msgid "Skip Intro"
 msgstr ""
 
-# Passer le générique de fin
+# Passer le générique
 msgctxt "#33569"
 msgid "Skip Credits"
 msgstr ""
@@ -1673,4 +1683,14 @@ msgstr ""
 # Recherches populaires
 msgctxt "#33584"
 msgid "Popular Searches"
+msgstr ""
+
+# minutes
+msgctxt "#33585"
+msgid "minutes"
+msgstr ""
+
+# Titres, personnes, genres et plus encore…
+msgctxt "#33586"
+msgid "Search titles, people, genres and more…"
 msgstr ""

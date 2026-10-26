@@ -158,18 +158,18 @@ STRINGS = {
     33145: ('Tous publics', 'All audiences'),
 
     # Discover/provider hub titles (Plex "Tendances" rows)
-    33160: ('Nouvelles bandes-annonces', 'New trailers'),
-    33161: ('Bandes-annonces en vogue', 'Trending trailers'),
-    33162: ('Recommandé sur vos services', 'Recommended on your services'),
-    33163: ('Les plus suivis cette semaine', 'Most watchlisted this week'),
-    33164: ('Bandes-annonces de votre Watchlist', 'Trailers from your Watchlist'),
-    33165: ('Disponibles sur vos services', 'Available on your services'),
-    33166: ('Bientôt disponible', 'Coming soon'),
-    33167: ('Disponibles à la location', 'Available to rent'),
-    33168: ('Parcourir par genre', 'Browse by genre'),
-    33169: ("Cette semaine dans l'histoire", 'This week in history'),
-    33170: ('Blockbusters à venir', 'Upcoming blockbusters'),
-    33171: ('Vos services', 'Your services'),
+    33185: ('Nouvelles bandes-annonces', 'New trailers'),
+    33186: ('Bandes-annonces en vogue', 'Trending trailers'),
+    33187: ('Recommandé sur vos services', 'Recommended on your services'),
+    33188: ('Les plus suivis cette semaine', 'Most watchlisted this week'),
+    33189: ('Bandes-annonces de votre Watchlist', 'Trailers from your Watchlist'),
+    33190: ('Disponibles sur vos services', 'Available on your services'),
+    33191: ('Bientôt disponible', 'Coming soon'),
+    33192: ('Disponibles à la location', 'Available to rent'),
+    33193: ('Parcourir par genre', 'Browse by genre'),
+    33194: ("Cette semaine dans l'histoire", 'This week in history'),
+    33195: ('Blockbusters à venir', 'Upcoming blockbusters'),
+    33196: ('Vos services', 'Your services'),
     33180: ('Chargement…', 'Loading…'),
 
     # --- search ----------------------------------------------------------
@@ -409,7 +409,7 @@ STRINGS = {
 
     # --- Skip Intro / Skip Credits chip (B2) ------------------------------
     33568: ("Passer l'intro", 'Skip Intro'),
-    33569: ('Passer le générique de fin', 'Skip Credits'),
+    33569: ('Passer le générique', 'Skip Credits'),
     33570: ('Passer', 'Skip'),
 
     # --- Dynamic library filters (B4) --------------------------------------
@@ -441,6 +441,13 @@ STRINGS = {
 
     # --- Search Popular Searches heading ------------------------------------
     33584: ('Recherches populaires', 'Popular Searches'),
+
+    # Plex-style OSD meta duration ("43 minutes", "1 h 15 min")
+    33585: ('minutes', 'minutes'),
+
+    # Plex search hint line above Popular Searches
+    33586: ('Titres, personnes, genres et plus encore…',
+            'Search titles, people, genres and more…'),
 }
 
 MONTH_ABBRS = {

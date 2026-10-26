@@ -25,7 +25,7 @@
         </control>
 
         <control type="group">
-            <left>96</left>
+            <left>844</left>
             <top>640</top>
             <animation effect="slide" start="0,60" end="0,0" time="220" tween="quadratic" easing="out" condition="true">WindowOpen</animation>
             <animation effect="fade" start="0" end="100" time="200" condition="true">WindowOpen</animation>
@@ -87,7 +87,7 @@
             <control type="button" id="6404">
                 <left>496</left>
                 <top>256</top>
-                <width>224</width>
+                <width>252</width>
                 <height>56</height>
                 <font>font_mini_bold</font>
                 <align>center</align>
@@ -102,9 +102,9 @@
                 <texturefocus colordiffuse="FFFFFFFF" border="18">rounded-solid.png</texturefocus>
             </control>
             <control type="button" id="6405">
-                <left>732</left>
+                <left>760</left>
                 <top>256</top>
-                <width>224</width>
+                <width>196</width>
                 <height>56</height>
                 <font>font_mini_bold</font>
                 <align>center</align>

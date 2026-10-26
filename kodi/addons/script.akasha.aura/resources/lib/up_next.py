@@ -224,9 +224,11 @@ def advance_via_up_next(addon_path):
     try:
         # B2: the chained episode has its own intro/credits windows --
         # refresh the stored markers before the supervision loop polls.
+        # B14: same for the Plex chapter list.
         import plex_client
-        osd_menu.store_markers(
-            plex_client.PlexClient(server, token, timeout=5), item)
+        client = plex_client.PlexClient(server, token, timeout=5)
+        osd_menu.store_markers(client, item)
+        osd_menu.store_chapters(client, item)
     except Exception:
         pass
     li = xbmcgui.ListItem(item.get('title') or '')

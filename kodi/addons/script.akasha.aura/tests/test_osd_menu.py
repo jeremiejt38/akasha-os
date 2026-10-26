@@ -5,11 +5,12 @@ xbmc modules are enough here -- only the pure chapter helpers are
 exercised, never the dialog class.
 """
 
+import json
 import os
 import sys
 import types
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
 
@@ -79,6 +80,82 @@ class ChapterEntriesTests(unittest.TestCase):
     def test_empty_and_none(self):
         self.assertEqual(osd_menu.chapter_entries(None, 0), [])
         self.assertEqual(osd_menu.chapter_entries([], 0), [])
+
+
+class _FakeHome:
+    def __init__(self):
+        self._props = {}
+
+    def setProperty(self, key, value):
+        self._props[key] = value
+
+    def getProperty(self, key):
+        return self._props.get(key, '')
+
+
+class StoreChaptersTests(unittest.TestCase):
+
+    def setUp(self):
+        self.home = _FakeHome()
+        self._patcher = patch.object(osd_menu, '_home', lambda: self.home)
+        self._patcher.start()
+
+    def tearDown(self):
+        self._patcher.stop()
+
+    def test_fetches_and_converts_to_seconds(self):
+        client = MagicMock()
+        client.item_chapters.return_value = [
+            {'name': 'Intro', 'start_ms': 0, 'end_ms': 584208},
+            {'name': 'Mid', 'start_ms': 584208, 'end_ms': 1200000},
+        ]
+        osd_menu.store_chapters(client, {'rating_key': '42'})
+        stored = json.loads(self.home.getProperty(osd_menu.PROP_CHAPTERS))
+        self.assertEqual(stored, [
+            {'name': 'Intro', 'time': 0.0},
+            {'name': 'Mid', 'time': 584.208}])
+        client.item_chapters.assert_called_once_with('42')
+
+    def test_no_chapters_clears_property(self):
+        self.home.setProperty(osd_menu.PROP_CHAPTERS, 'stale')
+        client = MagicMock()
+        client.item_chapters.return_value = []
+        osd_menu.store_chapters(client, {'rating_key': '42'})
+        self.assertEqual(self.home.getProperty(osd_menu.PROP_CHAPTERS), '')
+
+    def test_client_without_support_clears_property(self):
+        osd_menu.store_chapters(object(), {'rating_key': '42'})
+        self.assertEqual(self.home.getProperty(osd_menu.PROP_CHAPTERS), '')
+
+    def test_fetch_failure_clears_property(self):
+        client = MagicMock()
+        client.item_chapters.side_effect = RuntimeError('boom')
+        osd_menu.store_chapters(client, {'rating_key': '42'})
+        self.assertEqual(self.home.getProperty(osd_menu.PROP_CHAPTERS), '')
+
+
+class CurrentChaptersTests(unittest.TestCase):
+
+    def setUp(self):
+        self.home = _FakeHome()
+        self._patcher = patch.object(osd_menu, '_home', lambda: self.home)
+        self._patcher.start()
+
+    def tearDown(self):
+        self._patcher.stop()
+
+    def test_reads_stored_list(self):
+        self.home.setProperty(osd_menu.PROP_CHAPTERS,
+                              json.dumps([{'name': 'A', 'time': 10}]))
+        self.assertEqual(osd_menu._current_chapters(),
+                         [{'name': 'A', 'time': 10}])
+
+    def test_empty_when_unset_or_broken(self):
+        self.assertEqual(osd_menu._current_chapters(), [])
+        self.home.setProperty(osd_menu.PROP_CHAPTERS, '{bad json')
+        self.assertEqual(osd_menu._current_chapters(), [])
+        self.home.setProperty(osd_menu.PROP_CHAPTERS, '{}')
+        self.assertEqual(osd_menu._current_chapters(), [])
 
 
 if __name__ == '__main__':
