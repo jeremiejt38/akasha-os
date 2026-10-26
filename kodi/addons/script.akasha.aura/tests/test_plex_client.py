@@ -616,6 +616,27 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual(self.client.item_markers('42'), [])
 
     @patch('urllib.request.urlopen')
+    def test_item_chapters_normalises_entries(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Metadata': [{'Chapter': [
+                {'tag': 'Ouverture', 'index': 1, 'startTimeOffset': 0,
+                 'endTimeOffset': 584208},
+                {'index': 2, 'startTimeOffset': 584208,
+                 'endTimeOffset': 1200000}]}]}})
+        chapters = self.client.item_chapters('42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('includeChapters=1', url)
+        self.assertEqual(chapters, [
+            {'name': 'Ouverture', 'start_ms': 0, 'end_ms': 584208},
+            {'name': '', 'start_ms': 584208, 'end_ms': 1200000}])
+
+    @patch('urllib.request.urlopen')
+    def test_item_chapters_empty_when_absent(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(
+            {'MediaContainer': {'Metadata': [{'title': 'x'}]}})
+        self.assertEqual(self.client.item_chapters('42'), [])
+
+    @patch('urllib.request.urlopen')
     def test_watch_history_normalises_entries(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {'Metadata': [

@@ -57,6 +57,9 @@ PROP_SWITCHING = 'AuraSwitchingPlayback'
 # Intro/credits marker windows fetched at play time (B2), keyed by
 # ratingKey so a quality switch still resolves them after the restart.
 PROP_MARKERS = 'AuraPlaybackMarkers'
+# Plex-side chapters of the item about to play (B14). Kodi's JSON-RPC
+# has no chapter enumeration, so the list comes from the server.
+PROP_CHAPTERS = 'AuraPlaybackChapters'
 
 QUALITY_PRESETS = [
     ('original', i18n.tr(33210), None, None),
@@ -117,6 +120,7 @@ def store_playback_context(client, items):
         {k: (items or [{}])[0].get(k)
          for k in QUEUE_ITEM_FIELDS if (items or [{}])[0].get(k) is not None}))
     store_markers(client, (items or [None])[0])
+    store_chapters(client, (items or [None])[0])
 
 
 def store_markers(client, item):
@@ -138,6 +142,43 @@ def store_markers(client, item):
                 'Akasha Aura OSD: marker fetch failed: {}'.format(e),
                 getattr(xbmc, 'LOGWARNING', 2))
     win.setProperty(PROP_MARKERS, json.dumps(markers))
+
+
+def store_chapters(client, item):
+    """Fetch and persist the Plex chapters of the item about to play.
+
+    Stored as [{'name', 'time'}] with `time` in seconds so the OSD list
+    helpers stay shape-compatible; '' when the item has none so the
+    OSD circle visibility can key on the property. Best-effort like
+    store_markers: any failure stores empty."""
+    win = _home()
+    chapters = []
+    rk = (item or {}).get('rating_key')
+    fetch = getattr(client, 'item_chapters', None)
+    if rk and fetch:
+        try:
+            chapters = [
+                {'name': ch.get('name') or '',
+                 'time': (ch.get('start_ms') or 0) / 1000.0}
+                for ch in fetch(rk) or []
+            ]
+        except Exception as e:
+            getattr(xbmc, 'log', lambda *a, **k: None)(
+                'Akasha Aura OSD: chapter fetch failed: {}'.format(e),
+                getattr(xbmc, 'LOGWARNING', 2))
+    win.setProperty(PROP_CHAPTERS, json.dumps(chapters) if chapters else '')
+
+
+def _current_chapters():
+    """Chapter list of the *currently* playing item, [] when unknown."""
+    raw = _home().getProperty(PROP_CHAPTERS)
+    if not raw:
+        return []
+    try:
+        chapters = json.loads(raw)
+    except (ValueError, TypeError):
+        return []
+    return chapters if isinstance(chapters, list) else []
 
 
 def _current_markers():
@@ -372,16 +413,17 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
                   action=('builtin', 'osdaudiosettings'))
 
     def _build_chapters(self, lst):
-        """Chapters of the playing file (B14): title + timestamp rows,
-        current chapter selected -- seek on pick like Plex's list."""
-        props = _jsonrpc('Player.GetProperties', {
-            'playerid': 1,
-            'properties': ['chapters', 'time']})
+        """Chapters of the playing item (B14): title + timestamp rows,
+        current chapter selected -- seek on pick like Plex's list.
+        The list itself comes from the Plex metadata persisted by
+        store_chapters (Kodi's JSON-RPC has no chapter enumeration)."""
         try:
             position = xbmc.Player().getTime()
         except RuntimeError:
+            props = _jsonrpc('Player.GetProperties', {
+                'playerid': 1, 'properties': ['time']})
             position = _chapter_time_seconds(props.get('time'))
-        entries = chapter_entries(props.get('chapters'), position)
+        entries = chapter_entries(_current_chapters(), position)
         if not entries:
             self._add(lst, i18n.tr(33567), header=True)
             return
