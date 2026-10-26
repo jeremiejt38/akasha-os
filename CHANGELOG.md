@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.8](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.7...akasha-os-v0.69.8) (2026-10-26)
+
+
+### Bug Fixes
+
+* **aura-home:** keep the clock visible when the top bar recedes ([#215](https://github.com/jeremiejt38/akasha-os/issues/215)) ([9dcd5c5](https://github.com/jeremiejt38/akasha-os/commit/9dcd5c5465ccf9d86a43de99285e772dab14897f))
+
 ## [0.69.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.6...akasha-os-v0.69.7) (2026-10-26)
 
 
