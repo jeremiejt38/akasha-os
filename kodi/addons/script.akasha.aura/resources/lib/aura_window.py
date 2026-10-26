@@ -2128,6 +2128,61 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.getControl(DIVERT_SORT_BUTTON_ID).setLabel(sort_label)
         except RuntimeError:
             pass
+        self._layout_divert_toolbar()
+
+    def _layout_divert_toolbar(self):
+        """Reflow the library chip row so each pill hugs its label like Plex
+        (Kodi has no auto-width controls: measure the text, then reposition
+        the whole chain). All positions are in the chip group's coordinate
+        space, so the recessed-state slide still applies on top."""
+        def label_of(cid):
+            try:
+                return self.getControl(cid).getLabel()
+            except RuntimeError:
+                return ''
+
+        def put(cid, x, y, w=None):
+            try:
+                ctrl = self.getControl(cid)
+                ctrl.setPosition(x, y)
+                if w is not None:
+                    ctrl.setWidth(w)
+            except RuntimeError:
+                pass
+
+        def pill_w(text, pad=34):
+            return max(58, int(round(11 * len(text))) + pad)
+
+        y = 190
+        x = 127
+        w = pill_w(label_of(DIVERT_FILTER_BUTTON_ID))
+        for cid in (DIVERT_FILTER_BUTTON_ID, 3241, 3242):
+            put(cid, x, y, w)
+        x += w + 16
+        w = pill_w(label_of(3210))
+        put(3221, x, y, w)
+        put(3210, x, y, w)
+        x += w + 16
+        put(3222, x, y)
+        x += 46 + 16
+        w = pill_w(label_of(DIVERT_SORT_BUTTON_ID)) + 40
+        put(DIVERT_SORT_BUTTON_ID, x, y, w)
+        put(3223, x + 17, 202)
+        put(3224, x + 17, 202)
+        put(3243, x + 45, y, w - 45)
+        put(3244, x + 45, y, w - 45)
+        x += w + 16
+        w = pill_w(label_of(DIVERT_GENRE_BUTTON_ID))
+        for cid in (DIVERT_GENRE_BUTTON_ID, 3245, 3246):
+            put(cid, x, y, w)
+        x += w + 16
+        w = max(44, int(round(11 * len(label_of(3220)))) + 24)
+        put(3225, x, 198, w)
+        put(3220, x, 198, w)
+        x += w + 16
+        put(3218, x, y)
+        put(3226, x + 12, 202)
+        put(3227, x + 12, 202)
 
     def _render_divert_status(self, section, error=None):
         try:
@@ -2148,6 +2203,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 status.setLabel(label)
         except RuntimeError:
             pass
+        self._layout_divert_toolbar()
 
     def _divert_open_filter_menu(self):
         if not self._divert_sections:
