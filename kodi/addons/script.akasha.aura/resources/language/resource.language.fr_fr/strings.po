@@ -625,70 +625,80 @@ msgctxt "#33159"
 msgid "Movies & Shows"
 msgstr "Films et séries"
 
-# Nouvelles bandes-annonces
+# Sortie
 msgctxt "#33160"
-msgid "New trailers"
-msgstr "Nouvelles bandes-annonces"
+msgid "Release"
+msgstr "Sortie"
 
-# Bandes-annonces en vogue
+# Retirer de Continuer à regarder
 msgctxt "#33161"
-msgid "Trending trailers"
-msgstr "Bandes-annonces en vogue"
-
-# Recommandé sur vos services
-msgctxt "#33162"
-msgid "Recommended on your services"
-msgstr "Recommandé sur vos services"
-
-# Les plus suivis cette semaine
-msgctxt "#33163"
-msgid "Most watchlisted this week"
-msgstr "Les plus suivis cette semaine"
-
-# Bandes-annonces de votre Watchlist
-msgctxt "#33164"
-msgid "Trailers from your Watchlist"
-msgstr "Bandes-annonces de votre Watchlist"
-
-# Disponibles sur vos services
-msgctxt "#33165"
-msgid "Available on your services"
-msgstr "Disponibles sur vos services"
-
-# Bientôt disponible
-msgctxt "#33166"
-msgid "Coming soon"
-msgstr "Bientôt disponible"
-
-# Disponibles à la location
-msgctxt "#33167"
-msgid "Available to rent"
-msgstr "Disponibles à la location"
-
-# Parcourir par genre
-msgctxt "#33168"
-msgid "Browse by genre"
-msgstr "Parcourir par genre"
-
-# Cette semaine dans l'histoire
-msgctxt "#33169"
-msgid "This week in history"
-msgstr "Cette semaine dans l'histoire"
-
-# Blockbusters à venir
-msgctxt "#33170"
-msgid "Upcoming blockbusters"
-msgstr "Blockbusters à venir"
-
-# Vos services
-msgctxt "#33171"
-msgid "Your services"
-msgstr "Vos services"
+msgid "Remove from Continue Watching"
+msgstr "Retirer de Continuer à regarder"
 
 # Chargement…
 msgctxt "#33180"
 msgid "Loading…"
 msgstr "Chargement…"
+
+# Nouvelles bandes-annonces
+msgctxt "#33185"
+msgid "New trailers"
+msgstr "Nouvelles bandes-annonces"
+
+# Bandes-annonces en vogue
+msgctxt "#33186"
+msgid "Trending trailers"
+msgstr "Bandes-annonces en vogue"
+
+# Recommandé sur vos services
+msgctxt "#33187"
+msgid "Recommended on your services"
+msgstr "Recommandé sur vos services"
+
+# Les plus suivis cette semaine
+msgctxt "#33188"
+msgid "Most watchlisted this week"
+msgstr "Les plus suivis cette semaine"
+
+# Bandes-annonces de votre Watchlist
+msgctxt "#33189"
+msgid "Trailers from your Watchlist"
+msgstr "Bandes-annonces de votre Watchlist"
+
+# Disponibles sur vos services
+msgctxt "#33190"
+msgid "Available on your services"
+msgstr "Disponibles sur vos services"
+
+# Bientôt disponible
+msgctxt "#33191"
+msgid "Coming soon"
+msgstr "Bientôt disponible"
+
+# Disponibles à la location
+msgctxt "#33192"
+msgid "Available to rent"
+msgstr "Disponibles à la location"
+
+# Parcourir par genre
+msgctxt "#33193"
+msgid "Browse by genre"
+msgstr "Parcourir par genre"
+
+# Cette semaine dans l'histoire
+msgctxt "#33194"
+msgid "This week in history"
+msgstr "Cette semaine dans l'histoire"
+
+# Blockbusters à venir
+msgctxt "#33195"
+msgid "Upcoming blockbusters"
+msgstr "Blockbusters à venir"
+
+# Vos services
+msgctxt "#33196"
+msgid "Your services"
+msgstr "Vos services"
 
 # Pistes
 msgctxt "#33200"

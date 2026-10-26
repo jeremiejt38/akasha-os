@@ -3774,18 +3774,18 @@ def _hub_title_fr(hub):
     else:
         # Discover ("Tendances") provider hub identifiers.
         discover_titles = {
-            'home.recently-released-trailers': i18n.tr(33160),
-            'home.trending-trailers': i18n.tr(33161),
-            'home.recommended-on-services': i18n.tr(33162),
-            'home.top_watchlisted': i18n.tr(33163),
-            'home.new-trailers': i18n.tr(33164),
-            'home.watchlist-available': i18n.tr(33165),
-            'home.coming-soon': i18n.tr(33166),
-            'home.available-rentals': i18n.tr(33167),
-            'home.genres': i18n.tr(33168),
-            'home.historical-week': i18n.tr(33169),
-            'home.blockbuster-trailers': i18n.tr(33170),
-            'home.preferred-services': i18n.tr(33171),
+            'home.recently-released-trailers': i18n.tr(33185),
+            'home.trending-trailers': i18n.tr(33186),
+            'home.recommended-on-services': i18n.tr(33187),
+            'home.top_watchlisted': i18n.tr(33188),
+            'home.new-trailers': i18n.tr(33189),
+            'home.watchlist-available': i18n.tr(33190),
+            'home.coming-soon': i18n.tr(33191),
+            'home.available-rentals': i18n.tr(33192),
+            'home.genres': i18n.tr(33193),
+            'home.historical-week': i18n.tr(33194),
+            'home.blockbuster-trailers': i18n.tr(33195),
+            'home.preferred-services': i18n.tr(33196),
         }
         base = discover_titles.get(identifier, title)
 
