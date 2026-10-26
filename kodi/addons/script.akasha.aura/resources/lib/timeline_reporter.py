@@ -14,6 +14,7 @@ time, exactly like the OSD menus do -- so externally started playback
 (PM4K, JSON-RPC) simply reports nothing, as no mapping exists for it.
 """
 import threading
+import uuid
 
 import xbmc
 import xbmcgui
@@ -44,6 +45,9 @@ class TimelineReporter(threading.Thread):
         self._stop_event = threading.Event()
         self._context_provider = context_provider or osd_menu._playback_context
         self._client_factory = client_factory or plex_client.PlexClient
+        # Plex only persists viewOffset for reports tied to a session id;
+        # one UUID per playback session (Up Next chains keep it).
+        self._session = str(uuid.uuid4())
         # Last confirmed playing snapshot, reused for the final
         # state=stopped report after playback actually ends.
         self._last = None
@@ -73,13 +77,43 @@ class TimelineReporter(threading.Thread):
         self._last = (server, token, rating_key, time_ms, duration_ms)
         self._report(state)
 
-    def finish(self):
-        """Final `stopped` report, then terminate the thread loop."""
+    def stopped(self, position_ms=None):
+        """Immediate `state=stopped` for the item that just ended.
+
+        Plex clients send it when playback stops, not when the app
+        exits -- Aura's supervision loop calls _run_window() (blocking
+        doModal) after each play, so without this the server keeps the
+        session 'playing' until the user eventually quits Aura. The
+        thread keeps running: an Up Next chain may start a new item."""
+        if self._last is None:
+            return
+        if position_ms is not None:
+            server, token, rk, _t, dur = self._last
+            self._last = (server, token, rk, int(position_ms), dur)
+        self._report('stopped')
+        self._last = None
+
+    def finish(self, position_ms=None):
+        """Final `stopped` report, then terminate the thread loop.
+
+        `position_ms` overrides the last tick's time -- the supervision
+        loop polls the player every 500ms while the reporter only ticks
+        every 10s, so the stop position it sees is fresher."""
         if self._last:
+            if position_ms is not None:
+                server, token, rk, _t, dur = self._last
+                self._last = (server, token, rk, int(position_ms), dur)
             self._report('stopped')
         self._stop_event.set()
 
     def run(self):
+        # First report immediately, like Plex's own clients: a play that
+        # ends inside the first interval still lands a viewOffset, and
+        # the item shows in Now Playing / On Deck straight away.
+        try:
+            self.tick()
+        except Exception:
+            pass
         while not self._stop_event.wait(REPORT_INTERVAL_SECONDS):
             try:
                 self.tick()
@@ -90,7 +124,8 @@ class TimelineReporter(threading.Thread):
         server, token, rating_key, time_ms, duration_ms = self._last
         try:
             self._client_factory(server, token).report_timeline(
-                rating_key, time_ms, duration_ms, state)
+                rating_key, time_ms, duration_ms, state,
+                session=self._session)
             self._failures = 0
         except plex_client.PlexAPIError as e:
             # Offline servers are common on the LAN (Plex down, VPN cut);

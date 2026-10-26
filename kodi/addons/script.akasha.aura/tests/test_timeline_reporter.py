@@ -95,14 +95,14 @@ class TickTests(unittest.TestCase):
         rep, client = _reporter()
         rep.tick()
         client.report_timeline.assert_called_once_with(
-            '42', 61000, 2520000, 'playing')
+            '42', 61000, 2520000, 'playing', session=rep._session)
 
     def test_reports_paused_state(self):
         timeline_reporter.xbmc.getCondVisibility = lambda cond: True
         rep, client = _reporter()
         rep.tick()
         client.report_timeline.assert_called_once_with(
-            '42', 61000, 2520000, 'paused')
+            '42', 61000, 2520000, 'paused', session=rep._session)
 
     def test_no_report_without_context(self):
         rep, client = _reporter(server='', token='', rating_key='')
@@ -166,13 +166,80 @@ class FinishTests(unittest.TestCase):
         client.report_timeline.reset_mock()
         rep.finish()
         client.report_timeline.assert_called_once_with(
-            '42', 61000, 2520000, 'stopped')
+            '42', 61000, 2520000, 'stopped', session=rep._session)
         self.assertTrue(rep._stop_event.is_set())
 
     def test_finish_without_playback_reports_nothing(self):
         rep, client = _reporter()
         rep.finish()
         client.report_timeline.assert_not_called()
+
+    def test_finish_position_override_beats_stale_tick(self):
+        rep, client = _reporter()
+        rep.tick()  # _last time = 61000
+        rep.finish(position_ms=734000)
+        self.assertEqual(
+            client.report_timeline.call_args_list[-1].args,
+            ('42', 734000, 2520000, 'stopped'))
+        self.assertEqual(
+            client.report_timeline.call_args_list[-1].kwargs['session'],
+            rep._session)
+
+
+class StoppedTests(unittest.TestCase):
+
+    def setUp(self):
+        _home._props.clear()
+        _pin_stubs()
+        _fake_player.reset_mock(return_value=True, side_effect=True)
+        _fake_player.isPlayingVideo.return_value = True
+        _fake_player.getTime.return_value = 61.0
+        _fake_player.getTotalTime.return_value = 2520.0
+
+    def test_stopped_reports_immediately_and_clears_last(self):
+        rep, client = _reporter()
+        rep.tick()
+        client.report_timeline.reset_mock()
+        rep.stopped(position_ms=62000)
+        client.report_timeline.assert_called_once_with(
+            '42', 62000, 2520000, 'stopped', session=rep._session)
+        # Once reported, the item is done -- finish() must not repeat it.
+        rep.finish()
+        self.assertEqual(client.report_timeline.call_count, 1)
+
+    def test_stopped_without_playback_is_noop(self):
+        rep, client = _reporter()
+        rep.stopped(position_ms=62000)
+        client.report_timeline.assert_not_called()
+
+
+class RunTests(unittest.TestCase):
+
+    def setUp(self):
+        _home._props.clear()
+        _pin_stubs()
+        _fake_player.reset_mock(return_value=True, side_effect=True)
+        _fake_player.isPlayingVideo.return_value = True
+        _fake_player.getTime.return_value = 61.0
+        _fake_player.getTotalTime.return_value = 2520.0
+
+    def test_run_ticks_once_before_first_interval(self):
+        # Plex reports at play start, not after REPORT_INTERVAL_SECONDS:
+        # sub-interval plays still land a viewOffset for the stop report.
+        rep, client = _reporter()
+        rep._stop_event.set()
+        rep.run()
+        client.report_timeline.assert_called_once_with(
+            '42', 61000, 2520000, 'playing', session=rep._session)
+
+    def test_short_play_still_sends_stopped_report(self):
+        rep, client = _reporter()
+        rep._stop_event.set()
+        rep.run()
+        rep.finish()
+        self.assertEqual(
+            client.report_timeline.call_args_list[-1].args,
+            ('42', 61000, 2520000, 'stopped'))
 
 
 if __name__ == '__main__':
