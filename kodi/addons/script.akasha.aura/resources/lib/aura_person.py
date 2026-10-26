@@ -59,9 +59,9 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             pass
         try:
             count = len(self.items)
-            self.getControl(ROW_TITLE_ID).setLabel(
-                i18n.tr(33125).format(
-                    count, 's' if count != 1 else ''))
+            row_title = getattr(self, 'row_title', None) \
+                or i18n.tr(33125).format(count, 's' if count != 1 else '')
+            self.getControl(ROW_TITLE_ID).setLabel(row_title)
             _set(self, 'AuraPersonRowTitle', '1' if count else '')
             _set(self, 'AuraPersonEmpty',
                  '1' if not count else '')
