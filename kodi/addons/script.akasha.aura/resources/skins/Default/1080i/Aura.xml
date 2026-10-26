@@ -367,14 +367,14 @@
             <visible>String.IsEqual(Window.Property(AuraBarFocused),false)</visible>
             <control type="image">
                 <left>1694</left>
-                <top>40</top>
+                <top>39</top>
                 <width>126</width>
                 <height>48</height>
                 <texture colordiffuse="33000000" border="22">cap-r22.png</texture>
             </control>
             <control type="label">
                 <left>1694</left>
-                <top>40</top>
+                <top>39</top>
                 <width>126</width>
                 <height>48</height>
                 <align>center</align>
@@ -546,7 +546,7 @@
                 <control type="image">
                     <left>127</left>
                     <top>112</top>
-                    <width>677</width>
+                    <width>668</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
                 </control>
@@ -1289,8 +1289,8 @@
                 <!-- Plex Browse grid geometry (docs/plex-parity/SPEC.md):
                      6 columns of 240x360 posters, cell pitch 283x460,
                      title + year centered under the poster. -->
-                <left>127</left>
-                <top>262</top>
+                <left>115</left>
+                <top>250</top>
                 <width>1710</width>
                 <height>866</height>
                 <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -3311,7 +3311,7 @@
                         <top>615</top>
                         <width>18</width>
                         <height>11</height>
-                        <texture colordiffuse="FFFFFFFF">icon-more.png</texture>
+                        <texture colordiffuse="FFFFFFFF">icon-menu.png</texture>
                     </control>
                 </control>
 
