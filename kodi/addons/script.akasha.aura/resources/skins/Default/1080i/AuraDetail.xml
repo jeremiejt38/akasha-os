@@ -1360,6 +1360,7 @@
             <width>1920</width>
             <height>1080</height>
             <texture colordiffuse="FF10131A">white.png</texture>
+            <animation effect="fade" start="100" end="0" time="280" tween="quadratic" easing="out">Hidden</animation>
             <visible>String.IsEmpty(Window.Property(AuraDetailReady))</visible>
         </control>
         <control type="image">
@@ -1369,6 +1370,7 @@
             <height>1080</height>
             <aspectratio>scale</aspectratio>
             <texture background="true" colordiffuse="66FFFFFF">$INFO[Window.Property(AuraDetailFanart)]</texture>
+            <animation effect="fade" start="100" end="0" time="280" tween="quadratic" easing="out">Hidden</animation>
             <visible>String.IsEmpty(Window.Property(AuraDetailReady))</visible>
         </control>
     </controls>
