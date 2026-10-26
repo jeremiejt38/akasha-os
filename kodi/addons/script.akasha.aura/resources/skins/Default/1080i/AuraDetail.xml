@@ -134,10 +134,10 @@
             <texture>icon-home.png</texture>
         </control>
         <control type="image">
-            <left>51</left>
-            <top>612</top>
-            <width>26</width>
-            <height>16</height>
+            <left>47</left>
+            <top>609</top>
+            <width>34</width>
+            <height>22</height>
             <aspectratio>keep</aspectratio>
             <texture>icon-more.png</texture>
         </control>
@@ -148,7 +148,7 @@
             <top>296</top>
             <width>1100</width>
             <height>36</height>
-            <font>font_aura_mini</font>
+            <font>font_aura_meta</font>
             <textcolor>EEFFFFFF</textcolor>
         </control>
         <!-- Content-rating box trailing the meta line, like Plex's small
@@ -156,7 +156,7 @@
              width are computed in Python from the rendered meta width. -->
         <control type="image" id="7190">
             <left>0</left>
-            <top>294</top>
+            <top>296</top>
             <width>40</width>
             <height>36</height>
             <texture border="10">meta-rating-box.png</texture>
@@ -164,7 +164,7 @@
         </control>
         <control type="label" id="7191">
             <left>0</left>
-            <top>294</top>
+            <top>296</top>
             <width>40</width>
             <height>36</height>
             <font>font_aura_tiny_bold</font>
@@ -181,8 +181,8 @@
             <left>105</left>
             <top>344</top>
             <width>90</width>
-            <height>44</height>
-            <texture colordiffuse="3DFFFFFF" border="22">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg0))</visible>
         </control>
         <control type="image" id="7045">
@@ -198,7 +198,7 @@
             <left>105</left>
             <top>344</top>
             <width>90</width>
-            <height>44</height>
+            <height>40</height>
             <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -209,8 +209,8 @@
             <left>205</left>
             <top>344</top>
             <width>120</width>
-            <height>44</height>
-            <texture colordiffuse="3DFFFFFF" border="22">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg1))</visible>
         </control>
         <control type="image" id="7046">
@@ -226,7 +226,7 @@
             <left>205</left>
             <top>344</top>
             <width>120</width>
-            <height>44</height>
+            <height>40</height>
             <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -237,8 +237,8 @@
             <left>335</left>
             <top>344</top>
             <width>130</width>
-            <height>44</height>
-            <texture colordiffuse="3DFFFFFF" border="22">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg2))</visible>
         </control>
         <control type="image" id="7047">
@@ -254,7 +254,7 @@
             <left>335</left>
             <top>344</top>
             <width>130</width>
-            <height>44</height>
+            <height>40</height>
             <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -265,8 +265,8 @@
             <left>475</left>
             <top>344</top>
             <width>130</width>
-            <height>44</height>
-            <texture colordiffuse="3DFFFFFF" border="22">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg3))</visible>
         </control>
         <control type="image" id="7048">
@@ -282,7 +282,7 @@
             <left>475</left>
             <top>344</top>
             <width>130</width>
-            <height>44</height>
+            <height>40</height>
             <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -293,8 +293,8 @@
             <left>615</left>
             <top>344</top>
             <width>130</width>
-            <height>44</height>
-            <texture colordiffuse="3DFFFFFF" border="22">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg4))</visible>
         </control>
         <control type="image" id="7049">
@@ -310,7 +310,7 @@
             <left>615</left>
             <top>344</top>
             <width>130</width>
-            <height>44</height>
+            <height>40</height>
             <font>font_aura_mini</font>
             <align>center</align>
             <aligny>center</aligny>
@@ -792,9 +792,9 @@
             <scrolltime>150</scrolltime>
             <ondown>7100</ondown>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
-            <itemlayout width="160" height="56">
+            <itemlayout width="135" height="56">
                 <control type="image">
-                    <left>20</left>
+                    <left>8</left>
                     <top>4</top>
                     <width>119</width>
                     <height>48</height>
@@ -804,7 +804,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>160</width>
+                    <width>135</width>
                     <height>56</height>
                     <font>font_aura_small</font>
                     <align>center</align>
@@ -813,13 +813,13 @@
                     <textcolor>CCFFFFFF</textcolor>
                 </control>
             </itemlayout>
-            <focusedlayout width="160" height="56">
+            <focusedlayout width="135" height="56">
                 <!-- Kodi draws the selected item with the focused layout
                      even when the strip isn't focused: the unfocused
                      selected tab keeps Plex's thin outline, the truly
                      focused one inverts to a filled white pill. -->
                 <control type="image">
-                    <left>20</left>
+                    <left>8</left>
                     <top>4</top>
                     <width>119</width>
                     <height>48</height>
@@ -827,7 +827,7 @@
                     <visible>!Control.HasFocus(7120)</visible>
                 </control>
                 <control type="image">
-                    <left>20</left>
+                    <left>8</left>
                     <top>4</top>
                     <width>119</width>
                     <height>48</height>
@@ -837,9 +837,9 @@
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>160</width>
+                    <width>135</width>
                     <height>56</height>
-                    <font>font_aura_small_bold</font>
+                    <font>font_aura_small</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -849,7 +849,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>160</width>
+                    <width>135</width>
                     <height>56</height>
                     <font>font_aura_small_bold</font>
                     <align>center</align>
@@ -864,7 +864,7 @@
         <!-- "Vous l'avez regarde le..." line: Plex's "Activity by you"
              row shows overlapping circular avatars before the text. -->
         <control type="image" id="7180">
-            <left>128</left>
+            <left>132</left>
             <top>658</top>
             <width>56</width>
             <height>56</height>
@@ -872,7 +872,7 @@
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
         </control>
         <control type="image" id="7181">
-            <left>128</left>
+            <left>132</left>
             <top>658</top>
             <width>56</width>
             <height>56</height>
@@ -881,7 +881,7 @@
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + !String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
         </control>
         <control type="image" id="7182">
-            <left>128</left>
+            <left>132</left>
             <top>658</top>
             <width>56</width>
             <height>56</height>
@@ -890,10 +890,10 @@
         </control>
         <control type="label" id="7207">
             <left>200</left>
-            <top>668</top>
+            <top>666</top>
             <width>1200</width>
             <height>30</height>
-            <font>font_aura_tiny</font>
+            <font>font_aura_mini</font>
             <label>$INFO[Window.Property(AuraDetailActivity)]</label>
             <textcolor>D9FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>

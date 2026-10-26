@@ -312,7 +312,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         if item.get('genres'):
             parts.append(', '.join(item['genres'][:2]))
-        meta_text = '   '.join(parts)
+        meta_text = '    '.join(parts)
         try:
             self.getControl(7020).setLabel(meta_text)
         except RuntimeError:
@@ -323,7 +323,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailMetaRating', '1' if rating else '')
         if rating:
             # PIL under-measures Kodi's Inter ~1.0x here (see i18n.ellipsize)
-            box_x = 128 + int(i18n.text_width(meta_text, 22) or 0) + 24
+            box_x = 128 + int(i18n.text_width(meta_text, 20) or 0) + 24
             box_w = max(40, int((i18n.text_width(rating, 19) or 20)
                                 * 0.96) + 20)
             try:
@@ -538,7 +538,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
         try:
-            self.getControl(7207).setPosition(196, t + 105)
+            self.getControl(7207).setPosition(200, t + 105)
             self.getControl(7060).setPosition(128, t + 202)
             for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
                 self.getControl(cid).setPosition(128, t + 264)
@@ -553,7 +553,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if item.get('content_rating'):
             # Plex: shield glyph + "age N+" + chevron inside the pill.
             chips.append((_age_label(item['content_rating']) + ' ›',
-                          'age-shield.png', 24, True))
+                          'age-shield.png', 30, True))
         # Plex draws up to 4 bare provider chips (icon + value, no pill)
         # from the Ratings array; the legacy scalar fields are the
         # fallback when the array is absent.
@@ -582,44 +582,44 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         for slot, (text, icon, icon_w, pill) in enumerate(chips[:5]):
             text_w = int((i18n.text_width(text, 22) or len(text) * 11)
                          * 0.96)
-            width = (text_w + (icon_w + 16 if icon else 0)
-                     + (24 if pill else 0))
+            width = (text_w + (icon_w + 8 if icon else 0)
+                     + (14 if pill else 0))
             _set(self, 'AuraDetailChip{}'.format(slot), '1')
             if pill:
                 _set(self, 'AuraDetailChipBg{}'.format(slot), '1')
             try:
-                self.getControl(7021 + slot * 2).setPosition(chip_x, 344)
+                self.getControl(7021 + slot * 2).setPosition(chip_x, 340)
                 self.getControl(7021 + slot * 2).setWidth(width)
                 if icon:
                     ic = self.getControl(7045 + slot)
                     if icon == 'age-shield.png':
                         # Plex's green shield-check overshoots the pill
-                        # edge (~36px tall on a 48px pill).
-                        ic.setPosition(chip_x + 6, 344)
+                        # edge (~44px tall on a 40px pill).
+                        ic.setPosition(chip_x + 4, 338)
                         ic.setWidth(30)
-                        ic.setHeight(36)
+                        ic.setHeight(44)
                     else:
                         ic.setPosition(chip_x + (10 if pill else 0), 348)
                         ic.setWidth(icon_w)
-                        ic.setHeight(28)
+                        ic.setHeight(24)
                     _set(self, 'AuraDetailChipIcon{}'.format(slot), icon)
-                    lbl_x = chip_x + icon_w + (16 if pill else 6)
+                    lbl_x = chip_x + icon_w + (8 if pill else 6)
                     lbl_w = width - (lbl_x - chip_x)
                 else:
                     lbl_x, lbl_w = chip_x, width
-                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 344)
+                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 340)
                 self.getControl(CHIP_LABEL_IDS[slot]).setWidth(lbl_w)
                 self.getControl(CHIP_LABEL_IDS[slot]).setLabel(text)
             except RuntimeError:
                 pass
-            chip_x += width + 56
+            chip_x += width + 24
 
     @staticmethod
     def _rating_chip(value, rating_image, audience=False):
         icon = _provider_icon(rating_image, audience)
         # IMDb/TMDB are pill badges (64x32 texture at 48x24); the tomato
         # splat and popcorn stay bare glyphs.
-        icon_w = {'prov-imdb.png': 48, 'prov-tmdb.png': 60}.get(icon, 24)
+        icon_w = {'prov-imdb.png': 34, 'prov-tmdb.png': 38}.get(icon, 24)
         text = _fmt_rating(value, rating_image)
         if not icon:
             text = '{} {}'.format(_provider_label(rating_image),
@@ -698,7 +698,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # Plex wraps the tab row in a translucent container sized to
             # the tabs (160px pitch, ~16px trailing pad).
             self.getControl(7135).setWidth(
-                (len(self._seasons) + 1) * 160 + 16)
+                min(820, (len(self._seasons) + 1) * 135 + 16))
             if pos >= 0:
                 strip.selectItem(pos)
         except RuntimeError:
@@ -884,8 +884,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             for ov_id in ACTION_ICON_OVERLAYS.get(cid, ()):
                 try:
                     # 28px glyphs centred in the 64px circle, like Plex.
-                    self.getControl(ov_id).setPosition(x + 18,
-                                                       self._flow_top + 18)
+                    self.getControl(ov_id).setPosition(x + 13,
+                                                       self._flow_top + 11)
                 except RuntimeError:
                     pass
             lb = ACTION_LABEL_OVERLAYS.get(cid)

@@ -20,6 +20,8 @@ import sys
 FONTS = [
     ('font_aura_mini',
     'Inter-Unicode-Regular.ttf',22),
+    ('font_aura_meta',
+    'Inter-Unicode-Regular.ttf',20),
     ('font_aura_mini_bold',
     'Inter-Unicode-Bold.ttf',22),
     ('font_aura_tiny',
