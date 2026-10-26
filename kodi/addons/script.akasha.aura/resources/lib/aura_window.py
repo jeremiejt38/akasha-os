@@ -430,6 +430,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 thumb = client.user_thumb()
                 if thumb:
                     self.setProperty('AuraAvatar', thumb)
+                    # The search dialog's collapsed rail reads the avatar
+                    # off the global home window (same pattern as the
+                    # Up Next queue), not this window's own properties.
+                    xbmcgui.Window(10000).setProperty('AuraAvatar', thumb)
             except Exception as e:
                 xbmc.log('Akasha Aura: avatar fetch failed: {}'.format(e),
                          xbmc.LOGWARNING)
