@@ -240,6 +240,19 @@ class PlexClient:
         total = mc.get('totalSize', mc.get('size'))
         return items, total
 
+    def server_friendly_name(self):
+        """The Plex server's friendlyName ('Akasha') -- the amber line
+        Plex prints under each search-result card. The `/` root payload
+        is cheap and already flows through the read cache."""
+        if not hasattr(self, '_friendly_name'):
+            self._friendly_name = ''
+            try:
+                mc = self._media_container(self._request('/'))
+                self._friendly_name = mc.get('friendlyName') or ''
+            except Exception:
+                pass
+        return self._friendly_name
+
     def home_hubs(self, hub_count=24, per_hub=16):
         """The promoted "For You" hubs Plex TV renders as the home rows.
 

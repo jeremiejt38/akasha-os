@@ -12,6 +12,8 @@ Caller sets before doModal():
 - `on_person`    — callback(person dict) for people results
 - `on_genre`     — callback(genre dict) for genre results
 """
+import datetime
+
 import xbmc
 import xbmcgui
 import i18n
@@ -58,6 +60,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self._recent_loaded = False
         self._genres = None
         self._suggested = None
+        self._server_name = None
 
     def onInit(self):
         try:
@@ -80,10 +83,16 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         try:
             rail = self.getControl(RAIL_LIST_ID)
             rail.reset()
-            for icon in ('avatar-plex.png', 'icon-search.png',
-                         'icon-home.png', 'icon-more.png'):
+            avatar = xbmcgui.Window(10000).getProperty('AuraAvatar')
+            icons = ['avatar-plex.png', 'icon-search.png',
+                     'icon-home.png', 'icon-more.png']
+            if avatar:
+                icons[0] = avatar
+            for i, icon in enumerate(icons):
                 li = xbmcgui.ListItem('')
                 li.setArt({'icon': icon})
+                if i == 0 and avatar:
+                    li.setProperty('avatar', '1')
                 rail.addItem(li)
         except RuntimeError:
             pass
@@ -166,12 +175,16 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                                        or 'actor-fallback.png'})
                     li.setProperty('person', '1')
                 else:
-                    li = xbmcgui.ListItem(item.get('title') or '',
-                                          _result_sub(item))
+                    li = xbmcgui.ListItem(
+                        item.get('title') or '',
+                        _result_sub(item) if self.query
+                        else _suggest_sub(item))
                     thumb = item.get('poster_url') or item.get('landscape_url') \
                         or item.get('thumb_url') or 'DefaultVideo.png'
                     li.setArt({'poster': thumb})
-                    li.setProperty('server', item.get('_source') or 'Akasha')
+                    # Plex's amber line names the server that owns the
+                    # result, not the library section.
+                    li.setProperty('server', self._server_label())
                 panel.addItem(li)
         except RuntimeError:
             pass
@@ -265,6 +278,20 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                     xbmc.log('Akasha Aura Search: suggestions failed: {}'
                              .format(e), xbmc.LOGWARNING)
         return self._suggested[:12]
+
+    def _server_label(self):
+        """The Plex server's friendlyName for the amber line on result
+        cards ('Akasha' on the reference screen). Fetched once; the
+        connector client does not expose it so it falls back."""
+        if self._server_name is None:
+            self._server_name = 'Akasha'
+            fetch = getattr(self.client, 'server_friendly_name', None)
+            if fetch:
+                try:
+                    self._server_name = fetch() or 'Akasha'
+                except Exception:
+                    pass
+        return self._server_name
 
     def _search_people(self):
         """People matching the query (client-side over the per-section
@@ -470,6 +497,18 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
 def _set(window, prop, value):
     window.setProperty(prop, value or '')
+
+
+def _suggest_sub(item):
+    """Popular-Searches card subtitle like the Plex reference: 'N
+    saison(s)' for a show, the full release date when it is still in
+    the future, otherwise the bare year -- never 'year • type'."""
+    if item.get('type') == 'show' and item.get('child_count'):
+        return '{} {}'.format(item['child_count'], i18n.tr(33128))
+    avail = str(item.get('originally_available_at') or '')[:10]
+    if avail > datetime.date.today().isoformat():
+        return i18n.fmt_air_date(avail)
+    return str(item.get('year') or '')
 
 
 def _result_sub(item):

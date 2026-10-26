@@ -314,6 +314,10 @@ def build_video_item(raw_item, image_resolver):
         'show_title': raw_item.get('grandparentTitle') or '',
         'year': raw_item.get('year'),
         'originally_available_at': raw_item.get('originallyAvailableAt'),
+        # Plex counts seasons under childCount on shows -- the search
+        # suggestion cards print it as "N saison(s)" like the reference
+        # client's "1 Season" caption.
+        'child_count': raw_item.get('childCount'),
         'tagline': raw_item.get('tagline') or '',
         'summary': raw_item.get('summary') or '',
         'content_rating': _content_rating_display(raw_item),
