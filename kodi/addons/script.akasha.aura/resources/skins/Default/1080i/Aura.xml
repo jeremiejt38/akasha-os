@@ -369,6 +369,25 @@
             </control>
         </control>
 
+        <!-- Recessed-state clock: when the global bar fades out (focus in
+             the content), Plex keeps the clock at top-right, vertically
+             centered with the contextual tab strip (which slides up to
+             y~54-106). Shown only while the bar is recessed. -->
+        <control type="label">
+            <left>1500</left>
+            <top>60</top>
+            <width>300</width>
+            <height>40</height>
+            <align>right</align>
+            <aligny>center</aligny>
+            <font>font14</font>
+            <label>$INFO[System.Time(hh:mm)]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                <effect type="fade" start="100" end="0" time="220" tween="quadratic" easing="out"/>
+            </animation>
+        </control>
+
         <!-- Jeux sub-tabs: SteamLink / Moonlight / Autres. Moved out of the
              retracting top bar (group 100) into the content area, same
              pattern as Divertissement's own contextual tabs, since their
