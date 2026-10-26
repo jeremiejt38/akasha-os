@@ -43,9 +43,9 @@
             <width>1400</width>
             <height>34</height>
             <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration] • $INFO[VideoPlayer.VideoResolution]</label>
+            <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585] • $INFO[VideoPlayer.VideoResolution]</label>
             <textcolor>DDFFFFFF</textcolor>
-            <visible>VideoPlayer.Content(episodes)</visible>
+            <visible>VideoPlayer.Content(episodes) + !Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="label">
             <left>105</left>
@@ -53,9 +53,9 @@
             <width>1400</width>
             <height>34</height>
             <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration] • $INFO[VideoPlayer.VideoResolution]</label>
+            <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min • $INFO[VideoPlayer.VideoResolution]</label>
             <textcolor>DDFFFFFF</textcolor>
-            <visible>VideoPlayer.Content(movies)</visible>
+            <visible>VideoPlayer.Content(episodes) + Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="label">
             <left>105</left>
@@ -63,9 +63,39 @@
             <width>1400</width>
             <height>34</height>
             <font>font_mini</font>
-            <label>$INFO[VideoPlayer.Duration] • $INFO[VideoPlayer.VideoResolution]</label>
+            <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585] • $INFO[VideoPlayer.VideoResolution]</label>
             <textcolor>DDFFFFFF</textcolor>
-            <visible>!VideoPlayer.Content(episodes) + !VideoPlayer.Content(movies)</visible>
+            <visible>VideoPlayer.Content(movies) + !Integer.IsGreater(Player.Duration(h),0)</visible>
+        </control>
+        <control type="label">
+            <left>105</left>
+            <top>96</top>
+            <width>1400</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min • $INFO[VideoPlayer.VideoResolution]</label>
+            <textcolor>DDFFFFFF</textcolor>
+            <visible>VideoPlayer.Content(movies) + Integer.IsGreater(Player.Duration(h),0)</visible>
+        </control>
+        <control type="label">
+            <left>105</left>
+            <top>96</top>
+            <width>1400</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <label>$INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585] • $INFO[VideoPlayer.VideoResolution]</label>
+            <textcolor>DDFFFFFF</textcolor>
+            <visible>!VideoPlayer.Content(episodes) + !VideoPlayer.Content(movies) + !Integer.IsGreater(Player.Duration(h),0)</visible>
+        </control>
+        <control type="label">
+            <left>105</left>
+            <top>96</top>
+            <width>1400</width>
+            <height>34</height>
+            <font>font_mini</font>
+            <label>$INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min • $INFO[VideoPlayer.VideoResolution]</label>
+            <textcolor>DDFFFFFF</textcolor>
+            <visible>!VideoPlayer.Content(episodes) + !VideoPlayer.Content(movies) + Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
 
         <!-- Clock, top-right -->
@@ -106,8 +136,20 @@
             <height>44</height>
             <font>font_mini</font>
             <aligny>center</aligny>
-            <label>$INFO[Player.Time(h)]:$INFO[Player.Time(mm)]</label>
+            <label>$INFO[Player.Time(m)]:$INFO[Player.Time(ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
+            <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
+        </control>
+        <control type="label">
+            <left>140</left>
+            <top>918</top>
+            <width>110</width>
+            <height>44</height>
+            <font>font_mini</font>
+            <aligny>center</aligny>
+            <label>$INFO[Player.Time(h:mm:ss)]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="progress">
             <left>250</left>
@@ -129,8 +171,21 @@
             <font>font_mini</font>
             <align>right</align>
             <aligny>center</aligny>
-            <label>-$INFO[Player.TimeRemaining(h)]:$INFO[Player.TimeRemaining(mm)]</label>
+            <label>-$INFO[Player.TimeRemaining(m)]:$INFO[Player.TimeRemaining(ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
+            <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
+        </control>
+        <control type="label">
+            <left>1660</left>
+            <top>918</top>
+            <width>180</width>
+            <height>44</height>
+            <font>font_mini</font>
+            <align>right</align>
+            <aligny>center</aligny>
+            <label>-$INFO[Player.TimeRemaining(h:mm:ss)]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
 
         <!-- Dismiss chevron -->

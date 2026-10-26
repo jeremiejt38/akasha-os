@@ -1595,7 +1595,7 @@ msgctxt "#33568"
 msgid "Skip Intro"
 msgstr ""
 
-# Passer le générique de fin
+# Passer le générique
 msgctxt "#33569"
 msgid "Skip Credits"
 msgstr ""
@@ -1673,4 +1673,9 @@ msgstr ""
 # Recherches populaires
 msgctxt "#33584"
 msgid "Popular Searches"
+msgstr ""
+
+# minutes
+msgctxt "#33585"
+msgid "minutes"
 msgstr ""

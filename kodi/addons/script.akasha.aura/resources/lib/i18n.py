@@ -409,7 +409,7 @@ STRINGS = {
 
     # --- Skip Intro / Skip Credits chip (B2) ------------------------------
     33568: ("Passer l'intro", 'Skip Intro'),
-    33569: ('Passer le générique de fin', 'Skip Credits'),
+    33569: ('Passer le générique', 'Skip Credits'),
     33570: ('Passer', 'Skip'),
 
     # --- Dynamic library filters (B4) --------------------------------------
@@ -441,6 +441,9 @@ STRINGS = {
 
     # --- Search Popular Searches heading ------------------------------------
     33584: ('Recherches populaires', 'Popular Searches'),
+
+    # Plex-style OSD meta duration ("43 minutes", "1 h 15 min")
+    33585: ('minutes', 'minutes'),
 }
 
 MONTH_ABBRS = {
