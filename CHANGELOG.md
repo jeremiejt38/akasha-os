@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.10](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.9...akasha-os-v0.69.10) (2026-10-26)
+
+
+### Bug Fixes
+
+* **aura-detail:** label related row 'Titres similaires' ([#219](https://github.com/jeremiejt38/akasha-os/issues/219)) ([5f67d8d](https://github.com/jeremiejt38/akasha-os/commit/5f67d8dcaa39fef414a3bb5ea2ae583450af0fe5))
+
 ## [0.69.9](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.8...akasha-os-v0.69.9) (2026-10-26)
 
 
