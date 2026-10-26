@@ -75,10 +75,10 @@
         </control>
         <control type="label" id="7011">
             <left>128</left>
-            <top>200</top>
+            <top>230</top>
             <width>1100</width>
             <height>70</height>
-            <font>font_aura_head_bold</font>
+            <font>font_aura_info_black_doublerow</font>
             <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
         </control>
@@ -128,7 +128,7 @@
         <!-- Meta line: year - duration - genres -->
         <control type="label" id="7020">
             <left>128</left>
-            <top>302</top>
+            <top>296</top>
             <width>1100</width>
             <height>36</height>
             <font>font_aura_mini</font>
@@ -292,7 +292,7 @@
         <!-- Director / creator line -->
         <control type="label" id="7040">
             <left>128</left>
-            <top>518</top>
+            <top>512</top>
             <width>1100</width>
             <height>32</height>
             <font>font_aura_mini</font>
@@ -306,7 +306,7 @@
          focused (focusedcolor + textoffsetx clears the icon zone). -->
     <control type="button" id="7100">
         <left>105</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -323,7 +323,7 @@
     </control>
     <control type="image" id="7090">
         <left>125</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -332,7 +332,7 @@
     </control>
     <control type="image" id="7088">
         <left>125</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -341,7 +341,7 @@
     </control>
     <control type="button" id="7106">
         <left>375</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -360,7 +360,7 @@
     </control>
     <control type="image" id="7107">
         <left>395</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -369,7 +369,7 @@
     </control>
     <control type="image" id="7108">
         <left>395</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -379,7 +379,7 @@
     <!-- Bande-annonce / Bonus: only when /extras returns clips -->
     <control type="button" id="7109">
         <left>459</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -398,7 +398,7 @@
     </control>
     <control type="image" id="7111">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -407,7 +407,7 @@
     </control>
     <control type="image" id="7112">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -416,7 +416,7 @@
     </control>
     <control type="button" id="7103">
         <left>375</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -434,7 +434,7 @@
     </control>
     <control type="image" id="7092">
         <left>395</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -443,7 +443,7 @@
     </control>
     <control type="image" id="7093">
         <left>395</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -452,7 +452,7 @@
     </control>
     <control type="button" id="7104">
         <left>459</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -470,7 +470,7 @@
     </control>
     <control type="image" id="7099">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -479,7 +479,7 @@
     </control>
     <control type="image" id="7105">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -488,7 +488,7 @@
     </control>
     <control type="button" id="7101">
         <left>459</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -506,7 +506,7 @@
     </control>
     <control type="image" id="7094">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -515,7 +515,7 @@
     </control>
     <control type="image" id="7095">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -524,7 +524,7 @@
     </control>
     <control type="image" id="7096">
         <left>479</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <texture colordiffuse="FFE5A00D">icon-watched.png</texture>
@@ -532,7 +532,7 @@
     </control>
     <control type="button" id="7102">
         <left>543</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
         <font>font_aura_tiny_bold</font>
@@ -549,7 +549,7 @@
     </control>
     <control type="image" id="7097">
         <left>563</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -558,7 +558,7 @@
     </control>
     <control type="image" id="7098">
         <left>563</left>
-        <top>596</top>
+        <top>672</top>
         <width>24</width>
         <height>24</height>
         <aspectratio>keep</aspectratio>
@@ -657,7 +657,7 @@
     <!-- Media badges (video / audio / subs), right side like Plex -->
         <control type="image" id="7050">
             <left>1150</left>
-            <top>584</top>
+            <top>672</top>
             <width>350</width>
             <height>44</height>
             <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
@@ -665,7 +665,7 @@
         </control>
         <control type="label" id="7051">
             <left>1150</left>
-            <top>584</top>
+            <top>672</top>
             <width>350</width>
             <height>44</height>
             <font>font_aura_mini_bold</font>
@@ -676,7 +676,7 @@
         </control>
         <control type="image" id="7052">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
             <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
@@ -684,7 +684,7 @@
         </control>
         <control type="label" id="7053">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
             <font>font_aura_mini_bold</font>
@@ -695,7 +695,7 @@
         </control>
         <control type="image" id="7054">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
             <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
@@ -703,7 +703,7 @@
         </control>
         <control type="label" id="7055">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
             <font>font_aura_mini_bold</font>
@@ -715,7 +715,7 @@
         <!-- badge glyphs (speaker / subtitle box); video pill stays text-only -->
         <control type="image" id="7056">
             <left>1522</left>
-            <top>592</top>
+            <top>680</top>
             <width>28</width>
             <height>28</height>
             <aspectratio>keep</aspectratio>
@@ -724,7 +724,7 @@
         </control>
         <control type="image" id="7057">
             <left>1522</left>
-            <top>592</top>
+            <top>680</top>
             <width>28</width>
             <height>28</height>
             <aspectratio>keep</aspectratio>
@@ -800,7 +800,7 @@
              hint under the action row, from the server watch history. -->
         <control type="label" id="7207">
             <left>128</left>
-            <top>648</top>
+            <top>668</top>
             <width>1200</width>
             <height>30</height>
             <font>font_aura_tiny</font>
@@ -812,7 +812,7 @@
         <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
         <control type="label" id="7060">
             <left>128</left>
-            <top>722</top>
+            <top>726</top>
             <width>800</width>
             <height>44</height>
             <font>font_aura_main_bold</font>
@@ -910,7 +910,7 @@
 
         <!-- Episodes row (season tab): landscape cards -->
         <control type="list" id="7130">
-            <left>97</left>
+            <left>121</left>
             <top>740</top>
             <width>1800</width>
             <height>310</height>
@@ -1029,34 +1029,34 @@
             </focusedlayout>
         </control>
         <control type="list" id="7110">
-            <left>97</left>
-            <top>740</top>
+            <left>121</left>
+            <top>828</top>
             <width>1800</width>
-            <height>240</height>
+            <height>250</height>
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
             <visible>String.IsEqual(Window.Property(AuraDetailCastRow),1)</visible>
-            <itemlayout width="200" height="230">
+            <itemlayout width="215" height="244">
                 <control type="image">
-                    <left>20</left>
+                    <left>12</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <width>190</width>
+                    <height>190</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>20</left>
+                    <left>12</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <width>190</width>
+                    <height>190</height>
                     <texture colordiffuse="FF10131A">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>168</top>
-                    <width>200</width>
+                    <top>196</top>
+                    <width>215</width>
                     <height>26</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -1066,8 +1066,8 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>194</top>
-                    <width>200</width>
+                    <top>222</top>
+                    <width>215</width>
                     <height>24</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -1076,34 +1076,34 @@
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="200" height="230">
+            <focusedlayout width="215" height="244">
                 <control type="image">
-                    <left>20</left>
+                    <left>12</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <width>190</width>
+                    <height>190</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>20</left>
+                    <left>12</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <width>190</width>
+                    <height>190</height>
                     <texture colordiffuse="FF10131A">cast-mask.png</texture>
                 </control>
                 <control type="image">
-                    <left>18</left>
+                    <left>10</left>
                     <top>-2</top>
-                    <width>164</width>
-                    <height>164</height>
+                    <width>194</width>
+                    <height>194</height>
                     <texture>cast-ring.png</texture>
                     <visible>Control.HasFocus(7110)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>168</top>
-                    <width>200</width>
+                    <top>196</top>
+                    <width>215</width>
                     <height>26</height>
                     <font>font_aura_mini_bold</font>
                     <align>center</align>
@@ -1113,8 +1113,8 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>194</top>
-                    <width>200</width>
+                    <top>222</top>
+                    <width>215</width>
                     <height>24</height>
                     <font>font_aura_mini</font>
                     <align>center</align>

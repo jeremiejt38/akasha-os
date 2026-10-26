@@ -130,7 +130,7 @@ ACTION_LABEL_OVERLAYS = {
     WATCHED_BUTTON_ID: 7155,
     MORE_BUTTON_ID: 7156,
 }
-ACTION_ROW_TOP = 576
+ACTION_ROW_TOP = 564
 ACTION_ROW_LEFT = 128
 ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
@@ -423,13 +423,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             w = 34 + len(text) * 14 + ic_w
             badge_x -= w
             try:
-                self.getControl(bg_id).setPosition(badge_x, 584)
+                self.getControl(bg_id).setPosition(badge_x, 672)
                 self.getControl(bg_id).setWidth(w)
-                self.getControl(lb_id).setPosition(badge_x + ic_w, 584)
+                self.getControl(lb_id).setPosition(badge_x + ic_w, 672)
                 self.getControl(lb_id).setWidth(w - ic_w)
                 self.getControl(lb_id).setLabel(text)
                 if ic_id:
-                    self.getControl(ic_id).setPosition(badge_x + 12, 592)
+                    self.getControl(ic_id).setPosition(badge_x + 12, 680)
             except RuntimeError:
                 pass
             badge_x -= 14
@@ -443,6 +443,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraDetailSectionTitle',
                  '1' if item.get('cast') else '')
             try:
+                # Plex seats the Cast & Crew heading lower on movie pages
+                # (the Activity line occupies the space above it).
+                self.getControl(7060).setPosition(128, 770)
                 self.getControl(7060).setLabel(i18n.tr(33100))
             except RuntimeError:
                 pass
@@ -498,7 +501,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # prefixes are only the fallback when no icon is known.
         chips = []
         if item.get('content_rating'):
-            chips.append((_age_label(item['content_rating']), '', True))
+            # Plex: shield glyph + "age N+" + chevron inside the pill.
+            chips.append((_age_label(item['content_rating']) + ' ›',
+                          'age-shield.png', True))
         # Plex draws up to 4 bare provider chips (icon + value, no pill)
         # from the Ratings array; the legacy scalar fields are the
         # fallback when the array is absent.
@@ -587,6 +592,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _render_seasons(self):
         try:
+            # The window is reused across modes: always re-seat the
+            # heading (movie mode parks it lower under the activity row).
+            self.getControl(7060).setPosition(128, 726)
             self.getControl(7060).setLabel(i18n.tr(33103).format(
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         except RuntimeError:
@@ -639,6 +647,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _render_episodes(self):
         season = self._seasons[self._active_season]
         try:
+            self.getControl(7060).setPosition(128, 726)
             self.getControl(7060).setLabel(self._season_label(season))
         except RuntimeError:
             pass
