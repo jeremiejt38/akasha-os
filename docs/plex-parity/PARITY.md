@@ -100,7 +100,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - **Multi-utilisateurs / PIN (« Who's watching? »)** : fonction compte plex.tv — `profil/*` ; hors périmètre du connecteur privé.
 - **Onboarding Plex** (`onboarding/*`) : parcours de première ouverture de l'app Plex elle-même — hors périmètre Aura.
 - **Contenus « Sur Plex »** (TV en direct, Découvrir) : sources cloud Plex, notification explicite en attendant un proxy éventuel.
-- **Écran « Plus »** : Plex liste des sources supplémentaires (souvent vide) ; Aura ouvre « Gérer les bibliothèques » (épinglage) — équivalent fonctionnel.
+- **Écran « Plus »** : Plex liste des sources supplémentaires (souvent vide) ; Aura ouvre « Gérer les bibliothèques » (épinglage) — équivalent fonctionnel ; ~~feuille native grise~~ → **vérifié à l'écran** : `aura_menu.select` (feuille sombre partagée) + `aura_menu.confirm`/`.message` (textbox multiligne + pills Confirmer/Annuler/OK) remplacent tous les `Dialog().select`/`.yesno`/`.ok` visibles (gestion bibliothèques, veille/redémarrage/arrêt, infos fichier, désinstallations Store/App).
 - ~~**Portraits d'acteurs** : le serveur renvoie souvent `thumb=NONE` → fallback `actor-fallback.png`~~ → corrigé (v0.69.9) : les hubs ne portent pas les `thumb` des `Role`, la fiche réhydrate `metadata_item` en tâche de fond et la rangée cast affiche les vraies photos (vérifié sur films et épisodes) ; le fallback ne sert que pour les rôles réellement sans photo.
 - **Backdrop** : couleur de fondu légèrement différente (scrim proche mais pas pixel-perfect).
 - **Typographie** : Aura utilise `RobotoCondensed` (skin) vs le sans-serif standard de Plex — écart mineur, un changement de police casserait les métriques de toute la skin.
