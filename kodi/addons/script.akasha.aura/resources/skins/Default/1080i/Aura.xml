@@ -512,7 +512,7 @@
                      the global bar recedes (y 118 -> 60), and slides back
                      under it when the bar fades back in. -->
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                    <effect type="slide" start="0,0" end="0,-80" time="250" tween="quadratic" easing="out"/>
+                    <effect type="slide" start="0,0" end="0,-88" time="250" tween="quadratic" easing="out"/>
                 </animation>
 
                 <!-- Plex's library view has no big title block: the context
@@ -545,7 +545,7 @@
                      with dark text. -->
                 <control type="image">
                     <left>127</left>
-                    <top>112</top>
+                    <top>120</top>
                     <width>684</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
@@ -555,40 +555,40 @@
                      focused; white focus fill covers it otherwise). -->
                 <control type="image">
                     <left>139</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
                     <left>321</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
                     <left>496</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>154</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
                     <left>660</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
                     <height>46</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
 
                 <control type="button" id="3050">
                     <left>139</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <label>$ADDON[script.akasha.aura 33008]</label>
@@ -607,7 +607,7 @@
 
                 <control type="button" id="3100">
                     <left>321</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <label>$ADDON[script.akasha.aura 33010]</label>
@@ -627,7 +627,7 @@
                 <!-- Plex "Collections" tab (4th contextual library tab). -->
                 <control type="button" id="3075">
                     <left>496</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>154</width>
                     <height>46</height>
                     <label>$ADDON[script.akasha.aura 33011]</label>
@@ -646,7 +646,7 @@
 
                 <control type="button" id="3060">
                     <left>660</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
                     <height>46</height>
                     <label>$ADDON[script.akasha.aura 33009]</label>
@@ -666,7 +666,7 @@
             
                 <control type="label">
                     <left>139</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -678,7 +678,7 @@
                 </control>
                 <control type="label">
                     <left>321</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -690,7 +690,7 @@
                 </control>
                 <control type="label">
                     <left>496</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>154</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -702,7 +702,7 @@
                 </control>
                 <control type="label">
                     <left>660</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -714,7 +714,7 @@
                 </control>
                 <control type="label">
                     <left>139</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -726,7 +726,7 @@
                 </control>
                 <control type="label">
                     <left>139</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -738,7 +738,7 @@
                 </control>
                 <control type="label">
                     <left>321</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -750,7 +750,7 @@
                 </control>
                 <control type="label">
                     <left>321</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>164</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -762,7 +762,7 @@
                 </control>
                 <control type="label">
                     <left>496</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>154</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -774,7 +774,7 @@
                 </control>
                 <control type="label">
                     <left>496</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>154</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -786,7 +786,7 @@
                 </control>
                 <control type="label">
                     <left>660</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -798,7 +798,7 @@
                 </control>
                 <control type="label">
                     <left>660</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
                     <height>46</height>
                     <font>font_mini</font>
@@ -821,11 +821,11 @@
                 <!-- Same recentering as the library strip: y 118 -> 60
                      while the global bar is recessed. -->
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                    <effect type="slide" start="0,0" end="0,-80" time="250" tween="quadratic" easing="out"/>
+                    <effect type="slide" start="0,0" end="0,-88" time="250" tween="quadratic" easing="out"/>
                 </animation>
                 <control type="image">
                     <left>127</left>
-                    <top>112</top>
+                    <top>120</top>
                     <width>522</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
@@ -838,7 +838,7 @@
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
@@ -846,7 +846,7 @@
                     <top>120</top>
                     <width>170</width>
                     <height>48</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
@@ -854,7 +854,7 @@
                     <top>120</top>
                     <width>160</width>
                     <height>48</height>
-                    <texture colordiffuse="63FFFFFF" border="20">cap-outline-r24.png</texture>
+                    <texture colordiffuse="FFFFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
@@ -1359,7 +1359,7 @@
                         <top>32</top>
                         <width>36</width>
                         <height>36</height>
-                        <texture colordiffuse="80000000">circle.png</texture>
+                        <texture colordiffuse="E6000000">circle.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
@@ -1459,7 +1459,7 @@
                         <top>32</top>
                         <width>36</width>
                         <height>36</height>
-                        <texture colordiffuse="80000000">circle.png</texture>
+                        <texture colordiffuse="E6000000">circle.png</texture>
                         <visible>Integer.IsGreater(ListItem.PlayCount,0) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
@@ -1494,7 +1494,7 @@
                     </control>
                     <control type="label">
                         <left>12</left>
-                        <top>441</top>
+                        <top>439</top>
                         <width>240</width>
                         <height>26</height>
                         <font>font_tiny</font>
@@ -3277,7 +3277,7 @@
                         <top>447</top>
                         <width>38</width>
                         <height>38</height>
-                        <texture colordiffuse="B8262626">cast-mask.png</texture>
+                        <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
