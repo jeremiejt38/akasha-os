@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Akasha Plex-style VideoOSD (replaces Arctic Horizon 2's).
      Mirrors the Android TV OSD measured in docs/plex-parity/reference/lecteur/:
-     title + SxEx/show/duration top-left, clock top-right, slim seek bar
-     bottom with play/pause + times, subtitle and settings circles at the
-     bottom-right, a down chevron to dismiss. -->
+     title + SxEx/show/duration top-left (x73), naked clock top-right,
+     slim seek bar bottom (x222-1722, 12px) with the 24px white knob,
+     naked play/pause glyph, subtitle and settings circles bottom-right
+     at y870, a thin down chevron to dismiss. -->
 <window>
     <defaultcontrol>9100</defaultcontrol>
     <controls>
@@ -23,19 +24,21 @@
             <texture>akasha-osd-scrim-bottom.png</texture>
         </control>
 
-        <!-- Title block, top-left -->
+        <!-- Title block, top-left (Plex: Inter ~36px, caps y73-99) -->
         <control type="label">
-            <left>105</left>
-            <top>50</top>
+            <left>73</left>
+            <top>66</top>
             <width>1400</width>
             <height>48</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_head_bold</font>
             <label>$INFO[VideoPlayer.Title]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
+        <!-- Meta line + quality tag hugging the text (Plex: caps
+             y115-134, tag ~24px trailing ~10px after the last word). -->
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -45,7 +48,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -58,8 +61,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -69,7 +72,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -82,8 +85,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -93,7 +96,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -106,8 +109,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -117,7 +120,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -130,8 +133,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -141,7 +144,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -154,8 +157,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -165,7 +168,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -178,24 +181,25 @@
             </control>
         </control>
 
-        <!-- Clock, top-right -->
+        <!-- Clock, top-right: naked text, right edge ~1839 (Plex) -->
         <control type="label">
             <left>1640</left>
-            <top>50</top>
+            <top>53</top>
             <width>200</width>
-            <height>48</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_mini</font>
             <align>right</align>
+            <aligny>center</aligny>
             <label>$INFO[System.Time]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
 
-        <!-- Chapters + subtitle + settings circles, bottom-right. The
-             chapters circle only renders when the playing file carries
-             more than one chapter (B14). -->
+        <!-- Chapters + subtitle + settings circles, bottom-right (Plex
+             glyph centers ~y902). The chapters circle only renders when
+             the playing file carries more than one chapter (B14). -->
         <control type="button" id="9112">
-            <left>1570</left>
-            <top>828</top>
+            <left>1637</left>
+            <top>870</top>
             <width>64</width>
             <height>64</height>
             <label></label>
@@ -208,16 +212,16 @@
             <visible>Integer.IsGreater(Player.ChapterCount,1) | !String.IsEmpty(Window(10000).Property(AuraPlaybackChapters))</visible>
         </control>
         <control type="image">
-            <left>1586</left>
-            <top>844</top>
-            <width>32</width>
-            <height>32</height>
+            <left>1654</left>
+            <top>887</top>
+            <width>30</width>
+            <height>30</height>
             <texture>akasha-chapters.png</texture>
             <visible>Integer.IsGreater(Player.ChapterCount,1) | !String.IsEmpty(Window(10000).Property(AuraPlaybackChapters))</visible>
         </control>
         <control type="button" id="9110">
-            <left>1650</left>
-            <top>828</top>
+            <left>1711</left>
+            <top>870</top>
             <width>64</width>
             <height>64</height>
             <label></label>
@@ -229,15 +233,15 @@
             <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
         </control>
         <control type="image">
-            <left>1666</left>
-            <top>844</top>
-            <width>32</width>
-            <height>32</height>
-            <texture>osd/subs.png</texture>
+            <left>1728</left>
+            <top>887</top>
+            <width>30</width>
+            <height>30</height>
+            <texture>osd-subs.png</texture>
         </control>
         <control type="button" id="9111">
-            <left>1730</left>
-            <top>828</top>
+            <left>1785</left>
+            <top>870</top>
             <width>64</width>
             <height>64</height>
             <label></label>
@@ -248,17 +252,18 @@
             <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
         </control>
         <control type="image">
-            <left>1746</left>
-            <top>844</top>
-            <width>32</width>
-            <height>32</height>
+            <left>1802</left>
+            <top>887</top>
+            <width>30</width>
+            <height>30</height>
             <texture>osd/settings.png</texture>
         </control>
 
-        <!-- Bottom bar: play/pause, time, seek, remaining -->
+        <!-- Bottom bar: naked play/pause glyph (Plex ~21x23 at
+             x80,y963), elapsed, seek track + knob, remaining -->
         <control type="button" id="9100">
-            <left>70</left>
-            <top>912</top>
+            <left>62</left>
+            <top>946</top>
             <width>56</width>
             <height>56</height>
             <label></label>
@@ -266,62 +271,64 @@
             <onright>9101</onright>
             <onup>9110</onup>
             <texturenofocus>-</texturenofocus>
-            <texturefocus colordiffuse="33FFFFFF">akasha-circle.png</texturefocus>
+            <texturefocus colordiffuse="1AFFFFFF">akasha-circle.png</texturefocus>
         </control>
         <control type="image">
-            <left>82</left>
-            <top>924</top>
-            <width>32</width>
-            <height>32</height>
+            <left>60</left>
+            <top>946</top>
+            <width>64</width>
+            <height>64</height>
+            <aspectratio>keep</aspectratio>
             <texture>osd/pause.png</texture>
             <visible>!Player.Paused</visible>
         </control>
         <control type="image">
-            <left>82</left>
-            <top>924</top>
-            <width>32</width>
-            <height>32</height>
+            <left>56</left>
+            <top>947</top>
+            <width>64</width>
+            <height>64</height>
+            <aspectratio>keep</aspectratio>
             <texture>osd/play.png</texture>
             <visible>Player.Paused</visible>
         </control>
         <control type="label">
-            <left>140</left>
-            <top>918</top>
+            <left>148</left>
+            <top>954</top>
             <width>110</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <aligny>center</aligny>
             <label>$INFO[Player.Time(m)]:$INFO[Player.Time(ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="label">
-            <left>140</left>
-            <top>918</top>
+            <left>148</left>
+            <top>954</top>
             <width>110</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <aligny>center</aligny>
             <label>$INFO[Player.Time(h:mm:ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <!-- Seek visuals: a passive progress draws the gray track + amber
-             played fill (Plex accent), the interactive slider above it only
-             renders the white thumb. -->
+             played fill (Plex accent), the interactive slider above it
+             only renders the 24px white knob at the playhead. -->
         <control type="progress">
-            <left>250</left>
-            <top>937</top>
-            <width>1380</width>
-            <height>6</height>
+            <left>222</left>
+            <top>969</top>
+            <width>1500</width>
+            <height>12</height>
             <info>Player.Progress</info>
-            <texturebg colordiffuse="59FFFFFF" border="4">progress/progress-bg.png</texturebg>
+            <texturebg colordiffuse="5EFFFFFF" border="6">progress/progress-bg.png</texturebg>
         </control>
         <control type="progress">
-            <left>250</left>
-            <top>937</top>
-            <width>1380</width>
-            <height>6</height>
+            <left>222</left>
+            <top>969</top>
+            <width>1500</width>
+            <height>12</height>
             <info>Player.Progress</info>
             <texturebg colordiffuse="00FFFFFF">progress/progress-bg.png</texturebg>
             <lefttexture colordiffuse="FFE5A00D" border="2">progress/progress-left.png</lefttexture>
@@ -330,25 +337,25 @@
             <overlaytexture></overlaytexture>
         </control>
         <control type="slider" id="9101">
-            <left>250</left>
-            <top>928</top>
-            <width>1380</width>
-            <height>24</height>
+            <left>222</left>
+            <top>957</top>
+            <width>1500</width>
+            <height>36</height>
             <info>Player.Progress</info>
             <action>seek</action>
             <texturesliderbar colordiffuse="00FFFFFF">progress/slider_bg.png</texturesliderbar>
-            <textureslidernib colordiffuse="FFFFFFFF">progress/slider_nib.png</textureslidernib>
-            <textureslidernibfocus colordiffuse="FFFFFFFF">progress/slider_nib.png</textureslidernibfocus>
+            <textureslidernib colordiffuse="FFFFFFFF">osd-nib.png</textureslidernib>
+            <textureslidernibfocus colordiffuse="FFFFFFFF">osd-nib.png</textureslidernibfocus>
             <onleft>9100</onleft>
             <onup>9110</onup>
             <ondown>9102</ondown>
         </control>
         <control type="label">
-            <left>1660</left>
-            <top>918</top>
-            <width>180</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <left>1638</left>
+            <top>954</top>
+            <width>204</width>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <align>right</align>
             <aligny>center</aligny>
             <label>-$INFO[Player.TimeRemaining(m)]:$INFO[Player.TimeRemaining(ss)]</label>
@@ -356,11 +363,11 @@
             <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="label">
-            <left>1660</left>
-            <top>918</top>
-            <width>180</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <left>1638</left>
+            <top>954</top>
+            <width>204</width>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <align>right</align>
             <aligny>center</aligny>
             <label>-$INFO[Player.TimeRemaining(h:mm:ss)]</label>
@@ -368,11 +375,11 @@
             <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
 
-        <!-- Dismiss chevron -->
+        <!-- Dismiss chevron (Plex: thin ~20px V at y~1007) -->
         <control type="button" id="9102">
-            <left>930</left>
-            <top>1000</top>
-            <width>60</width>
+            <left>925</left>
+            <top>990</top>
+            <width>70</width>
             <height>40</height>
             <label></label>
             <onclick>Action(Back)</onclick>
@@ -381,11 +388,11 @@
             <texturefocus>-</texturefocus>
         </control>
         <control type="image">
-            <left>940</left>
-            <top>1010</top>
-            <width>40</width>
-            <height>24</height>
-            <texture colordiffuse="CCFFFFFF">akasha-chev-down.png</texture>
+            <left>949</left>
+            <top>1006</top>
+            <width>22</width>
+            <height>10</height>
+            <texture>osd-chev.png</texture>
         </control>
     </controls>
 </window>

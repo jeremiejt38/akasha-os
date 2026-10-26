@@ -28,6 +28,8 @@ FONTS = [
     'Inter-Unicode-Bold.ttf',19),
     ('font_aura_midi',
     'Inter-Unicode-Regular.ttf',29),
+    ('font_aura_small',
+    'Inter-Unicode-Regular.ttf',24),
     ('font_aura_hint',
     'Inter-Unicode-Regular.ttf',14),
     ('font_aura_hint_bold',
@@ -38,6 +40,8 @@ FONTS = [
     'Inter-Unicode-Bold.ttf',27),
     ('font_aura_info_black_doublerow',
     'Inter-Unicode-Bold.ttf',47),
+    ('font_aura_clock',
+    'Inter-Unicode-Regular.ttf',32),
 ]
 FONT_FILES = sorted({f[1] for f in FONTS})
 RESOURCE_ADDON = '/storage/.kodi/addons/resource.font.robotocjksc/resources'

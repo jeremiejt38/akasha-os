@@ -29,17 +29,17 @@
 
         <!-- Title block, top-left (same slot as VideoOSD) -->
         <control type="label">
-            <left>105</left>
-            <top>50</top>
+            <left>73</left>
+            <top>66</top>
             <width>1400</width>
             <height>48</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_head_bold</font>
             <label>$INFO[VideoPlayer.Title]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -49,7 +49,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -62,8 +62,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -73,7 +73,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Season,S] • E$INFO[VideoPlayer.Episode] • $INFO[VideoPlayer.TvShowTitle] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -86,8 +86,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -97,7 +97,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -110,8 +110,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -121,7 +121,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Year] • $INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -134,8 +134,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -145,7 +145,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Duration(mins)] $ADDON[script.akasha.aura 33585]</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -158,8 +158,8 @@
             </control>
         </control>
         <control type="grouplist">
-            <left>105</left>
-            <top>96</top>
+            <left>73</left>
+            <top>108</top>
             <width>1600</width>
             <height>34</height>
             <orientation>horizontal</orientation>
@@ -169,7 +169,7 @@
             <control type="label">
                 <width>auto</width>
                 <height>34</height>
-                <font>font_mini</font>
+                <font>font_aura_midi</font>
                 <aligny>center</aligny>
                 <label>$INFO[VideoPlayer.Duration(h)] h $INFO[VideoPlayer.Duration(mm)] min</label>
                 <textcolor>DDFFFFFF</textcolor>
@@ -185,11 +185,12 @@
         <!-- Clock, top-right -->
         <control type="label">
             <left>1640</left>
-            <top>50</top>
+            <top>53</top>
             <width>200</width>
-            <height>48</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_mini</font>
             <align>right</align>
+            <aligny>center</aligny>
             <label>$INFO[System.Time]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
@@ -198,61 +199,63 @@
              remaining; same coordinates as VideoOSD so the two states
              look continuous. -->
         <control type="image">
-            <left>82</left>
-            <top>924</top>
-            <width>32</width>
-            <height>32</height>
+            <left>60</left>
+            <top>946</top>
+            <width>64</width>
+            <height>64</height>
+            <aspectratio>keep</aspectratio>
             <texture>osd/pause.png</texture>
             <visible>!Player.Paused</visible>
         </control>
         <control type="image">
-            <left>82</left>
-            <top>924</top>
-            <width>32</width>
-            <height>32</height>
+            <left>56</left>
+            <top>947</top>
+            <width>64</width>
+            <height>64</height>
+            <aspectratio>keep</aspectratio>
             <texture>osd/play.png</texture>
             <visible>Player.Paused</visible>
         </control>
         <control type="label">
-            <left>140</left>
-            <top>918</top>
+            <left>148</left>
+            <top>954</top>
             <width>110</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <aligny>center</aligny>
             <label>$INFO[Player.Time(m)]:$INFO[Player.Time(ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="label">
-            <left>140</left>
-            <top>918</top>
+            <left>148</left>
+            <top>954</top>
             <width>110</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <aligny>center</aligny>
             <label>$INFO[Player.Time(h:mm:ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="progress">
-            <left>250</left>
-            <top>937</top>
-            <width>1380</width>
-            <height>6</height>
+            <left>222</left>
+            <top>969</top>
+            <width>1500</width>
+            <height>12</height>
             <info>Player.Progress</info>
-            <texturebg colordiffuse="59FFFFFF" border="4">progress/progress-bg.png</texturebg>
+            <texturebg colordiffuse="5EFFFFFF" border="6">progress/progress-bg.png</texturebg>
             <lefttexture colordiffuse="FFE5A00D" border="2">progress/progress-left.png</lefttexture>
             <midtexture colordiffuse="FFE5A00D" border="2">progress/progress-end.png</midtexture>
             <righttexture colordiffuse="FFE5A00D" border="2">progress/progress-right.png</righttexture>
             <overlaytexture></overlaytexture>
         </control>
         <control type="label">
-            <left>1660</left>
-            <top>918</top>
-            <width>180</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <left>1638</left>
+            <top>954</top>
+            <width>204</width>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <align>right</align>
             <aligny>center</aligny>
             <label>-$INFO[Player.TimeRemaining(m)]:$INFO[Player.TimeRemaining(ss)]</label>
@@ -260,11 +263,11 @@
             <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
         <control type="label">
-            <left>1660</left>
-            <top>918</top>
-            <width>180</width>
-            <height>44</height>
-            <font>font_mini</font>
+            <left>1638</left>
+            <top>954</top>
+            <width>204</width>
+            <height>40</height>
+            <font>font_aura_clock</font>
             <align>right</align>
             <aligny>center</aligny>
             <label>-$INFO[Player.TimeRemaining(h:mm:ss)]</label>
@@ -274,11 +277,11 @@
 
         <!-- Dismiss chevron -->
         <control type="image">
-            <left>940</left>
-            <top>1010</top>
-            <width>40</width>
-            <height>24</height>
-            <texture colordiffuse="CCFFFFFF">akasha-chev-down.png</texture>
+            <left>949</left>
+            <top>1006</top>
+            <width>22</width>
+            <height>10</height>
+            <texture>osd-chev.png</texture>
         </control>
     </controls>
 </window>

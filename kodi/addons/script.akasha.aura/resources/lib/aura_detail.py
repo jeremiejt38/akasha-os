@@ -131,7 +131,7 @@ ACTION_LABEL_OVERLAYS = {
     MORE_BUTTON_ID: 7156,
 }
 ACTION_ROW_TOP = 576
-ACTION_ROW_LEFT = 105
+ACTION_ROW_LEFT = 128
 ACTION_ROW_GAP = 32
 ACTION_CIRCLE_W = 64
 ACTION_LABEL_X = 66      # label zone offset inside the expanded pill
@@ -519,7 +519,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                                item.get('audience_rating_image'),
                                                audience=True)
                               + (False,)))
-        chip_x = 105
+        chip_x = 128
         for slot in range(5):
             _set(self, 'AuraDetailChip{}'.format(slot), '')
             _set(self, 'AuraDetailChipIcon{}'.format(slot), '')
@@ -530,15 +530,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if pill:
                 _set(self, 'AuraDetailChipBg{}'.format(slot), '1')
             try:
-                self.getControl(7021 + slot * 2).setPosition(chip_x, 356)
+                self.getControl(7021 + slot * 2).setPosition(chip_x, 350)
                 self.getControl(7021 + slot * 2).setWidth(width)
                 if icon:
-                    self.getControl(7045 + slot).setPosition(chip_x + 8, 362)
+                    self.getControl(7045 + slot).setPosition(chip_x + 8, 356)
                     _set(self, 'AuraDetailChipIcon{}'.format(slot), icon)
                     lbl_x, lbl_w = chip_x + 34, width - 40
                 else:
                     lbl_x, lbl_w = chip_x, width
-                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 356)
+                self.getControl(CHIP_LABEL_IDS[slot]).setPosition(lbl_x, 350)
                 self.getControl(CHIP_LABEL_IDS[slot]).setWidth(lbl_w)
                 self.getControl(CHIP_LABEL_IDS[slot]).setLabel(text)
             except RuntimeError:
@@ -601,6 +601,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 idx = season.get('index')
                 strip.addItem(xbmcgui.ListItem(i18n.tr(33102).format(
                     idx if idx is not None else season.get('title', '?'))))
+            # Plex wraps the tab row in a translucent container sized to
+            # the tabs (150px pitch, ~16px trailing pad).
+            self.getControl(7135).setWidth(
+                (len(self._seasons) + 1) * 150 + 16)
         except RuntimeError:
             pass
         try:
