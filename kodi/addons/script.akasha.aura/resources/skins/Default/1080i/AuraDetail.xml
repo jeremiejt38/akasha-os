@@ -321,9 +321,9 @@
         <!-- Synopsis (3 lines like Plex) -->
         <control type="textbox" id="7030">
             <left>128</left>
-            <top>400</top>
+            <top>398</top>
             <width>800</width>
-            <height>90</height>
+            <height>124</height>
             <font>font_aura_plot</font>
             <textcolor>DDFFFFFF</textcolor>
         </control>
@@ -331,7 +331,7 @@
         <!-- Director / creator line -->
         <control type="label" id="7040">
             <left>128</left>
-            <top>512</top>
+            <top>526</top>
             <width>1100</width>
             <height>32</height>
             <font>font_aura_mini</font>

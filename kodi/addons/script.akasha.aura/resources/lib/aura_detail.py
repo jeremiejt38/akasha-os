@@ -353,10 +353,22 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
         # Synopsis + director
         summary = item.get('summary') or ''
+        # The synopsis box holds exactly 3 lines of font_aura_plot in
+        # 800px -- measure-trim to fit (~1750px PIL) so no overflow
+        # fades the edges; the 240-char cap stays as a no-PIL fallback.
+        summary = i18n.ellipsize(summary, 25, budget_px=1750)
+        if summary.endswith('…') and ' ' in summary:
+            # Plex breaks the ellipsis on a word boundary.
+            summary = summary[:-1].rsplit(' ', 1)[0].rstrip(',. ') + '…'
         if len(summary) > 240:
             summary = summary[:240].rsplit(' ', 1)[0].rstrip(',. ') + '...'
         try:
-            self.getControl(7030).setText(summary)
+            box = self.getControl(7030)
+            box.setText(summary)
+            # setText leaves the box scrolled to the tail (first line
+            # fades under the top-edge scrim) -- reset() restores the
+            # scroll offset to the top.
+            box.reset()
         except RuntimeError:
             pass
         director = ''
