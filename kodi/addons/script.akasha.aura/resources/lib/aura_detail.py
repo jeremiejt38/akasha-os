@@ -1411,23 +1411,22 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         return own, names
 
     def _activity_when(self, viewed_at):
-        """'16 mai 2026 · il y a 2 min' -- Plex's feed rows carry the
-        absolute date plus a relative hint for recent events."""
+        """Plex's feed rows show ONLY the relative time for recent events
+        ('2m ago') and the absolute date for older ones ('May 17, 2026')."""
         if not viewed_at:
             return ''
-        date = i18n.fmt_air_date(
-            time.strftime('%Y-%m-%d', time.localtime(viewed_at)))
         delta = time.time() - viewed_at
         if 0 <= delta < 60 * 86400:
             if delta < 3600:
-                rel = i18n.tr(33599).format(
+                return i18n.tr(33599).format(
                     '{} min'.format(max(1, int(delta // 60))))
-            elif delta < 86400:
-                rel = i18n.tr(33599).format('{} h'.format(int(delta // 3600)))
-            else:
-                rel = i18n.tr(33599).format('{} j'.format(int(delta // 86400)))
-            return '{} · {}'.format(date, rel) if date else rel
-        return date
+            if delta < 86400:
+                return i18n.tr(33599).format(
+                    '{} h'.format(int(delta // 3600)))
+            return i18n.tr(33599).format(
+                '{} j'.format(int(delta // 86400)))
+        return i18n.fmt_air_date(
+            time.strftime('%Y-%m-%d', time.localtime(viewed_at)))
 
     def _open_activity_feed(self):
         """Plex's right-column watch feed: every server account that
@@ -1460,6 +1459,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     i18n.tr(33598).format(name or '?')
                 li = xbmcgui.ListItem(who)
                 li.setLabel2(self._activity_when(entry.get('viewed_at')))
+                li.setProperty('entrytitle',
+                               entry.get('show_title') or
+                               entry.get('title') or '')
                 li.setArt({'icon': acc.get('thumb') or 'avatar-plex.png'})
                 feed.addItem(li)
             feed.selectItem(0)
