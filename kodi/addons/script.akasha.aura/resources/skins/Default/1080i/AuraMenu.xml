@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1208">
-    <defaultcontrol>9010</defaultcontrol>
+    <!-- The entry list (9010) is populated from Python, so it is empty
+         when Kodi resolves the default control -- the dim backdrop
+         doubles as a focusable dismiss button (click-outside-to-close,
+         Plex sheet behavior) instead of a plain image. -->
+    <defaultcontrol>9001</defaultcontrol>
     <zorder>3</zorder>
     <controls>
         <control type="group">
@@ -10,12 +14,17 @@
             <animation effect="fade" start="100" end="0" time="120" tween="quadratic" easing="in">WindowClose</animation>
 
             <!-- Dim backdrop -->
-            <control type="image">
+            <control type="button" id="9001">
                 <left>0</left>
                 <top>0</top>
                 <width>1920</width>
                 <height>1080</height>
-                <texture colordiffuse="B3000000">white.png</texture>
+                <texturenofocus colordiffuse="B3000000">white.png</texturenofocus>
+                <texturefocus colordiffuse="B3000000">white.png</texturefocus>
+                <onup>9010</onup>
+                <onleft>9010</onleft>
+                <onright>9010</onright>
+                <ondown>9010</ondown>
             </control>
 
             <!-- Centered dark panel (position/size set from Python) -->

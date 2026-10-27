@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1201">
-    <defaultcontrol>8100</defaultcontrol>
+    <!-- The key grid (8100) is populated from Python, so it is empty
+         when Kodi resolves the default control. The static Space
+         button is always focusable; onInit moves focus to the grid
+         a beat later, so the boot behavior is unchanged. -->
+    <defaultcontrol>8115</defaultcontrol>
     <zorder>3</zorder>
     <controls>
         <!-- Plex-style search (docs/plex-parity/reference/recherche/):

@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1203">
-    <defaultcontrol>100</defaultcontrol>
+    <!-- The switcher panel (100) is populated from Python, so it is
+         empty when Kodi resolves the default control. A 1px invisible
+         pass-through button keeps the boot focus warning quiet; its
+         edges all lead back to the real panel. -->
+    <defaultcontrol>90</defaultcontrol>
     <zorder>3</zorder>
     <controls>
+        <control type="button" id="90">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus>-</texturefocus>
+            <onup>100</onup>
+            <onleft>100</onleft>
+            <onright>100</onright>
+            <ondown>100</ondown>
+        </control>
         <control type="image">
             <left>0</left>
             <top>0</top>

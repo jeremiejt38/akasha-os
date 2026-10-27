@@ -3,8 +3,24 @@
      shows above the seek bar for the audio/subtitles circle and for the
      gear (quality + advanced settings). -->
 <window type="dialog" id="1203">
-    <defaultcontrol>1000</defaultcontrol>
+    <!-- The option list (1000) is populated from Python, so it is
+         empty when Kodi resolves the default control. A 1px invisible
+         pass-through button keeps the boot focus warning quiet; its
+         edges all lead back to the real list. -->
+    <defaultcontrol>900</defaultcontrol>
     <controls>
+        <control type="button" id="900">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus>-</texturefocus>
+            <onup>1000</onup>
+            <onleft>1000</onleft>
+            <onright>1000</onright>
+            <ondown>1000</ondown>
+        </control>
         <!-- Scrim: same readability layer the VideoOSD uses. -->
         <control type="image">
             <left>0</left>

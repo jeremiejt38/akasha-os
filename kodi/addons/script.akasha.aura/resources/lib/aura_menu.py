@@ -125,6 +125,10 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 self.result = -1
             self.close()
+        elif controlID == 9001:
+            # Dim backdrop: click-outside-to-dismiss, like Plex sheets.
+            self.result = -1
+            self.close()
 
     def onAction(self, action):
         if action.getId() in (9, 10, 92):  # previous menu / nav back

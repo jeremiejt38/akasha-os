@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1204">
-    <defaultcontrol>7310</defaultcontrol>
+    <!-- The filmography list (7310) is populated from Python, so it is
+         empty when Kodi resolves the default control. A 1px invisible
+         pass-through button keeps the boot focus warning quiet; its
+         edges all lead back to the real list, and Python moves focus
+         there in onInit anyway. -->
+    <defaultcontrol>7001</defaultcontrol>
     <zorder>3</zorder>
     <controls>
+        <control type="button" id="7001">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus>-</texturefocus>
+            <onup>7310</onup>
+            <onleft>7310</onleft>
+            <onright>7310</onright>
+            <ondown>7310</ondown>
+        </control>
         <!-- Plex-style person page: circular photo, name, and the
              server-side filmography as a poster row (Cast & Crew pick
              on the detail page opens this). -->
