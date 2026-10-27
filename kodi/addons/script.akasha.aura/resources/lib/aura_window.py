@@ -253,6 +253,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_playlists = []
         self._divert_active_section = 0
         self._divert_items = []
+        # What _divert_items/_divert_paged currently hold: 'browse' is the
+        # section's own grid; the other loaders (collections, collection
+        # children, playlists, music nodes) clobber the same slots, so
+        # re-entering Bibliotheque must reload when the cache no longer
+        # holds browse items.
+        self._divert_items_source = 'browse'
         self._divert_paged = None
         # Skeleton loaders (plan a3f9c2e1 phase 5): how many trailing
         # placeholder ListItems are currently in each list/panel, so the
@@ -612,13 +618,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._defer_focus(self._first_content_id())
             return
 
-        # Bibliotheque: inline grid, already populated by _select_divert_section.
-        # Focus goes to the grid's first element like Plex, but deferred
-        # past Kodi's <visible>-condition revalidation -- a same-tick
-        # setFocus() silently reverts (seen in practice: a subsequent Up
-        # press behaved as if focus had never left the tab button) -- see
-        # docs/aura/decisions.md.
-        self._apply_browse_restate(section)
+        # Bibliotheque: inline grid, already populated by _select_divert_section
+        # -- unless a Collections/Categories/drill-down visit clobbered the
+        # shared _divert_items slot since (observed: the Bibliotheque tab
+        # kept rendering collection collages after a Collections visit).
+        if self._divert_items_source != 'browse':
+            self._load_divert_section_items(section)
+        else:
+            self._apply_browse_restate(section)
         self._sync_navigation()
         if focus:
             self._defer_focus(self._first_content_id())
@@ -1807,6 +1814,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """Plex's Collections library tab: the same poster grid as Browse,
         one card per collection."""
         self._divert_collection_key = None
+        self._divert_items_source = 'collections'
         self._divert_paged = self._collections_paged(section)
         error = None
         try:
@@ -1836,6 +1844,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         def fetch(offset, limit):
             return self._plex_client.collection_items_with_total(
                 item['rating_key'], limit=limit, offset=offset)
+        self._divert_items_source = 'collection'
         self._divert_paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
         try:
             self._divert_paged.load_initial()
@@ -1863,6 +1872,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         def fetch(offset, limit):
             return self._plex_client.playlist_items_with_total(
                 item['rating_key'], limit=limit, offset=offset)
+        self._divert_items_source = 'playlist'
         self._divert_paged = paged_list.PagedList(
             fetch, page_size=50, prefetch_margin=50)
         try:
@@ -1902,6 +1912,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         def fetch(offset, limit):
             return children[offset:offset + limit], len(children)
+        self._divert_items_source = 'music'
         self._divert_paged = paged_list.PagedList(
             fetch, page_size=50, prefetch_margin=50)
         self._divert_paged.load_initial()
@@ -2183,6 +2194,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # already-populated list without breaking scroll position), so this
         # is forward-progressive loading rather than a true sliding window.
         # See docs/aura/decisions.md.
+        self._divert_items_source = 'browse'
         self._divert_paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
             page_size=50, prefetch_margin=50)
