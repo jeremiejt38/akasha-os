@@ -828,40 +828,40 @@
                     <top>120</top>
                     <width>586</width>
                     <height>64</height>
-                    <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
+                    <texture colordiffuse="99000000" border="32">cap-r32.png</texture>
                 </control>
                 <!-- Active-tab outline (Plex shows a rounded outline on the
                      selected tab when the strip is not focused; the white
                      fill on focus covers it anyway). -->
                 <control type="image">
                     <left>135</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>190</width>
-                    <height>48</height>
-                    <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
+                    <height>56</height>
+                    <texture colordiffuse="40FFFFFF" border="24">cap-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
                     <left>333</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>196</width>
-                    <height>48</height>
-                    <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
+                    <height>56</height>
+                    <texture colordiffuse="40FFFFFF" border="24">cap-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
                     <left>537</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>160</width>
-                    <height>48</height>
-                    <texture colordiffuse="FF646464" border="22">tab-outline.png</texture>
+                    <height>56</height>
+                    <texture colordiffuse="40FFFFFF" border="24">cap-r24.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>135</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>190</width>
-                    <height>48</height>
+                    <height>56</height>
                     <label>$ADDON[script.akasha.aura 33015]</label>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -876,9 +876,9 @@
                 </control>
                 <control type="button" id="3071">
                     <left>333</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>196</width>
-                    <height>48</height>
+                    <height>56</height>
                     <label>$ADDON[script.akasha.aura 33014]</label>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -893,9 +893,9 @@
                 </control>
                 <control type="button" id="3072">
                     <left>537</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>160</width>
-                    <height>48</height>
+                    <height>56</height>
                     <label>$ADDON[script.akasha.aura 33576]</label>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -910,9 +910,9 @@
                 </control>
                 <control type="label">
                     <left>135</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>190</width>
-                    <height>48</height>
+                    <height>56</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -922,9 +922,9 @@
                 </control>
                 <control type="label">
                     <left>333</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>196</width>
-                    <height>48</height>
+                    <height>56</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -934,9 +934,9 @@
                 </control>
                 <control type="label">
                     <left>537</left>
-                    <top>120</top>
+                    <top>124</top>
                     <width>160</width>
-                    <height>48</height>
+                    <height>56</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -3306,15 +3306,15 @@
 
                 <control type="list" id="3310">
                     <left>20</left>
-                    <top>28</top>
+                    <top>32</top>
                     <width>400</width>
                     <height>1020</height>
                     <onup>2007</onup>
                     <onright>5110</onright>
-                    <itemlayout width="400" height="56">
+                    <itemlayout width="400" height="64">
                         <control type="image">
                             <left>8</left>
-                            <top>0</top>
+                            <top>4</top>
                             <width>384</width>
                             <height>56</height>
                             <texture colordiffuse="AAFFFFFF" border="28">chip-outline.png</texture>
@@ -3322,27 +3322,27 @@
                         </control>
                         <control type="image">
                             <left>30</left>
-                            <top>11</top>
+                            <top>15</top>
                             <width>34</width>
                             <height>34</height>
                             <aspectratio>keep</aspectratio>
                             <texture>$INFO[ListItem.Art(icon)]</texture>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="label">
                             <left>92</left>
-                            <top>0</top>
+                            <top>4</top>
                             <width>290</width>
                             <height>56</height>
                             <aligny>center</aligny>
                             <font>font_aura_tiny_bold</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="image">
                             <left>348</left>
-                            <top>12</top>
+                            <top>16</top>
                             <width>32</width>
                             <height>32</height>
                             <aspectratio>keep</aspectratio>
@@ -3351,7 +3351,7 @@
                         </control>
                         <control type="image">
                             <left>352</left>
-                            <top>16</top>
+                            <top>20</top>
                             <width>24</width>
                             <height>24</height>
                             <aspectratio>keep</aspectratio>
@@ -3360,7 +3360,7 @@
                         </control>
                         <control type="label">
                             <left>30</left>
-                            <top>0</top>
+                            <top>4</top>
                             <width>120</width>
                             <height>56</height>
                             <aligny>center</aligny>
@@ -3371,17 +3371,53 @@
                         </control>
                         <control type="image">
                             <left>150</left>
-                            <top>27</top>
+                            <top>31</top>
                             <width>240</width>
                             <height>2</height>
                             <texture colordiffuse="33FFFFFF">white.png</texture>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
-                    </itemlayout>
-                    <focusedlayout width="400" height="56">
+                                            <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <texture>avatar-plex.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <texture colordiffuse="FF262626">cast-mask.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="label">
+                            <left>92</left>
+                            <top>4</top>
+                            <width>240</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_small_bold</font>
+                            <label>$INFO[Window.Property(AuraUserName)]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+</itemlayout>
+                    <focusedlayout width="400" height="64">
                         <control type="image">
                             <left>8</left>
-                            <top>0</top>
+                            <top>4</top>
                             <width>384</width>
                             <height>56</height>
                             <texture colordiffuse="FFFFFFFF" border="28">rounded-solid.png</texture>
@@ -3389,27 +3425,27 @@
                         </control>
                         <control type="image">
                             <left>30</left>
-                            <top>11</top>
+                            <top>15</top>
                             <width>34</width>
                             <height>34</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="label">
                             <left>92</left>
-                            <top>0</top>
+                            <top>4</top>
                             <width>290</width>
                             <height>56</height>
                             <aligny>center</aligny>
                             <font>font_aura_tiny_bold</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FF1A1A1A</textcolor>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="image">
                             <left>348</left>
-                            <top>12</top>
+                            <top>16</top>
                             <width>32</width>
                             <height>32</height>
                             <aspectratio>keep</aspectratio>
@@ -3418,7 +3454,7 @@
                         </control>
                         <control type="image">
                             <left>352</left>
-                            <top>16</top>
+                            <top>20</top>
                             <width>24</width>
                             <height>24</height>
                             <aspectratio>keep</aspectratio>
@@ -3427,7 +3463,7 @@
                         </control>
                         <control type="label">
                             <left>30</left>
-                            <top>0</top>
+                            <top>4</top>
                             <width>120</width>
                             <height>56</height>
                             <aligny>center</aligny>
@@ -3438,13 +3474,49 @@
                         </control>
                         <control type="image">
                             <left>150</left>
-                            <top>27</top>
+                            <top>31</top>
                             <width>240</width>
                             <height>2</height>
                             <texture colordiffuse="33FFFFFF">white.png</texture>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
-                    </focusedlayout>
+                                            <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <texture>avatar-plex.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <texture colordiffuse="FFFFFFFF">cast-mask.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="label">
+                            <left>92</left>
+                            <top>4</top>
+                            <width>240</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_small_bold</font>
+                            <label>$INFO[Window.Property(AuraUserName)]</label>
+                            <textcolor>FF1A1A1A</textcolor>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+</focusedlayout>
                 </control>
             </control>
         </control>

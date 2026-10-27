@@ -80,10 +80,11 @@ DIVERT_PANEL_ID = 3230
 # Home -- then a divider, the library sections and Plus. Plex cloud-only
 # entries (profile, My Lists, playlists, On Plex) are hidden: they only
 # surfaced "unavailable" notifications.
-DIVERT_SIDEBAR_SEARCH_INDEX = 0
-DIVERT_SIDEBAR_HOME_INDEX = 1
-DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 2
-DIVERT_SIDEBAR_LIBS_OFFSET = 3
+DIVERT_SIDEBAR_PROFILE_INDEX = 0
+DIVERT_SIDEBAR_SEARCH_INDEX = 1
+DIVERT_SIDEBAR_HOME_INDEX = 2
+DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 3
+DIVERT_SIDEBAR_LIBS_OFFSET = 4
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 # Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
@@ -436,6 +437,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     # off the global home window (same pattern as the
                     # Up Next queue), not this window's own properties.
                     xbmcgui.Window(10000).setProperty('AuraAvatar', thumb)
+                name = client.user_name()
+                if name:
+                    self.setProperty('AuraUserName', name)
             except Exception as e:
                 xbmc.log('Akasha Aura: avatar fetch failed: {}'.format(e),
                          xbmc.LOGWARNING)
@@ -1954,6 +1958,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         sidebar.reset()
 
+        # Plex's first row is the profile switcher: round avatar +
+        # account name + '>' affordance (is_profile restyles the row in
+        # the itemlayout; the picture/name resolve live from the window
+        # properties _load_avatar fills asynchronously).
+        profile_item = xbmcgui.ListItem('')
+        profile_item.setProperty('is_profile', '1')
+        sidebar.addItem(profile_item)
+
         search_item = xbmcgui.ListItem(i18n.tr(33001))
         search_item.setArt({'icon': 'icon-search.png'})
         sidebar.addItem(search_item)
@@ -3253,6 +3265,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         try:
             pos = self.getControl(DIVERT_SIDEBAR_ID).getSelectedPosition()
         except RuntimeError:
+            return
+        if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
             return
         if pos == DIVERT_SIDEBAR_SEARCH_INDEX:
             self._open_search()

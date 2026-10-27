@@ -835,6 +835,16 @@ class PlexClient:
             return ''
         return str(data.get('thumb') or '')
 
+    def user_name(self):
+        """The plex.tv account title shown next to the sidebar avatar --
+        Plex TV renders it in the expanded drawer's profile row.
+        Returns '' when the endpoint is unreachable."""
+        try:
+            data = self._request(self.PLEX_TV_USER)
+        except PlexAPIError:
+            return ''
+        return str(data.get('title') or data.get('username') or '')
+
     def metadata_item(self, rating_key):
         """Fetch and normalise a single item by rating key (used to hydrate
         thin items before opening the detail page)."""
