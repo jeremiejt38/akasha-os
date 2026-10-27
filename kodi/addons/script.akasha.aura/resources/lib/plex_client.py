@@ -511,9 +511,11 @@ class PlexClient:
         ]
 
     def search(self, section_key, query, limit=50, offset=0):
-        """Search items in a section by title (client-side filter)."""
+        """Search items in a section by title. Plex's real substring
+        filter is `title=` -- `search=` is silently ignored and dumps
+        the whole section."""
         data = self._request('/library/sections/{}/all'.format(section_key), {
-            'search': query,
+            'title': query,
             'X-Plex-Container-Size': limit,
             'X-Plex-Container-Start': offset,
         })
@@ -521,7 +523,7 @@ class PlexClient:
 
     def search_with_total(self, section_key, query, limit=50, offset=0):
         data = self._request('/library/sections/{}/all'.format(section_key), {
-            'search': query,
+            'title': query,
             'X-Plex-Container-Size': limit,
             'X-Plex-Container-Start': offset,
         })

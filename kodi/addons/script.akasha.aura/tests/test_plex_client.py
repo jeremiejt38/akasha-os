@@ -237,7 +237,8 @@ class TestPlexClient(unittest.TestCase):
 
         mock_urlopen.side_effect = fake_urlopen
         self.client.search('1', 'inception')
-        self.assertIn('search=inception', captured['url'])
+        # Plex's substring filter is `title=`; `search=` is ignored.
+        self.assertIn('title=inception', captured['url'])
 
     @patch('urllib.request.urlopen')
     def test_show_seasons_uses_children_endpoint(self, mock_urlopen):
