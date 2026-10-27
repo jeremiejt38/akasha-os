@@ -130,15 +130,27 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _render_pills(self):
-        try:
-            pills = self.getControl(PILLS_LIST_ID)
-            pills.reset()
-            for i, (label, _type) in enumerate(_FILTERS):
-                li = xbmcgui.ListItem(label)
-                li.setProperty('selected', '1' if i == self._filter_index else '0')
-                pills.addItem(li)
-        except RuntimeError:
-            pass
+        # Plex's filter pills hug their text: measure each label and
+        # chain the static buttons (overlay labels 815x/816x draw the
+        # white / amber-selected / dark-on-focus states).
+        x = 686
+        for i, (label, _type) in enumerate(_FILTERS):
+            w = int((i18n.text_width(label, 19) or len(label) * 11)
+                    * 0.96) + 56
+            try:
+                btn = self.getControl(PILLS_LIST_ID + i)
+                btn.setPosition(x, 48)
+                btn.setWidth(w)
+                for base in (8150, 8155, 8160):
+                    lbl = self.getControl(base + i)
+                    lbl.setPosition(x, 48)
+                    lbl.setWidth(w)
+                    lbl.setLabel(label)
+            except RuntimeError:
+                pass
+            _set(self, 'AuraSearchPillSel{}'.format(i),
+                 '1' if i == self._filter_index else '')
+            x += w + 16
 
     def _render_recent(self):
         _set(self, 'AuraSearchHasRecent', '1' if self.recent else '')
@@ -393,12 +405,8 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             elif 0 <= pos < len(self.recent):
                 self.query = self.recent[pos]
                 self._refresh_query()
-        elif controlID == PILLS_LIST_ID:
-            try:
-                pos = self.getControl(PILLS_LIST_ID).getSelectedPosition()
-            except RuntimeError:
-                return
-            self._filter_index = pos
+        elif PILLS_LIST_ID <= controlID < PILLS_LIST_ID + len(_FILTERS):
+            self._filter_index = controlID - PILLS_LIST_ID
             self._render_pills()
             if self.query:
                 self._run_search()

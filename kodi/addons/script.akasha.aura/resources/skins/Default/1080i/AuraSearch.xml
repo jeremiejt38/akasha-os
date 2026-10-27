@@ -69,6 +69,14 @@
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="FF3A3B3E">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
                     <left>20</left>
                     <top>22</top>
                     <width>32</width>
@@ -184,6 +192,14 @@
                     <height>38</height>
                     <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="FF3A3B3E">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
                 </control>
                 <control type="image">
                     <left>20</left>
@@ -554,121 +570,198 @@
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
         </control>
 
-        <!-- Filter pills: Tout | Films | Series | Episodes -->
-        <control type="list" id="8120">
-            <left>686</left>
-            <top>48</top>
-            <width>1234</width>
-            <height>52</height>
-            <orientation>horizontal</orientation>
-            <scrolltime>120</scrolltime>
-            <onleft>8100</onleft>
-            <ondown>8130</ondown>
+        <!-- Filter pills: variable-width Plex pills. Python measures
+             each label (i18n.text_width) and positions the five static
+             buttons; three overlay labels cover the states (white text,
+             amber when selected, dark on white focus). -->
+        <control type="group" id="8125">
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-            <itemlayout width="150" height="52">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_aura_mini</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <visible>!String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_aura_mini_bold</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFE5A00D</textcolor>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-            </itemlayout>
-            <focusedlayout width="150" height="52" condition="Control.HasFocus(8120)">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_aura_mini_bold</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <visible>!String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_aura_mini_bold</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFE5A00D</textcolor>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-            </focusedlayout>
-            <focusedlayout width="150" height="52" condition="!Control.HasFocus(8120)">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_aura_mini</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <visible>!String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_aura_mini_bold</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFE5A00D</textcolor>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-            </focusedlayout>
+            <control type="button" id="8120">
+                <left>686</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8100</onleft>
+                <onright>8121</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8150">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel0),1) + !Control.HasFocus(8120)</visible>
+            </control>
+            <control type="label" id="8155">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel0),1) + !Control.HasFocus(8120)</visible>
+            </control>
+            <control type="label" id="8160">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8120)</visible>
+            </control>
+            <control type="button" id="8121">
+                <left>852</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8120</onleft>
+                <onright>8122</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8151">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel1),1) + !Control.HasFocus(8121)</visible>
+            </control>
+            <control type="label" id="8156">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel1),1) + !Control.HasFocus(8121)</visible>
+            </control>
+            <control type="label" id="8161">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8121)</visible>
+            </control>
+            <control type="button" id="8122">
+                <left>1018</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8121</onleft>
+                <onright>8123</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8152">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel2),1) + !Control.HasFocus(8122)</visible>
+            </control>
+            <control type="label" id="8157">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel2),1) + !Control.HasFocus(8122)</visible>
+            </control>
+            <control type="label" id="8162">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8122)</visible>
+            </control>
+            <control type="button" id="8123">
+                <left>1184</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8122</onleft>
+                <onright>8124</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8153">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel3),1) + !Control.HasFocus(8123)</visible>
+            </control>
+            <control type="label" id="8158">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel3),1) + !Control.HasFocus(8123)</visible>
+            </control>
+            <control type="label" id="8163">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8123)</visible>
+            </control>
+            <control type="button" id="8124">
+                <left>1350</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8123</onleft>
+                <onright>8130</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8154">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel4),1) + !Control.HasFocus(8124)</visible>
+            </control>
+            <control type="label" id="8159">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel4),1) + !Control.HasFocus(8124)</visible>
+            </control>
+            <control type="label" id="8164">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8124)</visible>
+            </control>
         </control>
-
         <!-- Results: 2-column card grid (typed query only — the empty
              query shows the poster-grid suggestions panel below instead,
              matching Plex's Popular Searches layout swap). -->
