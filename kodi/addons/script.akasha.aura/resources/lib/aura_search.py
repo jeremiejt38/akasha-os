@@ -236,11 +236,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._results = self._search_people()[:24]
             self._render_results()
             return
+        # Server-side `title=` is a raw substring filter: stray
+        # whitespace would exclude exact-title hits, so the API sees
+        # the stripped query like Plex's own client sends.
+        term = self.query.strip()
         results = []
         for section in self.sections:
             try:
                 items, _total = self.client.search_with_total(
-                    section['key'], self.query, limit=12)
+                    section['key'], term, limit=12)
             except Exception as e:
                 xbmc.log('Akasha Aura Search: {} failed: {}'.format(
                     section.get('title'), e), xbmc.LOGWARNING)
@@ -254,7 +258,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         elif wanted:
             results = [r for r in results if r.get('type') == wanted]
         # Plex sorts roughly by relevance; keep title-prefix hits first.
-        q = self.query.lower()
+        q = term.lower()
         results.sort(key=lambda r: 0 if (r.get('title') or '').lower()
                      .startswith(q) else 1)
         # 'Tout' merges matching people and genres first, like Plex's
@@ -287,7 +291,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                             '_genre': True, 'name': name,
                             'section_key': section['key'],
                             'section_title': section.get('title') or ''})
-        q = self.query.lower()
+        q = self.query.strip().lower()
         return [g for g in self._genres if q in (g['name'] or '').lower()]
 
     def _suggestions(self):
@@ -341,7 +345,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if not self.client or not hasattr(self.client, 'search_people'):
             return []
         try:
-            return self.client.search_people(self.query)
+            return self.client.search_people(self.query.strip())
         except Exception as e:
             xbmc.log('Akasha Aura Search: people failed: {}'.format(e),
                      xbmc.LOGWARNING)
@@ -361,6 +365,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 self.addon.getSetting('search.recent') or '[]')
             if not isinstance(self.recent, list):
                 self.recent = []
+            # Normalise: stray whitespace makes 'x' and 'x ' look like
+            # distinct entries while the stripped query matches the same
+            # titles.
+            cleaned = []
+            for entry in self.recent:
+                entry = str(entry).strip()
+                if entry and entry not in cleaned:
+                    cleaned.append(entry)
+            self.recent = cleaned
         except Exception:
             self.recent = []
 
@@ -375,6 +388,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _push_recent(self, query):
+        query = (query or '').strip()
         if query and query not in self.recent:
             self.recent.insert(0, query)
             del self.recent[8:]
