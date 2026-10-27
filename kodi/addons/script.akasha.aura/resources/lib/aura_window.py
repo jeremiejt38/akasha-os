@@ -1127,6 +1127,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 target=hit, args=(name,) + args, kwargs=kw,
                 daemon=True).start()
 
+    def _defer_hero(self, delay=0.08):
+        """Repaint the hero a beat after a programmatic slot hop.
+
+        _update_hero() reads the *current* focus via getFocusId(), but
+        Kodi has not applied the just-issued setFocus() yet when the
+        Up/Down slot-chain runs inside onAction -- the hero then paints
+        the item of the row we are LEAVING (observed: jumping from
+        "Continuer" onto Chucky left an ANTIGANG hero). Deferring one
+        tick lets the focus land first; the generation counter drops
+        stale paints when several hops queue."""
+        self._hero_generation = getattr(self, '_hero_generation', 0) + 1
+        generation = self._hero_generation
+
+        def worker():
+            time.sleep(delay)
+            if generation != self._hero_generation:
+                return
+            try:
+                self._update_hero()
+            except Exception:
+                pass
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def _update_hero(self, clear_if_empty=False):
         """Sync the Plex hero (backdrop/logo/meta/plot/cast) with the item
         currently focused in a Recommande row -- Plex repaints the whole
@@ -3018,14 +3042,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 focused in (RECO_LIST_IDS[-1], RECO_LANDSCAPE_IDS[-1]) \
                 and self._reco_slot_has_row(len(RECO_SLOT_IDS)):
             self._reco_scroll(+1)
-            self._update_hero()
+            self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_UP and \
                 focused in (RECO_LIST_IDS[0], RECO_LANDSCAPE_IDS[0]) \
                 and self._hub_offset > 0:
             self._reco_scroll(-1)
-            self._update_hero()
+            self._defer_hero()
             self._update_bar_focused()
             return
         # Prevent Down landing on an empty slot when fewer hubs remain than
@@ -3049,7 +3073,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     self.setFocus(self.getControl(prev))
                 except RuntimeError:
                     pass
-            self._update_hero()
+            self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_DOWN and 0 <= slot < len(RECO_SLOT_IDS) - 1:
@@ -3062,7 +3086,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     self.setFocus(self.getControl(nxt))
                 except RuntimeError:
                     pass
-            self._update_hero()
+            self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_UP and \
