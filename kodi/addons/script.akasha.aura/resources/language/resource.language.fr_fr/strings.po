@@ -1735,12 +1735,27 @@ msgctxt "#33594"
 msgid "Activity by you"
 msgstr "Activité de vous"
 
-# Activité de vous et X
+# Activité de vous et {}
 msgctxt "#33595"
 msgid "Activity by you and {}"
 msgstr "Activité de vous et {}"
 
-# Activité de X
+# Activité de {}
 msgctxt "#33596"
 msgid "Activity by {}"
 msgstr "Activité de {}"
+
+# Vous avez regardé
+msgctxt "#33597"
+msgid "You watched"
+msgstr "Vous avez regardé"
+
+# {} a regardé
+msgctxt "#33598"
+msgid "{} watched"
+msgstr "{} a regardé"
+
+# il y a {}
+msgctxt "#33599"
+msgid "{} ago"
+msgstr "il y a {}"

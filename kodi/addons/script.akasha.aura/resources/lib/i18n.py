@@ -463,6 +463,14 @@ STRINGS = {
     # Sidebar "My Lists" row (Plex parity -- lists the server playlists)
     33590: ('Mes listes', 'My Lists'),
     33591: ('Aucune liste', 'No lists yet'),
+    33592: ('Profil', 'Profile'),
+    33593: ('Serveur', 'Server'),
+    33594: ('Activité de vous', 'Activity by you'),
+    33595: ('Activité de vous et {}', 'Activity by you and {}'),
+    33596: ('Activité de {}', 'Activity by {}'),
+    33597: ('Vous avez regardé', 'You watched'),
+    33598: ('{} a regardé', '{} watched'),
+    33599: ('il y a {}', '{} ago'),
 }
 
 MONTH_ABBRS = {

@@ -1720,27 +1720,42 @@ msgctxt "#33591"
 msgid "No lists yet"
 msgstr ""
 
-# Profile
+# Profil
 msgctxt "#33592"
 msgid "Profile"
 msgstr ""
 
-# Server
+# Serveur
 msgctxt "#33593"
 msgid "Server"
 msgstr ""
 
-# Activity by you
+# Activité de vous
 msgctxt "#33594"
 msgid "Activity by you"
 msgstr ""
 
-# Activity by you and {}
+# Activité de vous et {}
 msgctxt "#33595"
 msgid "Activity by you and {}"
 msgstr ""
 
-# Activity by {}
+# Activité de {}
 msgctxt "#33596"
 msgid "Activity by {}"
+msgstr ""
+
+# Vous avez regardé
+msgctxt "#33597"
+msgid "You watched"
+msgstr ""
+
+# {} a regardé
+msgctxt "#33598"
+msgid "{} watched"
+msgstr ""
+
+# il y a {}
+msgctxt "#33599"
+msgid "{} ago"
 msgstr ""

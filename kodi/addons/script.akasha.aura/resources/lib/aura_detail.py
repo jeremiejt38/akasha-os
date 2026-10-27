@@ -97,14 +97,21 @@ MORE_RELATED_ID = 7206
 MORE_GO_SHOW_ID = 7208
 MORE_VERSION_ID = 7209
 MORE_EXTRAS_ID = 7210
+ACTIVITY_PANEL_ID = 7195
+ACTIVITY_ROW_ID = 7196
+ACTIVITY_FEED_ID = 7197
+
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
 # the skin; only Subtitles, File Info and Similar Titles remain reachable.
 MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
                   MORE_GO_SHOW_ID, MORE_VERSION_ID, MORE_EXTRAS_ID)
 
-ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, EXTRAS_BUTTON_ID,
-                  WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
+# Plex's action order: Play/Resume | Restart | Watchlist | Rate |
+# Watched | Extras | More -- extras sit next to More, not in the core
+# five (Plex ATV refs: focus_rate_005, focus_morelabel_010).
+ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, WATCHLIST_BUTTON_ID,
+                  RATE_BUTTON_ID, WATCHED_BUTTON_ID, EXTRAS_BUTTON_ID,
                   MORE_BUTTON_ID)
 # light/dark icon overlay pairs that ride on top of each action button
 ACTION_ICON_OVERLAYS = {
@@ -162,6 +169,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._activity_date = ''
         self._activity_label = ''
         self._activity_avatar2 = ''
+        self._feed_open = False
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
         self._row_pos = {}          # last absolute row positions (wrap guard)
@@ -182,6 +190,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # _render lifts it once populated. Reset here, not in _render:
         # mode swaps (episode <-> show) re-render without re-veiling.
         _set(self, 'AuraDetailReady', '')
+        _set(self, 'AuraDetailFeed', '')
+        self._feed_open = False
         _set(self, 'AuraDetailFanart',
              self.item.get('fanart_url') or self.item.get('art_url') or '')
         try:
@@ -584,6 +594,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
         try:
+            self.getControl(7196).setPosition(128, t + 90)
             self.getControl(7207).setPosition(200, t + 105)
             self.getControl(7060).setPosition(128, t + 202)
             for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
@@ -824,6 +835,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         try:
             watch = self.getControl(WATCH_BUTTON_ID)
             strip = self.getControl(SEASON_STRIP_ID)
+            activity = self.getControl(ACTIVITY_ROW_ID)
             for cid, mode in bottom.items():
                 row = self.getControl(cid)
                 if mode == self.mode or (mode == 'item' and
@@ -832,9 +844,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                         RESTART_BUTTON_ID
                         if self.getProperty('AuraDetailRestart')
                         else WATCHLIST_BUTTON_ID)
-                    watch.setNavigation(strip, row, watch,
+                    # The activity row sits between the action row and
+                    # the content rows (Plex's vertical stack).
+                    mid = activity if self._activity_label else watch
+                    watch.setNavigation(strip, mid, watch,
                                         self.getControl(right_id))
-                    row.setNavigation(watch, row, row, row)
+                    row.setNavigation(mid, row, row, row)
+                    activity.setNavigation(watch, row, activity, activity)
             if self.mode in ('show', 'season'):
                 strip.setNavigation(strip, watch, strip, strip)
         except RuntimeError as e:
@@ -990,7 +1006,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 if show_strip:
                     ctl.controlUp(self.getControl(SEASON_STRIP_ID))
                 if self.getProperty(bottom_prop):
-                    ctl.controlDown(self.getControl(bottom_id))
+                    ctl.controlDown(self.getControl(
+                        ACTIVITY_ROW_ID if self._activity_label
+                        else bottom_id))
             except RuntimeError:
                 pass
 
@@ -1034,6 +1052,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._open_episode()
         elif controlID == CAST_LIST_ID:
             self._open_person()
+        elif controlID == ACTIVITY_ROW_ID:
+            self._open_activity_feed()
 
     def _preferred_season_pos(self):
         """Season card to focus on the overview row: the season carrying
@@ -1146,6 +1166,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # The "Plus d'actions" side panel swallows Back/Left like Plex's
         # sheet: it collapses back onto the action row instead of closing
         # the whole page.
+        if self._feed_open:
+            if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
+                                  ACTION_MOVE_LEFT):
+                self._close_activity_feed()
+                return
+            super().onAction(action)
+            return
         if self._more_menu_open():
             if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
                                   ACTION_MOVE_LEFT):
@@ -1354,6 +1381,78 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 avatar2 = acc['thumb']
         self._activity_avatar2 = avatar2
         return own, names
+
+    def _activity_when(self, viewed_at):
+        """'16 mai 2026 · il y a 2 min' -- Plex's feed rows carry the
+        absolute date plus a relative hint for recent events."""
+        if not viewed_at:
+            return ''
+        date = i18n.fmt_air_date(
+            time.strftime('%Y-%m-%d', time.localtime(viewed_at)))
+        delta = time.time() - viewed_at
+        if 0 <= delta < 60 * 86400:
+            if delta < 3600:
+                rel = i18n.tr(33599).format(
+                    '{} min'.format(max(1, int(delta // 60))))
+            elif delta < 86400:
+                rel = i18n.tr(33599).format('{} h'.format(int(delta // 3600)))
+            else:
+                rel = i18n.tr(33599).format('{} j'.format(int(delta // 86400)))
+            return '{} · {}'.format(date, rel) if date else rel
+        return date
+
+    def _open_activity_feed(self):
+        """Plex's right-column watch feed: every server account that
+        viewed this item, newest first (watch history is item-scoped)."""
+        entries = self._watch_history_entries(
+            self.item.get('rating_key') if self.item else None)
+        if not entries:
+            return
+        accounts = {}
+        if self.client and hasattr(self.client, 'accounts'):
+            try:
+                accounts = self.client.accounts() or {}
+            except Exception:
+                pass
+        own_name = ''
+        try:
+            own_name = (self.getProperty('AuraUserName') or '').lower()
+        except RuntimeError:
+            pass
+        try:
+            feed = self.getControl(ACTIVITY_FEED_ID)
+            feed.reset()
+            for entry in entries:
+                aid = str(entry.get('account_id') or '')
+                acc = accounts.get(aid) or {}
+                name = acc.get('name') or ''
+                is_own = (aid == '1' or
+                          (own_name and name and name.lower() == own_name))
+                who = i18n.tr(33597) if is_own else \
+                    i18n.tr(33598).format(name or '?')
+                li = xbmcgui.ListItem(who)
+                li.setLabel2(self._activity_when(entry.get('viewed_at')))
+                li.setArt({'icon': acc.get('thumb') or 'avatar-plex.png'})
+                feed.addItem(li)
+            feed.selectItem(0)
+        except RuntimeError as e:
+            xbmc.log('Akasha Aura Detail: activity feed failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            return
+        _set(self, 'AuraDetailFeed', '1')
+        self._feed_open = True
+        try:
+            self.setFocus(self.getControl(ACTIVITY_FEED_ID))
+        except RuntimeError:
+            pass
+
+    def _close_activity_feed(self):
+        _set(self, 'AuraDetailFeed', '')
+        self._feed_open = False
+        try:
+            self.setFocus(self.getControl(ACTIVITY_ROW_ID))
+        except RuntimeError:
+            pass
 
     def _find_next_episode(self):
         if self._next_episode:

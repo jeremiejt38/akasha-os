@@ -936,6 +936,125 @@
             <wrapmultiline>false</wrapmultiline>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
         </control>
+        <!-- Activity row trigger: invisible button spanning the line.
+             Plex opens the right-column watch feed when it is pressed.
+             Navigation is wired in _sync_navigation (sits between the
+             action row and the bottom content row). -->
+        <control type="button" id="7196">
+            <left>128</left>
+            <top>650</top>
+            <width>760</width>
+            <height>64</height>
+            <font>font_aura_mini</font>
+            <label></label>
+            <textcolor>00FFFFFF</textcolor>
+            <texturenofocus></texturenofocus>
+            <texturefocus colordiffuse="14FFFFFF" border="26">rounded-solid.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
+        </control>
+
+        <!-- Activity feed (Plex's right column): translucent panel +
+             vertical list of 'X watched' entries with account avatars. -->
+        <control type="image" id="7195">
+            <left>1026</left>
+            <top>96</top>
+            <width>560</width>
+            <height>884</height>
+            <texture colordiffuse="CC10131A" border="30">rounded-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailFeed))</visible>
+        </control>
+        <control type="list" id="7197">
+            <left>1050</left>
+            <top>116</top>
+            <width>512</width>
+            <height>844</height>
+            <orientation>vertical</orientation>
+            <scrolltime>140</scrolltime>
+            <onleft>7196</onleft>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailFeed))</visible>
+            <itemlayout height="96">
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture>$INFO[ListItem.Icon]</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>16</top>
+                    <width>380</width>
+                    <height>32</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>50</top>
+                    <width>380</width>
+                    <height>28</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout height="96">
+                <control type="image">
+                    <left>4</left>
+                    <top>4</top>
+                    <width>504</width>
+                    <height>88</height>
+                    <texture colordiffuse="FFE8EAED" border="26">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture>$INFO[ListItem.Icon]</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <texture colordiffuse="FF1F222B">cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>16</top>
+                    <width>380</width>
+                    <height>32</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FF10131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>50</top>
+                    <width>380</width>
+                    <height>28</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>CC10131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+            <content />
+        </control>
 
         <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
         <control type="label" id="7060">
