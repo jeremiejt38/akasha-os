@@ -577,6 +577,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         currently selected library. No-op if no library is selected."""
         if not self._divert_sections:
             return
+        # _divert_active_section can go stale when _divert_sections is
+        # repopulated in a different order/shape (pin/unpin, playlists
+        # pseudo-entry) -- re-resolve by the library key instead of
+        # blindly indexing (observed: IndexError on Recommande click).
+        if not (0 <= self._divert_active_section
+                < len(self._divert_sections)):
+            self._divert_active_section = next(
+                (i for i, s in enumerate(self._divert_sections)
+                 if s['key'] == self._divert_last_library_key), 0)
         section = self._divert_sections[self._divert_active_section]
         self._divert_library_tab = index
         self.setProperty('DivertLibraryTab', str(index))
@@ -3961,9 +3970,7 @@ def _hub_title_fr(hub):
 
     The server reports hub titles in its own locale (English on Akasha),
     while the UI language is French -- so the standard hub identifiers are
-    mapped here rather than trusting the raw title. Section-scoped curated
-    hubs get the ' · Akasha' server suffix Plex appends on the reference
-    client ("Top Movies in Mystère · Akasha").
+    mapped here rather than trusting the raw title.
     """
     identifier = (hub.get('identifier') or '').lower()
     context = (hub.get('context') or '').lower()
@@ -4006,16 +4013,6 @@ def _hub_title_fr(hub):
         }
         base = discover_titles.get(identifier, title)
 
-    # Plex suffixes every section-scoped row with the server name
-    # ("Recently Added in Films · Akasha", "Top Movies in Mystère ·
-    # Akasha" -- standard hubs included); home-scoped hubs (identifier
-    # 'home.*', context 'hub.home.*') get none.
-    scoped = bool(identifier) and not identifier.startswith('home.') \
-        and 'hub.home' not in context
-    if scoped and '·' not in base:
-        # Plex renders the server suffix smaller and grey; Kodi labels
-        # cannot mix sizes, so we match the dimmed tone at least.
-        base += '[COLOR FF8A9199] · Akasha[/COLOR]'
     return base
 
 

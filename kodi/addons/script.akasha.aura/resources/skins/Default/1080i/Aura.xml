@@ -370,7 +370,7 @@
                 <top>36</top>
                 <width>126</width>
                 <height>48</height>
-                <texture colordiffuse="BFFFFFFF" border="22">cap-r22.png</texture>
+                <texture colordiffuse="4D000000" border="22">cap-r22.png</texture>
             </control>
             <control type="label">
                 <left>1708</left>
@@ -381,7 +381,7 @@
                 <aligny>center</aligny>
                 <font>font_aura_mini</font>
                 <label>$INFO[System.Time(hh:mm)]</label>
-                <textcolor>FF2A2A2A</textcolor>
+                <textcolor>FFFFFFFF</textcolor>
             </control>
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
                 <effect type="fade" start="100" end="0" time="220" tween="quadratic" easing="out"/>
@@ -558,7 +558,7 @@
                     <top>128</top>
                     <width>174</width>
                     <height>48</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="image">
@@ -566,7 +566,7 @@
                     <top>128</top>
                     <width>161</width>
                     <height>48</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="image">
@@ -574,7 +574,7 @@
                     <top>128</top>
                     <width>148</width>
                     <height>48</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="image">
@@ -582,7 +582,7 @@
                     <top>128</top>
                     <width>145</width>
                     <height>48</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
 
@@ -673,7 +673,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
                 </control>
                 <control type="label">
@@ -685,7 +685,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
                 </control>
                 <control type="label">
@@ -697,7 +697,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
                 </control>
                 <control type="label">
@@ -709,7 +709,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
                 <control type="label">
@@ -838,7 +838,7 @@
                     <top>124</top>
                     <width>190</width>
                     <height>56</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
@@ -846,7 +846,7 @@
                     <top>124</top>
                     <width>196</width>
                     <height>56</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
@@ -854,7 +854,7 @@
                     <top>124</top>
                     <width>160</width>
                     <height>56</height>
-                    <texture colordiffuse="E6FFFFFF" border="24">cap-r24.png</texture>
+                    <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
@@ -917,7 +917,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33015]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="label">
@@ -929,7 +929,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33014]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="label">
@@ -941,7 +941,7 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33576]</label>
-                    <textcolor>FF1A1A1A</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
             </control>
@@ -1519,10 +1519,10 @@
 
                     <control type="label" id="5100">
                         <left>127</left>
-                        <top>504</top>
+                        <top>484</top>
                         <width>1600</width>
-                        <height>48</height>
-                        <font>font_aura_mini_bold</font>
+                        <height>70</height>
+                        <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -1813,10 +1813,10 @@
 
                     <control type="label" id="5200">
                         <left>127</left>
-                        <top>976</top>
+                        <top>956</top>
                         <width>1600</width>
-                        <height>48</height>
-                        <font>font_aura_mini_bold</font>
+                        <height>70</height>
+                        <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -2107,10 +2107,10 @@
 
                     <control type="label" id="5300">
                         <left>127</left>
-                        <top>1448</top>
+                        <top>1428</top>
                         <width>1600</width>
-                        <height>48</height>
-                        <font>font_aura_mini_bold</font>
+                        <height>70</height>
+                        <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -2406,10 +2406,10 @@
 
                     <control type="label" id="5400">
                         <left>127</left>
-                        <top>1920</top>
+                        <top>1900</top>
                         <width>1600</width>
-                        <height>48</height>
-                        <font>font_aura_mini_bold</font>
+                        <height>70</height>
+                        <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
@@ -2701,10 +2701,10 @@
 
                     <control type="label" id="5500">
                         <left>127</left>
-                        <top>2392</top>
+                        <top>2372</top>
                         <width>1600</width>
-                        <height>48</height>
-                        <font>font_aura_mini_bold</font>
+                        <height>70</height>
+                        <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
                         <animation type="Conditional" condition="Control.HasFocus(5110) | Control.HasFocus(5111) | Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
