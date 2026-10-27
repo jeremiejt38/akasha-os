@@ -1759,3 +1759,8 @@ msgstr "{} a regardé"
 msgctxt "#33599"
 msgid "{} ago"
 msgstr "il y a {}"
+
+# Sortie le {}
+msgctxt "#33600"
+msgid "Releasing {}"
+msgstr "Sortie le {}"

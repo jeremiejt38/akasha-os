@@ -471,6 +471,7 @@ STRINGS = {
     33597: ('Vous avez regardé', 'You watched'),
     33598: ('{} a regardé', '{} watched'),
     33599: ('il y a {}', '{} ago'),
+    33600: ('Sortie le {}', 'Releasing {}'),
 }
 
 MONTH_ABBRS = {

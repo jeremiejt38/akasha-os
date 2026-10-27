@@ -785,15 +785,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         paged = paged_list.PagedList(
             paged_list.dedup_fetch(fetch_page), page_size=page_size,
             max_items=RECO_MAX_ITEMS_PER_ROW)
+        # Plex suffixes section hubs with the server name ('... · Akasha');
+        # the friendly name is cached after the first '/' root fetch.
+        server = ''
+        if self._plex_client:
+            try:
+                server = self._plex_client.server_friendly_name() or ''
+            except Exception:
+                pass
         try:
             paged.load_initial()
         except Exception as e:  # defensive: never crash the tab on a row failure
             xbmc.log('Akasha Aura: hub row "{}" failed: {}'.format(hub.get('title'), e),
                      xbmc.LOGWARNING)
-            return {'title': _hub_title_fr(hub), 'paged': paged, 'error': e,
-                    'style': 'shelf'}
-        return {'title': _hub_title_fr(hub), 'paged': paged, 'error': None,
-                'style': hub.get('style') or 'shelf'}
+            return {'title': _hub_title_fr(hub, server), 'paged': paged,
+                    'error': e, 'style': 'shelf'}
+        return {'title': _hub_title_fr(hub, server), 'paged': paged,
+                'error': None, 'style': hub.get('style') or 'shelf'}
 
     def _reco_legacy_rows(self, section):
         """Connector mode: the connector has no hubs endpoint, so rebuild the
@@ -4171,12 +4179,14 @@ def _format_date_fr(iso_date):
         return ''
 
 
-def _hub_title_fr(hub):
+def _hub_title_fr(hub, server_name=''):
     """Localise the well-known Plex hub titles.
 
     The server reports hub titles in its own locale (English on Akasha),
     while the UI language is French -- so the standard hub identifiers are
-    mapped here rather than trusting the raw title.
+    mapped here rather than trusting the raw title. Server-local rows are
+    suffixed ' · {server}' like Plex ('Recently Released Movies · Akasha');
+    'Continue Watching' and the cloud Discover rows are not.
     """
     identifier = (hub.get('identifier') or '').lower()
     context = (hub.get('context') or '').lower()
@@ -4189,8 +4199,9 @@ def _hub_title_fr(hub):
         or 'inprogress' in identifier or 'continue watching' in title_lc
         or 'on deck' in title_lc)
     if standard:
-        base = i18n.tr(33137)
-    elif 'recentlyadded' in identifier or 'recently added' in title_lc:
+        # 'Continue Watching' is a global row: Plex shows no server suffix.
+        return i18n.tr(33137)
+    if 'recentlyadded' in identifier or 'recently added' in title_lc:
         base = i18n.tr(33138)
         if ' in ' in title:
             base += ' ' + i18n.tr(33141).format(title.rsplit(' in ', 1)[-1])
@@ -4218,8 +4229,15 @@ def _hub_title_fr(hub):
             'home.preferred-services': i18n.tr(33196),
         }
         base = discover_titles.get(identifier, title)
+        # Cloud Discover rows ('Tendances') carry no server suffix; only
+        # unmapped section hubs (genre/director spotlights...) fall here.
+        if identifier in discover_titles:
+            return base
 
-    return base
+    if not server_name:
+        return base
+    # Plex renders the suffix dimmer than the row title.
+    return '{} [COLOR 80FFFFFF]· {}[/COLOR]'.format(base, server_name)
 
 
 # Plex Categories tiles: a fixed colour per genre, composited ~60% over a
@@ -4274,19 +4292,23 @@ def _hero_meta_line(item):
     separately). Matches docs/plex-parity/SPEC.md measurements."""
     parts = []
     item_type = item.get('type')
+    unreleased = _unreleased_label(item)
     if item_type == 'episode':
         if item.get('season') is not None and item.get('index') is not None:
             parts.append('S{} • E{}'.format(item['season'], item['index']))
         elif item.get('index') is not None:
             parts.append('E{}'.format(item['index']))
-        date = _format_date_fr(item.get('originally_available_at'))
+        date = unreleased or _format_date_fr(
+            item.get('originally_available_at'))
         if date:
             parts.append(date)
         duration = _format_duration(item.get('duration_ms'))
         if duration:
             parts.append(duration)
     elif item_type == 'movie':
-        if item.get('year'):
+        if unreleased:
+            parts.append(unreleased)
+        elif item.get('year'):
             parts.append(str(item['year']))
         duration = _format_duration(item.get('duration_ms'))
         if duration:
@@ -4295,7 +4317,9 @@ def _hero_meta_line(item):
         if genres:
             parts.append(', '.join(genres[:2]))
     else:  # show / season / other
-        if item.get('year'):
+        if unreleased:
+            parts.append(unreleased)
+        elif item.get('year'):
             parts.append(str(item['year']))
         genres = item.get('genres') or []
         if genres:
@@ -4304,6 +4328,22 @@ def _hero_meta_line(item):
         if duration:
             parts.append(duration)
     return '   '.join(parts)
+
+
+def _unreleased_label(item):
+    """Plex's amber 'Releasing Oct 29' hero meta, shown in place of the
+    year/air date while the release is still in the future."""
+    oa = item.get('originally_available_at')
+    if not oa:
+        return ''
+    try:
+        ts = time.mktime(time.strptime(str(oa)[:10], '%Y-%m-%d'))
+    except (ValueError, OverflowError):
+        return ''
+    if ts <= time.time():
+        return ''
+    return '[COLOR FFE5A00D]{}[/COLOR]'.format(
+        i18n.tr(33600).format(i18n.fmt_air_date(str(oa)[:10])))
 
 
 def _truncate_plot(text, limit=130):
