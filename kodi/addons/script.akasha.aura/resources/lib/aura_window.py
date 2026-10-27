@@ -2481,7 +2481,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _load_az_rail(self, section):
         """A-Z rail: Plex shows only the initials actually present in the
-        library (/firstCharacter buckets), not the full alphabet."""
+        library (/firstCharacter buckets), not the full alphabet. The rail
+        has no static <content> (Kodi appends programmatic items after
+        static ones instead of replacing them) so the rail is always
+        populated here -- full alphabet when the fetch fails or a section
+        type has no letters endpoint."""
         key = section.get('key') if section else None
         if key == self._divert_az_section:
             return
@@ -2493,14 +2497,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 letters = self._plex_client.section_letters(key)
             except Exception as e:
                 xbmc.log('Akasha Aura: A-Z letters fetch failed: {}'.format(e), xbmc.LOGERROR)
-        if not letters:
-            self._divert_az_letters = None
-            return
-        self._divert_az_letters = letters
+        self._divert_az_letters = letters or None
         try:
             rail = self.getControl(DIVERT_AZ_RAIL_ID)
             rail.reset()
-            for letter in letters:
+            for letter in letters or '#ABCDEFGHIJKLMNOPQRSTUVWXYZ':
                 rail.addItem(xbmcgui.ListItem(label=letter))
         except Exception as e:
             xbmc.log('Akasha Aura: A-Z rail render failed: {}'.format(e), xbmc.LOGERROR)
@@ -2509,8 +2510,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_az_jump(self):
         """A-Z rail: jump the grid to the first loaded item starting with
         the selected letter (Plex only offers the rail on title sort)."""
-        # The control-level getters misbehave on this static <content>
-        # list (getSelectedPosition -> -1, getSelectedItem may raise),
+        # The control-level getters misbehave on this rail list
+        # (getSelectedPosition -> -1, getSelectedItem may raise),
         # but Kodi's infolabels report the selection correctly.
         try:
             pos = int(xbmc.getInfoLabel('Container({}).Position'.format(
