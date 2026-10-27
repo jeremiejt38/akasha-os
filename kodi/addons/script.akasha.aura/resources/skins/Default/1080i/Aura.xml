@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1194">
-    <defaultcontrol>2007</defaultcontrol>
+    <!-- The tab list (2007) is populated by _populate_tab_list() from
+         Python, so it is empty -- and unfocusable -- when Kodi resolves
+         the default control at window open. The search button is a static
+         always-visible button; onInit's _focus_tab() then moves focus to
+         the real tab list within the same beat. -->
+    <defaultcontrol>2000</defaultcontrol>
     <controls>
         <!-- Fullscreen background -->
         <control type="image">
