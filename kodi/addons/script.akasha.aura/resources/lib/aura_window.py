@@ -81,10 +81,11 @@ DIVERT_PANEL_ID = 3230
 # entries (profile, My Lists, playlists, On Plex) are hidden: they only
 # surfaced "unavailable" notifications.
 DIVERT_SIDEBAR_PROFILE_INDEX = 0
-DIVERT_SIDEBAR_SEARCH_INDEX = 1
-DIVERT_SIDEBAR_HOME_INDEX = 2
-DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 3
-DIVERT_SIDEBAR_LIBS_OFFSET = 4
+DIVERT_SIDEBAR_LISTS_INDEX = 1
+DIVERT_SIDEBAR_SEARCH_INDEX = 2
+DIVERT_SIDEBAR_HOME_INDEX = 3
+DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 4
+DIVERT_SIDEBAR_LIBS_OFFSET = 5
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
 # Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
@@ -1708,13 +1709,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         self._set_divert_state(None)
 
+    def _divert_has_active_filters(self):
+        return bool(self._divert_search_query or self._divert_filter_genre
+                    or self._divert_filter_unwatched is not None
+                    or self._divert_filters)
+
     def _apply_grid_empty_state(self, section):
         """Empty-state variants for the Bibliotheque grid: Plex's
         "No Results" + clear-filters action when filters are active,
         "Your library is empty" + Back otherwise."""
-        filtered = bool(self._divert_search_query or self._divert_filter_genre
-                        or self._divert_filter_unwatched is not None
-                        or self._divert_filters)
+        filtered = self._divert_has_active_filters()
         if filtered:
             self._set_divert_state(
                 'empty', title=i18n.tr(33556), message='',
@@ -2072,6 +2076,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         profile_item.setProperty('is_profile', '1')
         sidebar.addItem(profile_item)
 
+        # Plex's second row is "My Lists" (bookmark icon): opens the
+        # server-side lists view -- locally the playlists pseudo-section
+        # is the closest equivalent (Plex's cloud watchlist has no
+        # server-local API).
+        lists_item = xbmcgui.ListItem(i18n.tr(33590))
+        lists_item.setArt({'icon': 'icon-mylist.png'})
+        sidebar.addItem(lists_item)
+
         search_item = xbmcgui.ListItem(i18n.tr(33001))
         search_item.setArt({'icon': 'icon-search.png'})
         sidebar.addItem(search_item)
@@ -2238,9 +2250,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
         try:
-            filter_label = next(
-                label for value, label in DIVERT_FILTER_OPTIONS
-                if value == self._divert_filter_unwatched)
+            # Plex replaces the leading "All" pill with "Clear" while any
+            # filter is active -- one click resets instead of opening the
+            # filter picker (see rail_from_grid_004.png).
+            if self._divert_has_active_filters():
+                filter_label = i18n.tr(33557)
+            else:
+                filter_label = next(
+                    label for value, label in DIVERT_FILTER_OPTIONS
+                    if value == self._divert_filter_unwatched)
             self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel(filter_label)
         except RuntimeError:
             pass
@@ -3301,7 +3319,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         elif controlID == CATEGORY_PANEL_ID:
             self._on_category_genre_selected()
         elif controlID == DIVERT_FILTER_BUTTON_ID:
-            self._divert_open_filter_menu()
+            # Filtered state renders this pill as "Clear" (Plex parity):
+            # one click resets instead of opening the picker.
+            if self._divert_has_active_filters():
+                self._divert_reset_filters()
+            else:
+                self._divert_open_filter_menu()
         elif controlID == DIVERT_SORT_BUTTON_ID:
             self._divert_open_sort_menu()
         elif controlID == DIVERT_PLAY_BUTTON_ID:
@@ -3345,6 +3368,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
             return
+        if pos == DIVERT_SIDEBAR_LISTS_INDEX:
+            self._open_my_lists()
+            return
         if pos == DIVERT_SIDEBAR_SEARCH_INDEX:
             self._open_search()
             return
@@ -3360,6 +3386,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
             self._activate_library(section_index)
+
+    def _open_my_lists(self):
+        """Sidebar 'My Lists' row: Plex's watchlist+lists page. The cloud
+        watchlist has no server-local API, so the local equivalent is the
+        playlists pseudo-section (B10) -- open it like a library."""
+        index = next(
+            (i for i, s in enumerate(self._divert_sections)
+             if s.get('type') == 'playlist'), None)
+        if index is None:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', i18n.tr(33591),
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        self._activate_library(index)
 
     def _open_search(self):
         """Module 0: Plex-style live search screen (AuraSearch.xml)."""

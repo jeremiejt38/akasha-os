@@ -1705,6 +1705,17 @@ msgctxt "#33588"
 msgid "OK"
 msgstr "OK"
 
+# Bandes-annonces et bonus
 msgctxt "#33589"
 msgid "Trailers & Extras"
 msgstr "Bandes-annonces et bonus"
+
+# Mes listes
+msgctxt "#33590"
+msgid "My Lists"
+msgstr "Mes listes"
+
+# Aucune liste
+msgctxt "#33591"
+msgid "No lists yet"
+msgstr "Aucune liste"

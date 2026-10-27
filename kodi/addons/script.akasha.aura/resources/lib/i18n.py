@@ -459,6 +459,10 @@ STRINGS = {
     33587: ('Confirmer', 'Confirm'),
     33588: ('OK', 'OK'),
     33589: ('Bandes-annonces et bonus', 'Trailers & Extras'),
+
+    # Sidebar "My Lists" row (Plex parity -- lists the server playlists)
+    33590: ('Mes listes', 'My Lists'),
+    33591: ('Aucune liste', 'No lists yet'),
 }
 
 MONTH_ABBRS = {
