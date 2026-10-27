@@ -104,8 +104,10 @@ ACTIVITY_FEED_ID = 7197
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
 # the skin; only Subtitles, File Info and Similar Titles remain reachable.
-MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
-                  MORE_GO_SHOW_ID, MORE_VERSION_ID, MORE_EXTRAS_ID)
+MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
+                  MORE_MANAGE_ID, MORE_FILE_INFO_ID, MORE_WAYS_ID,
+                  MORE_RELATED_ID, MORE_GO_SHOW_ID, MORE_VERSION_ID,
+                  MORE_EXTRAS_ID)
 
 # Plex's action order: Play/Resume | Restart | Watchlist | Rate |
 # Watched | Extras | More -- extras sit next to More, not in the core
@@ -1731,8 +1733,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _panel_nav(self, down):
         """MOVE_UP/DOWN inside the More panel: skip entries hidden by
         props -- static XML navigation cannot express that."""
-        order = (MORE_SUBTITLES_ID, MORE_FILE_INFO_ID, MORE_RELATED_ID,
-                 MORE_GO_SHOW_ID, MORE_VERSION_ID, MORE_EXTRAS_ID)
+        order = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
+                 MORE_MANAGE_ID, MORE_FILE_INFO_ID, MORE_WAYS_ID,
+                 MORE_RELATED_ID, MORE_GO_SHOW_ID, MORE_VERSION_ID,
+                 MORE_EXTRAS_ID)
         try:
             focused = self.getFocusId()
         except RuntimeError:
@@ -1749,6 +1753,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _on_more_entry(self, control_id):
         self._close_more_menu()
+        if control_id == MORE_SUBTITLES_ID:
+            self._pick_subtitle()
+            return
         if control_id == MORE_FILE_INFO_ID:
             self._show_file_info()
             return
@@ -1765,7 +1772,6 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._play_extra()
             return
         msg = {
-            MORE_SUBTITLES_ID: 'Choix des sous-titres pendant la lecture',
             MORE_LIST_ID: 'Listes indisponibles (fonction Plex cloud)',
             MORE_PLAYLIST_ID: 'Playlists indisponibles (fonction Plex cloud)',
             MORE_MANAGE_ID: 'Gestion indisponible (fonction Plex cloud)',
@@ -1862,6 +1868,63 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if item.get(key):
                 lines.append('{} : {}'.format(label, item[key]))
         aura_menu.message(self, i18n.tr(33116), '[CR]'.join(lines))
+
+    def _pick_subtitle(self):
+        """Plex's More>Subtitles picker: 'Off' plus one row per stream
+        ('French Forced (SRT)'), the current default marked with a
+        check; the choice is persisted as the part's default subtitle
+        (subtitleStreamID) so playback picks it up like Plex."""
+        item = self._playable_item() or self.item
+        if not self.client or not item.get('rating_key'):
+            return
+        fetch = getattr(self.client, 'item_subtitles', None)
+        apply_sel = getattr(self.client, 'select_subtitle', None)
+        if not fetch or not apply_sel:
+            return
+        try:
+            part_id, subs = fetch(item['rating_key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: subtitle list failed: {}'
+                     .format(e), xbmc.LOGWARNING)
+            return
+        if not part_id:
+            return
+        entries = [i18n.tr(33202)]
+        stream_ids = [0]
+        any_selected = False
+        for s in subs:
+            language = s.get('language') or s.get('languageTag') or ''
+            forced = s.get('forced')
+            if forced and str(forced).lower() not in ('0', 'false', 'none'):
+                language = '{} Forced'.format(language) \
+                    if language else 'Forced'
+            codec = str(s.get('codec') or s.get('format') or '').upper()
+            label = ' '.join(p for p in
+                             (language, '({})'.format(codec) if codec else '')
+                             if p) or i18n.tr(33115)
+            if s.get('selected'):
+                any_selected = True
+                label += '  ✓'
+            entries.append(label)
+            stream_ids.append(s.get('id'))
+        if not any_selected:
+            entries[0] += '  ✓'
+        pos = aura_menu.select(self, i18n.tr(33115), entries)
+        if pos < 0:
+            return
+        try:
+            apply_sel(part_id, stream_ids[pos])
+            # The badge + More-row value follow the new default, same
+            # way Plex re-reads the part after the pick.
+            new_label = 'Off' if pos == 0 else \
+                entries[pos].replace('  ✓', '')
+            item['subtitle_label'] = new_label
+            if item is not self.item:
+                self.item['subtitle_label'] = new_label
+            _set(self, 'AuraDetailSubsValue', new_label)
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: subtitle pick failed: {}'
+                     .format(e), xbmc.LOGWARNING)
 
     def _rate(self):
         if not self.client or not self.item.get('rating_key'):

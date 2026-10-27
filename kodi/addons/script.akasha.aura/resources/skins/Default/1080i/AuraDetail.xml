@@ -972,8 +972,8 @@
         </control>
 
         <!-- Activity feed (Plex's right column): each watch event is a
-             floating rounded card -- avatar + 'X watched' + item title +
-             date -- no enclosing panel. -->
+             floating rounded card with avatar + 'X watched' + item
+             title + date; no enclosing panel. -->
         <control type="list" id="7197">
             <left>930</left>
             <top>110</top>
@@ -1454,7 +1454,7 @@
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7200</onup>
-                <ondown>7204</ondown>
+                <ondown>7201</ondown>
                 <onleft>7102</onleft>
             </control>
             <control type="image">
@@ -1497,9 +1497,111 @@
                 <label>$INFO[Window.Property(AuraDetailSubsValue)]</label>
                 <visible>Control.HasFocus(7200)</visible>
             </control>
-            <control type="button" id="7204">
+            <control type="button" id="7201">
                 <left>1276</left>
                 <top>272</top>
+                <width>592</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33605]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>68</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onup>7200</onup>
+                <ondown>7202</ondown>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>292</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-mylist.png</texture>
+                <visible>!Control.HasFocus(7201)</visible>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>292</top>
+                <width>24</width>
+                <height>24</height>
+                <texture colordiffuse="FF14161F">icon-mylist.png</texture>
+                <visible>Control.HasFocus(7201)</visible>
+            </control>
+            <control type="button" id="7202">
+                <left>1276</left>
+                <top>348</top>
+                <width>592</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33606]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>68</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onup>7201</onup>
+                <ondown>7203</ondown>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>368</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-playlists.png</texture>
+                <visible>!Control.HasFocus(7202)</visible>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>368</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-playlists-dark.png</texture>
+                <visible>Control.HasFocus(7202)</visible>
+            </control>
+            <control type="button" id="7203">
+                <left>1276</left>
+                <top>424</top>
+                <width>592</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33607]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>68</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onup>7202</onup>
+                <ondown>7204</ondown>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>444</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-gear.png</texture>
+                <visible>!Control.HasFocus(7203)</visible>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>444</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-gear-dark.png</texture>
+                <visible>Control.HasFocus(7203)</visible>
+            </control>
+            <control type="button" id="7204">
+                <left>1276</left>
+                <top>500</top>
                 <width>592</width>
                 <height>64</height>
                 <font>font_aura_mini</font>
@@ -1511,13 +1613,13 @@
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7200</onup>
-                <ondown>7206</ondown>
+                <onup>7203</onup>
+                <ondown>7205</ondown>
                 <onleft>7102</onleft>
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>292</top>
+                <top>520</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-info.png</texture>
@@ -1525,15 +1627,49 @@
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>292</top>
+                <top>520</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-info-dark.png</texture>
                 <visible>Control.HasFocus(7204)</visible>
             </control>
+            <control type="button" id="7205">
+                <left>1276</left>
+                <top>576</top>
+                <width>592</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33608]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>68</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onup>7204</onup>
+                <ondown>7206</ondown>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>596</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-dots.png</texture>
+                <visible>!Control.HasFocus(7205)</visible>
+            </control>
+            <control type="image">
+                <left>1302</left>
+                <top>596</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-dots-dark.png</texture>
+                <visible>Control.HasFocus(7205)</visible>
+            </control>
             <control type="button" id="7206">
                 <left>1276</left>
-                <top>348</top>
+                <top>652</top>
                 <width>592</width>
                 <height>64</height>
                 <font>font_aura_mini</font>
@@ -1545,13 +1681,13 @@
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7204</onup>
+                <onup>7205</onup>
                 <ondown>7208</ondown>
                 <onleft>7102</onleft>
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>368</top>
+                <top>672</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-discover.png</texture>
@@ -1559,7 +1695,7 @@
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>368</top>
+                <top>672</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-discover-dark.png</texture>
@@ -1567,7 +1703,7 @@
             </control>
             <control type="button" id="7208">
                 <left>1276</left>
-                <top>424</top>
+                <top>728</top>
                 <width>592</width>
                 <height>64</height>
                 <font>font_aura_mini</font>
@@ -1582,11 +1718,11 @@
                 <onup>7206</onup>
                 <ondown>7209</ondown>
                 <onleft>7102</onleft>
-            
+
                 <visible>!String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible></control>
             <control type="image">
                 <left>1302</left>
-                <top>444</top>
+                <top>748</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-tv.png</texture>
@@ -1594,7 +1730,7 @@
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>444</top>
+                <top>748</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-tv-dark.png</texture>
@@ -1602,7 +1738,7 @@
             </control>
             <control type="button" id="7209">
                 <left>1276</left>
-                <top>500</top>
+                <top>804</top>
                 <width>592</width>
                 <height>64</height>
                 <font>font_aura_mini</font>
@@ -1617,11 +1753,11 @@
                 <onup>7208</onup>
                 <ondown>7210</ondown>
                 <onleft>7102</onleft>
-            
+
                 <visible>!String.IsEmpty(Window.Property(AuraDetailVersions))</visible></control>
             <control type="image">
                 <left>1302</left>
-                <top>520</top>
+                <top>824</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-play.png</texture>
@@ -1629,7 +1765,7 @@
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>520</top>
+                <top>824</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-play-dark.png</texture>
@@ -1637,7 +1773,7 @@
             </control>
             <control type="button" id="7210">
                 <left>1276</left>
-                <top>576</top>
+                <top>880</top>
                 <width>592</width>
                 <height>64</height>
                 <font>font_aura_mini</font>
@@ -1652,11 +1788,11 @@
                 <onup>7209</onup>
                 <ondown>7210</ondown>
                 <onleft>7102</onleft>
-            
+
                 <visible>!String.IsEmpty(Window.Property(AuraDetailExtras))</visible></control>
             <control type="image">
                 <left>1302</left>
-                <top>596</top>
+                <top>900</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-film.png</texture>
@@ -1664,7 +1800,7 @@
             </control>
             <control type="image">
                 <left>1302</left>
-                <top>596</top>
+                <top>900</top>
                 <width>24</width>
                 <height>24</height>
                 <texture>icon-film-dark.png</texture>

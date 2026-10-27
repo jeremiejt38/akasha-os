@@ -897,6 +897,25 @@ class PlexClient:
         data = self._request('/library/metadata/{}/children'.format(rating_key))
         return self._metadata_list(data)
 
+    def item_subtitles(self, rating_key):
+        """Subtitle streams of the item's first playable part, for the
+        More-panel picker: (part_id, [raw Stream dicts, streamType=3])."""
+        data = self._request('/library/metadata/{}'.format(rating_key))
+        mc = self._media_container(data)
+        for video in mc.get('Metadata', []):
+            for media in video.get('Media', []):
+                for part in media.get('Part', []):
+                    subs = [s for s in part.get('Stream', [])
+                            if str(s.get('streamType')) == '3']
+                    return part.get('id'), subs
+        return None, []
+
+    def select_subtitle(self, part_id, stream_id):
+        """Plex's default subtitle track picker:
+        PUT /library/parts/<id>?subtitleStreamID=<stream> ('Off' = 0)."""
+        self._request('/library/parts/{}'.format(part_id),
+                      {'subtitleStreamID': stream_id or 0}, method='PUT')
+
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
         return self.metadata_children(show_rating_key)

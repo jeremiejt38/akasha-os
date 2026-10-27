@@ -478,6 +478,11 @@ STRINGS = {
             'Activity by you, {} and {} others'),
     33603: ('Activité de {} et 1 autre', 'Activity by {} and 1 other'),
     33604: ('Activité de {} et {} autres', 'Activity by {} and {} others'),
+    33605: ('Ajouter à une liste', 'Add to List'),
+    33606: ('Ajouter à une playlist / collection',
+            'Add to Playlist / Collection'),
+    33607: ('Gérer', 'Manage'),
+    33608: ('Autres façons de regarder', 'More Ways to Watch'),
 }
 
 MONTH_ABBRS = {

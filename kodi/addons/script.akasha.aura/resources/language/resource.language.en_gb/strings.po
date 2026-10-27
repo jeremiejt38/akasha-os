@@ -1784,3 +1784,23 @@ msgstr ""
 msgctxt "#33604"
 msgid "Activity by {} and {} others"
 msgstr ""
+
+# Ajouter à une liste
+msgctxt "#33605"
+msgid "Add to List"
+msgstr ""
+
+# Ajouter à une playlist / collection
+msgctxt "#33606"
+msgid "Add to Playlist / Collection"
+msgstr ""
+
+# Gérer
+msgctxt "#33607"
+msgid "Manage"
+msgstr ""
+
+# Autres façons de regarder
+msgctxt "#33608"
+msgid "More Ways to Watch"
+msgstr ""
