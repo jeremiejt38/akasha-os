@@ -307,15 +307,20 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 pass
 
         # Meta line: Plex shows "S1 - E4  ·  air date  ·  duration" for
-        # episodes, "year  ·  duration  ·  genres" otherwise.
+        # episodes, "year  ·  duration  ·  genres" otherwise. Unreleased
+        # items get Plex's amber "Releasing Oct 29" in place of year/air.
         parts = []
+        unreleased = _unreleased_label(item)
         if item.get('type') == 'episode':
             se = _season_episode_label(item)
             if se:
                 parts.append(se.replace(' - ', ' • '))
-            air = _fmt_air_date(item.get('originally_available_at'))
+            air = unreleased or _fmt_air_date(
+                item.get('originally_available_at'))
             if air:
                 parts.append(air)
+        elif unreleased:
+            parts.append(unreleased)
         elif item.get('year'):
             parts.append(str(item['year']))
         duration = _fmt_duration(item.get('duration_ms'))
@@ -327,8 +332,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if item.get('genres'):
             parts.append(', '.join(item['genres'][:2]))
         meta_text = '    '.join(parts)
+        meta_display = meta_text
+        if unreleased:
+            # Keep meta_text plain for text_width() below; the amber wrap
+            # is display-only or the rating chip would be pushed right.
+            meta_display = meta_text.replace(
+                unreleased,
+                '[COLOR FFE5A00D]{}[/COLOR]'.format(unreleased), 1)
         try:
-            self.getControl(7020).setLabel(meta_text)
+            self.getControl(7020).setLabel(meta_display)
         except RuntimeError:
             pass
         # Plex trails the meta line with a small bordered box holding the
@@ -1915,6 +1927,21 @@ def _season_episode_label(item):
 
 def _fmt_air_date(iso_date):
     return i18n.fmt_air_date(iso_date)
+
+
+def _unreleased_label(item):
+    """Plex's amber 'Releasing Oct 29' meta, shown in place of the
+    year/air date while the release is still in the future."""
+    oa = item.get('originally_available_at')
+    if not oa:
+        return ''
+    try:
+        ts = time.mktime(time.strptime(str(oa)[:10], '%Y-%m-%d'))
+    except (ValueError, OverflowError):
+        return ''
+    if ts <= time.time():
+        return ''
+    return i18n.tr(33600).format(i18n.fmt_air_date(str(oa)[:10]))
 
 
 def _fmt_duration(duration_ms):
