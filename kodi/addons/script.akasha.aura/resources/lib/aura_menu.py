@@ -26,6 +26,13 @@ _MSG_LINE_H = 34
 _MSG_MAX_H = 300
 _MAX_PANEL_H = 700
 
+# Left-anchored sheet (Plex's profile submenu, AuraProfileMenu.xml):
+# slides in right next to the expanded sidebar, taller icon rows.
+_LEFT_X = 436
+_LEFT_Y = 34
+_LEFT_W = 408
+_LEFT_ROW_H = 76
+
 
 class AuraMenuWindow(xbmcgui.WindowXMLDialog):
     title = ''
@@ -39,6 +46,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
         self.message = ''
         self.entries = []
         self.result = -1
+        self.left_anchor = False
 
     def onInit(self):
         count = len(self.entries)
@@ -48,25 +56,35 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
                      if self.message else 0)
         msg_h = min(msg_lines * _MSG_LINE_H + 16,
                     _MSG_MAX_H) if self.message else 0
-        list_h = min(count * _ROW_H, _MAX_PANEL_H)
-        panel_h = list_h + _PAD_V * 2 + msg_h + \
-            (_TITLE_H if has_title else 0)
-        panel_top = max(0, (1080 - panel_h) // 2)
+        if self.left_anchor:
+            row_h = _LEFT_ROW_H
+            panel_w, panel_left = _LEFT_W, _LEFT_X
+            list_h = min(count * row_h, _MAX_PANEL_H)
+            panel_h = list_h + _PAD_V * 2 + msg_h + \
+                (_TITLE_H if has_title else 0)
+            panel_top = _LEFT_Y
+        else:
+            row_h = _ROW_H
+            panel_w = _PANEL_W
+            panel_left = (1920 - _PANEL_W) // 2
+            list_h = min(count * row_h, _MAX_PANEL_H)
+            panel_h = list_h + _PAD_V * 2 + msg_h + \
+                (_TITLE_H if has_title else 0)
+            panel_top = max(0, (1080 - panel_h) // 2)
         list_top = panel_top + _PAD_V + msg_h + \
             (_TITLE_H if has_title else 0)
         try:
             panel = self.getControl(PANEL_ID)
-            panel.setPosition((1920 - _PANEL_W) // 2, panel_top)
-            panel.setWidth(_PANEL_W)
+            panel.setPosition(panel_left, panel_top)
+            panel.setWidth(panel_w)
             panel.setHeight(panel_h)
         except RuntimeError:
             pass
         if has_title:
             try:
                 title = self.getControl(TITLE_ID)
-                title.setPosition(
-                    (1920 - _PANEL_W) // 2 + 40, panel_top + 18)
-                title.setWidth(_PANEL_W - 80)
+                title.setPosition(panel_left + 40, panel_top + 18)
+                title.setWidth(panel_w - 80)
                 title.setHeight(40)
                 title.setLabel(self.title)
             except RuntimeError:
@@ -75,21 +93,27 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             try:
                 msg = self.getControl(MESSAGE_ID)
                 msg.setPosition(
-                    (1920 - _PANEL_W) // 2 + 40,
+                    panel_left + 40,
                     panel_top + _PAD_V +
                     (_TITLE_H if has_title else 0))
-                msg.setWidth(_PANEL_W - 80)
+                msg.setWidth(panel_w - 80)
                 msg.setHeight(msg_h - 16)
                 msg.setText(self.message)
             except RuntimeError:
                 pass
         try:
             lst = self.getControl(LIST_ID)
-            lst.setPosition((1920 - _PANEL_W) // 2, list_top)
-            lst.setWidth(_PANEL_W)
+            lst.setPosition(panel_left, list_top)
+            lst.setWidth(panel_w)
             lst.setHeight(list_h)
             for entry in self.entries:
-                lst.addItem(xbmcgui.ListItem(entry))
+                # Tuple entries carry a leading icon (profile submenu).
+                if isinstance(entry, tuple):
+                    li = xbmcgui.ListItem(entry[0])
+                    li.setArt({'icon': entry[1]})
+                else:
+                    li = xbmcgui.ListItem(entry)
+                lst.addItem(li)
             self.setFocus(lst)
         except RuntimeError:
             pass
@@ -107,16 +131,18 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             self.close()
 
 
-def _dialog(owner, title, entries, message=''):
+def _dialog(owner, title, entries, message='', skin='AuraMenu.xml',
+            left_anchor=False):
     addon_path = getattr(owner, 'addon_path', None)
     if not addon_path and getattr(owner, 'addon', None) is not None:
         addon_path = owner.addon.getAddonInfo('path')
     addon_path = addon_path or ''
-    dlg = AuraMenuWindow('AuraMenu.xml', addon_path, 'Default', '1080i')
+    dlg = AuraMenuWindow(skin, addon_path, 'Default', '1080i')
     dlg.title = title or ''
     dlg.message = message or ''
     dlg.entries = list(entries)
     dlg.result = -1
+    dlg.left_anchor = left_anchor
     dlg.doModal()
     return dlg.result
 
@@ -129,6 +155,13 @@ def select(owner, title, entries):
 def contextmenu(owner, entries):
     """Plex-styled replacement for xbmcgui.Dialog().contextmenu()."""
     return _dialog(owner, '', entries)
+
+
+def profilemenu(owner, entries):
+    """Plex's sidebar profile submenu: a dark sheet anchored left of the
+    screen, rows carry an icon -- entries are [(label, icon_name), ...]."""
+    return _dialog(owner, '', entries, skin='AuraProfileMenu.xml',
+                   left_anchor=True)
 
 
 def confirm(owner, title, message):

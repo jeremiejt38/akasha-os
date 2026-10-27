@@ -1719,3 +1719,13 @@ msgstr "Mes listes"
 msgctxt "#33591"
 msgid "No lists yet"
 msgstr "Aucune liste"
+
+# Profil
+msgctxt "#33592"
+msgid "Profile"
+msgstr "Profil"
+
+# Serveur
+msgctxt "#33593"
+msgid "Server"
+msgstr "Serveur"

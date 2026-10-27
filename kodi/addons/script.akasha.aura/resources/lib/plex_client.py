@@ -461,6 +461,20 @@ class PlexClient:
         data = self._request('/library/sections/{}/all'.format(section_key), params)
         return self._metadata_list_with_total(data)
 
+    def section_letters(self, section_key):
+        """Initials actually present in the section, for the A-Z rail:
+        `/library/sections/{id}/firstCharacter` returns one Directory
+        entry per letter with a count ('#' buckets non-alpha)."""
+        data = self._request(
+            '/library/sections/{}/firstCharacter'.format(section_key))
+        mc = self._media_container(data)
+        out = []
+        for d in mc.get('Directory', []):
+            title = d.get('title')
+            if title:
+                out.append(title)
+        return out
+
     def section_filters(self, section_key):
         """The filter categories the server exposes for a section
         (`/library/sections/{id}/filters` -- parity backlog B4).

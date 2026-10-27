@@ -262,6 +262,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # holds browse items.
         self._divert_items_source = 'browse'
         self._divert_paged = None
+        # Letters actually present in the active section (Plex shows only
+        # those on the A-Z rail, not the full alphabet); None keeps the
+        # static <content> fallback and the '#'..'Z' position map.
+        self._divert_az_letters = None
+        self._divert_az_section = None
         # Skeleton loaders (plan a3f9c2e1 phase 5): how many trailing
         # placeholder ListItems are currently in each list/panel, so the
         # next render can remove exactly that many before appending fresh
@@ -2208,6 +2213,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # is forward-progressive loading rather than a true sliding window.
         # See docs/aura/decisions.md.
         self._divert_items_source = 'browse'
+        self._load_az_rail(section)
         self._divert_paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
             page_size=50, prefetch_margin=50)
@@ -2465,6 +2471,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         actions[idx][1]()
 
+    def _load_az_rail(self, section):
+        """A-Z rail: Plex shows only the initials actually present in the
+        library (/firstCharacter buckets), not the full alphabet."""
+        key = section.get('key') if section else None
+        if key == self._divert_az_section:
+            return
+        self._divert_az_section = key
+        letters = None
+        if (self._plex_client and section
+                and section.get('type') in ('movie', 'show', 'artist')):
+            try:
+                letters = self._plex_client.section_letters(key)
+            except Exception as e:
+                xbmc.log('Akasha Aura: A-Z letters fetch failed: {}'.format(e), xbmc.LOGERROR)
+        if not letters:
+            self._divert_az_letters = None
+            return
+        self._divert_az_letters = letters
+        try:
+            rail = self.getControl(DIVERT_AZ_RAIL_ID)
+            rail.reset()
+            for letter in letters:
+                rail.addItem(xbmcgui.ListItem(label=letter))
+        except Exception as e:
+            xbmc.log('Akasha Aura: A-Z rail render failed: {}'.format(e), xbmc.LOGERROR)
+            self._divert_az_letters = None
+
     def _divert_az_jump(self):
         """A-Z rail: jump the grid to the first loaded item starting with
         the selected letter (Plex only offers the rail on title sort)."""
@@ -2476,7 +2509,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 DIVERT_AZ_RAIL_ID)) or -1)
         except ValueError:
             return
-        letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        letters = self._divert_az_letters or '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         if not (0 <= pos < len(letters)):
             return
         letter = letters[pos]
@@ -3376,6 +3409,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             return
         if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
+            self._open_profile_menu()
             return
         if pos == DIVERT_SIDEBAR_LISTS_INDEX:
             self._open_my_lists()
@@ -3395,6 +3429,34 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
             self._activate_library(section_index)
+
+    def _open_profile_menu(self):
+        """Sidebar profile row: Plex's left-anchored submenu sheet. The
+        cloud-only entries of Plex's menu (Switch Profile, Notifications,
+        Friends, Services) have no server-local counterpart; the local
+        ones map to real actions."""
+        entries = [
+            (i18n.tr(33592), 'icon-profile.png'),
+            (i18n.tr(33593), 'icon-server.png'),
+            (i18n.tr(33019), 'icon-gear.png'),
+        ]
+        actions = [
+            self._show_profile_info,
+            self._reconnect_connector,
+            self._open_settings_panel,
+        ]
+        idx = aura_menu.profilemenu(self, entries)
+        if idx < 0:
+            return
+        actions[idx]()
+
+    def _show_profile_info(self):
+        """Plex's 'Profile' row opens the account page; the local
+        equivalent is a short account/server info sheet."""
+        name = self.getProperty('AuraUserName') or '-'
+        server = self.addon.getSetting('plex.server_url') or '-'
+        aura_menu.message(self, i18n.tr(33592),
+                          '{}\n{}'.format(name, server))
 
     def _open_my_lists(self):
         """Sidebar 'My Lists' row: Plex's watchlist+lists page. The cloud
