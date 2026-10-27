@@ -41,7 +41,7 @@ _FILTERS = (
     (i18n.tr(33051), 'movie'),
     (i18n.tr(33150), 'show'),
     (i18n.tr(33151), 'episode'),
-    (i18n.tr(33152), 'person'),
+    (i18n.tr(33100), 'person'),
 )
 
 
