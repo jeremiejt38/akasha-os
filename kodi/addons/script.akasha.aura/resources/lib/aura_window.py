@@ -532,7 +532,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """
         self._divert_view = 'home'
         self.setProperty('DivertView', 'home')
-        self.setProperty('DivertActiveLibrary', '')
+        # Plex draws the active-section outline on the Home row too --
+        # the sidebar ring matches ListItem.Label to this property.
+        self.setProperty('DivertActiveLibrary', i18n.tr(33005))
         self.setProperty('DivertHomeTab', str(self._home_tab))
         self.addon.setSetting('divert.last_view', 'home')
         self._set_sidebar_selection(DIVERT_SIDEBAR_HOME_INDEX)
