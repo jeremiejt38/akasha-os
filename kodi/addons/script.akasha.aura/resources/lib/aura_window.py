@@ -3503,7 +3503,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             'search', aura_search.AuraSearchWindow, 'AuraSearch.xml')
         search.addon = self.addon
         search.client = self._connector_client or self._plex_client
-        search.sections = self._divert_sections
+        # Plex searches every server library, not only the pinned ones
+        # (_divert_sections is the pinned subset).
+        search.sections = self._all_divert_sections or self._divert_sections
         search.on_select = self._open_search_result
         search.on_person = self._open_person_page
         search.on_genre = self._open_genre_result
