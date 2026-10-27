@@ -166,6 +166,7 @@ DIVERT_GENRE_BUTTON_ID = 3213  # retired: genre lives in the "..." overflow
 DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
 DIVERT_RESET_BUTTON_ID = 3218
+DIVERT_CLEAR_BUTTON_ID = 3219
 DIVERT_AZ_RAIL_ID = 3250
 
 # Surfaces whose Back press re-roots focus on the sidebar instead of
@@ -2250,11 +2251,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
         try:
-            # Plex replaces the leading "All" pill with "Clear" while any
-            # filter is active -- one click resets instead of opening the
-            # filter picker (see rail_from_grid_004.png).
-            if self._divert_has_active_filters():
-                filter_label = i18n.tr(33557)
+            # Plex's leading pill shows the ACTIVE filter value ('Action'
+            # when genre-filtered, 'All' by default), and a separate
+            # 'Clear' pill appears after the counter while filtered --
+            # see rail_from_grid_004.png / grid_focus_item2_005.png.
+            if self._divert_filter_genre:
+                filter_label = self._divert_filter_genre
             else:
                 filter_label = next(
                     label for value, label in DIVERT_FILTER_OPTIONS
@@ -2262,6 +2264,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.getControl(DIVERT_FILTER_BUTTON_ID).setLabel(filter_label)
         except RuntimeError:
             pass
+        self.setProperty('DivertFiltered',
+                         '1' if self._divert_has_active_filters() else '')
         try:
             sort_label = DIVERT_SORT_SHORT_LABELS.get(self._divert_sort, '-')
             self.getControl(DIVERT_SORT_BUTTON_ID).setLabel(sort_label)
@@ -2314,6 +2318,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         w = max(44, int(round(9.7 * len(label_of(3220)))) + 16)
         put(3220, x, 198, w)
         x += w + 16
+        # 'Clear' pill: present only while a filter is active, between
+        # the counter and the '...' overflow like Plex.
+        if self._divert_has_active_filters():
+            w = pill_w(label_of(DIVERT_CLEAR_BUTTON_ID))
+            for cid in (DIVERT_CLEAR_BUTTON_ID, 3247, 3248):
+                put(cid, x, y, w)
+            x += w + 16
         put(3218, x, y)
         put(3226, x + 12, 202)
         put(3227, x + 12, 202)
@@ -2329,8 +2340,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 label = i18n.tr_count(count, 33069)
                 if self._divert_search_query:
                     label += ' ' + i18n.tr(33070).format(self._divert_search_query)
-                if self._divert_filter_genre:
-                    label += ' ({})'.format(self._divert_filter_genre)
+                # The leading filter pill already displays the active
+                # genre name (Plex 'Action | Movies | by ... | N Items'),
+                # so the counter stays bare for genre filters.
                 if self._divert_filters:
                     label += ' ({})'.format(', '.join(
                         title for _v, title in self._divert_filters.values()))
@@ -3184,7 +3196,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # it arrives ~0ms after the hop's onFocus, a real keypress never
         # lands that soon after a focus change.
         chip_ids = (DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID,
-                    DIVERT_RESET_BUTTON_ID)
+                    DIVERT_CLEAR_BUTTON_ID, DIVERT_RESET_BUTTON_ID)
         if focused in chip_ids and aid in (ACTION_MOVE_UP,
                                          ACTION_MOVE_DOWN,
                                          ACTION_MOVE_LEFT):
@@ -3319,12 +3331,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         elif controlID == CATEGORY_PANEL_ID:
             self._on_category_genre_selected()
         elif controlID == DIVERT_FILTER_BUTTON_ID:
-            # Filtered state renders this pill as "Clear" (Plex parity):
-            # one click resets instead of opening the picker.
-            if self._divert_has_active_filters():
-                self._divert_reset_filters()
-            else:
-                self._divert_open_filter_menu()
+            self._divert_open_filter_menu()
+        elif controlID == DIVERT_CLEAR_BUTTON_ID:
+            self._divert_reset_filters()
         elif controlID == DIVERT_SORT_BUTTON_ID:
             self._divert_open_sort_menu()
         elif controlID == DIVERT_PLAY_BUTTON_ID:

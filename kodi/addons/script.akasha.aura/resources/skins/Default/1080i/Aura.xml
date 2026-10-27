@@ -1044,13 +1044,61 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3211</onleft>
-                    <onright>3218</onright>
+                    <onright condition="!String.IsEmpty(Window.Property(DivertFiltered))">3219</onright>
+                    <onright condition="String.IsEmpty(Window.Property(DivertFiltered))">3218</onright>
                     <onup>3212</onup>
                     <ondown>3212</ondown>
                     <textcolor>00FFFFFF</textcolor>
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                </control>
+
+                <!-- 'Clear' pill: Plex renders it between the item counter
+                     and the '...' overflow only while a filter is active
+                     (rail_from_grid_004.png). -->
+                <control type="button" id="3219">
+                    <left>700</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <label>$ADDON[script.akasha.aura 33557]</label>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <onleft>3212</onleft>
+                    <onright>3218</onright>
+                    <onup>3219</onup>
+                    <ondown>3219</ondown>
+                    <textcolor>00FFFFFF</textcolor>
+                    <focusedcolor>00FFFFFF</focusedcolor>
+                    <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
+                    <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <visible>!String.IsEmpty(Window.Property(DivertFiltered))</visible>
+                </control>
+                <control type="label" id="3247">
+                    <left>700</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3219)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <visible>!Control.HasFocus(3219) + !String.IsEmpty(Window.Property(DivertFiltered))</visible>
+                </control>
+                <control type="label" id="3248">
+                    <left>700</left>
+                    <top>190</top>
+                    <width>120</width>
+                    <height>48</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[Control.GetLabel(3219)]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3219) + !String.IsEmpty(Window.Property(DivertFiltered))</visible>
                 </control>
 
                 <!-- Item counter: Plex shows it as bare text in the pills
@@ -1076,7 +1124,8 @@
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
-                    <onleft>3212</onleft>
+                    <onleft condition="!String.IsEmpty(Window.Property(DivertFiltered))">3219</onleft>
+                    <onleft condition="String.IsEmpty(Window.Property(DivertFiltered))">3212</onleft>
                     <onright>3250</onright>
                     <onup>3218</onup>
                     <ondown>3218</ondown>
