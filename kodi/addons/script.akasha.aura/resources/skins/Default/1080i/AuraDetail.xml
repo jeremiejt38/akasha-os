@@ -906,6 +906,25 @@
             <texture colordiffuse="FF10131A">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
         </control>
+        <!-- Second account avatar, overlapping the first like Plex's
+             'Activity by you and X' stack. -->
+        <control type="image" id="7183">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window.Property(AuraDetailActivityAvatar2)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
+        </control>
+        <control type="image" id="7184">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
+        </control>
         <control type="label" id="7207">
             <left>200</left>
             <top>666</top>

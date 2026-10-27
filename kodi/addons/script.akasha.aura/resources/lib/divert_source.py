@@ -198,33 +198,42 @@ def _video_label(raw_item):
             hdr = 'HLG'
             break
     codec = str(media.get('videoCodec') or '').upper()
+    profile = str(media.get('videoProfile') or '')
+    inner = ' '.join(p for p in (codec, profile) if p)
     parts = [base]
     if hdr:
         parts.append(hdr)
-    if codec:
-        parts.append(codec)
+    if inner:
+        parts.append('({})'.format(inner))
     return ' '.join(parts)
 
 
 def _audio_label(raw_item):
-    """Plex-style audio badge, e.g. 'French EAC3 5.1'."""
+    """Plex-style audio badge, e.g. 'French (EAC3 5.1)'."""
     for stream in _streams(raw_item, 2):
         language = stream.get('language') or stream.get('languageTag') or ''
         codec = str(stream.get('codec') or '').upper()
         channels = stream.get('channels')
         layout = {2: '2.0', 6: '5.1', 8: '7.1'}.get(channels, str(channels) if channels else '')
-        label = ' '.join(p for p in (language, codec, layout) if p)
-        if label:
-            return label
+        inner = ' '.join(p for p in (codec, layout) if p)
+        if language and inner:
+            return '{} ({})'.format(language, inner)
+        if language or inner:
+            return language or inner
     return ''
 
 
 def _subtitle_label(raw_item):
-    """Short subtitle summary, e.g. 'French SRT' (first sub) or '3 sous-titres'."""
+    """Short subtitle summary, e.g. 'French SRT' (first sub); Plex draws
+    an 'Off' badge when a video file carries no subtitle stream."""
     subs = _streams(raw_item, 3)
-    if not subs:
+    if not _first_media(raw_item):
         return ''
-    first = subs[0]
+    # Plex's badge is the SELECTED subtitle ('Off' when none) -- streams
+    # carry `selected` for the track the server/user picked.
+    first = next((s for s in subs if s.get('selected')), None)
+    if not first:
+        return 'Off'
     language = first.get('language') or first.get('languageTag') or ''
     codec = str(first.get('codec') or first.get('format') or '').upper()
     label = ' '.join(p for p in (language, codec) if p)

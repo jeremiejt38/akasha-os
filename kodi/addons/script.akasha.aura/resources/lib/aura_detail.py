@@ -160,6 +160,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._extras_key = None
         self._activity_key = None
         self._activity_date = ''
+        self._activity_label = ''
+        self._activity_avatar2 = ''
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
         self._row_pos = {}          # last absolute row positions (wrap guard)
@@ -405,19 +407,23 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                  .format(e), xbmc.LOGWARNING)
         _set(self, 'AuraDetailExtras', '1' if self._extras else '')
 
-        # "Vous l'avez regarde le..." (B6): Plex's "Activity by you" hint
-        # from the server watch history. The entry list (50 rows) is
-        # cached on the reused window for 5 min -- without it every
-        # detail open paid a full history fetch for a single line.
+        # "Activity by you and X" (B6): Plex names every server account
+        # with history on this item ('you' first, then the others) and
+        # stacks their avatars; the expanded feed lives on the right
+        # column in Plex. The entry list (50 rows) is cached on the
+        # reused window for 5 min -- without it every detail open paid
+        # a full history fetch for a single line.
         if self._activity_key != item.get('rating_key'):
             self._activity_key = item.get('rating_key')
             self._activity_date = ''
+            self._activity_avatar2 = ''
+            self._activity_label = ''
+            entries = self._watch_history_entries(item.get('rating_key'))
             viewed_at = item.get('last_viewed_at')
             if not viewed_at:
                 # Thin items (hub cards) lack lastViewedAt: fall back to
                 # the item-scoped history call (metadataItemID, ~1KB).
-                for entry in self._watch_history_entries(
-                        item.get('rating_key')):
+                for entry in entries:
                     if entry.get('viewed_at'):
                         viewed_at = entry['viewed_at']
                         break
@@ -425,9 +431,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self._activity_date = i18n.fmt_air_date(
                     time.strftime('%Y-%m-%d',
                                   time.localtime(viewed_at)))
-        _set(self, 'AuraDetailActivity',
-             i18n.tr(33578).format(self._activity_date)
-             if self._activity_date else '')
+            own, names = self._activity_names(entries)
+            if own and names:
+                self._activity_label = i18n.tr(33595).format(
+                    ', '.join(names[:2]))
+            elif own:
+                self._activity_label = i18n.tr(33594)
+            elif names:
+                self._activity_label = i18n.tr(33596).format(
+                    ', '.join(names[:2]))
+            elif self._activity_date:
+                # No account data (older servers/connectors): keep the
+                # previous date-only line rather than nothing.
+                self._activity_label = i18n.tr(33578).format(
+                    self._activity_date)
+        _set(self, 'AuraDetailActivity', self._activity_label or '')
+        _set(self, 'AuraDetailActivityAvatar2',
+             self._activity_avatar2 or '')
+        try:
+            self.getControl(7207).setPosition(
+                248 if self._activity_avatar2 else 200,
+                self._flow_top + 105)
+        except RuntimeError:
+            pass
 
         # Plex's 'Go to Show' entry (B11): episodes only.
         _set(self, 'AuraDetailGoToShow',
@@ -550,6 +576,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         for cid in (7180, 7181, 7182):
             try:
                 self.getControl(cid).setPosition(132, t + 92)
+            except RuntimeError:
+                pass
+        for cid in (7183, 7184):
+            try:
+                self.getControl(cid).setPosition(178, t + 92)
             except RuntimeError:
                 pass
         try:
@@ -1283,6 +1314,46 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                              .format(e), xbmc.LOGWARNING)
         self._wh_cache = (rating_key, now, entries)
         return entries
+
+    def _activity_names(self, entries):
+        """(own_watched, other_names) for Plex's 'Activity by you and X':
+        each distinct account in this item's history, matched against the
+        server /accounts map. The configured account is 'you' -- id 1 is
+        the owner on unmanaged setups, otherwise match the plex.tv name.
+        Also records the first other account's avatar as _activity_avatar2.
+        """
+        own = False
+        names = []
+        avatar2 = ''
+        seen = set()
+        accounts = {}
+        if entries and self.client and hasattr(self.client, 'accounts'):
+            try:
+                accounts = self.client.accounts() or {}
+            except Exception:
+                accounts = {}
+        own_name = ''
+        try:
+            own_name = (self.getProperty('AuraUserName') or '').lower()
+        except RuntimeError:
+            pass
+        for entry in entries or []:
+            aid = str(entry.get('account_id') or '')
+            if not aid or aid in seen:
+                continue
+            seen.add(aid)
+            acc = accounts.get(aid) or {}
+            name = acc.get('name') or ''
+            if aid == '1' or (own_name and name and
+                              name.lower() == own_name):
+                own = True
+                continue
+            if name:
+                names.append(name)
+            if not avatar2 and acc.get('thumb'):
+                avatar2 = acc['thumb']
+        self._activity_avatar2 = avatar2
+        return own, names
 
     def _find_next_episode(self):
         if self._next_episode:

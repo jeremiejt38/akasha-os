@@ -702,8 +702,33 @@ class PlexClient:
         for raw in mc.get('Metadata', [])[:limit]:
             item = self._video_dict(raw, self.server_url, self.token)
             item['viewed_at'] = raw.get('viewedAt')
+            item['account_id'] = raw.get('accountID')
             items.append(item)
         return items
+
+    def accounts(self):
+        """Server accounts (`/accounts`): Plex Home users and the owner --
+        used by the 'Activity by you and X' line to name the watchers."""
+        if hasattr(self, '_accounts_cache'):
+            return self._accounts_cache
+        out = {}
+        try:
+            mc = self._media_container(self._request('/accounts'))
+            for d in mc.get('Account', []):
+                acc_id = d.get('id')
+                if acc_id is not None:
+                    thumb = d.get('thumb') or ''
+                    if thumb and not thumb.startswith('http'):
+                        thumb = PlexClient._resolve_image(
+                            thumb, self.server_url, self.token)
+                    out[str(acc_id)] = {
+                        'name': d.get('name') or '',
+                        'thumb': thumb,
+                    }
+        except Exception:
+            pass
+        self._accounts_cache = out
+        return out
 
     def related_items(self, rating_key, limit=16):
         """'More Like This' titles (`/library/metadata/{id}/related`, B7).
