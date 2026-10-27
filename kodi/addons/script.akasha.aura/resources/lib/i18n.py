@@ -484,6 +484,11 @@ STRINGS = {
     33607: ('Gérer', 'Manage'),
     33608: ('Autres façons de regarder', 'More Ways to Watch'),
     33609: ('Musique', 'Music'),
+    33610: ('Changer de profil', 'Switch Profile'),
+    33611: ('Notifications', 'Notifications'),
+    33612: ('Amis', 'Friends'),
+    33613: ('Indisponible hors plex.tv', 'Requires plex.tv'),
+    33614: ('Services', 'Services'),
 }
 
 MONTH_ABBRS = {

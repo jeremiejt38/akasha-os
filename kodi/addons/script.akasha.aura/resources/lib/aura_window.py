@@ -3442,17 +3442,25 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._activate_library(section_index)
 
     def _open_profile_menu(self):
-        """Sidebar profile row: Plex's left-anchored submenu sheet. The
-        cloud-only entries of Plex's menu (Switch Profile, Notifications,
-        Friends, Services) have no server-local counterpart; the local
-        ones map to real actions."""
+        """Sidebar profile row: Plex's left-anchored submenu sheet,
+        all seven rows like the app. The cloud-only entries (Switch
+        Profile, Notifications, Friends, Services) show a stub
+        notification; the local ones map to real actions."""
         entries = [
+            (i18n.tr(33610), 'icon-switch.png'),
             (i18n.tr(33592), 'icon-profile.png'),
+            (i18n.tr(33611), 'icon-bell.png'),
+            (i18n.tr(33612), 'icon-friends.png'),
+            (i18n.tr(33614), 'icon-services.png'),
             (i18n.tr(33593), 'icon-server.png'),
             (i18n.tr(33019), 'icon-gear.png'),
         ]
         actions = [
+            self._cloud_stub,
             self._show_profile_info,
+            self._cloud_stub,
+            self._cloud_stub,
+            self._cloud_stub,
             self._reconnect_connector,
             self._open_settings_panel,
         ]
@@ -3460,6 +3468,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if idx < 0:
             return
         actions[idx]()
+
+    def _cloud_stub(self):
+        """Cloud-only Plex menu rows have no server-local counterpart."""
+        xbmcgui.Dialog().notification(
+            'Akasha Aura', i18n.tr(33613),
+            xbmcgui.NOTIFICATION_INFO, 2000)
 
     def _show_profile_info(self):
         """Plex's 'Profile' row opens the account page; the local

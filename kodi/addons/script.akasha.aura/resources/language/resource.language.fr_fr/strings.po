@@ -1809,3 +1809,28 @@ msgstr "Autres façons de regarder"
 msgctxt "#33609"
 msgid "Music"
 msgstr "Musique"
+
+# Changer de profil
+msgctxt "#33610"
+msgid "Switch Profile"
+msgstr "Changer de profil"
+
+# Notifications
+msgctxt "#33611"
+msgid "Notifications"
+msgstr "Notifications"
+
+# Amis
+msgctxt "#33612"
+msgid "Friends"
+msgstr "Amis"
+
+# Indisponible hors plex.tv
+msgctxt "#33613"
+msgid "Requires plex.tv"
+msgstr "Indisponible hors plex.tv"
+
+# Services
+msgctxt "#33614"
+msgid "Services"
+msgstr "Services"
