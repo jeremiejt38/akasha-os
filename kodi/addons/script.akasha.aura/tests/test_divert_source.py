@@ -259,9 +259,10 @@ class TestDivertSource(unittest.TestCase):
         }
         items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
         item = items[0]
-        self.assertEqual(item['video_label'], '4K HDR10 HEVC')
-        self.assertEqual(item['audio_label'], 'French EAC3 5.1')
-        self.assertEqual(item['subtitle_label'], 'French SRT')
+        self.assertEqual(item['video_label'], '4K HDR10 (HEVC)')
+        self.assertEqual(item['audio_label'], 'French (EAC3 5.1)')
+        # Plex renders 'Off' until a subtitle stream is selected.
+        self.assertEqual(item['subtitle_label'], 'Off')
         self.assertEqual(item['part_key'], '/part/1')
 
     def test_watched_flag_from_view_count(self):
