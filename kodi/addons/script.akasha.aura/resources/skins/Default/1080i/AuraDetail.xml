@@ -1588,7 +1588,7 @@
                 <top>444</top>
                 <width>24</width>
                 <height>24</height>
-                <texture>icon-gear.png</texture>
+                <texture>icon-pencil.png</texture>
                 <visible>!Control.HasFocus(7203)</visible>
             </control>
             <control type="image">
@@ -1596,7 +1596,7 @@
                 <top>444</top>
                 <width>24</width>
                 <height>24</height>
-                <texture>icon-gear-dark.png</texture>
+                <texture>icon-pencil-dark.png</texture>
                 <visible>Control.HasFocus(7203)</visible>
             </control>
             <control type="button" id="7204">
@@ -1656,7 +1656,7 @@
                 <top>596</top>
                 <width>24</width>
                 <height>24</height>
-                <texture>icon-dots.png</texture>
+                <texture>icon-ways.png</texture>
                 <visible>!Control.HasFocus(7205)</visible>
             </control>
             <control type="image">
@@ -1664,7 +1664,7 @@
                 <top>596</top>
                 <width>24</width>
                 <height>24</height>
-                <texture>icon-dots-dark.png</texture>
+                <texture>icon-ways-dark.png</texture>
                 <visible>Control.HasFocus(7205)</visible>
             </control>
             <control type="button" id="7206">
