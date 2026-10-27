@@ -3311,7 +3311,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         elif controlID == DIVERT_SIDEBAR_ID:
             self._on_sidebar_item_selected()
         elif controlID == 3402:
-            self._manage_libraries()
+            self._open_more()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
         elif controlID in RECO_ALL_LIST_IDS:
@@ -3381,7 +3381,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         more_index = len(self._divert_sections) + DIVERT_SIDEBAR_LIBS_OFFSET
         if pos == more_index:
-            self._manage_libraries()
+            self._open_more()
             return
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
@@ -3839,6 +3839,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setFocus(sidebar)
         except RuntimeError:
             pass
+
+    def _open_more(self):
+        """Sidebar 'Plus': Plex's More screen lists the libraries NOT
+        pinned to the rail; picking one navigates to it without pinning.
+        Pin/reorder management lives on each library row's '...' kebab
+        (_sidebar_item_menu). When everything is pinned Plex shows the
+        'No Results / Your library is empty' state
+        (navigation/more_screen_003.png)."""
+        pinned = set(self._divert_pinned_libraries)
+        unpinned = [s for s in self._all_divert_sections
+                    if s['key'] not in pinned]
+        if not unpinned:
+            aura_menu.message(self, i18n.tr(33556), i18n.tr(33555))
+            return
+        idx = aura_menu.select(
+            self, i18n.tr(33007), [s['title'] for s in unpinned])
+        if idx < 0:
+            return
+        # Append the unpicked section for this session so the existing
+        # index-based activation path can open it; _load_divertissement()
+        # restores the pinned-only list on the next reload.
+        self._divert_sections.append(unpinned[idx])
+        self._populate_sidebar()
+        self._activate_library(len(self._divert_sections) - 1)
 
     def _manage_libraries(self):
         """Show a dialog to pin/unpin and reorder every library section."""
