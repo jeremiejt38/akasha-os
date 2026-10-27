@@ -3860,7 +3860,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         unpinned = [s for s in self._all_divert_sections
                     if s['key'] not in pinned]
         if not unpinned:
-            aura_menu.message(self, i18n.tr(33556), i18n.tr(33555))
+            # Plex's empty More screen: 'No Results / Your library is
+            # empty / Back' (navigation/more_screen_003.png).
+            aura_menu.message(self, i18n.tr(33556), i18n.tr(33555),
+                              button=i18n.tr(33020))
             return
         idx = aura_menu.select(
             self, i18n.tr(33007), [s['title'] for s in unpinned])

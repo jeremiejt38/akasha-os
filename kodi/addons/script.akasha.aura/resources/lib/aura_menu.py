@@ -141,8 +141,8 @@ def confirm(owner, title, message):
     return idx == 0
 
 
-def message(owner, title, text):
+def message(owner, title, text, button=None):
     """Plex-styled replacement for xbmcgui.Dialog().ok(): long text in
-    the scrolling text area, a single OK row dismisses."""
+    the scrolling text area, a single row dismisses (OK by default)."""
     import i18n
-    _dialog(owner, title, [i18n.tr(33588)], message=text)
+    _dialog(owner, title, [button or i18n.tr(33588)], message=text)

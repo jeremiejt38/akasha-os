@@ -703,7 +703,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         outline (unfocused) and filled (focused) states."""
         try:
             strip = self.getControl(SEASON_STRIP_ID)
-            pos = strip.getSelectedPosition()
+            # The capsule marks the ACTIVE view, not the last focused
+            # tab -- deriving it from the mode makes the rebuild
+            # self-healing whatever the focus-event ordering.
+            if self.mode == 'season':
+                pos = self._active_season + 1
+            elif self.mode == 'show':
+                pos = 0
+            else:
+                pos = strip.getSelectedPosition()
             strip.reset()
             strip.addItem(xbmcgui.ListItem(i18n.tr(33101)))
             for season in self._seasons:
