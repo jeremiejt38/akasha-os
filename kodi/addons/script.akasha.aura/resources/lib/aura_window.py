@@ -161,7 +161,7 @@ OFFLINE_ERROR_TYPES = (plex_client.PlexOfflineError,
 DIVERT_TYPE_LABEL_ID = 3210
 DIVERT_FILTER_BUTTON_ID = 3211
 DIVERT_SORT_BUTTON_ID = 3212
-DIVERT_GENRE_BUTTON_ID = 3213
+DIVERT_GENRE_BUTTON_ID = 3213  # retired: genre lives in the "..." overflow
 DIVERT_PLAY_BUTTON_ID = 3215
 DIVERT_SHUFFLE_BUTTON_ID = 3216
 DIVERT_RESET_BUTTON_ID = 3218
@@ -173,7 +173,7 @@ _CONTENT_BACK_IDS = frozenset(
     list(RECO_ALL_LIST_IDS)
     + [DIVERT_PANEL_ID, CATEGORY_PANEL_ID, DIVERT_AZ_RAIL_ID])
 DIVERT_TOOLBAR_BUTTON_IDS = (
-    DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID, DIVERT_GENRE_BUTTON_ID,
+    DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID,
     DIVERT_PLAY_BUTTON_ID, DIVERT_SHUFFLE_BUTTON_ID,
     DIVERT_RESET_BUTTON_ID,
 )
@@ -2293,10 +2293,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         put(3243, x + 56, y, w - 56)
         put(3244, x + 56, y, w - 56)
         x += w + 16
-        w = pill_w(label_of(DIVERT_GENRE_BUTTON_ID))
-        for cid in (DIVERT_GENRE_BUTTON_ID, 3245, 3246):
-            put(cid, x, y, w)
-        x += w + 16
         w = max(44, int(round(9.7 * len(label_of(3220)))) + 16)
         put(3220, x, 198, w)
         x += w + 16
@@ -2344,30 +2340,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         self._divert_sort = DIVERT_SORT_OPTIONS[idx][0]
         self._load_divert_section_items(self._divert_sections[self._divert_active_section])
-
-    def _divert_open_genre_menu(self):
-        if not self._divert_sections:
-            return
-        section = self._divert_sections[self._divert_active_section]
-        try:
-            if self._connector_client:
-                genres = divert_source.parse_genres(
-                    self._connector_client.section_genres(section['key']))
-            else:
-                genres = self._plex_client.section_genres(section['key'])
-        except Exception as e:
-            xbmc.log('Akasha Aura: divert genre load failed: {}'.format(e), xbmc.LOGERROR)
-            genres = []
-        if not genres:
-            return
-        idx = aura_menu.select(self, i18n.tr(33063), [i18n.tr(33053)] + genres)
-        if idx < 0:
-            return
-        self._divert_filter_genre = None if idx == 0 else genres[idx - 1]
-        if self._divert_filter_genre:
-            self._divert_search_query = ''
-            self._divert_filters = {}
-        self._load_divert_section_items(section)
 
     def _divert_reset_filters(self):
         if not self._divert_sections:
@@ -3194,7 +3166,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # it arrives ~0ms after the hop's onFocus, a real keypress never
         # lands that soon after a focus change.
         chip_ids = (DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID,
-                    DIVERT_GENRE_BUTTON_ID, DIVERT_RESET_BUTTON_ID)
+                    DIVERT_RESET_BUTTON_ID)
         if focused in chip_ids and aid in (ACTION_MOVE_UP,
                                          ACTION_MOVE_DOWN,
                                          ACTION_MOVE_LEFT):
@@ -3332,8 +3304,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_open_filter_menu()
         elif controlID == DIVERT_SORT_BUTTON_ID:
             self._divert_open_sort_menu()
-        elif controlID == DIVERT_GENRE_BUTTON_ID:
-            self._divert_open_genre_menu()
         elif controlID == DIVERT_PLAY_BUTTON_ID:
             self._divert_play_first()
         elif controlID == DIVERT_SHUFFLE_BUTTON_ID:

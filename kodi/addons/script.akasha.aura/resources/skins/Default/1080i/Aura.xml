@@ -1044,28 +1044,9 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3211</onleft>
-                    <onright>3213</onright>
+                    <onright>3218</onright>
                     <onup>3212</onup>
                     <ondown>3212</ondown>
-                    <textcolor>00FFFFFF</textcolor>
-                    <focusedcolor>00FFFFFF</focusedcolor>
-                    <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
-                    <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
-                </control>
-
-                <control type="button" id="3213">
-                    <left>643</left>
-                    <top>190</top>
-                    <width>120</width>
-                    <height>48</height>
-                    <label>$ADDON[script.akasha.aura 33063]</label>
-                    <font>font_aura_mini</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <onleft>3212</onleft>
-                    <onright>3218</onright>
-                    <onup>3213</onup>
-                    <ondown>3213</ondown>
                     <textcolor>00FFFFFF</textcolor>
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
@@ -1095,7 +1076,7 @@
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
-                    <onleft>3213</onleft>
+                    <onleft>3212</onleft>
                     <onright>3250</onright>
                     <onup>3218</onup>
                     <ondown>3218</ondown>
@@ -1170,30 +1151,10 @@
                     <textcolor>FF1A1A1A</textcolor>
                     <visible>Control.HasFocus(3212)</visible>
                 </control>
-                <control type="label" id="3245">
-                    <left>643</left>
-                    <top>190</top>
-                    <width>120</width>
-                    <height>48</height>
-                    <font>font_aura_mini</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[Control.GetLabel(3213)]</label>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <visible>!Control.HasFocus(3213)</visible>
-                </control>
-                <control type="label" id="3246">
-                    <left>643</left>
-                    <top>190</top>
-                    <width>120</width>
-                    <height>48</height>
-                    <font>font_aura_mini</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[Control.GetLabel(3213)]</label>
-                    <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3213)</visible>
-                </control>
+                <!-- The genre chip was removed for Plex parity: Plex's
+                     Browse toolbar is "All | type | by | sort | N items |
+                     ..." and genre lives in the overflow's advanced
+                     filters (see _divert_open_more_menu()). -->
             </control>
 
             <!-- A-Z quick-jump rail on the right edge (Plex Browse). Selecting
