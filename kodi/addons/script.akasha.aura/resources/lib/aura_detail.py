@@ -516,36 +516,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._sync_action_row()
 
         # Media badges, right-packed like Plex (video, audio, subtitles)
-        video = item.get('video_label') or ''
-        audio = item.get('audio_label') or ''
-        subs = item.get('subtitle_label') or ''
-        badge_x = 1890
-        for text, bg_id, lb_id, ic_id in ((subs, 7054, 7055, 7057),
-                                          (audio, 7052, 7053, 7056),
-                                          (video, 7050, 7051, 0)):
-            if not text:
-                continue
-            ic_w = 36 if ic_id else 0
-            w = 34 + len(text) * 14 + ic_w
-            badge_x -= w
-            try:
-                self.getControl(bg_id).setPosition(badge_x,
-                                                  self._flow_top + 108)
-                self.getControl(bg_id).setWidth(w)
-                self.getControl(lb_id).setPosition(badge_x + ic_w,
-                                                  self._flow_top + 108)
-                self.getControl(lb_id).setWidth(w - ic_w)
-                self.getControl(lb_id).setLabel(text)
-                if ic_id:
-                    self.getControl(ic_id).setPosition(badge_x + 12,
-                                                       self._flow_top + 116)
-            except RuntimeError:
-                pass
-            badge_x -= 14
-        _set(self, 'AuraDetailVideoBadge', '1' if video else '')
-        _set(self, 'AuraDetailAudioBadge', '1' if audio else '')
-        _set(self, 'AuraDetailSubsBadge', '1' if subs else '')
-        _set(self, 'AuraDetailSubsValue', subs or i18n.tr(33202))
+        self._layout_media_badges(item)
 
         # Bottom section
         if self.mode == 'item':
@@ -1869,6 +1840,41 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 lines.append('{} : {}'.format(label, item[key]))
         aura_menu.message(self, i18n.tr(33116), '[CR]'.join(lines))
 
+    def _layout_media_badges(self, item):
+        """Media badges, right-packed like Plex (video, audio,
+        subtitles). Re-runnable: _pick_subtitle() calls it again so the
+        pill follows the newly selected default stream."""
+        video = item.get('video_label') or ''
+        audio = item.get('audio_label') or ''
+        subs = item.get('subtitle_label') or ''
+        badge_x = 1890
+        for text, bg_id, lb_id, ic_id in ((subs, 7054, 7055, 7057),
+                                          (audio, 7052, 7053, 7056),
+                                          (video, 7050, 7051, 0)):
+            if not text:
+                continue
+            ic_w = 36 if ic_id else 0
+            w = 34 + len(text) * 14 + ic_w
+            badge_x -= w
+            try:
+                self.getControl(bg_id).setPosition(badge_x,
+                                                  self._flow_top + 108)
+                self.getControl(bg_id).setWidth(w)
+                self.getControl(lb_id).setPosition(badge_x + ic_w,
+                                                  self._flow_top + 108)
+                self.getControl(lb_id).setWidth(w - ic_w)
+                self.getControl(lb_id).setLabel(text)
+                if ic_id:
+                    self.getControl(ic_id).setPosition(badge_x + 12,
+                                                       self._flow_top + 116)
+            except RuntimeError:
+                pass
+            badge_x -= 14
+        _set(self, 'AuraDetailVideoBadge', '1' if video else '')
+        _set(self, 'AuraDetailAudioBadge', '1' if audio else '')
+        _set(self, 'AuraDetailSubsBadge', '1' if subs else '')
+        _set(self, 'AuraDetailSubsValue', subs or i18n.tr(33202))
+
     def _pick_subtitle(self):
         """Plex's More>Subtitles picker: 'Off' plus one row per stream
         ('French Forced (SRT)'), the current default marked with a
@@ -1916,12 +1922,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             apply_sel(part_id, stream_ids[pos])
             # The badge + More-row value follow the new default, same
             # way Plex re-reads the part after the pick.
-            new_label = 'Off' if pos == 0 else \
+            new_label = i18n.tr(33202) if pos == 0 else \
                 entries[pos].replace('  ✓', '')
             item['subtitle_label'] = new_label
             if item is not self.item:
                 self.item['subtitle_label'] = new_label
-            _set(self, 'AuraDetailSubsValue', new_label)
+            self._layout_media_badges(self.item)
         except Exception as e:
             xbmc.log('Akasha Aura Detail: subtitle pick failed: {}'
                      .format(e), xbmc.LOGWARNING)
