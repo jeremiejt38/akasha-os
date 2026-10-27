@@ -974,125 +974,6 @@
         <!-- Activity feed (Plex's right column): each watch event is a
              floating rounded card with avatar + 'X watched' + item
              title + date; no enclosing panel. -->
-        <control type="list" id="7197">
-            <left>930</left>
-            <top>110</top>
-            <width>660</width>
-            <height>870</height>
-            <orientation>vertical</orientation>
-            <scrolltime>140</scrolltime>
-            <onleft>7196</onleft>
-            <visible>!String.IsEmpty(Window.Property(AuraDetailFeed))</visible>
-            <itemlayout height="112">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>640</width>
-                    <height>96</height>
-                    <texture colordiffuse="D910131A" border="26">rounded-solid.png</texture>
-                </control>
-                <control type="image">
-                    <left>24</left>
-                    <top>20</top>
-                    <width>56</width>
-                    <height>56</height>
-                    <aspectratio>scale</aspectratio>
-                    <texture>$INFO[ListItem.Icon]</texture>
-                </control>
-                <control type="image">
-                    <left>24</left>
-                    <top>20</top>
-                    <width>56</width>
-                    <height>56</height>
-                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
-                </control>
-                <control type="label">
-                    <left>104</left>
-                    <top>12</top>
-                    <width>510</width>
-                    <height>26</height>
-                    <font>font_aura_tiny</font>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>DDFFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-                <control type="label">
-                    <left>104</left>
-                    <top>38</top>
-                    <width>510</width>
-                    <height>28</height>
-                    <font>font_aura_mini_bold</font>
-                    <label>$INFO[ListItem.Property(entrytitle)]</label>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-                <control type="label">
-                    <left>104</left>
-                    <top>66</top>
-                    <width>510</width>
-                    <height>24</height>
-                    <font>font_aura_tiny</font>
-                    <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>99FFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-            </itemlayout>
-            <focusedlayout height="112">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>640</width>
-                    <height>96</height>
-                    <texture colordiffuse="FFE8EAED" border="26">rounded-solid.png</texture>
-                </control>
-                <control type="image">
-                    <left>24</left>
-                    <top>20</top>
-                    <width>56</width>
-                    <height>56</height>
-                    <aspectratio>scale</aspectratio>
-                    <texture>$INFO[ListItem.Icon]</texture>
-                </control>
-                <control type="image">
-                    <left>24</left>
-                    <top>20</top>
-                    <width>56</width>
-                    <height>56</height>
-                    <texture colordiffuse="FF1F222B">cast-mask.png</texture>
-                </control>
-                <control type="label">
-                    <left>104</left>
-                    <top>12</top>
-                    <width>510</width>
-                    <height>26</height>
-                    <font>font_aura_tiny</font>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>DD10131A</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-                <control type="label">
-                    <left>104</left>
-                    <top>38</top>
-                    <width>510</width>
-                    <height>28</height>
-                    <font>font_aura_mini_bold</font>
-                    <label>$INFO[ListItem.Property(entrytitle)]</label>
-                    <textcolor>FF10131A</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-                <control type="label">
-                    <left>104</left>
-                    <top>66</top>
-                    <width>510</width>
-                    <height>24</height>
-                    <font>font_aura_tiny</font>
-                    <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>9910131A</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-            </focusedlayout>
-            <content />
-        </control>
 
         <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
         <control type="label" id="7060">
@@ -1408,6 +1289,126 @@
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
+        </control>
+
+        <control type="list" id="7197">
+            <left>930</left>
+            <top>110</top>
+            <width>660</width>
+            <height>870</height>
+            <orientation>vertical</orientation>
+            <scrolltime>140</scrolltime>
+            <onleft>7196</onleft>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailFeed))</visible>
+            <itemlayout height="112">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>640</width>
+                    <height>96</height>
+                    <texture colordiffuse="FF10131A" border="26">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture>$INFO[ListItem.Icon]</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>12</top>
+                    <width>510</width>
+                    <height>26</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>38</top>
+                    <width>510</width>
+                    <height>28</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Property(entrytitle)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>66</top>
+                    <width>510</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout height="112">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>640</width>
+                    <height>96</height>
+                    <texture colordiffuse="FFE8EAED" border="26">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture>$INFO[ListItem.Icon]</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <texture colordiffuse="FF1F222B">cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>12</top>
+                    <width>510</width>
+                    <height>26</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DD10131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>38</top>
+                    <width>510</width>
+                    <height>28</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Property(entrytitle)]</label>
+                    <textcolor>FF10131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>66</top>
+                    <width>510</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>9910131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+            <content />
         </control>
 
         <!-- "Plus d'actions" right-side panel (Plex More Actions sheet):
