@@ -1764,3 +1764,23 @@ msgstr "il y a {}"
 msgctxt "#33600"
 msgid "Releasing {}"
 msgstr "Sortie le {}"
+
+# Activité de vous, {} et 1 autre
+msgctxt "#33601"
+msgid "Activity by you, {} and 1 other"
+msgstr "Activité de vous, {} et 1 autre"
+
+# Activité de vous, {} et {} autres
+msgctxt "#33602"
+msgid "Activity by you, {} and {} others"
+msgstr "Activité de vous, {} et {} autres"
+
+# Activité de {} et 1 autre
+msgctxt "#33603"
+msgid "Activity by {} and 1 other"
+msgstr "Activité de {} et 1 autre"
+
+# Activité de {} et {} autres
+msgctxt "#33604"
+msgid "Activity by {} and {} others"
+msgstr "Activité de {} et {} autres"

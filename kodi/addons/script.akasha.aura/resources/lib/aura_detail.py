@@ -169,6 +169,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._activity_date = ''
         self._activity_label = ''
         self._activity_avatar2 = ''
+        self._activity_avatar3 = ''
         self._feed_open = False
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
@@ -439,6 +440,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._activity_key = item.get('rating_key')
             self._activity_date = ''
             self._activity_avatar2 = ''
+            self._activity_avatar3 = ''
             self._activity_label = ''
             entries = self._watch_history_entries(item.get('rating_key'))
             viewed_at = item.get('last_viewed_at')
@@ -454,14 +456,23 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     time.strftime('%Y-%m-%d',
                                   time.localtime(viewed_at)))
             own, names = self._activity_names(entries)
-            if own and names:
-                self._activity_label = i18n.tr(33595).format(
-                    ', '.join(names[:2]))
+            # Plex: one name then 'and N other(s)' once two or more
+            # other accounts appear ('by you, clara, and 2 others').
+            rest = len(names) - 1
+            if own and len(names) > 1:
+                self._activity_label = (i18n.tr(33601).format(names[0])
+                                        if rest == 1 else
+                                        i18n.tr(33602).format(names[0], rest))
+            elif own and names:
+                self._activity_label = i18n.tr(33595).format(names[0])
             elif own:
                 self._activity_label = i18n.tr(33594)
+            elif len(names) > 1:
+                self._activity_label = (i18n.tr(33603).format(names[0])
+                                        if rest == 1 else
+                                        i18n.tr(33604).format(names[0], rest))
             elif names:
-                self._activity_label = i18n.tr(33596).format(
-                    ', '.join(names[:2]))
+                self._activity_label = i18n.tr(33596).format(names[0])
             elif self._activity_date:
                 # No account data (older servers/connectors): keep the
                 # previous date-only line rather than nothing.
@@ -470,9 +481,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailActivity', self._activity_label or '')
         _set(self, 'AuraDetailActivityAvatar2',
              self._activity_avatar2 or '')
+        _set(self, 'AuraDetailActivityAvatar3',
+             self._activity_avatar3 or '')
         try:
             self.getControl(7207).setPosition(
-                248 if self._activity_avatar2 else 200,
+                296 if self._activity_avatar3 else
+                (248 if self._activity_avatar2 else 200),
                 self._flow_top + 105)
         except RuntimeError:
             pass
@@ -1363,7 +1377,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         """
         own = False
         names = []
-        avatar2 = ''
+        other_avatars = []
         seen = set()
         accounts = {}
         if entries and self.client and hasattr(self.client, 'accounts'):
@@ -1389,9 +1403,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 continue
             if name:
                 names.append(name)
-            if not avatar2 and acc.get('thumb'):
-                avatar2 = acc['thumb']
-        self._activity_avatar2 = avatar2
+            if acc.get('thumb'):
+                other_avatars.append(acc['thumb'])
+        self._activity_avatar2 = other_avatars[0] if other_avatars else ''
+        self._activity_avatar3 = (other_avatars[1]
+                                  if len(other_avatars) > 1 else '')
         return own, names
 
     def _activity_when(self, viewed_at):

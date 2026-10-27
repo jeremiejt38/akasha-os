@@ -224,8 +224,9 @@ def _audio_label(raw_item):
 
 
 def _subtitle_label(raw_item):
-    """Short subtitle summary, e.g. 'French SRT' (first sub); Plex draws
-    an 'Off' badge when a video file carries no subtitle stream."""
+    """Plex-style subtitle badge, e.g. 'French Forced (SRT)' -- selected
+    track's language + forced flag, codec in parens; 'Off' when a video
+    file carries no selected subtitle stream."""
     subs = _streams(raw_item, 3)
     if not _first_media(raw_item):
         return ''
@@ -235,9 +236,12 @@ def _subtitle_label(raw_item):
     if not first:
         return 'Off'
     language = first.get('language') or first.get('languageTag') or ''
+    forced = first.get('forced')
+    if forced and str(forced).lower() not in ('0', 'false', 'none'):
+        language = '{} Forced'.format(language) if language else 'Forced'
     codec = str(first.get('codec') or first.get('format') or '').upper()
-    label = ' '.join(p for p in (language, codec) if p)
-    return label or '{} sous-titres'.format(len(subs))
+    inner = ' '.join(p for p in (language, '({})'.format(codec) if codec else '') if p)
+    return inner or '{} sous-titres'.format(len(subs))
 
 
 def _content_rating_display(raw_item):

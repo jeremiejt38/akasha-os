@@ -925,6 +925,24 @@
             <texture colordiffuse="FF10131A">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
         </control>
+        <!-- Third avatar in the stack ('by you, clara, and 1 other'). -->
+        <control type="image" id="7185">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window.Property(AuraDetailActivityAvatar3)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
+        </control>
+        <control type="image" id="7186">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
+        </control>
         <control type="label" id="7207">
             <left>200</left>
             <top>666</top>
