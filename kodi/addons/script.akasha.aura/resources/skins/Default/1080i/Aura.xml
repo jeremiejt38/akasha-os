@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1194">
     <!-- The tab list (2007) is populated by _populate_tab_list() from
-         Python, so it is empty -- and unfocusable -- when Kodi resolves
-         the default control at window open. The search button is a static
+         Python, so it is empty and unfocusable when Kodi resolves the
+         default control at window open. The search button is a static
          always-visible button; onInit's _focus_tab() then moves focus to
          the real tab list within the same beat. -->
     <defaultcontrol>2000</defaultcontrol>
@@ -3045,18 +3045,18 @@
                      artwork tinted by a fixed per-genre colour scrim, name
                      centred, white outline ring on focus. No heading. -->
                 <control type="panel" id="6010">
-                    <left>100</left>
-                    <top>150</top>
+                    <left>124</left>
+                    <top>140</top>
                     <width>1780</width>
                     <height>930</height>
                     <onup>3060</onup>
                     <onleft>3310</onleft>
-                    <itemlayout width="410" height="300">
+                    <itemlayout width="424" height="312">
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <aspectratio>scale</aspectratio>
                             <fadetime>150</fadetime>
                             <texture background="true">$INFO[ListItem.Art(fanart)]</texture>
@@ -3065,21 +3065,21 @@
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <texture colordiffuse="$INFO[ListItem.Property(TileColor)]" border="16">rounded-solid.png</texture>
                         </control>
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <texture colordiffuse="FF1C1C1C">category-corners.png</texture>
                         </control>
                         <control type="label">
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <font>font_aura_head_bold</font>
                             <align>center</align>
                             <aligny>center</aligny>
@@ -3087,12 +3087,12 @@
                             <textcolor>FFFFFFFF</textcolor>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="410" height="300">
+                    <focusedlayout width="424" height="312">
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <aspectratio>scale</aspectratio>
                             <fadetime>150</fadetime>
                             <texture background="true">$INFO[ListItem.Art(fanart)]</texture>
@@ -3101,21 +3101,21 @@
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <texture colordiffuse="$INFO[ListItem.Property(TileColor)]" border="16">rounded-solid.png</texture>
                         </control>
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <texture colordiffuse="FF1C1C1C">category-corners.png</texture>
                         </control>
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <texture>cat-ring.png</texture>
                             <visible>Control.HasFocus(6010)</visible>
                         </control>
@@ -3123,7 +3123,7 @@
                             <left>0</left>
                             <top>0</top>
                             <width>376</width>
-                            <height>205</height>
+                            <height>212</height>
                             <font>font_aura_head_bold</font>
                             <align>center</align>
                             <aligny>center</aligny>

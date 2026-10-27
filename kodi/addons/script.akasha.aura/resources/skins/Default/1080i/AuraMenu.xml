@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1208">
     <!-- The entry list (9010) is populated from Python, so it is empty
-         when Kodi resolves the default control -- the dim backdrop
+         when Kodi resolves the default control; the dim backdrop
          doubles as a focusable dismiss button (click-outside-to-close,
          Plex sheet behavior) instead of a plain image. -->
     <defaultcontrol>9001</defaultcontrol>
