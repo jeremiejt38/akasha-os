@@ -483,6 +483,7 @@ STRINGS = {
             'Add to Playlist / Collection'),
     33607: ('Gérer', 'Manage'),
     33608: ('Autres façons de regarder', 'More Ways to Watch'),
+    33609: ('Musique', 'Music'),
 }
 
 MONTH_ABBRS = {

@@ -1804,3 +1804,8 @@ msgstr ""
 msgctxt "#33608"
 msgid "More Ways to Watch"
 msgstr ""
+
+# Musique
+msgctxt "#33609"
+msgid "Music"
+msgstr ""

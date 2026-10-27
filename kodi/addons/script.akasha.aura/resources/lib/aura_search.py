@@ -36,13 +36,17 @@ EMPTY_LABEL_ID = 8201
 RAIL_LIST_ID = 8140
 
 _KEYS = list('abcdefghijklmnopqrstuvwxyz') + list('1234567890')
+# Plex's filter rail is All / Movies / TV / Music / Cast & Crew
+# (Live TV and Services are cloud-only). Episode hits stay under All.
 _FILTERS = (
     (i18n.tr(33052), None),
     (i18n.tr(33051), 'movie'),
     (i18n.tr(33150), 'show'),
-    (i18n.tr(33151), 'episode'),
+    (i18n.tr(33609), 'music'),
     (i18n.tr(33100), 'person'),
 )
+
+_MUSIC_TYPES = ('artist', 'album', 'track')
 
 
 class AuraSearchWindow(xbmcgui.WindowXMLDialog):
@@ -244,7 +248,10 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             for item in items:
                 item['_source'] = section.get('title') or 'Akasha'
             results.extend(items)
-        if wanted:
+        if wanted == 'music':
+            results = [r for r in results
+                       if r.get('type') in _MUSIC_TYPES]
+        elif wanted:
             results = [r for r in results if r.get('type') == wanted]
         # Plex sorts roughly by relevance; keep title-prefix hits first.
         q = self.query.lower()
