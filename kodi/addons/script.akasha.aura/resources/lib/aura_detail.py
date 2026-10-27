@@ -25,6 +25,7 @@ import i18n
 import osd_menu
 
 ACTION_MOVE_LEFT = 1
+ACTION_MOVE_RIGHT = 2
 ACTION_MOVE_UP = 3
 ACTION_MOVE_DOWN = 4
 ACTION_PREVIOUS_MENU = 10
@@ -161,6 +162,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._activity_date = ''
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
+        self._row_pos = {}          # last absolute row positions (wrap guard)
         self._pending_season_index = None  # season card entry point
         self._restore_episode_pos = None   # episode pos to restore on Back
         self.exit_to_sidebar = False
@@ -1121,12 +1123,68 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             except Exception:
                 pass
             return
-        if action.getId() == ACTION_MOVE_LEFT and self._at_left_edge():
-            # Plex: pressing Left on the left edge opens the sidebar rail.
-            self.exit_to_sidebar = True
-            self.close()
+        if action.getId() == ACTION_MOVE_LEFT:
+            track = self._track_row_pos()
+            if track is not None:
+                if track[3] > 0 and track[1] == 1:
+                    # Plex: Left while already on the first row item
+                    # opens the sidebar rail.
+                    self.exit_to_sidebar = True
+                    self.close()
+                return
+            if self._at_left_edge():
+                self.exit_to_sidebar = True
+                self.close()
+                return
+            super().onAction(action)
             return
+        if action.getId() == ACTION_MOVE_RIGHT:
+            track = self._track_row_pos()
+            if track is not None:
+                focused, prev, current, total = track
+                if prev == total and current == 1:
+                    # Plex rows stop at the last item -- undo the wrap.
+                    self._row_pos[focused] = total
+                    self._reassert_position(focused, total - 1)
+                return
+            super().onAction(action)
+            return
+        if action.getId() in (ACTION_MOVE_UP, ACTION_MOVE_DOWN):
+            self._track_row_pos()
         super().onAction(action)
+
+    def _track_row_pos(self):
+        """Kodi applies directional moves natively, so onAction sees the
+        position only AFTER the move and cannot swallow it. Track the
+        absolute position (CurrentItem, 1-based) so edges are detected
+        from the prev->current transition. Returns
+        (control_id, prev, current, total) or None off a row list."""
+        try:
+            focused = self.getFocusId()
+        except RuntimeError:
+            return None
+        if focused not in (CAST_LIST_ID, EPISODES_LIST_ID,
+                           SEASONS_LIST_ID, SEASON_STRIP_ID):
+            return None
+        try:
+            total = int(xbmc.getInfoLabel(
+                'Container({}).NumItems'.format(focused)) or 0)
+            current = int(xbmc.getInfoLabel(
+                'Container({}).CurrentItem'.format(focused)) or 0)
+        except ValueError:
+            return None
+        prev = self._row_pos.get(focused, current)
+        self._row_pos[focused] = current
+        return focused, prev, current, total
+
+    def _reassert_position(self, control_id, position):
+        def worker():
+            time.sleep(0.15)
+            try:
+                self.getControl(control_id).selectItem(position)
+            except RuntimeError:
+                pass
+        threading.Thread(target=worker, daemon=True).start()
 
     def _at_left_edge(self):
         try:
