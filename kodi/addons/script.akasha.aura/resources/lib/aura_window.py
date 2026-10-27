@@ -1509,15 +1509,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # connector genre filter API expects the original (English) tag,
         # only the on-screen label is translated (Plex's metadata agents
         # report genre names in the source database's language, English
-        # regardless of Akasha's own French interface).
+        # regardless of Akasha's own French interface). Junk tags with no
+        # letters/digits (';;' seen on the real server) are dropped --
+        # Plex never renders them.
+        genres = [g for g in genres if any(ch.isalnum() for ch in g or '')]
         self._category_genres = genres
+        # Plex's Categories tab is a bare 4-column tile grid -- no
+        # "N categories" heading at all.
         if status:
-            status.setLabel(i18n.tr(33071).format(section['title'], len(genres)))
+            status.setLabel('')
         try:
             panel = self.getControl(CATEGORY_PANEL_ID)
             panel.reset()
             for genre in genres:
-                panel.addItem(xbmcgui.ListItem(divert_source.display_genre(genre)))
+                li = xbmcgui.ListItem(divert_source.display_genre(genre))
+                li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
+                panel.addItem(li)
         except RuntimeError:
             pass
         if error is not None:
@@ -1529,6 +1536,61 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 action_label=i18n.tr(33020), action=self._focus_sidebar)
         else:
             self._set_divert_state(None)
+            self._fetch_category_art(section, genres)
+
+    def _fetch_category_art(self, section, genres):
+        """Fill each genre tile's backdrop with a sample item's fanart --
+        Plex tints a representative artwork with the genre colour. Runs in
+        a worker: ~30 per-genre lookups would serialise for seconds on the
+        UI thread. Items are re-added once art is known so the panel
+        repaints with art + colour scrim."""
+        window_id = xbmcgui.getCurrentWindowId()
+        self._category_art_generation = \
+            getattr(self, '_category_art_generation', 0) + 1
+        generation = self._category_art_generation
+        section_key = section['key']
+
+        def worker():
+            art_by_genre = {}
+            for genre in genres:
+                try:
+                    if self._connector_client:
+                        raw = self._connector_client.section_items(
+                            section_key, limit=1, offset=0, genre=genre)
+                        items = divert_source.parse_metadata_list(
+                            raw, self._connector_client.image_url)
+                    else:
+                        items = self._plex_client.by_genre(
+                            section_key, genre, limit=1)
+                    if items:
+                        art = items[0].get('art_url') \
+                            or items[0].get('fanart_url') \
+                            or items[0].get('thumb_url') or ''
+                        if art:
+                            art_by_genre[genre] = art
+                except Exception:
+                    pass
+            if generation != self._category_art_generation:
+                return
+            if xbmcgui.getCurrentWindowId() != window_id:
+                return
+            try:
+                panel = self.getControl(CATEGORY_PANEL_ID)
+                pos = panel.getSelectedPosition()
+                panel.reset()
+                for genre in genres:
+                    li = xbmcgui.ListItem(divert_source.display_genre(genre))
+                    li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
+                    if genre in art_by_genre:
+                        li.setArt({'fanart': art_by_genre[genre],
+                                   'thumb': art_by_genre[genre]})
+                    panel.addItem(li)
+                if pos >= 0:
+                    panel.selectItem(pos)
+            except RuntimeError:
+                pass
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def _collections_paged(self, section):
         """PagedList over the section's Plex collections (Directory items)."""
@@ -4038,6 +4100,52 @@ def _hub_title_fr(hub):
         base = discover_titles.get(identifier, title)
 
     return base
+
+
+# Plex Categories tiles: a fixed colour per genre, composited ~60% over a
+# dimmed artwork. Colours sampled from
+# docs/plex-parity/reference/bibliotheque/films_collections_view_010.png;
+# the genre vocabulary mirrors display_genre()'s translation table.
+_GENRE_TILE_COLORS = {
+    'action': '3A7174', 'action/adventure': '6E5B45',
+    'adventure': '8F3849', 'animation': '46792A', 'anime': '4A5E8C',
+    'biography': '7B2234', 'biographie': '7B2234',
+    'children': '3E7A6E', 'enfants': '3E7A6E', 'kids': '3E7A6E',
+    'comedy': '6E5F28', 'comedie': '6E5F28', 'comédie': '6E5F28',
+    'comédie musicale': '8C5A3A', 'musical': '8C5A3A',
+    'crime': '2E4263', 'documentary': 'A55F55', 'documentaire': 'A55F55',
+    'drama': '70653A', 'drame': '70653A',
+    'family': '3F6B46', 'familial': '3F6B46',
+    'fantasy': '5E4A8C', 'fantastique': '5E4A8C',
+    'film-noir': '3A3A3A', 'history': '6B4A2E', 'histoire': '6B4A2E',
+    'horror': '3A2538', 'horreur': '3A2538',
+    'independent': '4A5560', 'indépendant': '4A5560',
+    'martial arts': '6B3A3A', 'arts martiaux': '6B3A3A',
+    'mini-series': '4A6B8C', 'mini-série': '4A6B8C',
+    'music': '7A3E6E', 'musique': '7A3E6E',
+    'mystery': '37474F', 'mystère': '37474F',
+    'romance': '8C3A4E', 'science fiction': '2E5E7A',
+    'science-fiction': '2E5E7A', 'sci-fi': '2E5E7A',
+    'sport': '3A6B5A', 'suspense': '3A3A55',
+    'thriller': '2E3050', 'tv movie': '556B6E', 'téléfilm': '556B6E',
+    'war': '55554E', 'guerre': '55554E',
+    'western': '6E4B26', 'court-métrage': '5A5A6E', 'short': '5A5A6E',
+    'japanimé': '5A4A7A', 'cuisine': '6E5A3A',
+}
+
+
+def _genre_tile_color(genre):
+    """Plex Categories tile colour ('RRGGBB') for a genre name; unknown
+    genres get a muted slate derived from the name so every tile still
+    looks deliberate instead of defaulting to one flat navy."""
+    color = _GENRE_TILE_COLORS.get((genre or '').strip().lower())
+    if color:
+        return color
+    # Deterministic fallback: muted hue from the name's hash.
+    h = sum(bytearray((genre or 'x').encode('utf-8', 'replace')))
+    return '{:02X}{:02X}{:02X}'.format(
+        0x34 + (h % 3) * 0x1A, 0x40 + ((h // 3) % 3) * 0x1A,
+        0x50 + ((h // 9) % 3) * 0x1A)
 
 
 def _hero_meta_line(item):

@@ -3051,70 +3051,91 @@
                     <label>-</label>
                     <textcolor>77FFFFFF</textcolor>
                 </control>
+                <!-- Plex Categories: 4-col tile grid (~376x205). Genre
+                     artwork tinted by a fixed per-genre colour scrim, name
+                     centred, white outline ring on focus. No heading. -->
                 <control type="panel" id="6010">
-                    <left>160</left>
-                    <top>340</top>
-                    <width>1700</width>
-                    <height>700</height>
+                    <left>100</left>
+                    <top>150</top>
+                    <width>1780</width>
+                    <height>930</height>
                     <onup>3060</onup>
                     <onleft>3310</onleft>
-                    <itemlayout width="284" height="100">
+                    <itemlayout width="410" height="300">
                         <control type="image">
                             <left>0</left>
                             <top>0</top>
-                            <width>272</width>
-                            <height>84</height>
-                            <texture colordiffuse="FF262B3D" border="18">rounded-solid.png</texture>
+                            <width>376</width>
+                            <height>205</height>
+                            <aspectratio>scale</aspectratio>
+                            <fadetime>150</fadetime>
+                            <texture background="true">$INFO[ListItem.Art(fanart)]</texture>
                         </control>
                         <control type="image">
                             <left>0</left>
-                            <top>6</top>
-                            <width>4</width>
-                            <height>72</height>
-                            <texture colordiffuse="996C8CFF">white.png</texture>
+                            <top>0</top>
+                            <width>376</width>
+                            <height>205</height>
+                            <texture colordiffuse="$INFO[ListItem.Property(TileColor)]" border="16">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>376</width>
+                            <height>205</height>
+                            <texture colordiffuse="FF1C1C1C">category-corners.png</texture>
                         </control>
                         <control type="label">
-                            <left>20</left>
+                            <left>0</left>
                             <top>0</top>
-                            <width>252</width>
-                            <height>84</height>
-                            <font>font_aura_tiny_bold</font>
-                            <align>left</align>
+                            <width>376</width>
+                            <height>205</height>
+                            <font>font_aura_head_bold</font>
+                            <align>center</align>
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
-                            <textcolor>CCFFFFFF</textcolor>
+                            <textcolor>FFFFFFFF</textcolor>
                         </control>
                     </itemlayout>
-                    <focusedlayout width="284" height="100">
+                    <focusedlayout width="410" height="300">
                         <control type="image">
-                            <left>-2</left>
-                            <top>-2</top>
-                            <width>276</width>
-                            <height>88</height>
-                            <texture colordiffuse="FF6C8CFF" border="18">rounded-solid.png</texture>
+                            <left>0</left>
+                            <top>0</top>
+                            <width>376</width>
+                            <height>205</height>
+                            <aspectratio>scale</aspectratio>
+                            <fadetime>150</fadetime>
+                            <texture background="true">$INFO[ListItem.Art(fanart)]</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>376</width>
+                            <height>205</height>
+                            <texture colordiffuse="$INFO[ListItem.Property(TileColor)]" border="16">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>376</width>
+                            <height>205</height>
+                            <texture colordiffuse="FF1C1C1C">category-corners.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>0</left>
+                            <top>0</top>
+                            <width>376</width>
+                            <height>205</height>
+                            <texture>cat-ring.png</texture>
                             <visible>Control.HasFocus(6010)</visible>
                         </control>
-                        <control type="image">
-                            <left>0</left>
-                            <top>0</top>
-                            <width>272</width>
-                            <height>84</height>
-                            <texture colordiffuse="FF262B3D" border="18">rounded-solid.png</texture>
-                        </control>
-                        <control type="image">
-                            <left>0</left>
-                            <top>6</top>
-                            <width>4</width>
-                            <height>72</height>
-                            <texture colordiffuse="FF6C8CFF">white.png</texture>
-                        </control>
                         <control type="label">
-                            <left>20</left>
+                            <left>0</left>
                             <top>0</top>
-                            <width>252</width>
-                            <height>84</height>
-                            <font>font_aura_tiny_bold</font>
-                            <align>left</align>
+                            <width>376</width>
+                            <height>205</height>
+                            <font>font_aura_head_bold</font>
+                            <align>center</align>
                             <aligny>center</aligny>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
