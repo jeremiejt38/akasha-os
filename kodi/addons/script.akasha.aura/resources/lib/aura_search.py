@@ -65,6 +65,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self.addon = None
         self.query = ''
         self.recent = []
+        self._search_gen = 0
         self._results = []
         self._filter_index = 0
         self._recent_loaded = False
@@ -199,12 +200,86 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 self.query or i18n.tr(33001))
         except RuntimeError:
             pass
+        # Serial searches blocked the whole dialog per keystroke on a
+        # slow server path (~5s per section); the fetch now runs on a
+        # worker and the generation counter drops stale results.
+        self._search_gen = getattr(self, '_search_gen', 0) + 1
         if self.query:
-            self._run_search()
+            self._launch_search(self._search_gen)
         else:
             # Plex fills the empty results zone with suggested content.
             self._results = self._suggestions()
             self._render_results()
+
+    def _launch_search(self, gen):
+        def worker():
+            results = self._collect_results()
+            if gen != self._search_gen or self._yield_stop.is_set():
+                return
+            self._results = results[:24]
+            self._render_results()
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _run_search(self):
+        self._results = self._collect_results()[:24]
+        self._render_results()
+
+    def _collect_results(self):
+        """Section fetches run in parallel (bounded by the slowest one)
+        then get filtered/sorted like Plex's All view."""
+        wanted = _FILTERS[self._filter_index][1]
+        if wanted == 'person':
+            return self._search_people()[:24]
+        # Server-side `title=` is a raw substring filter: stray
+        # whitespace would exclude exact-title hits, so the API sees
+        # the stripped query like Plex's own client sends.
+        term = self.query.strip()
+        results = []
+        lock = threading.Lock()
+
+        def hit(section):
+            try:
+                items, _total = self.client.search_with_total(
+                    section['key'], term, limit=12)
+            except Exception as e:
+                xbmc.log('Akasha Aura Search: {} failed: {}'.format(
+                    section.get('title'), e), xbmc.LOGWARNING)
+                return
+            with lock:
+                for item in items:
+                    item['_source'] = section.get('title') or 'Akasha'
+                results.extend(items)
+
+        threads = [threading.Thread(target=hit, args=(section,),
+                                    daemon=True)
+                   for section in self.sections]
+        for t in threads:
+            t.start()
+        # Cap the wait at the slowest section; a hung request must not
+        # keep the results frozen when the rest already landed.
+        for t in threads:
+            t.join(15.0)
+        if wanted == 'music':
+            results = [r for r in results
+                       if r.get('type') in _MUSIC_TYPES]
+        elif wanted == 'livetv':
+            results = [r for r in results
+                       if r.get('type') in _LIVETV_TYPES]
+        elif wanted == 'services':
+            results = [r for r in results
+                       if r.get('type') in _SERVICE_TYPES]
+        elif wanted:
+            results = [r for r in results if r.get('type') == wanted]
+        # Plex sorts roughly by relevance; keep title-prefix hits first.
+        q = term.lower()
+        results.sort(key=lambda r: 0 if (r.get('title') or '').lower()
+                     .startswith(q) else 1)
+        # 'Tout' merges matching people and genres first, like Plex's
+        # People/genre result cards.
+        if wanted is None:
+            results = (self._search_people()[:8]
+                       + self._search_genres()[:4] + results)
+        return results[:24]
 
     def _render_results(self):
         _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
@@ -259,51 +334,6 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self._render_recent()
 
     # ------------------------------------------------------------- search
-
-    def _run_search(self):
-        wanted = _FILTERS[self._filter_index][1]
-        if wanted == 'person':
-            self._results = self._search_people()[:24]
-            self._render_results()
-            return
-        # Server-side `title=` is a raw substring filter: stray
-        # whitespace would exclude exact-title hits, so the API sees
-        # the stripped query like Plex's own client sends.
-        term = self.query.strip()
-        results = []
-        for section in self.sections:
-            try:
-                items, _total = self.client.search_with_total(
-                    section['key'], term, limit=12)
-            except Exception as e:
-                xbmc.log('Akasha Aura Search: {} failed: {}'.format(
-                    section.get('title'), e), xbmc.LOGWARNING)
-                continue
-            for item in items:
-                item['_source'] = section.get('title') or 'Akasha'
-            results.extend(items)
-        if wanted == 'music':
-            results = [r for r in results
-                       if r.get('type') in _MUSIC_TYPES]
-        elif wanted == 'livetv':
-            results = [r for r in results
-                       if r.get('type') in _LIVETV_TYPES]
-        elif wanted == 'services':
-            results = [r for r in results
-                       if r.get('type') in _SERVICE_TYPES]
-        elif wanted:
-            results = [r for r in results if r.get('type') == wanted]
-        # Plex sorts roughly by relevance; keep title-prefix hits first.
-        q = term.lower()
-        results.sort(key=lambda r: 0 if (r.get('title') or '').lower()
-                     .startswith(q) else 1)
-        # 'Tout' merges matching people and genres first, like Plex's
-        # People/genre result cards.
-        if wanted is None:
-            results = (self._search_people()[:8]
-                       + self._search_genres()[:4] + results)
-        self._results = results[:24]
-        self._render_results()
 
     def _search_genres(self):
         """Genre-name matches, client-side over the per-section genre
@@ -471,7 +501,8 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._filter_index = controlID - PILLS_LIST_ID
             self._render_pills()
             if self.query:
-                self._run_search()
+                self._search_gen += 1
+                self._launch_search(self._search_gen)
         elif controlID in (RESULTS_PANEL_ID, SUGGEST_PANEL_ID):
             self._pick_result()
         elif controlID == RAIL_LIST_ID:
