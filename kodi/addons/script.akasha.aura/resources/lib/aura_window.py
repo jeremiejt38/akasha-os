@@ -2162,6 +2162,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
                 self._divert_sections = []
 
+        # Server-local playlists (B10): Plex always surfaces a "Playlists"
+        # sidebar entry (the rail shows it even when the list is empty --
+        # the page then renders its empty state). Direct Plex only -- the
+        # connector exposes no /playlists proxy. The pseudo-section joins
+        # the ordered pool before pinning so its rail position follows
+        # divert.library_order like a real section instead of being
+        # forced last.
+        self._divert_playlists = []
+        if self._plex_client:
+            try:
+                self._divert_playlists = self._plex_client.playlists()
+            except Exception as e:
+                xbmc.log('Akasha Aura: playlists fetch failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+            self._divert_sections.append({
+                'key': 'playlists', 'type': 'playlist',
+                'title': i18n.tr(33582)})
+
         self._all_divert_sections = config.ordered_items(
             self._divert_sections, self._divert_library_order)
         pinned_set = set(self._divert_pinned_libraries)
@@ -2175,20 +2193,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         else:
             self._divert_sections = list(self._all_divert_sections)
 
-        # Server-local playlists (B10): Plex surfaces them as an extra
-        # sidebar entry, only when the user actually has some. Direct
-        # Plex only -- the connector exposes no /playlists proxy.
-        self._divert_playlists = []
-        if self._plex_client:
-            try:
-                self._divert_playlists = self._plex_client.playlists()
-            except Exception as e:
-                xbmc.log('Akasha Aura: playlists fetch failed: {}'.format(e),
-                         xbmc.LOGWARNING)
-            if self._divert_playlists:
-                self._divert_sections.append({
-                    'key': 'playlists', 'type': 'playlist',
-                    'title': i18n.tr(33582)})
         self._populate_sidebar()
 
         # Which library (if any) becomes active is decided by the caller
@@ -2255,6 +2259,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         convention `icon-<slug>.png`.
         """
         title = (section.get('title') or '').lower()
+        if section.get('type') == 'playlist':
+            return 'icon-playlists.png'
         if section.get('type') == 'artist':
             return 'icon-music.png'
         if 'anime' in title:
