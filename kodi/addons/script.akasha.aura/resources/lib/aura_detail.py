@@ -216,6 +216,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._activity_color3 = ''
         self._feed_open = False
         self._next_episode = None
+        self._hero_episode = None     # focused episode painted as hero (season mode)
+        self._action_top = 564      # action row y (below cards in season mode)
+        self._badge_top = 672       # media pills y (director line in season)
         self._active_season = 0     # 0 = "Show" overview tab
         self._row_pos = {}          # last absolute row positions (wrap guard)
         self._pending_season_index = None  # season card entry point
@@ -290,6 +293,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _render(self):
         item = self.item
         self.watched = bool(item.get('watched'))
+        # A full render always resets the episode hero: season mode
+        # re-seeds it on the focused/next-up card right below. Bumping
+        # the generation also cancels any in-flight hero hydration from
+        # the previous page.
+        self._hero_episode = None
+        self._hero_gen = getattr(self, '_hero_gen', 0) + 1
 
         # Kick off the independent Plex calls in parallel FIRST: extras,
         # watch history, on-deck and seasons each used to run serially
@@ -362,112 +371,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.getControl(cid).setColorDiffuse(alpha + tint)
             except (RuntimeError, AttributeError):
                 pass
-        _set(self, 'AuraDetailLogo', item.get('logo_url') or '')
-        if item.get('logo_url'):
-            try:
-                self.getControl(7010).setImage(item['logo_url'], useCache=False)
-            except RuntimeError:
-                pass
-        else:
-            try:
-                self.getControl(7011).setLabel(item.get('title') or '')
-            except RuntimeError:
-                pass
-
-        # Meta line: Plex shows "S1 - E4  ·  air date  ·  duration" for
-        # episodes, "year  ·  duration  ·  genres" otherwise. Unreleased
-        # items get Plex's amber "Releasing Oct 29" in place of year/air.
-        parts = []
-        unreleased = _unreleased_label(item)
-        if item.get('type') == 'episode':
-            se = _season_episode_label(item)
-            if se:
-                parts.append(se.replace(' - ', ' • '))
-            air = unreleased or _fmt_air_date(
-                item.get('originally_available_at'))
-            if air:
-                parts.append(air)
-        elif unreleased:
-            parts.append(unreleased)
-        elif item.get('year'):
-            parts.append(str(item['year']))
-        duration = _fmt_duration(item.get('duration_ms'))
-        if duration:
-            parts.append(duration)
-        elif self.mode in ('show', 'season') and self._seasons:
-            parts.append('{} saison{}'.format(
-                len(self._seasons), 's' if len(self._seasons) > 1 else ''))
-        if item.get('genres'):
-            parts.append(', '.join(item['genres'][:2]))
-        meta_text = '    '.join(parts)
-        meta_display = meta_text
-        if unreleased:
-            # Keep meta_text plain for text_width() below; the amber wrap
-            # is display-only or the rating chip would be pushed right.
-            meta_display = meta_text.replace(
-                unreleased,
-                '[COLOR FFE5A00D]{}[/COLOR]'.format(unreleased), 1)
-        try:
-            self.getControl(7020).setLabel(meta_display)
-        except RuntimeError:
-            pass
-        # Plex trails the meta line with a small bordered box holding the
-        # content rating ("12" / "10" / "TV-MA"), ~16px after the text.
-        rating = (item.get('content_rating') or '').strip()
-        _set(self, 'AuraDetailMetaRating', '1' if rating else '')
-        if rating:
-            # PIL under-measures Kodi's Inter ~1.0x here (see i18n.ellipsize)
-            box_x = 128 + int(i18n.text_width(meta_text, 20) or 0) + 24
-            box_w = max(40, int((i18n.text_width(rating, 19) or 20)
-                                * 0.96) + 20)
-            try:
-                self.getControl(7190).setPosition(box_x, 294)
-                self.getControl(7190).setWidth(box_w)
-                self.getControl(7191).setPosition(box_x, 294)
-                self.getControl(7191).setWidth(box_w)
-                self.getControl(7191).setLabel(rating)
-            except RuntimeError:
-                pass
-
-        self._render_chips(item)
-
-        # Synopsis + director
-        summary = item.get('summary') or ''
-        # The synopsis box holds exactly 3 lines of font_aura_plot in
-        # 800px -- measure-trim to fill them (~1950px PIL * ~1.2 Kodi
-        # width factor = ~2.9 rendered lines) so no overflow fades the
-        # edges; the 240-char cap stays as a no-PIL fallback.
-        summary = i18n.ellipsize(summary, 25, budget_px=1950)
-        if summary.endswith('…') and ' ' in summary:
-            # Plex breaks the ellipsis on a word boundary.
-            summary = summary[:-1].rsplit(' ', 1)[0].rstrip(',. ') + '…'
-        if len(summary) > 240:
-            summary = summary[:240].rsplit(' ', 1)[0].rstrip(',. ') + '...'
-        try:
-            box = self.getControl(7030)
-            box.setText(summary)
-            # setText leaves the box scrolled to the tail (first line
-            # fades under the top-edge scrim) -- reset() restores the
-            # scroll offset to the top.
-            box.reset()
-        except RuntimeError:
-            pass
-        director = ''
-        if item.get('directors'):
-            director = i18n.tr(33117).format(', '.join(item['directors'][:2]))
-        elif item.get('type') == 'episode' and item.get('show_title') \
-                and not item.get('logo_url'):
-            director = item['show_title']
-        try:
-            self.getControl(7040).setLabel(director)
-        except RuntimeError:
-            pass
-        # Plex flows the whole lower block up 40px when the page has no
-        # director/creator line (shows, director-less items): measured on
-        # the Plex ATV refs -- action pill y564 with director, y524
-        # without. The reused window re-applies every offset each render.
-        self._flow_top = 564 if director else 524
-        self._apply_flow()
+        self._paint_hero(item)
 
         # Bonus clips (trailer, deleted scenes...): Plex shows a trailer
         # button whenever /extras answers -- fetched once per item.
@@ -585,7 +489,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._sync_action_row()
 
         # Media badges, right-packed like Plex (video, audio, subtitles)
-        self._layout_media_badges(item)
+        self._layout_media_badges()
 
         # Bottom section
         if self.mode == 'item':
@@ -648,6 +552,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 if self._episodes:
                     lst.selectItem(pos)
                 self.setFocus(lst)
+                self._row_pos[EPISODES_LIST_ID] = pos + 1
+                # Plex's season view is an episode page: hero = that card.
+                self._set_hero_episode(pos)
             else:
                 self.setFocus(self.getControl(WATCH_BUTTON_ID))
         except RuntimeError:
@@ -663,32 +570,236 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         pinned to the action pill top (T). The window is reused across
         modes so every offset is re-applied on each render."""
         t = self._flow_top
+        # Plex's season page stacks differently from the show overview
+        # (official-live/27-detail-show): no section heading, episode
+        # cards right under the hero (~y585), and the action circles
+        # BELOW the cards (~y930). The Cast & Crew swap restores the
+        # standard actions-over-cast stack, matching Plex's scroll.
+        season_cards = self.mode == 'season' and not self._cast_active
+        self._action_top = 930 if season_cards else t
+        # The activity line is a show-level section: Plex does not draw
+        # it on the season page.
+        act_top = 2200 if self.mode == 'season' else t + 92
         for cid in (7180, 7181, 7182):
             try:
-                self.getControl(cid).setPosition(132, t + 92)
+                self.getControl(cid).setPosition(132, act_top)
             except RuntimeError:
                 pass
-        for cid in (7183, 7184):
+        # Avatar-initial overlays ride on the same y (act_top parks the
+        # whole activity line on Plex's season page) but keep their
+        # baked x: the second stack sits at 224.
+        for cid in (7183, 7184, 7187, 7188):
             try:
-                self.getControl(cid).setPosition(178, t + 92)
+                self.getControl(cid).setPosition(178, act_top)
+            except RuntimeError:
+                pass
+        for cid in (7185, 7186, 7189, 7192):
+            try:
+                self.getControl(cid).setPosition(224, act_top)
             except RuntimeError:
                 pass
         try:
-            self.getControl(7196).setPosition(128, t + 90)
-            self.getControl(7207).setPosition(200, t + 105)
-            self.getControl(7060).setPosition(128, t + 202)
+            self.getControl(7196).setPosition(
+                128, 2200 if self.mode == 'season' else t + 90)
+            # 7207 is the 'Vous l'avez regarde...' activity label -- the
+            # whole activity line is parked on Plex's season page. The
+            # media pills ride at the director line instead (~y530,
+            # official-live/27); elsewhere they sit under the actions.
+            self.getControl(7207).setPosition(
+                200, 2200 if self.mode == 'season' else t + 105)
+            self._badge_top = t - 40 if season_cards else t + 108
+            # On the season cards view Plex shows no section heading --
+            # only the 'Cast & Crew' heading peeking at the bottom edge
+            # above its cropped portrait row.
+            label_ctl = self.getControl(7060)
+            if season_cards:
+                label_ctl.setLabel(i18n.tr(33100))
+                label_ctl.setPosition(128, 1005)
+            else:
+                label_ctl.setPosition(128, t + 202)
+            row_top = 590 if season_cards else t + 264
             for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
-                self.getControl(cid).setPosition(128, t + 264)
+                self.getControl(cid).setPosition(128, row_top)
             # Parked sections keep their 'visible' state (Kodi only
             # moves focus natively into visible controls) but sit past
-            # the screen edge; the focused one owns the bottom slot.
+            # the screen edge; the focused one owns the bottom slot. On
+            # the season page Plex lets the cast portraits peek under
+            # the bottom edge, so the parked cast row only goes far
+            # enough to stay a sliver.
             if self.mode in ('show', 'season'):
                 parked = (SEASONS_LIST_ID if self.mode == 'show'
                           else EPISODES_LIST_ID) \
                     if self._cast_active else CAST_LIST_ID
-                self.getControl(parked).setPosition(128, 2200)
+                parked_top = 1050 if (self.mode == 'season' and
+                                      parked == CAST_LIST_ID) else 2200
+                self.getControl(parked).setPosition(128, parked_top)
         except RuntimeError:
             pass
+
+    def _paint_hero(self, item):
+        """Logo/title, meta line + content-rating box, provider chips,
+        synopsis and director line for `item` -- the detail record for
+        movies/shows, the FOCUSED EPISODE on season pages (Plex's season
+        view is an episode page: 'Le retour', 'S7 • E16', 'Directed
+        by...'). Re-runnable: _set_hero_episode() repaints it per card."""
+        # Plex's season hero keeps the SHOW clearlogo with the episode
+        # title as a heading under it (official-live/27: 'THE ROOKIE'
+        # logo + 'Le retour'). The episode record has no logo of its
+        # own, so it borrows the show's and the title moves to the
+        # AuraDetailEpTitle label (7013); the logo itself shrinks to
+        # Plex's ~85px season size.
+        hero_logo = item.get('logo_url') or ''
+        season_hero = (self.mode == 'season' and item is not self.item
+                       and bool(hero_logo or self.item.get('logo_url')))
+        if season_hero and not hero_logo:
+            hero_logo = self.item['logo_url']
+        _set(self, 'AuraDetailLogo', hero_logo)
+        _set(self, 'AuraDetailEpTitle',
+             (item.get('title') or '') if season_hero else '')
+        try:
+            logo_ctl = self.getControl(7010)
+            logo_ctl.setWidth(560 if season_hero else 720)
+            logo_ctl.setHeight(85 if season_hero else 162)
+        except RuntimeError:
+            pass
+        if hero_logo:
+            try:
+                self.getControl(7010).setImage(hero_logo,
+                                               useCache=False)
+                self.getControl(7011).setLabel('')
+            except RuntimeError:
+                pass
+        else:
+            try:
+                self.getControl(7011).setLabel(item.get('title') or '')
+            except RuntimeError:
+                pass
+
+        # Meta line: Plex shows "S1 - E4  ·  air date  ·  duration" for
+        # episodes, "year  ·  duration  ·  genres" otherwise. Unreleased
+        # items get Plex's amber "Releasing Oct 29" in place of year/air.
+        parts = []
+        unreleased = _unreleased_label(item)
+        if item.get('type') == 'episode':
+            se = _season_episode_label(item)
+            if se:
+                parts.append(se.replace(' - ', ' • '))
+            air = unreleased or _fmt_air_date(
+                item.get('originally_available_at'))
+            if air:
+                parts.append(air)
+        elif unreleased:
+            parts.append(unreleased)
+        elif item.get('year'):
+            parts.append(str(item['year']))
+        duration = _fmt_duration(item.get('duration_ms'))
+        if duration:
+            parts.append(duration)
+        elif self.mode in ('show', 'season') and self._seasons:
+            parts.append('{} saison{}'.format(
+                len(self._seasons), 's' if len(self._seasons) > 1 else ''))
+        if item.get('genres'):
+            parts.append(', '.join(item['genres'][:2]))
+        meta_text = '    '.join(parts)
+        meta_display = meta_text
+        if unreleased:
+            # Keep meta_text plain for text_width() below; the amber wrap
+            # is display-only or the rating chip would be pushed right.
+            meta_display = meta_text.replace(
+                unreleased,
+                '[COLOR FFE5A00D]{}[/COLOR]'.format(unreleased), 1)
+        try:
+            self.getControl(7020).setLabel(meta_display)
+        except RuntimeError:
+            pass
+        # Plex trails the meta line with a small bordered box holding the
+        # content rating ("12" / "10" / "TV-MA"), ~16px after the text.
+        rating = (item.get('content_rating') or '').strip()
+        _set(self, 'AuraDetailMetaRating', '1' if rating else '')
+        if rating:
+            # PIL under-measures Kodi's Inter ~1.0x here (see i18n.ellipsize)
+            box_x = 128 + int(i18n.text_width(meta_text, 20) or 0) + 24
+            box_w = max(40, int((i18n.text_width(rating, 19) or 20)
+                                * 0.96) + 20)
+            try:
+                self.getControl(7190).setPosition(box_x, 294)
+                self.getControl(7190).setWidth(box_w)
+                self.getControl(7191).setPosition(box_x, 294)
+                self.getControl(7191).setWidth(box_w)
+                self.getControl(7191).setLabel(rating)
+            except RuntimeError:
+                pass
+
+        self._render_chips(item)
+
+        # Synopsis + director
+        summary = item.get('summary') or ''
+        # The synopsis box holds exactly 3 lines of font_aura_plot in
+        # 800px -- measure-trim to fill them (~1950px PIL * ~1.2 Kodi
+        # width factor = ~2.9 rendered lines) so no overflow fades the
+        # edges; the 240-char cap stays as a no-PIL fallback.
+        summary = i18n.ellipsize(summary, 25, budget_px=1950)
+        if summary.endswith('…') and ' ' in summary:
+            # Plex breaks the ellipsis on a word boundary.
+            summary = summary[:-1].rsplit(' ', 1)[0].rstrip(',. ') + '…'
+        if len(summary) > 240:
+            summary = summary[:240].rsplit(' ', 1)[0].rstrip(',. ') + '...'
+        try:
+            box = self.getControl(7030)
+            box.setText(summary)
+            # setText leaves the box scrolled to the tail (first line
+            # fades under the top-edge scrim) -- reset() restores the
+            # scroll offset to the top.
+            box.reset()
+        except RuntimeError:
+            pass
+        director = ''
+        if item.get('directors'):
+            director = i18n.tr(33117).format(', '.join(item['directors'][:2]))
+        elif item.get('type') == 'episode' and item.get('show_title') \
+                and not item.get('logo_url'):
+            director = item['show_title']
+        try:
+            self.getControl(7040).setLabel(director)
+        except RuntimeError:
+            pass
+        # Plex flows the whole lower block up 40px when the page has no
+        # director/creator line (shows, director-less items): measured on
+        # the Plex ATV refs -- action pill y564 with director, y524
+        # without. The reused window re-applies every offset each render.
+        self._flow_top = 564 if director else 524
+        self._apply_flow()
+
+    def _set_hero_episode(self, pos):
+        """Plex's season page hero follows the focused episode card.
+        Paint the thin children record immediately (title/synopsis are
+        already there), then hydrate the full record behind a debounce
+        -- provider chips, 'Directed by' and the real stream badges land
+        a beat later exactly like Plex's hero does on a Right-hold."""
+        if self.mode != 'season' or not (0 <= pos < len(self._episodes)):
+            return
+        ep = self._episodes[pos]
+        if ep is self._hero_episode:
+            return
+        self._hero_episode = ep
+        gen = self._hero_gen = getattr(self, '_hero_gen', 0) + 1
+        self._paint_hero(ep)
+        self._layout_media_badges(hydrate=False)
+        # Resume/Restart state and the pill label follow the focused
+        # card ('Resume S1 E2 · Nm left'), like Plex's hero actions.
+        self._sync_action_row()
+
+        def work():
+            time.sleep(0.25)
+            if gen != getattr(self, '_hero_gen', 0):
+                return
+            self._hydrate_stream_labels(ep)
+            if gen != getattr(self, '_hero_gen', 0):
+                return
+            self._paint_hero(ep)
+            self._layout_media_badges()
+            self._sync_action_row()
+        threading.Thread(target=work, daemon=True).start()
 
     def _render_chips(self, item):
         # Each chip: (text, provider icon or ''). Plex draws a provider
@@ -958,6 +1069,23 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                        cast_ctl, cast_ctl)
             if self.mode in ('show', 'season'):
                 strip.setNavigation(strip, watch, strip, strip)
+            if self.mode == 'season':
+                # Plex's season column (official-live/27): tab strip ->
+                # episode cards -> action circles -> Cast & Crew. The
+                # activity line and the section heading are parked.
+                ep = self.getControl(EPISODES_LIST_ID)
+                cast = self.getControl(CAST_LIST_ID)
+                right_id = (
+                    RESTART_BUTTON_ID
+                    if self.getProperty('AuraDetailRestart')
+                    else WATCHLIST_BUTTON_ID)
+                strip.setNavigation(strip, ep, strip, strip)
+                ep.setNavigation(strip, watch, ep, ep)
+                down_ctl = cast if self.getProperty('AuraDetailCastRow') \
+                    else watch
+                watch.setNavigation(ep, down_ctl, watch,
+                                    self.getControl(right_id))
+                cast.setNavigation(watch, cast, cast, cast)
         except RuntimeError as e:
             xbmc.log('Akasha Aura Detail: nav sync failed: {}'.format(e),
                      xbmc.LOGWARNING)
@@ -1051,10 +1179,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         x = ACTION_ROW_LEFT
         for cid in order:
             # Plex keeps the labelled Resume CTA a full white pill even
-            # unfocused (official-live/44); the Restart action collapses
-            # to a circle like every other icon-only action once the
-            # cursor leaves the row.
-            always = restart and cid == WATCH_BUTTON_ID
+            # unfocused on item/show pages (official-live/44) -- but the
+            # season page draws a bare circle like every other action
+            # (official-live/27). Restart collapses to a circle too once
+            # the cursor leaves the row.
+            always = restart and cid == WATCH_BUTTON_ID \
+                and self.mode != 'season'
             w = self._action_width(cid, cid if always else focused)
             underlay = ACTION_PILL_UNDERLAYS.get(cid)
             if underlay:
@@ -1064,12 +1194,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                      '1' if expanded_unfocused else '')
                 try:
                     u = self.getControl(underlay)
-                    u.setPosition(x, self._flow_top)
+                    u.setPosition(x, self._action_top)
                     u.setWidth(w)
                 except RuntimeError:
                     pass
             try:
-                self.getControl(cid).setPosition(x, self._flow_top)
+                self.getControl(cid).setPosition(x, self._action_top)
                 self.getControl(cid).setWidth(w)
             except RuntimeError:
                 pass
@@ -1077,7 +1207,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 try:
                     # 28px glyphs centred in the 64px circle, like Plex.
                     self.getControl(ov_id).setPosition(x + 13,
-                                                       self._flow_top + 11)
+                                                       self._action_top + 11)
                 except RuntimeError:
                     pass
             lb = ACTION_LABEL_OVERLAYS.get(cid)
@@ -1093,7 +1223,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if lb and w > ACTION_CIRCLE_W:
                 try:
                     lbl = self.getControl(lb)
-                    lbl.setPosition(x + ACTION_LABEL_X, self._flow_top)
+                    lbl.setPosition(x + ACTION_LABEL_X, self._action_top)
                     # Kodi insets label text ~10px: keep a generous zone
                     # so 'Reprendre S# E# · Nm restantes' never ellipsizes.
                     lbl.setWidth(w - ACTION_LABEL_X - 12)
@@ -1113,10 +1243,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # land under the cursor. Up reaches the season strip in show
         # mode, Down the visible bottom row.
         bottom_id = {'item': CAST_LIST_ID, 'show': SEASONS_LIST_ID,
-                     'season': EPISODES_LIST_ID}.get(self.mode)
+                     'season': CAST_LIST_ID}.get(self.mode)
         bottom_prop = {'item': 'AuraDetailCastRow',
                        'show': 'AuraDetailSeasonsRow',
-                       'season': 'AuraDetailEpisodesRow'}.get(self.mode)
+                       'season': 'AuraDetailCastRow'}.get(self.mode)
         show_strip = self.mode in ('show', 'season')
         for i, cid in enumerate(order):
             try:
@@ -1126,10 +1256,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 if i + 1 < len(order):
                     ctl.controlRight(self.getControl(order[i + 1]))
                 if show_strip:
-                    ctl.controlUp(self.getControl(SEASON_STRIP_ID))
+                    # Plex's season page puts the action circles under
+                    # the episode cards: Up goes back to the cards, not
+                    # straight to the tab strip.
+                    ctl.controlUp(self.getControl(
+                        EPISODES_LIST_ID if self.mode == 'season'
+                        else SEASON_STRIP_ID))
                 if self.getProperty(bottom_prop):
                     ctl.controlDown(self.getControl(
-                        ACTIVITY_ROW_ID if self._activity_label
+                        ACTIVITY_ROW_ID if (self._activity_label and
+                                            self.mode != 'season')
                         else bottom_id))
             except RuntimeError:
                 pass
@@ -1152,8 +1288,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._cast_active = active
         self._apply_flow()
         try:
-            self.getControl(7060).setLabel(
-                i18n.tr(33100) if active else self._section_label())
+            # On the season cards view the heading already reads
+            # 'Cast & Crew' (bottom-edge sliver); every other state
+            # carries the section title.
+            if not (self.mode == 'season' and not active):
+                self.getControl(7060).setLabel(
+                    i18n.tr(33100) if active else self._section_label())
         except RuntimeError:
             pass
 
@@ -1163,6 +1303,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self._set_cast_active(True)
             elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
                 self._set_cast_active(False)
+        if controlID == EPISODES_LIST_ID and self.mode == 'season':
+            try:
+                pos = self.getControl(EPISODES_LIST_ID) \
+                    .getSelectedPosition()
+            except RuntimeError:
+                pos = -1
+            self._set_hero_episode(pos)
         self._sync_action_row()
         # Kodi never re-evaluates Control.HasFocus(7120) inside a list
         # layout when focus moves elsewhere -- the selected tab would
@@ -1243,6 +1390,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         content, never bouncing back up to the tab strip."""
         self.mode = 'show'
         self._cast_active = False
+        self._hero_episode = None
+        # Back on the seasons overview Plex paints the SHOW hero again
+        # (no media badges -- _badge_item() now yields None here).
+        self._paint_hero(self.item)
+        self._layout_media_badges()
         _set(self, 'AuraDetailSeasonsRow', '1')
         _set(self, 'AuraDetailEpisodesRow', '')
         self._render_seasons()
@@ -1272,12 +1424,17 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # Landing on the next episode to watch, like Plex's season pages.
         try:
             lst = self.getControl(EPISODES_LIST_ID)
+            pos = self._preferred_episode_pos()
             if self._episodes:
-                lst.selectItem(self._preferred_episode_pos())
+                lst.selectItem(pos)
             self.setFocus(lst)
             self.getControl(SEASON_STRIP_ID).selectItem(strip_pos)
         except RuntimeError:
-            pass
+            pos = -1
+        # Seed the tracker so the very first Right/Left off the landing
+        # card is seen as a position change (Plex hero follows focus).
+        self._row_pos[EPISODES_LIST_ID] = pos + 1
+        self._set_hero_episode(pos)
 
     def _episode_sheet(self):
         try:
@@ -1407,6 +1564,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return None
         prev = self._row_pos.get(focused, current)
         self._row_pos[focused] = current
+        if focused == EPISODES_LIST_ID and current != prev \
+                and self.mode == 'season':
+            # Plex's season-page hero follows the focused card.
+            self._set_hero_episode(current - 1)
         return focused, prev, current, total
 
     def _reassert_position(self, control_id, position):
@@ -1441,6 +1602,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         current season -- Plex badges and plays that one, not blindly
         S1E1 (and never the bare show record, which carries no
         streams)."""
+        if self.mode == 'season' and self._hero_episode:
+            # Plex's season page actions act on the focused card (the
+            # hero): play/resume, stream pickers and badges all follow it.
+            return self._hero_episode
         if self.mode in ('show', 'season'):
             nxt = self._find_next_episode()
             if nxt:
@@ -1460,7 +1625,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _watch_label(self):
         item = self.item
         if self.mode in ('show', 'season'):
-            nxt = self._find_next_episode()
+            nxt = (self._hero_episode or self._find_next_episode()) \
+                if self.mode == 'season' else self._find_next_episode()
             if nxt:
                 label = i18n.tr(33105).format(
                     nxt.get('season') or '?', nxt.get('index') or '?')
@@ -2057,14 +2223,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _hydrate_stream_labels(self, src):
         """On Deck / children records carry Media but no Stream detail,
         so their audio_label is empty and their subtitle_label falls
-        back to 'Off' -- Plex badges the playable episode's REAL tracks
-        ('French (EAC3 5.1)', 'French Forced (SRT)'). One full metadata
-        fetch fills the labels; the _streams_checked flag keeps picks
-        and re-renders from refetching."""
+        back to 'Off' -- Plex badges the episode's REAL tracks ('French
+        (EAC3 5.1)', 'French Forced (SRT)'). One full metadata fetch
+        also fills the hero-only fields children lack (directors,
+        provider ratings, richer summary). The _streams_checked flag
+        keeps picks and re-renders from refetching."""
         if not src or src.get('_streams_checked'):
             return
-        if not self.client or not src.get('rating_key') \
-                or src.get('audio_label'):
+        if not self.client or not src.get('rating_key'):
             return
         src['_streams_checked'] = True
         try:
@@ -2073,20 +2239,43 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Detail: stream labels failed: {}'
                      .format(e), xbmc.LOGWARNING)
             return
-        for key in ('video_label', 'audio_label', 'subtitle_label'):
+        for key in ('video_label', 'audio_label', 'subtitle_label',
+                    'summary', 'directors', 'ratings', 'rating',
+                    'audience_rating', 'rating_image',
+                    'audience_rating_image', 'content_rating',
+                    'content_rating_age'):
             if full.get(key):
                 src[key] = full[key]
 
-    def _layout_media_badges(self, item):
+    def _badge_item(self):
+        """The record the media pills describe -- Plex's matrix:
+        show overview = NO badges at all, season page = the focused
+        (hero) episode, movie/episode page = the item itself."""
+        if self.mode == 'show':
+            return None
+        if self.mode == 'season':
+            return self._hero_episode or self._playable_item()
+        return self.item
+
+    def _layout_media_badges(self, hydrate=True):
         """Media badges, right-packed like Plex (video, audio,
-        subtitles). Re-runnable: _pick_subtitle() calls it again so the
-        pill follows the newly selected default stream. Plex reads the
-        streams of the episode Watch would start on show pages."""
-        src = self._playable_item() or item
-        self._hydrate_stream_labels(src)
-        video = src.get('video_label') or ''
-        audio = src.get('audio_label') or ''
-        subs = src.get('subtitle_label') or ''
+        subtitles) -- hidden on the show overview. Re-runnable:
+        _pick_subtitle()/_pick_audio() and _set_hero_episode() call it
+        again so the pills follow the current record. The More-panel
+        track values keep reading the episode Watch would start even
+        on the (badge-less) show page. hydrate=False paints whatever
+        the record already carries -- focus moves stay instant while
+        the deferred worker fills the real tracks behind it."""
+        badge = self._badge_item()
+        vals = badge if badge is not None \
+            else (self._playable_item() or self.item)
+        if hydrate:
+            self._hydrate_stream_labels(vals)
+            if badge is not vals:
+                self._hydrate_stream_labels(badge)
+        video = (badge or {}).get('video_label') or ''
+        audio = (badge or {}).get('audio_label') or ''
+        subs = (badge or {}).get('subtitle_label') or ''
         badge_x = 1890
         for text, bg_id, lb_id, ic_id in ((subs, 7054, 7055, 7057),
                                           (audio, 7052, 7053, 7056),
@@ -2098,23 +2287,25 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             badge_x -= w
             try:
                 self.getControl(bg_id).setPosition(badge_x,
-                                                  self._flow_top + 108)
+                                                  self._badge_top)
                 self.getControl(bg_id).setWidth(w)
                 self.getControl(lb_id).setPosition(badge_x + ic_w,
-                                                  self._flow_top + 108)
+                                                  self._badge_top)
                 self.getControl(lb_id).setWidth(w - ic_w)
                 self.getControl(lb_id).setLabel(text)
                 if ic_id:
                     self.getControl(ic_id).setPosition(badge_x + 12,
-                                                       self._flow_top + 116)
+                                                       self._badge_top + 8)
             except RuntimeError:
                 pass
             badge_x -= 14
         _set(self, 'AuraDetailVideoBadge', '1' if video else '')
         _set(self, 'AuraDetailAudioBadge', '1' if audio else '')
         _set(self, 'AuraDetailSubsBadge', '1' if subs else '')
-        _set(self, 'AuraDetailSubsValue', subs or i18n.tr(33202))
-        _set(self, 'AuraDetailAudioValue', audio or i18n.tr(33203))
+        _set(self, 'AuraDetailSubsValue',
+             (vals or {}).get('subtitle_label') or i18n.tr(33202))
+        _set(self, 'AuraDetailAudioValue',
+             (vals or {}).get('audio_label') or i18n.tr(33203))
 
     def _pick_audio(self):
         """Plex's More>Audio Stream picker: one row per audio track
@@ -2163,7 +2354,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             item['audio_label'] = new_label
             if item is not self.item:
                 self.item['audio_label'] = new_label
-            self._layout_media_badges(self.item)
+            self._layout_media_badges()
         except Exception as e:
             xbmc.log('Akasha Aura Detail: audio pick failed: {}'
                      .format(e), xbmc.LOGWARNING)
@@ -2220,7 +2411,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             item['subtitle_label'] = new_label
             if item is not self.item:
                 self.item['subtitle_label'] = new_label
-            self._layout_media_badges(self.item)
+            self._layout_media_badges()
         except Exception as e:
             xbmc.log('Akasha Aura Detail: subtitle pick failed: {}'
                      .format(e), xbmc.LOGWARNING)

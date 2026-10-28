@@ -82,6 +82,18 @@
             <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
         </control>
+        <!-- Season hero: Plex paints the SHOW clearlogo with the episode
+             title as a heading right under it (official-live/27). -->
+        <control type="label" id="7013">
+            <left>128</left>
+            <top>230</top>
+            <width>1100</width>
+            <height>70</height>
+            <font>font_aura_info_black_doublerow</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Window.Property(AuraDetailEpTitle)]</label>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailEpTitle))</visible>
+        </control>
 
         <!-- Plex keeps its collapsed rail visible on detail pages too.
                  Decorative here: Back still returns to the library. -->
