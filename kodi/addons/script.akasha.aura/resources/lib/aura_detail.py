@@ -831,6 +831,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     # property, and playback items get a real resume point
                     # later via apply_resume_point().
                     pass
+                if num:
+                    li.setProperty('epnum', 'E{}'.format(num))
                 if ep.get('progress'):
                     li.setProperty('PercentPlayed',
                                    str(int(ep['progress'] * 100)))

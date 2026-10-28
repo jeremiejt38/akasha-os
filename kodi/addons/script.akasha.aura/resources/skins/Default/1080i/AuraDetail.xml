@@ -1106,39 +1106,50 @@
             <left>128</left>
             <top>740</top>
             <width>1800</width>
-            <height>310</height>
+            <height>296</height>
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
             <visible>String.IsEqual(Window.Property(AuraDetailEpisodesRow),1)</visible>
-            <itemlayout width="340" height="310">
+            <itemlayout width="544" height="296">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
+                    <width>512</width>
+                    <height>288</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
+                    <width>512</width>
+                    <height>288</height>
                     <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                 </control>
                 <control type="image">
-                    <left>280</left>
+                    <left>416</left>
                     <top>0</top>
-                    <width>40</width>
+                    <width>96</width>
                     <height>40</height>
-                    <texture>watched-tab.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                    <texture>ep-badge.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
+                </control>
+                <control type="label">
+                    <left>422</left>
+                    <top>4</top>
+                    <width>76</width>
+                    <height>32</height>
+                    <font>font_aura_midi</font>
+                    <align>right</align>
+                    <label>$INFO[ListItem.Property(epnum)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
                 </control>
                 <control type="progress">
-                    <left>8</left>
-                    <top>164</top>
-                    <width>304</width>
+                    <left>12</left>
+                    <top>272</top>
+                    <width>488</width>
                     <height>8</height>
                     <info>ListItem.Property(PercentPlayed)</info>
                     <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
@@ -1148,64 +1159,55 @@
                     <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
                     <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
                 </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>190</top>
-                    <width>320</width>
-                    <height>28</height>
-                    <font>font_aura_mini</font>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>DDFFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>218</top>
-                    <width>320</width>
-                    <height>26</height>
-                    <font>font_aura_mini</font>
-                    <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>77FFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
             </itemlayout>
-            <focusedlayout width="340" height="310">
+            <focusedlayout width="544" height="296">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
+                    <width>512</width>
+                    <height>288</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
+                    <width>512</width>
+                    <height>288</height>
                     <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
                     <left>-4</left>
                     <top>-4</top>
-                    <width>328</width>
-                    <height>188</height>
+                    <width>520</width>
+                    <height>296</height>
                     <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
-                    <left>280</left>
+                    <left>416</left>
                     <top>0</top>
-                    <width>40</width>
+                    <width>96</width>
                     <height>40</height>
-                    <texture>watched-tab.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                    <texture>ep-badge.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
+                </control>
+                <control type="label">
+                    <left>422</left>
+                    <top>4</top>
+                    <width>76</width>
+                    <height>32</height>
+                    <font>font_aura_midi</font>
+                    <align>right</align>
+                    <label>$INFO[ListItem.Property(epnum)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
                 </control>
                 <control type="progress">
-                    <left>8</left>
-                    <top>164</top>
-                    <width>304</width>
+                    <left>12</left>
+                    <top>272</top>
+                    <width>488</width>
                     <height>8</height>
                     <info>ListItem.Property(PercentPlayed)</info>
                     <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
@@ -1214,26 +1216,6 @@
                     <overlaytexture>-</overlaytexture>
                     <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
                     <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>190</top>
-                    <width>320</width>
-                    <height>28</height>
-                    <font>font_aura_mini_bold</font>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFFFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>218</top>
-                    <width>320</width>
-                    <height>26</height>
-                    <font>font_aura_mini</font>
-                    <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>99FFFFFF</textcolor>
-                    <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
         </control>
