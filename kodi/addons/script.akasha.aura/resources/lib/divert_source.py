@@ -335,6 +335,9 @@ def build_video_item(raw_item, image_resolver):
         'tagline': raw_item.get('tagline') or '',
         'summary': raw_item.get('summary') or '',
         'content_rating': _content_rating_display(raw_item),
+        # Plex's "age N+" chip uses contentRatingAge, not the textual
+        # contentRating ('fr/10' would mislabel a 13+ item as 10+).
+        'content_rating_age': raw_item.get('contentRatingAge'),
         'rating': raw_item.get('rating'),
         'audience_rating': raw_item.get('audienceRating'),
         'rating_image': raw_item.get('ratingImage') or '',

@@ -732,8 +732,14 @@ class PlexClient:
         """
         params = {'sort': 'viewedAt:desc',
                   'X-Plex-Container-Size': limit}
-        if rating_key:
+        if rating_key and str(rating_key).isdigit():
+            # Cloud GUIDs ('62d7d0c5...' on online/person items) make the
+            # endpoint answer 400 -- only numeric ratingKeys are valid.
             params['metadataItemID'] = rating_key
+        elif rating_key:
+            # Unscoped would download the entire history (~25MB): better
+            # an empty activity row than a stalled Pi.
+            return []
         elif since_days:
             # Bounding by recency shrinks the payload ~6x (25MB -> ~4MB
             # on this server) while still covering the activity row.
@@ -933,7 +939,11 @@ class PlexClient:
     def metadata_item(self, rating_key):
         """Fetch and normalise a single item by rating key (used to hydrate
         thin items before opening the detail page)."""
-        data = self._request('/library/metadata/{}'.format(rating_key))
+        data = self._request('/library/metadata/{}'.format(rating_key), {
+            # Plex's provider chips (IMDb / RT / TMDB) only arrive through
+            # the opt-in Ratings array, not the legacy scalar fields.
+            'includeRatings': '1',
+        })
         items = self._metadata_list(data)
         return items[0] if items else None
 

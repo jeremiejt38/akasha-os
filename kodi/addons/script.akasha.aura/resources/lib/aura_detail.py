@@ -285,13 +285,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._bg_start('ondeck', 'on_deck', limit=60)
             if self.mode == 'show':
                 self._bg_start('seasons', 'show_seasons', rk)
-            if self.mode == 'item':
+            if not item.get('ratings') or not item.get('cast'):
                 # Hub/list records are thin: Role entries have no thumbs
                 # and Media streams often lack audio/subtitle detail, so
-                # the Cast & Crew row and the audio/sub badges would
-                # render empty where Plex shows them. The full metadata
-                # record has both -- fetch overlaps the synchronous
-                # render, joined just before the badge block.
+                # the Cast & Crew row, the provider rating chips (IMDb /
+                # RT) and the audio/sub badges would render empty where
+                # Plex shows them. The full metadata record has all of
+                # it -- fetch overlaps the synchronous render, joined
+                # just before the badge block. Skipped when the caller
+                # already passed a full record (nothing to hydrate).
                 self._bg_start('meta', 'metadata_item', rk)
 
         _set(self, 'AuraDetailShowStrip',
@@ -393,6 +395,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if full:
                 for key in ('cast', 'ratings', 'rating', 'audience_rating',
                             'rating_image', 'audience_rating_image',
+                            'content_rating', 'content_rating_age',
                             'video_label', 'audio_label', 'subtitle_label'):
                     if full.get(key):
                         item[key] = full[key]
@@ -642,8 +645,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # glyph (IMDb / RT splat / popcorn / TMDB) before the value; text
         # prefixes are only the fallback when no icon is known.
         chips = []
-        if item.get('content_rating'):
-            # Plex: shield glyph + "age N+" + chevron inside the pill.
+        age = item.get('content_rating_age')
+        if age is not None and str(age) != '':
+            # Plex: shield glyph + "age N+" + chevron inside the pill,
+            # sourced from contentRatingAge like the official app.
+            label = (i18n.tr(33145) if str(age) == '0'
+                     else 'age {}+'.format(age))
+            chips.append((label + ' ›', 'age-shield.png', 30, True))
+        elif item.get('content_rating'):
             chips.append((_age_label(item['content_rating']) + ' ›',
                           'age-shield.png', 30, True))
         # Plex draws up to 4 bare provider chips (icon + value, no pill)
