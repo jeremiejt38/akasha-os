@@ -54,6 +54,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
         self.rail_items = []
         self.rail_props = {}
         self.rail_pick = -1
+        self.focus = 0
 
     def _populate_rail_replica(self):
         """Clone of the parent's expanded sidebar, drawn inside this
@@ -152,6 +153,10 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
                     li = xbmcgui.ListItem(entry)
                 lst.addItem(li)
             self.setFocus(lst)
+            # Stacked sheets (Settings over the account menu, 52-back-state)
+            # restore focus on the row that opened them.
+            if self.focus:
+                lst.selectItem(min(self.focus, len(self.entries) - 1))
         except RuntimeError:
             pass
 
@@ -186,7 +191,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
 
 def _dialog(owner, title, entries, message='', skin='AuraMenu.xml',
             left_anchor=False, keep_sidebar=False,
-            rail_items=None, rail_props=None):
+            rail_items=None, rail_props=None, focus=0):
     addon_path = getattr(owner, 'addon_path', None)
     if not addon_path and getattr(owner, 'addon', None) is not None:
         addon_path = owner.addon.getAddonInfo('path')
@@ -199,6 +204,7 @@ def _dialog(owner, title, entries, message='', skin='AuraMenu.xml',
     dlg.left_anchor = left_anchor
     dlg.rail_items = rail_items or []
     dlg.rail_props = rail_props or {}
+    dlg.focus = focus
     # Plex keeps the rail expanded behind its left-anchored sheets: while
     # a rail-anchored dialog is modal the sidebar list loses focus and
     # would collapse to the icon pill. AuraSheetOpen holds the expanded
@@ -256,14 +262,15 @@ def _sidebar_snapshot(owner, list_id=3310):
     return items, props
 
 
-def profilemenu(owner, entries):
+def profilemenu(owner, entries, focus=0):
     """Plex's sidebar profile submenu: a dark sheet anchored left of the
     screen, rows carry an icon -- entries are [(label, icon_name), ...].
     Returns the dialog (caller reads .result and .rail_pick)."""
     rail_items, rail_props = _sidebar_snapshot(owner)
     return _dialog(owner, '', entries, skin='AuraProfileMenu.xml',
                    left_anchor=True, keep_sidebar=True,
-                   rail_items=rail_items, rail_props=rail_props)
+                   rail_items=rail_items, rail_props=rail_props,
+                   focus=focus)
 
 
 def confirm(owner, title, message):

@@ -3474,14 +3474,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._reconnect_connector,
             self._open_settings_panel,
         ]
-        dlg = aura_menu.profilemenu(self, entries)
-        idx = dlg.result
-        if idx < 0:
-            pick = getattr(dlg, 'rail_pick', -1)
-            if pick >= 0:
-                self._activate_rail_index(pick)
-            return
-        actions[idx]()
+        # Plex stacks its sheets: Back from Settings/Profile/the switcher
+        # re-opens this menu with focus on the row that opened it
+        # (official-live/52), not the home screen.
+        focus = 0
+        while True:
+            self._menu_exit = False
+            dlg = aura_menu.profilemenu(self, entries, focus=focus)
+            idx = dlg.result
+            if idx < 0:
+                pick = getattr(dlg, 'rail_pick', -1)
+                if pick >= 0:
+                    self._activate_rail_index(pick)
+                return
+            focus = idx
+            actions[idx]()
+            if (getattr(self, '_menu_exit', False)
+                    or getattr(self, 'playback_started', False)):
+                return
 
     def _open_profile_picker(self):
         """Plex's 'Who's watching?' picker (aura_switch): list the Plex
@@ -3550,6 +3560,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                                           pick.get('thumb') or '')
         self._load_divertissement()
         self._activate_home()
+        # A completed switch lands on the new profile's home, not back on
+        # the account menu the sheet stack would otherwise restore.
+        self._menu_exit = True
 
     def _cloud_stub(self):
         """Cloud-only Plex menu rows have no server-local counterpart."""
