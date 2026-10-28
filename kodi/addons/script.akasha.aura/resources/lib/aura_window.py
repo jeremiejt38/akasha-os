@@ -406,7 +406,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             playback_item = getattr(self, '_playback_item', None)
             self._playback_item = None
             if playback_item and pending_home is None:
-                self._open_detail(playback_item)
+                self._open_detail(playback_item, return_from_playback=True)
             if pending_home:
                 self._on_home_press_action(pending_home)
             # A double press completed across a (re)launch can evade both
@@ -1346,14 +1346,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._open_item_context_menu(
             item, lambda: self._reco_open(item), list_control_id)
 
-    def _open_detail(self, item, season_index=None):
+    def _open_detail(self, item, season_index=None,
+                     return_from_playback=False):
         """Open the Plex-style detail page (AuraDetail.xml) for a playable
         item (movie, episode, trailer/clip). `season_index` pre-selects a
-        season tab when a season card was the entry point."""
+        season tab when a season card was the entry point.
+        `return_from_playback` lands focus on the 'Show' tab strip like
+        Plex does after a video stops (official-live/44)."""
         detail = self._get_sub_window(
             'detail', aura_detail.AuraDetailWindow, 'AuraDetail.xml')
         detail.client = self._connector_client or self._plex_client
         detail.item = item
+        detail.land_on_strip = return_from_playback
         # Reset per-open state (the window instance is cached/reused).
         detail.mode = 'show' if item.get('type') == 'show' else 'item'
         detail._show_item = None

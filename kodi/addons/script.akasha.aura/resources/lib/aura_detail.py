@@ -596,7 +596,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # white pill in the reference captures), the next episode to
         # watch inside a season -- never the tab strip.
         try:
-            if self.mode == 'show':
+            if self.mode == 'show' and getattr(self, 'land_on_strip', False):
+                # Back from playback: Plex drops focus on the 'Show' tab
+                # rather than the Resume pill (44-after-back).
+                pos = self._preferred_season_pos()
+                self.getControl(SEASONS_LIST_ID).selectItem(pos)
+                self.setFocus(self.getControl(SEASON_STRIP_ID))
+            elif self.mode == 'show':
                 pos = self._preferred_season_pos()
                 lst = self.getControl(SEASONS_LIST_ID)
                 lst.selectItem(pos)
