@@ -21,6 +21,11 @@ _OFFLINE_BACKOFF_SECONDS = 30.0
 _CACHE_TTL_SECONDS = 30.0
 _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
+# Same soft/hard split as plex_client: a single read timeout under load
+# must not trip the breaker; only hard transport errors or 3 timeouts
+# in a row do.
+_fail_streak = {}
+_TIMEOUTS_TO_TRIP = 3
 _read_cache = {}
 # In-flight request dedup (see plex_client): concurrent callers join the
 # same fetch instead of duplicating it.
@@ -28,12 +33,16 @@ _inflight = {}
 _inflight_lock = threading.Lock()
 
 
-def _mark_offline(host):
-    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+def _mark_offline(host, soft=False):
+    streak = _fail_streak.get(host, 0) + 1
+    _fail_streak[host] = streak
+    if not soft or streak >= _TIMEOUTS_TO_TRIP:
+        _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
 
 
 def _mark_online(host):
     _offline_until.pop(host, None)
+    _fail_streak.pop(host, None)
 
 
 def _is_offline(host):
@@ -125,8 +134,9 @@ class ConnectorClient:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise ConnectorAPIError('Connector API {} for {}: {}'.format(e.code, path, body)) from e
         except OSError as e:
-            _mark_offline(host)
             reason = getattr(e, 'reason', e)
+            _mark_offline(host, soft=isinstance(reason, TimeoutError) or
+                          'timed out' in str(reason).lower())
             raise ConnectorOfflineError('Connector URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise ConnectorAPIError('Connector JSON decode error for {}: {}'.format(path, e)) from e

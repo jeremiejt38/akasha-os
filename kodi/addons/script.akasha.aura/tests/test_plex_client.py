@@ -513,6 +513,25 @@ class TestPlexErrorClassification(unittest.TestCase):
             self.client.on_deck(limit=1)
         self.assertNotIsInstance(ctx.exception, plex_client.PlexOfflineError)
 
+    @patch('urllib.request.urlopen')
+    def test_single_timeout_does_not_trip_breaker(self, mock_urlopen):
+        """A read timeout under load must not fail the whole UI fast."""
+        mock_urlopen.side_effect = TimeoutError('timed out')
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        # Second call retries for real -- the breaker stays open.
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        self.assertEqual(mock_urlopen.call_count, 2)
+        # Third consecutive timeout trips the breaker; the next call
+        # fast-fails without a new HTTP attempt.
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        mock_urlopen.reset_mock()
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        self.assertEqual(mock_urlopen.call_count, 0)
+
 
 class TestPlexClientTimeline(unittest.TestCase):
     """B3: /:/timeline progress reports."""

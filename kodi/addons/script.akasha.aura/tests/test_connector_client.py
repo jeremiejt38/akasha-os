@@ -219,6 +219,23 @@ class TestConnectorErrorClassification(unittest.TestCase):
         self.assertNotIsInstance(
             ctx.exception, connector_client.ConnectorOfflineError)
 
+    @patch('urllib.request.urlopen')
+    def test_single_timeout_does_not_trip_breaker(self, mock_urlopen):
+        mock_urlopen.side_effect = TimeoutError('timed out')
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        self.assertEqual(mock_urlopen.call_count, 2)
+        # Third consecutive timeout trips the breaker; next call
+        # fast-fails without a new HTTP attempt.
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        mock_urlopen.reset_mock()
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        self.assertEqual(mock_urlopen.call_count, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

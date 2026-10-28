@@ -14,4 +14,5 @@ def _clear_http_layer_state():
     for module in (connector_client, plex_client):
         module._read_cache.clear()
         module._offline_until.clear()
+        module._fail_streak.clear()
     yield

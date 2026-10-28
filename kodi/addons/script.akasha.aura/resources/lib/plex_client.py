@@ -31,6 +31,13 @@ _OFFLINE_BACKOFF_SECONDS = 30.0
 _CACHE_TTL_SECONDS = 30.0
 _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
+# Read timeouts (server reachable but busy -- e.g. Plex transcoding)
+# must not trip the breaker on a single slow answer, or the whole UI
+# fails fast for 30 s during a transient load spike. Only genuinely
+# unreachable servers (refused/DNS/no route) or several timeouts in a
+# row arm it.
+_fail_streak = {}
+_TIMEOUTS_TO_TRIP = 3
 _read_cache = {}
 # In-flight request dedup: card-focus prefetch and the detail page's
 # parallel fetchers can ask for the same endpoint at the same time.
@@ -48,12 +55,16 @@ _PEOPLE_CACHE_TTL_SECONDS = 600.0
 _people_cache = {}
 
 
-def _mark_offline(host):
-    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+def _mark_offline(host, soft=False):
+    streak = _fail_streak.get(host, 0) + 1
+    _fail_streak[host] = streak
+    if not soft or streak >= _TIMEOUTS_TO_TRIP:
+        _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
 
 
 def _mark_online(host):
     _offline_until.pop(host, None)
+    _fail_streak.pop(host, None)
 
 
 def _is_offline(host):
@@ -166,8 +177,11 @@ class PlexClient:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise PlexAPIError('Plex API {} for {}: {}'.format(e.code, path, body)) from e
         except OSError as e:
-            _mark_offline(host)
             reason = getattr(e, 'reason', e)
+            # A read timeout means the connection was established: the
+            # server is alive but slow, so it counts as a soft failure.
+            _mark_offline(host, soft=isinstance(reason, TimeoutError) or
+                          'timed out' in str(reason).lower())
             raise PlexOfflineError('Plex URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise PlexAPIError('Plex JSON decode error for {}: {}'.format(path, e)) from e
