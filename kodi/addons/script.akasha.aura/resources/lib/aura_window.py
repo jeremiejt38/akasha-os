@@ -3896,7 +3896,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 options.append(i18n.tr(33081).format(title))
                 actions.append('down')
 
-        idx = aura_menu.contextmenu(self, options)
+        idx = aura_menu.contextmenu(self, options, keep_sidebar=True)
         if idx < 0 or idx >= len(actions):
             return
 

@@ -11,6 +11,7 @@ Usage:
 Both return the selected index or -1 on Back/dismiss.
 """
 
+import xbmc
 import xbmcgui
 
 PANEL_ID = 9000
@@ -28,9 +29,12 @@ _MAX_PANEL_H = 700
 
 # Left-anchored sheet (Plex's profile submenu, AuraProfileMenu.xml):
 # slides in right next to the expanded sidebar, taller icon rows.
-_LEFT_X = 436
+# Geometry measured on the official client (48-account-menu):
+# panel x437 y34 w398, 26px vertical padding, 76px row pitch.
+_LEFT_X = 437
 _LEFT_Y = 34
-_LEFT_W = 408
+_LEFT_W = 398
+_LEFT_PAD_V = 26
 _LEFT_ROW_H = 76
 
 
@@ -47,8 +51,39 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
         self.entries = []
         self.result = -1
         self.left_anchor = False
+        self.rail_items = []
+        self.rail_props = {}
+
+    def _populate_rail_replica(self):
+        """Clone of the parent's expanded sidebar, drawn inside this
+        dialog. Kodi dims the underlying window under a modal sheet --
+        the replica keeps Plex's always-readable rail look."""
+        try:
+            rail = self.getControl(9020)
+        except RuntimeError as e:
+            xbmc.log('Akasha Aura: rail replica control 9020 missing: {}'.format(e), xbmc.LOGERROR)
+            return
+        try:
+            rail.reset()
+        except (AttributeError, RuntimeError):
+            pass
+        for it in self.rail_items:
+            li = xbmcgui.ListItem(it.get('label', ''))
+            if it.get('icon'):
+                li.setArt({'icon': it['icon']})
+            for prop in ('is_profile', 'is_header', 'is_library'):
+                if it.get(prop):
+                    li.setProperty(prop, it[prop])
+            rail.addItem(li)
+        for key, val in self.rail_props.items():
+            try:
+                self.setProperty(key, val)
+            except RuntimeError:
+                pass
 
     def onInit(self):
+        if self.rail_items:
+            self._populate_rail_replica()
         count = len(self.entries)
         has_title = bool(self.title)
         msg_lines = (self.message.count('[CR]')
@@ -60,7 +95,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             row_h = _LEFT_ROW_H
             panel_w, panel_left = _LEFT_W, _LEFT_X
             list_h = min(count * row_h, _MAX_PANEL_H)
-            panel_h = list_h + _PAD_V * 2 + msg_h + \
+            panel_h = list_h + _LEFT_PAD_V * 2 + msg_h + \
                 (_TITLE_H if has_title else 0)
             panel_top = _LEFT_Y
         else:
@@ -71,7 +106,8 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             panel_h = list_h + _PAD_V * 2 + msg_h + \
                 (_TITLE_H if has_title else 0)
             panel_top = max(0, (1080 - panel_h) // 2)
-        list_top = panel_top + _PAD_V + msg_h + \
+        list_top = panel_top + \
+            (_LEFT_PAD_V if self.left_anchor else _PAD_V) + msg_h + \
             (_TITLE_H if has_title else 0)
         try:
             panel = self.getControl(PANEL_ID)
@@ -136,7 +172,8 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
 
 
 def _dialog(owner, title, entries, message='', skin='AuraMenu.xml',
-            left_anchor=False):
+            left_anchor=False, keep_sidebar=False,
+            rail_items=None, rail_props=None):
     addon_path = getattr(owner, 'addon_path', None)
     if not addon_path and getattr(owner, 'addon', None) is not None:
         addon_path = owner.addon.getAddonInfo('path')
@@ -147,7 +184,25 @@ def _dialog(owner, title, entries, message='', skin='AuraMenu.xml',
     dlg.entries = list(entries)
     dlg.result = -1
     dlg.left_anchor = left_anchor
-    dlg.doModal()
+    dlg.rail_items = rail_items or []
+    dlg.rail_props = rail_props or {}
+    # Plex keeps the rail expanded behind its left-anchored sheets: while
+    # a rail-anchored dialog is modal the sidebar list loses focus and
+    # would collapse to the icon pill. AuraSheetOpen holds the expanded
+    # look (labels/panel/dim) for the dialog's lifetime.
+    if keep_sidebar:
+        try:
+            owner.setProperty('AuraSheetOpen', '1')
+        except (AttributeError, RuntimeError):
+            pass
+    try:
+        dlg.doModal()
+    finally:
+        if keep_sidebar:
+            try:
+                owner.clearProperty('AuraSheetOpen')
+            except (AttributeError, RuntimeError):
+                pass
     return dlg.result
 
 
@@ -156,16 +211,45 @@ def select(owner, title, entries):
     return _dialog(owner, title, entries)
 
 
-def contextmenu(owner, entries):
+def contextmenu(owner, entries, keep_sidebar=False):
     """Plex-styled replacement for xbmcgui.Dialog().contextmenu()."""
-    return _dialog(owner, '', entries)
+    return _dialog(owner, '', entries, keep_sidebar=keep_sidebar)
+
+
+def _sidebar_snapshot(owner, list_id=3310):
+    """Serialize the owner's sidebar list so a rail-anchored sheet can
+    draw an undimmed replica (labels, icons, layout props)."""
+    items = []
+    try:
+        sidebar = owner.getControl(list_id)
+        for i in range(sidebar.size()):
+            li = sidebar.getListItem(i)
+            items.append({
+                'label': li.getLabel(),
+                'icon': li.getArt('icon'),
+                'is_profile': li.getProperty('is_profile'),
+                'is_header': li.getProperty('is_header'),
+                'is_library': li.getProperty('is_library'),
+            })
+    except (AttributeError, RuntimeError) as e:
+        xbmc.log('Akasha Aura: sidebar snapshot failed: {}'.format(e),
+                 xbmc.LOGERROR)
+    props = {}
+    for key in ('AuraAvatar', 'AuraUserName', 'DivertActiveLibrary'):
+        try:
+            props[key] = owner.getProperty(key) or ''
+        except (AttributeError, RuntimeError):
+            pass
+    return items, props
 
 
 def profilemenu(owner, entries):
     """Plex's sidebar profile submenu: a dark sheet anchored left of the
     screen, rows carry an icon -- entries are [(label, icon_name), ...]."""
+    rail_items, rail_props = _sidebar_snapshot(owner)
     return _dialog(owner, '', entries, skin='AuraProfileMenu.xml',
-                   left_anchor=True)
+                   left_anchor=True, keep_sidebar=True,
+                   rail_items=rail_items, rail_props=rail_props)
 
 
 def confirm(owner, title, message):

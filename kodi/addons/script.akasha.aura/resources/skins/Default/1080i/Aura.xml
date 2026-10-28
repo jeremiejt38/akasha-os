@@ -3219,7 +3219,7 @@
                     <width>1920</width>
                     <height>1080</height>
                     <texture colordiffuse="8C000000">white.png</texture>
-                    <visible>Control.HasFocus(3310)</visible>
+                    <visible>Control.HasFocus(3310) | !String.IsEmpty(Window.Property(AuraSheetOpen))</visible>
                     <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="true">
                         <effect type="fade" start="0" end="100" time="180" easing="out"/>
                     </animation>
@@ -3231,7 +3231,7 @@
                      sidebar is unfocused; it appears as soon as the panel
                      expands on focus. -->
                 <control type="group">
-                    <visible>!Control.HasFocus(3310)</visible>
+                    <visible>!Control.HasFocus(3310) + String.IsEmpty(Window.Property(AuraSheetOpen))</visible>
                     <control type="image">
                         <left>28</left>
                         <top>432</top>
@@ -3301,8 +3301,8 @@
                     <top>20</top>
                     <width>400</width>
                     <height>1040</height>
-                    <texture colordiffuse="FF262626" border="26">cap-r26.png</texture>
-                    <visible>Control.HasFocus(3310)</visible>
+                    <texture colordiffuse="FF000000" border="26">cap-r26.png</texture>
+                    <visible>Control.HasFocus(3310) | !String.IsEmpty(Window.Property(AuraSheetOpen))</visible>
                     <animation type="Conditional" condition="Control.HasFocus(3310)" reversible="false">
                         <effect type="slide" start="-420,0" end="0,0" time="200" tween="quadratic" easing="out"/>
                     </animation>
@@ -3325,7 +3325,7 @@
                             <width>384</width>
                             <height>56</height>
                             <texture colordiffuse="AAFFFFFF" border="28">chip-outline.png</texture>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
                         </control>
                         <control type="image">
                             <left>30</left>
@@ -3334,7 +3334,7 @@
                             <height>34</height>
                             <aspectratio>keep</aspectratio>
                             <texture>$INFO[ListItem.Art(icon)]</texture>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="label">
                             <left>92</left>
@@ -3345,7 +3345,7 @@
                             <font>font_aura_tiny_bold</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
-                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                            <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="image">
                             <left>348</left>
@@ -3354,7 +3354,7 @@
                             <height>32</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="AAFFFFFF">icon-chevron-right.png</texture>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
                         <control type="image">
                             <left>352</left>
@@ -3363,7 +3363,7 @@
                             <height>24</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="73FFFFFF">icon-dots.png</texture>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_library)) + ListItem.IsSelected</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_library)) + ListItem.IsSelected | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_library)) + ListItem.IsSelected</visible>
                         </control>
                         <control type="label">
                             <left>30</left>
@@ -3374,7 +3374,7 @@
                             <font>font_aura_hint</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>99FFFFFF</textcolor>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                         <control type="image">
                             <left>150</left>
@@ -3382,7 +3382,7 @@
                             <width>240</width>
                             <height>2</height>
                             <texture colordiffuse="33FFFFFF">white.png</texture>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                                             <control type="image">
                             <left>26</left>
@@ -3390,7 +3390,7 @@
                             <width>36</width>
                             <height>36</height>
                             <texture>avatar-plex.png</texture>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
                         </control>
                         <control type="image">
                             <left>26</left>
@@ -3399,15 +3399,15 @@
                             <height>36</height>
                             <aspectratio>scale</aspectratio>
                             <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
                         </control>
                         <control type="image">
                             <left>26</left>
                             <top>14</top>
                             <width>36</width>
                             <height>36</height>
-                            <texture colordiffuse="FF262626">cast-mask.png</texture>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                            <texture colordiffuse="FF000000">cast-mask.png</texture>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
                         </control>
                         <control type="label">
                             <left>92</left>
@@ -3418,7 +3418,7 @@
                             <font>font_aura_small_bold</font>
                             <label>$INFO[Window.Property(AuraUserName)]</label>
                             <textcolor>CCFFFFFF</textcolor>
-                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                            <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
 </itemlayout>
                     <focusedlayout width="400" height="64">
@@ -3522,6 +3522,108 @@
                             <label>$INFO[Window.Property(AuraUserName)]</label>
                             <textcolor>FF1A1A1A</textcolor>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+
+                        <control type="image">
+                            <left>8</left>
+                            <top>4</top>
+                            <width>384</width>
+                            <height>56</height>
+                            <texture colordiffuse="AAFFFFFF" border="28">chip-outline.png</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
+                        </control>
+                        <control type="image">
+                            <left>30</left>
+                            <top>15</top>
+                            <width>34</width>
+                            <height>34</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture>$INFO[ListItem.Art(icon)]</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="label">
+                            <left>92</left>
+                            <top>4</top>
+                            <width>290</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_tiny_bold</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>348</left>
+                            <top>16</top>
+                            <width>32</width>
+                            <height>32</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="AAFFFFFF">icon-chevron-right.png</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>352</left>
+                            <top>20</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="73FFFFFF">icon-dots.png</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_library)) + ListItem.IsSelected</visible>
+                        </control>
+                        <control type="label">
+                            <left>30</left>
+                            <top>4</top>
+                            <width>120</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_hint</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>150</left>
+                            <top>31</top>
+                            <width>240</width>
+                            <height>2</height>
+                            <texture colordiffuse="33FFFFFF">white.png</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                                            <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <texture>avatar-plex.png</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>26</left>
+                            <top>14</top>
+                            <width>36</width>
+                            <height>36</height>
+                            <texture colordiffuse="FF000000">cast-mask.png</texture>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="label">
+                            <left>92</left>
+                            <top>4</top>
+                            <width>240</width>
+                            <height>56</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_small_bold</font>
+                            <label>$INFO[Window.Property(AuraUserName)]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
                         </control>
 </focusedlayout>
                 </control>
