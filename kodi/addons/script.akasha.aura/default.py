@@ -108,6 +108,13 @@ if __name__ == '__main__':
         skip_marker.AuraSkipMarkerWindow(
             'AuraSkipMarker.xml', ADDON_PATH, 'Default', '1080i').doModal()
         sys.exit(0)
+    if 'osdqueue' in sys.argv[1:]:
+        # Pressing Down (or the chevron) on the VideoOSD opens Plex's
+        # chapters + play-queue overlay.
+        import osd_menu
+        osd_menu.AuraOsdQueueWindow(
+            'AuraOsdQueue.xml', ADDON_PATH, 'Default', '1080i').doModal()
+        sys.exit(0)
     if 'osdmenu' in sys.argv[1:]:
         import osd_menu
         if 'quality' in sys.argv[1:]:

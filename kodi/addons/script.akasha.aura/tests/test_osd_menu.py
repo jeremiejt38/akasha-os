@@ -112,9 +112,25 @@ class StoreChaptersTests(unittest.TestCase):
         osd_menu.store_chapters(client, {'rating_key': '42'})
         stored = json.loads(self.home.getProperty(osd_menu.PROP_CHAPTERS))
         self.assertEqual(stored, [
-            {'name': 'Intro', 'time': 0.0},
-            {'name': 'Mid', 'time': 584.208}])
+            {'name': 'Intro', 'time': 0.0, 'thumb': ''},
+            {'name': 'Mid', 'time': 584.208, 'thumb': ''}])
         client.item_chapters.assert_called_once_with('42')
+
+    def test_builds_bif_thumb_url_from_part_key(self):
+        client = MagicMock()
+        client.server_url = 'https://plex.test'
+        client.token = 'tok'
+        client.item_chapters.return_value = [
+            {'name': 'Intro', 'start_ms': 0, 'end_ms': 584208},
+        ]
+        osd_menu.store_chapters(client, {
+            'rating_key': '42',
+            'part_key': '/library/parts/123/abc/file.mkv'})
+        stored = json.loads(self.home.getProperty(osd_menu.PROP_CHAPTERS))
+        self.assertEqual(
+            stored[0]['thumb'],
+            'https://plex.test/library/parts/123/indexes/sd/0'
+            '?X-Plex-Token=tok')
 
     def test_no_chapters_clears_property(self):
         self.home.setProperty(osd_menu.PROP_CHAPTERS, 'stale')

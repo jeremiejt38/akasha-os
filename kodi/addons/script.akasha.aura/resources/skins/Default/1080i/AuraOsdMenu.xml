@@ -41,7 +41,7 @@
                 <top>0</top>
                 <width>780</width>
                 <height>700</height>
-                <texture colordiffuse="F21F1614" border="28">rounded-solid.png</texture>
+                <texture colordiffuse="F2161616" border="28">rounded-solid.png</texture>
             </control>
             <control type="label" id="10">
                 <left>50</left>
@@ -125,7 +125,7 @@
                         <aligny>center</aligny>
                         <font>font_aura_tiny</font>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>AA10131A</textcolor>
+                        <textcolor>66FFFFFF</textcolor>
                         <visible>String.IsEqual(ListItem.Property(header),1)</visible>
                     </control>
                 </focusedlayout>

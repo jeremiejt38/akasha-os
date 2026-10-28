@@ -159,3 +159,46 @@ the dialog closes and `_activate_rail_index(pos)` activates the real
 sidebar entry — matching Plex, where the rail stays functional under
 modal sheets. Implemented for both `AuraSettingsPanel.xml` and
 `AuraProfileMenu.xml`.
+
+## Playback OSD + chapters/queue overlay (official refs 35-43)
+
+`skin-patches/plex-osd/VideoOSD.xml` was measured against
+`official-live/40-osd-back.png` (clean 1080p frame):
+
+- Circles: **two only** (subtitles + gear — Plex has no chapters
+  circle), ~76px diameter at y862, centers x1743/x1820; focused circle
+  goes solid white with a dark glyph twin (icon swap on
+  `Control.HasFocus`).
+- Seek bar x222-1722 (matches official x216-1722 within glyph margin),
+  12px amber track + 24px white knob, elapsed x148, remaining ends
+  x1842 — all confirmed.
+- The thin chevron (y~1006) is the entry to the chapters/queue
+  overlay: its onclick now runs `osdqueue` instead of `Action(Back)`.
+
+`AuraOsdQueue.xml` (new window 1204) reproduces Plex's Down-on-OSD
+sheet (`41-osd-settings-menu.png`, `39-osd-playqueue.png`):
+
+- "Chapters" heading + horizontal cards 404x227 (16:9), white rounded
+  outline on focus, bold chapter name + dimmed timestamp centered
+  below, pitch 426 — thumbs come from the Plex BIF index
+  (`/library/parts/<partId>/indexes/sd/<startMs>`), wired through
+  `store_chapters` (`thumb` field, part id parsed from `part_key`).
+- "Play Queue" heading + episode cards 396x223 pitch 417; the
+  currently-playing card carries a dark disc + white play glyph
+  (`ListItem.Property(playing)`).
+- Layout is a bottom-anchored stack that slides -345px when the queue
+  list takes focus (conditional reversible `slide` animations driven
+  by `Control.HasFocus(1002)`), collapsing to a queue-only layout when
+  `Window.Property(haschapters)` is empty.
+- Scrim = light veil + bottom gradient + a `F2000000` slab so the
+  VideoOSD bar underneath cannot bleed through.
+- Selecting a chapter seeks (`Player().seekTime`); selecting a queued
+  episode rewrites PROP_ITEM/PROP_QUEUE exactly like the Up Next
+  advance, refreshes markers+chapters, and plays the part URL with the
+  PROP_SWITCHING guard held until `isPlayingVideo`.
+
+OSD menu fixes in the same pass: the list now lands focus on the
+first *actionable* row (headers carry no action and Plex never lets
+them take the pill), and header rows in `focusedlayout` keep the
+dimmed `66FFFFFF` instead of the invisible `AA10131A` on dark. Panel
+background neutralised to `F2161616`.

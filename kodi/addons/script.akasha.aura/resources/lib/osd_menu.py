@@ -157,9 +157,20 @@ def store_chapters(client, item):
     fetch = getattr(client, 'item_chapters', None)
     if rk and fetch:
         try:
+            server = getattr(client, 'server_url', '') or ''
+            token = getattr(client, 'token', '') or ''
+            # Plex chapter cards show the BIF index frame at the chapter
+            # start: /library/parts/<id>/indexes/sd/<ms>.
+            part_bits = ((item or {}).get('part_key') or '').split('/')
+            part_id = part_bits[3] if len(part_bits) > 3 else ''
             chapters = [
                 {'name': ch.get('name') or '',
-                 'time': (ch.get('start_ms') or 0) / 1000.0}
+                 'time': (ch.get('start_ms') or 0) / 1000.0,
+                 'thumb': ('{}/library/parts/{}/indexes/sd/{}'
+                           '?X-Plex-Token={}'.format(
+                               server, part_id,
+                               int(ch.get('start_ms') or 0), token)
+                           if part_id and server and token else '')}
                 for ch in fetch(rk) or []
             ]
         except Exception as e:
@@ -350,6 +361,12 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
             self.getControl(10).setLabel(i18n.tr(33200))
             self._build_streams(lst)
         self.setFocusId(1000)
+        # Land on the first actionable row -- headers carry no action
+        # and Plex never lets them take the selection pill.
+        for i, action in enumerate(self._actions):
+            if action:
+                lst.selectItem(i)
+                break
 
     # -- item construction ------------------------------------------------
 
@@ -517,5 +534,151 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
                     and xbmc.Player().isPlayingVideo()):
                 player.seekTime(position)
             win.setProperty(PROP_QUALITY, preset_id)
+        finally:
+            win.setProperty(PROP_SWITCHING, '')
+
+
+def _queue_items():
+    """[current item] + queued episodes, read from the playback props."""
+    win = _home()
+    try:
+        current = json.loads(win.getProperty(PROP_ITEM) or '{}')
+    except (ValueError, TypeError):
+        current = {}
+    try:
+        rest = json.loads(win.getProperty(PROP_QUEUE) or '[]')
+    except (ValueError, TypeError):
+        rest = []
+    items = [current] if current else []
+    items += [it for it in rest if isinstance(it, dict)]
+    return items
+
+
+def _queue_subtitle(item):
+    """'S7 • E13 • Show title' -- Plex's secondary line under queue cards."""
+    season, index, show = (item.get('season'), item.get('index'),
+                           item.get('show_title'))
+    if season is not None and index is not None:
+        head = 'S{} • E{}'.format(season, index)
+        return '{} • {}'.format(head, show) if show else head
+    return show or ''
+
+
+class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
+    """Down-on-OSD overlay: chapter thumbnails + the play queue, exactly
+    like Plex Android TV's bottom sheet. The video keeps playing behind
+    it; selecting a chapter seeks, selecting a queued episode jumps."""
+
+    def onInit(self):
+        self._chapters = _current_chapters()
+        self._queue = _queue_items()
+        if self._chapters:
+            self.setProperty('haschapters', '1')
+            try:
+                position = xbmc.Player().getTime()
+            except RuntimeError:
+                position = 0
+            entries = chapter_entries(self._chapters, position)
+            lst = self.getControl(1001)
+            for (label, _seconds, _current), ch in zip(
+                    entries, self._chapters):
+                name, _, stamp = label.rpartition(' — ')
+                li = xbmcgui.ListItem(name or label, stamp)
+                if ch.get('thumb'):
+                    li.setArt({'thumb': ch['thumb'], 'icon': ch['thumb']})
+                lst.addItem(li)
+        qlst = self.getControl(1002)
+        for i, it in enumerate(self._queue):
+            li = xbmcgui.ListItem(it.get('title') or '',
+                                  _queue_subtitle(it))
+            art = (it.get('thumb_url') or it.get('art_url')
+                   or it.get('fanart_url') or '')
+            if art:
+                li.setArt({'thumb': art, 'icon': art})
+            if i == 0:
+                li.setProperty('playing', '1')
+            qlst.addItem(li)
+        try:
+            self.setFocusId(1001 if self._chapters else 1002)
+        except RuntimeError:
+            pass
+
+    def onClick(self, control_id):
+        if control_id == 1001:
+            pos = self.getControl(1001).getSelectedPosition()
+            if 0 <= pos < len(self._chapters):
+                self.close()
+                try:
+                    xbmc.Player().seekTime(float(
+                        _chapter_time_seconds(
+                            self._chapters[pos].get('time'))))
+                except RuntimeError:
+                    pass
+        elif control_id == 1002:
+            pos = self.getControl(1002).getSelectedPosition()
+            if pos > 0:
+                self._play_queue_index(pos)
+            self.close()
+
+    def onAction(self, action):
+        if action.getId() in _back_ids():
+            self.close()
+        elif action.getId() == getattr(xbmcgui, 'ACTION_MOVE_UP', 3):
+            try:
+                focus = self.getFocusId()
+            except RuntimeError:
+                return
+            if focus == 1002 and not self._chapters:
+                self.close()
+            elif (focus == 1001
+                    and self.getControl(1001).getSelectedPosition() == 0):
+                self.close()
+
+    def _play_queue_index(self, pos):
+        """Jump to queue[pos] (queue[0] is the playing item): the props
+        are rewritten exactly like the Up Next advance does, then the
+        part URL is played directly."""
+        win = _home()
+        server, token, _, _ = _playback_context()
+        item = self._queue[pos] if pos < len(self._queue) else None
+        if not item or not server or not token:
+            return
+        rest = self._queue[pos + 1:]
+        win.setProperty(PROP_QUEUE, json.dumps(rest))
+        win.setProperty(PROP_ITEM, json.dumps(item))
+        try:
+            import up_next
+            item = up_next._hydrate(item)
+        except Exception:
+            pass
+        part = item.get('part_key')
+        if not part:
+            return
+        joiner = '&' if '?' in part else '?'
+        url = '{}{}{}X-Plex-Token={}'.format(server, part, joiner, token)
+        win.setProperty(PROP_SWITCHING, '1')
+        try:
+            import plex_client
+            client = plex_client.PlexClient(server, token, timeout=5)
+            store_markers(client, item)
+            store_chapters(client, item)
+        except Exception:
+            pass
+        li = xbmcgui.ListItem(item.get('title') or '')
+        try:
+            import aura_detail
+            aura_detail.AuraDetailWindow._apply_info_tags(li, item)
+            aura_detail.apply_resume_point(li, item)
+        except Exception:
+            pass
+        li.setMimeType('video/mp4')
+        win.setProperty(PROP_QUALITY, 'original')
+        try:
+            player = xbmc.Player()
+            player.play(url, li)
+            waited = 0
+            while not player.isPlayingVideo() and waited < 12000:
+                xbmc.sleep(250)
+                waited += 250
         finally:
             win.setProperty(PROP_SWITCHING, '')

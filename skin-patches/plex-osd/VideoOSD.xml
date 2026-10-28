@@ -4,7 +4,8 @@
      title + SxEx/show/duration top-left (x73), naked clock top-right,
      slim seek bar bottom (x222-1722, 12px) with the 24px white knob,
      naked play/pause glyph, subtitle and settings circles bottom-right
-     at y870, a thin down chevron to dismiss. -->
+     (~76px at y862), a thin down chevron opening the chapters/queue
+     overlay (AuraOsdQueue). -->
 <window>
     <defaultcontrol>9100</defaultcontrol>
     <controls>
@@ -194,69 +195,65 @@
             <textcolor>FFFFFFFF</textcolor>
         </control>
 
-        <!-- Chapters + subtitle + settings circles, bottom-right (Plex
-             glyph centers ~y902). The chapters circle only renders when
-             the playing file carries more than one chapter (B14). -->
-        <control type="button" id="9112">
-            <left>1637</left>
-            <top>870</top>
-            <width>64</width>
-            <height>64</height>
-            <label></label>
-            <onclick>RunScript(script.akasha.aura,osdmenu,chapters)</onclick>
-            <onleft>9100</onleft>
-            <onright>9110</onright>
-            <ondown>9101</ondown>
-            <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>
-            <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
-            <visible>Integer.IsGreater(Player.ChapterCount,1) | !String.IsEmpty(Window(10000).Property(AuraPlaybackChapters))</visible>
-        </control>
-        <control type="image">
-            <left>1654</left>
-            <top>887</top>
-            <width>30</width>
-            <height>30</height>
-            <texture>akasha-chapters.png</texture>
-            <visible>Integer.IsGreater(Player.ChapterCount,1) | !String.IsEmpty(Window(10000).Property(AuraPlaybackChapters))</visible>
-        </control>
+        <!-- Subtitle + settings circles, bottom-right (Plex: ~76px
+             circles, centers x~1743/1820, glyph center ~y900). Focused
+             circle goes solid white with a dark glyph. -->
         <control type="button" id="9110">
-            <left>1711</left>
-            <top>870</top>
-            <width>64</width>
-            <height>64</height>
+            <left>1705</left>
+            <top>862</top>
+            <width>76</width>
+            <height>76</height>
             <label></label>
             <onclick>RunScript(script.akasha.aura,osdmenu,streams)</onclick>
-            <onleft>9112</onleft>
+            <onleft>9101</onleft>
             <onright>9111</onright>
-            <ondown>9101</ondown>
+            <ondown>9102</ondown>
             <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
         </control>
         <control type="image">
             <left>1728</left>
-            <top>887</top>
+            <top>885</top>
             <width>30</width>
             <height>30</height>
             <texture>osd-subs.png</texture>
+            <visible>!Control.HasFocus(9110)</visible>
+        </control>
+        <control type="image">
+            <left>1728</left>
+            <top>885</top>
+            <width>30</width>
+            <height>30</height>
+            <texture colordiffuse="FF1F1614">osd-subs.png</texture>
+            <visible>Control.HasFocus(9110)</visible>
         </control>
         <control type="button" id="9111">
-            <left>1785</left>
-            <top>870</top>
-            <width>64</width>
-            <height>64</height>
+            <left>1782</left>
+            <top>862</top>
+            <width>76</width>
+            <height>76</height>
             <label></label>
             <onclick>RunScript(script.akasha.aura,osdmenu,quality)</onclick>
             <onleft>9110</onleft>
-            <ondown>9101</ondown>
+            <ondown>9102</ondown>
             <texturenofocus colordiffuse="73FFFFFF">akasha-circle.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
         </control>
         <control type="image">
-            <left>1802</left>
-            <top>887</top>
+            <left>1805</left>
+            <top>885</top>
             <width>30</width>
             <height>30</height>
             <texture>osd/settings.png</texture>
+            <visible>!Control.HasFocus(9111)</visible>
+        </control>
+        <control type="image">
+            <left>1805</left>
+            <top>885</top>
+            <width>30</width>
+            <height>30</height>
+            <texture colordiffuse="FF1F1614">osd/settings.png</texture>
+            <visible>Control.HasFocus(9111)</visible>
         </control>
 
         <!-- Bottom bar: naked play/pause glyph (Plex ~21x23 at
@@ -375,14 +372,14 @@
             <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
         </control>
 
-        <!-- Dismiss chevron (Plex: thin ~20px V at y~1007) -->
+        <!-- Chapters/queue chevron (Plex: thin ~20px V at y~1007) -->
         <control type="button" id="9102">
             <left>925</left>
             <top>990</top>
             <width>70</width>
             <height>40</height>
             <label></label>
-            <onclick>Action(Back)</onclick>
+            <onclick>RunScript(script.akasha.aura,osdqueue)</onclick>
             <onup>9101</onup>
             <texturenofocus>-</texturenofocus>
             <texturefocus>-</texturefocus>

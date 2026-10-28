@@ -1839,3 +1839,8 @@ msgstr "Services"
 msgctxt "#33615"
 msgid "Live TV"
 msgstr "TV en direct"
+
+# File de lecture
+msgctxt "#33616"
+msgid "Play Queue"
+msgstr "File de lecture"
