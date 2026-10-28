@@ -40,6 +40,13 @@
                 <texture colordiffuse="FF1A1310">white.png</texture>
             </control>
 
+            <!-- Header + first filmography row: slides up like Plex's
+                 page scroll when the second row takes focus. -->
+            <control type="group" id="7380">
+                <animation type="Conditional" condition="Control.HasFocus(7311)" reversible="true">
+                    <effect type="slide" start="0,0" end="0,-480" time="250" tween="quadratic" easing="inout"/>
+                </animation>
+
             <!-- Circular photo -->
             <control type="image" id="7301">
                 <left>150</left>
@@ -98,7 +105,133 @@
                 <height>340</height>
                 <orientation>horizontal</orientation>
                 <scrolltime>200</scrolltime>
+                <ondown>7311</ondown>
                 <visible>!String.IsEmpty(Window.Property(AuraPersonRowTitle))</visible>
+                <itemlayout width="212" height="340">
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>200</width>
+                        <height>300</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    </control>
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>200</width>
+                        <height>300</height>
+                        <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>150</left>
+                        <top>10</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture colordiffuse="CC1A1310">circle.png</texture>
+                        <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>158</left>
+                        <top>18</top>
+                        <width>24</width>
+                        <height>24</height>
+                        <texture>check.png</texture>
+                        <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>306</top>
+                        <width>200</width>
+                        <height>28</height>
+                        <font>font_aura_mini</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>DDFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="212" height="340">
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>200</width>
+                        <height>300</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    </control>
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>200</width>
+                        <height>300</height>
+                        <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                        <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="image">
+                        <left>-4</left>
+                        <top>-4</top>
+                        <width>208</width>
+                        <height>308</height>
+                        <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                        <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="image">
+                        <left>150</left>
+                        <top>10</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture colordiffuse="CC1A1310">circle.png</texture>
+                        <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>158</left>
+                        <top>18</top>
+                        <width>24</width>
+                        <height>24</height>
+                        <texture>check.png</texture>
+                        <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>306</top>
+                        <width>200</width>
+                        <height>28</height>
+                        <font>font_aura_mini_bold</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                </focusedlayout>
+            </control>
+            </control>
+
+            <!-- Second filmography row (e.g. 'Séries TV' under 'Films'):
+                 sits below the fold and slides into view on focus,
+                 matching Plex's vertical page scroll. -->
+            <control type="label" id="7306">
+                <left>150</left>
+                <top>860</top>
+                <width>1000</width>
+                <height>44</height>
+                <font>font_aura_mini_bold</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>!String.IsEmpty(Window.Property(AuraPersonRow2))</visible>
+                <animation type="Conditional" condition="Control.HasFocus(7311)" reversible="true">
+                    <effect type="slide" start="0,0" end="0,-480" time="250" tween="quadratic" easing="inout"/>
+                </animation>
+            </control>
+            <control type="list" id="7311">
+                <left>142</left>
+                <top>920</top>
+                <width>1800</width>
+                <height>340</height>
+                <orientation>horizontal</orientation>
+                <scrolltime>200</scrolltime>
+                <onup>7310</onup>
+                <visible>!String.IsEmpty(Window.Property(AuraPersonRow2))</visible>
+                <animation type="Conditional" condition="Control.HasFocus(7311)" reversible="true">
+                    <effect type="slide" start="0,0" end="0,-480" time="250" tween="quadratic" easing="inout"/>
+                </animation>
                 <itemlayout width="212" height="340">
                     <control type="image">
                         <left>0</left>
