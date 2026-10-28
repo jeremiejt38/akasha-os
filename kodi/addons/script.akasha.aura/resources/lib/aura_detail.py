@@ -110,6 +110,15 @@ ACTIVITY_ROW_ID = 7196
 ACTIVITY_FEED_ID = 7197
 
 MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
+
+# Panel geometry (matches Plex's measured sheet) and the aux-control
+# id ranges so _pack_more_panel() can re-pack rows around hidden
+# conditional entries (Go to show / Version / Extras).
+MORE_PANEL_TOP = 210
+MORE_PANEL_PITCH = 77
+MORE_ICON_LIGHT_BASE = 7230
+MORE_ICON_DARK_BASE = 7250
+MORE_VALUE_IDS = (7260, 7261)
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
 # the skin; only Subtitles, File Info and Similar Titles remain reachable.
 MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
@@ -1712,11 +1721,32 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         the right edge; cloud-only entries surface an explicit
         notification and File Info shows the media data we actually
         have."""
+        self._pack_more_panel()
         _set(self, 'AuraDetailMore', '1')
         try:
             self.setFocus(self.getControl(MORE_PANEL_FIRST_ID))
         except RuntimeError:
             pass
+
+    def _pack_more_panel(self):
+        """Plex keeps the sheet compact: entries hidden by props leave
+        no empty slot. Controls keep their canonical slot in the XML;
+        here each visible row is moved to its packed position."""
+        visible = [c for c in MORE_PANEL_IDS if self._panel_entry_visible(c)]
+        for slot, cid in enumerate(visible):
+            i = MORE_PANEL_IDS.index(cid)
+            top = MORE_PANEL_TOP + MORE_PANEL_PITCH * slot
+            targets = {cid: top,
+                       MORE_ICON_LIGHT_BASE + i: top + 20,
+                       MORE_ICON_DARK_BASE + i: top + 20}
+            if cid == MORE_SUBTITLES_ID:
+                targets.update({v: top for v in MORE_VALUE_IDS})
+            for aux, y in targets.items():
+                try:
+                    ctl = self.getControl(aux)
+                    ctl.setPosition(ctl.getPosition()[0], y)
+                except (RuntimeError, AttributeError):
+                    pass
 
     def _close_more_menu(self):
         _set(self, 'AuraDetailMore', '')
