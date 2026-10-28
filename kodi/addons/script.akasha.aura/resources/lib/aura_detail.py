@@ -172,6 +172,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._activity_label = ''
         self._activity_avatar2 = ''
         self._activity_avatar3 = ''
+        self._activity_initial2 = ''
+        self._activity_initial3 = ''
+        self._activity_color2 = ''
+        self._activity_color3 = ''
         self._feed_open = False
         self._next_episode = None
         self._active_season = 0     # 0 = "Show" overview tab
@@ -443,6 +447,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._activity_date = ''
             self._activity_avatar2 = ''
             self._activity_avatar3 = ''
+            self._activity_initial2 = ''
+            self._activity_initial3 = ''
+            self._activity_color2 = ''
+            self._activity_color3 = ''
             self._activity_label = ''
             entries = self._watch_history_entries(item.get('rating_key'))
             viewed_at = item.get('last_viewed_at')
@@ -485,10 +493,20 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
              self._activity_avatar2 or '')
         _set(self, 'AuraDetailActivityAvatar3',
              self._activity_avatar3 or '')
+        _set(self, 'AuraDetailActivityInitial2',
+             self._activity_initial2 or '')
+        _set(self, 'AuraDetailActivityInitial3',
+             self._activity_initial3 or '')
+        _set(self, 'AuraDetailActivityColor2',
+             self._activity_color2 or '')
+        _set(self, 'AuraDetailActivityColor3',
+             self._activity_color3 or '')
         try:
             self.getControl(7207).setPosition(
-                296 if self._activity_avatar3 else
-                (248 if self._activity_avatar2 else 200),
+                296 if (self._activity_avatar3
+                        or self._activity_initial3) else
+                (248 if (self._activity_avatar2
+                         or self._activity_initial2) else 200),
                 self._flow_top + 105)
         except RuntimeError:
             pass
@@ -1350,7 +1368,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         """
         own = False
         names = []
-        other_avatars = []
+        others = []
         seen = set()
         accounts = {}
         if entries and self.client and hasattr(self.client, 'accounts'):
@@ -1376,11 +1394,24 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 continue
             if name:
                 names.append(name)
-            if acc.get('thumb'):
-                other_avatars.append(acc['thumb'])
-        self._activity_avatar2 = other_avatars[0] if other_avatars else ''
-        self._activity_avatar3 = (other_avatars[1]
-                                  if len(other_avatars) > 1 else '')
+            others.append({'name': name, 'thumb': acc.get('thumb') or ''})
+        # Plex stacks up to two extra avatars; accounts without a photo
+        # get a colored disc with their initial (deterministic tint).
+        _PALETTE = ('FF9E6B3C', 'FF7A7A3F', 'FF4E7A6B', 'FF6B4E7A',
+                    'FF8A4E4E', 'FF4E6B8A', 'FF8A6B4E', 'FF5E7A4E')
+        for slot, other in enumerate(others[:2], start=2):
+            thumb = other.get('thumb') or ''
+            name = other.get('name') or ''
+            setattr(self, '_activity_avatar{}'.format(slot), thumb)
+            if not thumb and name:
+                idx = sum(bytearray(name.encode('utf-8'))) % len(_PALETTE)
+                setattr(self, '_activity_initial{}'.format(slot),
+                        name[0].upper())
+                setattr(self, '_activity_color{}'.format(slot),
+                        _PALETTE[idx])
+            else:
+                setattr(self, '_activity_initial{}'.format(slot), '')
+                setattr(self, '_activity_color{}'.format(slot), '')
         return own, names
 
     def _activity_when(self, viewed_at):

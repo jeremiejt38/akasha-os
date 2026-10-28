@@ -925,6 +925,28 @@
             <texture colordiffuse="FF10131A">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
         </control>
+        <!-- Initial fallback for slot 2: colored disc + letter, like
+             Plex's generated avatars for accounts without a photo. -->
+        <control type="image" id="7187">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailActivityColor2)]">circle.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial2))</visible>
+        </control>
+        <control type="label" id="7188">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <font>font_aura_small_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Window.Property(AuraDetailActivityInitial2)]</label>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial2))</visible>
+        </control>
         <!-- Third avatar in the stack ('by you, clara, and 1 other'). -->
         <control type="image" id="7185">
             <left>224</left>
@@ -942,6 +964,27 @@
             <height>56</height>
             <texture colordiffuse="FF10131A">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
+        </control>
+        <!-- Initial fallback for slot 3. -->
+        <control type="image" id="7189">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailActivityColor3)]">circle.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial3))</visible>
+        </control>
+        <control type="label" id="7192">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <font>font_aura_small_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Window.Property(AuraDetailActivityInitial3)]</label>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial3))</visible>
         </control>
         <control type="label" id="7207">
             <left>200</left>
