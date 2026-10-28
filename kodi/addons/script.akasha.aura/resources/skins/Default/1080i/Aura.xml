@@ -304,20 +304,11 @@
                 <content />
             </control>
 
-            <!-- Right side: time + date (always visible, unaffected by
-                 module focus), then the settings gear, icon-only, opens
-                 the context menu from plan 04bda1b4 phase 3 instead of
-                 activating native Settings directly. -->
-            <control type="label" id="2005">
-                <left>1420</left>
-                <top>43</top>
-                <width>360</width>
-                <height>34</height>
-                <align>right</align>
-                <font>font_aura_mini</font>
-                <label>$INFO[System.Time(hh:mm)]</label>
-                <textcolor>FFFFFFFF</textcolor>
-            </control>
+            <!-- Right side: the settings gear, icon-only, opens the
+                 context menu from plan 04bda1b4 phase 3 instead of
+                 activating native Settings directly. The clock lives in
+                 the always-on translucent chip below (outside this
+                 fading group), matching the official client's behaviour. -->
 
             <!-- Settings gear: same circle-button construction as Arctic
                  Horizon 2's own top-right menu button (Includes_Objects.xml
@@ -364,23 +355,31 @@
             </control>
         </control>
 
-        <!-- Recessed-state clock: when the global bar fades out (focus in
-             the content), Plex keeps the clock at top-right, vertically
-             centered with the contextual tab strip (which slides up to
-             y~54-106). Shown only while the bar is recessed. -->
+        <!-- Clock chip: the official client keeps the clock in a ~30%
+             black pill at top-right on every navigation surface, whether
+             the tab strip is focused or recessed (measured on official
+             captures: bounds [1700,40]-[1823,88], 30% black scrim over
+             the backdrop, white text). Always visible here; detail and
+             search are separate windows so it never bleeds into them. -->
         <control type="group">
-            <visible>String.IsEqual(Window.Property(AuraBarFocused),false)</visible>
+            <!-- While the module bar is expanded the settings gear sits at
+                 x1804+; the chip slides 40px left so its right cap stays
+                 clear, and returns to the official [1700,40] spot once the
+                 bar recesses and the gear fades out. -->
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                <effect type="slide" start="0,0" end="-40,0" time="250" tween="quadratic" easing="out"/>
+            </animation>
             <control type="image">
-                <left>1708</left>
-                <top>36</top>
-                <width>126</width>
+                <left>1700</left>
+                <top>40</top>
+                <width>123</width>
                 <height>48</height>
-                <texture colordiffuse="FF0DA0E5" border="22">cap-r22.png</texture>
+                <texture colordiffuse="4D000000" border="24">cap-r22.png</texture>
             </control>
             <control type="label">
-                <left>1708</left>
-                <top>36</top>
-                <width>126</width>
+                <left>1700</left>
+                <top>40</top>
+                <width>123</width>
                 <height>48</height>
                 <align>center</align>
                 <aligny>center</aligny>
@@ -388,9 +387,6 @@
                 <label>$INFO[System.Time(hh:mm)]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
-            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
-                <effect type="fade" start="100" end="0" time="220" tween="quadratic" easing="out"/>
-            </animation>
         </control>
 
         <!-- Jeux sub-tabs: SteamLink / Moonlight / Autres. Moved out of the
@@ -1327,12 +1323,12 @@
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="progress">
-                        <left>25</left>
-                        <top>378</top>
-                        <width>214</width>
-                        <height>6</height>
-                        <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                        <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                        <left>24</left>
+                        <top>370</top>
+                        <width>216</width>
+                        <height>8</height>
+                        <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                        <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                         <lefttexture></lefttexture>
                         <righttexture></righttexture>
                         <overlaytexture></overlaytexture>
@@ -1419,12 +1415,12 @@
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="progress">
-                        <left>25</left>
-                        <top>378</top>
-                        <width>214</width>
-                        <height>6</height>
-                        <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                        <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                        <left>24</left>
+                        <top>370</top>
+                        <width>216</width>
+                        <height>8</height>
+                        <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                        <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                         <lefttexture></lefttexture>
                         <righttexture></righttexture>
                         <overlaytexture></overlaytexture>
@@ -1563,12 +1559,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1607,12 +1603,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1683,12 +1679,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1757,12 +1753,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1857,12 +1853,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1901,12 +1897,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1977,12 +1973,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2051,12 +2047,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2156,12 +2152,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2200,12 +2196,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2276,12 +2272,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2350,12 +2346,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2451,12 +2447,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2495,12 +2491,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2571,12 +2567,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2645,12 +2641,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2744,12 +2740,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2788,12 +2784,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>13</left>
-                                <top>348</top>
-                                <width>214</width>
-                                <height>6</height>
-                                <texturebg colordiffuse="59000000" border="3">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="3">prog-bar.png</midtexture>
+                                <left>12</left>
+                                <top>340</top>
+                                <width>216</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2860,12 +2856,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2934,12 +2930,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>8</left>
-                                <top>240</top>
-                                <width>432</width>
-                                <height>4</height>
-                                <texturebg colordiffuse="59000000">white.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">white.png</midtexture>
+                                <left>12</left>
+                                <top>232</top>
+                                <width>424</width>
+                                <height>8</height>
+                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
