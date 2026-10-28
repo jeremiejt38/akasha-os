@@ -584,15 +584,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._render_episodes()
 
         self._sync_navigation()
-        # Plex lands focus on the most meaningful content: the season the
-        # user is currently watching, the next episode to watch inside a
-        # season, the Watch button otherwise -- never the tab strip.
+        # Plex lands focus on the most meaningful content: the
+        # Watch/Resume action in show overview (it stays the expanded
+        # white pill in the reference captures), the next episode to
+        # watch inside a season -- never the tab strip.
         try:
             if self.mode == 'show':
                 pos = self._preferred_season_pos()
                 lst = self.getControl(SEASONS_LIST_ID)
                 lst.selectItem(pos)
-                self.setFocus(lst)
+                self.setFocus(self.getControl(WATCH_BUTTON_ID))
             elif self.mode == 'season':
                 pos = (self._restore_episode_pos
                        if self._restore_episode_pos is not None
