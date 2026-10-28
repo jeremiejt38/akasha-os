@@ -360,6 +360,18 @@
         <onright>7106</onright>
         <ondown>7110</ondown>
     </control>
+    <!-- White underlay over the unfocused circle when the Resume pill
+         stays expanded without focus (Plex keeps the labelled CTA a
+         full white pill even while the season strip holds the cursor
+         -- official-live/44). Sized by _sync_action_row(). -->
+    <control type="image" id="7160">
+        <left>105</left>
+        <top>564</top>
+        <width>64</width>
+        <height>64</height>
+        <texture colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraPill7100))</visible>
+    </control>
     <control type="image" id="7090">
         <left>125</left>
         <top>672</top>
@@ -385,7 +397,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-resume-dark.png</texture>
-        <visible>String.IsEqual(Window.Property(AuraDetailResume),1) + Control.HasFocus(7100)</visible>
+        <visible>String.IsEqual(Window.Property(AuraDetailResume),1) + [Control.HasFocus(7100) | !String.IsEmpty(Window.Property(AuraPill7100))]</visible>
     </control>
     <control type="image" id="7091">
         <left>125</left>
@@ -394,7 +406,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-resume.png</texture>
-        <visible>String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100)</visible>
+        <visible>String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100) + String.IsEmpty(Window.Property(AuraPill7100))</visible>
     </control>
     <control type="button" id="7106">
         <left>375</left>
@@ -415,6 +427,16 @@
         <ondown>7110</ondown>
         <visible>String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
     </control>
+    <!-- Restart pill underlay: same permanent-white rule as Resume
+         (reference/lecteur/after_back_003). -->
+    <control type="image" id="7161">
+        <left>375</left>
+        <top>564</top>
+        <width>64</width>
+        <height>64</height>
+        <texture colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraPill7106))</visible>
+    </control>
     <control type="image" id="7107">
         <left>395</left>
         <top>672</top>
@@ -422,7 +444,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-restart.png</texture>
-        <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
+        <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1) + String.IsEmpty(Window.Property(AuraPill7106))</visible>
     </control>
     <control type="image" id="7108">
         <left>395</left>
@@ -431,7 +453,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-restart-dark.png</texture>
-        <visible>Control.HasFocus(7106)</visible>
+        <visible>[Control.HasFocus(7106) | !String.IsEmpty(Window.Property(AuraPill7106))]</visible>
     </control>
     <!-- Bande-annonce / Bonus: only when /extras returns clips -->
     <control type="button" id="7109">
@@ -648,7 +670,7 @@
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
         <label></label>
-        <visible>Control.HasFocus(7106)</visible>
+        <visible>Control.HasFocus(7106) | !String.IsEmpty(Window.Property(AuraPill7106))</visible>
     </control>
     <control type="label" id="7152">
         <left>0</left>

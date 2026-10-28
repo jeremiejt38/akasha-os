@@ -149,6 +149,10 @@ CHIP_LABEL_IDS = (7022, 7024, 7026, 7028, 7032)
 # label overlay per action button: ControlButton.setLabel is not rendered
 # on this Kodi build (XML <label> bakes at parse time), so the pill text
 # lives on a sibling label control, visible only while the action has focus
+ACTION_PILL_UNDERLAYS = {
+    WATCH_BUTTON_ID: 7160,
+    RESTART_BUTTON_ID: 7161,
+}
 ACTION_LABEL_OVERLAYS = {
     WATCH_BUTTON_ID: 7150,
     RESTART_BUTTON_ID: 7151,
@@ -995,7 +999,25 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             focused = 0
         x = ACTION_ROW_LEFT
         for cid in order:
-            w = self._action_width(cid, focused)
+            # Plex keeps the labelled Resume/Restart CTA a full white
+            # pill even unfocused (official-live/44,
+            # lecteur/after_back_003); only icon-only actions collapse
+            # back to circles when the cursor leaves the row.
+            always = restart and cid in (WATCH_BUTTON_ID,
+                                         RESTART_BUTTON_ID)
+            w = self._action_width(cid, cid if always else focused)
+            underlay = ACTION_PILL_UNDERLAYS.get(cid)
+            if underlay:
+                expanded_unfocused = w > ACTION_CIRCLE_W \
+                    and cid != focused
+                _set(self, 'AuraPill{}'.format(cid),
+                     '1' if expanded_unfocused else '')
+                try:
+                    u = self.getControl(underlay)
+                    u.setPosition(x, self._flow_top)
+                    u.setWidth(w)
+                except RuntimeError:
+                    pass
             try:
                 self.getControl(cid).setPosition(x, self._flow_top)
                 self.getControl(cid).setWidth(w)
