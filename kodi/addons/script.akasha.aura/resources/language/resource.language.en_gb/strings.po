@@ -1844,3 +1844,33 @@ msgstr ""
 msgctxt "#33616"
 msgid "Play Queue"
 msgstr ""
+
+# Qui regarde ?
+msgctxt "#33617"
+msgid "Who’s watching?"
+msgstr ""
+
+# Ajouter un utilisateur
+msgctxt "#33618"
+msgid "Add user"
+msgstr ""
+
+# Saisir le code PIN
+msgctxt "#33619"
+msgid "Enter your PIN"
+msgstr ""
+
+# Code PIN incorrect
+msgctxt "#33620"
+msgid "Incorrect PIN"
+msgstr ""
+
+# Échec du changement de profil
+msgctxt "#33621"
+msgid "Profile switch failed"
+msgstr ""
+
+# Profil : {}
+msgctxt "#33622"
+msgid "Profile: {}"
+msgstr ""

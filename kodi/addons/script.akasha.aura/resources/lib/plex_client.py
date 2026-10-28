@@ -768,6 +768,65 @@ class PlexClient:
             items.append(item)
         return items
 
+    PLEX_TV_BASE = 'https://plex.tv'
+
+    def home_users(self):
+        """Plex Home members (cloud `api/v2/home/users`): [{id, title,
+        thumb, protected}] for the 'Who's watching?' profile picker."""
+        data = self._request(self.PLEX_TV_BASE + '/api/v2/home/users')
+        out = []
+        for u in data.get('users') or []:
+            out.append({'id': u.get('id'),
+                        'title': u.get('title') or '',
+                        'thumb': u.get('thumb') or '',
+                        'protected': bool(u.get('protected'))})
+        return out
+
+    def switch_home_user(self, user_id, pin=None):
+        """POST `api/v2/home/users/<id>/switch`; returns the member's
+        auth token. PIN-protected profiles need `pin`; a wrong PIN makes
+        plex.tv answer 4xx -> PlexAPIError. The response shape differs
+        between XML-era and JSON clients, so the token is searched
+        under both spellings."""
+        url = '{}/api/home/users/{}/switch'.format(
+            self.PLEX_TV_BASE, user_id)
+        if pin:
+            url += '?' + urllib.parse.urlencode({'pin': pin})
+        # Dedicated request: plex.tv may answer JSON {'authToken': ...}
+        # or XML <user authenticationToken="..."/> depending on the
+        # client product headers -- _request() would JSON-crash on XML.
+        req = urllib.request.Request(url, headers=self._headers(),
+                                     method='POST')
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                body = resp.read().decode('utf-8', errors='replace')
+        except urllib.error.HTTPError as e:
+            raise PlexAPIError(
+                'Plex API {} for home user switch'.format(e.code)) from e
+        except OSError as e:
+            raise PlexOfflineError(
+                'plex.tv unreachable for home user switch: {}'.format(e)) from e
+        token = ''
+        try:
+            data = json.loads(body) if body.strip() else {}
+            token = (data.get('authToken') or data.get('authenticationToken')
+                     or (data.get('user') or {}).get('authToken')
+                     or (data.get('user') or {}).get('authenticationToken')
+                     or '')
+        except ValueError:
+            pass
+        if not token:
+            try:
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(body)
+                token = (root.get('authenticationToken')
+                         or root.get('authToken') or '')
+            except (ValueError, ET.ParseError):
+                pass
+        if not token:
+            raise PlexAPIError('home user switch returned no token')
+        return token
+
     def accounts(self):
         """Server accounts (`/accounts`): Plex Home users and the owner --
         used by the 'Activity by you and X' line to name the watchers."""

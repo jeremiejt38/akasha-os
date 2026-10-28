@@ -3458,7 +3458,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             (i18n.tr(33019), 'icon-gear.png'),
         ]
         actions = [
-            self._cloud_stub,
+            self._open_profile_picker,
             self._show_profile_info,
             self._cloud_stub,
             self._cloud_stub,
@@ -3474,6 +3474,74 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._activate_rail_index(pick)
             return
         actions[idx]()
+
+    def _open_profile_picker(self):
+        """Plex's 'Who's watching?' picker (aura_switch): list the Plex
+        Home members, ask the PIN when the profile is protected, switch
+        via plex.tv, then rebuild the client + home like a cold start."""
+        import aura_switch
+        client = self._plex_client
+        if client is None:
+            server_url = self.addon.getSetting('plex.server_url')
+            token = self.addon.getSetting('plex.token')
+            if not config.is_plex_configured(server_url, token):
+                return
+            client = plex_client.PlexClient(server_url, token, timeout=12)
+        try:
+            users = client.home_users()
+        except Exception as e:
+            xbmc.log('Akasha Aura: home users fetch failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            self._cloud_stub()
+            return
+        if not users:
+            return
+        users.append({'id': None, 'add': True,
+                      'title': i18n.tr(33618),
+                      'thumb': 'user-add.png'})
+        pick = None
+        token = None
+        error = False
+        while True:
+            # Plex flow: picker -> PIN pad -> Back lands back on the
+            # picker, not on the home screen; a wrong PIN reopens the
+            # pad itself with the 'incorrect PIN' line.
+            if pick is None:
+                pick = aura_switch.pick_user(self, users)
+                if pick is None:
+                    return
+                if pick.get('add'):
+                    # Account creation lives on app.plex.tv.
+                    self._cloud_stub()
+                    return
+            pin = None
+            if pick.get('protected'):
+                pin = aura_switch.ask_pin(self, error=error)
+                error = False
+                if pin is None:
+                    pick = None  # Back on the pad: reopen the picker
+                    continue
+            try:
+                token = client.switch_home_user(pick['id'], pin)
+                break
+            except Exception as e:
+                xbmc.log('Akasha Aura: home user switch failed: {}'
+                         .format(e), xbmc.LOGWARNING)
+                if not pick.get('protected'):
+                    xbmcgui.Dialog().notification(
+                        'Akasha Aura', i18n.tr(33621),
+                        xbmcgui.NOTIFICATION_ERROR, 3000)
+                    return
+                error = True  # wrong PIN: pad reopens with the error line
+        self.addon.setSetting('plex.token', token)
+        plex_client._read_cache.clear()
+        self._plex_client = None
+        self.setProperty('AuraUserName', pick.get('title') or '')
+        self.setProperty('AuraAvatar', pick.get('thumb') or '')
+        xbmcgui.Window(10000).setProperty('AuraAvatar',
+                                          pick.get('thumb') or '')
+        self._load_divertissement()
+        self._activate_home()
 
     def _cloud_stub(self):
         """Cloud-only Plex menu rows have no server-local counterpart."""

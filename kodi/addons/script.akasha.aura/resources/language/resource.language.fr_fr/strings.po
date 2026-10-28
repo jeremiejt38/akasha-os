@@ -1844,3 +1844,33 @@ msgstr "TV en direct"
 msgctxt "#33616"
 msgid "Play Queue"
 msgstr "File de lecture"
+
+# Qui regarde ?
+msgctxt "#33617"
+msgid "Who’s watching?"
+msgstr "Qui regarde ?"
+
+# Ajouter un utilisateur
+msgctxt "#33618"
+msgid "Add user"
+msgstr "Ajouter un utilisateur"
+
+# Saisir le code PIN
+msgctxt "#33619"
+msgid "Enter your PIN"
+msgstr "Saisir le code PIN"
+
+# Code PIN incorrect
+msgctxt "#33620"
+msgid "Incorrect PIN"
+msgstr "Code PIN incorrect"
+
+# Échec du changement de profil
+msgctxt "#33621"
+msgid "Profile switch failed"
+msgstr "Échec du changement de profil"
+
+# Profil : {}
+msgctxt "#33622"
+msgid "Profile: {}"
+msgstr "Profil : {}"

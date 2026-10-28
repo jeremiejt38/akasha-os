@@ -491,6 +491,12 @@ STRINGS = {
     33614: ('Services', 'Services'),
     33615: ('TV en direct', 'Live TV'),
     33616: ('File de lecture', 'Play Queue'),
+    33617: ('Qui regarde ?', 'Who\u2019s watching?'),
+    33618: ('Ajouter un utilisateur', 'Add user'),
+    33619: ('Saisir le code PIN', 'Enter your PIN'),
+    33620: ('Code PIN incorrect', 'Incorrect PIN'),
+    33621: ('Échec du changement de profil', 'Profile switch failed'),
+    33622: ('Profil : {}', 'Profile: {}'),
 }
 
 MONTH_ABBRS = {
