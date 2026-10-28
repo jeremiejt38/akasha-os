@@ -112,3 +112,27 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - **Fiche — épisodes** : cartes paysage avec resume `InfoTagVideo.setResumePoint` (repli `resumetime`/`totaltime`) → barre orange `IsResumable` **vérifiée** (The Rookie S7E8 ~51 %, A.D. S1E1 ~3 %), badge ✓ « vu » cercle sombre top-right **vérifié** (S7E4-E7), titres tronqués en `…` Unicode (`i18n.ellipsize`, budget 253 px), durée sous le titre, focus auto sur le premier épisode en cours/non vu. Ligne activité `7207` liée à `AuraDetailActivity` (elle n'avait jamais de `<label>` — texte invisible jusqu'ici) avec stack d'avatars (`AuraAvatar` réel en premier).
 - **Recherche — horloge et hint** : ~~horloge pill superflue~~ → **supprimée** (la référence Plex n'en a pas sur cet écran) ; ~~hint trop blanc/gras~~ → `font_aura_small` + `C8FFFFFF` (Plex ≈201/191 gris) ; en-tête « Recherches populaires » agrandi en `font_aura_head_bold` (caps ≈24 px comme la référence).
 - **`ReloadSkin` pendant une lecture active** : peut faire planter Kodi (SIGSEGV observé en test au teardown du player) — opération dev uniquement, pas un chemin utilisateur.
+
+## Color channel order — AABBGGRR (root cause of the cyan bars)
+
+**Discovery (verified on-device, Kodi 21.3 ARM64 / LibreELEC 12.2.1):** on
+this build, `colordiffuse` / `textcolor` hex strings are interpreted as
+`AABBGGRR`, not the documented `AARRGGBB`. Every R/B-asymmetric color
+rendered swapped:
+
+- `FFE5A00D` (Plex amber) rendered `(13,160,229)` cyan — the "blue
+  progress bars" on CW cards were our own amber bars misread.
+- `FF6C8CFF` (periwinkle focus) rendered salmon `(255,140,108)`.
+- Estuary's native `button_focus` `FF00B8F5` renders golden-amber on the
+  same box (visible in DialogAddonSettings) → the quirk is build-wide,
+  not skin-specific.
+
+**Fix:** every non-symmetric 8-hex color in the skin XMLs is stored
+pre-swapped (written as `AABBGGRR`), so the *rendered* color matches the
+ARGB intent. Python-fed colors going through `$INFO`-bound colordiffuse
+(genre `TileColor`, activity avatar palette) are swapped at the source
+(`_bgr()` helper). Symmetric colors (whites, blacks, greys) unchanged.
+
+Test rects measured on the Pi framebuffer:
+`colordiffuse="FFE5A00D"` → `(13,160,229)`; `colordiffuse="FF0DA0E5"` →
+`(229,160,13)` amber. Commit `2263ec7`.
