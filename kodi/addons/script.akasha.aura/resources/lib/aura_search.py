@@ -221,7 +221,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _launch_search(self, gen):
         def worker():
-            results = self._collect_results()
+            try:
+                results = self._collect_results()
+            except Exception as e:
+                xbmc.log('Akasha Aura Search: collect failed: {}'.format(
+                    e), xbmc.LOGERROR)
+                return
             if gen != self._search_gen or self._yield_stop.is_set():
                 return
             self._results = results[:24]
@@ -240,6 +245,18 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         term = self.query.strip()
         results = []
         lock = threading.Lock()
+        # 'Tout' also merges people/genre cards; both are per-section
+        # directory walks that must overlap the title searches, not
+        # queue behind them.
+        side = {}
+        if wanted is None:
+            for name, fn in (('people', self._search_people),
+                             ('genres', self._search_genres)):
+                side[name] = threading.Thread(
+                    target=lambda f=fn, n=name: side.__setitem__(
+                        n + '_r', f()),
+                    daemon=True)
+                side[name].start()
 
         def hit(section):
             try:
@@ -281,8 +298,10 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         # 'Tout' merges matching people and genres first, like Plex's
         # People/genre result cards.
         if wanted is None:
-            results = (self._search_people()[:8]
-                       + self._search_genres()[:4] + results)
+            side['people'].join(15.0)
+            side['genres'].join(15.0)
+            results = (side.get('people_r', [])[:8]
+                       + side.get('genres_r', [])[:4] + results)
         return results[:24]
 
     def _render_results(self):
@@ -346,7 +365,9 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._genres = []
             if self.client and getattr(self.client, 'section_genres', None):
                 import divert_source
-                for section in self.sections:
+                lock = threading.Lock()
+
+                def pull(section):
                     try:
                         raw = self.client.section_genres(section['key'])
                         names = (divert_source.parse_genres(raw)
@@ -355,12 +376,20 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                         xbmc.log('Akasha Aura Search: genres failed for {}: {}'
                                  .format(section.get('title'), e),
                                  xbmc.LOGWARNING)
-                        continue
-                    for name in names or []:
-                        self._genres.append({
-                            '_genre': True, 'name': name,
-                            'section_key': section['key'],
-                            'section_title': section.get('title') or ''})
+                        return
+                    with lock:
+                        for name in names or []:
+                            self._genres.append({
+                                '_genre': True, 'name': name,
+                                'section_key': section['key'],
+                                'section_title': section.get('title') or ''})
+
+                ts = [threading.Thread(target=pull, args=(s,), daemon=True)
+                      for s in self.sections]
+                for t in ts:
+                    t.start()
+                for t in ts:
+                    t.join(15.0)
         q = self.query.strip().lower()
         return [g for g in self._genres if q in (g['name'] or '').lower()]
 

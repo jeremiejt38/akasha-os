@@ -623,25 +623,40 @@ class PlexClient:
             return []
         seen = set()
         out = []
-        for section in self.video_sections():
-            for kind in kinds:
-                try:
-                    people = self.people_directory(section['key'], kind)
-                except PlexAPIError:
+        lock = threading.Lock()
+
+        # Each (section, kind) is one directory fetch (~seconds on a
+        # slow server path); walking them serially froze the search.
+        def pull(section, kind):
+            try:
+                people = self.people_directory(section['key'], kind)
+            except PlexAPIError:
+                return
+            batch = []
+            for person in people:
+                if q not in person['name'].lower():
                     continue
-                for person in people:
-                    if q not in person['name'].lower() \
-                            or person['id'] in seen:
+                batch.append((person['id'], {
+                    'name': person['name'],
+                    'thumb_url': person['thumb_url'],
+                    'role': (i18n.tr(33154) if kind == 'director'
+                             else i18n.tr(33127)),
+                    'person_filter': '{}={}'.format(kind, person['id']),
+                    '_person': True,
+                }))
+            with lock:
+                for pid, p in batch:
+                    if pid in seen:
                         continue
-                    seen.add(person['id'])
-                    out.append({
-                        'name': person['name'],
-                        'thumb_url': person['thumb_url'],
-                        'role': (i18n.tr(33154) if kind == 'director'
-                                 else i18n.tr(33127)),
-                        'person_filter': '{}={}'.format(kind, person['id']),
-                        '_person': True,
-                    })
+                    seen.add(pid)
+                    out.append(p)
+
+        ts = [threading.Thread(target=pull, args=(s, k), daemon=True)
+              for s in self.video_sections() for k in kinds]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(15.0)
         return out[:20]
 
     def playlists(self):
