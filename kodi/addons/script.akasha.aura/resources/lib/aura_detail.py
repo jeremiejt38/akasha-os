@@ -137,11 +137,14 @@ MORE_VALUE_IDS = {MORE_SUBTITLES_ID: (7260, 7261),
                   MORE_AUDIO_ID: (7262, 7263)}
 # Cloud-only Plex entries (List, Playlist, Manage, More Ways) show a
 # notification; Subtitles, Audio, File Info and Similar Titles work.
-# Plex's order: Audio Stream first, then Subtitles.
+# Plex's order (official-live/22-detail-overflow): Audio Stream,
+# Subtitles, Add to List, Add To Playlist/Collection, Watch Trailer,
+# Manage, File Info, More Ways to Watch -- the conditional entries
+# (Similar Titles, Go to show, Version) sit after them.
 MORE_PANEL_IDS = (MORE_AUDIO_ID, MORE_SUBTITLES_ID, MORE_LIST_ID,
-                  MORE_PLAYLIST_ID, MORE_MANAGE_ID, MORE_FILE_INFO_ID,
-                  MORE_WAYS_ID, MORE_RELATED_ID, MORE_GO_SHOW_ID,
-                  MORE_VERSION_ID, MORE_EXTRAS_ID)
+                  MORE_PLAYLIST_ID, MORE_EXTRAS_ID, MORE_MANAGE_ID,
+                  MORE_FILE_INFO_ID, MORE_WAYS_ID, MORE_RELATED_ID,
+                  MORE_GO_SHOW_ID, MORE_VERSION_ID)
 
 # Plex's action order: Play/Resume | Restart | Watchlist | Rate |
 # Watched | Extras | More -- extras sit next to More, not in the core
