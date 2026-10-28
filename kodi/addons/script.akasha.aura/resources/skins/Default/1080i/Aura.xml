@@ -3233,13 +3233,6 @@
                 <control type="group">
                     <visible>!Control.HasFocus(3310) + String.IsEmpty(Window.Property(AuraSheetOpen))</visible>
                     <control type="image">
-                        <left>28</left>
-                        <top>432</top>
-                        <width>72</width>
-                        <height>216</height>
-                        <texture colordiffuse="FF1A1A1A" border="36">cap-r36.png</texture>
-                    </control>
-                    <control type="image">
                         <left>44</left>
                         <top>448</top>
                         <width>38</width>
@@ -3264,7 +3257,7 @@
                         <top>448</top>
                         <width>38</width>
                         <height>38</height>
-                        <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
+                        <texture colordiffuse="B3000000">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
