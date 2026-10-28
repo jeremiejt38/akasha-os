@@ -375,7 +375,7 @@
     <!-- White underlay over the unfocused circle when the Resume pill
          stays expanded without focus (Plex keeps the labelled CTA a
          full white pill even while the season strip holds the cursor
-         -- official-live/44). Sized by _sync_action_row(). -->
+         (official-live/44). Sized by _sync_action_row(). -->
     <control type="image" id="7160">
         <left>105</left>
         <top>564</top>
