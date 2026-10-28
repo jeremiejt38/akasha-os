@@ -122,6 +122,11 @@ the two color pipelines read hex *differently* on this build:
   is interpreted as `AABBGGRR`, not the documented `AARRGGBB`.
 - `textcolor` / `focusedcolor` / `disabledcolor` elements and inline
   `[COLOR …]` label tags are interpreted as plain `AARRGGBB`.
+- `midtexture` on `progress` controls is also plain `AARRGGBB` —
+  measured on-device: `midtexture colordiffuse="FF0DA0E5"` renders
+  `(13,160,229)` cyan, `FFE5A00D` renders the intended amber. The
+  progress fill therefore keeps `FFE5A00D`, *unswapped*, while the
+  image `texture` amber next to it keeps `FF0DA0E5` (swapped).
 
 Measured on the Pi framebuffer: `colordiffuse="FF0DA0E5"` renders
 `(229,160,13)` amber (BGR-swapped), while `textcolor="FF0DA0E5"` renders
@@ -130,8 +135,9 @@ Measured on the Pi framebuffer: `colordiffuse="FF0DA0E5"` renders
 colordiffuse quirk is build-wide, not skin-specific.
 
 **Fix:** every non-symmetric `colordiffuse`-family color is stored
-pre-swapped (`AABBGGRR`); every `textcolor`-family color keeps the
-standard `AARRGGBB` order. Python-fed colors through `$INFO`-bound
+pre-swapped (`AABBGGRR`) *except* `midtexture`/other `progress`-control
+textures which stay in `AARRGGBB`; every `textcolor`-family color keeps
+the standard `AARRGGBB` order. Python-fed colors through `$INFO`-bound
 colordiffuse (genre `TileColor`, activity avatar palette) are swapped
 at the source (`_bgr()` helper); `[COLOR]` tags are *not* swapped.
 Commits `2263ec7`, `83b4aeb` (partially reverted), and the revert that

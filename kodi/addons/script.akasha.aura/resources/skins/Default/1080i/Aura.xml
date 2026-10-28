@@ -1328,7 +1328,7 @@
                         <width>216</width>
                         <height>8</height>
                         <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                        <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                        <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                         <lefttexture></lefttexture>
                         <righttexture></righttexture>
                         <overlaytexture></overlaytexture>
@@ -1420,7 +1420,7 @@
                         <width>216</width>
                         <height>8</height>
                         <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                        <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                        <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                         <lefttexture></lefttexture>
                         <righttexture></righttexture>
                         <overlaytexture></overlaytexture>
@@ -1564,7 +1564,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1608,7 +1608,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1684,7 +1684,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1758,7 +1758,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1858,7 +1858,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1902,7 +1902,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -1978,7 +1978,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2052,7 +2052,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2157,7 +2157,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2201,7 +2201,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2277,7 +2277,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2351,7 +2351,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2452,7 +2452,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2496,7 +2496,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2572,7 +2572,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2646,7 +2646,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2745,7 +2745,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2789,7 +2789,7 @@
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2861,7 +2861,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2935,7 +2935,7 @@
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>

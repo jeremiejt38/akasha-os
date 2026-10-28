@@ -1152,7 +1152,7 @@
                     <width>488</width>
                     <height>8</height>
                     <info>ListItem.Property(PercentPlayed)</info>
-                    <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                    <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
@@ -1210,7 +1210,7 @@
                     <width>488</width>
                     <height>8</height>
                     <info>ListItem.Property(PercentPlayed)</info>
-                    <midtexture colordiffuse="FF0DA0E5" border="2">prog-fill.png</midtexture>
+                    <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
