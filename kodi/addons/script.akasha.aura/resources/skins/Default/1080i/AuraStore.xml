@@ -20,7 +20,7 @@
             <height>60</height>
             <font>font16</font>
             <label>Akasha Store</label>
-            <textcolor>FF6C8CFF</textcolor>
+            <textcolor>FFFF8C6C</textcolor>
         </control>
 
         <!-- Back button -->

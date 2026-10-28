@@ -81,7 +81,7 @@
                 <height>36</height>
                 <font>font_aura_tiny</font>
                 <aligny>center</aligny>
-                <textcolor>FFE5A00D</textcolor>
+                <textcolor>FF0DA0E5</textcolor>
                 <label>-</label>
             </control>
             <control type="button" id="6404">

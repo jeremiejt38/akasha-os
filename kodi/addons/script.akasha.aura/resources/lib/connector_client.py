@@ -105,7 +105,7 @@ class ConnectorClient:
                         owner_ev = threading.Event()
                         _inflight[key] = owner_ev
                         break
-                if not ev.wait(15.0):
+                if not ev.wait(25.0):
                     with _inflight_lock:
                         if _inflight.get(key) is ev:
                             owner_ev = threading.Event()

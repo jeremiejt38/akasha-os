@@ -442,7 +442,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     token = self.addon.getSetting('plex.token')
                     if not config.is_plex_configured(server_url, token):
                         return
-                    client = plex_client.PlexClient(server_url, token, timeout=5)
+                    client = plex_client.PlexClient(server_url, token, timeout=12)
                 thumb = client.user_thumb()
                 if thumb:
                     self.setProperty('AuraAvatar', thumb)
@@ -470,7 +470,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not server_url:
             return None
 
-        client = connector_client.ConnectorClient(server_url, timeout=5)
+        client = connector_client.ConnectorClient(server_url, timeout=12)
         stored_token = self.addon.getSetting('connector.session_token')
         if stored_token:
             client.token = stored_token
@@ -2037,7 +2037,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                                        action=self._open_settings_menu)
                 return
             try:
-                self._plex_client = plex_client.PlexClient(server_url, token, timeout=5)
+                self._plex_client = plex_client.PlexClient(server_url, token, timeout=12)
                 self._divert_sections = self._plex_client.library_sections()
             except Exception as e:
                 xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
@@ -4368,7 +4368,7 @@ def _unreleased_label(item):
         return ''
     if ts <= time.time():
         return ''
-    return '[COLOR FFE5A00D]{}[/COLOR]'.format(
+    return '[COLOR FF0DA0E5]{}[/COLOR]'.format(
         i18n.tr(33600).format(i18n.fmt_air_date(str(oa)[:10])))
 
 

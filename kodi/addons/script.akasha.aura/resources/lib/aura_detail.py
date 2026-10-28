@@ -345,7 +345,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # is display-only or the rating chip would be pushed right.
             meta_display = meta_text.replace(
                 unreleased,
-                '[COLOR FFE5A00D]{}[/COLOR]'.format(unreleased), 1)
+                '[COLOR FF0DA0E5]{}[/COLOR]'.format(unreleased), 1)
         try:
             self.getControl(7020).setLabel(meta_display)
         except RuntimeError:

@@ -137,7 +137,7 @@ class PlexClient:
                         break
                 # Another thread is already fetching this exact URL:
                 # join it and serve the result from the cache it fills.
-                if not ev.wait(15.0):
+                if not ev.wait(25.0):
                     # Owner stalled -- take over rather than hang.
                     with _inflight_lock:
                         if _inflight.get(key) is ev:
