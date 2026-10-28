@@ -12,7 +12,7 @@ Statuts : ✅ identique · 🟡 différence mineure · 🔴 différence majeure 
 | Sidebar rail expansé | Livré | `sidebar/expanded_focus_001` | Panneau flottant arrondi + dim écran ; profil (avatar + « Akasha » + ›), Ma liste, Recherche, Accueil, header « Bibliothèques » + ligne, bibliothèques, Playlists, Plus ; focus = pill blanche | ✅ | — | captures |
 | Sidebar — profil | Livré | `parametres/sidebar_top_004` (panneau Switch Profile/Profile/Notifications/Friends/Services/Server/Settings) | Panneau latéral `AuraProfileMenu.xml` (ancré gauche) avec les **7 lignes Plex dans l'ordre** : Changer de profil, Profil, Notifications, Amis, Services, Serveur, Paramètres — icônes dédiées ; les 4 entrées cloud affichent une notification stub, Profil/Serveur/Paramètres gardent leurs actions | ✅ | — | captures |
 | Sidebar — Ma liste / Playlists | Limitation | My Lists, Playlists | Items présents, clic → notification explicite | ⬜ | Fonctions cloud plex.tv non proxifiées par le connecteur privé | — |
-| Sidebar — section « Sur Plex » | Limitation | `sidebar/focus_more_028` (On Plex : Live TV, Discover) | Header + items présents, clic → notification | ⬜ | Contenus cloud Plex hors connecteur privé | — |
+| Sidebar — section « Sur Plex » | Livré | `sidebar/focus_more_028`, `scroll_down_*` (On Plex : Live TV, Discover) | Divider « Sur Plex » + items « TV en direct » (icône antenne) et « Découvrir » (boussole) sous le rail bibliothèques ; TV en direct → grille des **239 chaînes FAST réelles** (`epg.provider.plex.tv/lineups/plex/channels`, vignettes chaînes officielles) ; Découvrir → Accueil onglet Tendances (mêmes hubs Discover) ; lecture d'une chaîne = tune URL HLS, nécessite inputstream.adaptive (absent LibreELEC, même limite que les trailers cloud) | ✅ | Lecture HLS bloquée par le runtime | captures |
 | Sidebar — outline bibliothèque active | Livré | `parametres/settings_focus_005` | Pill outline sur la bibliothèque active (propriété `DivertActiveLibrary`) | ✅ | — | captures |
 | Bibliothèque — onglets | Livré | `films_tabs_focus_002` | Recommandé / Bibliothèque / Collections / Catégories + ⋯ | ✅ | — | captures |
 | Bibliothèque — grille Browse | Livré | `films_browse_focus_003` | 6 colonnes 240×360, titre+année centrés, pills sombres (`2EFFFFFF`) en flux à gauche (type, par tri, Genre, compteur en pill, ⋯), zoom 108% + ring fin externe `poster-ring-thin.png`, rail A-Z avec cercle `az-ring.png`, badge ✓ + barre de progression ambrée | ✅ | — | `grid_v5.png` |
@@ -74,7 +74,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 | L1 | Onglet Activité — entrées **amis**, réactions | GraphQL social privé plex.tv |
 | L2 | Watchlist cloud synchronisée | metadata.provider.plex.tv (voir note : `discover.provider` déjà utilisé pour Tendances — limite possiblement côté connecteur, à trancher) |
 | ~~L3~~ | ~~Multi-profils Plex Home + PIN, « Switch Profile »~~ | ~~Fonction compte plex.tv~~ → **implémenté** : picker « Qui regarde ? » (`AuraWhoWatching.xml`, membres via `api/v2/home/users`, avatars plex.tv réels, badges cadenas, tuile « + Ajouter un utilisateur » en stub) + pavé PIN (`AuraPinEntry.xml`, 4 points, 1-9/0/⌫, touches télécommande acceptées) ; switch via `api/home/users/<id>/switch`, token persisté, rechargement complet ; Back du pavé → picker, mauvais PIN → pavé + ligne erreur ambrée. **Vérifié à l'écran.** |
-| L4 | Live TV / chaînes « Sur Plex », Discover cloud | Contenus cloud |
+| ~~L4~~ | ~~Live TV / chaînes « Sur Plex », Discover cloud~~ | → **partiellement implémenté** : segment rail « Sur Plex » livré (Live TV = grille des 239 chaînes FAST `epg.provider.plex.tv`, Discover → onglet Tendances) ; seule la **lecture HLS** des chaînes reste bloquée (inputstream.adaptive absent) |
 | L5 | « More Ways to Watch », Watch Together | Cloud / social |
 | L6 | Miniatures de seek (trickplay bif) | Kodi n'a pas de support trickplay |
 | L7 | Ratings & Reviews, Discussions | API sociale privée |
@@ -229,7 +229,7 @@ Plex's `For You | Trending | Activity` strip. Delivered:
   one card per series.
 
 Remaining divergences: service badges (prime/tv) on Trending cards
-need Plex's availability API (not in the hub payload); the cloud
+need Plex's availability API -- `metadata.provider.plex.tv/library/metadata/<id>/availabilities` exists but returns an empty container for every item on this account (no streaming services selected), so there is no badge data to render; the cloud
 detail page opens hydrated but its local follow-up calls (extras,
 history) no-op — no playable file exists locally; the
 "Find What To Watch, Anywhere!" promo tile is not reproduced.
