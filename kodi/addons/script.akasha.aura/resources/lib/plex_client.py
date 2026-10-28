@@ -569,19 +569,34 @@ class PlexClient:
         a person page, deduped and newest first."""
         seen = set()
         items = []
-        for section in self.video_sections():
+        lock = threading.Lock()
+
+        # One filtered page per video section (~seconds each on a slow
+        # server path) -- walked in parallel so a person page does not
+        # sit on a black window while sections queue.
+        def pull(section):
             try:
                 page, _total = self.items_by_filter_with_total(
                     section['key'], filter_str)
             except PlexAPIError:
+                return
+            with lock:
+                items.extend(page)
+
+        ts = [threading.Thread(target=pull, args=(s,), daemon=True)
+              for s in self.video_sections()]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(15.0)
+        deduped = []
+        for item in items:
+            if item.get('rating_key') in seen:
                 continue
-            for item in page:
-                if item.get('rating_key') in seen:
-                    continue
-                seen.add(item.get('rating_key'))
-                items.append(item)
-        items.sort(key=lambda i: i.get('year') or 0, reverse=True)
-        return items
+            seen.add(item.get('rating_key'))
+            deduped.append(item)
+        deduped.sort(key=lambda i: i.get('year') or 0, reverse=True)
+        return deduped
 
     def people_directory(self, section_key, kind='actor'):
         """Every person tagged in a section ('actor' or 'director').
@@ -960,21 +975,61 @@ class PlexClient:
             {'label': i18n.tr(33138), 'items': self.recently_added(limits['recently_added'])},
         ]
 
-        for section in self.movie_sections():
-            rr = self.recently_released(section['key'], limits['recently_released'])
+        # Per-section work is ~6 sequential requests (recently_released +
+        # genre directory + one page per genre); serialised across the
+        # movie sections it kept the loading veil up for minutes on a
+        # slow server path. Requests are cheap GETs already deduped by
+        # the in-flight cache -- fan them out through a bounded pool.
+        pool = threading.Semaphore(8)
+        rows_lock = threading.Lock()
+        section_rows = {}
+
+        def fetch(fn, *args):
+            try:
+                with pool:
+                    return fn(*args)
+            except Exception:
+                return None
+
+        def build_section(section):
+            srows = []
+            rr = fetch(self.recently_released,
+                       section['key'], limits['recently_released'])
             if rr:
-                rows.append({
+                srows.append({
                     'label': '{} — {}'.format(section['title'], i18n.tr(33139)),
                     'items': rr,
                 })
+            genres = fetch(self.section_genres, section['key']) or []
+            got = {}
+            gthreads = []
+            for pos, genre in enumerate(genres[:limits['genres_per_section']]):
+                def per_genre(g=genre, p=pos):
+                    items = fetch(self.by_genre, section['key'], g,
+                                  limits['per_genre'])
+                    if items:
+                        with rows_lock:
+                            got[p] = {
+                                'label': '{} — {}'.format(section['title'], g),
+                                'items': items,
+                            }
+                t = threading.Thread(target=per_genre, daemon=True)
+                t.start()
+                gthreads.append(t)
+            for t in gthreads:
+                t.join(15.0)
+            srows.extend(got[p] for p in sorted(got))
+            with rows_lock:
+                section_rows[section['key']] = srows
 
-            genres = self.section_genres(section['key'])
-            for genre in genres[:limits['genres_per_section']]:
-                items = self.by_genre(section['key'], genre, limits['per_genre'])
-                if items:
-                    rows.append({
-                        'label': '{} — {}'.format(section['title'], genre),
-                        'items': items,
-                    })
+        sections = self.movie_sections()
+        ts = [threading.Thread(target=build_section, args=(s,), daemon=True)
+              for s in sections]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(30.0)
+        for section in sections:
+            rows.extend(section_rows.get(section['key'], []))
 
         return rows
