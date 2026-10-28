@@ -1834,3 +1834,8 @@ msgstr ""
 msgctxt "#33614"
 msgid "Services"
 msgstr ""
+
+# TV en direct
+msgctxt "#33615"
+msgid "Live TV"
+msgstr ""

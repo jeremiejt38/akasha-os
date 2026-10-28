@@ -489,6 +489,7 @@ STRINGS = {
     33612: ('Amis', 'Friends'),
     33613: ('Indisponible hors plex.tv', 'Requires plex.tv'),
     33614: ('Services', 'Services'),
+    33615: ('TV en direct', 'Live TV'),
 }
 
 MONTH_ABBRS = {

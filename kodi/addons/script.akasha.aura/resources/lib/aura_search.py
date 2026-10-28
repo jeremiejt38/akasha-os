@@ -36,17 +36,22 @@ EMPTY_LABEL_ID = 8201
 RAIL_LIST_ID = 8140
 
 _KEYS = list('abcdefghijklmnopqrstuvwxyz') + list('1234567890')
-# Plex's filter rail is All / Movies / TV / Music / Cast & Crew
-# (Live TV and Services are cloud-only). Episode hits stay under All.
+# Plex 2026.19.1's filter rail, in order: All / Movies / TV / Music /
+# Live TV / People / Services. Live TV and Services rarely match on a
+# local library -- Plex still shows the pills and an empty state.
 _FILTERS = (
     (i18n.tr(33052), None),
     (i18n.tr(33051), 'movie'),
     (i18n.tr(33150), 'show'),
     (i18n.tr(33609), 'music'),
-    (i18n.tr(33100), 'person'),
+    (i18n.tr(33615), 'livetv'),
+    (i18n.tr(33152), 'person'),
+    (i18n.tr(33614), 'services'),
 )
 
 _MUSIC_TYPES = ('artist', 'album', 'track')
+_LIVETV_TYPES = ('livetv', 'channel')
+_SERVICE_TYPES = ('service', 'cloud', 'online')
 
 
 class AuraSearchWindow(xbmcgui.WindowXMLDialog):
@@ -145,7 +150,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 btn = self.getControl(PILLS_LIST_ID + i)
                 btn.setPosition(x, 48)
                 btn.setWidth(w)
-                for base in (8150, 8155, 8160):
+                for base in (8150, 8160, 8170):
                     lbl = self.getControl(base + i)
                     lbl.setPosition(x, 48)
                     lbl.setWidth(w)
@@ -157,6 +162,23 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             x += w + 16
 
     def _render_recent(self):
+        # With a query, Plex swaps the left column's search history for
+        # plain-text suggestions -- the top hits (people/genres/titles
+        # already merged by _run_search) as tappable rows, no icon.
+        if self.query:
+            rows = self._results[:7]
+            _set(self, 'AuraSearchHasRecent', '1' if rows else '')
+            try:
+                lst = self.getControl(RECENT_LIST_ID)
+                lst.reset()
+                for item in rows:
+                    li = xbmcgui.ListItem(
+                        item.get('title') or item.get('name') or '')
+                    li.setProperty('suggest', '1')
+                    lst.addItem(li)
+            except RuntimeError:
+                pass
+            return
         _set(self, 'AuraSearchHasRecent', '1' if self.recent else '')
         try:
             lst = self.getControl(RECENT_LIST_ID)
@@ -224,9 +246,17 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                     # Plex's amber line names the server that owns the
                     # result, not the library section.
                     li.setProperty('server', self._server_label())
+                    # Episode cards carry a fourth line: the show name
+                    # between title and 'S5 E1 • Episode'.
+                    if item.get('type') == 'episode' \
+                            and item.get('show_title'):
+                        li.setProperty('parent', item['show_title'])
                 panel.addItem(li)
         except RuntimeError:
             pass
+        # The left column mirrors the query state too (suggestions once
+        # typed, history while empty) -- refresh it with the results.
+        self._render_recent()
 
     # ------------------------------------------------------------- search
 
@@ -255,6 +285,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if wanted == 'music':
             results = [r for r in results
                        if r.get('type') in _MUSIC_TYPES]
+        elif wanted == 'livetv':
+            results = [r for r in results
+                       if r.get('type') in _LIVETV_TYPES]
+        elif wanted == 'services':
+            results = [r for r in results
+                       if r.get('type') in _SERVICE_TYPES]
         elif wanted:
             results = [r for r in results if r.get('type') == wanted]
         # Plex sorts roughly by relevance; keep title-prefix hits first.
@@ -419,7 +455,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 pos = self.getControl(RECENT_LIST_ID).getSelectedPosition()
             except RuntimeError:
                 return
-            if pos == len(self.recent[:8]) and self.recent:
+            if self.query:
+                # Suggestion row: opens the hit straight away, like the
+                # result card it mirrors.
+                if 0 <= pos < len(self._results[:7]):
+                    self._open_result(self._results[pos])
+            elif pos == len(self.recent[:8]) and self.recent:
                 self.recent = []
                 self._save_recent()
                 self._render_recent()
@@ -533,6 +574,9 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if not (0 <= pos < len(self._results)):
             return
         item = self._results[pos]
+        self._open_result(item)
+
+    def _open_result(self, item):
         if item.get('_person'):
             if self.on_person:
                 self.on_person(item)

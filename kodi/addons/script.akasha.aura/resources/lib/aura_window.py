@@ -4260,9 +4260,9 @@ def _hub_title_fr(hub, server_name=''):
 
 
 # Plex Categories tiles: a fixed colour per genre, composited ~60% over a
-# dimmed artwork. Colours sampled from
-# docs/plex-parity/reference/bibliotheque/films_collections_view_010.png;
-# the genre vocabulary mirrors display_genre()'s translation table.
+# dimmed artwork. Colours sampled from the official 2026.19.1 client
+# (docs/plex-parity/official-live/16-lib-categories.png); the genre
+# vocabulary mirrors display_genre()'s translation table.
 _GENRE_TILE_COLORS = {
     'action': '3A7174', 'action/adventure': '6E5B45',
     'adventure': '8F3849', 'animation': '46792A', 'anime': '4A5E8C',
@@ -4272,9 +4272,9 @@ _GENRE_TILE_COLORS = {
     'comédie musicale': '8C5A3A', 'musical': '8C5A3A',
     'crime': '2E4263', 'documentary': 'A55F55', 'documentaire': 'A55F55',
     'drama': '70653A', 'drame': '70653A',
-    'family': '3F6B46', 'familial': '3F6B46',
-    'fantasy': '5E4A8C', 'fantastique': '5E4A8C',
-    'film-noir': '3A3A3A', 'history': '6B4A2E', 'histoire': '6B4A2E',
+    'family': '8C4A78', 'familial': '8C4A78',
+    'fantasy': '495628', 'fantastique': '495628',
+    'film-noir': '3A3A3A', 'history': '434C1D', 'histoire': '434C1D',
     'horror': '3A2538', 'horreur': '3A2538',
     'independent': '4A5560', 'indépendant': '4A5560',
     'martial arts': '6B3A3A', 'arts martiaux': '6B3A3A',
@@ -4285,7 +4285,7 @@ _GENRE_TILE_COLORS = {
     'science-fiction': '2E5E7A', 'sci-fi': '2E5E7A',
     'sport': '3A6B5A', 'suspense': '3A3A55',
     'thriller': '2E3050', 'tv movie': '556B6E', 'téléfilm': '556B6E',
-    'war': '55554E', 'guerre': '55554E',
+    'war': '7E3F74', 'guerre': '7E3F74',
     'western': '6E4B26', 'court-métrage': '5A5A6E', 'short': '5A5A6E',
     'japanimé': '5A4A7A', 'cuisine': '6E5A3A',
 }

@@ -1834,3 +1834,8 @@ msgstr "Indisponible hors plex.tv"
 msgctxt "#33614"
 msgid "Services"
 msgstr "Services"
+
+# TV en direct
+msgctxt "#33615"
+msgid "Live TV"
+msgstr "TV en direct"
