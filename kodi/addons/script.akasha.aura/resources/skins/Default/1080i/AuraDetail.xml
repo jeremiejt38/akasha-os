@@ -1091,10 +1091,10 @@
                     <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                 </control>
                 <control type="image">
-                    <left>200</left>
-                    <top>0</top>
-                    <width>40</width>
-                    <height>40</height>
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
                     <texture>watched-tab.png</texture>
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
@@ -1125,10 +1125,10 @@
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
-                    <left>200</left>
-                    <top>0</top>
-                    <width>40</width>
-                    <height>40</height>
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
                     <texture>watched-tab.png</texture>
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
@@ -1167,7 +1167,7 @@
                     <width>96</width>
                     <height>40</height>
                     <texture>ep-badge.png</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="label">
                     <left>422</left>
@@ -1178,7 +1178,17 @@
                     <align>right</align>
                     <label>$INFO[ListItem.Property(epnum)]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <!-- Watched episodes get Plex's dark check tab in place
+                     of the number badge (official-live/46). -->
+                <control type="image">
+                    <left>452</left>
+                    <top>8</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="progress">
                     <left>12</left>
@@ -1225,7 +1235,7 @@
                     <width>96</width>
                     <height>40</height>
                     <texture>ep-badge.png</texture>
-                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="label">
                     <left>422</left>
@@ -1236,7 +1246,15 @@
                     <align>right</align>
                     <label>$INFO[ListItem.Property(epnum)]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>!String.IsEmpty(ListItem.Property(epnum))</visible>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="image">
+                    <left>452</left>
+                    <top>8</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="progress">
                     <left>12</left>
