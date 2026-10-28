@@ -41,7 +41,7 @@
                 <top>0</top>
                 <width>780</width>
                 <height>700</height>
-                <texture colordiffuse="F214161F" border="28">rounded-solid.png</texture>
+                <texture colordiffuse="F21F1614" border="28">rounded-solid.png</texture>
             </control>
             <control type="label" id="10">
                 <left>50</left>
@@ -95,7 +95,7 @@
                         <top>2</top>
                         <width>720</width>
                         <height>60</height>
-                        <texture colordiffuse="FFE5A00D" border="16">rounded-solid.png</texture>
+                        <texture colordiffuse="FF0DA0E5" border="16">rounded-solid.png</texture>
                         <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
                     </control>
                     <control type="label">
@@ -114,7 +114,7 @@
                         <top>18</top>
                         <width>28</width>
                         <height>28</height>
-                        <texture colordiffuse="FF10131A">check.png</texture>
+                        <texture colordiffuse="FF1A1310">check.png</texture>
                         <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
                     </control>
                     <control type="label">

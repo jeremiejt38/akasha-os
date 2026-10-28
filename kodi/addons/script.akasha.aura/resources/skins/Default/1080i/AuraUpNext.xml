@@ -36,7 +36,7 @@
                 <top>0</top>
                 <width>1020</width>
                 <height>336</height>
-                <texture colordiffuse="F214161F" border="28">rounded-solid.png</texture>
+                <texture colordiffuse="F21F1614" border="28">rounded-solid.png</texture>
             </control>
             <control type="image" id="6406">
                 <left>24</left>

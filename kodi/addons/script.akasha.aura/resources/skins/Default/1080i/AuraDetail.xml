@@ -26,7 +26,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF10131A">white.png</texture>
+            <texture colordiffuse="FF1A1310">white.png</texture>
         </control>
 
         <!-- Backdrop, full-bleed right-anchored like Plex -->
@@ -52,14 +52,14 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="5C10131A">white.png</texture>
+            <texture colordiffuse="5C1A1310">white.png</texture>
         </control>
         <control type="image" id="7003">
             <left>0</left>
             <top>620</top>
             <width>1920</width>
             <height>460</height>
-            <texture colordiffuse="FF10131A">scrim-bottom.png</texture>
+            <texture colordiffuse="FF1A1310">scrim-bottom.png</texture>
         </control>
 
         <!-- Clear logo (when available) or text title -->
@@ -90,7 +90,7 @@
             <top>430</top>
             <width>72</width>
             <height>218</height>
-            <texture colordiffuse="B810131A" border="36">rounded-solid.png</texture>
+            <texture colordiffuse="B81A1310" border="36">rounded-solid.png</texture>
         </control>
         <control type="image">
             <left>44</left>
@@ -114,7 +114,7 @@
             <top>447</top>
             <width>40</width>
             <height>40</height>
-            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
         </control>
         <control type="image">
@@ -584,7 +584,7 @@
         <top>672</top>
         <width>24</width>
         <height>24</height>
-        <texture colordiffuse="FFE5A00D">icon-watched.png</texture>
+        <texture colordiffuse="FF0DA0E5">icon-watched.png</texture>
         <visible>String.IsEqual(Window.Property(AuraDetailWatched),1) + !Control.HasFocus(7101)</visible>
     </control>
     <control type="button" id="7102">
@@ -798,7 +798,7 @@
             <top>32</top>
             <width>216</width>
             <height>64</height>
-            <texture colordiffuse="CC0D1017" border="32">rounded-solid.png</texture>
+            <texture colordiffuse="CC17100D" border="32">rounded-solid.png</texture>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
         </control>
         <control type="list" id="7120">
@@ -903,7 +903,7 @@
             <top>658</top>
             <width>56</width>
             <height>56</height>
-            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
         </control>
         <!-- Second account avatar, overlapping the first like Plex's
@@ -922,7 +922,7 @@
             <top>658</top>
             <width>56</width>
             <height>56</height>
-            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
         </control>
         <!-- Initial fallback for slot 2: colored disc + letter, like
@@ -962,7 +962,7 @@
             <top>658</top>
             <width>56</width>
             <height>56</height>
-            <texture colordiffuse="FF10131A">cast-mask.png</texture>
+            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
         </control>
         <!-- Initial fallback for slot 3. -->
@@ -1054,7 +1054,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>200</left>
@@ -1079,7 +1079,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1125,7 +1125,7 @@
                     <top>0</top>
                     <width>320</width>
                     <height>180</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>280</left>
@@ -1140,13 +1140,13 @@
                     <top>170</top>
                     <width>312</width>
                     <height>6</height>
-                    <info>ListItem.PercentPlayed</info>
-                    <midtexture colordiffuse="FFFF9D00">white.png</midtexture>
+                    <info>ListItem.Property(PercentPlayed)</info>
+                    <midtexture colordiffuse="FF009DFF">white.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
                     <texturebg colordiffuse="59FFFFFF">white.png</texturebg>
-                    <visible>ListItem.IsResumable</visible>
+                    <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1183,7 +1183,7 @@
                     <top>0</top>
                     <width>320</width>
                     <height>180</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1207,13 +1207,13 @@
                     <top>170</top>
                     <width>312</width>
                     <height>6</height>
-                    <info>ListItem.PercentPlayed</info>
-                    <midtexture colordiffuse="FFFF9D00">white.png</midtexture>
+                    <info>ListItem.Property(PercentPlayed)</info>
+                    <midtexture colordiffuse="FF009DFF">white.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
                     <texturebg colordiffuse="59FFFFFF">white.png</texturebg>
-                    <visible>ListItem.IsResumable</visible>
+                    <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1260,7 +1260,7 @@
                     <top>0</top>
                     <width>190</width>
                     <height>190</height>
-                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                    <texture colordiffuse="FF1A1310">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1299,7 +1299,7 @@
                     <top>0</top>
                     <width>190</width>
                     <height>190</height>
-                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                    <texture colordiffuse="FF1A1310">cast-mask.png</texture>
                 </control>
                 <control type="image">
                     <left>10</left>
@@ -1349,7 +1349,7 @@
                     <top>0</top>
                     <width>640</width>
                     <height>96</height>
-                    <texture colordiffuse="FF10131A" border="26">rounded-solid.png</texture>
+                    <texture colordiffuse="FF1A1310" border="26">rounded-solid.png</texture>
                 </control>
                 <control type="image">
                     <left>24</left>
@@ -1364,7 +1364,7 @@
                     <top>20</top>
                     <width>56</width>
                     <height>56</height>
-                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                    <texture colordiffuse="FF1A1310">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>104</left>
@@ -1403,7 +1403,7 @@
                     <top>0</top>
                     <width>640</width>
                     <height>96</height>
-                    <texture colordiffuse="FFE8EAED" border="26">rounded-solid.png</texture>
+                    <texture colordiffuse="FFEDEAE8" border="26">rounded-solid.png</texture>
                 </control>
                 <control type="image">
                     <left>24</left>
@@ -1418,7 +1418,7 @@
                     <top>20</top>
                     <width>56</width>
                     <height>56</height>
-                    <texture colordiffuse="FF1F222B">cast-mask.png</texture>
+                    <texture colordiffuse="FF2B221F">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>104</left>
@@ -1472,7 +1472,7 @@
                 <top>28</top>
                 <width>640</width>
                 <height>1024</height>
-                <texture colordiffuse="F214161F" border="24">rounded-solid.png</texture>
+                <texture colordiffuse="F21F1614" border="24">rounded-solid.png</texture>
             </control>
             <control type="label">
                 <left>1300</left>
@@ -1572,7 +1572,7 @@
                 <top>292</top>
                 <width>24</width>
                 <height>24</height>
-                <texture colordiffuse="FF14161F">icon-mylist.png</texture>
+                <texture colordiffuse="FF1F1614">icon-mylist.png</texture>
                 <visible>Control.HasFocus(7201)</visible>
             </control>
             <control type="button" id="7202">
@@ -1865,7 +1865,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF10131A">white.png</texture>
+            <texture colordiffuse="FF1A1310">white.png</texture>
             <animation effect="fade" start="100" end="0" time="280" tween="quadratic" easing="out">Hidden</animation>
             <visible>String.IsEmpty(Window.Property(AuraDetailReady))</visible>
         </control>

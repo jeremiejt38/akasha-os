@@ -37,7 +37,7 @@
                 <top>0</top>
                 <width>1920</width>
                 <height>1080</height>
-                <texture colordiffuse="FF10131A">white.png</texture>
+                <texture colordiffuse="FF1A1310">white.png</texture>
             </control>
 
             <!-- Circular photo -->
@@ -53,7 +53,7 @@
                 <top>120</top>
                 <width>220</width>
                 <height>220</height>
-                <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                <texture colordiffuse="FF1A1310">cast-mask.png</texture>
             </control>
 
             <!-- Name -->
@@ -113,14 +113,14 @@
                         <top>0</top>
                         <width>200</width>
                         <height>300</height>
-                        <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                        <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                     </control>
                     <control type="image">
                         <left>150</left>
                         <top>10</top>
                         <width>40</width>
                         <height>40</height>
-                        <texture colordiffuse="CC10131A">circle.png</texture>
+                        <texture colordiffuse="CC1A1310">circle.png</texture>
                         <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                     </control>
                     <control type="image">
@@ -156,7 +156,7 @@
                         <top>0</top>
                         <width>200</width>
                         <height>300</height>
-                        <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                        <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                         <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="image">
@@ -172,7 +172,7 @@
                         <top>10</top>
                         <width>40</width>
                         <height>40</height>
-                        <texture colordiffuse="CC10131A">circle.png</texture>
+                        <texture colordiffuse="CC1A1310">circle.png</texture>
                         <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                     </control>
                     <control type="image">

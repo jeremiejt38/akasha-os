@@ -29,7 +29,7 @@
 
             <!-- Centered dark panel (position/size set from Python) -->
             <control type="image" id="9000">
-                <texture colordiffuse="FF1F222B" border="26">rounded-solid.png</texture>
+                <texture colordiffuse="FF2B221F" border="26">rounded-solid.png</texture>
             </control>
             <control type="label" id="9005">
                 <font>font_aura_mini_bold</font>
@@ -61,7 +61,7 @@
                         <top>6</top>
                         <width>616</width>
                         <height>52</height>
-                        <texture colordiffuse="FFE8EAED" border="26">rounded-solid.png</texture>
+                        <texture colordiffuse="FFEDEAE8" border="26">rounded-solid.png</texture>
                     </control>
                     <control type="label">
                         <left>40</left>

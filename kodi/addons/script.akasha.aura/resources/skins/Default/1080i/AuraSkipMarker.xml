@@ -26,7 +26,7 @@
                 <onright>6410</onright>
                 <textcolor>FFFFFFFF</textcolor>
                 <focusedcolor>FF1A1A1A</focusedcolor>
-                <texturenofocus colordiffuse="CC14161F" border="36">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="CC1F1614" border="36">rounded-solid.png</texturenofocus>
                 <texturefocus colordiffuse="FFFFFFFF" border="36">rounded-solid.png</texturefocus>
             </control>
         </control>

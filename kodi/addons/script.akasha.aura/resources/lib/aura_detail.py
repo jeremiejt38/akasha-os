@@ -826,17 +826,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 li.setArt({'thumb': ep.get('landscape_url')
                                     or ep.get('thumb_url') or ''})
                 if ep.get('view_offset_ms') and ep.get('duration_ms'):
-                    # Resume point -> ListItem.IsResumable + the orange
-                    # progress bar under the landscape card, Plex-style.
-                    try:
-                        li.getVideoInfoTag().setResumePoint(
-                            float(ep['view_offset_ms']) / 1000.0,
-                            float(ep['duration_ms']) / 1000.0)
-                    except Exception:
-                        li.setProperty('resumetime', str(
-                            float(ep['view_offset_ms']) / 1000.0))
-                        li.setProperty('totaltime', str(
-                            float(ep['duration_ms']) / 1000.0))
+                    # No resume info on the episode cards: the card draws
+                    # its own Plex-style progress from the PercentPlayed
+                    # property, and playback items get a real resume point
+                    # later via apply_resume_point().
+                    pass
                 if ep.get('progress'):
                     li.setProperty('PercentPlayed',
                                    str(int(ep['progress'] * 100)))
@@ -1397,8 +1391,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             others.append({'name': name, 'thumb': acc.get('thumb') or ''})
         # Plex stacks up to two extra avatars; accounts without a photo
         # get a colored disc with their initial (deterministic tint).
-        _PALETTE = ('FF9E6B3C', 'FF7A7A3F', 'FF4E7A6B', 'FF6B4E7A',
-                    'FF8A4E4E', 'FF4E6B8A', 'FF8A6B4E', 'FF5E7A4E')
+        # NOTE: Kodi's texture colordiffuse reads hex as AABBGGRR on this
+        # build, so these literals are stored pre-swapped (BGR).
+        _PALETTE = ('FF3C6B9E', 'FF3F7A7A', 'FF6B7A4E', 'FF7A4E6B',
+                    'FF4E4E8A', 'FF8A6B4E', 'FF4E6B8A', 'FF4E7A5E')
         for slot, other in enumerate(others[:2], start=2):
             thumb = other.get('thumb') or ''
             name = other.get('name') or ''

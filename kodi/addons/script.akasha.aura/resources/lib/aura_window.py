@@ -1547,7 +1547,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel.reset()
             for genre in genres:
                 li = xbmcgui.ListItem(divert_source.display_genre(genre))
-                li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
+                li.setProperty('TileColor', 'B0' + _bgr(_genre_tile_color(genre)))
                 panel.addItem(li)
         except RuntimeError:
             pass
@@ -1604,7 +1604,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 panel.reset()
                 for genre in genres:
                     li = xbmcgui.ListItem(divert_source.display_genre(genre))
-                    li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
+                    li.setProperty('TileColor', 'B0' + _bgr(_genre_tile_color(genre)))
                     if genre in art_by_genre:
                         li.setArt({'fanart': art_by_genre[genre],
                                    'thumb': art_by_genre[genre]})
@@ -4291,6 +4291,13 @@ _GENRE_TILE_COLORS = {
 }
 
 
+def _bgr(rgb):
+    """Swap R and B in an 'RRGGBB' hex string. Kodi's texture colordiffuse
+    reads the value as AABBGGRR on this build, so colors fed through
+    $INFO-bound colordiffuse must be stored pre-swapped."""
+    return rgb[4:6] + rgb[2:4] + rgb[0:2]
+
+
 def _genre_tile_color(genre):
     """Plex Categories tile colour ('RRGGBB') for a genre name; unknown
     genres get a muted slate derived from the name so every tile still
@@ -4453,8 +4460,10 @@ def _build_divert_list_item(item):
             if set_playcount is not None:
                 set_playcount(int(item['view_count']))
         if item.get('view_offset_ms') and item.get('duration_ms'):
-            tag.setResumePoint(float(item['view_offset_ms']) / 1000.0,
-                               float(item['duration_ms']) / 1000.0)
+            # No resume info on navigation cards: the card draws its own
+            # Plex-style progress from AuraProgress, and playback items get
+            # a real resume point later via apply_resume_point().
+            pass
     except Exception:
         info = {
             'title': item['title'],
