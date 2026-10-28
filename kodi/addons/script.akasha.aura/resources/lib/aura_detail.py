@@ -296,6 +296,21 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 # already passed a full record (nothing to hydrate).
                 self._bg_start('meta', 'metadata_item', rk)
 
+        # Thin items get hydrated by the 'meta' fetch started above:
+        # merge the fields the full record fills in (cast thumbs, page
+        # tint, stream badges, richer ratings) BEFORE anything renders,
+        # so the UltraBlurColors tint picks up the real palette too.
+        if 'meta' in self._bg_done:
+            full = self._bg_get('meta') or {}
+            if full:
+                for key in ('cast', 'ratings', 'rating', 'audience_rating',
+                            'rating_image', 'audience_rating_image',
+                            'content_rating', 'content_rating_age',
+                            'blur_colors', 'logo_url', 'fanart_url',
+                            'video_label', 'audio_label', 'subtitle_label'):
+                    if full.get(key):
+                        item[key] = full[key]
+
         _set(self, 'AuraDetailShowStrip',
              '1' if self.mode in ('show', 'season') else '')
         _set(self, 'AuraDetailSeasonsRow',
@@ -387,27 +402,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
 
-        # Thin items get hydrated by the 'meta' fetch started above:
-        # merge the fields the full record fills in (cast thumbs, stream
-        # badges, richer ratings) before chips/badges/cast render.
-        if 'meta' in self._bg_done:
-            full = self._bg_get('meta') or {}
-            if full:
-                for key in ('cast', 'ratings', 'rating', 'audience_rating',
-                            'rating_image', 'audience_rating_image',
-                            'content_rating', 'content_rating_age',
-                            'video_label', 'audio_label', 'subtitle_label'):
-                    if full.get(key):
-                        item[key] = full[key]
-
         self._render_chips(item)
 
         # Synopsis + director
         summary = item.get('summary') or ''
         # The synopsis box holds exactly 3 lines of font_aura_plot in
-        # 800px -- measure-trim to fit (~1750px PIL) so no overflow
-        # fades the edges; the 240-char cap stays as a no-PIL fallback.
-        summary = i18n.ellipsize(summary, 25, budget_px=1750)
+        # 800px -- measure-trim to fill them (~1950px PIL * ~1.2 Kodi
+        # width factor = ~2.9 rendered lines) so no overflow fades the
+        # edges; the 240-char cap stays as a no-PIL fallback.
+        summary = i18n.ellipsize(summary, 25, budget_px=1950)
         if summary.endswith('…') and ' ' in summary:
             # Plex breaks the ellipsis on a word boundary.
             summary = summary[:-1].rsplit(' ', 1)[0].rstrip(',. ') + '…'
@@ -485,7 +488,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self._activity_date = i18n.fmt_air_date(
                     time.strftime('%Y-%m-%d',
                                   time.localtime(viewed_at)))
-            own, names = self._activity_names(entries)
+            own, names = self._activity_names(
+                entries, item.get('rating_key'))
             # Plex: one name then 'and N other(s)' once two or more
             # other accounts appear ('by you, clara, and 2 others').
             rest = len(names) - 1
@@ -1382,7 +1386,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._wh_cache = (rating_key, now, entries)
         return entries
 
-    def _activity_names(self, entries):
+    def _activity_names(self, entries, rating_key=None):
         """(own_watched, other_names) for Plex's 'Activity by you and X':
         each distinct account in this item's history, matched against the
         server /accounts map. The configured account is 'you' -- id 1 is
@@ -1399,13 +1403,24 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 accounts = self.client.accounts() or {}
             except Exception:
                 accounts = {}
+        # Plex names every account with history on the item, even those
+        # outside the 50-entry normalisation window: watch_history()
+        # stashes the full ordered id list from the scoped response.
+        account_ids = []
+        wh = getattr(self.client, '_wh_accounts', None)
+        if wh and str(rating_key or '') == wh[0]:
+            account_ids = list(wh[1])
+        if not account_ids:
+            for entry in entries or []:
+                aid = str(entry.get('account_id') or '')
+                if aid and aid not in account_ids:
+                    account_ids.append(aid)
         own_name = ''
         try:
             own_name = (self.getProperty('AuraUserName') or '').lower()
         except RuntimeError:
             pass
-        for entry in entries or []:
-            aid = str(entry.get('account_id') or '')
+        for aid in account_ids:
             if not aid or aid in seen:
                 continue
             seen.add(aid)

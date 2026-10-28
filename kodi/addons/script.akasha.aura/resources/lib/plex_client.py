@@ -747,11 +747,21 @@ class PlexClient:
                 int(time.time() - since_days * 86400))] = ''
         data = self._request('/status/sessions/history/all', params)
         mc = self._media_container(data)
+        raw_meta = mc.get('Metadata', [])
+        # Plex's 'Activity by you, X, and N others' names EVERY account
+        # with history on the item -- not just the ones inside the
+        # normalisation window. Stash the full ordered distinct list so
+        # the detail page can name them all without a second fetch.
+        self._wh_accounts = (str(rating_key or ''),
+                             list(dict.fromkeys(
+                                 str(e.get('accountID') or '')
+                                 for e in raw_meta
+                                 if e.get('accountID'))))
         items = []
         # Slice BEFORE normalising: the endpoint ignores the container
         # size, so without this an unscoped call would build a full
         # video dict for every history entry ever recorded.
-        for raw in mc.get('Metadata', [])[:limit]:
+        for raw in raw_meta[:limit]:
             item = self._video_dict(raw, self.server_url, self.token)
             item['viewed_at'] = raw.get('viewedAt')
             item['account_id'] = raw.get('accountID')
