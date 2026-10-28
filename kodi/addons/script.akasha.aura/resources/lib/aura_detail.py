@@ -1576,6 +1576,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _stream_url(self, item=None):
         item = item or self.item
+        # Cloud clips (Discover trailers) carry an absolute CDN url that
+        # plays as-is -- no local part_key to resolve.
+        if item.get('direct_url'):
+            return item['direct_url']
         if not self.client or not item.get('part_key'):
             return None
         base = getattr(self.client, 'server_url', None)

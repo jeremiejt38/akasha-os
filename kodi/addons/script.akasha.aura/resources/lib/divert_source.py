@@ -288,6 +288,11 @@ def build_video_item(raw_item, image_resolver):
     parts = media.get('Part') or []
     if parts:
         part_key = parts[0].get('key') or ''
+    # Cloud clips (Discover trailers) carry an absolute CDN url on the
+    # Media entry -- playable as-is, no token, no part_key resolution.
+    direct_url = str(media.get('url') or '')
+    if not direct_url.startswith('http'):
+        direct_url = ''
 
     # Multi-version items (B12): one playable version per Media entry,
     # labelled "1080p HEVC — film.1080p.mkv" like Plex's version picker.
@@ -393,6 +398,7 @@ def build_video_item(raw_item, image_resolver):
         'audio_label': _audio_label(raw_item),
         'subtitle_label': _subtitle_label(raw_item),
         'part_key': part_key,
+        'direct_url': direct_url,
         'versions': versions,
         'section_id': str(section_id) if section_id is not None else None,
         # Plex's per-item blur palette (corner hex colors, no alpha) --
