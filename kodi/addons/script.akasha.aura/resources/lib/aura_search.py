@@ -422,6 +422,35 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 except Exception as e:
                     xbmc.log('Akasha Aura Search: suggestions failed: {}'
                              .format(e), xbmc.LOGWARNING)
+            # Plex's cloud provider returns nothing without a plex.tv
+            # Discover account: fall back to the server's own promoted
+            # hubs (skipping Continue Watching / On Deck so the grid is
+            # fresh suggestions, not things already in flight).
+            if not self._suggested:
+                local = getattr(self.client, 'home_hubs', None)
+                if local:
+                    try:
+                        for hub in local(hub_count=6, per_hub=8):
+                            if (hub.get('identifier') or '').startswith(
+                                    'home.'):
+                                continue
+                            items = list(hub.get('items') or [])
+                            key = hub.get('key') or ''
+                            if not items and key and \
+                                    hasattr(self.client,
+                                            'hub_items_with_total'):
+                                try:
+                                    items, _ = \
+                                        self.client.hub_items_with_total(
+                                            key, limit=8)
+                                except Exception:
+                                    items = []
+                            self._suggested.extend(items)
+                            if len(self._suggested) >= 12:
+                                break
+                    except Exception as e:
+                        xbmc.log('Akasha Aura Search: local suggestions '
+                                 'failed: {}'.format(e), xbmc.LOGWARNING)
         return self._suggested[:12]
 
     def _server_label(self):

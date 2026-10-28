@@ -202,3 +202,27 @@ first *actionable* row (headers carry no action and Plex never lets
 them take the pill), and header rows in `focusedlayout` keep the
 dimmed `66FFFFFF` instead of the invisible `AA10131A` on dark. Panel
 background neutralised to `F2161616`.
+
+## Home tab strip — cloud-only (documented limitation)
+
+`official-live/54-home-tabs-focus.png` shows Plex's top-left
+`For You | Trending | Activity` strip. **For You** maps to our
+existing home (server `/hubs/promoted` rows). **Trending** and
+**Activity** stream from Plex Discover cloud
+(`metadata.provider.plex.tv`) — the server token has no Discover
+sections ("Missing library sections"), same class of limitation as
+the plex.tv profile features: the strip is not replicated because two
+of its three tabs would be permanently empty shells.
+
+## Search "Popular Searches" — local-hub fallback
+
+Same cloud wall on the search empty state: Plex feeds
+"Recherches populaires" from Discover promoted hubs, which return
+empty placeholders on this server/account. `_suggestions()` in
+`aura_search.py` now falls back to the server's own
+`home_hubs()` (skipping `home.*` resume hubs so the grid suggests
+fresh content, not in-flight items), resolving hub continuations
+through `hub_items_with_total()` when inline items are missing.
+Verified on the Pi: the section now shows the same poster grid as
+`official-live/29-search-empty.png` (x686, 240×360, ~299 pitch),
+with recent history + "Effacer l'historique" under the keyboard.
