@@ -62,17 +62,25 @@ def episode_queue_items(client, item):
 
 
 def apply_resume_point(li, item, start_over=False):
-    """Set the Kodi 20+ resume point (resumetime/totaltime properties are
-    deprecated) when the item carries a Plex view offset."""
+    """Set the resume point when the item carries a Plex view offset.
+
+    Three mechanisms are set: for Player.play(url, li), Kodi only honors
+    the ListItem 'StartOffset' property -- the videotag resume point
+    (setResumePoint/resumetime) is only consulted through the Kodi media
+    database, which never has an entry for a bare stream URL (verified
+    on-device: the InfoTag-only path restarted the episode at 0:00
+    instead of the Plex viewOffset)."""
     if not item.get('view_offset_ms') or start_over:
         return
+    offset = float(item['view_offset_ms']) / 1000.0
     try:
         li.getVideoInfoTag().setResumePoint(
-            float(item['view_offset_ms']) / 1000.0,
-            float(item.get('duration_ms') or 0) / 1000.0)
+            offset, float(item.get('duration_ms') or 0) / 1000.0)
     except Exception:
-        li.setProperty('resumetime', str(float(item['view_offset_ms']) / 1000.0))
-        li.setProperty('totaltime', str(float(item['duration_ms'] or 0) / 1000.0))
+        pass
+    li.setProperty('resumetime', str(offset))
+    li.setProperty('totaltime', str(float(item['duration_ms'] or 0) / 1000.0))
+    li.setProperty('StartOffset', str(offset))
 
 WATCH_BUTTON_ID = 7100
 WATCHED_BUTTON_ID = 7101

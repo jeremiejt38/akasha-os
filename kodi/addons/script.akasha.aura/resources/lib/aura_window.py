@@ -4387,17 +4387,20 @@ _KODI_MEDIA_TYPES = frozenset(
 
 
 def _set_resume_point(li, item):
-    """Kodi 20+ InfoTagVideo resume point, with the deprecated
-    resumetime/totaltime properties as fallback."""
+    """StartOffset is the only resume mechanism Player.play(url, li)
+    honors (the videotag resume point is only read via the Kodi media
+    DB); the rest is belt & suspenders -- see aura_detail's
+    apply_resume_point."""
+    offset = float(item['view_offset_ms']) / 1000.0
     try:
         li.getVideoInfoTag().setResumePoint(
-            float(item['view_offset_ms']) / 1000.0,
-            float(item.get('duration_ms') or 0) / 1000.0)
+            offset, float(item.get('duration_ms') or 0) / 1000.0)
     except Exception:
-        li.setProperty('resumetime',
-                       str(float(item['view_offset_ms']) / 1000.0))
-        li.setProperty('totaltime',
-                       str(float(item.get('duration_ms') or 0) / 1000.0))
+        pass
+    li.setProperty('resumetime', str(offset))
+    li.setProperty('totaltime',
+                   str(float(item.get('duration_ms') or 0) / 1000.0))
+    li.setProperty('StartOffset', str(offset))
 
 
 def _build_divert_list_item(item):
