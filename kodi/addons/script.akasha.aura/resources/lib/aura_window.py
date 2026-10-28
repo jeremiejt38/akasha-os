@@ -1684,26 +1684,35 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         generation = self._category_art_generation
         section_key = section['key']
 
+        def fetch_one(genre):
+            try:
+                if self._connector_client:
+                    raw = self._connector_client.section_items(
+                        section_key, limit=1, offset=0, genre=genre)
+                    items = divert_source.parse_metadata_list(
+                        raw, self._connector_client.image_url)
+                else:
+                    items = self._plex_client.by_genre(
+                        section_key, genre, limit=1)
+                if items:
+                    art = items[0].get('art_url') \
+                        or items[0].get('fanart_url') \
+                        or items[0].get('thumb_url') or ''
+                    if art:
+                        return genre, art
+            except Exception:
+                pass
+            return genre, None
+
         def worker():
+            # ~30 per-genre lookups serialise for tens of seconds on the
+            # Pi -- fan them out to the bounded pool like the Discover
+            # hub hydration.
             art_by_genre = {}
-            for genre in genres:
-                try:
-                    if self._connector_client:
-                        raw = self._connector_client.section_items(
-                            section_key, limit=1, offset=0, genre=genre)
-                        items = divert_source.parse_metadata_list(
-                            raw, self._connector_client.image_url)
-                    else:
-                        items = self._plex_client.by_genre(
-                            section_key, genre, limit=1)
-                    if items:
-                        art = items[0].get('art_url') \
-                            or items[0].get('fanart_url') \
-                            or items[0].get('thumb_url') or ''
-                        if art:
-                            art_by_genre[genre] = art
-                except Exception:
-                    pass
+            with ThreadPoolExecutor(max_workers=6) as pool:
+                for genre, art in pool.map(fetch_one, genres):
+                    if art:
+                        art_by_genre[genre] = art
             if generation != self._category_art_generation:
                 return
             if xbmcgui.getCurrentWindowId() != window_id:
