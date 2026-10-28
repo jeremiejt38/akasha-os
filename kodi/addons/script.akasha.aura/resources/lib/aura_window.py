@@ -3763,8 +3763,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.addon = self.addon
         search.client = self._connector_client or self._plex_client
         # Plex searches every server library, not only the pinned ones
-        # (_divert_sections is the pinned subset).
-        search.sections = self._all_divert_sections or self._divert_sections
+        # (_divert_sections is the pinned subset). Pseudo-sections like
+        # Playlists / Live TV have no library endpoint: passing them to
+        # the per-section title filter would 404 on every keystroke.
+        pool = self._all_divert_sections or self._divert_sections
+        search.sections = [s for s in pool
+                           if s.get('type') in ('movie', 'show', 'artist')]
         search.on_select = self._open_search_result
         search.on_person = self._open_person_page
         search.on_genre = self._open_genre_result

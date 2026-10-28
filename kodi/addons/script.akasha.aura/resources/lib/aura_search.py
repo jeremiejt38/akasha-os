@@ -75,6 +75,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self._yield_stop = threading.Event()
 
     def onInit(self):
+        # The window is a cached singleton: a past close() leaves
+        # _yield_stop set, which makes every later search worker bail
+        # out before rendering (results freeze on the previous query).
+        # Fresh event + fresh query state on every open, like Plex's
+        # blank search page.
+        self._yield_stop = threading.Event()
+        self.query = ''
+        self._results = []
+        self._filter_index = 0
         # Same yield-to-playback rule as the main window's
         # _watch_external_playback watchdog: a modal dialog would
         # otherwise keep rendering over the fullscreen video when

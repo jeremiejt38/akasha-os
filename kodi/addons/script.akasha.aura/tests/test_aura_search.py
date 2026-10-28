@@ -239,5 +239,30 @@ class TestKeyboardRightEdge(unittest.TestCase):
         self.assertIn(2, win.action_dispatched)
 
 
+class TestReopenResetsState(unittest.TestCase):
+    """The window is a cached singleton: close() sets _yield_stop, so a
+    reopened dialog must rebuild it or every search worker bails out
+    early and results stay frozen on the previous query."""
+
+    def test_reopen_resets_yield_stop_and_query(self):
+        class _IdlePlayer:
+            def isPlayingVideo(self):
+                return False
+        # aura_search.xbmc is bound at import time to this file's own
+        # stub; patching sys.modules['xbmc'] would hit whichever test
+        # module installed its stub last instead.
+        aura_search.xbmc.Player = lambda *a, **k: _IdlePlayer()
+        win = _window()
+        win._yield_stop.set()
+        win.query = 'stale'
+        win._results = [{'title': 'x'}]
+        win._filter_index = 2
+        win.onInit()
+        self.assertFalse(win._yield_stop.is_set())
+        self.assertEqual(win.query, '')
+        self.assertEqual(win._results, [])
+        self.assertEqual(win._filter_index, 0)
+
+
 if __name__ == '__main__':
     unittest.main()
