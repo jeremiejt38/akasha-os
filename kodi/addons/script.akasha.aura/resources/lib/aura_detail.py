@@ -203,6 +203,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._row_pos = {}          # last absolute row positions (wrap guard)
         self._pending_season_index = None  # season card entry point
         self._restore_episode_pos = None   # episode pos to restore on Back
+        # Show/season pages stack Cast & Crew under the content row like
+        # Plex. Kodi windows can't scroll, so the inactive section parks
+        # off-screen and takes the slot back on focus (see _apply_flow).
+        self._cast_active = False
         self.exit_to_sidebar = False
         # Vertical rhythm of the lower block (see _apply_flow): the Plex
         # action pill sits at y564 under a director line, y524 without.
@@ -321,8 +325,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
              '1' if self.mode == 'show' else '')
         _set(self, 'AuraDetailEpisodesRow',
              '1' if self.mode == 'season' else '')
-        _set(self, 'AuraDetailCastRow',
-             '1' if self.mode == 'item' and item.get('cast') else '')
+        self._cast_active = False
+        # Plex exposes Cast & Crew on every detail flavour -- movies,
+        # shows, seasons, episodes (27-detail-show).
+        _set(self, 'AuraDetailCastRow', '1' if item.get('cast') else '')
 
         try:
             self.getControl(7001).setImage(
@@ -594,6 +600,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif self.mode == 'season':
             self._render_episodes()
 
+        if self.mode != 'item':
+            # Item mode renders the cast row inline above; on show
+            # pages it waits parked below the content row.
+            self._render_cast()
+
         self._sync_navigation()
         # Plex lands focus on the most meaningful content: the
         # Watch/Resume action in show overview (it stays the expanded
@@ -651,6 +662,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self.getControl(7060).setPosition(128, t + 202)
             for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
                 self.getControl(cid).setPosition(128, t + 264)
+            # Parked sections keep their 'visible' state (Kodi only
+            # moves focus natively into visible controls) but sit past
+            # the screen edge; the focused one owns the bottom slot.
+            if self.mode in ('show', 'season'):
+                parked = (SEASONS_LIST_ID if self.mode == 'show'
+                          else EPISODES_LIST_ID) \
+                    if self._cast_active else CAST_LIST_ID
+                self.getControl(parked).setPosition(128, 2200)
         except RuntimeError:
             pass
 
@@ -749,6 +768,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if any(m.get('thumb_url') for m in full_cast):
                 cast = full_cast
                 self.item['cast'] = cast
+        # The bg meta hydration lands AFTER the prop is first set, so
+        # re-assert it with the resolved cast: a thin hub item would
+        # otherwise leave the row populated but unreachable.
+        _set(self, 'AuraDetailCastRow', '1' if cast else '')
         try:
             lst = self.getControl(CAST_LIST_ID)
             lst.reset()
@@ -905,6 +928,17 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                         self.getControl(right_id))
                     row.setNavigation(mid, row, row, row)
                     activity.setNavigation(watch, row, activity, activity)
+            if self.mode in ('show', 'season') and \
+                    self.getProperty('AuraDetailCastRow'):
+                # Plex stacks Cast & Crew under the season/episode row:
+                # Down enters it, Up puts the content row back.
+                row_id = (SEASONS_LIST_ID if self.mode == 'show'
+                          else EPISODES_LIST_ID)
+                row_ctl = self.getControl(row_id)
+                cast_ctl = self.getControl(CAST_LIST_ID)
+                row_ctl.setNavigation(mid, cast_ctl, row_ctl, row_ctl)
+                cast_ctl.setNavigation(row_ctl, cast_ctl,
+                                       cast_ctl, cast_ctl)
             if self.mode in ('show', 'season'):
                 strip.setNavigation(strip, watch, strip, strip)
         except RuntimeError as e:
@@ -1083,7 +1117,35 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pass
 
+    def _section_label(self):
+        """The 7060 heading text for the current bottom section."""
+        if self.mode == 'season' and self._seasons:
+            return self._season_label(self._seasons[self._active_season])
+        if self.mode == 'show':
+            return i18n.tr(33103).format(
+                len(self._seasons), 's' if len(self._seasons) > 1 else '')
+        return i18n.tr(33100)
+
+    def _set_cast_active(self, active):
+        """Swap the parked lower section into the bottom slot. Same end
+        state as Plex's page scroll: focus on Cast & Crew slides it in,
+        focus back on the content row restores it."""
+        if active == self._cast_active:
+            return
+        self._cast_active = active
+        self._apply_flow()
+        try:
+            self.getControl(7060).setLabel(
+                i18n.tr(33100) if active else self._section_label())
+        except RuntimeError:
+            pass
+
     def onFocus(self, controlID):
+        if self.mode in ('show', 'season'):
+            if controlID == CAST_LIST_ID:
+                self._set_cast_active(True)
+            elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
+                self._set_cast_active(False)
         self._sync_action_row()
         # Kodi never re-evaluates Control.HasFocus(7120) inside a list
         # layout when focus moves elsewhere -- the selected tab would
@@ -1163,9 +1225,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         on the season just left -- navigation stays centred on the
         content, never bouncing back up to the tab strip."""
         self.mode = 'show'
+        self._cast_active = False
         _set(self, 'AuraDetailSeasonsRow', '1')
         _set(self, 'AuraDetailEpisodesRow', '')
         self._render_seasons()
+        self._apply_flow()
         self._sync_navigation()
         try:
             lst = self.getControl(SEASONS_LIST_ID)
@@ -1182,9 +1246,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._active_season = season_pos
         self._load_episodes(season_pos)
         self.mode = 'season'
+        self._cast_active = False
         _set(self, 'AuraDetailSeasonsRow', '')
         _set(self, 'AuraDetailEpisodesRow', '1')
         self._render_episodes()
+        self._apply_flow()
         self._sync_navigation()
         # Landing on the next episode to watch, like Plex's season pages.
         try:
