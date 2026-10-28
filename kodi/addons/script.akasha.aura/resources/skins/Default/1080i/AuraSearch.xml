@@ -418,7 +418,7 @@
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
             <onleft>8116</onleft>
-            <onright>8130</onright>
+            <onright>8120</onright>
             <ondown>8110</ondown>
         </control>
         <control type="image">
