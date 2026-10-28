@@ -335,7 +335,7 @@
                     <onright>2000</onright>
                     <ondown>9000</ondown>
                     <texturenofocus colordiffuse="CC3D2B26">circle.png</texturenofocus>
-                    <texturefocus colordiffuse="FFFF8C6C">circle.png</texturefocus>
+                    <texturefocus colordiffuse="FFFFFFFF">circle.png</texturefocus>
                 </control>
                 <control type="image">
                     <left>6</left>
@@ -351,6 +351,16 @@
                     <height>40</height>
                     <aspectratio>keep</aspectratio>
                     <texture>icon-gear.png</texture>
+                    <visible>!Control.HasFocus(2004)</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture>icon-gear-dark.png</texture>
+                    <visible>Control.HasFocus(2004)</visible>
                 </control>
             </control>
         </control>

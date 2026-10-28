@@ -95,7 +95,7 @@
                         <top>2</top>
                         <width>720</width>
                         <height>60</height>
-                        <texture colordiffuse="FF0DA0E5" border="16">rounded-solid.png</texture>
+                        <texture colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texture>
                         <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
                     </control>
                     <control type="label">

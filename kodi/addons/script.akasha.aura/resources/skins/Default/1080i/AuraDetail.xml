@@ -584,7 +584,7 @@
         <top>672</top>
         <width>24</width>
         <height>24</height>
-        <texture colordiffuse="FF0DA0E5">icon-watched.png</texture>
+        <texture colordiffuse="FFE5A00D">icon-watched.png</texture>
         <visible>String.IsEqual(Window.Property(AuraDetailWatched),1) + !Control.HasFocus(7101)</visible>
     </control>
     <control type="button" id="7102">

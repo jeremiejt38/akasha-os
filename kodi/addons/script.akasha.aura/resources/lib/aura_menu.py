@@ -53,6 +53,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
         self.left_anchor = False
         self.rail_items = []
         self.rail_props = {}
+        self.rail_pick = -1
 
     def _populate_rail_replica(self):
         """Clone of the parent's expanded sidebar, drawn inside this
@@ -155,6 +156,18 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def onClick(self, controlID):
+        if controlID == 9020:
+            # Rail replica row picked: Plex keeps the rail interactive
+            # under its left-anchored sheets -- hand the index back so
+            # the caller can activate the real sidebar entry.
+            try:
+                self.rail_pick = \
+                    self.getControl(9020).getSelectedPosition()
+            except RuntimeError:
+                self.rail_pick = -1
+            self.result = -1
+            self.close()
+            return
         if controlID == LIST_ID:
             try:
                 self.result = self.getControl(LIST_ID).getSelectedPosition()
@@ -203,17 +216,17 @@ def _dialog(owner, title, entries, message='', skin='AuraMenu.xml',
                 owner.clearProperty('AuraSheetOpen')
             except (AttributeError, RuntimeError):
                 pass
-    return dlg.result
+    return dlg
 
 
 def select(owner, title, entries):
     """Plex-styled replacement for xbmcgui.Dialog().select()."""
-    return _dialog(owner, title, entries)
+    return _dialog(owner, title, entries).result
 
 
 def contextmenu(owner, entries, keep_sidebar=False):
     """Plex-styled replacement for xbmcgui.Dialog().contextmenu()."""
-    return _dialog(owner, '', entries, keep_sidebar=keep_sidebar)
+    return _dialog(owner, '', entries, keep_sidebar=keep_sidebar).result
 
 
 def _sidebar_snapshot(owner, list_id=3310):
@@ -245,7 +258,8 @@ def _sidebar_snapshot(owner, list_id=3310):
 
 def profilemenu(owner, entries):
     """Plex's sidebar profile submenu: a dark sheet anchored left of the
-    screen, rows carry an icon -- entries are [(label, icon_name), ...]."""
+    screen, rows carry an icon -- entries are [(label, icon_name), ...].
+    Returns the dialog (caller reads .result and .rail_pick)."""
     rail_items, rail_props = _sidebar_snapshot(owner)
     return _dialog(owner, '', entries, skin='AuraProfileMenu.xml',
                    left_anchor=True, keep_sidebar=True,
@@ -258,7 +272,7 @@ def confirm(owner, title, message):
     two list rows. Returns True only when Confirm is picked."""
     import i18n
     idx = _dialog(owner, title,
-                  [i18n.tr(33587), i18n.tr(33564)], message=message)
+                  [i18n.tr(33587), i18n.tr(33564)], message=message).result
     return idx == 0
 
 

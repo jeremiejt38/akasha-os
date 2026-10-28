@@ -114,32 +114,48 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - **`ReloadSkin` pendant une lecture active** : peut faire planter Kodi (SIGSEGV observé en test au teardown du player) — opération dev uniquement, pas un chemin utilisateur.
 - **Menu profil (sheet gauche)** : géométrie calée sur `official-live/48-account-menu.png` (sheet x437-835 y34, pitch 76, pill 64 px, icône x+48, texte x+106) ; les 7 entrées officielles avec icônes ; pill blanche focusée ; sheet et rail en **noir pur `#000000`** (le rail étendu officiel est opaque noir — `FF262626` → `FF000000` dans `Aura.xml` + réplique). **Découverte Kodi** : un `WindowXMLDialog` modal assombrit irréductiblement la fenêtre parente — impossible de garder le rail lisible dessous. Solution : `_sidebar_snapshot()` sérialise les items/props du rail (3310) et `AuraProfileMenu.xml` redessine une **réplique non dimmée** dans le dialog (liste 9020, layout cloné avec conditions « expanded » forcées). Deux pièges : un `<control type="list">` ne rend **rien** sans `<focusedlayout>` (les deux layouts sont obligatoires pour l'allocation des vues), et Kodi peint l'item sélectionné avec le `focusedlayout` même quand la liste n'a pas le focus — le focusedlayout de la réplique est donc un clone exact de l'itemlayout. La ligne profil de la réplique porte la pill source `#1A1A1A` (`is_profile`), comme l'officiel. Actions validées à l'écran : Profil → fiche info, Paramètres → panneau settings, Back → rail. **Écart restant** : à la fermeture d'un dialog imbriqué, le focus rail retombe sur un item bibliothèque plutôt que la ligne profil.
 
-## Color channel order — mixed: colordiffuse BGR, textcolor ARGB
+## Color channel order — AARRGGBB everywhere (corrected)
 
-**Discovery (verified on-device, Kodi 21.3 ARM64 / LibreELEC 12.2.1):**
-the two color pipelines read hex *differently* on this build:
+**Corrected finding (verified on-device, Kodi 21.3 ARM64 / LibreELEC
+12.2.1):** every color pipeline in our addon reads plain `AARRGGBB`:
 
-- `colordiffuse` (and `texturefocus`/`texturenofocus` color attributes)
-  is interpreted as `AABBGGRR`, not the documented `AARRGGBB`.
-- `textcolor` / `focusedcolor` / `disabledcolor` elements and inline
-  `[COLOR …]` label tags are interpreted as plain `AARRGGBB`.
-- `midtexture` on `progress` controls is also plain `AARRGGBB` —
-  measured on-device: `midtexture colordiffuse="FF0DA0E5"` renders
-  `(13,160,229)` cyan, `FFE5A00D` renders the intended amber. The
-  progress fill therefore keeps `FFE5A00D`, *unswapped*, while the
-  image `texture` amber next to it keeps `FF0DA0E5` (swapped).
+- Regular image `<texture colordiffuse="FF0000FF">` renders `(0,0,255)`
+  blue — standard ARGB — inside and outside `<list>` controls.
+- `texturefocus`/`texturenofocus` color attributes are also ARGB
+  (`FFFF8C6C` renders salmon `(255,152,123)`).
+- `midtexture` on `progress` controls is ARGB too (`FFE5A00D` renders
+  the intended amber progress fill).
+- `textcolor`/`focusedcolor`/`[COLOR]` tags are ARGB.
 
-Measured on the Pi framebuffer: `colordiffuse="FF0DA0E5"` renders
-`(229,160,13)` amber (BGR-swapped), while `textcolor="FF0DA0E5"` renders
-`(13,160,229)` cyan (straight ARGB). Estuary's native `button_focus`
-`FF00B8F5` renders golden-amber on the same box, confirming the
-colordiffuse quirk is build-wide, not skin-specific.
+The earlier claim that `colordiffuse` is `AABBGGRR` build-wide was a
+**false diagnosis** — likely a mix-up with Estuary's native XBT textures
+(`button_focus FF00B8F5` is authored golden-amber natively, not
+swapped). Its consequence: values that had been pre-swapped
+(`FF0DA0E5` intended-as-amber, `FFFF8C6C` intended-as-light-focus)
+rendered cyan/salmon until corrected back to their natural ARGB.
 
-**Fix:** every non-symmetric `colordiffuse`-family color is stored
-pre-swapped (`AABBGGRR`) *except* `midtexture`/other `progress`-control
-textures which stay in `AARRGGBB`; every `textcolor`-family color keeps
-the standard `AARRGGBB` order. Python-fed colors through `$INFO`-bound
-colordiffuse (genre `TileColor`, activity avatar palette) are swapped
-at the source (`_bgr()` helper); `[COLOR]` tags are *not* swapped.
-Commits `2263ec7`, `83b4aeb` (partially reverted), and the revert that
-restored all text-family colors to ARGB.
+**Rule now:** author all colors in `AARRGGBB`. Python-fed
+`$INFO`-bound colordiffuse (genre `TileColor`, avatar `_PALETTE`) are
+natural ARGB — the `_bgr()` helper is gone from the call sites.
+
+## Settings sheet (official geometry + interactive rail replica)
+
+Measured on `official-live/49-settings.png`: the sheet is a black
+rounded panel x437-1233 (w796), y34-1045, corners ~16px; title at
+x503 y112-138 (`font_aura_main_bold`, bottom-anchored); white focus
+pill x502-1169 (w668, h64), 76px pitch, first row pill y134; values
+right-aligned ending ~x1141; OFF toggle = 51x32 track `(40,42,45)` +
+knob `(87,91,97)`, ON toggle = amber `E5A00D` track + white knob
+(Plex gold). `AuraSettingsPanel.xml` was refactored from the old
+full-height split-pane to this sheet; the contextual help pane is
+hidden (no right pane in the official sheet).
+
+The expanded rail stays readable behind the sheet through the same
+`_sidebar_snapshot()` + replica-list-9020 mechanism as the profile
+menu — and the replica is **interactive**: `Left` moves focus onto it
+(white focus pill + dark text variants gated on
+`Control.HasFocus(9020)`), `Select` stores `rail_selection`/`rail_pick`,
+the dialog closes and `_activate_rail_index(pos)` activates the real
+sidebar entry — matching Plex, where the rail stays functional under
+modal sheets. Implemented for both `AuraSettingsPanel.xml` and
+`AuraProfileMenu.xml`.

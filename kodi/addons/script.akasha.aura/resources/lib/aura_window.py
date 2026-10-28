@@ -1547,7 +1547,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             panel.reset()
             for genre in genres:
                 li = xbmcgui.ListItem(divert_source.display_genre(genre))
-                li.setProperty('TileColor', 'B0' + _bgr(_genre_tile_color(genre)))
+                li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
                 panel.addItem(li)
         except RuntimeError:
             pass
@@ -1604,7 +1604,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 panel.reset()
                 for genre in genres:
                     li = xbmcgui.ListItem(divert_source.display_genre(genre))
-                    li.setProperty('TileColor', 'B0' + _bgr(_genre_tile_color(genre)))
+                    li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
                     if genre in art_by_genre:
                         li.setArt({'fanart': art_by_genre[genre],
                                    'thumb': art_by_genre[genre]})
@@ -3414,11 +3414,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.executebuiltin('RunAddon(plugin.program.moonlight-qt)')
         xbmcgui.Dialog().notification('Akasha Aura', item['title'], xbmcgui.NOTIFICATION_INFO, 2000)
 
-    def _on_sidebar_item_selected(self):
-        try:
-            pos = self.getControl(DIVERT_SIDEBAR_ID).getSelectedPosition()
-        except RuntimeError:
-            return
+    def _on_sidebar_item_selected(self, pos=None):
+        if pos is None:
+            try:
+                pos = self.getControl(
+                    DIVERT_SIDEBAR_ID).getSelectedPosition()
+            except RuntimeError:
+                return
         if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
             self._open_profile_menu()
             return
@@ -3464,8 +3466,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._reconnect_connector,
             self._open_settings_panel,
         ]
-        idx = aura_menu.profilemenu(self, entries)
+        dlg = aura_menu.profilemenu(self, entries)
+        idx = dlg.result
         if idx < 0:
+            pick = getattr(dlg, 'rail_pick', -1)
+            if pick >= 0:
+                self._activate_rail_index(pick)
             return
         actions[idx]()
 
@@ -3807,7 +3813,37 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # to close Aura first for every row, uniformly, rather than trying
         # to special-case which actions need it.
         win.parent_window = self
-        win.doModal()
+        # Plex keeps the expanded rail readable behind its settings
+        # sheet. Kodi dims the parent under a modal dialog, so the panel
+        # draws a full-brightness rail replica from this snapshot; the
+        # AuraSheetOpen property holds the real rail expanded for the
+        # dialog's lifetime.
+        win.rail_items, win.rail_props = aura_menu._sidebar_snapshot(self)
+        try:
+            self.setProperty('AuraSheetOpen', '1')
+        except (AttributeError, RuntimeError):
+            pass
+        try:
+            win.doModal()
+        finally:
+            try:
+                self.clearProperty('AuraSheetOpen')
+            except (AttributeError, RuntimeError):
+                pass
+        sel = getattr(win, 'rail_selection', -1)
+        if sel >= 0:
+            self._activate_rail_index(sel)
+
+    def _activate_rail_index(self, pos):
+        """Activate a real sidebar entry picked from a sheet's rail
+        replica (Plex keeps the rail interactive under modal sheets)."""
+        try:
+            sidebar = self.getControl(DIVERT_SIDEBAR_ID)
+            sidebar.selectItem(pos)
+            self.setFocus(sidebar)
+            self._on_sidebar_item_selected(pos)
+        except RuntimeError:
+            pass
 
     def _settings_sleep(self):
         # Reuses the exact same standby+wake-on-input script already used
@@ -4289,13 +4325,6 @@ _GENRE_TILE_COLORS = {
     'western': '6E4B26', 'court-métrage': '5A5A6E', 'short': '5A5A6E',
     'japanimé': '5A4A7A', 'cuisine': '6E5A3A',
 }
-
-
-def _bgr(rgb):
-    """Swap R and B in an 'RRGGBB' hex string. Kodi's texture colordiffuse
-    reads the value as AABBGGRR on this build, so colors fed through
-    $INFO-bound colordiffuse must be stored pre-swapped."""
-    return rgb[4:6] + rgb[2:4] + rgb[0:2]
 
 
 def _genre_tile_color(genre):

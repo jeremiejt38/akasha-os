@@ -62,12 +62,45 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
         # own window, closed alongside this panel before firing a
         # native-window action (see the comment there for why).
         self.parent_window = None
+        # Rail replica snapshot (same mechanism as the profile menu):
+        # Plex keeps the expanded sidebar readable behind its settings
+        # sheet, but Kodi dims the parent window under a modal dialog.
+        self.rail_items = []
+        self.rail_props = {}
+        # Set when the user picks a row in the rail replica: the parent
+        # activates that real sidebar entry after the dialog closes.
+        self.rail_selection = -1
 
     # ------------------------------------------------------------------
     # Lifecycle / navigation
     # ------------------------------------------------------------------
 
+    def _populate_rail_replica(self):
+        try:
+            rail = self.getControl(9020)
+        except RuntimeError:
+            return
+        try:
+            rail.reset()
+        except (AttributeError, RuntimeError):
+            pass
+        for it in self.rail_items:
+            li = xbmcgui.ListItem(it.get('label', ''))
+            if it.get('icon'):
+                li.setArt({'icon': it['icon']})
+            for prop in ('is_profile', 'is_header', 'is_library'):
+                if it.get(prop):
+                    li.setProperty(prop, it[prop])
+            rail.addItem(li)
+        for key, val in self.rail_props.items():
+            try:
+                self.setProperty(key, val)
+            except RuntimeError:
+                pass
+
     def onInit(self):
+        if self.rail_items:
+            self._populate_rail_replica()
         self._push(_View('root', _tr(33019)))
 
     def _push(self, view):
@@ -375,6 +408,17 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def onClick(self, controlID):
+        if controlID == 9020:
+            # Rail replica row picked: hand the index back to the real
+            # sidebar, which activates the entry after close (Plex lets
+            # the rail stay interactive under the settings sheet).
+            try:
+                self.rail_selection = \
+                    self.getControl(9020).getSelectedPosition()
+            except RuntimeError:
+                self.rail_selection = -1
+            self.close()
+            return
         if controlID != LIST_ID or self._navigating:
             return
         try:

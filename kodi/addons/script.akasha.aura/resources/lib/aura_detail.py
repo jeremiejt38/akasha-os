@@ -1410,8 +1410,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             others.append({'name': name, 'thumb': acc.get('thumb') or ''})
         # Plex stacks up to two extra avatars; accounts without a photo
         # get a colored disc with their initial (deterministic tint).
-        # NOTE: Kodi's texture colordiffuse reads hex as AABBGGRR on this
-        # build, so these literals are stored pre-swapped (BGR).
+        # NOTE: colordiffuse on addon textures is plain AARRGGBB on this
+        # build, so the palette keeps straight RRGGBB literals.
         _PALETTE = ('FF3C6B9E', 'FF3F7A7A', 'FF6B7A4E', 'FF7A4E6B',
                     'FF4E4E8A', 'FF8A6B4E', 'FF4E6B8A', 'FF4E7A5E')
         for slot, other in enumerate(others[:2], start=2):
