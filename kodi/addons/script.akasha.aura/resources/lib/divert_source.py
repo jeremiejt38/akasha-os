@@ -321,6 +321,10 @@ def build_video_item(raw_item, image_resolver):
         'sort_title': raw_item.get('titleSort') or '',
         'type': item_type,
         'rating_key': raw_item.get('ratingKey'),
+        # Raw metadata path ('/library/metadata/<id>' or
+        # '<parent>/extras/<clip>' for trailers) -- needed to hydrate
+        # Discover/cloud cards, whose parent id lives inside the key.
+        'key': raw_item.get('key') or '',
         'parent_rating_key': raw_item.get('parentRatingKey'),
         'grandparent_rating_key': raw_item.get('grandparentRatingKey'),
         'index': raw_item.get('index'),

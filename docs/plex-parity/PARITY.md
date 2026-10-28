@@ -205,16 +205,34 @@ them take the pill), and header rows in `focusedlayout` keep the
 dimmed `66FFFFFF` instead of the invisible `AA10131A` on dark. Panel
 background neutralised to `F2161616`.
 
-## Home tab strip — cloud-only (documented limitation)
+## Home tab strip — For You / Tendances / Activité
 
-`official-live/54-home-tabs-focus.png` shows Plex's top-left
-`For You | Trending | Activity` strip. **For You** maps to our
-existing home (server `/hubs/promoted` rows). **Trending** and
-**Activity** stream from Plex Discover cloud
-(`metadata.provider.plex.tv`) — the server token has no Discover
-sections ("Missing library sections"), same class of limitation as
-the plex.tv profile features: the strip is not replicated because two
-of its three tabs would be permanently empty shells.
+`official-live/54-home-tabs-focus.png` + `55-tab-trending.png` show
+Plex's `For You | Trending | Activity` strip. Delivered:
+
+- **Pour vous** — local `/hubs/promoted` rows (verified earlier).
+- **Tendances** — `discover.provider.plex.tv/hubs/promoted` (the
+  *server* token is accepted — the earlier "401/no token" suspicion
+  came from a headerless manual curl, not a scope issue). The 12
+  promoted hubs are placeholders (zero inline items) hydrated via
+  their provider `key`, fetched in a bounded 6-worker pool — a serial
+  chain froze the click handler ~60s. Cards are tagged `cloud` and
+  backfilled from `provider_metadata()` (trailers hydrate the parent
+  movie through their `/extras/` key): the hero then shows the same
+  meta + plot + cast block as `55-tab-trending.png`. Focus lands on
+  the first card after a tab click (immediate + deferred focus, like
+  `_focus_first_subtab`). If Discover fails or answers empty, the tab
+  renders the honest empty state — never a silent copy of Pour vous.
+- **Activité** — own watch history (friend feed is Plex's private
+  social GraphQL, documented limitation L1). Entries lack
+  `grandparentRatingKey`, so the row collapses on the show title —
+  one card per series.
+
+Remaining divergences: service badges (prime/tv) on Trending cards
+need Plex's availability API (not in the hub payload); the cloud
+detail page opens hydrated but its local follow-up calls (extras,
+history) no-op — no playable file exists locally; the
+"Find What To Watch, Anywhere!" promo tile is not reproduced.
 
 ## Search "Popular Searches" — local-hub fallback
 

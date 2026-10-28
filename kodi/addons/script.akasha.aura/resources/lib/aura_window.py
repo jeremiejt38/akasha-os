@@ -8,6 +8,7 @@ skeleton.
 """
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 import random
 import subprocess
 import sys
@@ -676,7 +677,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('DivertHomeTab', str(index))
         self._load_recommendations(None)
         self._sync_navigation()
-        self._defer_focus(self._first_content_id())
+        # Same immediate+deferred pattern as _focus_first_subtab: the hub
+        # load above is synchronous (Discover placeholders take ~40-60s),
+        # so the slots are already bound -- the direct setFocus lands now
+        # and the deferred re-apply covers Kodi's post-click restore.
+        target = self._first_content_id()
+        if target is not None:
+            try:
+                self.setFocus(self.getControl(target))
+            except RuntimeError:
+                pass
+            self._defer_focus(target)
 
     def _reco_hub_rows(self, section):
         """Build row descriptors from real Plex hubs.
@@ -702,21 +713,39 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 # Plex's Activité tab is a friend feed on a private API;
                 # the honest local equivalent is the own watch history
                 # (/status/sessions/history/all) rendered as one hub row.
+                # History carries one entry per episode watched and no
+                # grandparentRatingKey to dedup on -- collapse on the show
+                # title so a series renders one card, like Plex's feed.
+                history = self._plex_client.watch_history(
+                    limit=50, since_days=180)
+                deduped, seen_shows = [], set()
+                for it in history:
+                    k = it.get('show_title') or it.get('title') \
+                        or it.get('rating_key')
+                    if k in seen_shows:
+                        continue
+                    seen_shows.add(k)
+                    deduped.append(it)
                 hubs = [{
                     'title': i18n.tr(33577), 'key': '',
                     'identifier': 'aura.activity', 'context': '',
                     'type': '', 'style': 'shelf', 'more': False,
-                    'items': self._plex_client.watch_history(
-                        limit=50, since_days=180),
+                    'items': deduped,
                 }]
             else:
                 hubs = self._plex_client.home_hubs()
         except Exception as e:
             xbmc.log('Akasha Aura: hubs load failed, falling back to legacy rows: {}'
                      .format(e), xbmc.LOGWARNING)
+            if section is None and self._home_tab != HOME_TAB_FOR_YOU:
+                # Tendances/Activité have no local equivalent: an empty
+                # viewport is honest; re-serving the For You rows under
+                # another tab is not.
+                return [], e
             return None, e
         rows = []
         seen_keys = set()
+        candidates = []
         for hub in hubs:
             # Discover emits non-shelf hubs (genre buttons, service pills)
             # that have no poster content to render.
@@ -739,7 +768,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 continue
             if hub_id:
                 seen_keys.add(hub_id)
-            row = self._reco_init_hub_row(hub)
+            candidates.append(hub)
+        # Placeholder hubs (Discover answers with zero inline items) each
+        # need one continuation fetch -- hydrate them in parallel or a
+        # 12-hub Tendances switch freezes the click handler for ~60s.
+        # Bounded pool: each fetch is one GET with its own timeout and the
+        # client's in-flight/cache guards; PagedLists share no state.
+        if len(candidates) > 1:
+            with ThreadPoolExecutor(max_workers=6) as pool:
+                built = list(pool.map(self._reco_init_hub_row, candidates))
+        else:
+            built = [self._reco_init_hub_row(h) for h in candidates]
+        for row in built:
             if not row:
                 continue
             # Empty hubs (key present but zero items server-side) render as
@@ -754,6 +794,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # "Continuer a regarder"/"Ajoutes recemment" labels with no
             # cards underneath).
             return rows, None
+        if section is None and self._home_tab != HOME_TAB_FOR_YOU:
+            # Empty Discover/Activity response: same empty-viewport rule,
+            # never the For You rows under a foreign tab.
+            return [], None
         return None, None
 
     def _reco_init_hub_row(self, hub):
@@ -762,6 +806,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         extra requests); later pages paginate the hub's `key` endpoint."""
         inline = list(hub.get('items') or [])
         key = hub.get('key') or ''
+        cloud = bool(hub.get('cloud'))
         # page_size must match the inline page exactly: a shorter first page
         # would mark the PagedList exhausted even though the hub key can
         # still paginate further.
@@ -778,7 +823,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if not key:
                 return [], len(inline)
             try:
-                return self._plex_client.hub_items_with_total(key, limit, offset)
+                page, total = self._plex_client.hub_items_with_total(
+                    key, limit, offset)
+                if cloud:
+                    for it in page:
+                        it['cloud'] = True
+                return page, total
             except Exception as e:
                 xbmc.log('Akasha Aura: hub page fetch failed for {}: {}'
                          .format(key, e), xbmc.LOGWARNING)
@@ -1151,6 +1201,43 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 target=hit, args=(name,) + args, kwargs=kw,
                 daemon=True).start()
 
+    def _cloud_hydrate(self, item):
+        """Merge a Discover/cloud card's full provider record in place
+        (summary, genres, cast, ratings) -- the hub payloads carry thin
+        cards only. Callers own the `cloud_full` one-shot marker; a
+        failed fetch simply keeps the thin fields."""
+        rk = item.get('rating_key')
+        key = item.get('key') or ''
+        if not self._plex_client or not (rk or key):
+            return
+        # Trailer clips key into '<movie>/extras/<clip>' -- the hero and
+        # the detail page show the parent MOVIE's record, not the clip's.
+        if '/extras/' in key:
+            path = key.split('/extras/')[0]
+        elif key:
+            path = key
+        else:
+            path = '/library/metadata/{}'.format(rk)
+        try:
+            fresh = self._plex_client.provider_metadata(path)
+        except Exception:
+            fresh = None
+        if fresh:
+            for key, value in fresh.items():
+                if value and not item.get(key):
+                    item[key] = value
+
+    def _hydrate_cloud_item(self, item):
+        """Background `_cloud_hydrate` for the hero: repaint once the full
+        record is merged so the plot/cast/genres appear without stalling
+        the UI thread on a provider round-trip."""
+        def worker():
+            self._cloud_hydrate(item)
+            # Repaints whatever is focused now -- the dwell may have moved
+            # on, in which case the new card's hero is the right paint.
+            self._update_hero()
+        threading.Thread(target=worker, daemon=True).start()
+
     def _defer_hero(self, delay=0.08):
         """Repaint the hero a beat after a programmatic slot hop.
 
@@ -1198,6 +1285,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if clear_if_empty:
                 self._clear_hero()
             return
+
+        # Discover/cloud cards render thin fields first, then the full
+        # provider record (plot/cast/genres) fades in like Plex's own
+        # progressive hero fill.
+        if item.get('cloud') and not item.get('cloud_full'):
+            # Mark before spawning so a rapid hero repaint does not queue
+            # a second provider fetch for the same card.
+            item['cloud_full'] = True
+            self._hydrate_cloud_item(item)
 
         is_episode = item.get('type') == 'episode'
         title = item.get('show_title') if is_episode else item.get('title')
@@ -1317,6 +1413,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if item['type'] == 'track':
             self._play_track(item)
             return
+        # Cloud cards need their full provider record before the detail
+        # page opens -- its local-server follow-up calls stay honest
+        # no-ops, but the page at least paints Plex's metadata.
+        if item.get('cloud') and not item.get('cloud_full'):
+            item['cloud_full'] = True
+            self._cloud_hydrate(item)
         if item['type'] in ('show', 'season'):
             self._open_show(item)
         elif item['type'] == 'episode' and item.get('grandparent_rating_key'):

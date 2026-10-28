@@ -297,7 +297,27 @@ class PlexClient:
             # resolve the continuation endpoint against the provider base.
             if hub['key'] and not hub['key'].startswith('http'):
                 hub['key'] = self.DISCOVER_BASE + hub['key']
+            # Cloud cards are thin (no summary/Genre/Role) and live on the
+            # provider, not the local server -- flagged so the hero/detail
+            # hydrate them from provider_metadata() instead of local APIs.
+            hub['cloud'] = True
+            for it in hub.get('items') or []:
+                it['cloud'] = True
         return hubs
+
+    def provider_metadata(self, key):
+        """Full record for a Discover/cloud item (summary, genres, cast,
+        ratings) -- the promoted-hub payloads carry thin cards only."""
+        if not key:
+            return None
+        path = key if key.startswith('http') else self.DISCOVER_BASE + key
+        data = self._request(path, {'includeRatings': 1})
+        items = self._metadata_list(data)
+        if not items:
+            return None
+        for it in items:
+            it['cloud'] = True
+        return items[0]
 
     def section_hubs(self, section_key, hub_count=24, per_hub=16):
         """The per-library hubs Plex shows on a library's Recommended tab."""
