@@ -1367,6 +1367,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         detail._active_season = 0
         detail._pending_season_index = season_index
         detail.exit_to_sidebar = False
+        # The detail instance is cached: reset the flag it raises when a
+        # video starts, otherwise every later visit would close the whole
+        # window again and re-arm the restore loop.
+        detail.playback_started = False
         detail.doModal()
         # Detail-page mutations (watched toggle) live on the shared item
         # dict; push them onto the originating card so the row badge
@@ -3587,6 +3591,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.on_select = self._open_search_result
         search.on_person = self._open_person_page
         search.on_genre = self._open_genre_result
+        # Cached instance: clear the flag a playback launch leaves set,
+        # or closing the search later re-triggers the restore loop.
+        search.playback_started = False
         search.doModal()
         if getattr(search, 'playback_started', False):
             self.playback_started = True
