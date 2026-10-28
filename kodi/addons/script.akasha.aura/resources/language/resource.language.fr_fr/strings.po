@@ -1889,3 +1889,8 @@ msgstr "TV en direct"
 msgctxt "#33625"
 msgid "Discover"
 msgstr "Découvrir"
+
+# Piste audio
+msgctxt "#33626"
+msgid "Audio Stream"
+msgstr "Piste audio"

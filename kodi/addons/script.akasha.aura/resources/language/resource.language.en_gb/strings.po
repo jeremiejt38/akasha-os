@@ -1889,3 +1889,8 @@ msgstr ""
 msgctxt "#33625"
 msgid "Discover"
 msgstr ""
+
+# Piste audio
+msgctxt "#33626"
+msgid "Audio Stream"
+msgstr ""

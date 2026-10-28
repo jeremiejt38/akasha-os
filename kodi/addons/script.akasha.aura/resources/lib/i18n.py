@@ -501,6 +501,7 @@ STRINGS = {
     33623: ('Sur Plex', 'On Plex'),
     33624: ('TV en direct', 'Live TV'),
     33625: ('Découvrir', 'Discover'),
+    33626: ('Piste audio', 'Audio Stream'),
 }
 
 MONTH_ABBRS = {

@@ -105,26 +105,43 @@ MORE_RELATED_ID = 7206
 MORE_GO_SHOW_ID = 7208
 MORE_VERSION_ID = 7209
 MORE_EXTRAS_ID = 7210
+MORE_AUDIO_ID = 7211
 ACTIVITY_PANEL_ID = 7195
 ACTIVITY_ROW_ID = 7196
 ACTIVITY_FEED_ID = 7197
 
-MORE_PANEL_FIRST_ID = MORE_SUBTITLES_ID
+# Plex opens the sheet on its first entry: Audio Stream.
+MORE_PANEL_FIRST_ID = MORE_AUDIO_ID
 
 # Panel geometry (matches Plex's measured sheet) and the aux-control
-# id ranges so _pack_more_panel() can re-pack rows around hidden
+# ids so _pack_more_panel() can re-pack rows around hidden
 # conditional entries (Go to show / Version / Extras).
 MORE_PANEL_TOP = 210
 MORE_PANEL_PITCH = 77
-MORE_ICON_LIGHT_BASE = 7230
-MORE_ICON_DARK_BASE = 7250
-MORE_VALUE_IDS = (7260, 7261)
-# Cloud-only Plex entries (List, Playlist, Manage, More Ways) are hidden in
-# the skin; only Subtitles, File Info and Similar Titles remain reachable.
-MORE_PANEL_IDS = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
-                  MORE_MANAGE_ID, MORE_FILE_INFO_ID, MORE_WAYS_ID,
-                  MORE_RELATED_ID, MORE_GO_SHOW_ID, MORE_VERSION_ID,
-                  MORE_EXTRAS_ID)
+# Icon/value control ids per panel button. The original entries keep
+# the 7230+i / 7250+i scheme; Audio Stream (added later) takes free
+# ids after them so no existing XML id moves.
+MORE_ICON_LIGHT = {MORE_SUBTITLES_ID: 7230, MORE_LIST_ID: 7231,
+                   MORE_PLAYLIST_ID: 7232, MORE_MANAGE_ID: 7233,
+                   MORE_FILE_INFO_ID: 7234, MORE_WAYS_ID: 7235,
+                   MORE_RELATED_ID: 7236, MORE_GO_SHOW_ID: 7237,
+                   MORE_VERSION_ID: 7238, MORE_EXTRAS_ID: 7239,
+                   MORE_AUDIO_ID: 7240}
+MORE_ICON_DARK = {MORE_SUBTITLES_ID: 7250, MORE_LIST_ID: 7251,
+                  MORE_PLAYLIST_ID: 7252, MORE_MANAGE_ID: 7253,
+                  MORE_FILE_INFO_ID: 7254, MORE_WAYS_ID: 7255,
+                  MORE_RELATED_ID: 7256, MORE_GO_SHOW_ID: 7257,
+                  MORE_VERSION_ID: 7258, MORE_EXTRAS_ID: 7259,
+                  MORE_AUDIO_ID: 7241}
+MORE_VALUE_IDS = {MORE_SUBTITLES_ID: (7260, 7261),
+                  MORE_AUDIO_ID: (7262, 7263)}
+# Cloud-only Plex entries (List, Playlist, Manage, More Ways) show a
+# notification; Subtitles, Audio, File Info and Similar Titles work.
+# Plex's order: Audio Stream first, then Subtitles.
+MORE_PANEL_IDS = (MORE_AUDIO_ID, MORE_SUBTITLES_ID, MORE_LIST_ID,
+                  MORE_PLAYLIST_ID, MORE_MANAGE_ID, MORE_FILE_INFO_ID,
+                  MORE_WAYS_ID, MORE_RELATED_ID, MORE_GO_SHOW_ID,
+                  MORE_VERSION_ID, MORE_EXTRAS_ID)
 
 # Plex's action order: Play/Resume | Restart | Watchlist | Rate |
 # Watched | Extras | More -- extras sit next to More, not in the core
@@ -1419,16 +1436,25 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     # ------------------------------------------------------------ actions
 
     def _playable_item(self):
-        """The item Watch/Resume would actually start (OnDeck episode for
-        shows, the item itself otherwise)."""
+        """The item Watch/Resume would actually start: the OnDeck
+        episode when one exists, else the first UNWATCHED episode of the
+        current season -- Plex badges and plays that one, not blindly
+        S1E1 (and never the bare show record, which carries no
+        streams)."""
         if self.mode in ('show', 'season'):
             nxt = self._find_next_episode()
             if nxt:
                 return nxt
-            if self._seasons:
-                self._load_episodes(0)
-                return self._episodes[0] if self._episodes else None
-            return None
+            self._load_seasons()
+            if not self._seasons:
+                return None
+            season_pos = self._active_season \
+                if self.mode == 'season' else 0
+            self._load_episodes(season_pos)
+            for ep in self._episodes:
+                if not ep.get('watched'):
+                    return ep
+            return self._episodes[0] if self._episodes else None
         return self.item
 
     def _watch_label(self):
@@ -1737,11 +1763,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _play(self, start_over=False):
         item = self.item
         if self.mode in ('show', 'season'):
-            item = self._find_next_episode()
-            if not item and self._seasons:
-                # Fall back to the very first episode, like Plex's Play.
-                self._load_episodes(0)
-                item = self._episodes[0] if self._episodes else None
+            # Same pick the badges show: OnDeck episode, else first
+            # unwatched of the season -- Plex's Play starts the next
+            # episode, not blindly S1E1.
+            item = self._playable_item()
             if not item:
                 xbmcgui.Dialog().notification(
                     'Akasha Aura', i18n.tr(33121),
@@ -1856,13 +1881,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         here each visible row is moved to its packed position."""
         visible = [c for c in MORE_PANEL_IDS if self._panel_entry_visible(c)]
         for slot, cid in enumerate(visible):
-            i = MORE_PANEL_IDS.index(cid)
             top = MORE_PANEL_TOP + MORE_PANEL_PITCH * slot
-            targets = {cid: top,
-                       MORE_ICON_LIGHT_BASE + i: top + 20,
-                       MORE_ICON_DARK_BASE + i: top + 20}
-            if cid == MORE_SUBTITLES_ID:
-                targets.update({v: top for v in MORE_VALUE_IDS})
+            targets = {cid: top}
+            for aux in (MORE_ICON_LIGHT.get(cid), MORE_ICON_DARK.get(cid)):
+                if aux:
+                    targets[aux] = top + 20
+            for v in MORE_VALUE_IDS.get(cid, ()):
+                targets[v] = top
             for aux, y in targets.items():
                 try:
                     ctl = self.getControl(aux)
@@ -1893,10 +1918,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _panel_nav(self, down):
         """MOVE_UP/DOWN inside the More panel: skip entries hidden by
         props -- static XML navigation cannot express that."""
-        order = (MORE_SUBTITLES_ID, MORE_LIST_ID, MORE_PLAYLIST_ID,
-                 MORE_MANAGE_ID, MORE_FILE_INFO_ID, MORE_WAYS_ID,
-                 MORE_RELATED_ID, MORE_GO_SHOW_ID, MORE_VERSION_ID,
-                 MORE_EXTRAS_ID)
+        order = MORE_PANEL_IDS
         try:
             focused = self.getFocusId()
         except RuntimeError:
@@ -1913,6 +1935,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _on_more_entry(self, control_id):
         self._close_more_menu()
+        if control_id == MORE_AUDIO_ID:
+            self._pick_audio()
+            return
         if control_id == MORE_SUBTITLES_ID:
             self._pick_subtitle()
             return
@@ -2029,13 +2054,39 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 lines.append('{} : {}'.format(label, item[key]))
         aura_menu.message(self, i18n.tr(33116), '[CR]'.join(lines))
 
+    def _hydrate_stream_labels(self, src):
+        """On Deck / children records carry Media but no Stream detail,
+        so their audio_label is empty and their subtitle_label falls
+        back to 'Off' -- Plex badges the playable episode's REAL tracks
+        ('French (EAC3 5.1)', 'French Forced (SRT)'). One full metadata
+        fetch fills the labels; the _streams_checked flag keeps picks
+        and re-renders from refetching."""
+        if not src or src.get('_streams_checked'):
+            return
+        if not self.client or not src.get('rating_key') \
+                or src.get('audio_label'):
+            return
+        src['_streams_checked'] = True
+        try:
+            full = self.client.metadata_item(src['rating_key']) or {}
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: stream labels failed: {}'
+                     .format(e), xbmc.LOGWARNING)
+            return
+        for key in ('video_label', 'audio_label', 'subtitle_label'):
+            if full.get(key):
+                src[key] = full[key]
+
     def _layout_media_badges(self, item):
         """Media badges, right-packed like Plex (video, audio,
         subtitles). Re-runnable: _pick_subtitle() calls it again so the
-        pill follows the newly selected default stream."""
-        video = item.get('video_label') or ''
-        audio = item.get('audio_label') or ''
-        subs = item.get('subtitle_label') or ''
+        pill follows the newly selected default stream. Plex reads the
+        streams of the episode Watch would start on show pages."""
+        src = self._playable_item() or item
+        self._hydrate_stream_labels(src)
+        video = src.get('video_label') or ''
+        audio = src.get('audio_label') or ''
+        subs = src.get('subtitle_label') or ''
         badge_x = 1890
         for text, bg_id, lb_id, ic_id in ((subs, 7054, 7055, 7057),
                                           (audio, 7052, 7053, 7056),
@@ -2063,6 +2114,59 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailAudioBadge', '1' if audio else '')
         _set(self, 'AuraDetailSubsBadge', '1' if subs else '')
         _set(self, 'AuraDetailSubsValue', subs or i18n.tr(33202))
+        _set(self, 'AuraDetailAudioValue', audio or i18n.tr(33203))
+
+    def _pick_audio(self):
+        """Plex's More>Audio Stream picker: one row per audio track
+        ('French (EAC3 5.1)'), the current default marked with a
+        check; the choice persists as the part's default audio
+        (audioStreamID) so playback picks it up like Plex."""
+        item = self._playable_item() or self.item
+        if not self.client or not item.get('rating_key'):
+            return
+        fetch = getattr(self.client, 'item_audio', None)
+        apply_sel = getattr(self.client, 'select_audio', None)
+        if not fetch or not apply_sel:
+            return
+        try:
+            part_id, tracks = fetch(item['rating_key'])
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: audio list failed: {}'
+                     .format(e), xbmc.LOGWARNING)
+            return
+        if not part_id or not tracks:
+            return
+        entries = []
+        stream_ids = []
+        for s in tracks:
+            language = s.get('language') or s.get('languageTag') or ''
+            codec = str(s.get('codec') or '').upper()
+            layout = {2: '2.0', 6: '5.1', 8: '7.1'}.get(
+                s.get('channels'), str(s.get('channels') or ''))
+            inner = ' '.join(p for p in (codec, layout) if p)
+            label = ' '.join(
+                p for p in (language,
+                            '({})'.format(inner) if inner else '')
+                if p) or i18n.tr(33201)
+            if s.get('selected'):
+                label += '  ✓'
+            entries.append(label)
+            stream_ids.append(s.get('id'))
+        pos = aura_menu.select(self, i18n.tr(33626), entries)
+        if pos < 0:
+            return
+        try:
+            apply_sel(part_id, stream_ids[pos])
+            # The badge + More-row value follow the new default, same
+            # way Plex re-reads the part after the pick.
+            new_label = entries[pos].replace('  ✓', '')
+            item['audio_label'] = new_label
+            if item is not self.item:
+                self.item['audio_label'] = new_label
+            self._layout_media_badges(self.item)
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: audio pick failed: {}'
+                     .format(e), xbmc.LOGWARNING)
 
     def _pick_subtitle(self):
         """Plex's More>Subtitles picker: 'Off' plus one row per stream

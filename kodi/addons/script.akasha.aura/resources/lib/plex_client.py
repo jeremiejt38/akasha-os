@@ -1090,6 +1090,25 @@ class PlexClient:
                     return part.get('id'), subs
         return None, []
 
+    def item_audio(self, rating_key):
+        """Audio streams of the item's first playable part, for the
+        More-panel picker: (part_id, [raw Stream dicts, streamType=2])."""
+        data = self._request('/library/metadata/{}'.format(rating_key))
+        mc = self._media_container(data)
+        for video in mc.get('Metadata', []):
+            for media in video.get('Media', []):
+                for part in media.get('Part', []):
+                    tracks = [s for s in part.get('Stream', [])
+                              if str(s.get('streamType')) == '2']
+                    return part.get('id'), tracks
+        return None, []
+
+    def select_audio(self, part_id, stream_id):
+        """Plex's default audio track picker:
+        PUT /library/parts/<id>?audioStreamID=<stream>."""
+        self._request('/library/parts/{}'.format(part_id),
+                      {'audioStreamID': stream_id or 0}, method='PUT')
+
     def select_subtitle(self, part_id, stream_id):
         """Plex's default subtitle track picker:
         PUT /library/parts/<id>?subtitleStreamID=<stream> ('Off' = 0)."""

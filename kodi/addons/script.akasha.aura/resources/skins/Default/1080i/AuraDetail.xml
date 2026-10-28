@@ -1543,6 +1543,64 @@
                 <label>$INFO[Window.Property(AuraDetailSubsValue)]</label>
                 <visible>Control.HasFocus(7200)</visible>
             </control>
+            <!-- Audio Stream: Plex's first More-actions entry, same
+                 icon + right-value row shape as Subtitles. -->
+            <control type="button" id="7211">
+                <left>1314</left>
+                <top>210</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33626]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image" id="7240">
+                <left>1338</left>
+                <top>230</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>badge-audio.png</texture>
+                <visible>!Control.HasFocus(7211)</visible>
+            </control>
+            <control type="image" id="7241">
+                <left>1338</left>
+                <top>230</top>
+                <width>24</width>
+                <height>24</height>
+                <texture colordiffuse="FF1F1614">badge-audio.png</texture>
+                <visible>Control.HasFocus(7211)</visible>
+            </control>
+            <control type="label" id="7262">
+                <left>1340</left>
+                <top>210</top>
+                <width>456</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <align>right</align>
+                <aligny>center</aligny>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(AuraDetailAudioValue)]</label>
+                <visible>!Control.HasFocus(7211)</visible>
+            </control>
+            <control type="label" id="7263">
+                <left>1340</left>
+                <top>210</top>
+                <width>456</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <align>right</align>
+                <aligny>center</aligny>
+                <textcolor>9914161F</textcolor>
+                <label>$INFO[Window.Property(AuraDetailAudioValue)]</label>
+                <visible>Control.HasFocus(7211)</visible>
+            </control>
             <control type="button" id="7201">
                 <left>1314</left>
                 <top>287</top>
