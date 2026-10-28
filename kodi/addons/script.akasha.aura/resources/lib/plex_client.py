@@ -319,6 +319,41 @@ class PlexClient:
             it['cloud'] = True
         return items[0]
 
+    EPG_BASE = 'https://epg.provider.plex.tv'
+
+    def live_channels(self):
+        """Plex's free linear channels (the rail's On Plex > Live TV
+        entry): /lineups/plex/channels lists every FAST channel the
+        account can tune. Normalised to grid dicts (type 'channel')
+        carrying the HLS tune URL from the Media Part key -- playback
+        needs inputstream.adaptive (documented LibreELEC limitation,
+        same as cloud trailers)."""
+        data = self._request(self.EPG_BASE + '/lineups/plex/channels')
+        mc = self._media_container(data)
+        out = []
+        for raw in mc.get('Channel', []):
+            if raw.get('hidden') in (True, 'true', 'True', '1', 1):
+                continue
+            part_key = ''
+            for media in raw.get('Media', []):
+                for part in media.get('Part', []):
+                    if part.get('key'):
+                        part_key = part['key']
+                        break
+                if part_key:
+                    break
+            out.append({
+                'type': 'channel',
+                'title': raw.get('title') or '',
+                'channel_id': raw.get('id'),
+                'summary': raw.get('summary') or '',
+                'thumb_url': raw.get('thumb') or raw.get('coverPoster') or '',
+                'fanart_url': raw.get('art') or '',
+                'tune_url': self.EPG_BASE + part_key +
+                '?X-Plex-Token=' + self.token if part_key else '',
+            })
+        return out
+
     def section_hubs(self, section_key, hub_count=24, per_hub=16):
         """The per-library hubs Plex shows on a library's Recommended tab."""
         data = self._request('/hubs/sections/{}'.format(section_key), {

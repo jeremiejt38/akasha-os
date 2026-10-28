@@ -254,6 +254,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_sections = []
         self._all_divert_sections = []
         self._divert_playlists = []
+        # On Plex cloud entries (Live TV / Discover): rail index of the
+        # segment divider and the lazily fetched channel list.
+        self._sidebar_onplex_index = None
+        self._live_channels = None
         self._divert_active_section = 0
         self._divert_items = []
         # What _divert_items/_divert_paged currently hold: 'browse' is the
@@ -703,8 +707,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return [], None
             return None, None
         try:
-            if section and section.get('type') == 'playlist':
-                return [], None  # playlists have no recommendation hubs
+            if section and section.get('type') in ('playlist', 'livetv'):
+                return [], None  # playlists/live TV have no recommendation hubs
             if section:
                 hubs = self._plex_client.section_hubs(section['key'])
             elif self._home_tab == HOME_TAB_TRENDING:
@@ -1628,8 +1632,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         error = None
         try:
-            if section.get('type') == 'playlist':
-                genres = []  # no genre directory for playlists
+            if section.get('type') in ('playlist', 'livetv'):
+                genres = []  # no genre directory for playlists/live TV
             elif self._connector_client:
                 genres = divert_source.parse_genres(
                     self._connector_client.section_genres(section['key']))
@@ -1738,6 +1742,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _collections_paged(self, section):
         """PagedList over the section's Plex collections (Directory items)."""
         def fetch(offset, limit):
+            if section.get('type') in ('playlist', 'livetv'):
+                return [], 0  # pseudo-sections have no collections
             if self._plex_client:
                 return self._plex_client.section_collections_with_total(
                     section['key'], limit=limit, offset=offset)
@@ -2238,18 +2244,41 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         sidebar.addItem(header_item)
 
         for section in self._divert_sections:
+            # The live-TV pseudo-section lives under the 'On Plex'
+            # divider (added lazily by _open_live_tv), never among the
+            # library rows. It stays tail-appended in _divert_sections
+            # so pos->index mapping still resolves every visible row.
+            if section.get('type') == 'livetv':
+                continue
             li = xbmcgui.ListItem(section['title'])
             li.setArt({'icon': self._divert_section_icon(section)})
             # Real sections get the '...' kebab on the focused row --
             # Left opens _sidebar_item_menu (pin/reorder). The playlists
             # pseudo-entry has no pin semantics, so no affordance.
-            if section.get('type') != 'playlist':
+            if section.get('type') not in ('playlist', 'livetv'):
                 li.setProperty('is_library', '1')
             sidebar.addItem(li)
 
         more_item = xbmcgui.ListItem(i18n.tr(33007))
         more_item.setArt({'icon': 'icon-more.png'})
         sidebar.addItem(more_item)
+
+        # Plex's "On Plex" segment below the libraries: a second divider
+        # then the cloud Live TV + Discover entries (reference/sidebar/
+        # scroll_down_*). Direct Plex only -- the connector has no cloud
+        # endpoints.
+        self._sidebar_onplex_index = None
+        if self._plex_client:
+            self._sidebar_onplex_index = sidebar.size()
+            onplex_header = xbmcgui.ListItem(i18n.tr(33623))
+            onplex_header.setProperty('is_header', '1')
+            sidebar.addItem(onplex_header)
+            livetv_item = xbmcgui.ListItem(i18n.tr(33624))
+            livetv_item.setArt({'icon': 'icon-livetv.png'})
+            sidebar.addItem(livetv_item)
+            discover_item = xbmcgui.ListItem(i18n.tr(33625))
+            discover_item.setArt({'icon': 'icon-discover.png'})
+            sidebar.addItem(discover_item)
 
     def _divert_section_icon(self, section):
         """Return a distinct icon name for a library section.
@@ -2261,6 +2290,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         title = (section.get('title') or '').lower()
         if section.get('type') == 'playlist':
             return 'icon-playlists.png'
+        if section.get('type') == 'livetv':
+            return 'icon-livetv.png'
         if section.get('type') == 'artist':
             return 'icon-music.png'
         if 'anime' in title:
@@ -2299,11 +2330,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             lambda: self._divert_section_page_uncached(section, offset, limit))
 
     def _divert_section_page_uncached(self, section, offset, limit):
-        if section.get('type') == 'playlist':
-            # The playlists pseudo-section pages over the prefetched
-            # list -- /playlists itself has no pagination.
-            return (self._divert_playlists[offset:offset + limit],
-                    len(self._divert_playlists))
+        if section.get('type') in ('playlist', 'livetv'):
+            # Both pseudo-sections page over a prefetched list --
+            # /playlists and the EPG lineup have no pagination.
+            pool = (self._live_channels if section.get('type') == 'livetv'
+                    else self._divert_playlists) or []
+            return (pool[offset:offset + limit], len(pool))
         unwatched = self._divert_filter_unwatched
         if self._connector_client:
             raw = self._connector_client.section_items(
@@ -3560,10 +3592,25 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if pos == DIVERT_SIDEBAR_LIBS_HEADER_INDEX:
             return
-        more_index = len(self._divert_sections) + DIVERT_SIDEBAR_LIBS_OFFSET
+        # More sits after the *displayed* sections -- tail-appended
+        # pseudo-sections (live TV) populate no sidebar row, so they
+        # must not shift the More/On Plex positions.
+        display_count = sum(
+            1 for s in self._divert_sections if s.get('type') != 'livetv')
+        more_index = display_count + DIVERT_SIDEBAR_LIBS_OFFSET
         if pos == more_index:
             self._open_more()
             return
+        if self._sidebar_onplex_index is not None:
+            rel = pos - self._sidebar_onplex_index
+            if rel == 0:
+                return  # 'On Plex' divider
+            if rel == 1:
+                self._open_live_tv()
+                return
+            if rel == 2:
+                self._open_discover()
+                return
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
         if 0 <= section_index < len(self._divert_sections):
             self._activate_library(section_index)
@@ -4120,8 +4167,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not (0 <= section_index < len(self._divert_sections)):
             return
         section = self._divert_sections[section_index]
-        # The playlists pseudo-entry has no pin/reorder semantics.
-        if section.get('type') == 'playlist':
+        # The playlists/live-TV pseudo-entries have no pin semantics.
+        if section.get('type') in ('playlist', 'livetv'):
             return
         key = section['key']
         title = section['title']
@@ -4205,10 +4252,92 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         # Append the unpicked section for this session so the existing
         # index-based activation path can open it; _load_divertissement()
-        # restores the pinned-only list on the next reload.
+        # restores the pinned-only list on the next reload. Pseudo-
+        # sections (live TV) must stay tail-appended -- the sidebar only
+        # renders real sections, so a pseudo entry left mid-list would
+        # shift every pos->index mapping after it.
+        livetv_tail = [s for s in self._divert_sections
+                       if s.get('type') == 'livetv']
+        self._divert_sections = [s for s in self._divert_sections
+                                 if s.get('type') != 'livetv']
         self._divert_sections.append(unpinned[idx])
+        self._divert_sections.extend(livetv_tail)
         self._populate_sidebar()
-        self._activate_library(len(self._divert_sections) - 1)
+        self._activate_library(
+            len(self._divert_sections) - 1 - len(livetv_tail))
+
+    def _open_discover(self):
+        """Sidebar 'Discover' (On Plex): Plex's cloud browse surface.
+        The closest surface we render is the Accueil 'Tendances' tab,
+        which already displays the Discover provider hubs."""
+        self._activate_home()
+        if self._home_tab != HOME_TAB_TRENDING:
+            self._set_home_tab(HOME_TAB_TRENDING)
+        # Ring the rail's Discover row rather than Accueil while the
+        # cloud content is shown.
+        self.setProperty('DivertActiveLibrary', i18n.tr(33625))
+        if self._sidebar_onplex_index is not None:
+            self._set_sidebar_selection(self._sidebar_onplex_index + 2)
+
+    def _open_live_tv(self):
+        """Sidebar 'Live TV' (On Plex): Plex's free linear channels.
+        The grid pages over the prefetched lineup like the playlists
+        pseudo-section; selecting a channel tunes its HLS URL."""
+        if not self._plex_client:
+            return
+        if self._live_channels is None:
+            try:
+                self._live_channels = self._plex_client.live_channels()
+            except Exception as e:
+                xbmc.log('Akasha Aura: live channels fetch failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+                self._live_channels = []
+        if not self._live_channels:
+            aura_menu.message(self, i18n.tr(33556), i18n.tr(33555),
+                              button=i18n.tr(33020))
+            return
+        # Transient pseudo-section (same trick as _open_more) but the
+        # sidebar is NOT repopulated: the rail entry stays under the
+        # 'On Plex' divider instead of being re-listed as a library.
+        # Kept tail-appended (see _open_more) so pos->index mapping is
+        # unaffected by its presence.
+        self._divert_sections = [s for s in self._divert_sections
+                                 if s.get('type') != 'livetv']
+        section = {'key': 'livetv', 'type': 'livetv',
+                   'title': i18n.tr(33624)}
+        self._divert_sections.append(section)
+        index = len(self._divert_sections) - 1
+        self._divert_view = 'library'
+        self.setProperty('DivertView', 'library')
+        self.setProperty('DivertActiveLibrary', section['title'])
+        self.addon.setSetting('divert.last_view', 'library')
+        self._select_divert_section(index)
+        if self._sidebar_onplex_index is not None:
+            self._set_sidebar_selection(self._sidebar_onplex_index + 1)
+        self._sync_navigation()
+        try:
+            self.getControl(3400).setLabel(section['title'])
+        except RuntimeError:
+            pass
+        self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
+
+    def _play_channel(self, item):
+        """Linear Plex channel: tune the HLS URL. Needs
+        inputstream.adaptive for demuxing -- absent on the LibreELEC
+        build, so the stream drops back to the grid (documented
+        limitation, same class as cloud trailers)."""
+        url = item.get('tune_url')
+        if not url:
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', i18n.tr(33075),
+                xbmcgui.NOTIFICATION_INFO, 2000)
+            return
+        li = xbmcgui.ListItem(item.get('title') or '')
+        li.setMimeType('application/vnd.apple.mpegurl')
+        self.playback_started = True
+        self._playback_item = item
+        self.close()
+        xbmc.Player().play(url, li)
 
     def _manage_libraries(self):
         """Show a dialog to pin/unpin and reorder every library section."""
@@ -4316,6 +4445,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if item.get('type') == 'playlist':
             self._open_playlist(item)
+            return
+        if item.get('type') == 'channel':
+            self._play_channel(item)
             return
         if item.get('type') in ('artist', 'album'):
             self._open_music_node(item)

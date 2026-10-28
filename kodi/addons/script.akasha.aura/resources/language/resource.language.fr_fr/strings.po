@@ -1874,3 +1874,18 @@ msgstr "Échec du changement de profil"
 msgctxt "#33622"
 msgid "Profile: {}"
 msgstr "Profil : {}"
+
+# Sur Plex
+msgctxt "#33623"
+msgid "On Plex"
+msgstr "Sur Plex"
+
+# TV en direct
+msgctxt "#33624"
+msgid "Live TV"
+msgstr "TV en direct"
+
+# Découvrir
+msgctxt "#33625"
+msgid "Discover"
+msgstr "Découvrir"

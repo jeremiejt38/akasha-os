@@ -497,6 +497,10 @@ STRINGS = {
     33620: ('Code PIN incorrect', 'Incorrect PIN'),
     33621: ('Échec du changement de profil', 'Profile switch failed'),
     33622: ('Profil : {}', 'Profile: {}'),
+    # On Plex rail segment (cloud entries below the libraries)
+    33623: ('Sur Plex', 'On Plex'),
+    33624: ('TV en direct', 'Live TV'),
+    33625: ('Découvrir', 'Discover'),
 }
 
 MONTH_ABBRS = {
