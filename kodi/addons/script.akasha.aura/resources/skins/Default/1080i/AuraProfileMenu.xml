@@ -87,7 +87,7 @@
                         <aligny>center</aligny>
                         <font>font_aura_mini_bold</font>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>FF1A1310</textcolor>
+                        <textcolor>FF10131A</textcolor>
                         <wrapmultiline>false</wrapmultiline>
                     </control>
                 </focusedlayout>

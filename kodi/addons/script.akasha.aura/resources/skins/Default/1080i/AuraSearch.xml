@@ -601,7 +601,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel0),1) + !Control.HasFocus(8120)</visible>
             </control>
@@ -609,7 +609,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8120)</visible>
             </control>
@@ -638,7 +638,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel1),1) + !Control.HasFocus(8121)</visible>
             </control>
@@ -646,7 +646,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8121)</visible>
             </control>
@@ -675,7 +675,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel2),1) + !Control.HasFocus(8122)</visible>
             </control>
@@ -683,7 +683,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8122)</visible>
             </control>
@@ -712,7 +712,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel3),1) + !Control.HasFocus(8123)</visible>
             </control>
@@ -720,7 +720,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8123)</visible>
             </control>
@@ -749,7 +749,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel4),1) + !Control.HasFocus(8124)</visible>
             </control>
@@ -757,7 +757,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8124)</visible>
             </control>
@@ -786,7 +786,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel5),1) + !Control.HasFocus(8125)</visible>
             </control>
@@ -794,7 +794,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8125)</visible>
             </control>
@@ -823,7 +823,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF0DA0E5</textcolor>
+                <textcolor>FFE5A00D</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>String.IsEqual(Window.Property(AuraSearchPillSel6),1) + !Control.HasFocus(8126)</visible>
             </control>
@@ -831,7 +831,7 @@
                 <top>48</top><height>52</height>
                 <font>font_aura_mini_bold</font>
                 <align>center</align><aligny>center</aligny>
-                <textcolor>FF1F1614</textcolor>
+                <textcolor>FF14161F</textcolor>
                 <wrapmultiline>false</wrapmultiline>
                 <visible>Control.HasFocus(8126)</visible>
             </control>
@@ -946,7 +946,7 @@
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FF0DA0E5</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
@@ -979,7 +979,7 @@
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FF0DA0E5</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
                 </control></itemlayout>
@@ -1077,7 +1077,7 @@
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FF0DA0E5</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
@@ -1110,7 +1110,7 @@
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FF0DA0E5</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
@@ -1220,7 +1220,7 @@
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FF0DA0E5</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
@@ -1253,7 +1253,7 @@
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FF0DA0E5</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                     <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
                 </control></focusedlayout>

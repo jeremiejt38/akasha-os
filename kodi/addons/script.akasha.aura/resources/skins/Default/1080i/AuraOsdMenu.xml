@@ -106,7 +106,7 @@
                         <aligny>center</aligny>
                         <font>font_aura_mini</font>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>FF1A1310</textcolor>
+                        <textcolor>FF10131A</textcolor>
                         <visible>!String.IsEqual(ListItem.Property(header),1)</visible>
                     </control>
                     <control type="image">
@@ -125,7 +125,7 @@
                         <aligny>center</aligny>
                         <font>font_aura_tiny</font>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>AA1A1310</textcolor>
+                        <textcolor>AA10131A</textcolor>
                         <visible>String.IsEqual(ListItem.Property(header),1)</visible>
                     </control>
                 </focusedlayout>

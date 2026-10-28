@@ -4368,7 +4368,7 @@ def _unreleased_label(item):
         return ''
     if ts <= time.time():
         return ''
-    return '[COLOR FF0DA0E5]{}[/COLOR]'.format(
+    return '[COLOR FFE5A00D]{}[/COLOR]'.format(
         i18n.tr(33600).format(i18n.fmt_air_date(str(oa)[:10])))
 
 

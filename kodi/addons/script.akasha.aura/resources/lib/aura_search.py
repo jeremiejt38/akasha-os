@@ -205,8 +205,16 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         # worker and the generation counter drops stale results.
         self._search_gen = getattr(self, '_search_gen', 0) + 1
         if self.query:
+            # Plex flips the page instantly: pills replace "Popular
+            # Searches" and the left column swaps history for text
+            # suggestions -- neither waits on the network fetch.
+            _set(self, 'AuraSearchHasQuery', '1')
+            _set(self, 'AuraSearchEmpty', '')
+            self._results = []
+            self._render_recent()
             self._launch_search(self._search_gen)
         else:
+            _set(self, 'AuraSearchHasQuery', '')
             # Plex fills the empty results zone with suggested content.
             self._results = self._suggestions()
             self._render_results()
@@ -219,10 +227,6 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._results = results[:24]
             self._render_results()
         threading.Thread(target=worker, daemon=True).start()
-
-    def _run_search(self):
-        self._results = self._collect_results()[:24]
-        self._render_results()
 
     def _collect_results(self):
         """Section fetches run in parallel (bounded by the slowest one)

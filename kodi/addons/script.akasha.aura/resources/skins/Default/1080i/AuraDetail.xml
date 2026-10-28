@@ -1409,7 +1409,7 @@
                     <height>26</height>
                     <font>font_aura_tiny</font>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>DD1A1310</textcolor>
+                    <textcolor>DD10131A</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
@@ -1419,7 +1419,7 @@
                     <height>28</height>
                     <font>font_aura_mini_bold</font>
                     <label>$INFO[ListItem.Property(entrytitle)]</label>
-                    <textcolor>FF1A1310</textcolor>
+                    <textcolor>FF10131A</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
@@ -1429,7 +1429,7 @@
                     <height>24</height>
                     <font>font_aura_tiny</font>
                     <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>991A1310</textcolor>
+                    <textcolor>9910131A</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
@@ -1476,7 +1476,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7200</onup>
@@ -1519,7 +1519,7 @@
                 <font>font_aura_mini</font>
                 <align>right</align>
                 <aligny>center</aligny>
-                <textcolor>991F1614</textcolor>
+                <textcolor>9914161F</textcolor>
                 <label>$INFO[Window.Property(AuraDetailSubsValue)]</label>
                 <visible>Control.HasFocus(7200)</visible>
             </control>
@@ -1534,7 +1534,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7200</onup>
@@ -1568,7 +1568,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7201</onup>
@@ -1602,7 +1602,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7202</onup>
@@ -1636,7 +1636,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7203</onup>
@@ -1670,7 +1670,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7204</onup>
@@ -1704,7 +1704,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7205</onup>
@@ -1738,7 +1738,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7206</onup>
@@ -1773,7 +1773,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7208</onup>
@@ -1808,7 +1808,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>68</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
-                <focusedcolor>FF1F1614</focusedcolor>
+                <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
                 <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onup>7209</onup>
