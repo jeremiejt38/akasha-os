@@ -999,12 +999,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             focused = 0
         x = ACTION_ROW_LEFT
         for cid in order:
-            # Plex keeps the labelled Resume/Restart CTA a full white
-            # pill even unfocused (official-live/44,
-            # lecteur/after_back_003); only icon-only actions collapse
-            # back to circles when the cursor leaves the row.
-            always = restart and cid in (WATCH_BUTTON_ID,
-                                         RESTART_BUTTON_ID)
+            # Plex keeps the labelled Resume CTA a full white pill even
+            # unfocused (official-live/44); the Restart action collapses
+            # to a circle like every other icon-only action once the
+            # cursor leaves the row.
+            always = restart and cid == WATCH_BUTTON_ID
             w = self._action_width(cid, cid if always else focused)
             underlay = ACTION_PILL_UNDERLAYS.get(cid)
             if underlay:
