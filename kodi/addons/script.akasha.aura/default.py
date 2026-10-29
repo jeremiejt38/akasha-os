@@ -179,151 +179,165 @@ if __name__ == '__main__':
                 window.doModal()
                 watch_stop.set()
 
-            _run_window()
-            # Playback started from Aura: the window closed itself because
-            # a modal dialog would otherwise cover the fullscreen video.
-            # Wait for playback to end, then re-open Aura where the user
-            # left it -- Plex-style "return to app" after watching.
-            # Meanwhile the reporter keeps the server-side viewOffset
-            # fresh (`/:/timeline`, parity B3) so resume works on any
-            # device, and it survives the Up Next episode chaining below.
-            reporter = timeline_reporter.TimelineReporter()
-            reporter.start()
-            # Initialized out here too: when the window closes without any
-            # playback, the while body never runs and the post-loop cleanup
-            # still reads these names (reporter.finish / persist_selection).
-            last_pos_ms = None
-            latest_item = None
-            latest_selection = None
-            while getattr(window, 'playback_started', False):
-                # Player.play() is asynchronous: wait for the stream to
-                # actually start before watching for its end, otherwise
-                # Aura re-opens instantly and covers the video again.
-                # playback_started deliberately stays True for the whole
-                # session -- including the wait-for-start phase and the
-                # gaps between chained episodes -- so monitors can tell
-                # "Aura closed for playback" apart from "Aura just closed"
-                # and ignore presses that should not open dialogs.
-                waited = 0
-                while not xbmc.Player().isPlayingVideo() and waited < 15000:
-                    xbmc.sleep(200)
-                    waited += 200
-                # Track how much video is left while it plays: when the
-                # item stops, the last polled remaining time tells a
-                # natural episode end (Up Next card, B1) apart from a
-                # user stop (straight back to Aura).
-                remaining_s = None
+            # Aura IS the shell: the native Kodi windows underneath are
+            # permanently covered by the loading overlay
+            # (skin-patches/patch_native_loading.py), so a bare Back-exit
+            # used to strand the user on an eternal "Chargement..." until
+            # Home was pressed again. Supervise the window and reopen it
+            # whenever it closes outside of a playback handoff.
+            monitor = xbmc.Monitor()
+            while not monitor.abortRequested():
+                _run_window()
+                # Playback started from Aura: the window closed itself
+                # because a modal dialog would otherwise cover the
+                # fullscreen video. Wait for playback to end, then re-open
+                # Aura where the user left it -- Plex-style "return to
+                # app" after watching.
+                # Meanwhile the reporter keeps the server-side viewOffset
+                # fresh (`/:/timeline`, parity B3) so resume works on any
+                # device, and it survives the Up Next episode chaining below.
+                reporter = timeline_reporter.TimelineReporter()
+                reporter.start()
+                # Initialized out here too: when the window closes without any
+                # playback, the while body never runs and the post-loop cleanup
+                # still reads these names (reporter.finish / persist_selection).
                 last_pos_ms = None
-                silent = 0
-                was_playing = False
-                skip_shown_for = None
-                # B15: per-show audio/subtitle continuity -- applied once
-                # the player has enumerated its streams, captured
-                # periodically and persisted per show.
-                prefs_applied_for = None
-                latest_selection = None
                 latest_item = None
-                last_capture = 0.0
-                while silent < 4:
-                    if xbmc.Player().isPlayingVideo():
-                        silent = 0
-                        if not was_playing:
-                            # Play-start transition: report now, Plex-style,
-                            # not at the next 10s tick -- a sub-10s play
-                            # still lands a viewOffset for the stop report.
-                            was_playing = True
+                latest_selection = None
+                while getattr(window, 'playback_started', False):
+                    # Player.play() is asynchronous: wait for the stream to
+                    # actually start before watching for its end, otherwise
+                    # Aura re-opens instantly and covers the video again.
+                    # playback_started deliberately stays True for the whole
+                    # session -- including the wait-for-start phase and the
+                    # gaps between chained episodes -- so monitors can tell
+                    # "Aura closed for playback" apart from "Aura just closed"
+                    # and ignore presses that should not open dialogs.
+                    waited = 0
+                    while not xbmc.Player().isPlayingVideo() and waited < 15000:
+                        xbmc.sleep(200)
+                        waited += 200
+                    # Track how much video is left while it plays: when the
+                    # item stops, the last polled remaining time tells a
+                    # natural episode end (Up Next card, B1) apart from a
+                    # user stop (straight back to Aura).
+                    remaining_s = None
+                    last_pos_ms = None
+                    silent = 0
+                    was_playing = False
+                    skip_shown_for = None
+                    # B15: per-show audio/subtitle continuity -- applied once
+                    # the player has enumerated its streams, captured
+                    # periodically and persisted per show.
+                    prefs_applied_for = None
+                    latest_selection = None
+                    latest_item = None
+                    last_capture = 0.0
+                    while silent < 4:
+                        if xbmc.Player().isPlayingVideo():
+                            silent = 0
+                            if not was_playing:
+                                # Play-start transition: report now, Plex-style,
+                                # not at the next 10s tick -- a sub-10s play
+                                # still lands a viewOffset for the stop report.
+                                was_playing = True
+                                try:
+                                    reporter.tick()
+                                except Exception:
+                                    pass
                             try:
-                                reporter.tick()
-                            except Exception:
+                                total = xbmc.Player().getTotalTime()
+                                if total:
+                                    remaining_s = total - xbmc.Player().getTime()
+                                last_pos_ms = int(xbmc.Player().getTime() * 1000)
+                            except RuntimeError:
                                 pass
-                        try:
-                            total = xbmc.Player().getTotalTime()
-                            if total:
-                                remaining_s = total - xbmc.Player().getTime()
-                            last_pos_ms = int(xbmc.Player().getTime() * 1000)
-                        except RuntimeError:
-                            pass
-                        item = stream_prefs.current_item()
-                        item_key = (item or {}).get('rating_key')
-                        if item_key and item_key != prefs_applied_for:
-                            # Episode boundary: commit the previous item's
-                            # last selection before applying the new one.
-                            try:
-                                stream_prefs.persist_selection(
-                                    xbmcaddon.Addon(), latest_item,
-                                    latest_selection)
-                            except Exception:
-                                pass
-                            # Streams enumerate ~1s after play() resolves.
-                            xbmc.sleep(1200)
-                            try:
-                                stream_prefs.apply_saved_streams(
-                                    xbmcaddon.Addon(), item)
-                            except Exception:
-                                pass
-                            prefs_applied_for = item_key
-                        if item_key:
-                            latest_item = item
-                        if time.time() - last_capture >= 10:
-                            last_capture = time.time()
-                            try:
-                                sel = stream_prefs.capture_selection()
-                                if sel:
-                                    latest_selection = sel
-                            except Exception:
-                                pass
-                        # B2: inside an intro/credits marker, float the
-                        # Plex-style skip chip -- once per marker window,
-                        # and never again after a Back-dismiss.
-                        marker = skip_marker.update_active_marker()
-                        skip_key = ((marker.get('type'),
-                                     marker.get('start_ms'))
-                                    if marker else None)
-                        if skip_key and skip_key != skip_shown_for:
-                            skip_shown_for = skip_key
-                            xbmc.executebuiltin(
-                                'RunScript(script.akasha.aura,skipmarker)')
-                        elif not skip_key:
-                            skip_shown_for = None
-                    # A quality switch stop/starts the player; the OSD menu
-                    # holds this property across the gap so the brief silence
-                    # isn't read as end-of-playback.
-                    elif (xbmcgui.Window(10000)
-                          .getProperty('AuraSwitchingPlayback')):
-                        silent = 0
-                        # Re-report on resume: the new stream starts at a
-                        # different position/quality.
-                        was_playing = False
-                    else:
-                        was_playing = False
-                        silent += 1
-                    xbmc.sleep(500)
-                # Plex reports state=stopped the moment playback ends --
-                # before the Up Next card even decides -- so the server's
-                # viewOffset/Now Playing state lands while it matters.
+                            item = stream_prefs.current_item()
+                            item_key = (item or {}).get('rating_key')
+                            if item_key and item_key != prefs_applied_for:
+                                # Episode boundary: commit the previous item's
+                                # last selection before applying the new one.
+                                try:
+                                    stream_prefs.persist_selection(
+                                        xbmcaddon.Addon(), latest_item,
+                                        latest_selection)
+                                except Exception:
+                                    pass
+                                # Streams enumerate ~1s after play() resolves.
+                                xbmc.sleep(1200)
+                                try:
+                                    stream_prefs.apply_saved_streams(
+                                        xbmcaddon.Addon(), item)
+                                except Exception:
+                                    pass
+                                prefs_applied_for = item_key
+                            if item_key:
+                                latest_item = item
+                            if time.time() - last_capture >= 10:
+                                last_capture = time.time()
+                                try:
+                                    sel = stream_prefs.capture_selection()
+                                    if sel:
+                                        latest_selection = sel
+                                except Exception:
+                                    pass
+                            # B2: inside an intro/credits marker, float the
+                            # Plex-style skip chip -- once per marker window,
+                            # and never again after a Back-dismiss.
+                            marker = skip_marker.update_active_marker()
+                            skip_key = ((marker.get('type'),
+                                         marker.get('start_ms'))
+                                        if marker else None)
+                            if skip_key and skip_key != skip_shown_for:
+                                skip_shown_for = skip_key
+                                xbmc.executebuiltin(
+                                    'RunScript(script.akasha.aura,skipmarker)')
+                            elif not skip_key:
+                                skip_shown_for = None
+                        # A quality switch stop/starts the player; the OSD menu
+                        # holds this property across the gap so the brief silence
+                        # isn't read as end-of-playback.
+                        elif (xbmcgui.Window(10000)
+                              .getProperty('AuraSwitchingPlayback')):
+                            silent = 0
+                            # Re-report on resume: the new stream starts at a
+                            # different position/quality.
+                            was_playing = False
+                        else:
+                            was_playing = False
+                            silent += 1
+                        xbmc.sleep(500)
+                    # Plex reports state=stopped the moment playback ends --
+                    # before the Up Next card even decides -- so the server's
+                    # viewOffset/Now Playing state lands while it matters.
+                    try:
+                        reporter.stopped(last_pos_ms)
+                    except Exception:
+                        pass
+                    if up_next.is_natural_end(remaining_s) \
+                            and not (xbmcgui.Window(10000)
+                                     .getProperty('AuraSwitchingPlayback')) \
+                            and up_next.advance_via_up_next(ADDON_PATH):
+                        # The card played the next episode: stay in playback
+                        # mode and keep supervising the new item.
+                        continue
+                    window.playback_started = False
+                    _run_window()
+                # Playback session over: commit the last stream selection
+                # (B15), then the final state=stopped report commits the
+                # last position before the reporter thread exits.
                 try:
-                    reporter.stopped(last_pos_ms)
+                    stream_prefs.persist_selection(
+                        xbmcaddon.Addon(), latest_item, latest_selection)
                 except Exception:
                     pass
-                if up_next.is_natural_end(remaining_s) \
-                        and not (xbmcgui.Window(10000)
-                                 .getProperty('AuraSwitchingPlayback')) \
-                        and up_next.advance_via_up_next(ADDON_PATH):
-                    # The card played the next episode: stay in playback
-                    # mode and keep supervising the new item.
-                    continue
-                window.playback_started = False
-                _run_window()
-            # Playback session over: commit the last stream selection
-            # (B15), then the final state=stopped report commits the
-            # last position before the reporter thread exits.
-            try:
-                stream_prefs.persist_selection(
-                    xbmcaddon.Addon(), latest_item, latest_selection)
-            except Exception:
-                pass
-            reporter.finish(position_ms=last_pos_ms)
-            del window
+                reporter.finish(position_ms=last_pos_ms)
+                # Bare close outside playback: Aura is the shell and the
+                # native Home beneath is permanently veiled, so reopen
+                # instead of ending the script. waitForAbort debounces a
+                # rapid close-open cycle and keeps Kodi shutdown prompt.
+                if monitor.waitForAbort(0.75):
+                    break
         finally:
             # The reporter is a daemon thread -- without this it would
             # outlive the script and keep pinging for the Kodi session.
@@ -332,6 +346,28 @@ if __name__ == '__main__':
             except Exception:
                 pass
             heartbeat_stop.set()
+            # Shutdown-hang diagnostic: the invoker's "waiting on thread
+            # <ident>" line names no Python name, so pair it with this
+            # dump -- the still-alive thread's ident identifies the code
+            # holding the process open.
+            try:
+                frames = sys._current_frames()
+                for t in threading.enumerate():
+                    if t is threading.current_thread() or not t.is_alive():
+                        continue
+                    xbmc.log('Akasha Aura: exit with thread alive: '
+                             'ident={} name={} daemon={}'.format(
+                                 t.ident, t.name, t.daemon),
+                             xbmc.LOGWARNING)
+                    frame = frames.get(t.ident)
+                    if frame is not None:
+                        import traceback
+                        for line in traceback.format_stack(frame)[-6:]:
+                            xbmc.log('Akasha Aura:   stack: {}'.format(
+                                line.strip().replace('\n', ' | ')),
+                                xbmc.LOGWARNING)
+            except Exception:
+                pass
             try:
                 os.remove(LOCK_FILE)
             except OSError:

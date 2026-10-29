@@ -58,6 +58,7 @@ class HomePressMonitor(xbmc.Monitor):
                 return
             self._pending_single_timer = threading.Timer(
                 DOUBLE_PRESS_WINDOW_SECONDS, self._on_single_timeout)
+            self._pending_single_timer.daemon = True
             self._pending_single_timer.start()
 
     def _on_single_timeout(self):
