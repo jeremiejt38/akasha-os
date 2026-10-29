@@ -615,6 +615,43 @@ class PlexClient:
         })
         return self._metadata_list_with_total(data)
 
+    def hub_search(self, query, limit=50):
+        """Plex's /hubs/search: one relevance-ranked call returning typed
+        hubs (shows, movies, episodes, artists, tracks... plus actor /
+        director tag Directory entries) -- the same endpoint the Android
+        TV app's All tab uses. Returns
+        {'content': [video dicts], 'people': [_person dicts]}."""
+        data = self._request('/hubs/search', {
+            'query': query,
+            'limit': limit,
+        })
+        mc = self._media_container(data)
+        out = {'content': [], 'people': []}
+        for hub in mc.get('Hub') or []:
+            htype = hub.get('type')
+            for raw in hub.get('Metadata') or []:
+                out['content'].append(
+                    self._video_dict(raw, self.server_url, self.token))
+            for raw in hub.get('Directory') or []:
+                name = raw.get('tag') or raw.get('title')
+                if not name:
+                    continue
+                thumb = raw.get('thumb') or ''
+                # Hub Directory thumbs are already absolute URLs; relative
+                # paths resolve against the server like elsewhere.
+                if thumb and not thumb.startswith('http'):
+                    thumb = '{}{}?X-Plex-Token={}'.format(
+                        self.server_url, thumb, self.token)
+                out['people'].append({
+                    '_person': True,
+                    'name': name,
+                    'thumb_url': thumb,
+                    'role': (i18n.tr(33154) if htype == 'director'
+                             else i18n.tr(33127)),
+                    'person_filter': raw.get('filter') or '',
+                })
+        return out
+
     def section_collections_with_total(self, section_key, limit=200, offset=0):
         """JSON payloads list collections under `Metadata` (only XML uses
         `Directory`); same normaliser applies (thumb -> poster, childCount)."""

@@ -12,7 +12,6 @@ Caller sets before doModal():
 - `on_person`    — callback(person dict) for people results
 - `on_genre`     — callback(genre dict) for genre results
 """
-import datetime
 import threading
 
 import xbmc
@@ -248,6 +247,18 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         wanted = _FILTERS[self._filter_index][1]
         if wanted == 'person':
             return self._search_people()[:24]
+        # The All view uses Plex's own /hubs/search (relevance-ranked,
+        # cast-associated people) when the client exposes it -- the
+        # connector path falls back to per-section title scans below.
+        if wanted is None and getattr(self.client, 'hub_search', None):
+            try:
+                merged = self._collect_results_hub()
+            except Exception as e:
+                xbmc.log('Akasha Aura Search: hub search failed: {}'
+                         .format(e), xbmc.LOGWARNING)
+                merged = None
+            if merged is not None:
+                return merged[:24]
         # Server-side `title=` is a raw substring filter: stray
         # whitespace would exclude exact-title hits, so the API sees
         # the stripped query like Plex's own client sends.
@@ -312,6 +323,47 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             results = (side.get('people_r', [])[:8]
                        + side.get('genres_r', [])[:4] + results)
         return results[:24]
+
+    def _collect_results_hub(self):
+        """'/hubs/search' path for the All tab: Plex's own relevance order
+        (shows/episodes/movies first) plus the name-matched people the
+        official app paints in the right column (official-live/30:
+        'rook' yields Michael Rooker / Chad Rook). Items are interleaved
+        content/person so the two-column panel fills media on the left
+        and people on the right like Plex's flat merged list."""
+        hub = self.client.hub_search(self.query.strip())
+        content = hub.get('content') or []
+        people = hub.get('people') or []
+        if not content and not people:
+            return None
+        # The same person comes back once per section (and once per
+        # kind): dedupe by name, combining roles so an actor/director
+        # shows "Actor, Director" like Plex's card.
+        seen = {}
+        for p in people:
+            nm = p.get('name')
+            if not nm:
+                continue
+            prev = seen.get(nm)
+            if prev is None:
+                seen[nm] = p
+            elif p.get('role') and p['role'] not in prev['role']:
+                prev['role'] = '{}, {}'.format(prev['role'], p['role'])
+                if not prev.get('person_filter'):
+                    prev['person_filter'] = p.get('person_filter') or ''
+        people = list(seen.values())
+        try:
+            genres = self._search_genres()[:4]
+        except Exception:
+            genres = []
+        side_items = people + genres
+        merged = []
+        for i in range(max(len(content), len(side_items))):
+            if i < len(content):
+                merged.append(content[i])
+            if i < len(side_items):
+                merged.append(side_items[i])
+        return merged
 
     def _render_results(self):
         _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
@@ -698,14 +750,12 @@ def _set(window, prop, value):
 
 
 def _suggest_sub(item):
-    """Popular-Searches card subtitle like the Plex reference: 'N
-    saison(s)' for a show, the full release date when it is still in
-    the future, otherwise the bare year -- never 'year • type'."""
+    """Popular-Searches card subtitle like the Plex reference
+    (official-live/29-search-empty): 'N saison(s)' for a show, the bare
+    year otherwise -- including future releases ('De Gaulle: Liberte'
+    renders '2026', not the full date)."""
     if item.get('type') == 'show' and item.get('child_count'):
         return i18n.tr_count(item['child_count'], 33128)
-    avail = str(item.get('originally_available_at') or '')[:10]
-    if avail > datetime.date.today().isoformat():
-        return i18n.fmt_air_date(avail)
     return str(item.get('year') or '')
 
 
