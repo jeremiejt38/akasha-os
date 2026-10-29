@@ -94,6 +94,43 @@ def _already_running():
         return False
 
 
+# Script windows are allocated dynamic ids from 13000 up; a healthy Aura
+# session always has one of them as the current dialog. Anything else
+# (0 = none, or a native window id) while doModal() runs means the modal
+# never activated -- the "wedged doModal" seen after a mid-teardown script
+# kill, where the veil stays up forever with a live heartbeat.
+SCRIPT_WINDOW_ID_MIN = 13000
+_MODAL_ACTIVATION_GRACE_S = 10.0
+
+
+def _watch_modal_activation(window):
+    """Force-close a doModal() that never made any script dialog active.
+
+    The supervisor thread is blocked inside doModal so it cannot notice
+    the wedge itself. From here we can: for a short grace window after
+    the modal call begins, the current dialog must become a script
+    window (ours or a child such as the profile sheet). If it doesn't,
+    close() posts the exit and the loop below re-opens Aura cleanly.
+    """
+    deadline = time.time() + _MODAL_ACTIVATION_GRACE_S
+    while time.time() < deadline:
+        try:
+            if xbmc.Player().isPlayingVideo():
+                return  # video owns the screen; Aura closed itself on purpose
+            if xbmcgui.getCurrentWindowDialogId() >= SCRIPT_WINDOW_ID_MIN:
+                return  # a script dialog is up: healthy activation
+        except Exception:
+            pass
+        xbmc.sleep(200)
+    try:
+        xbmc.log('Akasha Aura: modal failed to activate within {:.0f}s, '
+                 'forcing close'.format(_MODAL_ACTIVATION_GRACE_S),
+                 xbmc.LOGWARNING)
+        window.close()
+    except Exception:
+        pass
+
+
 if __name__ == '__main__':
     # "opensettings": the gear-wheel remote button's global keymap entry
     # (dd440e2e section 9), distinct from a plain Home press.
@@ -176,6 +213,9 @@ if __name__ == '__main__':
                 threading.Thread(
                     target=_watch_external_playback,
                     args=(window, watch_stop), daemon=True).start()
+                threading.Thread(
+                    target=_watch_modal_activation,
+                    args=(window,), daemon=True).start()
                 window.doModal()
                 watch_stop.set()
 

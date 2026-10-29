@@ -19,6 +19,7 @@ import time
 
 import xbmc
 import xbmcgui
+import gui_guard
 import aura_menu
 import i18n
 
@@ -1057,7 +1058,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             elif self.mode == 'show':
                 pos = 0
             else:
-                pos = strip.getSelectedPosition()
+                pos = gui_guard.pos(strip)
             strip.reset()
             strip.addItem(xbmcgui.ListItem(i18n.tr(33101)))
             for season in self._seasons:
@@ -1513,11 +1514,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
             self._set_section('content')
         if controlID == EPISODES_LIST_ID and self.mode == 'season':
-            try:
-                pos = self.getControl(EPISODES_LIST_ID) \
-                    .getSelectedPosition()
-            except RuntimeError:
-                pos = -1
+            pos = gui_guard.selpos(self, EPISODES_LIST_ID)
             self._set_hero_episode(pos)
         self._sync_action_row()
         # Kodi never re-evaluates Control.HasFocus(7120) inside a list
@@ -1563,7 +1560,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         elif controlID == SEASON_STRIP_ID:
             self._on_strip_selected()
         elif controlID == SEASONS_LIST_ID:
-            pos = self.getControl(SEASONS_LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, SEASONS_LIST_ID)
             if 0 <= pos < len(self._seasons):
                 self._show_season(pos + 1)
         elif controlID == EPISODES_LIST_ID:
@@ -1572,7 +1569,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._open_person()
         elif controlID == EXTRAS_ROW_ID:
             try:
-                pos = self.getControl(EXTRAS_ROW_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, EXTRAS_ROW_ID)
             except RuntimeError:
                 pos = -1
             self._play_extra(pos)
@@ -1605,7 +1602,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _on_strip_selected(self):
         try:
-            pos = self.getControl(SEASON_STRIP_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, SEASON_STRIP_ID)
         except RuntimeError:
             return
         if pos == 0:
@@ -1667,7 +1664,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _episode_sheet(self):
         try:
-            pos = self.getControl(EPISODES_LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, EPISODES_LIST_ID)
         except RuntimeError:
             return
         if not (0 <= pos < len(self._episodes)):
@@ -1681,7 +1678,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _open_episode(self):
         try:
-            pos = self.getControl(EPISODES_LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, EPISODES_LIST_ID)
         except RuntimeError:
             return
         if not (0 <= pos < len(self._episodes)):
@@ -1818,7 +1815,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if focused in (CAST_LIST_ID, EPISODES_LIST_ID, SEASONS_LIST_ID,
                        SEASON_STRIP_ID):
             try:
-                return self.getControl(focused).getSelectedPosition() == 0
+                return gui_guard.selpos(self, focused) == 0
             except RuntimeError:
                 return False
         return False
@@ -2088,7 +2085,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         """Cast & Crew pick -> Plex-style person page (photo + the
         person's server-side filmography across the video sections)."""
         try:
-            pos = self.getControl(CAST_LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, CAST_LIST_ID)
         except RuntimeError:
             return
         cast = self.item.get('cast') or []
@@ -2382,7 +2379,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         items = (self._related_hubs[hub].get('items') or []
                  if hub < len(self._related_hubs) else [])
         try:
-            pos = self.getControl(RELATED_ROWS[hub]).getSelectedPosition()
+            pos = gui_guard.selpos(self, RELATED_ROWS[hub])
         except RuntimeError:
             return
         if not (0 <= pos < len(items)):

@@ -13,6 +13,7 @@ Both return the selected index or -1 on Back/dismiss.
 
 import xbmc
 import xbmcgui
+import gui_guard
 
 PANEL_ID = 9000
 TITLE_ID = 9005
@@ -167,7 +168,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             # the caller can activate the real sidebar entry.
             try:
                 self.rail_pick = \
-                    self.getControl(9020).getSelectedPosition()
+                    gui_guard.selpos(self, 9020)
             except RuntimeError:
                 self.rail_pick = -1
             self.result = -1
@@ -175,7 +176,7 @@ class AuraMenuWindow(xbmcgui.WindowXMLDialog):
             return
         if controlID == LIST_ID:
             try:
-                self.result = self.getControl(LIST_ID).getSelectedPosition()
+                self.result = gui_guard.selpos(self, LIST_ID)
             except RuntimeError:
                 self.result = -1
             self.close()

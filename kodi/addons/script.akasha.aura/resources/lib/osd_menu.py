@@ -20,6 +20,7 @@ time into Window(10000) properties via store_playback_context().
 import json
 import os
 import sys
+import threading
 import urllib.parse
 import urllib.request
 import uuid
@@ -27,6 +28,7 @@ import uuid
 import xbmc
 import xbmcaddon
 import xbmcgui
+import gui_guard
 import i18n
 
 try:
@@ -75,6 +77,30 @@ def _back_ids():
     # stub used by the unit tests (10=ACTION_PREVIOUS_MENU, 92=ACTION_NAV_BACK).
     return (getattr(xbmcgui, 'ACTION_PREVIOUS_MENU', 10),
             getattr(xbmcgui, 'ACTION_NAV_BACK', 92))
+
+
+def _close_on_playback_end(dialog):
+    """Self-close a transient playback dialog when the video stops.
+
+    These dialogs outlive their purpose the moment playback ends; if one is
+    still open while Kodi tears the GUI down for the Home transition, a
+    queued input callback can hit the window's controls mid-destruction --
+    that race is what SEGV'd ControlList::getSelectedPosition() on
+    2026-10-29. Closing on our own terms first shrinks the window to ~0."""
+    def worker():
+        while xbmc.Player().isPlayingVideo():
+            if getattr(dialog, '_closed', False):
+                return
+            xbmc.sleep(500)
+        if getattr(dialog, '_closed', False):
+            return
+        dialog._closed = True
+        try:
+            dialog.close()
+        except RuntimeError:
+            pass
+
+    threading.Thread(target=worker, daemon=True).start()
 
 
 def _home():
@@ -348,6 +374,7 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
     mode = 'streams'
 
     def onInit(self):
+        self._closed = False
         self._actions = []
         lst = self.getControl(1000)
         lst.reset()
@@ -360,13 +387,14 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         else:
             self.getControl(10).setLabel(i18n.tr(33200))
             self._build_streams(lst)
-        self.setFocusId(1000)
+        gui_guard.focus(self, 1000)
         # Land on the first actionable row -- headers carry no action
         # and Plex never lets them take the selection pill.
         for i, action in enumerate(self._actions):
             if action:
                 lst.selectItem(i)
                 break
+        _close_on_playback_end(self)
 
     # -- item construction ------------------------------------------------
 
@@ -460,26 +488,30 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
     # -- actions ----------------------------------------------------------
 
     def onClick(self, control_id):
-        if control_id != 1000:
+        if control_id != 1000 or self._closed:
             return
-        pos = self.getControl(1000).getSelectedPosition()
+        pos = gui_guard.selpos(self, 1000)
         if not (0 <= pos < len(self._actions)) or not self._actions[pos]:
             return
         kind = self._actions[pos][0]
         if kind == 'audio':
             _jsonrpc('Player.SetAudioStream',
                      {'playerid': 1, 'stream': self._actions[pos][1]})
+            self._closed = True
             self.close()
         elif kind == 'sub':
             _jsonrpc('Player.SetSubtitle', {
                 'playerid': 1, 'subtitle': self._actions[pos][1],
                 'enable': True})
+            self._closed = True
             self.close()
         elif kind == 'builtin':
+            self._closed = True
             self.close()
             xbmc.executebuiltin(
                 'ActivateWindow({})'.format(self._actions[pos][1]))
         elif kind == 'chapter':
+            self._closed = True
             self.close()
             try:
                 xbmc.Player().seekTime(float(self._actions[pos][1]))
@@ -487,6 +519,7 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
                 pass
         elif kind == 'quality':
             _, pid, kbps, res = self._actions[pos]
+            self._closed = True
             self.close()
             self._switch_quality(pid, kbps, res)
         elif kind == 'mode':
@@ -504,6 +537,7 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
 
     def onAction(self, action):
         if action.getId() in _back_ids():
+            self._closed = True
             self.close()
 
     def _switch_quality(self, preset_id, kbps, resolution):
@@ -586,6 +620,7 @@ class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
     it; selecting a chapter seeks, selecting a queued episode jumps."""
 
     def onInit(self):
+        self._closed = False
         self._chapters = _current_chapters()
         self._queue = _queue_items()
         if self._chapters:
@@ -614,15 +649,23 @@ class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
             if i == 0:
                 li.setProperty('playing', '1')
             qlst.addItem(li)
-        try:
-            self.setFocusId(1001 if self._chapters else 1002)
-        except RuntimeError:
-            pass
+        if not self._chapters and not self._queue:
+            # Nothing to show: an open-but-unfocusable dialog is exactly the
+            # state that logged "Control 1002 has been asked to focus, but
+            # it can't" before the teardown SEGV -- bail immediately.
+            self._closed = True
+            self.close()
+            return
+        gui_guard.focus(self, 1001 if self._chapters else 1002)
+        _close_on_playback_end(self)
 
     def onClick(self, control_id):
+        if self._closed:
+            return
         if control_id == 1001:
-            pos = self.getControl(1001).getSelectedPosition()
+            pos = gui_guard.selpos(self, 1001)
             if 0 <= pos < len(self._chapters):
+                self._closed = True
                 self.close()
                 try:
                     xbmc.Player().seekTime(float(
@@ -631,13 +674,17 @@ class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
                 except RuntimeError:
                     pass
         elif control_id == 1002:
-            pos = self.getControl(1002).getSelectedPosition()
+            pos = gui_guard.selpos(self, 1002)
+            self._closed = True
+            self.close()
             if pos > 0:
                 self._play_queue_index(pos)
-            self.close()
 
     def onAction(self, action):
+        if self._closed:
+            return
         if action.getId() in _back_ids():
+            self._closed = True
             self.close()
         elif action.getId() == getattr(xbmcgui, 'ACTION_MOVE_UP', 3):
             try:
@@ -645,9 +692,11 @@ class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 return
             if focus == 1002 and not self._chapters:
+                self._closed = True
                 self.close()
             elif (focus == 1001
-                    and self.getControl(1001).getSelectedPosition() == 0):
+                    and gui_guard.selpos(self, 1001) == 0):
+                self._closed = True
                 self.close()
 
     def _play_queue_index(self, pos):

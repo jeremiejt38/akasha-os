@@ -16,6 +16,7 @@ the detail page does.
 
 import xbmc
 import xbmcgui
+import gui_guard
 import aura_menu
 import i18n
 import osd_menu
@@ -125,7 +126,7 @@ def toggle_watched(win, client, item, control_id):
         return
     item['view_count'] = 0 if watched else 1
     try:
-        li = win.getControl(control_id).getSelectedItem()
+        li = gui_guard.selitem(win, control_id)
         li.getVideoInfoTag().setPlayCount(item['view_count'])
     except Exception:
         pass
@@ -150,7 +151,7 @@ def remove_continue_watching(win, client, item, control_id,
     item['view_offset_ms'] = 0
     try:
         ctrl = win.getControl(control_id)
-        pos = ctrl.getSelectedPosition()
+        pos = gui_guard.pos(ctrl)
         if on_removed is not None:
             on_removed(pos)
         ctrl.removeItem(pos)

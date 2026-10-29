@@ -1406,9 +1406,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Plex's age chip hugs its text (~40px for "10"): resize the
         # chip group/image/label since Kodi cannot auto-size it.
         chip_w = max(44, 14 * len(rating) + 24)
-        # 5005-5008: chip in the meta slot below the episode subtitle;
-        # 5009-5012: same chip in the no-subtitle (movie/show) meta slot.
-        for cid in (5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013):
+        # 5005/5006/5007: chip group+image+label in the meta slot below the
+        # episode subtitle; 5009/5010/5013/5012: same chip in the no-subtitle
+        # (movie/show) meta slot.
+        for cid in (5005, 5006, 5007, 5009, 5010, 5013, 5012):
             try:
                 self.getControl(cid).setWidth(chip_w)
             except RuntimeError:
@@ -1841,14 +1842,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             try:
                 panel = self.getControl(CATEGORY_PANEL_ID)
                 pos = panel.getSelectedPosition()
-                panel.reset()
+                # Build all ListItems BEFORE touching the panel: reset() +
+                # N addItem() calls mutate the control N+1 times off the GUI
+                # thread; bulk addItems() shrinks that to a single mutation
+                # window (crash class: native list touched mid-teardown).
+                items = []
                 for genre in genres:
                     li = xbmcgui.ListItem(divert_source.display_genre(genre))
                     li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
                     if genre in art_by_genre:
                         li.setArt({'fanart': art_by_genre[genre],
                                    'thumb': art_by_genre[genre]})
-                    panel.addItem(li)
+                    items.append(li)
+                panel.reset()
+                panel.addItems(items)
                 if pos >= 0:
                     panel.selectItem(pos)
             except RuntimeError:
@@ -2054,6 +2061,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if self._divert_state is None:
             self._focus_divert_content()
 
+    def _skeleton_divert_panel(self):
+        """Seed skeleton cards while the first page is in flight.
+
+        The WAN Plex fetch blocks ~7s on this network; a bare grid reads
+        as "empty library" that whole time (observed post-restart), so
+        paint the same dimmed silhouettes _sync_placeholders() uses while
+        scrolling -- the real render below resets over them.
+        """
+        try:
+            panel = self.getControl(DIVERT_PANEL_ID)
+            panel.reset()
+            panel.addItems([_build_placeholder_list_item()
+                            for _ in range(PLACEHOLDER_ITEM_CAP)])
+        except Exception:
+            pass
+
     def _fill_divert_panel(self):
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
@@ -2078,6 +2101,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_collection_key = None
         self._divert_items_source = 'collections'
         self._divert_paged = self._collections_paged(section)
+        self._skeleton_divert_panel()
         error = None
         try:
             self._divert_paged.load_initial()
@@ -2108,10 +2132,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 item['rating_key'], limit=limit, offset=offset)
         self._divert_items_source = 'collection'
         self._divert_paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        self._skeleton_divert_panel()
         try:
             self._divert_paged.load_initial()
         except Exception as e:
             xbmc.log('Akasha Aura: collection children load failed: {}'.format(e), xbmc.LOGERROR)
+            try:
+                self.getControl(DIVERT_PANEL_ID).reset()
+            except Exception:
+                pass
             return
         self._divert_items = self._divert_paged.items
         self._divert_collection_key = item['rating_key']
@@ -2137,11 +2166,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_items_source = 'playlist'
         self._divert_paged = paged_list.PagedList(
             fetch, page_size=50, prefetch_margin=50)
+        self._skeleton_divert_panel()
         try:
             self._divert_paged.load_initial()
         except Exception as e:
             xbmc.log('Akasha Aura: playlist items load failed: {}'.format(e),
                      xbmc.LOGERROR)
+            try:
+                self.getControl(DIVERT_PANEL_ID).reset()
+            except Exception:
+                pass
             return
         self._divert_items = self._divert_paged.items
         self._divert_collection_key = item['rating_key']
@@ -2530,6 +2564,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
             page_size=50, prefetch_margin=50)
+        self._skeleton_divert_panel()
         error = None
         try:
             self._divert_paged.load_initial()

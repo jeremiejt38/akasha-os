@@ -38,6 +38,7 @@ import urllib.request
 import xbmc
 import xbmcaddon
 import xbmcgui
+import gui_guard
 import aura_menu
 import i18n
 
@@ -154,7 +155,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
 
     def _selected_entry(self):
         try:
-            pos = self.getControl(LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, LIST_ID)
         except RuntimeError:
             return None
         if 0 <= pos < len(self.entries):
@@ -392,7 +393,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             return
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             try:
-                pos = self.getControl(LIST_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, LIST_ID)
             except RuntimeError:
                 pos = 0
             if self._paged:

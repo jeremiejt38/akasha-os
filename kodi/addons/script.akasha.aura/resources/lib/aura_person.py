@@ -14,6 +14,7 @@ Caller sets before doModal():
 """
 import xbmc
 import xbmcgui
+import gui_guard
 import i18n
 
 ACTION_MOVE_LEFT = 1
@@ -136,7 +137,7 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             try:
                 focused = self.getFocusId()
                 if focused in (FILMO_LIST_ID, FILMO_LIST2_ID) and \
-                        self.getControl(focused).getSelectedPosition() == 0:
+                        gui_guard.selpos(self, focused) == 0:
                     self.close()
                     return
             except RuntimeError:
@@ -155,7 +156,7 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
     def _filmography_sheet(self):
         try:
             lid = self.getFocusId()
-            pos = self.getControl(lid).getSelectedPosition()
+            pos = gui_guard.selpos(self, lid)
         except RuntimeError:
             return
         items = self._rows.get(lid, [])
@@ -171,7 +172,7 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
     def _open_item(self):
         try:
             lid = self.getFocusId()
-            pos = self.getControl(lid).getSelectedPosition()
+            pos = gui_guard.selpos(self, lid)
         except RuntimeError:
             return
         items = self._rows.get(lid, [])

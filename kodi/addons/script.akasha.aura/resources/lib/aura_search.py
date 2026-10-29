@@ -16,6 +16,7 @@ import threading
 
 import xbmc
 import xbmcgui
+import gui_guard
 import i18n
 
 ACTION_PREVIOUS_MENU = 10
@@ -588,7 +589,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID == KEYS_PANEL_ID:
             try:
-                pos = self.getControl(KEYS_PANEL_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, KEYS_PANEL_ID)
             except RuntimeError:
                 return
             if 0 <= pos < len(_KEYS):
@@ -605,7 +606,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._refresh_query()
         elif controlID == RECENT_LIST_ID:
             try:
-                pos = self.getControl(RECENT_LIST_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, RECENT_LIST_ID)
             except RuntimeError:
                 return
             if self.query:
@@ -632,7 +633,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             # Plex rail over search: the active (search) entry and the
             # avatar do nothing; Home/More leave to the main window.
             try:
-                pos = self.getControl(RAIL_LIST_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, RAIL_LIST_ID)
             except RuntimeError:
                 return
             if pos in (2, 3):
@@ -660,11 +661,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             # when the key grid's Right would leave it (last column);
             # mid-row Rights still move between letters.
             if focused == KEYS_PANEL_ID:
-                try:
-                    pos = self.getControl(KEYS_PANEL_ID) \
-                        .getSelectedPosition()
-                except RuntimeError:
-                    pos = -1
+                pos = gui_guard.selpos(self, KEYS_PANEL_ID)
                 if pos >= 0 and pos % 6 != 5:
                     super().onAction(action)
                     return
@@ -702,8 +699,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _result_sheet(self):
         try:
-            pos = self.getControl(
-                self._results_panel_id()).getSelectedPosition()
+            pos = gui_guard.selpos(self, self._results_panel_id())
         except RuntimeError:
             return
         if not (0 <= pos < len(self._results)):
@@ -721,8 +717,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _pick_result(self):
         try:
-            pos = self.getControl(
-                self._results_panel_id()).getSelectedPosition()
+            pos = gui_guard.selpos(self, self._results_panel_id())
         except RuntimeError:
             return
         if not (0 <= pos < len(self._results)):

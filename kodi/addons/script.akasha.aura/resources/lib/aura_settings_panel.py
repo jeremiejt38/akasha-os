@@ -18,6 +18,7 @@ import threading
 
 import xbmc
 import xbmcgui
+import gui_guard
 
 import i18n
 import settings_catalog
@@ -115,7 +116,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
         if self._stack:
             top = self._stack[-1]
             try:
-                top.pos = self.getControl(LIST_ID).getSelectedPosition()
+                top.pos = gui_guard.selpos(self, LIST_ID)
             except RuntimeError:
                 top.pos = 0
         self._stack.append(view)
@@ -432,7 +433,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             # Android TV: Right drills into the row like a click (except
             # inline switches, which Center alone toggles).
             try:
-                pos = self.getControl(LIST_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, LIST_ID)
                 rows = self._stack[-1].rows
                 if 0 <= pos < len(rows) and 'switch' not in rows[pos]:
                     self.onClick(LIST_ID)
@@ -445,7 +446,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
 
     def _refresh_help(self):
         try:
-            pos = self.getControl(LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, LIST_ID)
             rows = self._stack[-1].rows
             text = rows[pos].get('help', '') if 0 <= pos < len(rows) else ''
             self.getControl(HELP_LABEL_ID).setLabel(text)
@@ -459,7 +460,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             # the rail stay interactive under the settings sheet).
             try:
                 self.rail_selection = \
-                    self.getControl(9020).getSelectedPosition()
+                    gui_guard.selpos(self, 9020)
             except RuntimeError:
                 self.rail_selection = -1
             self.close()
@@ -467,7 +468,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
         if controlID != LIST_ID or self._navigating:
             return
         try:
-            pos = self.getControl(LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, LIST_ID)
         except RuntimeError:
             return
         view = self._stack[-1]

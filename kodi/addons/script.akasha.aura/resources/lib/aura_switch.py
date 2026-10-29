@@ -14,6 +14,7 @@ Usage:
 
 import xbmc
 import xbmcgui
+import gui_guard
 
 import i18n
 
@@ -66,7 +67,7 @@ class AuraWhoWatchingWindow(xbmcgui.WindowXMLDialog):
         if controlID == USERS_PANEL:
             try:
                 self.pick = self.users[
-                    self.getControl(USERS_PANEL).getSelectedPosition()]
+                    gui_guard.selpos(self, USERS_PANEL)]
             except (RuntimeError, IndexError):
                 self.pick = None
             self.close()
@@ -127,7 +128,7 @@ class AuraPinWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID == PIN_PANEL:
             try:
-                pos = self.getControl(PIN_PANEL).getSelectedPosition()
+                pos = gui_guard.selpos(self, PIN_PANEL)
                 key = ('1', '2', '3', '4', '5', '6', '7', '8', '9',
                        '0', 'back')[pos]
             except (RuntimeError, IndexError):
