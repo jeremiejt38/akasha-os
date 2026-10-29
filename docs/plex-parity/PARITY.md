@@ -260,3 +260,23 @@ through `hub_items_with_total()` when inline items are missing.
 Verified on the Pi: the section now shows the same poster grid as
 `official-live/29-search-empty.png` (x686, 240×360, ~299 pitch),
 with recent history + "Effacer l'historique" under the keyboard.
+
+## Shell respawn — Back-exit no longer strands on the loading veil
+
+`patch_native_loading.py` permanently covers the native Kodi windows with
+the "Chargement..." overlay (documented intent: they are transition
+surfaces only). A bare Back-exit therefore left the user on an eternal
+loading screen until Home was pressed, and the dying invoker could stall
+for minutes in `CPythonInvoker: waiting on thread` while a stray worker
+kept the interpreter alive.
+
+`default.py` now supervises the window in an abort-aware loop: the
+playback handoff keeps its existing wait-and-restore flow, and a plain
+close reopens Aura after a 0.75 s debounce -- the shell is the
+destination, matching the "native Home is never a destination" rule.
+The invoker no longer tears down per close, which removes the recurring
+thread-wait symptom entirely; a stack dump of still-alive threads is
+logged at real script exit for the residual unknown worker.
+`HomePressMonitor`'s single-press Timer is now daemonized too.
+Verified on Pi: five rapid Backs return to a working home each time,
+Kodi shutdown stays prompt.
