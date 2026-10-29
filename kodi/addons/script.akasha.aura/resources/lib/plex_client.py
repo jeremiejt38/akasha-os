@@ -258,14 +258,18 @@ class PlexClient:
         """The Plex server's friendlyName ('Akasha') -- the amber line
         Plex prints under each search-result card. The `/` root payload
         is cheap and already flows through the read cache."""
-        if not hasattr(self, '_friendly_name'):
-            self._friendly_name = ''
+        # Retry while empty instead of caching '' forever: a transient
+        # miss at window init used to drop the ' · {server}' row-title
+        # suffix for the whole session. Cost stays bounded -- '/' is
+        # read-cached for 30 s on success and failures fail fast under
+        # the offline breaker.
+        if not getattr(self, '_friendly_name', None):
             try:
                 mc = self._media_container(self._request('/'))
                 self._friendly_name = mc.get('friendlyName') or ''
             except Exception:
                 pass
-        return self._friendly_name
+        return getattr(self, '_friendly_name', '')
 
     def home_hubs(self, hub_count=24, per_hub=16):
         """The promoted "For You" hubs Plex TV renders as the home rows.

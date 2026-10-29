@@ -128,7 +128,7 @@
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture colordiffuse="99FFFFFF" border="8">chip-rect.png</texture>
+                        <texture colordiffuse="B314161E" border="10">rounded-solid.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
@@ -862,44 +862,44 @@
                 <control type="image">
                     <left>127</left>
                     <top>120</top>
-                    <width>586</width>
-                    <height>64</height>
-                    <texture colordiffuse="99000000" border="32">cap-r32.png</texture>
+                    <width>648</width>
+                    <height>62</height>
+                    <texture colordiffuse="99000000" border="30">cap-r32.png</texture>
                 </control>
                 <!-- Active-tab outline (Plex shows a rounded outline on the
                      selected tab when the strip is not focused; the white
                      fill on focus covers it anyway). -->
                 <control type="image">
                     <left>135</left>
-                    <top>124</top>
+                    <top>128</top>
                     <width>190</width>
-                    <height>56</height>
+                    <height>46</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
-                    <left>333</left>
-                    <top>124</top>
-                    <width>196</width>
-                    <height>56</height>
+                    <left>335</left>
+                    <top>128</top>
+                    <width>240</width>
+                    <height>46</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
-                    <left>537</left>
-                    <top>124</top>
-                    <width>160</width>
-                    <height>56</height>
+                    <left>585</left>
+                    <top>128</top>
+                    <width>180</width>
+                    <height>46</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>135</left>
-                    <top>124</top>
+                    <top>128</top>
                     <width>190</width>
-                    <height>56</height>
-                    <label>$ADDON[script.akasha.aura 33015]</label>
-                    <font>font_aura_mini</font>
+                    <height>46</height>
+                    <label></label>
+                    <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3310</onleft>
@@ -911,12 +911,12 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
                 <control type="button" id="3071">
-                    <left>333</left>
-                    <top>124</top>
-                    <width>196</width>
-                    <height>56</height>
-                    <label>$ADDON[script.akasha.aura 33014]</label>
-                    <font>font_aura_mini</font>
+                    <left>335</left>
+                    <top>128</top>
+                    <width>240</width>
+                    <height>46</height>
+                    <label></label>
+                    <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3070</onleft>
@@ -928,12 +928,12 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
                 <control type="button" id="3072">
-                    <left>537</left>
-                    <top>124</top>
-                    <width>160</width>
-                    <height>56</height>
-                    <label>$ADDON[script.akasha.aura 33576]</label>
-                    <font>font_aura_mini</font>
+                    <left>585</left>
+                    <top>128</top>
+                    <width>180</width>
+                    <height>46</height>
+                    <label></label>
+                    <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3071</onleft>
@@ -944,41 +944,117 @@
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
+                <!-- The buttons carry no label: text is drawn by overlay
+                     labels so each state (inactive dim / active bright /
+                     focused dark) renders exactly once without a
+                     double-draw or scroll offset. -->
                 <control type="label">
                     <left>135</left>
-                    <top>124</top>
+                    <top>128</top>
                     <width>190</width>
-                    <height>56</height>
-                    <font>font_aura_mini</font>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33015]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
+                </control>
+                <control type="label">
+                    <left>135</left>
+                    <top>128</top>
+                    <width>190</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33015]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="label">
-                    <left>333</left>
-                    <top>124</top>
-                    <width>196</width>
-                    <height>56</height>
-                    <font>font_aura_mini</font>
+                    <left>135</left>
+                    <top>128</top>
+                    <width>190</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33015]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3070)</visible>
+                </control>
+                <control type="label">
+                    <left>335</left>
+                    <top>128</top>
+                    <width>240</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33014]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
+                </control>
+                <control type="label">
+                    <left>335</left>
+                    <top>128</top>
+                    <width>240</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33014]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="label">
-                    <left>537</left>
-                    <top>124</top>
-                    <width>160</width>
-                    <height>56</height>
-                    <font>font_aura_mini</font>
+                    <left>335</left>
+                    <top>128</top>
+                    <width>240</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33014]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3071)</visible>
+                </control>
+                <control type="label">
+                    <left>585</left>
+                    <top>128</top>
+                    <width>180</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33576]</label>
+                    <textcolor>88FFFFFF</textcolor>
+                    <visible>!String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
+                </control>
+                <control type="label">
+                    <left>585</left>
+                    <top>128</top>
+                    <width>180</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33576]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),home) + String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
+                </control>
+                <control type="label">
+                    <left>585</left>
+                    <top>128</top>
+                    <width>180</width>
+                    <height>46</height>
+                    <font>font_aura_tab</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$ADDON[script.akasha.aura 33576]</label>
+                    <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(3072)</visible>
                 </control>
             </control>
 
@@ -3009,50 +3085,6 @@
                         </focusedlayout>
                     </control>
 
-                    <!-- Right-edge fades: Plex fades the last visible poster
-                         into the page instead of a hard cut at x=1823. One
-                         scrim per row slot, mirroring each list's visible
-                         condition; the parent group's slides carry them. -->
-                    <control type="image">
-                        <left>1663</left>
-                        <top>568</top>
-                        <width>257</width>
-                        <height>372</height>
-                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
-                        <visible>!Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
-                    </control>
-                    <control type="image">
-                        <left>1663</left>
-                        <top>1040</top>
-                        <width>257</width>
-                        <height>372</height>
-                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
-                        <visible>!Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
-                    </control>
-                    <control type="image">
-                        <left>1663</left>
-                        <top>1512</top>
-                        <width>257</width>
-                        <height>372</height>
-                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
-                        <visible>Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
-                    </control>
-                    <control type="image">
-                        <left>1663</left>
-                        <top>1984</top>
-                        <width>257</width>
-                        <height>372</height>
-                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
-                        <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
-                    </control>
-                    <control type="image">
-                        <left>1663</left>
-                        <top>2456</top>
-                        <width>257</width>
-                        <height>372</height>
-                        <texture colordiffuse="FF1C1C1C">scrim-row-right.png</texture>
-                        <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
-                    </control>
                 </control>
             </control>
 

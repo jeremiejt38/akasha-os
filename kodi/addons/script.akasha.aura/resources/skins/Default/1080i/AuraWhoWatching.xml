@@ -26,7 +26,7 @@
                 <top>126</top>
                 <width>1920</width>
                 <height>60</height>
-                <font>font_aura_rowhead</font>
+                <font>font_aura_info_black_doublerow</font>
                 <align>center</align>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
