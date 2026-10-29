@@ -95,6 +95,10 @@ EPISODES_LIST_ID = 7130
 SEASONS_LIST_ID = 7140
 EXTRAS_ROW_ID = 7170
 RELATED_LIST_ID = 7175
+RELATED2_LIST_ID = 7176
+# Plex stacks every /related hub as its own row ('Related Shows',
+# then 'More with <actor>'); the fixed window has room for two.
+RELATED_ROWS = (RELATED_LIST_ID, RELATED2_LIST_ID)
 
 # "Plus d'actions" side panel entries (Plex More Actions sheet).
 MORE_SUBTITLES_ID = 7200
@@ -238,11 +242,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # Trailers & Extras, Related titles. Kodi windows can't scroll,
         # so the inactive sections park off-screen and the focused one
         # takes the bottom slot (see _apply_flow / _set_section).
-        self._bottom = 'content'    # 'content' | 'cast' | 'extras' | 'related'
-        self._related = []
-        self._related_title = ''
+        self._bottom = 'content'    # 'content' | 'cast' | 'extras' | 'relatedN'
+        self._related_hubs = []     # [{'title': hub title, 'items': [...]}]
         self._related_key = None
-        self._related_title = ''
         self.exit_to_sidebar = False
         # Vertical rhythm of the lower block (see _apply_flow): the Plex
         # action pill sits at y564 under a director line, y524 without.
@@ -425,20 +427,20 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         _set(self, 'AuraDetailExtrasRow', '1' if self._extras else '')
         self._render_extras_row()
 
-        # Related hubs ('Related Shows', 'More with <actor>'): the row
-        # stacks under Trailers & Extras like Plex's page scroll.
+        # Related hubs ('Related Shows', 'More with <actor>'): each hub
+        # is its own row stacked under Trailers & Extras like Plex's
+        # page scroll; the window has room for two (RELATED_ROWS).
         if self._related_key != item.get('rating_key'):
             self._related_key = item.get('rating_key')
-            self._related = []
-            self._related_title = ''
+            self._related_hubs = []
             if 'related' in self._bg_done:
-                hubs = self._bg_get('related') or []
-                if hubs:
-                    self._related_title = hubs[0].get('title') or ''
-                    for hub in hubs:
-                        self._related.extend(hub.get('items') or [])
+                self._related_hubs = [
+                    h for h in (self._bg_get('related') or [])
+                    if h.get('items')][:len(RELATED_ROWS)]
             self._render_related()
-        _set(self, 'AuraDetailRelatedRow', '1' if self._related else '')
+        for i in range(len(RELATED_ROWS)):
+            _set(self, 'AuraDetailRelated{}Row'.format(i + 1),
+                 '1' if i < len(self._related_hubs) else '')
 
         # "Activity by you and X" (B6): Plex names every server account
         # with history on this item ('you' first, then the others) and
@@ -631,7 +633,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # appear in Plex's fully-scrolled state: the action row, the
         # activity line and the media pills have scrolled off the top,
         # so we park them and lift the row until its captions fit.
-        deep = self._bottom in ('extras', 'related')
+        deep = (self._bottom == 'extras' or
+                self._bottom.startswith('related'))
         self._action_top = (2200 if deep
                             else 930 if season_cards else t)
         # The activity line is a show-level section: Plex draws it
@@ -686,7 +689,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # fully-scrolled state.
             _ROW_H = {SEASONS_LIST_ID: 380, EPISODES_LIST_ID: 296,
                       CAST_LIST_ID: 250, EXTRAS_ROW_ID: 380,
-                      RELATED_LIST_ID: 430}
+                      RELATED_LIST_ID: 430, RELATED2_LIST_ID: 430}
             if season_cards:
                 nxt = secs[1] if len(secs) > 1 else None
                 label_ctl.setLabel(
@@ -708,8 +711,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # Parked sections keep their 'visible' state (Kodi only
             # moves focus natively into visible controls) but sit past
             # the screen edge; the focused one owns the bottom slot.
-            for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID,
-                        EXTRAS_ROW_ID, RELATED_LIST_ID):
+            for cid in ((SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID,
+                         EXTRAS_ROW_ID) + RELATED_ROWS):
                 top = (row_top if cid == active
                        else 1050 if cid == sliver else 2200)
                 self.getControl(cid).setPosition(128, top)
@@ -1154,18 +1157,22 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _render_related(self):
-        """Plex's 'Related' row: poster cards, title + year caption."""
+        """Plex's related rows: one list per hub, poster cards with
+        title + year caption ('Related Shows', 'More with <actor>')."""
         try:
-            lst = self.getControl(RELATED_LIST_ID)
-            lst.reset()
-            for it in self._related:
-                li = xbmcgui.ListItem(it.get('title') or '')
-                li.setArt({'thumb': it.get('poster_url') or
-                           it.get('thumb_url') or ''})
-                li.setLabel2(str(it.get('year') or ''))
-                li.setProperty('watched',
-                               '1' if it.get('watched') else '0')
-                lst.addItem(li)
+            for i, ctl_id in enumerate(RELATED_ROWS):
+                lst = self.getControl(ctl_id)
+                lst.reset()
+                if i >= len(self._related_hubs):
+                    continue
+                for it in self._related_hubs[i]['items']:
+                    li = xbmcgui.ListItem(it.get('title') or '')
+                    li.setArt({'thumb': it.get('poster_url') or
+                               it.get('thumb_url') or ''})
+                    li.setLabel2(str(it.get('year') or ''))
+                    li.setProperty('watched',
+                                   '1' if it.get('watched') else '0')
+                    lst.addItem(li)
         except RuntimeError:
             pass
 
@@ -1448,24 +1455,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             secs.append('cast')
         if self._extras:
             secs.append('extras')
-        if self._related:
-            secs.append('related')
+        for i in range(len(self._related_hubs)):
+            secs.append('related{}'.format(i))
         return secs
 
     def _section_list(self, sec):
         if sec == 'content':
             return (SEASONS_LIST_ID if self.mode == 'show'
                     else EPISODES_LIST_ID)
-        return {'cast': CAST_LIST_ID, 'extras': EXTRAS_ROW_ID,
-                'related': RELATED_LIST_ID}.get(sec)
+        if sec and sec.startswith('related'):
+            return RELATED_ROWS[int(sec[7:])]
+        return {'cast': CAST_LIST_ID, 'extras': EXTRAS_ROW_ID}.get(sec)
 
     def _section_title(self, sec):
         if sec == 'cast':
             return i18n.tr(33100)
         if sec == 'extras':
             return i18n.tr(33589)
-        if sec == 'related':
-            return self._related_title or i18n.tr(33574)
+        if sec and sec.startswith('related'):
+            i = int(sec[7:])
+            if i < len(self._related_hubs):
+                return (self._related_hubs[i].get('title') or
+                        i18n.tr(33574))
+            return i18n.tr(33574)
         return self._section_label()
 
     def _set_section(self, sec):
@@ -1490,8 +1502,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._set_section('cast')
         elif controlID == EXTRAS_ROW_ID:
             self._set_section('extras')
-        elif controlID == RELATED_LIST_ID:
-            self._set_section('related')
+        elif controlID in RELATED_ROWS:
+            self._set_section(
+                'related{}'.format(RELATED_ROWS.index(controlID)))
         elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
             self._set_section('content')
         if controlID == EPISODES_LIST_ID and self.mode == 'season':
@@ -1558,8 +1571,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             except RuntimeError:
                 pos = -1
             self._play_extra(pos)
-        elif controlID == RELATED_LIST_ID:
-            self._open_related_card()
+        elif controlID in RELATED_ROWS:
+            self._open_related_card(RELATED_ROWS.index(controlID))
         elif controlID == ACTIVITY_ROW_ID:
             self._open_activity_feed()
 
@@ -2357,17 +2370,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             xbmcgui.Dialog().notification('Akasha Aura', msg,
                                           xbmcgui.NOTIFICATION_INFO, 2500)
 
-    def _open_related_card(self):
-        """Clicking a poster in the Related row pushes that title's
+    def _open_related_card(self, hub=0):
+        """Clicking a poster in a Related row pushes that title's
         fiche on top of the current one -- Plex's drill-in; Back pops
         back to this page."""
+        items = (self._related_hubs[hub].get('items') or []
+                 if hub < len(self._related_hubs) else [])
         try:
-            pos = self.getControl(RELATED_LIST_ID).getSelectedPosition()
+            pos = self.getControl(RELATED_ROWS[hub]).getSelectedPosition()
         except RuntimeError:
             return
-        if not (0 <= pos < len(self._related)):
+        if not (0 <= pos < len(items)):
             return
-        it = self._related[pos]
+        it = items[pos]
         detail = AuraDetailWindow(
             'AuraDetail.xml', self.addon_path, 'Default', '1080i')
         detail.client = self.client

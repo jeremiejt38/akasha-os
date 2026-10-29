@@ -1539,7 +1539,121 @@
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
-            <visible>String.IsEqual(Window.Property(AuraDetailRelatedRow),1)</visible>
+            <visible>String.IsEqual(Window.Property(AuraDetailRelated1Row),1)</visible>
+            <itemlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>248</width>
+                    <height>368</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+<control type="list" id="7176">
+            <left>128</left>
+            <top>828</top>
+            <width>1800</width>
+            <height>430</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailRelated2Row),1)</visible>
             <itemlayout width="272" height="430">
                 <control type="image">
                     <left>0</left>
