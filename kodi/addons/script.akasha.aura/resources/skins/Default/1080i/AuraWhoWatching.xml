@@ -62,7 +62,7 @@
                         <top>213</top>
                         <width>54</width>
                         <height>54</height>
-                        <texture colordiffuse="FFFFFFFF">circle.png</texture>
+                        <texture colordiffuse="FFE5A00D">circle.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(protected))</visible>
                     </control>
                     <control type="image">
@@ -70,7 +70,7 @@
                         <top>225</top>
                         <width>30</width>
                         <height>30</height>
-                        <texture>icon-lock-amber.png</texture>
+                        <texture>icon-lock-white.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(protected))</visible>
                     </control>
                     <control type="label">
