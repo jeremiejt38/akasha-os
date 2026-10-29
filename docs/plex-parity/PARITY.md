@@ -236,6 +236,15 @@ detail page opens hydrated but its local follow-up calls (extras,
 history) no-op — no playable file exists locally; the
 "Find What To Watch, Anywhere!" promo tile is not reproduced.
 
+Cloud detail pages (verified on Pi, VisionQuest): trailer/clip cards
+hydrate into their PARENT record wholesale (type + key), so a cloud
+show keeps its season strip ("Série | Saison 1") like `27-detail-show`;
+seasons and episodes are fetched through `provider_children()` (the
+node's own `/children` key on discover.provider.plex.tv), the hero
+follows the focused episode with per-episode provider rating chips,
+and the action row is the cloud set — "Ajouter à ma liste" pill +
+list/rate/watched/more circles matching `56-tab-activity`.
+
 ## Search "Popular Searches" — local-hub fallback
 
 Same cloud wall on the search empty state: Plex feeds
