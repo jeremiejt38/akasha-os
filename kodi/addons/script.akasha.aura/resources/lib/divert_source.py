@@ -275,7 +275,10 @@ def build_video_item(raw_item, image_resolver):
     # Plex TV cards show the *show* poster for episodes (2:3), the item's own
     # thumb for movies/shows/seasons; fanart falls back to the show's art.
     poster = grandparent_thumb if item_type == 'episode' and grandparent_thumb else thumb
-    fanart = art or grandparent_art
+    # Cloud/discover cards occasionally drop `art` but still carry a
+    # `background` entry inside Image[] (e.g. the '13' trailer card) --
+    # fall back to it so the hero backdrop is never flat.
+    fanart = art or grandparent_art or _image_of_type(raw_item, 'background')
 
     duration_ms = raw_item.get('duration')
     view_offset_ms = raw_item.get('viewOffset')
