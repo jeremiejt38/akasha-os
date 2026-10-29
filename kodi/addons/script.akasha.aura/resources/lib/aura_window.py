@@ -185,9 +185,12 @@ DIVERT_TOOLBAR_BUTTON_IDS = (
 # (full labels used in the selection dialog); DIVERT_SORT_SHORT_LABELS are
 # the abbreviated captions shown directly on the toolbar button, which has
 # much less room than a full-screen dialog.
+# Plex's Browse grid defaults to Title sort (official 15-lib-browse shows
+# the A-Z rail active on 'A'); keep it first so DIVERT_SORT_OPTIONS[0] is
+# both the default and the first row of the sort picker.
 DIVERT_SORT_OPTIONS = [
-    ('addedAt:desc', i18n.tr(33056)),
     ('titleSort', i18n.tr(33057)),
+    ('addedAt:desc', i18n.tr(33056)),
     ('originallyAvailableAt:desc', i18n.tr(33058)),
     ('rating:desc', i18n.tr(33059)),
 ]
