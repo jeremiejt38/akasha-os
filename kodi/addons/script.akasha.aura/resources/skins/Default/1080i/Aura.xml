@@ -1699,10 +1699,9 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5101">
                         <left>127</left>
-                        <top>495</top>
+                        <top>509</top>
                         <width>600</width>
-                        <height>42</height>
-                        <aligny>bottom</aligny>
+                        <height>26</height>
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
@@ -2009,10 +2008,9 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5201">
                         <left>127</left>
-                        <top>967</top>
+                        <top>981</top>
                         <width>600</width>
-                        <height>42</height>
-                        <aligny>bottom</aligny>
+                        <height>26</height>
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
@@ -2324,10 +2322,9 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5301">
                         <left>127</left>
-                        <top>1439</top>
+                        <top>1453</top>
                         <width>600</width>
-                        <height>42</height>
-                        <aligny>bottom</aligny>
+                        <height>26</height>
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
@@ -2635,10 +2632,9 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5401">
                         <left>127</left>
-                        <top>1911</top>
+                        <top>1925</top>
                         <width>600</width>
-                        <height>42</height>
-                        <aligny>bottom</aligny>
+                        <height>26</height>
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
@@ -2945,10 +2941,9 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5501">
                         <left>127</left>
-                        <top>2383</top>
+                        <top>2397</top>
                         <width>600</width>
-                        <height>42</height>
-                        <aligny>bottom</aligny>
+                        <height>26</height>
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
