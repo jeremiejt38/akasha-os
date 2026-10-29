@@ -93,6 +93,8 @@ CAST_LIST_ID = 7110
 SEASON_STRIP_ID = 7120
 EPISODES_LIST_ID = 7130
 SEASONS_LIST_ID = 7140
+EXTRAS_ROW_ID = 7170
+RELATED_LIST_ID = 7175
 
 # "Plus d'actions" side panel entries (Plex More Actions sheet).
 MORE_SUBTITLES_ID = 7200
@@ -149,15 +151,20 @@ MORE_PANEL_IDS = (MORE_AUDIO_ID, MORE_SUBTITLES_ID, MORE_LIST_ID,
 # Plex's action order: Play/Resume | Restart | Watchlist | Rate |
 # Watched | Extras | More -- extras sit next to More, not in the core
 # five (Plex ATV refs: focus_rate_005, focus_morelabel_010).
+LIST_BUTTON_ID = 7164      # cloud-only 'Add to List' circle (official 56)
+
+# Watched | Extras | More -- extras sit next to More, not in the core
+# five (Plex ATV refs: focus_rate_005, focus_morelabel_010).
 ACTION_ROW_IDS = (WATCH_BUTTON_ID, RESTART_BUTTON_ID, WATCHLIST_BUTTON_ID,
-                  RATE_BUTTON_ID, WATCHED_BUTTON_ID, EXTRAS_BUTTON_ID,
-                  MORE_BUTTON_ID)
+                  LIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
+                  EXTRAS_BUTTON_ID, MORE_BUTTON_ID)
 # light/dark icon overlay pairs that ride on top of each action button
 ACTION_ICON_OVERLAYS = {
-    WATCH_BUTTON_ID: (7088, 7089, 7090, 7091),
+    WATCH_BUTTON_ID: (7088, 7089, 7090, 7091, 7163),
     RESTART_BUTTON_ID: (7107, 7108),
     EXTRAS_BUTTON_ID: (7111, 7112),
     WATCHLIST_BUTTON_ID: (7092, 7093),
+    LIST_BUTTON_ID: (7165, 7166),
     RATE_BUTTON_ID: (7099, 7105),
     WATCHED_BUTTON_ID: (7094, 7095, 7096),
     MORE_BUTTON_ID: (7097, 7098),
@@ -178,6 +185,7 @@ ACTION_LABEL_OVERLAYS = {
     RESTART_BUTTON_ID: 7151,
     EXTRAS_BUTTON_ID: 7152,
     WATCHLIST_BUTTON_ID: 7153,
+    LIST_BUTTON_ID: 7157,
     RATE_BUTTON_ID: 7154,
     WATCHED_BUTTON_ID: 7155,
     MORE_BUTTON_ID: 7156,
@@ -226,10 +234,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._row_pos = {}          # last absolute row positions (wrap guard)
         self._pending_season_index = None  # season card entry point
         self._restore_episode_pos = None   # episode pos to restore on Back
-        # Show/season pages stack Cast & Crew under the content row like
-        # Plex. Kodi windows can't scroll, so the inactive section parks
-        # off-screen and takes the slot back on focus (see _apply_flow).
-        self._cast_active = False
+        # Plex stacks sections under the content row: Cast & Crew,
+        # Trailers & Extras, Related titles. Kodi windows can't scroll,
+        # so the inactive sections park off-screen and the focused one
+        # takes the bottom slot (see _apply_flow / _set_section).
+        self._bottom = 'content'    # 'content' | 'cast' | 'extras' | 'related'
+        self._related = []
+        self._related_title = ''
+        self._related_key = None
+        self._related_title = ''
         self.exit_to_sidebar = False
         # Vertical rhythm of the lower block (see _apply_flow): the Plex
         # action pill sits at y564 under a director line, y524 without.
@@ -313,16 +326,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._bg_results = {}
         if self.client and item.get('rating_key'):
             rk = item['rating_key']
-            self._bg_start('extras', 'item_extras', rk)
-            if not item.get('last_viewed_at'):
-                # Scoped by metadataItemID: unscoped history answers the
-                # WHOLE log (~25MB) -- the OOM that killed Kodi.
-                self._bg_start('history', 'watch_history',
-                               limit=50, rating_key=rk)
-            self._bg_start('ondeck', 'on_deck', limit=60)
+            cloud = bool(item.get('cloud'))
+            if not cloud:
+                # Cloud (Discover) records have hex provider keys: the
+                # local server 404s every one of these calls.
+                self._bg_start('extras', 'item_extras', rk)
+                if hasattr(self.client, 'item_related'):
+                    self._bg_start('related', 'item_related', rk)
+                if not item.get('last_viewed_at'):
+                    # Scoped by metadataItemID: unscoped history answers
+                    # the WHOLE log (~25MB) -- the OOM that killed Kodi.
+                    self._bg_start('history', 'watch_history',
+                                   limit=50, rating_key=rk)
+                self._bg_start('ondeck', 'on_deck', limit=60)
             if self.mode == 'show':
-                self._bg_start('seasons', 'show_seasons', rk)
-            if not item.get('ratings') or not item.get('cast'):
+                if cloud and hasattr(self.client, 'provider_children'):
+                    # The provider serves seasons on the node's own key
+                    # (/library/metadata/<hex>/children).
+                    self._bg_start('seasons', 'provider_children',
+                                   item.get('key') or '')
+                elif not cloud:
+                    self._bg_start('seasons', 'show_seasons', rk)
+            if not cloud and (not item.get('ratings')
+                              or not item.get('cast')):
                 # Hub/list records are thin: Role entries have no thumbs
                 # and Media streams often lack audio/subtitle detail, so
                 # the Cast & Crew row, the provider rating chips (IMDb /
@@ -348,13 +374,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     if full.get(key):
                         item[key] = full[key]
 
+        _set(self, 'AuraDetailCloud',
+             '1' if item.get('cloud') else '')
         _set(self, 'AuraDetailShowStrip',
              '1' if self.mode in ('show', 'season') else '')
         _set(self, 'AuraDetailSeasonsRow',
              '1' if self.mode == 'show' else '')
         _set(self, 'AuraDetailEpisodesRow',
              '1' if self.mode == 'season' else '')
-        self._cast_active = False
+        self._bottom = 'content'
         # Plex exposes Cast & Crew on every detail flavour -- movies,
         # shows, seasons, episodes (27-detail-show).
         _set(self, 'AuraDetailCastRow', '1' if item.get('cast') else '')
@@ -384,6 +412,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if self.client and item.get('rating_key'):
                 if 'extras' in self._bg_done:
                     self._extras = self._bg_get('extras') or []
+                elif item.get('cloud'):
+                    self._extras = []
                 else:
                     try:
                         self._extras = self.client.item_extras(
@@ -392,6 +422,23 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                         xbmc.log('Akasha Aura Detail: extras failed: {}'
                                  .format(e), xbmc.LOGWARNING)
         _set(self, 'AuraDetailExtras', '1' if self._extras else '')
+        _set(self, 'AuraDetailExtrasRow', '1' if self._extras else '')
+        self._render_extras_row()
+
+        # Related hubs ('Related Shows', 'More with <actor>'): the row
+        # stacks under Trailers & Extras like Plex's page scroll.
+        if self._related_key != item.get('rating_key'):
+            self._related_key = item.get('rating_key')
+            self._related = []
+            self._related_title = ''
+            if 'related' in self._bg_done:
+                hubs = self._bg_get('related') or []
+                if hubs:
+                    self._related_title = hubs[0].get('title') or ''
+                    for hub in hubs:
+                        self._related.extend(hub.get('items') or [])
+            self._render_related()
+        _set(self, 'AuraDetailRelatedRow', '1' if self._related else '')
 
         # "Activity by you and X" (B6): Plex names every server account
         # with history on this item ('you' first, then the others) and
@@ -578,11 +625,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # cards right under the hero (~y585), and the action circles
         # BELOW the cards (~y930). The Cast & Crew swap restores the
         # standard actions-over-cast stack, matching Plex's scroll.
-        season_cards = self.mode == 'season' and not self._cast_active
-        self._action_top = 930 if season_cards else t
-        # The activity line is a show-level section: Plex does not draw
-        # it on the season page.
-        act_top = 2200 if self.mode == 'season' else t + 92
+        season_cards = (self.mode == 'season' and
+                        self._bottom == 'content')
+        # The tall lower sections (extras 380px, related 430px) only
+        # appear in Plex's fully-scrolled state: the action row, the
+        # activity line and the media pills have scrolled off the top,
+        # so we park them and lift the row until its captions fit.
+        deep = self._bottom in ('extras', 'related')
+        self._action_top = (2200 if deep
+                            else 930 if season_cards else t)
+        # The activity line is a show-level section: Plex draws it
+        # neither on the season page nor in the scrolled-off state.
+        act_top = (2200 if (self.mode == 'season' or deep)
+                   else t + 92)
         for cid in (7180, 7181, 7182):
             try:
                 self.getControl(cid).setPosition(132, act_top)
@@ -603,39 +658,61 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 pass
         try:
             self.getControl(7196).setPosition(
-                128, 2200 if self.mode == 'season' else t + 90)
+                128, act_top - 2 if not (self.mode == 'season' or deep)
+                else 2200)
             # 7207 is the 'Vous l'avez regarde...' activity label -- the
-            # whole activity line is parked on Plex's season page. The
-            # media pills ride at the director line instead (~y530,
-            # official-live/27); elsewhere they sit under the actions.
+            # whole activity line is parked on Plex's season page and in
+            # the scrolled-off state. The media pills ride at the
+            # director line instead (~y530, official-live/27); elsewhere
+            # they sit under the actions.
             self.getControl(7207).setPosition(
-                200, 2200 if self.mode == 'season' else t + 105)
-            self._badge_top = t - 40 if season_cards else t + 108
+                200, act_top + 13 if not (self.mode == 'season' or deep)
+                else 2200)
+            self._badge_top = (2200 if deep
+                               else t - 40 if season_cards else t + 108)
             # On the season cards view Plex shows no section heading --
-            # only the 'Cast & Crew' heading peeking at the bottom edge
-            # above its cropped portrait row.
+            # only the NEXT section's title peeking at the bottom edge
+            # above its cropped row ('Cast & Crew' sliver, or extras/
+            # related when the item has no cast).
             label_ctl = self.getControl(7060)
+            secs = self._bottom_sections()
+            # 'content' isn't a section on plain item pages -- the first
+            # real section (Cast & Crew, or extras/related when there
+            # is no cast) owns the slot.
+            if self._bottom not in secs:
+                self._bottom = secs[0] if secs else 'content'
+            # Full section heights incl. captions -- the deep rows are
+            # bottom-anchored ~10px off the screen edge like Plex's
+            # fully-scrolled state.
+            _ROW_H = {SEASONS_LIST_ID: 380, EPISODES_LIST_ID: 296,
+                      CAST_LIST_ID: 250, EXTRAS_ROW_ID: 380,
+                      RELATED_LIST_ID: 430}
             if season_cards:
-                label_ctl.setLabel(i18n.tr(33100))
+                nxt = secs[1] if len(secs) > 1 else None
+                label_ctl.setLabel(
+                    self._section_title(nxt) if nxt else '')
                 label_ctl.setPosition(128, 1005)
             else:
+                label_ctl.setLabel(self._section_title(self._bottom))
                 label_ctl.setPosition(128, t + 202)
             row_top = 590 if season_cards else t + 264
-            for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID):
-                self.getControl(cid).setPosition(128, row_top)
+            if deep:
+                active_list = self._section_list(self._bottom)
+                row_top = 1070 - _ROW_H.get(active_list, 300)
+                label_ctl.setPosition(128, row_top - 64)
+            active = self._section_list(self._bottom)
+            # The sliver row is the next section's list peeking under
+            # the season cards' bottom edge.
+            sliver = self._section_list(secs[1]) \
+                if season_cards and len(secs) > 1 else None
             # Parked sections keep their 'visible' state (Kodi only
             # moves focus natively into visible controls) but sit past
-            # the screen edge; the focused one owns the bottom slot. On
-            # the season page Plex lets the cast portraits peek under
-            # the bottom edge, so the parked cast row only goes far
-            # enough to stay a sliver.
-            if self.mode in ('show', 'season'):
-                parked = (SEASONS_LIST_ID if self.mode == 'show'
-                          else EPISODES_LIST_ID) \
-                    if self._cast_active else CAST_LIST_ID
-                parked_top = 1050 if (self.mode == 'season' and
-                                      parked == CAST_LIST_ID) else 2200
-                self.getControl(parked).setPosition(128, parked_top)
+            # the screen edge; the focused one owns the bottom slot.
+            for cid in (SEASONS_LIST_ID, EPISODES_LIST_ID, CAST_LIST_ID,
+                        EXTRAS_ROW_ID, RELATED_LIST_ID):
+                top = (row_top if cid == active
+                       else 1050 if cid == sliver else 2200)
+                self.getControl(cid).setPosition(128, top)
         except RuntimeError:
             pass
 
@@ -919,12 +996,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         try:
             if 'seasons' in self._bg_done:
                 self._seasons = self._bg_get('seasons') or []
+            elif self.item.get('cloud') \
+                    and hasattr(self.client, 'provider_children'):
+                self._seasons = self.client.provider_children(
+                    self.item.get('key') or '') or []
             else:
                 self._seasons = self.client.show_seasons(
                     self.item['rating_key'])
         except Exception as e:
             xbmc.log('Akasha Aura Detail: seasons failed: {}'.format(e), xbmc.LOGERROR)
             self._seasons = []
+        if self.item.get('cloud'):
+            self._seasons = [s for s in self._seasons
+                             if s.get('type') == 'season']
 
     def _render_seasons(self):
         try:
@@ -993,7 +1077,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _load_episodes(self, season_pos):
         season = self._seasons[season_pos]
         try:
-            self._episodes = self.client.season_episodes(season['rating_key'])
+            if self.item.get('cloud') \
+                    and hasattr(self.client, 'provider_children'):
+                self._episodes = [
+                    e for e in (self.client.provider_children(
+                        season.get('key') or '') or [])
+                    if e.get('type') == 'episode']
+            else:
+                self._episodes = self.client.season_episodes(
+                    season['rating_key'])
         except Exception as e:
             xbmc.log('Akasha Aura Detail: episodes failed: {}'.format(e), xbmc.LOGERROR)
             self._episodes = []
@@ -1036,6 +1128,47 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
 
+    def _render_extras_row(self):
+        """Plex's 'Trailers & Extras' row: landscape stills, title +
+        subtype caption under each card (official 24-detail-bottom2)."""
+        _EXTRA_KINDS = {
+            'trailer': i18n.tr(33108),
+            'behind_the_scenes': 'Behind the Scenes',
+            'featurette': 'Featurette',
+            'deleted_or_extended_scene': 'Deleted Scene',
+            'interview': 'Interview',
+            'scene_or_sample': 'Clip',
+            'short': 'Short',
+        }
+        try:
+            lst = self.getControl(EXTRAS_ROW_ID)
+            lst.reset()
+            for ex in self._extras:
+                li = xbmcgui.ListItem(ex.get('title') or '')
+                li.setArt({'thumb': ex.get('thumb_url') or
+                           ex.get('art_url') or ''})
+                li.setLabel2(_EXTRA_KINDS.get(ex.get('subtype') or '',
+                                              i18n.tr(33109)))
+                lst.addItem(li)
+        except RuntimeError:
+            pass
+
+    def _render_related(self):
+        """Plex's 'Related' row: poster cards, title + year caption."""
+        try:
+            lst = self.getControl(RELATED_LIST_ID)
+            lst.reset()
+            for it in self._related:
+                li = xbmcgui.ListItem(it.get('title') or '')
+                li.setArt({'thumb': it.get('poster_url') or
+                           it.get('thumb_url') or ''})
+                li.setLabel2(str(it.get('year') or ''))
+                li.setProperty('watched',
+                               '1' if it.get('watched') else '0')
+                lst.addItem(li)
+        except RuntimeError:
+            pass
+
     def _sync_navigation(self):
         """Rewire directional targets to whichever bottom row is visible."""
         bottom = {CAST_LIST_ID: 'item', SEASONS_LIST_ID: 'show',
@@ -1059,36 +1192,45 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                                         self.getControl(right_id))
                     row.setNavigation(mid, row, row, row)
                     activity.setNavigation(watch, row, activity, activity)
-            if self.mode in ('show', 'season') and \
-                    self.getProperty('AuraDetailCastRow'):
-                # Plex stacks Cast & Crew under the season/episode row:
-                # Down enters it, Up puts the content row back.
-                row_id = (SEASONS_LIST_ID if self.mode == 'show'
-                          else EPISODES_LIST_ID)
-                row_ctl = self.getControl(row_id)
-                cast_ctl = self.getControl(CAST_LIST_ID)
-                row_ctl.setNavigation(mid, cast_ctl, row_ctl, row_ctl)
-                cast_ctl.setNavigation(row_ctl, cast_ctl,
-                                       cast_ctl, cast_ctl)
+            secs = self._bottom_sections()
+            ids = [self._section_list(s) for s in secs]
             if self.mode in ('show', 'season'):
                 strip.setNavigation(strip, watch, strip, strip)
+            if self.mode == 'item' and ids:
+                # Plain fiche: the first real section is the bottom row
+                # (cast when present, else extras/related).
+                first = self.getControl(ids[0])
+                first.setNavigation(mid, first, first, first)
+                activity.setNavigation(watch, first,
+                                       activity, activity)
             if self.mode == 'season':
                 # Plex's season column (official-live/27): tab strip ->
-                # episode cards -> action circles -> Cast & Crew. The
-                # activity line and the section heading are parked.
+                # episode cards -> action circles -> lower sections.
                 ep = self.getControl(EPISODES_LIST_ID)
-                cast = self.getControl(CAST_LIST_ID)
                 right_id = (
                     RESTART_BUTTON_ID
                     if self.getProperty('AuraDetailRestart')
                     else WATCHLIST_BUTTON_ID)
                 strip.setNavigation(strip, ep, strip, strip)
                 ep.setNavigation(strip, watch, ep, ep)
-                down_ctl = cast if self.getProperty('AuraDetailCastRow') \
-                    else watch
+                down_ctl = (self.getControl(ids[1])
+                            if len(ids) > 1 else watch)
                 watch.setNavigation(ep, down_ctl, watch,
                                     self.getControl(right_id))
-                cast.setNavigation(watch, cast, cast, cast)
+            # Stack the lower sections Plex-style (23/24-detail-bottom):
+            # content -> Cast & Crew -> Trailers & Extras -> Related.
+            for i in range(1, len(ids)):
+                ctl = self.getControl(ids[i])
+                prev = self.getControl(ids[i - 1])
+                nxt = (self.getControl(ids[i + 1])
+                       if i + 1 < len(ids) else ctl)
+                # On the season page the first lower section goes back
+                # up to the action row, not to the episode cards.
+                ctl.controlUp(watch if (self.mode == 'season' and i == 1)
+                              else prev)
+                ctl.controlDown(nxt)
+                if not (self.mode == 'season' and i == 1):
+                    prev.controlDown(ctl)
         except RuntimeError as e:
             xbmc.log('Akasha Aura Detail: nav sync failed: {}'.format(e),
                      xbmc.LOGWARNING)
@@ -1104,6 +1246,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             RESTART_BUTTON_ID: i18n.tr(33107),
             EXTRAS_BUTTON_ID: self._extras_label(),
             WATCHLIST_BUTTON_ID: i18n.tr(33110),
+            LIST_BUTTON_ID: i18n.tr(33605),
             RATE_BUTTON_ID: i18n.tr(33111),
             WATCHED_BUTTON_ID: (i18n.tr(33113) if self.watched
                                 else i18n.tr(33112)),
@@ -1154,17 +1297,21 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # watched | more -- trailers/extras live in the More panel like
         # Plex's "Trailers & Extras" entry, not in the action row. The
         # watchlist bookmark stays visible like Plex even though cloud
-        # sync is unavailable (click surfaces the notification).
+        # sync is unavailable (click surfaces the notification). On a
+        # cloud (Discover) page the bookmark circle folds into the
+        # 'Add to Watchlist' pill like official-live/56.
+        cloud = bool(self.item.get('cloud'))
         order = ([WATCH_BUTTON_ID]
                  + ([RESTART_BUTTON_ID] if restart else [])
-                 + [WATCHLIST_BUTTON_ID, RATE_BUTTON_ID, WATCHED_BUTTON_ID,
-                    MORE_BUTTON_ID])
-        for cid in (WATCHLIST_BUTTON_ID,) + ACTION_ICON_OVERLAYS.get(
-                WATCHLIST_BUTTON_ID, ()):
-            try:
-                self.getControl(cid).setVisible(True)
-            except RuntimeError:
-                pass
+                 + ([LIST_BUTTON_ID] if cloud else [WATCHLIST_BUTTON_ID])
+                 + [RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID])
+        for cid, vis in ((WATCHLIST_BUTTON_ID, not cloud),
+                         (LIST_BUTTON_ID, cloud)):
+            for cid2 in (cid,) + ACTION_ICON_OVERLAYS.get(cid, ()):
+                try:
+                    self.getControl(cid2).setVisible(vis)
+                except RuntimeError:
+                    pass
         # The extras circle left the row for the More panel: hide it on
         # this reused window no matter what a previous render did.
         for cid in (EXTRAS_BUTTON_ID,) + ACTION_ICON_OVERLAYS.get(
@@ -1185,9 +1332,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # unfocused on item/show pages (official-live/44) -- but the
             # season page draws a bare circle like every other action
             # (official-live/27). Restart collapses to a circle too once
-            # the cursor leaves the row.
-            always = restart and cid == WATCH_BUTTON_ID \
-                and self.mode != 'season'
+            # the cursor leaves the row. The cloud 'Add to Watchlist'
+            # pill is likewise the page's standing CTA (official-live/56).
+            always = cid == WATCH_BUTTON_ID and (cloud or (
+                restart and self.mode != 'season'))
             w = self._action_width(cid, cid if always else focused)
             underlay = ACTION_PILL_UNDERLAYS.get(cid)
             if underlay:
@@ -1244,12 +1392,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # Left/right nav follows the visible order exactly -- hidden
         # buttons (watchlist, and restart/extras when absent) must never
         # land under the cursor. Up reaches the season strip in show
-        # mode, Down the visible bottom row.
-        bottom_id = {'item': CAST_LIST_ID, 'show': SEASONS_LIST_ID,
-                     'season': CAST_LIST_ID}.get(self.mode)
-        bottom_prop = {'item': 'AuraDetailCastRow',
-                       'show': 'AuraDetailSeasonsRow',
-                       'season': 'AuraDetailCastRow'}.get(self.mode)
+        # mode, Down the visible bottom row -- the first real lower
+        # section, which may be extras/related when there is no cast.
+        secs = self._bottom_sections()
+        lower = [s for s in secs if s != 'content']
+        if self.mode == 'show':
+            bottom_id = SEASONS_LIST_ID
+            bottom_ok = bool(self._seasons)
+        elif self.mode == 'season':
+            bottom_id = self._section_list(lower[0]) if lower else None
+            bottom_ok = bool(lower)
+        else:
+            bottom_id = self._section_list(secs[0]) if secs else None
+            bottom_ok = bool(secs)
         show_strip = self.mode in ('show', 'season')
         for i, cid in enumerate(order):
             try:
@@ -1265,7 +1420,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                     ctl.controlUp(self.getControl(
                         EPISODES_LIST_ID if self.mode == 'season'
                         else SEASON_STRIP_ID))
-                if self.getProperty(bottom_prop):
+                if bottom_ok:
                     ctl.controlDown(self.getControl(
                         ACTIVITY_ROW_ID if (self._activity_label and
                                             self.mode != 'season')
@@ -1282,30 +1437,63 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 len(self._seasons), 's' if len(self._seasons) > 1 else '')
         return i18n.tr(33100)
 
-    def _set_cast_active(self, active):
-        """Swap the parked lower section into the bottom slot. Same end
-        state as Plex's page scroll: focus on Cast & Crew slides it in,
+    def _bottom_sections(self):
+        """Ordered lower sections Plex stacks under the content row:
+        Cast & Crew, then Trailers & Extras, then Related titles --
+        each present only when it has data."""
+        secs = []
+        if self.mode in ('show', 'season'):
+            secs.append('content')
+        if self.item.get('cast'):
+            secs.append('cast')
+        if self._extras:
+            secs.append('extras')
+        if self._related:
+            secs.append('related')
+        return secs
+
+    def _section_list(self, sec):
+        if sec == 'content':
+            return (SEASONS_LIST_ID if self.mode == 'show'
+                    else EPISODES_LIST_ID)
+        return {'cast': CAST_LIST_ID, 'extras': EXTRAS_ROW_ID,
+                'related': RELATED_LIST_ID}.get(sec)
+
+    def _section_title(self, sec):
+        if sec == 'cast':
+            return i18n.tr(33100)
+        if sec == 'extras':
+            return i18n.tr(33589)
+        if sec == 'related':
+            return self._related_title or i18n.tr(33574)
+        return self._section_label()
+
+    def _set_section(self, sec):
+        """Swap a parked lower section into the bottom slot. Same end
+        state as Plex's page scroll: focusing a lower row slides it in,
         focus back on the content row restores it."""
-        if active == self._cast_active:
+        if sec == self._bottom:
             return
-        self._cast_active = active
+        self._bottom = sec
         self._apply_flow()
         try:
-            # On the season cards view the heading already reads
-            # 'Cast & Crew' (bottom-edge sliver); every other state
-            # carries the section title.
-            if not (self.mode == 'season' and not active):
-                self.getControl(7060).setLabel(
-                    i18n.tr(33100) if active else self._section_label())
+            # On the season cards view the heading already reads the
+            # next section's title (bottom-edge sliver); every other
+            # state carries the section title.
+            if not (self.mode == 'season' and sec == 'content'):
+                self.getControl(7060).setLabel(self._section_title(sec))
         except RuntimeError:
             pass
 
     def onFocus(self, controlID):
-        if self.mode in ('show', 'season'):
-            if controlID == CAST_LIST_ID:
-                self._set_cast_active(True)
-            elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
-                self._set_cast_active(False)
+        if controlID == CAST_LIST_ID:
+            self._set_section('cast')
+        elif controlID == EXTRAS_ROW_ID:
+            self._set_section('extras')
+        elif controlID == RELATED_LIST_ID:
+            self._set_section('related')
+        elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
+            self._set_section('content')
         if controlID == EPISODES_LIST_ID and self.mode == 'season':
             try:
                 pos = self.getControl(EPISODES_LIST_ID) \
@@ -1324,7 +1512,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def onClick(self, controlID):
         if controlID == WATCH_BUTTON_ID:
-            self._play()
+            if self.item.get('cloud'):
+                # 'Add to Watchlist' pill: cloud watchlist sync is a
+                # plex.tv feature, like the standalone bookmark circle.
+                xbmcgui.Dialog().notification(
+                    'Akasha Aura', i18n.tr(33124),
+                    xbmcgui.NOTIFICATION_INFO, 1500)
+            else:
+                self._play()
         elif controlID == RESTART_BUTTON_ID:
             self._play(start_over=True)
         elif controlID == WATCHED_BUTTON_ID:
@@ -1334,6 +1529,11 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # once the connector proxies it.
             xbmcgui.Dialog().notification(
                 'Akasha Aura', i18n.tr(33124), xbmcgui.NOTIFICATION_INFO, 1500)
+        elif controlID == LIST_BUTTON_ID:
+            # Same cloud-only list feature as the More panel entry.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', 'Listes indisponibles (fonction Plex cloud)',
+                xbmcgui.NOTIFICATION_INFO, 2500)
         elif controlID == EXTRAS_BUTTON_ID:
             self._play_extra()
         elif controlID == RATE_BUTTON_ID:
@@ -1352,6 +1552,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._open_episode()
         elif controlID == CAST_LIST_ID:
             self._open_person()
+        elif controlID == EXTRAS_ROW_ID:
+            try:
+                pos = self.getControl(EXTRAS_ROW_ID).getSelectedPosition()
+            except RuntimeError:
+                pos = -1
+            self._play_extra(pos)
+        elif controlID == RELATED_LIST_ID:
+            self._open_related_card()
         elif controlID == ACTIVITY_ROW_ID:
             self._open_activity_feed()
 
@@ -1392,7 +1600,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         on the season just left -- navigation stays centred on the
         content, never bouncing back up to the tab strip."""
         self.mode = 'show'
-        self._cast_active = False
+        self._bottom = 'content'
         self._hero_episode = None
         # Back on the seasons overview Plex paints the SHOW hero again
         # (no media badges -- _badge_item() now yields None here).
@@ -1418,7 +1626,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._active_season = season_pos
         self._load_episodes(season_pos)
         self.mode = 'season'
-        self._cast_active = False
+        self._bottom = 'content'
         _set(self, 'AuraDetailSeasonsRow', '')
         _set(self, 'AuraDetailEpisodesRow', '1')
         self._render_episodes()
@@ -1605,6 +1813,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         current season -- Plex badges and plays that one, not blindly
         S1E1 (and never the bare show record, which carries no
         streams)."""
+        if self.item.get('cloud'):
+            # Discover records carry no local part: nothing is playable,
+            # Plex draws 'Add to Watchlist' instead of a Watch CTA.
+            return None
         if self.mode == 'season' and self._hero_episode:
             # Plex's season page actions act on the focused card (the
             # hero): play/resume, stream pickers and badges all follow it.
@@ -1627,6 +1839,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     def _watch_label(self):
         item = self.item
+        if item.get('cloud'):
+            return i18n.tr(33110)
         if self.mode in ('show', 'season'):
             nxt = (self._hero_episode or self._find_next_episode()) \
                 if self.mode == 'season' else self._find_next_episode()
@@ -1819,7 +2033,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _find_next_episode(self):
         if self._next_episode:
             return self._next_episode
-        if not self.client:
+        if not self.client or self.item.get('cloud'):
             return None
         try:
             if 'ondeck' in self._bg_done:
@@ -1899,10 +2113,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             self._playback_item = person._playback_item
             self.close()
 
-    def _play_extra(self):
+    def _play_extra(self, index=None):
         """Bande-annonce/Bonus button: a single extra plays straight
-        away, several open Plex's pick list first."""
+        away, several open Plex's pick list first. The Trailers &
+        Extras row passes the focused card's index directly."""
         if not self._extras:
+            return
+        if index is not None and 0 <= index < len(self._extras):
+            pick = self._extras[index]
+            self._start_extra(pick)
             return
         pick = self._extras[0]
         if len(self._extras) > 1:
@@ -1916,6 +2135,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if pos < 0:
                 return
             pick = ordered[pos]
+        self._start_extra(pick)
+
+    def _start_extra(self, pick):
         url = self._stream_url(pick)
         if not url:
             xbmcgui.Dialog().notification(
@@ -2135,6 +2357,28 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             xbmcgui.Dialog().notification('Akasha Aura', msg,
                                           xbmcgui.NOTIFICATION_INFO, 2500)
 
+    def _open_related_card(self):
+        """Clicking a poster in the Related row pushes that title's
+        fiche on top of the current one -- Plex's drill-in; Back pops
+        back to this page."""
+        try:
+            pos = self.getControl(RELATED_LIST_ID).getSelectedPosition()
+        except RuntimeError:
+            return
+        if not (0 <= pos < len(self._related)):
+            return
+        it = self._related[pos]
+        detail = AuraDetailWindow(
+            'AuraDetail.xml', self.addon_path, 'Default', '1080i')
+        detail.client = self.client
+        detail.item = it
+        detail.mode = 'show' if it.get('type') == 'show' else 'item'
+        detail.doModal()
+        if getattr(detail, 'playback_started', False):
+            self.playback_started = True
+            self._playback_item = getattr(detail, '_playback_item', None)
+            self.close()
+
     def _open_related(self):
         """Plex's 'More Like This' (B7): the /related hub flattened into
         a poster row. Rendered through the person-page window -- same
@@ -2237,7 +2481,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             return
         src['_streams_checked'] = True
         try:
-            full = self.client.metadata_item(src['rating_key']) or {}
+            if self.item.get('cloud') or src.get('cloud'):
+                # Provider records hydrate through the Discover base --
+                # the hex key 404s on the local server.
+                fn = getattr(self.client, 'provider_metadata', None)
+                full = (fn(src.get('key')) or {}) if fn else {}
+            else:
+                full = self.client.metadata_item(src['rating_key']) or {}
         except Exception as e:
             xbmc.log('Akasha Aura Detail: stream labels failed: {}'
                      .format(e), xbmc.LOGWARNING)
@@ -2254,7 +2504,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         """The record the media pills describe -- Plex's matrix:
         show overview = NO badges at all, season page = the focused
         (hero) episode, movie/episode page = the item itself."""
-        if self.mode == 'show':
+        if self.mode == 'show' or self.item.get('cloud'):
             return None
         if self.mode == 'season':
             return self._hero_episode or self._playable_item()

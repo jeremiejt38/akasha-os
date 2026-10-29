@@ -614,6 +614,33 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual([i['rating_key'] for i in items], ['1', '2', '3'])
 
     @patch('urllib.request.urlopen')
+    def test_item_related_keeps_hub_titles(self, mock_urlopen):
+        def video(rk, title):
+            return {'ratingKey': rk, 'title': title, 'type': 'show'}
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Hub': [
+                {'title': 'Related Shows',
+                 'Metadata': [video('7', 'A'), video('8', 'B')]},
+                {'title': 'More with Jane Doe',
+                 'Metadata': [video('9', 'C')]},
+                {'title': 'Empty hub', 'Metadata': []},
+            ]}})
+        hubs = self.client.item_related('42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/library/metadata/42/related', url)
+        self.assertEqual([h['title'] for h in hubs],
+                         ['Related Shows', 'More with Jane Doe'])
+        self.assertEqual(
+            [[i['rating_key'] for i in h['items']] for h in hubs],
+            [['7', '8'], ['9']])
+
+    @patch('urllib.request.urlopen')
+    def test_item_related_empty_when_absent(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(
+            {'MediaContainer': {'Metadata': [{'title': 'x'}]}})
+        self.assertEqual(self.client.item_related('42'), [])
+
+    @patch('urllib.request.urlopen')
     def test_item_markers_normalises_windows(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {'Metadata': [{'Marker': [

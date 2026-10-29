@@ -391,7 +391,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-play-dark.png</texture>
-        <visible>!String.IsEqual(Window.Property(AuraDetailResume),1) + Control.HasFocus(7100)</visible>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + !String.IsEqual(Window.Property(AuraDetailResume),1) + Control.HasFocus(7100)</visible>
     </control>
     <control type="image" id="7089">
         <left>125</left>
@@ -400,7 +400,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-play.png</texture>
-        <visible>!String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100)</visible>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + !String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100)</visible>
     </control>
     <control type="image" id="7088">
         <left>125</left>
@@ -409,7 +409,7 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-resume-dark.png</texture>
-        <visible>String.IsEqual(Window.Property(AuraDetailResume),1) + [Control.HasFocus(7100) | !String.IsEmpty(Window.Property(AuraPill7100))]</visible>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + String.IsEqual(Window.Property(AuraDetailResume),1) + [Control.HasFocus(7100) | !String.IsEmpty(Window.Property(AuraPill7100))]</visible>
     </control>
     <control type="image" id="7091">
         <left>125</left>
@@ -418,7 +418,56 @@
         <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-resume.png</texture>
-        <visible>String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100) + String.IsEmpty(Window.Property(AuraPill7100))</visible>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100) + String.IsEmpty(Window.Property(AuraPill7100))</visible>
+    </control>
+    <!-- Cloud (Discover) pages: the Watch circle becomes Plex's 'Add to
+         Watchlist' bookmark pill (official-live/56). The pill stays
+         expanded, so the dark glyph always rides on the white fill. -->
+    <control type="image" id="7163">
+        <left>125</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-bookmark-dark.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud))</visible>
+    </control>
+    <!-- Cloud pages only: 'Add to List' circle right after the
+         Watchlist pill (official-live/56). -->
+    <control type="button" id="7164">
+        <left>375</left>
+        <top>564</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_aura_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+        <ondown>7110</ondown>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud))</visible>
+    </control>
+    <control type="image" id="7165">
+        <left>395</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-list.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud)) + !Control.HasFocus(7164)</visible>
+    </control>
+    <control type="image" id="7166">
+        <left>395</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-list-dark.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud)) + Control.HasFocus(7164)</visible>
     </control>
     <control type="button" id="7106">
         <left>375</left>
@@ -707,6 +756,18 @@
         <textcolor>FF1A1A1A</textcolor>
         <label></label>
         <visible>Control.HasFocus(7103)</visible>
+    </control>
+    <control type="label" id="7157">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_aura_mini</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7164)</visible>
     </control>
     <control type="label" id="7154">
         <left>0</left>
@@ -1359,6 +1420,222 @@
                     <top>222</top>
                     <width>215</width>
                     <height>24</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Trailers & Extras row: landscape stills, title + subtype
+             caption under each card (official 24-detail-bottom2). -->
+        <control type="list" id="7170">
+            <left>128</left>
+            <top>828</top>
+            <width>1800</width>
+            <height>380</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailExtrasRow),1)</visible>
+            <itemlayout width="544" height="380">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>512</width>
+                    <height>288</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>512</width>
+                    <height>288</height>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>300</top>
+                    <width>512</width>
+                    <height>32</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>332</top>
+                    <width>512</width>
+                    <height>28</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="544" height="380">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>512</width>
+                    <height>288</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>512</width>
+                    <height>288</height>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>520</width>
+                    <height>296</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>300</top>
+                    <width>512</width>
+                    <height>32</height>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>332</top>
+                    <width>512</width>
+                    <height>28</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <!-- Related titles row: poster cards, title + year caption
+             (official 'Related Movies' / 'More with X', 24-detail-bottom2). -->
+        <control type="list" id="7175">
+            <left>128</left>
+            <top>828</top>
+            <width>1800</width>
+            <height>430</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailRelatedRow),1)</visible>
+            <itemlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>248</width>
+                    <height>368</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>

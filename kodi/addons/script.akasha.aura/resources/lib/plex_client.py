@@ -319,6 +319,19 @@ class PlexClient:
             it['cloud'] = True
         return items[0]
 
+    def provider_children(self, key):
+        """All children of a Discover/cloud node (show seasons, season
+        episodes) -- the provider mirrors the /library/metadata/<hex>
+        path layout, so a node's own `key` is the children endpoint."""
+        if not key:
+            return []
+        path = key if key.startswith('http') else self.DISCOVER_BASE + key
+        data = self._request(path)
+        items = self._metadata_list(data)
+        for it in items:
+            it['cloud'] = True
+        return items
+
     EPG_BASE = 'https://epg.provider.plex.tv'
 
     def live_channels(self):
@@ -937,6 +950,22 @@ class PlexClient:
             item['subtype'] = raw.get('subtype') or ''
             items.append(item)
         return items
+
+    def item_related(self, rating_key):
+        """Related hubs stacked under a detail page (official
+        'Related Shows' / 'More with <actor>' rows). Each hub keeps its
+        server-localised title so the row heading matches Plex."""
+        data = self._request(
+            '/library/metadata/{}/related'.format(rating_key))
+        mc = self._media_container(data)
+        hubs = []
+        for hub in mc.get('Hub', []):
+            items = [self._video_dict(it, self.server_url, self.token)
+                     for it in hub.get('Metadata', [])]
+            if items:
+                hubs.append({'title': hub.get('title') or '',
+                             'items': items})
+        return hubs
 
     def item_markers(self, rating_key):
         """Playback markers (intro/credits) of an item.
