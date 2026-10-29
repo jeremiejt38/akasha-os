@@ -182,39 +182,19 @@
             </control>
         </control>
 
-        <!-- Clock, top-right -->
+        <!-- Clock, top-right: 24h on this FR-locale device, no AM/PM
+             suffix (matching how French Plex draws its clock). -->
+
         <control type="label">
             <left>1640</left>
             <top>53</top>
-            <width>164</width>
+            <width>200</width>
             <height>40</height>
             <font>font_aura_mini</font>
             <align>right</align>
             <aligny>center</aligny>
             <label>$INFO[System.Time(h:mm)]</label>
             <textcolor>FFFFFFFF</textcolor>
-        </control>
-        <control type="label">
-            <left>1807</left>
-            <top>53</top>
-            <width>44</width>
-            <height>40</height>
-            <aligny>center</aligny>
-            <font>font_aura_mini</font>
-            <label>AM</label>
-            <textcolor>FFFFFFFF</textcolor>
-            <visible>!Integer.IsGreater(System.Time(hh),11)</visible>
-        </control>
-        <control type="label">
-            <left>1807</left>
-            <top>53</top>
-            <width>44</width>
-            <height>40</height>
-            <aligny>center</aligny>
-            <font>font_aura_mini</font>
-            <label>PM</label>
-            <textcolor>FFFFFFFF</textcolor>
-            <visible>Integer.IsGreater(System.Time(hh),11)</visible>
         </control>
 
         <!-- Bottom bar: passive play/pause glyph, elapsed, slim progress,
@@ -239,26 +219,28 @@
             <visible>Player.Paused</visible>
         </control>
         <control type="label">
-            <left>148</left>
+            <left>136</left>
             <top>954</top>
-            <width>110</width>
+            <width>72</width>
             <height>40</height>
             <font>font_aura_clock</font>
+            <align>right</align>
             <aligny>center</aligny>
             <label>$INFO[Player.Time(m)]:$INFO[Player.Time(ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
-            <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
+            <visible>!Integer.IsGreater(Player.Time(h),0)</visible>
         </control>
         <control type="label">
-            <left>148</left>
+            <left>96</left>
             <top>954</top>
-            <width>110</width>
+            <width>112</width>
             <height>40</height>
             <font>font_aura_clock</font>
+            <align>right</align>
             <aligny>center</aligny>
             <label>$INFO[Player.Time(h:mm:ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
-            <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
+            <visible>Integer.IsGreater(Player.Time(h),0)</visible>
         </control>
         <control type="progress">
             <left>222</left>
@@ -282,7 +264,7 @@
             <aligny>center</aligny>
             <label>-$INFO[Player.TimeRemaining(m)]:$INFO[Player.TimeRemaining(ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
-            <visible>!Integer.IsGreater(Player.Duration(h),0)</visible>
+            <visible>!Integer.IsGreater(Player.TimeRemaining(h),0)</visible>
         </control>
         <control type="label">
             <left>1638</left>
@@ -294,7 +276,7 @@
             <aligny>center</aligny>
             <label>-$INFO[Player.TimeRemaining(h:mm:ss)]</label>
             <textcolor>FFFFFFFF</textcolor>
-            <visible>Integer.IsGreater(Player.Duration(h),0)</visible>
+            <visible>Integer.IsGreater(Player.TimeRemaining(h),0)</visible>
         </control>
 
         <!-- Dismiss chevron -->
