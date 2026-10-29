@@ -419,6 +419,10 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         current = _home().getProperty(PROP_QUALITY) or 'original'
         _, _, rating_key, _ = _playback_context()
 
+        # Plex's gear sheet leads with track pickers (audio + subtitles)
+        # -- rebuild the same dialog in streams mode on click.
+        self._add(lst, i18n.tr(33200), action=('mode', 'streams'))
+
         self._add(lst, i18n.tr(33205), header=True)
         for pid, label, kbps, res in QUALITY_PRESETS:
             self._add(lst, label, selected=(pid == current),
@@ -485,6 +489,18 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
             _, pid, kbps, res = self._actions[pos]
             self.close()
             self._switch_quality(pid, kbps, res)
+        elif kind == 'mode':
+            self.mode = self._actions[pos][1]
+            lst = self.getControl(1000)
+            lst.reset()
+            self._actions = []
+            if self.mode == 'streams':
+                self.getControl(10).setLabel(i18n.tr(33200))
+                self._build_streams(lst)
+            for i, a in enumerate(self._actions):
+                if a:
+                    lst.selectItem(i)
+                    break
 
     def onAction(self, action):
         if action.getId() in _back_ids():

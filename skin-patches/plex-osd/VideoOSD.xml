@@ -195,7 +195,7 @@
             <textcolor>FFFFFFFF</textcolor>
         </control>
 
-        <!-- Subtitle + settings circles, bottom-right (Plex: ~76px
+        <!-- Play-queue + settings circles, bottom-right (Plex: ~76px
              circles, centers x~1743/1820, glyph center ~y900). Focused
              circle goes solid white with a dark glyph. -->
         <control type="button" id="9110">
@@ -204,7 +204,7 @@
             <width>76</width>
             <height>76</height>
             <label></label>
-            <onclick>RunScript(script.akasha.aura,osdmenu,streams)</onclick>
+            <onclick>RunScript(script.akasha.aura,osdqueue)</onclick>
             <onleft>9101</onleft>
             <onright>9111</onright>
             <ondown>9102</ondown>
@@ -216,7 +216,7 @@
             <top>885</top>
             <width>30</width>
             <height>30</height>
-            <texture>osd-subs.png</texture>
+            <texture>osd-queue.png</texture>
             <visible>!Control.HasFocus(9110)</visible>
         </control>
         <control type="image">
@@ -224,7 +224,7 @@
             <top>885</top>
             <width>30</width>
             <height>30</height>
-            <texture colordiffuse="FF1F1614">osd-subs.png</texture>
+            <texture colordiffuse="FF1F1614">osd-queue-dark.png</texture>
             <visible>Control.HasFocus(9110)</visible>
         </control>
         <control type="button" id="9111">
