@@ -943,6 +943,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self.setProperty('AuraRowStyle{}'.format(i), '')
                 try:
                     self.getControl(label_id).setLabel('')
+                    self.getControl(label_id + 1).setLabel('')
                 except RuntimeError:
                     pass
                 continue
