@@ -242,18 +242,18 @@
         </control>
         <!-- Mic + filter-tune icons (visual parity, non functional) -->
         <control type="image">
-            <left>453</left>
-            <top>66</top>
-            <width>18</width>
-            <height>27</height>
+            <left>450</left>
+            <top>58</top>
+            <width>28</width>
+            <height>44</height>
             <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
         </control>
         <control type="image">
-            <left>512</left>
-            <top>66</top>
-            <width>28</width>
-            <height>27</height>
+            <left>505</left>
+            <top>58</top>
+            <width>46</width>
+            <height>44</height>
             <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-tune.png</texture>
         </control>
