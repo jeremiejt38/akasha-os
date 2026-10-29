@@ -70,7 +70,7 @@
                  by Window.Property(AuraHero*) from aura_window.py. -->
             <control type="image">
                 <left>127</left>
-                <top>180</top>
+                <top>127</top>
                 <width>560</width>
                 <height>100</height>
                 <aspectratio align="left" aligny="bottom">keep</aspectratio>
@@ -80,7 +80,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>226</top>
+                <top>173</top>
                 <width>1500</width>
                 <height>62</height>
                 <font>font_aura_info_black_doublerow</font>
@@ -91,7 +91,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>292</top>
+                <top>247</top>
                 <width>1500</width>
                 <height>44</height>
                 <font>font_aura_midi</font>
@@ -105,7 +105,7 @@
                  label text. -->
             <control type="grouplist">
                 <left>127</left>
-                <top>340</top>
+                <top>295</top>
                 <width>1400</width>
                 <height>36</height>
                 <orientation>horizontal</orientation>
@@ -128,7 +128,7 @@
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture colordiffuse="B314161E" border="10">rounded-solid.png</texture>
+                        <texture colordiffuse="E014161E" border="10">rounded-solid.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
@@ -145,7 +145,7 @@
             </control>
             <control type="textbox">
                 <left>127</left>
-                <top>380</top>
+                <top>335</top>
                 <width>880</width>
                 <height>70</height>
                 <font>font_aura_mini</font>
@@ -154,7 +154,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>458</top>
+                <top>413</top>
                 <width>1100</width>
                 <height>26</height>
                 <font>font_aura_tiny</font>

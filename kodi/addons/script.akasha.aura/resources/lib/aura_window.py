@@ -3327,6 +3327,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._focus_tab(self.active_tab)
             self._update_bar_focused()
             return
+        if aid == ACTION_MOVE_DOWN and \
+                focused in (DIVERT_SUBTAB_IDS + JEUX_SUBTAB_IDS +
+                            APP_SUBTAB_IDS + HOME_TAB_IDS):
+            # Same cascade, Down direction: a native hop from the tab bar
+            # into the strip re-delivers the press and ondown ejects
+            # straight to the content -- the strip must actually receive
+            # focus (Plex: bar -> tab strip -> cards).
+            if (time.monotonic() -
+                    getattr(self, '_last_focus_change', 0)) < 0.05:
+                return
         # Recommande row viewport (see RECO_SLOT_IDS): Plex pins the focused
         # row at a fixed screen position -- focus stays on a slot while its
         # contents slide by one hub when scrolling past an edge.
