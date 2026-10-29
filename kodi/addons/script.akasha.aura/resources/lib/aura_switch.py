@@ -58,7 +58,7 @@ class AuraWhoWatchingWindow(xbmcgui.WindowXMLDialog):
                 if u.get('protected'):
                     li.setProperty('protected', '1')
                 panel.addItem(li)
-            self.setFocus(panel)
+            gui_guard.focus(self, USERS_PANEL)
         except RuntimeError as e:
             xbmc.log('Akasha Aura Switch: picker populate failed: {}'
                      .format(e), xbmc.LOGERROR)

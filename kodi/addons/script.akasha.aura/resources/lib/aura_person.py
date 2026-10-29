@@ -107,12 +107,9 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraPersonEmpty', '1' if not groups else '')
         except RuntimeError:
             pass
-        try:
-            self.setFocus(self.getControl(
-                FILMO_LIST_ID if FILMO_LIST_ID in self._rows
-                else FILMO_LIST2_ID))
-        except RuntimeError:
-            pass
+        gui_guard.focus(self,
+                        FILMO_LIST_ID if FILMO_LIST_ID in self._rows
+                        else FILMO_LIST2_ID)
 
     def onClick(self, controlID):
         if controlID in (FILMO_LIST_ID, FILMO_LIST2_ID):
