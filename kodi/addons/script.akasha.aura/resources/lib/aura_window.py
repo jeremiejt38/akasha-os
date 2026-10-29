@@ -1337,8 +1337,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('AuraHeroRating', rating)
         # Plex's age chip hugs its text (~40px for "10"): resize the
         # chip group/image/label since Kodi cannot auto-size it.
-        chip_w = max(44, 11 * len(rating) + 24)
-        for cid in (5005, 5006, 5007):
+        chip_w = max(44, 14 * len(rating) + 24)
+        for cid in (5005, 5006, 5007, 5008):
             try:
                 self.getControl(cid).setWidth(chip_w)
             except RuntimeError:

@@ -115,7 +115,7 @@
                     <width min="20" max="1350">auto</width>
                     <height>36</height>
                     <aligny>center</aligny>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_plot</font>
                     <textcolor>DDFFFFFF</textcolor>
                     <label>$INFO[Window.Property(AuraHeroMeta)]</label>
                 </control>
@@ -128,7 +128,14 @@
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture colordiffuse="E014161E" border="10">rounded-solid.png</texture>
+                        <texture border="10">meta-rating-box.png</texture>
+                    </control>
+                    <control type="image" id="5008">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>44</width>
+                        <height>34</height>
+                        <texture colordiffuse="80FFFFFF" border="10">chip-outline.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
@@ -137,7 +144,7 @@
                         <height>34</height>
                         <align>center</align>
                         <aligny>center</aligny>
-                        <font>font_aura_hint_bold</font>
+                        <font>font_aura_tiny_bold</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <label>$INFO[Window.Property(AuraHeroRating)]</label>
                     </control>
