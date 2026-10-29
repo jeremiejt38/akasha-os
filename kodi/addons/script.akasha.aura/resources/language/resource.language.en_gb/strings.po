@@ -1935,12 +1935,12 @@ msgctxt "#33634"
 msgid "Manage Profile Privacy"
 msgstr ""
 
-# Synchroniser l’état de visionnage et les notes
+# Synchroniser visionnage et notes
 msgctxt "#33635"
 msgid "Sync Watch State and Ratings"
 msgstr ""
 
-# Paramètres de langue des critiques et discussions
+# Langue des critiques et discussions
 msgctxt "#33636"
 msgid "Review & Discussion Language Settings"
 msgstr ""
