@@ -1645,7 +1645,7 @@
             </focusedlayout>
         </control>
 
-<control type="list" id="7176">
+        <control type="list" id="7176">
             <left>128</left>
             <top>828</top>
             <width>1800</width>
