@@ -1218,6 +1218,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # the detail page show the parent MOVIE's record, not the clip's.
         if '/extras/' in key:
             path = key.split('/extras/')[0]
+        elif key.endswith('/children'):
+            # A show/season node's own key IS its children endpoint --
+            # the record itself sits one level up, otherwise items[0]
+            # merges a SEASON's fields into the show card.
+            path = key[:-len('/children')]
         elif key:
             path = key
         else:
@@ -1227,9 +1232,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception:
             fresh = None
         if fresh:
-            for key, value in fresh.items():
-                if value and not item.get(key):
-                    item[key] = value
+            if '/extras/' in key:
+                # Trailer/clip card: the detail page paints the PARENT
+                # record -- adopt its type/key wholesale so a show
+                # keeps its season strip and mode (the clip's own key
+                # only routes into the /extras endpoint).
+                item.update(fresh)
+            else:
+                for key, value in fresh.items():
+                    if value and not item.get(key):
+                        item[key] = value
 
     def _hydrate_cloud_item(self, item):
         """Background `_cloud_hydrate` for the hero: repaint once the full
@@ -1461,7 +1473,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         Plex does after a video stops (official-live/44)."""
         detail = self._get_sub_window(
             'detail', aura_detail.AuraDetailWindow, 'AuraDetail.xml')
-        detail.client = self._connector_client or self._plex_client
+        # Cloud (Discover) records live on the metadata provider: the
+        # connector cannot resolve their hex keys, so always talk Plex.
+        detail.client = (self._plex_client if item.get('cloud')
+                         else self._connector_client or self._plex_client)
         detail.item = item
         detail.land_on_strip = return_from_playback
         # Reset per-open state (the window instance is cached/reused).
@@ -4411,7 +4426,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'Akasha Aura', item.get('title') or '', xbmcgui.NOTIFICATION_INFO, 2000)
             return
         season_index = None
-        if item.get('type') == 'season' and item.get('parent_rating_key') \
+        if item.get('type') == 'season' and item.get('cloud'):
+            # A cloud season's parent show lives on the provider; the
+            # local server only 404s the hex key.
+            season_index = item.get('index')
+            pk = item.get('parent_rating_key')
+            if pk:
+                try:
+                    full = self._plex_client.provider_metadata(
+                        '/library/metadata/{}'.format(pk))
+                    if full:
+                        full.setdefault('type', 'show')
+                        item = full
+                except Exception as e:
+                    xbmc.log('Akasha Aura: cloud season parent '
+                             'hydration failed: {}'.format(e),
+                             xbmc.LOGWARNING)
+        elif item.get('type') == 'season' and item.get('parent_rating_key') \
                 and hasattr(client, 'metadata_item'):
             season_index = item.get('index')
             try:
