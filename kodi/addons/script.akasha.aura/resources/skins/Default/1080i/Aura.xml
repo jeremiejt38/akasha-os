@@ -135,7 +135,7 @@
                     <width min="20" max="1350">auto</width>
                     <height>36</height>
                     <aligny>center</aligny>
-                    <font>font_aura_plot</font>
+                    <font>font_aura_meta</font>
                     <textcolor>DDFFFFFF</textcolor>
                     <label>$INFO[Window.Property(AuraHeroMeta)]</label>
                 </control>
@@ -183,7 +183,7 @@
                     <width min="20" max="1350">auto</width>
                     <height>36</height>
                     <aligny>center</aligny>
-                    <font>font_aura_plot</font>
+                    <font>font_aura_meta</font>
                     <textcolor>DDFFFFFF</textcolor>
                     <label>$INFO[Window.Property(AuraHeroMeta)]</label>
                 </control>
@@ -3468,13 +3468,13 @@
                         <top>432</top>
                         <width>72</width>
                         <height>212</height>
-                        <texture colordiffuse="73000000" border="38">cap-r36.png</texture>
+                        <texture colordiffuse="55000000" border="38">cap-r36.png</texture>
                     </control>
                     <control type="image">
-                        <left>41</left>
-                        <top>444</top>
-                        <width>46</width>
-                        <height>46</height>
+                        <left>44</left>
+                        <top>447</top>
+                        <width>40</width>
+                        <height>40</height>
                         <texture>avatar-plex.png</texture>
                         <visible>String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
@@ -3482,19 +3482,19 @@
                          user's picture): fetched into AuraAvatar by
                          _load_avatar, circle-clipped by the cast mask. -->
                     <control type="image">
-                        <left>41</left>
-                        <top>444</top>
-                        <width>46</width>
-                        <height>46</height>
+                        <left>44</left>
+                        <top>447</top>
+                        <width>40</width>
+                        <height>40</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
-                        <left>41</left>
-                        <top>444</top>
-                        <width>46</width>
-                        <height>46</height>
+                        <left>44</left>
+                        <top>447</top>
+                        <width>40</width>
+                        <height>40</height>
                         <texture colordiffuse="B3000000">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>

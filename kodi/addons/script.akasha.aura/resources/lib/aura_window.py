@@ -1569,7 +1569,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     _, y = suffix_control.getPosition()
                 except RuntimeError:
                     y = 0
-                suffix_control.setPosition(127 + width + 10, y)
+                suffix_control.setPosition(127 + width + 8, y)
         except RuntimeError:
             pass
 
