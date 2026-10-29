@@ -86,10 +86,16 @@
 
             <!-- Hero: clearlogo (or large title fallback), episode/season
                  subtitle, meta line + rating chip, synopsis, cast. All fed
-                 by Window.Property(AuraHero*) from aura_window.py. -->
+                 by Window.Property(AuraHero*) from aura_window.py. The
+                 block slides down while the module bar is expanded so the
+                 contextual tab strip keeps clear of the artwork. -->
+            <control type="group">
+                <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                    <effect type="slide" start="0,0" end="0,50" time="220" tween="quadratic" easing="out"/>
+                </animation>
             <control type="image">
                 <left>127</left>
-                <top>175</top>
+                <top>128</top>
                 <width>560</width>
                 <height>100</height>
                 <aspectratio align="left" aligny="bottom">keep</aspectratio>
@@ -99,7 +105,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>218</top>
+                <top>166</top>
                 <width>1500</width>
                 <height>62</height>
                 <font>font_aura_info_black_doublerow</font>
@@ -110,7 +116,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>289</top>
+                <top>241</top>
                 <width>1500</width>
                 <height>44</height>
                 <font>font_aura_main_bold</font>
@@ -124,12 +130,12 @@
                  label text. -->
             <control type="grouplist">
                 <left>127</left>
-                <top>350</top>
+                <top>296</top>
                 <width>1400</width>
                 <height>36</height>
                 <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
                 <orientation>horizontal</orientation>
-                <itemgap>14</itemgap>
+                <itemgap>24</itemgap>
                 <align>left</align>
                 <control type="label">
                     <width min="20" max="1350">auto</width>
@@ -143,19 +149,14 @@
                     <width>44</width>
                     <height>36</height>
                     <visible>!String.IsEmpty(Window.Property(AuraHeroRating))</visible>
+                    <!-- Episode hero chip: Plex paints an opaque black box
+                         with no stroke (53-home-for-you). -->
                     <control type="image" id="5006">
                         <left>0</left>
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture border="10">meta-rating-box.png</texture>
-                    </control>
-                    <control type="image" id="5008">
-                        <left>0</left>
-                        <top>0</top>
-                        <width>44</width>
-                        <height>34</height>
-                        <texture colordiffuse="80FFFFFF" border="10">chip-outline.png</texture>
+                        <texture colordiffuse="F214141A" border="10">rounded-solid.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
@@ -164,7 +165,7 @@
                         <height>34</height>
                         <align>center</align>
                         <aligny>center</aligny>
-                        <font>font_aura_tiny_bold</font>
+                        <font>font_aura_tiny</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <label>$INFO[Window.Property(AuraHeroRating)]</label>
                     </control>
@@ -177,7 +178,7 @@
                 <height>36</height>
                 <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
                 <orientation>horizontal</orientation>
-                <itemgap>14</itemgap>
+                <itemgap>24</itemgap>
                 <align>left</align>
                 <control type="label">
                     <width min="20" max="1350">auto</width>
@@ -191,19 +192,14 @@
                     <width>44</width>
                     <height>36</height>
                     <visible>!String.IsEmpty(Window.Property(AuraHeroRating))</visible>
+                    <!-- Film hero chip: fill + the thin pale edge baked into
+                         meta-rating-box (55-tab-trending). -->
                     <control type="image" id="5010">
                         <left>0</left>
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
                         <texture border="10">meta-rating-box.png</texture>
-                    </control>
-                    <control type="image" id="5011">
-                        <left>0</left>
-                        <top>0</top>
-                        <width>44</width>
-                        <height>34</height>
-                        <texture colordiffuse="80FFFFFF" border="10">chip-outline.png</texture>
                     </control>
                     <control type="label" id="5012">
                         <left>0</left>
@@ -212,7 +208,7 @@
                         <height>34</height>
                         <align>center</align>
                         <aligny>center</aligny>
-                        <font>font_aura_tiny_bold</font>
+                        <font>font_aura_tiny</font>
                         <textcolor>FFFFFFFF</textcolor>
                         <label>$INFO[Window.Property(AuraHeroRating)]</label>
                     </control>
@@ -220,7 +216,7 @@
             </control>
             <control type="textbox">
                 <left>127</left>
-                <top>379</top>
+                <top>348</top>
                 <width>880</width>
                 <height>70</height>
                 <font>font_aura_plot</font>
@@ -247,6 +243,7 @@
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroCast)]</label>
                 <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
+            </control>
             </control>
         </control>
 
@@ -3468,7 +3465,7 @@
                         <top>432</top>
                         <width>72</width>
                         <height>212</height>
-                        <texture colordiffuse="55000000" border="38">cap-r36.png</texture>
+                        <texture colordiffuse="55000000" border="34">cap-r36.png</texture>
                     </control>
                     <control type="image">
                         <left>44</left>
@@ -3490,33 +3487,36 @@
                         <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
+                    <!-- Corner cover only needed while the avatar is still
+                         square (pre-crop or no PIL): the AuraAvatarRound
+                         PNG bakes the circle in. -->
                     <control type="image">
                         <left>44</left>
                         <top>447</top>
                         <width>40</width>
                         <height>40</height>
-                        <texture colordiffuse="B3000000">cast-mask.png</texture>
-                        <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        <texture colordiffuse="FF000000">cast-mask.png</texture>
+                        <visible>!String.IsEmpty(Window.Property(AuraAvatar)) + String.IsEmpty(Window.Property(AuraAvatarRound))</visible>
                     </control>
                     <control type="image">
-                        <left>45</left>
-                        <top>511</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>53</left>
+                        <top>514</top>
+                        <width>22</width>
+                        <height>22</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-search.png</texture>
                     </control>
                     <control type="image">
-                        <left>51</left>
-                        <top>572</top>
-                        <width>26</width>
-                        <height>24</height>
+                        <left>53</left>
+                        <top>561</top>
+                        <width>22</width>
+                        <height>22</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-home-o.png</texture>
                     </control>
                     <control type="image">
                         <left>53</left>
-                        <top>621</top>
+                        <top>611</top>
                         <width>22</width>
                         <height>18</height>
                         <texture colordiffuse="FFFFFFFF">icon-menu.png</texture>

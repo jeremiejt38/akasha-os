@@ -450,11 +450,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     client = plex_client.PlexClient(server_url, token, timeout=12)
                 thumb = client.user_thumb()
                 if thumb:
-                    self.setProperty('AuraAvatar', thumb)
+                    circled = _circle_avatar(thumb)
+                    self.setProperty('AuraAvatarRound', '1' if circled else '')
+                    self.setProperty('AuraAvatar', circled or thumb)
                     # The search dialog's collapsed rail reads the avatar
                     # off the global home window (same pattern as the
                     # Up Next queue), not this window's own properties.
-                    xbmcgui.Window(10000).setProperty('AuraAvatar', thumb)
+                    xbmcgui.Window(10000).setProperty('AuraAvatar', circled or thumb)
                 name = client.user_name()
                 if name:
                     self.setProperty('AuraUserName', name)
@@ -1569,7 +1571,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     _, y = suffix_control.getPosition()
                 except RuntimeError:
                     y = 0
-                suffix_control.setPosition(127 + width + 8, y)
+                suffix_control.setPosition(127 + width + 15, y)
         except RuntimeError:
             pass
 
@@ -3790,6 +3792,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         plex_client._read_cache.clear()
         self._plex_client = None
         self.setProperty('AuraUserName', pick.get('title') or '')
+        self.setProperty('AuraAvatarRound', '')
         self.setProperty('AuraAvatar', pick.get('thumb') or '')
         xbmcgui.Window(10000).setProperty('AuraAvatar',
                                           pick.get('thumb') or '')
@@ -4653,8 +4656,8 @@ def _format_duration(duration_ms):
     return '{}m'.format(minutes)
 
 
-_MONTHS_FR = ('janv.', 'fevr.', 'mars', 'avr.', 'mai', 'juin', 'juil.',
-              'aout', 'sept.', 'oct.', 'nov.', 'dec.')
+_MONTHS_FR = ('janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.',
+              'août', 'sept.', 'oct.', 'nov.', 'déc.')
 
 
 def _format_date_fr(iso_date):
@@ -4662,6 +4665,35 @@ def _format_date_fr(iso_date):
     try:
         year, month, day = (int(p) for p in str(iso_date)[:10].split('-'))
         return '{} {} {}'.format(day, _MONTHS_FR[month - 1], year)
+    except Exception:
+        return ''
+
+
+def _circle_avatar(url, size=80):
+    """Download the plex.tv avatar and clip it to a circle, saved as a
+    transparent PNG in the addon profile. Plex's rail shows a round
+    avatar; Kodi can't clip a texture, so we bake the mask in. Returns ''
+    on any failure (the caller then falls back to the square URL plus the
+    cast-mask overlay)."""
+    try:
+        from PIL import Image, ImageDraw
+        import io
+        import urllib.request
+        req = urllib.request.Request(
+            url, headers={'User-Agent': 'AkashaOSAura/1.0'})
+        raw = urllib.request.urlopen(req, timeout=12).read()
+        im = Image.open(io.BytesIO(raw)).convert('RGBA')
+        im = im.resize((size, size), Image.LANCZOS)
+        mask = Image.new('L', (size, size), 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, size - 1, size - 1), fill=255)
+        im.putalpha(mask)
+        path = os.path.join(
+            xbmc.translatePath('special://profile/addon_data/script.akasha.aura'),
+            'avatar_circle.png')
+        if not os.path.isdir(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+        im.save(path)
+        return path
     except Exception:
         return ''
 
