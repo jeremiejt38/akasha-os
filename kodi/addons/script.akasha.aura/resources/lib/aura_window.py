@@ -2350,18 +2350,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         added without touching this code as long as the file name matches the
         convention `icon-<slug>.png`.
         """
-        title = (section.get('title') or '').lower()
         if section.get('type') == 'playlist':
             return 'icon-playlists.png'
         if section.get('type') == 'livetv':
             return 'icon-livetv.png'
         if section.get('type') == 'artist':
-            return 'icon-music.png'
-        if 'anime' in title:
-            return 'icon-anime.png'
-        if 'documentaire' in title or 'documentary' in title:
-            return 'icon-documentary.png'
-        if 'concert' in title or 'musique' in title or 'music' in title:
             return 'icon-music.png'
         if section.get('type') == 'show':
             return 'icon-tv.png'
