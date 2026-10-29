@@ -4,7 +4,11 @@
          four fill-in dots (AuraPinDot0..3), an error line, and a 3-col
          numeric pad (digits 1-9, 0, backspace). Remote digit keys are
          also accepted by aura_switch. -->
-    <defaultcontrol>9210</defaultcontrol>
+    <!-- The pad panel (9210) is populated from Python, so it is empty
+         when Kodi resolves the default control: a 1px invisible
+         pass-through button takes the initial focus instead (same
+         pattern as b64aabb); onInit re-focuses the real pad. -->
+    <defaultcontrol>9212</defaultcontrol>
     <controls>
         <control type="group">
             <left>0</left>
@@ -103,6 +107,18 @@
                 <textcolor>FFE5A00D</textcolor>
             </control>
 
+            <control type="button" id="9212">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <onleft>9210</onleft>
+                <onright>9210</onright>
+                <onup>9210</onup>
+                <ondown>9210</ondown>
+            </control>
             <control type="panel" id="9210">
                 <left>785</left>
                 <top>430</top>

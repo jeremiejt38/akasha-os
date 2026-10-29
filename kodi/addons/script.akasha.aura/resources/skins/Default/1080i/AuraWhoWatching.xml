@@ -5,7 +5,11 @@
          centered row of big round avatars with lock badges on PIN
          profiles and a '+ Add user' ghost tile. The user panel (9100)
          is centered by aura_switch once the member count is known. -->
-    <defaultcontrol>9100</defaultcontrol>
+    <!-- The user panel (9100) is populated from Python, so it is empty
+         when Kodi resolves the default control: a 1px invisible
+         pass-through button takes the initial focus instead (same
+         pattern as b64aabb); onInit re-focuses the real panel. -->
+    <defaultcontrol>9102</defaultcontrol>
     <controls>
         <control type="group">
             <left>0</left>
@@ -31,6 +35,18 @@
                 <textcolor>FFFFFFFF</textcolor>
             </control>
 
+            <control type="button" id="9102">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus>-</texturefocus>
+                <onleft>9100</onleft>
+                <onright>9100</onright>
+                <onup>9100</onup>
+                <ondown>9100</ondown>
+            </control>
             <control type="panel" id="9100">
                 <left>510</left>
                 <top>266</top>
