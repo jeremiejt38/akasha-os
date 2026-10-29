@@ -1260,6 +1260,26 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._update_hero()
         threading.Thread(target=worker, daemon=True).start()
 
+    def _hydrate_server_item(self, item):
+        """Background metadata fetch for thin SERVER items -- watch-history
+        entries (Activité row) ship duration=None/contentRating=None, so
+        the hero's '24m TP' fragment only exists on the full record. Same
+        merge-absent + repaint pattern as the cloud hydrate above."""
+        def worker():
+            rk = item.get('rating_key')
+            client = self._plex_client or self._connector_client
+            if client and rk and str(rk).isdigit():
+                try:
+                    fresh = client.metadata_item(rk)
+                except Exception:
+                    fresh = None
+                if fresh:
+                    for key, value in fresh.items():
+                        if value and not item.get(key):
+                            item[key] = value
+            self._update_hero()
+        threading.Thread(target=worker, daemon=True).start()
+
     def _defer_hero(self, delay=0.08):
         """Repaint the hero a beat after a programmatic slot hop.
 
@@ -1316,6 +1336,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # a second provider fetch for the same card.
             item['cloud_full'] = True
             self._hydrate_cloud_item(item)
+        elif not item.get('cloud') and item.get('rating_key') \
+                and not item.get('server_full') \
+                and (not item.get('duration_ms')
+                     or not item.get('content_rating')
+                     or not item.get('blur_colors')):
+            item['server_full'] = True
+            self._hydrate_server_item(item)
 
         is_episode = item.get('type') == 'episode'
         title = item.get('show_title') if is_episode else item.get('title')

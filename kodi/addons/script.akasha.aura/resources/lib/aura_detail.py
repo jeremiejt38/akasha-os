@@ -371,6 +371,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 for key in ('cast', 'ratings', 'rating', 'audience_rating',
                             'rating_image', 'audience_rating_image',
                             'content_rating', 'content_rating_age',
+                            'duration_ms', 'summary', 'genres',
+                            'originally_available_at', 'year',
                             'blur_colors', 'logo_url', 'fanart_url',
                             'video_label', 'audio_label', 'subtitle_label'):
                     if full.get(key):
@@ -736,13 +738,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                        and bool(hero_logo or self.item.get('logo_url')))
         if season_hero and not hero_logo:
             hero_logo = self.item['logo_url']
+        # Standalone episode pages get the same compact logo + bold
+        # episode title heading Plex paints under it.
+        ep_heading = (item.get('type') == 'episode' and bool(hero_logo))
         _set(self, 'AuraDetailLogo', hero_logo)
         _set(self, 'AuraDetailEpTitle',
-             (item.get('title') or '') if season_hero else '')
+             item.get('title') or '' if (season_hero or ep_heading) else '')
         try:
             logo_ctl = self.getControl(7010)
-            logo_ctl.setWidth(560 if season_hero else 720)
-            logo_ctl.setHeight(85 if season_hero else 162)
+            logo_ctl.setWidth(560 if (season_hero or ep_heading) else 720)
+            logo_ctl.setHeight(85 if (season_hero or ep_heading) else 162)
         except RuntimeError:
             pass
         if hero_logo:
