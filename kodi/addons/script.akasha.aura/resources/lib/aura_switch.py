@@ -23,7 +23,7 @@ PIN_PANEL = 9210
 PIN_TITLE = 9201
 PIN_ERROR = 9202
 
-_TILE_W = 280
+_TILE_W = 300
 _PAD_COLS = 3
 
 
@@ -50,7 +50,7 @@ class AuraWhoWatchingWindow(xbmcgui.WindowXMLDialog):
             panel = self.getControl(USERS_PANEL)
             count = len(self.users)
             panel.setWidth(count * _TILE_W)
-            panel.setPosition((1920 - count * _TILE_W) // 2, 268)
+            panel.setPosition((1920 - count * _TILE_W) // 2, 266)
             for u in self.users:
                 li = xbmcgui.ListItem(u.get('title') or ' ')
                 li.setArt({'thumb': u.get('thumb') or 'avatar-plex.png'})

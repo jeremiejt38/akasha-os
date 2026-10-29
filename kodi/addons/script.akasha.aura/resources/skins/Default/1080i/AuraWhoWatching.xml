@@ -23,60 +23,60 @@
 
             <control type="label" id="9101">
                 <left>0</left>
-                <top>126</top>
+                <top>130</top>
                 <width>1920</width>
-                <height>60</height>
-                <font>font_aura_info_black_doublerow</font>
+                <height>80</height>
+                <font>font_aura_title_black</font>
                 <align>center</align>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
 
             <control type="panel" id="9100">
-                <left>560</left>
-                <top>268</top>
-                <width>800</width>
-                <height>290</height>
+                <left>510</left>
+                <top>266</top>
+                <width>900</width>
+                <height>350</height>
                 <orientation>horizontal</orientation>
                 <onleft>9100</onleft>
                 <onright>9100</onright>
                 <onup>9100</onup>
                 <ondown>9100</ondown>
-                <itemlayout width="280" height="280">
+                <itemlayout width="300" height="350">
                     <control type="image">
-                        <left>45</left>
-                        <top>0</top>
-                        <width>190</width>
-                        <height>190</height>
+                        <left>40</left>
+                        <top>42</top>
+                        <width>220</width>
+                        <height>220</height>
                         <aspectratio>scale</aspectratio>
                         <texture>$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="image">
-                        <left>45</left>
-                        <top>0</top>
-                        <width>190</width>
-                        <height>190</height>
+                        <left>40</left>
+                        <top>42</top>
+                        <width>220</width>
+                        <height>220</height>
                         <texture colordiffuse="FA080808">cast-mask.png</texture>
                     </control>
                     <control type="image">
-                        <left>185</left>
-                        <top>140</top>
-                        <width>48</width>
-                        <height>48</height>
+                        <left>208</left>
+                        <top>213</top>
+                        <width>54</width>
+                        <height>54</height>
                         <texture colordiffuse="FFFFFFFF">circle.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(protected))</visible>
                     </control>
                     <control type="image">
-                        <left>196</left>
-                        <top>151</top>
-                        <width>26</width>
-                        <height>26</height>
-                        <texture>icon-lock-dark.png</texture>
+                        <left>220</left>
+                        <top>225</top>
+                        <width>30</width>
+                        <height>30</height>
+                        <texture>icon-lock-amber.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(protected))</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>206</top>
-                        <width>280</width>
+                        <top>283</top>
+                        <width>300</width>
                         <height>30</height>
                         <font>font_aura_small</font>
                         <align>center</align>
@@ -84,51 +84,51 @@
                         <label>$INFO[ListItem.Label]</label>
                     </control>
                 </itemlayout>
-                <focusedlayout width="280" height="280">
+                <focusedlayout width="300" height="350">
                     <control type="image">
-                        <left>40</left>
-                        <top>-5</top>
-                        <width>200</width>
-                        <height>200</height>
+                        <left>-2</left>
+                        <top>0</top>
+                        <width>304</width>
+                        <height>304</height>
                         <texture>cast-ring.png</texture>
                     </control>
                     <control type="image">
-                        <left>45</left>
-                        <top>0</top>
-                        <width>190</width>
-                        <height>190</height>
+                        <left>18</left>
+                        <top>20</top>
+                        <width>264</width>
+                        <height>264</height>
                         <aspectratio>scale</aspectratio>
                         <texture>$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="image">
-                        <left>45</left>
-                        <top>0</top>
-                        <width>190</width>
-                        <height>190</height>
+                        <left>18</left>
+                        <top>20</top>
+                        <width>264</width>
+                        <height>264</height>
                         <texture colordiffuse="FA080808">cast-mask.png</texture>
                     </control>
                     <control type="image">
-                        <left>185</left>
-                        <top>140</top>
-                        <width>48</width>
-                        <height>48</height>
+                        <left>230</left>
+                        <top>235</top>
+                        <width>54</width>
+                        <height>54</height>
                         <texture colordiffuse="FFFFFFFF">circle.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(protected))</visible>
                     </control>
                     <control type="image">
-                        <left>196</left>
-                        <top>151</top>
-                        <width>26</width>
-                        <height>26</height>
-                        <texture>icon-lock-dark.png</texture>
+                        <left>242</left>
+                        <top>247</top>
+                        <width>30</width>
+                        <height>30</height>
+                        <texture>icon-lock-amber.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(protected))</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>206</top>
-                        <width>280</width>
-                        <height>30</height>
-                        <font>font_aura_small_bold</font>
+                        <top>279</top>
+                        <width>300</width>
+                        <height>60</height>
+                        <font>font_aura_name_bold</font>
                         <align>center</align>
                         <textcolor>FFFFFFFF</textcolor>
                         <label>$INFO[ListItem.Label]</label>
