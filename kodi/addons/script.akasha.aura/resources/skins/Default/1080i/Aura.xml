@@ -663,7 +663,7 @@
                 <!-- Contextual tab strip, styled after Plex: dark rounded
                      container, plain text tabs, focused tab = white pill
                      with dark text. -->
-                <control type="image">
+                <control type="image" id="3095">
                     <left>127</left>
                     <top>120</top>
                     <width>695</width>
@@ -695,9 +695,9 @@
                     <width>148</width>
                     <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
-                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
                 </control>
-                <control type="image">
+                <control type="image" id="3091">
                     <left>669</left>
                     <top>128</top>
                     <width>145</width>
@@ -735,7 +735,8 @@
                     <align>center</align>
                     <aligny>center</aligny>
                     <onleft>3050</onleft>
-                    <onright>3075</onright>
+                    <onright condition="!String.IsEmpty(Window.Property(DivertHasCollections))">3075</onright>
+                    <onright condition="String.IsEmpty(Window.Property(DivertHasCollections))">3060</onright>
                     <onup>2007</onup>
                     <ondown>3211</ondown>
                     <textcolor>00FFFFFF</textcolor>
@@ -744,7 +745,9 @@
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
 
-                <!-- Plex "Collections" tab (4th contextual library tab). -->
+                <!-- Plex "Collections" tab: the official strip only shows
+                     it when the library actually has collections (hidden
+                     otherwise; Séries/Cartoons have none). -->
                 <control type="button" id="3075">
                     <left>504</left>
                     <top>128</top>
@@ -762,6 +765,7 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <visible>!String.IsEmpty(Window.Property(DivertHasCollections))</visible>
                 </control>
 
                 <control type="button" id="3060">
@@ -773,7 +777,8 @@
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
-                    <onleft>3075</onleft>
+                    <onleft condition="!String.IsEmpty(Window.Property(DivertHasCollections))">3075</onleft>
+                    <onleft condition="String.IsEmpty(Window.Property(DivertHasCollections))">3100</onleft>
                     <onright>5110</onright>
                     <onup>2007</onup>
                     <ondown>6010</ondown>
@@ -818,9 +823,9 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
                 </control>
-                <control type="label">
+                <control type="label" id="3092">
                     <left>669</left>
                     <top>129</top>
                     <width>145</width>
@@ -890,7 +895,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <textcolor>9BFFFFFF</textcolor>
-                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075)</visible>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
                 </control>
                 <control type="label">
                     <left>504</left>
@@ -902,9 +907,9 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3075)</visible>
+                    <visible>Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
                 </control>
-                <control type="label">
+                <control type="label" id="3093">
                     <left>669</left>
                     <top>129</top>
                     <width>145</width>
@@ -916,7 +921,7 @@
                     <textcolor>9BFFFFFF</textcolor>
                     <visible>!String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
                 </control>
-                <control type="label">
+                <control type="label" id="3094">
                     <left>669</left>
                     <top>129</top>
                     <width>145</width>

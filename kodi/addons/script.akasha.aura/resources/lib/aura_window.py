@@ -297,6 +297,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None  # None=Tout, True=Non vus, False=Vus
         self._divert_filters = {}  # B4 dynamic server filters {key: (value, title)}
+        # Per-section 'has collections' probe: Plex only shows the
+        # Collections tab on libraries that actually have some.
+        self._divert_collections_probe = {}
         self._divert_search_query = ''
         # Recommande/Categories, rendered inline like Bibliotheque -- see
         # docs/aura/decisions.md ("recommandations et categories inlinees").
@@ -609,6 +612,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 (i for i, s in enumerate(self._divert_sections)
                  if s['key'] == self._divert_last_library_key), 0)
         section = self._divert_sections[self._divert_active_section]
+        if index == DIVERT_SUBTAB_COLLECTIONS \
+                and not self._divert_collections_probe.get(section['key']):
+            index = DIVERT_SUBTAB_RECOMMANDE
         self._divert_library_tab = index
         self.setProperty('DivertLibraryTab', str(index))
         self.addon.setSetting('divert.last_subtab', str(index))
@@ -2451,7 +2457,43 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_filter_unwatched = None
         self._divert_filters = {}
         self._divert_search_query = ''
+        self._apply_collections_tab(section)
         self._load_divert_section_items(section)
+
+    def _apply_collections_tab(self, section):
+        """Plex only shows the Collections library tab when the section
+        actually has collections (Films has 556 here; Séries/Cartoons
+        have none and the official strip collapses to 3 pills). One
+        cached limit=1 probe per section; the Catégories pill and its
+        overlays reseat onto the freed slot via DivertHasCollections."""
+        key = section.get('key') or ''
+        has = self._divert_collections_probe.get(key)
+        if has is None:
+            has = False
+            client = self._plex_client
+            if client and section.get('type') in ('movie', 'show') \
+                    and hasattr(client, 'section_collections_with_total'):
+                try:
+                    _items, total = client.section_collections_with_total(
+                        key, limit=1)
+                    has = bool(total)
+                except Exception:
+                    has = False
+            self._divert_collections_probe[key] = has
+        self.setProperty('DivertHasCollections', '1' if has else '')
+        if not has and self._divert_library_tab == DIVERT_SUBTAB_COLLECTIONS:
+            self._divert_library_tab = DIVERT_SUBTAB_RECOMMANDE
+            self.setProperty('DivertLibraryTab',
+                             str(DIVERT_SUBTAB_RECOMMANDE))
+        cat_x = 669 if has else 504
+        try:
+            self.getControl(3060).setPosition(cat_x, 128)
+            for cid, top in ((3091, 128), (3092, 129), (3093, 129),
+                             (3094, 129)):
+                self.getControl(cid).setPosition(cat_x, top)
+            self.getControl(3095).setWidth(695 if has else 530)
+        except RuntimeError:
+            pass
 
     def _load_divert_section_items(self, section):
         # page_size/prefetch_margin=50: only the visible portion of the grid
