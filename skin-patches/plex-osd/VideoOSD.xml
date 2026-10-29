@@ -388,17 +388,25 @@
             <top>968</top>
             <width>64</width>
             <height>64</height>
-            <label>−10</label>
-            <font>font_aura_mini_bold</font>
-            <align>center</align>
+            <label></label>
             <onclick>PlayerControl(SmallSkipBackward)</onclick>
             <onleft>9100</onleft>
             <onup>9110</onup>
             <ondown>9102</ondown>
             <texturenofocus colordiffuse="4DFFFFFF">akasha-circle.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF">akasha-circle.png</texturefocus>
-            <textcolor>FFFFFFFF</textcolor>
-            <focusedcolor>FF1F1614</focusedcolor>
+            <visible>!Control.HasFocus(9100)</visible>
+        </control>
+        <control type="label">
+            <left>1744</left>
+            <top>968</top>
+            <width>64</width>
+            <height>64</height>
+            <font>font_aura_small_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <label>−10</label>
+            <textcolor>FF1F1614</textcolor>
             <visible>!Control.HasFocus(9100)</visible>
         </control>
 
