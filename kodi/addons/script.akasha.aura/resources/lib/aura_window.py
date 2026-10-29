@@ -31,6 +31,7 @@ import aura_settings_panel
 import aura_store
 import config
 import context_sheet
+import gui_guard
 import settings_press_handler
 import osd_menu
 import connector_client
@@ -1162,10 +1163,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return None
         _, _, _, paged = self._reco_rows[focused]
         try:
-            li = self.getControl(focused).getSelectedItem()
+            li = gui_guard.selitem(self, focused)
             if li is not None and li.getProperty('IsPlaceholder'):
                 return None
-            pos = self.getControl(focused).getSelectedPosition()
+            pos = gui_guard.selpos(self, focused)
         except RuntimeError:
             return None
         if not (0 <= pos < len(paged.items)):
@@ -1492,10 +1493,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not row:
             return
         try:
-            li = self.getControl(list_control_id).getSelectedItem()
+            li = gui_guard.selitem(self, list_control_id)
             if li is not None and li.getProperty('IsPlaceholder'):
                 return
-            pos = self.getControl(list_control_id).getSelectedPosition()
+            pos = gui_guard.selpos(self, list_control_id)
         except RuntimeError:
             return
         _, _, _, paged = row
@@ -1538,10 +1539,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not row:
             return
         try:
-            li = self.getControl(list_control_id).getSelectedItem()
+            li = gui_guard.selitem(self, list_control_id)
             if li is not None and li.getProperty('IsPlaceholder'):
                 return
-            pos = self.getControl(list_control_id).getSelectedPosition()
+            pos = gui_guard.selpos(self, list_control_id)
         except RuntimeError:
             return
         _, _, _, paged = row
@@ -1636,7 +1637,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         label_control_id, title, _suffix, paged = row
         try:
-            position = self.getControl(list_control_id).getSelectedPosition()
+            position = gui_guard.selpos(self, list_control_id)
         except RuntimeError:
             return
         try:
@@ -1841,7 +1842,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return
             try:
                 panel = self.getControl(CATEGORY_PANEL_ID)
-                pos = panel.getSelectedPosition()
+                pos = gui_guard.pos(panel)
                 # Build all ListItems BEFORE touching the panel: reset() +
                 # N addItem() calls mutate the control N+1 times off the GUI
                 # thread; bulk addItems() shrinks that to a single mutation
@@ -2247,7 +2248,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         to that genre, instead of the former separate AuraLibraryWindow --
         same in-place-navigation rationale as the rest of this change."""
         try:
-            pos = self.getControl(CATEGORY_PANEL_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, CATEGORY_PANEL_ID)
         except RuntimeError:
             return
         if not (0 <= pos < len(self._category_genres)) or not self._category_section:
@@ -3015,7 +3016,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not self._divert_paged or not self._divert_sections:
             return
         try:
-            position = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+            position = gui_guard.selpos(self, DIVERT_PANEL_ID)
         except RuntimeError:
             return
         try:
@@ -3261,7 +3262,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # from left/right inside the list itself.
         try:
             tabs = self.getControl(TAB_LIST_ID)
-            if tabs.getSelectedPosition() != index:
+            if gui_guard.pos(tabs) != index:
                 tabs.selectItem(index)
             self._tab_list_pos = index
         except (RuntimeError, AttributeError):
@@ -3301,7 +3302,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if controlID == DIVERT_PANEL_ID:
             # Same cache pre-warm as the reco rows, for the library grid.
             try:
-                pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, DIVERT_PANEL_ID)
                 items = (self._divert_paged.items
                          if self._divert_paged else [])
                 if 0 <= pos < len(items):
@@ -3443,7 +3444,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 last_known = getattr(self, '_tab_list_pos', self.active_tab)
                 super().onAction(action)
                 try:
-                    pos_after = self.getControl(TAB_LIST_ID).getSelectedPosition()
+                    pos_after = gui_guard.selpos(self, TAB_LIST_ID)
                 except RuntimeError:
                     pos_after = last_known
                 last = len(config.TABS) - 1
@@ -3689,7 +3690,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID == TAB_LIST_ID:
             try:
-                self._show_tab(self.getControl(TAB_LIST_ID).getSelectedPosition())
+                self._show_tab(gui_guard.selpos(self, TAB_LIST_ID))
             except RuntimeError:
                 pass
         elif controlID in HOME_TAB_IDS:
@@ -3745,7 +3746,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _on_jeux_item_selected(self):
         try:
-            pos = self.getControl(JEUX_PANEL_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, JEUX_PANEL_ID)
         except RuntimeError:
             return
         if not (0 <= pos < len(self._jeux_items)):
@@ -3765,8 +3766,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _on_sidebar_item_selected(self, pos=None):
         if pos is None:
             try:
-                pos = self.getControl(
-                    DIVERT_SIDEBAR_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, DIVERT_SIDEBAR_ID)
             except RuntimeError:
                 return
         if pos == DIVERT_SIDEBAR_PROFILE_INDEX:
@@ -4366,7 +4366,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         item's kebab."""
         try:
             sidebar = self.getControl(DIVERT_SIDEBAR_ID)
-            pos = sidebar.getSelectedPosition()
+            pos = gui_guard.pos(sidebar)
         except RuntimeError:
             return
         section_index = pos - DIVERT_SIDEBAR_LIBS_OFFSET
@@ -4654,7 +4654,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _on_divert_item_selected(self):
         try:
-            pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, DIVERT_PANEL_ID)
         except RuntimeError:
             return
         if not (0 <= pos < len(self._divert_items)):
@@ -4686,7 +4686,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _on_divert_context_menu(self):
         try:
-            pos = self.getControl(DIVERT_PANEL_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, DIVERT_PANEL_ID)
         except RuntimeError:
             return
         if not (0 <= pos < len(self._divert_items)):
@@ -4728,7 +4728,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             focused = self.getFocusId()
             if focused != DIVERT_PANEL_ID and focused not in RECO_ALL_LIST_IDS:
                 return
-            li = self.getControl(focused).getSelectedItem()
+            li = gui_guard.selitem(self, focused)
             if li is None:
                 return
             tag = li.getVideoInfoTag()
@@ -5256,7 +5256,7 @@ class _HomePressAppSwitcher(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID != 100:
             return
-        pos = self.getControl(100).getSelectedPosition()
+        pos = gui_guard.selpos(self, 100)
         if not (0 <= pos < len(self._actions)):
             return
         action = self._actions[pos]
