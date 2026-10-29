@@ -1361,7 +1361,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         else:
             subtitle = ''
 
-        cast = ', '.join(c['name'] for c in (item.get('cast') or [])[:4])
+        # Plex paints the hero cast line on home/Tendances but not on the
+        # library Recommande hero (official 13-library-films: meta, plot,
+        # then the first row directly).
+        cast = '' if self._divert_view == 'library' else ', '.join(
+            c['name'] for c in (item.get('cast') or [])[:4])
         fanart = item.get('fanart_url') or item.get('art_url') or ''
         # Warm the texture cache through a hidden 1px image NOW so the
         # debounced backdrop swap below hits a ready texture instead of
@@ -1381,15 +1385,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('AuraHeroLogo', item.get('logo_url') or '')
         self.setProperty('AuraHeroTitle', title)
         self.setProperty('AuraHeroSubtitle', subtitle)
-        self.setProperty('AuraHeroMeta', _hero_meta_line(item))
+        self.setProperty('AuraHeroMeta', _hero_meta_line(
+            item, compact=(self._divert_view == 'library')))
         rating = item.get('content_rating') or ''
         self.setProperty('AuraHeroRating', rating)
+        # Library heroes paint the solid chip like episodes; only the home
+        # movie/show hero keeps the bordered meta-rating-box.
+        self.setProperty('AuraHeroChipSolid',
+                         '1' if (is_episode or
+                                 self._divert_view == 'library') else '')
         # Plex's age chip hugs its text (~40px for "10"): resize the
         # chip group/image/label since Kodi cannot auto-size it.
         chip_w = max(44, 14 * len(rating) + 24)
         # 5005-5008: chip in the meta slot below the episode subtitle;
         # 5009-5012: same chip in the no-subtitle (movie/show) meta slot.
-        for cid in (5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012):
+        for cid in (5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013):
             try:
                 self.getControl(cid).setWidth(chip_w)
             except RuntimeError:
@@ -1410,7 +1420,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         for prop in ('AuraHeroFanart', 'AuraHeroFanartPreload',
                      'AuraHeroLogo', 'AuraHeroLogoPreload',
                      'AuraHeroTitle', 'AuraHeroSubtitle', 'AuraHeroMeta',
-                     'AuraHeroRating', 'AuraHeroPlot', 'AuraHeroCast'):
+                     'AuraHeroRating', 'AuraHeroChipSolid',
+                     'AuraHeroPlot', 'AuraHeroCast'):
             try:
                 self.setProperty(prop, '')
             except RuntimeError:
@@ -4911,10 +4922,13 @@ def _genre_tile_color(genre):
         0x50 + ((h // 9) % 3) * 0x1A)
 
 
-def _hero_meta_line(item):
+def _hero_meta_line(item, compact=False):
     """Plex hero meta row: 'S18 • E6   10 nov. 2019   21m' for episodes,
     '2002   1h 50m   Comédie, Mystère' for movies (rating chip rendered
-    separately). Matches docs/plex-parity/SPEC.md measurements."""
+    separately). Matches docs/plex-parity/SPEC.md measurements.
+
+    The library Recommande hero is the compact variant: no genres and no
+    cast (official 13-library-films shows '2017   84m   G' only)."""
     parts = []
     item_type = item.get('type')
     unreleased = _unreleased_label(item)
@@ -4939,7 +4953,7 @@ def _hero_meta_line(item):
         if duration:
             parts.append(duration)
         genres = item.get('genres') or []
-        if genres:
+        if genres and not compact:
             parts.append(', '.join(genres[:2]))
     else:  # show / season / other
         if unreleased:
@@ -4947,7 +4961,7 @@ def _hero_meta_line(item):
         elif item.get('year'):
             parts.append(str(item['year']))
         genres = item.get('genres') or []
-        if genres:
+        if genres and not compact:
             parts.append(', '.join(genres[:2]))
         duration = _format_duration(item.get('duration_ms'))
         if duration:

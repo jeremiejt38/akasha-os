@@ -193,13 +193,24 @@
                     <height>36</height>
                     <visible>!String.IsEmpty(Window.Property(AuraHeroRating))</visible>
                     <!-- Film hero chip: fill + the thin pale edge baked into
-                         meta-rating-box (55-tab-trending). -->
+                         meta-rating-box (55-tab-trending). The library
+                         Recommande hero paints the same solid black box as
+                         episodes instead (13-library-films). -->
                     <control type="image" id="5010">
                         <left>0</left>
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
                         <texture border="10">meta-rating-box.png</texture>
+                        <visible>String.IsEmpty(Window.Property(AuraHeroChipSolid))</visible>
+                    </control>
+                    <control type="image" id="5013">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>44</width>
+                        <height>34</height>
+                        <texture colordiffuse="F214141A" border="10">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(Window.Property(AuraHeroChipSolid))</visible>
                     </control>
                     <control type="label" id="5012">
                         <left>0</left>
