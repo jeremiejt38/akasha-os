@@ -1130,6 +1130,15 @@ class PlexClient:
             return ''
         return str(data.get('title') or data.get('username') or '')
 
+    def user_info(self):
+        """Full plex.tv /api/v2/user dict for the Account sheet
+        (email, username, subscription). Returns {} on failure."""
+        try:
+            data = self._request(self.PLEX_TV_USER)
+        except PlexAPIError:
+            return {}
+        return data if isinstance(data, dict) else {}
+
     def metadata_item(self, rating_key):
         """Fetch and normalise a single item by rating key (used to hydrate
         thin items before opening the detail page)."""

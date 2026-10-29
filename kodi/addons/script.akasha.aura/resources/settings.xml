@@ -3,6 +3,7 @@
     <category label="Plex">
         <setting id="plex.server_url" type="text" label="URL du serveur Plex" default="https://plex.akasha.ing"/>
         <setting id="plex.token" type="text" label="Token Plex (X-Plex-Token)" default=""/>
+        <setting id="plex.auto_sign_in" type="bool" label="Connexion automatique" default="true"/>
     </category>
     <category label="Akasha OS Connector">
         <setting id="connector.server_url" type="text" label="URL du connector (ex: https://connector.akasha.ing)" default=""/>

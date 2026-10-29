@@ -428,6 +428,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     settings_press_handler.double_press_just_happened()):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
+            elif (not playback_item and
+                    self.addon.getSetting('plex.auto_sign_in') == 'false'):
+                # Plex's 'Automatically Sign In' toggle off -> the app
+                # opens on the 'Who's watching?' picker rather than the
+                # last profile's home (not on post-playback re-opens).
+                self._open_profile_picker()
             # Startup loads that failed surfaced the state view: its action
             # button takes over focus once the initial focus pass is done.
             if self._divert_state and self._divert_state_action:
@@ -3886,12 +3892,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmcgui.NOTIFICATION_INFO, 2000)
 
     def _show_profile_info(self):
-        """Plex's 'Profile' row opens the account page; the local
-        equivalent is a short account/server info sheet."""
-        name = self.getProperty('AuraUserName') or '-'
-        server = self.addon.getSetting('plex.server_url') or '-'
-        aura_menu.message(self, i18n.tr(33592),
-                          '{}\n{}'.format(name, server))
+        """Plex's 'Profile' row opens the Account sheet
+        (official-live/51): the settings panel pushed straight onto its
+        'account' view, filled from plex.tv /api/v2/user."""
+        user = {}
+        client = self._plex_client
+        if client is not None:
+            try:
+                user = client.user_info() or {}
+            except Exception as e:
+                xbmc.log('Akasha Aura: user_info failed: {}'.format(e),
+                         xbmc.LOGINFO)
+        self._open_settings_panel(start_view='account', account_user=user)
 
     def _open_my_lists(self):
         """Sidebar 'My Lists' row: Plex's watchlist+lists page. The cloud
@@ -4183,9 +4195,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         options[choice][1]()
 
-    def _open_settings_panel(self):
+    def _open_settings_panel(self, start_view=None, account_user=None):
         """Unified settings panel (plan a5a87f03): categories list + curated
-        actions, replacing the old direct Kodi/LibreELEC/Akasha shortcuts."""
+        actions, replacing the old direct Kodi/LibreELEC/Akasha shortcuts.
+        start_view='account' jumps straight to the Plex-style Account
+        sheet (profile menu's Profile row, official-live/51)."""
         if getattr(self, 'playback_started', False) or xbmc.Player().isPlayingVideo():
             # The SettingsPressMonitor stays alive while this window is
             # closed for fullscreen playback, so a (possibly spurious)
@@ -4213,6 +4227,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         win = self._get_sub_window(
             'settings_panel', aura_settings_panel.AuraSettingsPanelWindow,
             'AuraSettingsPanel.xml')
+        win.start_view = start_view
+        win.account_user = account_user or {}
         # Aura itself is a type="dialog" window (see docs/aura/decisions.md
         # on why -- it needs to sit on top of native Kodi Home as a safety
         # net), which means it keeps rendering on top of any *base* window

@@ -502,6 +502,20 @@ STRINGS = {
     33624: ('TV en direct', 'Live TV'),
     33625: ('Découvrir', 'Discover'),
     33626: ('Piste audio', 'Audio Stream'),
+    33627: ('Compte', 'Account'),
+    33628: ('E-mail', 'Email'),
+    33629: ('Nom d’utilisateur', 'Username'),
+    33630: ('Abonnements', 'Subscriptions'),
+    33631: ('Plex Pass', 'Plex Pass'),
+    33632: ('Connexion automatique', 'Automatically Sign In'),
+    33633: ('Langue', 'Language'),
+    33634: ('Gérer la confidentialité du profil', 'Manage Profile Privacy'),
+    33635: ('Synchroniser l’état de visionnage et les notes',
+            'Sync Watch State and Ratings'),
+    33636: ('Paramètres de langue des critiques et discussions',
+            'Review & Discussion Language Settings'),
+    33637: ('Se déconnecter', 'Sign Out'),
+    33638: ('Supprimer le compte', 'Delete Account'),
 }
 
 MONTH_ABBRS = {

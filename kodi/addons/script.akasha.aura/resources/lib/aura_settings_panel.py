@@ -70,6 +70,11 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
         # Set when the user picks a row in the rail replica: the parent
         # activates that real sidebar entry after the dialog closes.
         self.rail_selection = -1
+        # 'account' opens the panel straight on the Plex-style Account
+        # sheet (official-live/51) instead of the OS categories; the
+        # caller passes the /api/v2/user dict via account_user.
+        self.start_view = None
+        self.account_user = {}
 
     # ------------------------------------------------------------------
     # Lifecycle / navigation
@@ -101,7 +106,10 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
     def onInit(self):
         if self.rail_items:
             self._populate_rail_replica()
-        self._push(_View('root', _tr(33019)))
+        if self.start_view == 'account':
+            self._push(_View('account', _tr(33627)))
+        else:
+            self._push(_View('root', _tr(33019)))
 
     def _push(self, view):
         if self._stack:
@@ -154,6 +162,8 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
                      xbmc.LOGERROR)
 
     def _build_rows(self, view):
+        if view.kind == 'account':
+            return self._account_rows()
         if view.kind == 'root':
             return [self._category_row(cat) for cat in self.categories]
         if view.kind == 'category':
@@ -186,6 +196,41 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
                 {'kind': 'item', 'label': _tr(33538), 'op': 'remove'},
             ]
         return []
+
+    _AUTO_SIGN_IN_ITEM = {
+        'id': 'auto_sign_in', 'type': 'bool', 'label': 33632,
+        'source': ('addon', 'script.akasha.aura', 'plex.auto_sign_in'),
+    }
+
+    def _account_rows(self):
+        """Plex's Account sheet (official-live/51): identity rows from
+        plex.tv /api/v2/user, then the app-level preferences. Rows whose
+        counterpart lives on plex.tv only are stubbed like the account
+        menu's cloud entries."""
+        u = self.account_user or {}
+        rows = [
+            {'kind': 'info', 'label': _tr(33628),
+             'value': str(u.get('email') or '-')},
+            {'kind': 'info', 'label': _tr(33629),
+             'value': str(u.get('username') or u.get('title') or '-')},
+        ]
+        sub = u.get('subscription') or {}
+        if (isinstance(sub, dict) and sub.get('active')) \
+                or u.get('plexPass') or u.get('hasPlexPass'):
+            rows.append({'kind': 'info', 'label': _tr(33630),
+                         'value': _tr(33631)})
+        rows.append(self._item_row(self._AUTO_SIGN_IN_ITEM))
+        rows.append({'kind': 'info', 'label': _tr(33633),
+                     'value': xbmc.getLanguage() or '-'})
+        rows.append({'kind': 'stub', 'label': _tr(33634)})
+        # Aura always reports watch state/ratings back to the Plex
+        # server, so Plex's toggle is effectively On here.
+        rows.append({'kind': 'info', 'label': _tr(33635),
+                     'value': _tr(33530)})
+        rows.append({'kind': 'stub', 'label': _tr(33636)})
+        rows.append({'kind': 'stub', 'label': _tr(33637)})
+        rows.append({'kind': 'stub', 'label': _tr(33638)})
+        return [r for r in rows if r]
 
     def _category_row(self, cat):
         return {'kind': 'category', 'label': _tr(cat['title']),
@@ -435,6 +480,13 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             self._navigating = False
 
     def _activate(self, view, row, pos):
+        if view.kind == 'account':
+            item = row.get('item')
+            if row.get('kind') == 'stub':
+                self.backend.notify(_tr(33613))
+            elif item is not None and item['type'] == 'bool':
+                self._toggle_bool(view, row, pos, item)
+            return
         if view.kind == 'root':
             cat = row['category']
             self._push(_View('category', _tr(cat['title']), cat))

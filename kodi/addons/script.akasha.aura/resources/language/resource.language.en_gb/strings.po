@@ -1894,3 +1894,63 @@ msgstr ""
 msgctxt "#33626"
 msgid "Audio Stream"
 msgstr ""
+
+# Compte
+msgctxt "#33627"
+msgid "Account"
+msgstr ""
+
+# E-mail
+msgctxt "#33628"
+msgid "Email"
+msgstr ""
+
+# Nom d’utilisateur
+msgctxt "#33629"
+msgid "Username"
+msgstr ""
+
+# Abonnements
+msgctxt "#33630"
+msgid "Subscriptions"
+msgstr ""
+
+# Plex Pass
+msgctxt "#33631"
+msgid "Plex Pass"
+msgstr ""
+
+# Connexion automatique
+msgctxt "#33632"
+msgid "Automatically Sign In"
+msgstr ""
+
+# Langue
+msgctxt "#33633"
+msgid "Language"
+msgstr ""
+
+# Gérer la confidentialité du profil
+msgctxt "#33634"
+msgid "Manage Profile Privacy"
+msgstr ""
+
+# Synchroniser l’état de visionnage et les notes
+msgctxt "#33635"
+msgid "Sync Watch State and Ratings"
+msgstr ""
+
+# Paramètres de langue des critiques et discussions
+msgctxt "#33636"
+msgid "Review & Discussion Language Settings"
+msgstr ""
+
+# Se déconnecter
+msgctxt "#33637"
+msgid "Sign Out"
+msgstr ""
+
+# Supprimer le compte
+msgctxt "#33638"
+msgid "Delete Account"
+msgstr ""
