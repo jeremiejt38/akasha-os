@@ -170,7 +170,7 @@ ACTION_ICON_OVERLAYS = {
     WATCHLIST_BUTTON_ID: (7092, 7093),
     LIST_BUTTON_ID: (7165, 7166),
     RATE_BUTTON_ID: (7099, 7105),
-    WATCHED_BUTTON_ID: (7094, 7095, 7096),
+    WATCHED_BUTTON_ID: (7094, 7095),
     MORE_BUTTON_ID: (7097, 7098),
 }
 # Chip label ids per slot (7030 is the synopsis textbox -- the 5th label
