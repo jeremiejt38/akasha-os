@@ -76,12 +76,13 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 |---|--------|--------|
 | L1 | Onglet Activité — entrées **amis**, réactions | GraphQL social privé plex.tv |
 | L2 | Watchlist cloud synchronisée | metadata.provider.plex.tv (voir note : `discover.provider` déjà utilisé pour Tendances — limite possiblement côté connecteur, à trancher) |
-| ~~L3~~ | ~~Multi-profils Plex Home + PIN, « Switch Profile »~~ | ~~Fonction compte plex.tv~~ → **implémenté** : picker « Qui regarde ? » (`AuraWhoWatching.xml`, membres via `api/v2/home/users`, avatars plex.tv réels, badges cadenas, tuile « + Ajouter un utilisateur » en stub) + pavé PIN (`AuraPinEntry.xml`, 4 points, 1-9/0/⌫, touches télécommande acceptées) ; switch via `api/home/users/<id>/switch`, token persisté, rechargement complet ; Back du pavé → picker, mauvais PIN → pavé + ligne erreur ambrée. **Vérifié à l'écran.** |
+| ~~L3~~ | ~~Multi-profils Plex Home + PIN, « Switch Profile »~~ | ~~Fonction compte plex.tv~~ → **implémenté** : picker « Qui regarde ? » (`AuraWhoWatching.xml`, membres via `api/v2/home/users`, avatars plex.tv réels, tuile « + Ajouter un utilisateur » en stub) + pavé PIN (`AuraPinEntry.xml`, 4 points, 1-9/0/⌫, touches télécommande acceptées) ; switch via `api/home/users/<id>/switch`, token persisté, rechargement complet ; Back du pavé → picker, mauvais PIN → pavé + ligne erreur ambrée. **Géométrie calée sur `official-live/00a/45`** : avatars 220 px (264 px focus) pitch 300, anneau blanc 304 px, badge cadenas **ambre + glyphe blanc** inversé blanc + ambre au focus, titre 70 px, nom focus 40 px gras / non-focus 24 px gris. **Vérifié à l'écran.** |
 | ~~L4~~ | ~~Live TV / chaînes « Sur Plex », Discover cloud~~ | → **partiellement implémenté** : segment rail « Sur Plex » livré (Live TV = grille des 239 chaînes FAST `epg.provider.plex.tv`, Discover → onglet Tendances) ; seule la **lecture HLS** des chaînes reste bloquée (inputstream.adaptive absent) |
 | L5 | « More Ways to Watch », Watch Together | Cloud / social |
 | L6 | Miniatures de seek (trickplay bif) | Kodi n'a pas de support trickplay |
 | L7 | Ratings & Reviews, Discussions | API sociale privée |
 | L8 | Recherche vocale | Micro télécommande = protocole BLE propriétaire (voir plan voix `c8c8548a`) |
+| L9 | Feuille « Account » complète (vie privée, critiques/discussions, suppression) | Entrées cloud plex.tv — la fiche locale montre Email/Username/Subscriptions réels (`/api/v2/user`), toggle « Connexion automatique » fonctionnel, le reste en stub |
 
 ### Écarts visuels restants (revue Claude sur captures)
 
@@ -171,6 +172,8 @@ modal sheets. Implemented for both `AuraSettingsPanel.xml` and
 `AuraProfileMenu.xml`.
 
 ## Playback OSD + chapters/queue overlay (official refs 35-43)
+
+- Chip « −10 » (`9112`) : cercle translucide ~60 px coin bas-droit, révélé dès que le focus OSD quitte le bouton lecture (`!Control.HasFocus(9100)`) — même condition que Plex, qui l'affiche après la première entrée directionnelle (`36-43`). `PlayerControl(SmallStepBackward)`, pill blanche + texte sombre au focus.
 
 `skin-patches/plex-osd/VideoOSD.xml` was measured against
 `official-live/40-osd-back.png` (clean 1080p frame):
