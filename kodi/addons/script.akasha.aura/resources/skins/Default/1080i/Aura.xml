@@ -386,16 +386,41 @@
                 <height>48</height>
                 <texture colordiffuse="4D000000" border="24">cap-r22.png</texture>
             </control>
+            <!-- '6:53 AM': Kodi's System.Time has no meridiem token on
+                 this build, so the AM/PM suffix is a second label driven
+                 by a numeric hour comparison. -->
             <control type="label">
                 <left>1700</left>
                 <top>40</top>
-                <width>123</width>
+                <width>96</width>
                 <height>48</height>
-                <align>center</align>
+                <align>right</align>
                 <aligny>center</aligny>
                 <font>font_aura_mini</font>
-                <label>$INFO[System.Time(h:mm xx)]</label>
+                <label>$INFO[System.Time(h:mm)]</label>
                 <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="label">
+                <left>1799</left>
+                <top>40</top>
+                <width>44</width>
+                <height>48</height>
+                <aligny>center</aligny>
+                <font>font_aura_mini</font>
+                <label>AM</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>!Integer.IsGreater(System.Time(hh),11)</visible>
+            </control>
+            <control type="label">
+                <left>1799</left>
+                <top>40</top>
+                <width>44</width>
+                <height>48</height>
+                <aligny>center</aligny>
+                <font>font_aura_mini</font>
+                <label>PM</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>Integer.IsGreater(System.Time(hh),11)</visible>
             </control>
         </control>
 
