@@ -394,7 +394,7 @@
                 <align>center</align>
                 <aligny>center</aligny>
                 <font>font_aura_mini</font>
-                <label>$INFO[System.Time(hh:mm)]</label>
+                <label>$INFO[System.Time(h:mm xx)]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
         </control>

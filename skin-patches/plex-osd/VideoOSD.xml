@@ -191,7 +191,7 @@
             <font>font_aura_mini</font>
             <align>right</align>
             <aligny>center</aligny>
-            <label>$INFO[System.Time]</label>
+            <label>$INFO[System.Time(h:mm xx)]</label>
             <textcolor>FFFFFFFF</textcolor>
         </control>
 
