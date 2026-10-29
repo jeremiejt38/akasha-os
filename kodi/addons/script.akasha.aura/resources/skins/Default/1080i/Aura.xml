@@ -43,6 +43,25 @@
                 <texture>scrim-hero.png</texture>
             </control>
 
+            <!-- Plex tints the whole field with the focused item's
+                 UltraBlurColors palette (left/bottom colored veils over
+                 the dark scrim). Colors are applied from Python via
+                 setColorDiffuse, synced with the debounced fanart swap. -->
+            <control type="image" id="5020">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <texture>scrim-tint-left.png</texture>
+            </control>
+            <control type="image" id="5021">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <texture>scrim-tint-bottom.png</texture>
+            </control>
+
             <!-- Texture prewarmers: invisible 1px images that decode+upload
                  the hero fanart/clearlogo as soon as focus changes, so the
                  debounced 1080p backdrop swap hits a warm texture instead of
@@ -91,7 +110,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>297</top>
+                <top>289</top>
                 <width>1500</width>
                 <height>44</height>
                 <font>font_aura_main_bold</font>
@@ -105,7 +124,7 @@
                  label text. -->
             <control type="grouplist">
                 <left>127</left>
-                <top>354</top>
+                <top>350</top>
                 <width>1400</width>
                 <height>36</height>
                 <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
@@ -153,7 +172,7 @@
             </control>
             <control type="grouplist">
                 <left>127</left>
-                <top>282</top>
+                <top>296</top>
                 <width>1400</width>
                 <height>36</height>
                 <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
@@ -201,7 +220,7 @@
             </control>
             <control type="textbox">
                 <left>127</left>
-                <top>390</top>
+                <top>379</top>
                 <width>880</width>
                 <height>70</height>
                 <font>font_aura_plot</font>
@@ -211,7 +230,7 @@
             </control>
             <control type="textbox">
                 <left>127</left>
-                <top>349</top>
+                <top>346</top>
                 <width>880</width>
                 <height>70</height>
                 <font>font_aura_plot</font>
@@ -221,11 +240,11 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>418</top>
+                <top>427</top>
                 <width>1100</width>
                 <height>26</height>
                 <font>font_aura_tiny</font>
-                <textcolor>CCFFFFFF</textcolor>
+                <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroCast)]</label>
                 <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
             </control>
@@ -1699,7 +1718,7 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5101">
                         <left>127</left>
-                        <top>509</top>
+                        <top>513</top>
                         <width>600</width>
                         <height>26</height>
                         <font>font_aura_meta</font>
@@ -2008,7 +2027,7 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5201">
                         <left>127</left>
-                        <top>981</top>
+                        <top>985</top>
                         <width>600</width>
                         <height>26</height>
                         <font>font_aura_meta</font>
@@ -2322,7 +2341,7 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5301">
                         <left>127</left>
-                        <top>1453</top>
+                        <top>1457</top>
                         <width>600</width>
                         <height>26</height>
                         <font>font_aura_meta</font>
@@ -2632,7 +2651,7 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5401">
                         <left>127</left>
-                        <top>1925</top>
+                        <top>1929</top>
                         <width>600</width>
                         <height>26</height>
                         <font>font_aura_meta</font>
@@ -2941,7 +2960,7 @@
                          row title size, positioned at runtime by Aura. -->
                     <control type="label" id="5501">
                         <left>127</left>
-                        <top>2397</top>
+                        <top>2401</top>
                         <width>600</width>
                         <height>26</height>
                         <font>font_aura_meta</font>
@@ -3441,11 +3460,21 @@
                      expands on focus. -->
                 <control type="group">
                     <visible>!Control.HasFocus(3310) + String.IsEmpty(Window.Property(AuraSheetOpen))</visible>
+                    <!-- Plex floats the 4 rail icons on a translucent dark
+                         capsule (53-home-for-you): rounded slab behind the
+                         column, fully-rounded corners. -->
                     <control type="image">
-                        <left>44</left>
-                        <top>448</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>28</left>
+                        <top>432</top>
+                        <width>72</width>
+                        <height>212</height>
+                        <texture colordiffuse="73000000" border="38">cap-r36.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>41</left>
+                        <top>444</top>
+                        <width>46</width>
+                        <height>46</height>
                         <texture>avatar-plex.png</texture>
                         <visible>String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
@@ -3453,43 +3482,43 @@
                          user's picture): fetched into AuraAvatar by
                          _load_avatar, circle-clipped by the cast mask. -->
                     <control type="image">
-                        <left>44</left>
-                        <top>448</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>41</left>
+                        <top>444</top>
+                        <width>46</width>
+                        <height>46</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
-                        <left>44</left>
-                        <top>448</top>
-                        <width>38</width>
-                        <height>38</height>
+                        <left>41</left>
+                        <top>444</top>
+                        <width>46</width>
+                        <height>46</height>
                         <texture colordiffuse="B3000000">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
                     <control type="image">
-                        <left>48</left>
-                        <top>508</top>
-                        <width>32</width>
-                        <height>32</height>
+                        <left>45</left>
+                        <top>511</top>
+                        <width>38</width>
+                        <height>38</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-search.png</texture>
                     </control>
                     <control type="image">
-                        <left>53</left>
-                        <top>562</top>
-                        <width>22</width>
-                        <height>20</height>
+                        <left>51</left>
+                        <top>572</top>
+                        <width>26</width>
+                        <height>24</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-home-o.png</texture>
                     </control>
                     <control type="image">
-                        <left>55</left>
-                        <top>614</top>
-                        <width>18</width>
-                        <height>14</height>
+                        <left>53</left>
+                        <top>621</top>
+                        <width>22</width>
+                        <height>18</height>
                         <texture colordiffuse="FFFFFFFF">icon-menu.png</texture>
                     </control>
                 </control>

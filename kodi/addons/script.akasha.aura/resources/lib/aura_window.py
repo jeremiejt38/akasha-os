@@ -1332,7 +1332,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # stalling the renderer ~200ms mid-settle on decode+upload.
         self.setProperty('AuraHeroFanartPreload', fanart)
         self.setProperty('AuraHeroLogoPreload', item.get('logo_url') or '')
-        self._schedule_hero_fanart(fanart)
+        # Plex washes the whole home field with the item's UltraBlurColors
+        # (colored left/bottom veils); applied with the fanart swap so art
+        # and tint never disagree.
+        blur = item.get('blur_colors') or {}
+        tint_left = _tint_hex(blur.get('topLeft'),
+                              blur.get('bottomLeft'))
+        tint_bottom = _tint_hex(blur.get('bottomLeft'),
+                                blur.get('bottomRight'),
+                                blur.get('topLeft'))
+        self._schedule_hero_fanart(fanart, tint_left, tint_bottom)
         self.setProperty('AuraHeroLogo', item.get('logo_url') or '')
         self.setProperty('AuraHeroTitle', title)
         self.setProperty('AuraHeroSubtitle', subtitle)
@@ -1370,8 +1379,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self.setProperty(prop, '')
             except RuntimeError:
                 pass
+        for cid in (5020, 5021):  # field tint veils back to neutral
+            try:
+                self.getControl(cid).setColorDiffuse('00000000')
+            except (RuntimeError, AttributeError):
+                pass
 
-    def _schedule_hero_fanart(self, url):
+    def _schedule_hero_fanart(self, url, tint_left='', tint_bottom=''):
         """Debounce the 1080p backdrop swap while the user scrolls.
 
         Without this every keypress pushes a new fanart URL into the skin
@@ -1379,7 +1393,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         for each one -- the classic hero stutter when holding Right. Text
         props still update immediately; the backdrop only catches up
         ~300ms after scrolling stops, matching Plex's own hero behaviour
-        (it never repaints mid-fling either).
+        (it never repaints mid-fling either). The UltraBlurColors field
+        tint rides along so artwork and color change in the same frame.
         """
         with self._hero_fanart_lock:
             if self._hero_fanart_timer is not None:
@@ -1391,20 +1406,29 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._hero_fanart_current = None
                 return
             self._hero_fanart_timer = threading.Timer(
-                0.3, self._apply_hero_fanart, args=(url,))
+                0.3, self._apply_hero_fanart,
+                args=(url, tint_left, tint_bottom))
             self._hero_fanart_timer.daemon = True
             self._hero_fanart_timer.start()
 
-    def _apply_hero_fanart(self, url):
+    def _apply_hero_fanart(self, url, tint_left='', tint_bottom=''):
         with self._hero_fanart_lock:
             self._hero_fanart_timer = None
-            if url == self._hero_fanart_current:
-                return
+            changed = url != self._hero_fanart_current
             self._hero_fanart_current = url
-        try:
-            self.setProperty('AuraHeroFanart', url)
-        except RuntimeError:
-            pass
+        # 5020: left veil tinted topLeft; 5021: bottom veil tinted
+        # bottomLeft. No palette (cloud items) -> alpha 0, neutral field.
+        for cid, col in ((5020, tint_left), (5021, tint_bottom)):
+            try:
+                self.getControl(cid).setColorDiffuse(
+                    ('FF' + col) if col else '00000000')
+            except (RuntimeError, AttributeError):
+                pass
+        if changed:
+            try:
+                self.setProperty('AuraHeroFanart', url)
+            except RuntimeError:
+                pass
 
     def _on_reco_item_selected(self, list_control_id):
         row = self._reco_rows.get(list_control_id)
@@ -1545,7 +1569,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     _, y = suffix_control.getPosition()
                 except RuntimeError:
                     y = 0
-                suffix_control.setPosition(127 + width + 8, y)
+                suffix_control.setPosition(127 + width + 10, y)
         except RuntimeError:
             pass
 
@@ -4642,6 +4666,45 @@ def _format_date_fr(iso_date):
         return ''
 
 
+def _blur_hex(value):
+    """Normalise an UltraBlurColors corner ('rrggbb' or '#rrggbb') to
+    'RRGGBB' for setColorDiffuse, '' when absent."""
+    s = str(value or '').lstrip('#')[-6:]
+    return s.upper() if len(s) == 6 else ''
+
+
+def _tint_hex(*values):
+    """Boost a raw UltraBlurColors corner for the Plex field wash.
+
+    Plex's blur palette is near-black by design ('040b03'), but the
+    reference client paints a clearly saturated colored veil (~(123,37,43)
+    measured on 53-home-for-you). Raw corners would tint invisibly, so
+    the hue is kept while saturation/value are pulled up to the range the
+    official client displays. Fallbacks are used when the preferred
+    corner is near-neutral or absent (a forced hue would otherwise
+    invent color out of quantization noise, e.g. '141314' -> magenta).
+    """
+    import colorsys
+    best = None
+    for value in values:
+        hexs = _blur_hex(value)
+        if not hexs:
+            continue
+        r, g, b = (int(hexs[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        if s >= 0.25:  # genuinely colored: take it and stop
+            best = (h, max(s, 0.70))
+            break
+        if best is None:  # keep the first neutral as last resort
+            best = (h, s)
+    if best is None:
+        return ''
+    r, g, b = colorsys.hsv_to_rgb(best[0], best[1], 0.42)
+    return '{:02X}{:02X}{:02X}'.format(int(round(r * 255)),
+                                     int(round(g * 255)),
+                                     int(round(b * 255)))
+
+
 def _hub_title_fr(hub, server_name=''):
     """Localise the well-known Plex hub titles.
 
@@ -4701,8 +4764,10 @@ def _hub_title_fr(hub, server_name=''):
         return base, ''
     # Plex renders the suffix in a smaller, dimmer face than the row
     # title -- returned separately so the caller can render it in its
-    # own label (Kodi labels cannot mix font sizes inline).
-    return base, '· ' + server_name
+    # own label (Kodi labels cannot mix font sizes inline). A leading
+    # U+00B7 is dropped by Kodi's label renderer, so the middle dot is
+    # shielded by a non-breaking space (not trimmed by its ASCII trim).
+    return base, ' · ' + server_name
 
 
 # Plex Categories tiles: a fixed colour per genre, composited ~60% over a
