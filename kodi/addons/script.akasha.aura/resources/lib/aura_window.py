@@ -300,7 +300,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_search_query = ''
         # Recommande/Categories, rendered inline like Bibliotheque -- see
         # docs/aura/decisions.md ("recommandations et categories inlinees").
-        self._reco_rows = {}  # {list_control_id: (label_control_id, title, PagedList)}
+        self._reco_rows = {}  # {list_id: (label_id, title, suffix, PagedList)}
         self._reco_first_section = None
         self._category_section = None
         self._category_genres = []
@@ -849,15 +849,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 server = self._plex_client.server_friendly_name() or ''
             except Exception:
                 pass
+        title, title_suffix = _hub_title_fr(hub, server)
         try:
             paged.load_initial()
         except Exception as e:  # defensive: never crash the tab on a row failure
             xbmc.log('Akasha Aura: hub row "{}" failed: {}'.format(hub.get('title'), e),
                      xbmc.LOGWARNING)
-            return {'title': _hub_title_fr(hub, server), 'paged': paged,
-                    'error': e, 'style': 'shelf'}
-        return {'title': _hub_title_fr(hub, server), 'paged': paged,
-                'error': None, 'style': hub.get('style') or 'shelf'}
+            return {'title': title, 'title_suffix': title_suffix,
+                    'paged': paged, 'error': e, 'style': 'shelf'}
+        return {'title': title, 'title_suffix': title_suffix,
+                'paged': paged, 'error': None,
+                'style': hub.get('style') or 'shelf'}
 
     def _reco_legacy_rows(self, section):
         """Connector mode: the connector has no hubs endpoint, so rebuild the
@@ -955,7 +957,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             lst = land_lst if style == 'hero' else poster_lst
             hidden_lst.reset()
             self._reco_rows.pop(hidden_id, None)
-            self._reco_rows[effective_id] = (label_id, row['title'], row['paged'])
+            self._reco_rows[effective_id] = (
+                label_id, row['title'],
+                row.get('title_suffix') or '', row['paged'])
             self._render_reco_row_label(effective_id, row.get('error'))
             if row.get('error'):
                 lst.reset()
@@ -1138,7 +1142,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return None
         if focused not in self._reco_rows:
             return None
-        _, _, paged = self._reco_rows[focused]
+        _, _, _, paged = self._reco_rows[focused]
         try:
             li = self.getControl(focused).getSelectedItem()
             if li is not None and li.getProperty('IsPlaceholder'):
@@ -1290,8 +1294,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # Plex's initial auto-highlight.
             for i in range(len(RECO_SLOT_IDS)):
                 row = self._reco_rows.get(self._reco_slot_list_id(i))
-                if row and row[2].items:
-                    item = row[2].items[0]
+                if row and row[3].items:
+                    item = row[3].items[0]
                     break
         if item is None:
             # A reload that yields zero items must not keep the previous
@@ -1338,7 +1342,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Plex's age chip hugs its text (~40px for "10"): resize the
         # chip group/image/label since Kodi cannot auto-size it.
         chip_w = max(44, 14 * len(rating) + 24)
-        for cid in (5005, 5006, 5007, 5008):
+        # 5005-5008: chip in the meta slot below the episode subtitle;
+        # 5009-5012: same chip in the no-subtitle (movie/show) meta slot.
+        for cid in (5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012):
             try:
                 self.getControl(cid).setWidth(chip_w)
             except RuntimeError:
@@ -1411,7 +1417,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pos = self.getControl(list_control_id).getSelectedPosition()
         except RuntimeError:
             return
-        _, _, paged = row
+        _, _, _, paged = row
         if not (0 <= pos < len(paged.items)):
             return
         self._reco_open(paged.items[pos])
@@ -1457,7 +1463,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pos = self.getControl(list_control_id).getSelectedPosition()
         except RuntimeError:
             return
-        _, _, paged = row
+        _, _, _, paged = row
         if not (0 <= pos < len(paged.items)):
             return
         item = paged.items[pos]
@@ -1518,12 +1524,28 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.close()
 
     def _render_reco_row_label(self, list_control_id, error=None):
-        label_control_id, title, paged = self._reco_rows[list_control_id]
+        label_control_id, title, title_suffix, paged = (
+            self._reco_rows[list_control_id])
         try:
             # Plex shows the bare row title ("Continue Watching", "Top Movies
             # in Mystère · Akasha") -- no item counter on home rows.
-            self.getControl(label_control_id).setLabel(
-                '{} — erreur de chargement'.format(title) if error else title)
+            shown = '{} — erreur de chargement'.format(title) if error else title
+            self.getControl(label_control_id).setLabel(shown)
+            # Plex renders the server suffix (~' · Akasha') in a smaller,
+            # dimmer face -- a separate label sized at ~60% of the title.
+            suffix_control = self.getControl(label_control_id + 1)
+            if error or not title_suffix:
+                suffix_control.setLabel('')
+            else:
+                suffix_control.setLabel(title_suffix)
+                width = i18n.text_width(shown, 34)
+                if width is None:  # PIL unavailable: rough Inter-bold estimate
+                    width = len(shown) * 17
+                try:
+                    _, y = suffix_control.getPosition()
+                except RuntimeError:
+                    y = 0
+                suffix_control.setPosition(127 + width + 8, y)
         except RuntimeError:
             pass
 
@@ -1531,7 +1553,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         row = self._reco_rows.get(list_control_id)
         if not row:
             return
-        label_control_id, title, paged = row
+        label_control_id, title, _suffix, paged = row
         try:
             position = self.getControl(list_control_id).getSelectedPosition()
         except RuntimeError:
@@ -4537,8 +4559,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """Backing-store removal behind 'Remove from Continue
         Watching' -- the shared sheet handles the control itself."""
         row = self._reco_rows.get(control_id)
-        if row and 0 <= pos < len(row[2].items):
-            del row[2].items[pos]
+        if row and 0 <= pos < len(row[3].items):
+            del row[3].items[pos]
         elif control_id == DIVERT_PANEL_ID \
                 and 0 <= pos < len(self._divert_items):
             del self._divert_items[pos]
@@ -4641,7 +4663,7 @@ def _hub_title_fr(hub, server_name=''):
         or 'on deck' in title_lc)
     if standard:
         # 'Continue Watching' is a global row: Plex shows no server suffix.
-        return i18n.tr(33137)
+        return i18n.tr(33137), ''
     if 'recentlyadded' in identifier or 'recently added' in title_lc:
         base = i18n.tr(33138)
         if ' in ' in title:
@@ -4673,12 +4695,14 @@ def _hub_title_fr(hub, server_name=''):
         # Cloud Discover rows ('Tendances') carry no server suffix; only
         # unmapped section hubs (genre/director spotlights...) fall here.
         if identifier in discover_titles:
-            return base
+            return base, ''
 
     if not server_name:
-        return base
-    # Plex renders the suffix dimmer than the row title.
-    return '{} [COLOR 80FFFFFF]· {}[/COLOR]'.format(base, server_name)
+        return base, ''
+    # Plex renders the suffix in a smaller, dimmer face than the row
+    # title -- returned separately so the caller can render it in its
+    # own label (Kodi labels cannot mix font sizes inline).
+    return base, '· ' + server_name
 
 
 # Plex Categories tiles: a fixed colour per genre, composited ~60% over a

@@ -53,7 +53,7 @@ FONTS = [
     ('font_aura_rowhead',
     'Inter-Unicode-Bold.ttf',34),
     ('font_aura_tab',
-    'Inter-Unicode-Regular.ttf',34),
+    'Inter-Unicode-Regular.ttf',25),
 ]
 FONT_FILES = sorted({f[1] for f in FONTS})
 RESOURCE_ADDON = '/storage/.kodi/addons/resource.font.robotocjksc/resources'

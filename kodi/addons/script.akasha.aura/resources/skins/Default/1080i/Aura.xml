@@ -70,7 +70,7 @@
                  by Window.Property(AuraHero*) from aura_window.py. -->
             <control type="image">
                 <left>127</left>
-                <top>127</top>
+                <top>175</top>
                 <width>560</width>
                 <height>100</height>
                 <aspectratio align="left" aligny="bottom">keep</aspectratio>
@@ -80,7 +80,7 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>173</top>
+                <top>218</top>
                 <width>1500</width>
                 <height>62</height>
                 <font>font_aura_info_black_doublerow</font>
@@ -91,11 +91,11 @@
             </control>
             <control type="label">
                 <left>127</left>
-                <top>247</top>
+                <top>297</top>
                 <width>1500</width>
                 <height>44</height>
-                <font>font_aura_midi</font>
-                <textcolor>FFF0F0F0</textcolor>
+                <font>font_aura_main_bold</font>
+                <textcolor>FFFFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroSubtitle)]</label>
                 <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
             </control>
@@ -105,9 +105,10 @@
                  label text. -->
             <control type="grouplist">
                 <left>127</left>
-                <top>295</top>
+                <top>354</top>
                 <width>1400</width>
                 <height>36</height>
+                <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
                 <orientation>horizontal</orientation>
                 <itemgap>14</itemgap>
                 <align>left</align>
@@ -150,23 +151,83 @@
                     </control>
                 </control>
             </control>
+            <control type="grouplist">
+                <left>127</left>
+                <top>282</top>
+                <width>1400</width>
+                <height>36</height>
+                <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
+                <orientation>horizontal</orientation>
+                <itemgap>14</itemgap>
+                <align>left</align>
+                <control type="label">
+                    <width min="20" max="1350">auto</width>
+                    <height>36</height>
+                    <aligny>center</aligny>
+                    <font>font_aura_plot</font>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <label>$INFO[Window.Property(AuraHeroMeta)]</label>
+                </control>
+                <control type="group" id="5009">
+                    <width>44</width>
+                    <height>36</height>
+                    <visible>!String.IsEmpty(Window.Property(AuraHeroRating))</visible>
+                    <control type="image" id="5010">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>44</width>
+                        <height>34</height>
+                        <texture border="10">meta-rating-box.png</texture>
+                    </control>
+                    <control type="image" id="5011">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>44</width>
+                        <height>34</height>
+                        <texture colordiffuse="80FFFFFF" border="10">chip-outline.png</texture>
+                    </control>
+                    <control type="label" id="5012">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>44</width>
+                        <height>34</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font_aura_tiny_bold</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <label>$INFO[Window.Property(AuraHeroRating)]</label>
+                    </control>
+                </control>
+            </control>
             <control type="textbox">
                 <left>127</left>
-                <top>335</top>
+                <top>390</top>
                 <width>880</width>
                 <height>70</height>
-                <font>font_aura_mini</font>
+                <font>font_aura_plot</font>
                 <textcolor>CCFFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroPlot)]</label>
+                <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
+            </control>
+            <control type="textbox">
+                <left>127</left>
+                <top>349</top>
+                <width>880</width>
+                <height>70</height>
+                <font>font_aura_plot</font>
+                <textcolor>CCFFFFFF</textcolor>
+                <label>$INFO[Window.Property(AuraHeroPlot)]</label>
+                <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
             </control>
             <control type="label">
                 <left>127</left>
-                <top>413</top>
+                <top>418</top>
                 <width>1100</width>
                 <height>26</height>
                 <font>font_aura_tiny</font>
-                <textcolor>99FFFFFF</textcolor>
+                <textcolor>CCFFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroCast)]</label>
+                <visible>String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
             </control>
         </control>
 
@@ -555,7 +616,7 @@
                      the global bar recedes (y 118 -> 60), and slides back
                      under it when the bar fades back in. -->
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                    <effect type="slide" start="0,0" end="0,-88" time="250" tween="quadratic" easing="out"/>
+                    <effect type="slide" start="0,0" end="0,-80" time="250" tween="quadratic" easing="out"/>
                 </animation>
 
                 <!-- Plex's library view has no big title block: the context
@@ -869,41 +930,41 @@
                 <control type="image">
                     <left>127</left>
                     <top>120</top>
-                    <width>648</width>
-                    <height>62</height>
-                    <texture colordiffuse="99000000" border="30">cap-r32.png</texture>
+                    <width>470</width>
+                    <height>48</height>
+                    <texture colordiffuse="99000000" border="24">cap-r24.png</texture>
                 </control>
                 <!-- Active-tab outline (Plex shows a rounded outline on the
                      selected tab when the strip is not focused; the white
                      fill on focus covers it anyway). -->
                 <control type="image">
                     <left>135</left>
-                    <top>128</top>
-                    <width>190</width>
+                    <top>121</top>
+                    <width>144</width>
                     <height>46</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
-                    <left>335</left>
-                    <top>128</top>
-                    <width>240</width>
+                    <left>295</left>
+                    <top>121</top>
+                    <width>151</width>
                     <height>46</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
-                    <left>585</left>
-                    <top>128</top>
-                    <width>180</width>
+                    <left>462</left>
+                    <top>121</top>
+                    <width>114</width>
                     <height>46</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>135</left>
-                    <top>128</top>
-                    <width>190</width>
+                    <top>121</top>
+                    <width>144</width>
                     <height>46</height>
                     <label></label>
                     <font>font_aura_tab</font>
@@ -913,14 +974,14 @@
                     <onright>3071</onright>
                     <onup>2007</onup>
                     <ondown>5110</ondown>
-                    <textcolor>88FFFFFF</textcolor>
+                    <textcolor>A6FFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
                 <control type="button" id="3071">
-                    <left>335</left>
-                    <top>128</top>
-                    <width>240</width>
+                    <left>295</left>
+                    <top>121</top>
+                    <width>151</width>
                     <height>46</height>
                     <label></label>
                     <font>font_aura_tab</font>
@@ -930,14 +991,14 @@
                     <onright>3072</onright>
                     <onup>2007</onup>
                     <ondown>5110</ondown>
-                    <textcolor>88FFFFFF</textcolor>
+                    <textcolor>A6FFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
                 <control type="button" id="3072">
-                    <left>585</left>
-                    <top>128</top>
-                    <width>180</width>
+                    <left>462</left>
+                    <top>121</top>
+                    <width>114</width>
                     <height>46</height>
                     <label></label>
                     <font>font_aura_tab</font>
@@ -947,7 +1008,7 @@
                     <onright>5110</onright>
                     <onup>2007</onup>
                     <ondown>5110</ondown>
-                    <textcolor>88FFFFFF</textcolor>
+                    <textcolor>A6FFFFFF</textcolor>
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
                 </control>
@@ -957,20 +1018,20 @@
                      double-draw or scroll offset. -->
                 <control type="label">
                     <left>135</left>
-                    <top>128</top>
-                    <width>190</width>
+                    <top>121</top>
+                    <width>144</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33015]</label>
-                    <textcolor>88FFFFFF</textcolor>
+                    <textcolor>A6FFFFFF</textcolor>
                     <visible>!String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="label">
                     <left>135</left>
-                    <top>128</top>
-                    <width>190</width>
+                    <top>121</top>
+                    <width>144</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -981,8 +1042,8 @@
                 </control>
                 <control type="label">
                     <left>135</left>
-                    <top>128</top>
-                    <width>190</width>
+                    <top>121</top>
+                    <width>144</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -992,21 +1053,21 @@
                     <visible>Control.HasFocus(3070)</visible>
                 </control>
                 <control type="label">
-                    <left>335</left>
-                    <top>128</top>
-                    <width>240</width>
+                    <left>295</left>
+                    <top>121</top>
+                    <width>151</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33014]</label>
-                    <textcolor>88FFFFFF</textcolor>
+                    <textcolor>A6FFFFFF</textcolor>
                     <visible>!String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="label">
-                    <left>335</left>
-                    <top>128</top>
-                    <width>240</width>
+                    <left>295</left>
+                    <top>121</top>
+                    <width>151</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1016,9 +1077,9 @@
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="label">
-                    <left>335</left>
-                    <top>128</top>
-                    <width>240</width>
+                    <left>295</left>
+                    <top>121</top>
+                    <width>151</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1028,21 +1089,21 @@
                     <visible>Control.HasFocus(3071)</visible>
                 </control>
                 <control type="label">
-                    <left>585</left>
-                    <top>128</top>
-                    <width>180</width>
+                    <left>462</left>
+                    <top>121</top>
+                    <width>114</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33576]</label>
-                    <textcolor>88FFFFFF</textcolor>
+                    <textcolor>A6FFFFFF</textcolor>
                     <visible>!String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="label">
-                    <left>585</left>
-                    <top>128</top>
-                    <width>180</width>
+                    <left>462</left>
+                    <top>121</top>
+                    <width>114</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1052,9 +1113,9 @@
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="label">
-                    <left>585</left>
-                    <top>128</top>
-                    <width>180</width>
+                    <left>462</left>
+                    <top>121</top>
+                    <width>114</width>
                     <height>46</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1623,7 +1684,7 @@
 
                     <control type="label" id="5100">
                         <left>127</left>
-                        <top>484</top>
+                        <top>495</top>
                         <width>1600</width>
                         <height>70</height>
                         <font>font_aura_rowhead</font>
@@ -1634,10 +1695,26 @@
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                     </control>
+                    <!-- Server suffix (~". Akasha") rendered at ~60% of the
+                         row title size, positioned at runtime by Aura. -->
+                    <control type="label" id="5101">
+                        <left>127</left>
+                        <top>495</top>
+                        <width>600</width>
+                        <height>42</height>
+                        <aligny>bottom</aligny>
+                        <font>font_aura_meta</font>
+                        <label>-</label>
+                        <textcolor>99FFFFFF</textcolor>
+                        <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                                                    <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                                                    <effect type="fade" start="100" end="0" time="200"/>
+                                                </animation>
+                    </control>
                     <control type="list" id="5110">
                         <left>127</left>
                         <top>568</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -1734,11 +1811,11 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
-                                <width>248</width>
-                                <height>368</height>
-                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                <left>-6</left>
+                                <top>-6</top>
+                                <width>252</width>
+                                <height>372</height>
+                                <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5110) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5111) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -1747,7 +1824,7 @@
                     <control type="list" id="5111">
                         <left>127</left>
                         <top>568</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -1917,7 +1994,7 @@
 
                     <control type="label" id="5200">
                         <left>127</left>
-                        <top>956</top>
+                        <top>967</top>
                         <width>1600</width>
                         <height>70</height>
                         <font>font_aura_rowhead</font>
@@ -1928,10 +2005,26 @@
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
                     </control>
+                    <!-- Server suffix (~". Akasha") rendered at ~60% of the
+                         row title size, positioned at runtime by Aura. -->
+                    <control type="label" id="5201">
+                        <left>127</left>
+                        <top>967</top>
+                        <width>600</width>
+                        <height>42</height>
+                        <aligny>bottom</aligny>
+                        <font>font_aura_meta</font>
+                        <label>-</label>
+                        <textcolor>99FFFFFF</textcolor>
+                        <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                                                    <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                                                    <effect type="fade" start="100" end="0" time="200"/>
+                                                </animation>
+                    </control>
                     <control type="list" id="5210">
                         <left>127</left>
                         <top>1040</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2028,11 +2121,11 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
-                                <width>248</width>
-                                <height>368</height>
-                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                <left>-6</left>
+                                <top>-6</top>
+                                <width>252</width>
+                                <height>372</height>
+                                <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5210) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5211) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2041,7 +2134,7 @@
                     <control type="list" id="5211">
                         <left>127</left>
                         <top>1040</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2211,7 +2304,7 @@
 
                     <control type="label" id="5300">
                         <left>127</left>
-                        <top>1428</top>
+                        <top>1439</top>
                         <width>1600</width>
                         <height>70</height>
                         <font>font_aura_rowhead</font>
@@ -2227,10 +2320,26 @@
                              decode its posters for nothing. -->
                         <visible>Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
+                    <!-- Server suffix (~". Akasha") rendered at ~60% of the
+                         row title size, positioned at runtime by Aura. -->
+                    <control type="label" id="5301">
+                        <left>127</left>
+                        <top>1439</top>
+                        <width>600</width>
+                        <height>42</height>
+                        <aligny>bottom</aligny>
+                        <font>font_aura_meta</font>
+                        <label>-</label>
+                        <textcolor>99FFFFFF</textcolor>
+                        <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                                                    <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                                                    <effect type="fade" start="100" end="0" time="200"/>
+                                                </animation>
+                    </control>
                     <control type="list" id="5310">
                         <left>127</left>
                         <top>1512</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2327,11 +2436,11 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
-                                <width>248</width>
-                                <height>368</height>
-                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                <left>-6</left>
+                                <top>-6</top>
+                                <width>252</width>
+                                <height>372</height>
+                                <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5310) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5311) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2340,7 +2449,7 @@
                     <control type="list" id="5311">
                         <left>127</left>
                         <top>1512</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2510,7 +2619,7 @@
 
                     <control type="label" id="5400">
                         <left>127</left>
-                        <top>1900</top>
+                        <top>1911</top>
                         <width>1600</width>
                         <height>70</height>
                         <font>font_aura_rowhead</font>
@@ -2522,10 +2631,26 @@
                         </animation>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
+                    <!-- Server suffix (~". Akasha") rendered at ~60% of the
+                         row title size, positioned at runtime by Aura. -->
+                    <control type="label" id="5401">
+                        <left>127</left>
+                        <top>1911</top>
+                        <width>600</width>
+                        <height>42</height>
+                        <aligny>bottom</aligny>
+                        <font>font_aura_meta</font>
+                        <label>-</label>
+                        <textcolor>99FFFFFF</textcolor>
+                        <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                                                    <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
+                                                    <effect type="fade" start="100" end="0" time="200"/>
+                                                </animation>
+                    </control>
                     <control type="list" id="5410">
                         <left>127</left>
                         <top>1984</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2622,11 +2747,11 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
-                                <width>248</width>
-                                <height>368</height>
-                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                <left>-6</left>
+                                <top>-6</top>
+                                <width>252</width>
+                                <height>372</height>
+                                <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5410) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5411) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2635,7 +2760,7 @@
                     <control type="list" id="5411">
                         <left>127</left>
                         <top>1984</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2805,7 +2930,7 @@
 
                     <control type="label" id="5500">
                         <left>127</left>
-                        <top>2372</top>
+                        <top>2383</top>
                         <width>1600</width>
                         <height>70</height>
                         <font>font_aura_rowhead</font>
@@ -2816,10 +2941,25 @@
                         </animation>
                         <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
                     </control>
+                    <!-- Server suffix (~". Akasha") rendered at ~60% of the
+                         row title size, positioned at runtime by Aura. -->
+                    <control type="label" id="5501">
+                        <left>127</left>
+                        <top>2383</top>
+                        <width>600</width>
+                        <height>42</height>
+                        <aligny>bottom</aligny>
+                        <font>font_aura_meta</font>
+                        <label>-</label>
+                        <textcolor>99FFFFFF</textcolor>
+                        <animation type="Conditional" condition="Control.HasFocus(5110) | Control.HasFocus(5111) | Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                                                    <effect type="fade" start="100" end="0" time="160"/>
+                                                </animation>
+                    </control>
                     <control type="list" id="5510">
                         <left>127</left>
                         <top>2456</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -2915,11 +3055,11 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
-                                <width>248</width>
-                                <height>368</height>
-                                <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                <left>-6</left>
+                                <top>-6</top>
+                                <width>252</width>
+                                <height>372</height>
+                                <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
                                 <visible>Control.HasFocus(5510) + String.IsEmpty(ListItem.Property(IsPlaceholder)) | Control.HasFocus(5511) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2928,7 +3068,7 @@
                     <control type="list" id="5511">
                         <left>127</left>
                         <top>2456</top>
-                        <width>1696</width>
+                        <width>1793</width>
                         <height>372</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
