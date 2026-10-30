@@ -328,9 +328,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # View-load jobs share a bounded pool: two WAN fetches in flight
         # at most, so a burst of tab clicks cannot stack unbounded
         # threads on the shared Plex/Unraid path. Each job re-checks the
-        # view generation when it is finally dequeued.
+        # view generation when it is finally dequeued. Background chores
+        # (collection probes, warm-up, boot revalidation) get their own
+        # 1-worker pool so they can never starve a view load.
         self._view_pool = ThreadPoolExecutor(
             max_workers=2, thread_name_prefix='aura-views')
+        self._bg_pool = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix='aura-bg')
+        self._pools_shutdown = False
         self._warm_probe_timer = None
         self._az_jump_active = False
         self._hub_offset = 0
@@ -438,9 +443,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         # Window reuse (re-open after playback/settings): the previous
-        # close() armed _closing -- clear it before any loader can spawn.
+        # close() armed _closing -- clear it, bump the generation so any
+        # worker still running from the last session becomes harmless,
+        # and drop every in-flight flag a dead worker cannot clear.
         with self._ui_lock:
             self._closing = False
+            self._view_load_gen += 1
+            self._az_jump_active = False
+            self._collection_probe_inflight.clear()
+            if self._pools_shutdown:
+                self._view_pool = ThreadPoolExecutor(
+                    max_workers=2, thread_name_prefix='aura-views')
+                self._bg_pool = ThreadPoolExecutor(
+                    max_workers=1, thread_name_prefix='aura-bg')
+                self._pools_shutdown = False
+            with self._pending_appends_lock:
+                self._pending_appends = {}
         # Lift the Home boot veil (skin-patches/patch_home_boot_veil.py):
         # Aura now owns the screen so the loading screen can fade out.
         try:
@@ -497,11 +515,28 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura: init error: {}'.format(e), xbmc.LOGERROR)
 
     def close(self):
-        # Arm _closing BEFORE the native teardown: worker render tails
-        # check it under _ui_lock and bail rather than mutating controls
-        # that are being freed (stale-pointer half of the crash class).
-        with self._ui_lock:
-            self._closing = True
+        # Arm _closing BEFORE taking the lock (a boolean write is atomic):
+        # workers bail at their next check even while a render tail still
+        # holds the lock. The lock itself is taken with a timeout -- a
+        # blocking acquire here could deadlock against a native GUI lock
+        # Kodi may hold around this callback -- and teardown proceeds
+        # regardless, since the flag alone neutralizes every worker.
+        self._closing = True
+        if self._ui_lock.acquire(timeout=0.5):
+            try:
+                self._view_load_gen += 1
+                # Executor threads are non-daemon: a queued WAN fetch
+                # would otherwise delay interpreter shutdown. Queued
+                # jobs are cancelled; running ones die at their next
+                # _closing/gen check.
+                self._view_pool.shutdown(wait=False, cancel_futures=True)
+                self._bg_pool.shutdown(wait=False, cancel_futures=True)
+                self._pools_shutdown = True
+            finally:
+                self._ui_lock.release()
+        else:
+            xbmc.log('Akasha Aura: close() proceeded without the UI lock '
+                     '(contention timeout)', xbmc.LOGWARNING)
         try:
             super().close()
         except AttributeError:  # test stubs / unusual bases
@@ -2527,7 +2562,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._adopt_playlists([])
             self._order_and_pin_sections()
             self._populate_sidebar()
-            self._view_pool.submit(
+            self._submit_bg(
                 lambda: self._revalidate_boot_sections(sections_key))
         else:
             if connector:
@@ -2573,10 +2608,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             else:
                 self._divert_playlists = []
 
-            self._cache.set(sections_key, [
-                s for s in self._divert_sections
-                if s.get('key') != 'playlists'],
-                BOOT_CACHE_TTL_SECONDS)
+            # A sqlite writer can wait on busy_timeout under contention --
+            # keep even this single insert off the boot path.
+            raw_sections = [s for s in self._divert_sections
+                            if s.get('key') != 'playlists']
+            self._submit_bg(
+                lambda: self._cache.set(
+                    sections_key, raw_sections, BOOT_CACHE_TTL_SECONDS))
             self._order_and_pin_sections()
             self._populate_sidebar()
 
@@ -2613,7 +2651,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             def arm_probes():
                 self._warm_probe_timer = None
                 if not self._closing:
-                    self._view_pool.submit(warm_probes)
+                    self._submit_bg(warm_probes)
 
             self._warm_probe_timer = threading.Timer(3.0, arm_probes)
             self._warm_probe_timer.daemon = True
@@ -2931,7 +2969,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 if active is not None and active.get('key') == key:
                     self._apply_collections_tab(active)
 
-        self._view_pool.submit(probe)
+        self._submit_bg(probe)
+
+    def _submit_bg(self, fn):
+        """Queue a background chore. Silent no-op once the pool is down:
+        a stray Timer or late callback firing during teardown must not
+        raise RuntimeError('cannot schedule new futures')."""
+        if self._pools_shutdown:
+            return
+        try:
+            self._bg_pool.submit(fn)
+        except RuntimeError:
+            pass
 
     def _load_divert_section_items(self, section):
         # page_size/prefetch_margin=50: only the visible portion of the grid

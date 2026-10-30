@@ -40,7 +40,18 @@ def _acquire(window):
     lock = getattr(window, '_ui_lock', None)
     if lock is None or not hasattr(lock, 'acquire'):
         return None
-    return lock if lock.acquire(timeout=_LOCK_TIMEOUT_SECONDS) else False
+    if lock.acquire(timeout=_LOCK_TIMEOUT_SECONDS):
+        return lock
+    # Contention metric: a timeout here means a worker's critical section
+    # ran longer than the input waited -- if this fires often the
+    # sections are too long, not the timeout too short.
+    try:
+        import xbmc
+        xbmc.log('Akasha Aura: ui lock busy >{}ms, guarded call degraded'
+                 .format(int(_LOCK_TIMEOUT_SECONDS * 1000)), xbmc.LOGWARNING)
+    except Exception:
+        pass
+    return False
 
 
 def selpos(window, control_id):
