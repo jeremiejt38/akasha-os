@@ -1954,3 +1954,8 @@ msgstr "Se déconnecter"
 msgctxt "#33638"
 msgid "Delete Account"
 msgstr "Supprimer le compte"
+
+# En direct
+msgctxt "#33639"
+msgid "Live"
+msgstr "En direct"

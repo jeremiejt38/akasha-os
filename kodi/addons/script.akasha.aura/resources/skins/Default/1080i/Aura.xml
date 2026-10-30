@@ -1501,7 +1501,19 @@
                         <aspectratio>scale</aspectratio>
                         <fadetime>150</fadetime>
                         <texture background="true">$INFO[ListItem.Art(poster)]</texture>
-                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + String.IsEmpty(ListItem.Property(IsChannel))</visible>
+                    </control>
+                    <!-- FAST channel logos are wide banners: keep their
+                         aspect (inset 16px) instead of scale-cropping. -->
+                    <control type="image">
+                        <left>28</left>
+                        <top>46</top>
+                        <width>208</width>
+                        <height>328</height>
+                        <aspectratio align="center">keep</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.IsEmpty(ListItem.Property(IsChannel))</visible>
                     </control>
                     <control type="image">
                         <left>12</left>
@@ -1591,7 +1603,18 @@
                         <aspectratio>scale</aspectratio>
                         <fadetime>150</fadetime>
                         <texture background="true">$INFO[ListItem.Art(poster)]</texture>
-                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + String.IsEmpty(ListItem.Property(IsChannel))</visible>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="image">
+                        <left>28</left>
+                        <top>46</top>
+                        <width>208</width>
+                        <height>328</height>
+                        <aspectratio align="center">keep</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.IsEmpty(ListItem.Property(IsChannel))</visible>
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="image">

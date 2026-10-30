@@ -210,6 +210,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.client = None
+        # FAST-channel EPG always queries epg.provider.plex.tv -- the
+        # connector client cannot proxy it, so the main window hands the
+        # Plex client along separately (see _open_detail).
+        self.epg_client = None
         self.item = {}
         self.watched = False
         self.mode = 'item'          # 'item' | 'show' | 'season'
@@ -232,6 +236,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._activity_color3 = ''
         self._feed_open = False
         self._next_episode = None
+        self._epg = None            # {'now','next','progress'} for channels
         self._hero_episode = None     # focused episode painted as hero (season mode)
         self._action_top = 564      # action row y (below cards in season mode)
         self._badge_top = 672       # media pills y (director line in season)
@@ -278,8 +283,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _bg_start(self, key, fn_name, *args, **kwargs):
         """Fire one independent client call on a daemon thread; _bg_get()
         joins it where the result is consumed. On a warm read cache the
-        call returns instantly -- on a cold one the requests overlap."""
-        fn = getattr(self.client, fn_name, None)
+        call returns instantly -- on a cold one the requests overlap.
+        `client` overrides self.client for endpoints that live on a
+        different host (the FAST EPG is on epg.provider.plex.tv, not the
+        connector)."""
+        client = kwargs.pop('client', None) or self.client
+        fn = getattr(client, fn_name, None)
         if fn is None:
             return
         done = threading.Event()
@@ -361,6 +370,16 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 # just before the badge block. Skipped when the caller
                 # already passed a full record (nothing to hydrate).
                 self._bg_start('meta', 'metadata_item', rk)
+
+        # FAST channel: pull now/next from the Plex EPG grid (one
+        # request -- the endpoint has no bulk mode). Joined here so the
+        # hero paints 'EN DIRECT · <programme> · HH:MM' in a single pass.
+        self._epg = None
+        if (item.get('type') == 'channel' and item.get('grid_key')
+                and getattr(self, 'epg_client', None)):
+            self._bg_start('epg', 'channel_epg', item['grid_key'],
+                           client=self.epg_client)
+            self._epg = self._bg_get('epg')
 
         # Thin items get hydrated by the 'meta' fetch started above:
         # merge the fields the full record fills in (cast thumbs, page
@@ -769,6 +788,19 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # items get Plex's amber "Releasing Oct 29" in place of year/air.
         parts = []
         unreleased = _unreleased_label(item)
+        # FAST channel hero: 'EN DIRECT · <programme> · HH:MM–HH:MM',
+        # the live tag rendered red like Plex's live badge.
+        epg = (getattr(self, '_epg', None) or {}) \
+            if item.get('type') == 'channel' else {}
+        live_tag = ''
+        if epg.get('now'):
+            live_tag = i18n.tr(33639).upper()
+            parts.append(live_tag)
+            if epg['now'].get('title'):
+                parts.append(epg['now']['title'])
+            span = _fmt_air_span(epg['now'])
+            if span:
+                parts.append(span)
         if item.get('type') == 'episode':
             se = _season_episode_label(item)
             if se:
@@ -791,7 +823,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             parts.append(', '.join(item['genres'][:2]))
         meta_text = '    '.join(parts)
         meta_display = meta_text
-        if unreleased:
+        if live_tag:
+            # Red 'EN DIRECT' tag like Plex's live badge; meta_text stays
+            # plain so the rating-box measure below ignores the markup.
+            meta_display = meta_text.replace(
+                live_tag,
+                '[COLOR FFE5383B]{}[/COLOR]'.format(live_tag), 1)
+        elif unreleased:
             # Keep meta_text plain for text_width() below; the amber wrap
             # is display-only or the rating chip would be pushed right.
             meta_display = meta_text.replace(
@@ -823,6 +861,10 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
         # Synopsis + director
         summary = item.get('summary') or ''
+        # On a live channel the channel-level blurb (often truncated in
+        # the lineup feed) gives way to the airing programme's synopsis.
+        if item.get('type') == 'channel' and epg.get('now'):
+            summary = epg['now'].get('summary') or summary
         # The synopsis box holds exactly 3 lines of font_aura_plot in
         # 800px -- measure-trim to fill them (~1950px PIL * ~1.2 Kodi
         # width factor = ~2.9 rendered lines) so no overflow fades the
@@ -843,7 +885,17 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
         director = ''
-        if item.get('directors'):
+        if item.get('type') == 'channel' and epg.get('next'):
+            # Plex's live pages lead with the upcoming programme: the
+            # director slot carries 'À suivre · <titre> · HH:MM'.
+            nxt = epg['next']
+            director = i18n.tr(33561)
+            if nxt.get('title'):
+                director += '  \u00b7  ' + nxt['title']
+            if nxt.get('begins_at'):
+                director += '  \u00b7  ' + time.strftime(
+                    '%H:%M', time.localtime(nxt['begins_at']))
+        elif item.get('directors'):
             director = i18n.tr(33117).format(', '.join(item['directors'][:2]))
         elif item.get('type') == 'episode' and item.get('show_title') \
                 and not item.get('logo_url'):
@@ -1195,7 +1247,9 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 if mode == self.mode or (mode == 'item' and
                                          self.mode == 'item'):
                     right_id = (
-                        RESTART_BUTTON_ID
+                        MORE_BUTTON_ID
+                        if self.item.get('type') == 'channel'
+                        else RESTART_BUTTON_ID
                         if self.getProperty('AuraDetailRestart')
                         else WATCHLIST_BUTTON_ID)
                     # The activity row sits between the action row and
@@ -1314,10 +1368,17 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         # cloud (Discover) page the bookmark circle folds into the
         # 'Add to Watchlist' pill like official-live/56.
         cloud = bool(self.item.get('cloud'))
-        order = ([WATCH_BUTTON_ID]
-                 + ([RESTART_BUTTON_ID] if restart else [])
-                 + ([LIST_BUTTON_ID] if cloud else [WATCHLIST_BUTTON_ID])
-                 + [RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID])
+        channel = self.item.get('type') == 'channel'
+        if channel:
+            # A live channel only plays: watchlist/rate/watched/restart
+            # have no meaning on an unbounded stream (and their Plex
+            # calls would 404), so the row keeps Regarder + More only.
+            order = [WATCH_BUTTON_ID, MORE_BUTTON_ID]
+        else:
+            order = ([WATCH_BUTTON_ID]
+                     + ([RESTART_BUTTON_ID] if restart else [])
+                     + ([LIST_BUTTON_ID] if cloud else [WATCHLIST_BUTTON_ID])
+                     + [RATE_BUTTON_ID, WATCHED_BUTTON_ID, MORE_BUTTON_ID])
         for cid, vis in ((WATCHLIST_BUTTON_ID, not cloud),
                          (LIST_BUTTON_ID, cloud)):
             for cid2 in (cid,) + ACTION_ICON_OVERLAYS.get(cid, ()):
@@ -1333,6 +1394,40 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self.getControl(cid).setVisible(False)
             except RuntimeError:
                 pass
+        # The window instance is reused: on a channel page hide every
+        # dead action a previous render may have left visible, and
+        # restore them on normal pages (Python's setVisible is a
+        # forced-hide that survives the skin's own focus conditions).
+        # RESTART/EXTRAS/LIST stay skin-driven -- their property
+        # conditions already hide them on a channel, and Python never
+        # re-shows them, so touching them would wedge them forever.
+        for cid in (RATE_BUTTON_ID, WATCHED_BUTTON_ID):
+            for cid2 in (cid,) + ACTION_ICON_OVERLAYS.get(cid, ()):
+                try:
+                    self.getControl(cid2).setVisible(not channel)
+                except RuntimeError:
+                    pass
+        if channel:
+            # Watchlist/List buttons+icons get re-shown by the cloud
+            # block above on the next normal render -- hide only.
+            for cid in (WATCHLIST_BUTTON_ID, LIST_BUTTON_ID):
+                for cid2 in (cid,) + ACTION_ICON_OVERLAYS.get(cid, ()):
+                    try:
+                        self.getControl(cid2).setVisible(False)
+                    except RuntimeError:
+                        pass
+            # Pill labels of hidden actions could linger at their last
+            # expanded position -- drop them all, the order loop
+            # re-paints the live ones below.
+            for cid in (WATCHLIST_BUTTON_ID, LIST_BUTTON_ID,
+                        RATE_BUTTON_ID, WATCHED_BUTTON_ID,
+                        EXTRAS_BUTTON_ID, RESTART_BUTTON_ID):
+                lb = ACTION_LABEL_OVERLAYS.get(cid)
+                if lb:
+                    try:
+                        self.getControl(lb).setVisible(False)
+                    except RuntimeError:
+                        pass
         try:
             focused = self.getFocusId()
         except RuntimeError:
@@ -2793,3 +2888,13 @@ def _fmt_duration(duration_ms):
     if hours:
         return '{}h {}m'.format(hours, minutes)
     return '{}m'.format(minutes)
+
+
+def _fmt_air_span(epg_event):
+    """'HH:MM–HH:MM' local time range for one EPG event (unix stamps)."""
+    begin, end = epg_event.get('begins_at'), epg_event.get('ends_at')
+    if not begin or not end:
+        return ''
+    return '{}\u2013{}'.format(
+        time.strftime('%H:%M', time.localtime(begin)),
+        time.strftime('%H:%M', time.localtime(end)))

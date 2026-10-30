@@ -516,6 +516,7 @@ STRINGS = {
             'Review & Discussion Language Settings'),
     33637: ('Se déconnecter', 'Sign Out'),
     33638: ('Supprimer le compte', 'Delete Account'),
+    33639: ('En direct', 'Live'),
 }
 
 MONTH_ABBRS = {

@@ -363,6 +363,7 @@ class PlexClient:
                 'type': 'channel',
                 'title': raw.get('title') or '',
                 'channel_id': raw.get('id'),
+                'grid_key': raw.get('gridKey') or '',
                 'summary': raw.get('summary') or '',
                 'thumb_url': raw.get('thumb') or raw.get('coverPoster') or '',
                 'fanart_url': raw.get('art') or '',
@@ -370,6 +371,69 @@ class PlexClient:
                 '?X-Plex-Token=' + self.token if part_key else '',
             })
         return out
+
+    def channel_epg(self, grid_key):
+        """Now/next programme for one FAST channel via the EPG grid.
+
+        /grid wants a `date` plus ISO-8601 beginsAt</endsAt> bounds; each
+        event's Media[0] carries unix beginsAt/endsAt and an onAir flag.
+        Returns {'now': ev|None, 'next': ev|None, 'progress': int|None}
+        with normalized programme dicts, or None on fetch failure. Kept
+        to a ~3h forward window -- the endpoint has no bulk multi-channel
+        mode (one channelGridKey per request), so callers fetch lazily.
+        """
+        now = int(time.time())
+
+        def ts(t):
+            return time.strftime('%Y-%m-%dT%H:%M:%S.000Z', time.gmtime(t))
+
+        data = self._request(self.EPG_BASE + '/grid', {
+            'date': ts(now)[:10],
+            'beginsAt<': ts(now + 3 * 3600),
+            'endsAt>': ts(now - 600),
+            'channelGridKey': grid_key,
+        })
+        # Each Metadata is a programme; its Media[] array lists EVERY
+        # airing slot for the window (channels without a real EPG get
+        # one placeholder entry with hourly Media slots). Flatten to
+        # per-slot events, then pick now/next across the timeline.
+        events = []
+        for raw in self._media_container(data).get('Metadata') or []:
+            prog = {
+                'title': (raw.get('grandparentTitle')
+                          or raw.get('title') or ''),
+                'episode_title': (raw.get('title') or ''
+                                  if raw.get('grandparentTitle') else ''),
+                'summary': raw.get('summary') or '',
+                'thumb': (raw.get('grandparentThumb')
+                          or raw.get('thumb') or ''),
+            }
+            for media in raw.get('Media') or [{}]:
+                events.append(dict(
+                    prog,
+                    begins_at=media.get('beginsAt'),
+                    ends_at=media.get('endsAt'),
+                    on_air=bool(media.get('onAir')),
+                ))
+        events.sort(key=lambda e: e.get('begins_at') or 0)
+        current = None
+        nxt = None
+        for ev in events:
+            begin = ev.get('begins_at') or 0
+            end = ev.get('ends_at') or 0
+            if begin <= now < end or (ev['on_air'] and current is None):
+                if current is None:
+                    current = ev
+            elif begin > now and nxt is None:
+                nxt = ev
+        progress = None
+        if current and current.get('begins_at') and current.get('ends_at'):
+            span = current['ends_at'] - current['begins_at']
+            if span > 0:
+                progress = max(0, min(100,
+                                      int((now - current['begins_at'])
+                                          * 100 / span)))
+        return {'now': current, 'next': nxt, 'progress': progress}
 
     def section_hubs(self, section_key, hub_count=24, per_hub=16):
         """The per-library hubs Plex shows on a library's Recommended tab."""

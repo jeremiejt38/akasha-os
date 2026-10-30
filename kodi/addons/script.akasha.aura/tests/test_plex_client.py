@@ -3,6 +3,7 @@
 import io
 import json
 import threading
+import time
 import unittest
 from unittest.mock import patch
 
@@ -805,6 +806,74 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertFalse(t1.is_alive() or t2.is_alive())
         self.assertEqual(len(calls), 1)
         self.assertEqual(results, [[], []])
+
+
+class TestChannelEpg(unittest.TestCase):
+    """channel_epg() normalises the /grid payload: each event's schedule
+    lives in Media[0] (unix beginsAt/endsAt + onAir)."""
+
+    NOW = 1_700_000_000  # fixed instant for deterministic now/next
+
+    def setUp(self):
+        self.client = plex_client.PlexClient('http://x', 'tok123')
+        self._now = patch('time.time', return_value=self.NOW)
+        self._now.start()
+        self.addCleanup(self._now.stop)
+
+    @staticmethod
+    def _grid(events):
+        return MockHTTPResponse({'MediaContainer': {'Metadata': events}})
+
+    @staticmethod
+    def _ev(title, begin, end, on_air=False, **kw):
+        media = kw.pop('media', None)
+        ev = {'title': title, 'summary': 'plot', 'Media': media or [{
+            'beginsAt': begin, 'endsAt': end, 'onAir': on_air}]}
+        ev.update(kw)
+        return ev
+
+    @patch('urllib.request.urlopen')
+    def test_now_next_and_progress(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([
+            self._ev('Earlier', self.NOW - 7200, self.NOW - 3600),
+            self._ev('On Air', self.NOW - 1800, self.NOW + 1800,
+                     on_air=True, grandparentTitle='Show'),
+            self._ev('Later', self.NOW + 1800, self.NOW + 5400),
+        ])
+        epg = self.client.channel_epg('grid-key-1')
+        self.assertEqual(epg['now']['title'], 'Show')   # grandparent wins
+        self.assertEqual(epg['now']['episode_title'], 'On Air')
+        self.assertTrue(epg['now']['on_air'])
+        self.assertEqual(epg['next']['title'], 'Later')
+        self.assertEqual(epg['progress'], 50)           # midway through
+
+    @patch('urllib.request.urlopen')
+    def test_missing_media_is_tolerated(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([
+            {'title': 'No schedule', 'summary': 'x'},   # no Media at all
+            {'title': 'Empty', 'Media': []},            # empty Media
+        ])
+        epg = self.client.channel_epg('g')
+        self.assertIsNone(epg['now'])
+        self.assertIsNone(epg['next'])
+        self.assertIsNone(epg['progress'])
+
+    @patch('urllib.request.urlopen')
+    def test_empty_metadata(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([])
+        epg = self.client.channel_epg('g')
+        self.assertEqual(epg, {'now': None, 'next': None, 'progress': None})
+
+    @patch('urllib.request.urlopen')
+    def test_grid_params_are_encoded(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([])
+        self.client.channel_epg('key-42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('epg.provider.plex.tv/grid?', url)
+        self.assertIn('channelGridKey=key-42', url)
+        self.assertIn('beginsAt%3C=', url)              # beginsAt<
+        self.assertIn('endsAt%3E=', url)                # endsAt>
+        self.assertIn('date=', url)
 
 
 if __name__ == '__main__':

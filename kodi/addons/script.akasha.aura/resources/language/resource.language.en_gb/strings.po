@@ -1954,3 +1954,8 @@ msgstr ""
 msgctxt "#33638"
 msgid "Delete Account"
 msgstr ""
+
+# En direct
+msgctxt "#33639"
+msgid "Live"
+msgstr ""
