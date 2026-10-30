@@ -245,6 +245,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self._active_season = 0     # 0 = "Show" overview tab
         self._row_pos = {}          # last absolute row positions (wrap guard)
         self._pending_season_index = None  # season card entry point
+        self._season_pending = None   # preferred season, applied on first focus
         self._restore_episode_pos = None   # episode pos to restore on Back
         # Plex stacks sections under the content row: Cast & Crew,
         # Trailers & Extras, Related titles. Kodi windows can't scroll,
@@ -642,13 +643,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             if self.mode == 'show' and getattr(self, 'land_on_strip', False):
                 # Back from playback: Plex drops focus on the 'Show' tab
                 # rather than the Resume pill (44-after-back).
-                pos = self._preferred_season_pos()
-                self.getControl(SEASONS_LIST_ID).selectItem(pos)
+                self._season_pending = self._preferred_season_pos()
                 self.setFocus(self.getControl(SEASON_STRIP_ID))
             elif self.mode == 'show':
-                pos = self._preferred_season_pos()
-                lst = self.getControl(SEASONS_LIST_ID)
-                lst.selectItem(pos)
+                # Plex leaves the row flush-left (S1 first): pre-selecting
+                # the On Deck season would scroll the row before the user
+                # ever reaches it. The preferred card is applied when the
+                # row gains focus instead (official-live/32).
+                self._season_pending = self._preferred_season_pos()
                 self.setFocus(self.getControl(WATCH_BUTTON_ID))
             elif self.mode == 'season':
                 pos = (self._restore_episode_pos
@@ -1647,6 +1649,15 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 'related{}'.format(RELATED_ROWS.index(controlID)))
         elif controlID in (SEASONS_LIST_ID, EPISODES_LIST_ID):
             self._set_section('content')
+        if controlID == SEASONS_LIST_ID and self._season_pending is not None:
+            # First entry into the seasons row: land on the season Plex
+            # would highlight (On Deck's), scrolling only now.
+            try:
+                self.getControl(SEASONS_LIST_ID).selectItem(
+                    self._season_pending)
+            except RuntimeError:
+                pass
+            self._season_pending = None
         if controlID == EPISODES_LIST_ID and self.mode == 'season':
             pos = gui_guard.selpos(self, EPISODES_LIST_ID)
             self._set_hero_episode(pos)
