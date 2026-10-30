@@ -20,6 +20,7 @@ import urllib.parse
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 import aura_menu
 import i18n
 
@@ -325,10 +326,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # no control is touched while the window is being torn down
         # (the stale native-pointer half of the crash class).
         self._closing = False
-        # Mutable stop flag handed to the live-playlist pump thread;
-        # replaced (not cleared) on each new tune so an old pump always
-        # exits even if the player is already playing something new.
-        self._live_pump_stop = [False]
+        # Live-TV loopback proxy state: the current variant URL plus a
+        # short-TTL / in-flight-deduped cache of the rewritten playlist
+        # the proxy serves on each demuxer poll.
+        self._live_variant = None
+        self._live_proxy_port = 0
+        self._live_pl_lock = threading.Lock()
+        self._live_pl_fetch_lock = threading.Lock()
+        self._live_pl_text = None
+        self._live_pl_at = 0.0
         # View-load jobs share a bounded pool: two WAN fetches in flight
         # at most, so a burst of tab clicks cannot stack unbounded
         # threads on the shared Plex/Unraid path. Each job re-checks the
@@ -635,6 +641,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         (unpinned, removed source...) or no sections loaded at all.
         """
         if self._divert_view == 'library' and self._divert_last_library_key:
+            if self._divert_last_library_key == 'livetv':
+                # The pseudo-section is only appended while the user is
+                # on Live TV -- a plain index lookup misses it after the
+                # sections list is repopulated and the stale index then
+                # resolves to a real library (observed: returning from a
+                # live tune landed on the Films grid).
+                self._open_live_tv()
+                return
             index = next(
                 (i for i, s in enumerate(self._divert_sections)
                  if s['key'] == self._divert_last_library_key), None)
@@ -5032,9 +5046,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pass
         self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
 
-    # ----------------------------------------------------- live tv pump
+    # --------------------------------------------------- live tv proxy
 
-    _LIVE_PLAYLIST = '/tmp/aura_live.m3u8'
+    # getAddonInfo('profile') returns a special:// path, which plain
+    # open()/os.path cannot touch -- translate it to the real FS path.
+    _LIVE_NOHW_FLAG = os.path.join(
+        xbmcvfs.translatePath(
+            xbmcaddon.Addon().getAddonInfo('profile')),
+        'live_nohw.flag')
 
     def _live_fetch(self, url):
         import urllib.request
@@ -5071,61 +5090,105 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 best_bw = int(bw.group(1)) if bw else 0
         return best_url
 
-    def _live_rewrite(self, variant_url, dest):
-        """Fetch `variant_url` and write it to `dest` with every
-        SSAI-beacon segment line replaced by its decoded `redirect_url`
-        target (a plain .ts). inputstream.adaptive mis-detects the
-        extensionless beacon paths and ffmpeg's hls demuxer stalls on
-        them; both play the rewritten list fine."""
-        text = self._live_fetch(variant_url)
+    def _live_rewrite_text(self, text, base_url):
+        """Return the playlist with relative segment paths resolved and
+        every SSAI-beacon URL replaced by its decoded `redirect_url`
+        target (a plain .ts). Harmless for already-clean playlists."""
         out = []
         for line in text.splitlines():
             s = line.strip()
             if not s or s.startswith('#'):
                 out.append(line)
                 continue
-            s = urllib.parse.urljoin(variant_url, s)
+            s = urllib.parse.urljoin(base_url, s)
             if 'redirect_url=' in s:
                 qs = urllib.parse.parse_qs(
                     urllib.parse.urlparse(s).query)
                 if qs.get('redirect_url'):
                     s = qs['redirect_url'][0]
             out.append(s)
-        tmp = dest + '.tmp'
-        with open(tmp, 'w') as f:
-            f.write('\n'.join(out) + '\n')
-        os.replace(tmp, dest)
+        return '\n'.join(out) + '\n'
 
-    def _live_pump_run(self, variant_url, dest, flag):
-        """Refresh the rewritten playlist while playback runs: ffmpeg's
-        hls demuxer re-reads the file every target duration, so a live
-        rolling rewrite keeps the stream alive indefinitely. Bounded:
-        exits on playback stop, script abort, or 4 fetch failures."""
-        fails = 0
-        player = xbmc.Player()
-        monitor = xbmc.Monitor()
-        while not flag[0] and not monitor.abortRequested():
-            time.sleep(3)
-            if not player.isPlaying():
-                break
+    def _live_get_playlist(self):
+        """Fetch + rewrite the current variant for the loopback proxy.
+        Demuxer polls arrive per target duration (~6-9 s); a 2 s TTL and
+        a fetch lock deduplicate bursts and keep the shared Plex route
+        to one request at a time. A stale snapshot is served instead of
+        blocking on an in-flight WAN refresh: the demuxer re-polls in a
+        few seconds anyway, and ISA's close path must not be held up by
+        a slow upstream (observed ~18 s player shutdown otherwise)."""
+        with self._live_pl_lock:
+            if (self._live_pl_text is not None
+                    and time.time() - self._live_pl_at < 2):
+                return self._live_pl_text
+            stale = self._live_pl_text
+        if self._live_pl_fetch_lock.acquire(blocking=False):
             try:
-                self._live_rewrite(variant_url, dest)
-                fails = 0
-            except Exception as e:
-                fails += 1
-                if fails >= 4:
-                    xbmc.log(
-                        'Akasha Aura: live pump stopped after '
-                        '{} fetch failures: {}'.format(fails, e),
-                        xbmc.LOGWARNING)
-                    break
+                text = self._live_rewrite_text(
+                    self._live_fetch(self._live_variant),
+                    self._live_variant)
+                with self._live_pl_lock:
+                    self._live_pl_text, self._live_pl_at = \
+                        text, time.time()
+                return text
+            finally:
+                self._live_pl_fetch_lock.release()
+        if stale is not None:
+            return stale
+        # First fetch ever: nothing to serve yet, wait for the in-flight
+        # request to land one; an empty result still errors out as 502
+        # so the demuxer retries instead of caching a broken playlist.
+        with self._live_pl_fetch_lock:
+            pass
+        with self._live_pl_lock:
+            if not self._live_pl_text:
+                raise RuntimeError('live playlist unavailable')
+            return self._live_pl_text
+
+    def _live_proxy_start(self):
+        """Lazily start the loopback HTTP server that hands Kodi a
+        freshly rewritten variant playlist on every poll -- required
+        because ffmpeg treats file:// playlists as static (the static
+        file starves after its listed segments) while http:// playlists
+        without EXT-X-ENDLIST are reloaded as live."""
+        if self._live_proxy_port:
+            return
+        from http.server import BaseHTTPRequestHandler, \
+            ThreadingHTTPServer
+        owner = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path.split('?')[0] != '/live.m3u8':
+                    self.send_error(404)
+                    return
+                try:
+                    data = owner._live_get_playlist().encode('utf-8')
+                    self.send_response(200)
+                    self.send_header(
+                        'Content-Type', 'application/vnd.apple.mpegurl')
+                    self.send_header('Content-Length', str(len(data)))
+                    self.end_headers()
+                    self.wfile.write(data)
+                except Exception:
+                    self.send_error(502)
+
+            def log_message(self, *args):
+                pass
+
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        server.daemon_threads = True
+        self._live_proxy_port = server.server_address[1]
+        threading.Thread(
+            target=server.serve_forever, kwargs={'poll_interval': 1},
+            daemon=True).start()
 
     def _play_channel(self, item):
-        """Linear Plex channel: tune the HLS URL. FAST playouts that use
-        Amagi SSAI wrap segments in '/beacon/...&redirect_url=' URLs that
-        both inputstream.adaptive and ffmpeg reject; a pump thread
-        rewrites the rolling variant playlist to direct .ts URLs so any
-        channel plays through the stock ffmpeg path."""
+        """Linear Plex channel: tune the HLS URL through a loopback
+        proxy that serves the freshly fetched variant on every demuxer
+        poll and rewrites SSAI '/beacon/...&redirect_url=' segments to
+        plain .ts links that both inputstream.adaptive and ffmpeg
+        mishandle upstream."""
         url = item.get('tune_url')
         if not url:
             xbmcgui.Dialog().notification(
@@ -5137,9 +5200,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             variant_url = self._live_pick_variant(url)
             if not variant_url:
                 raise ValueError('no playable variant in master')
-            # First fill is synchronous so the file exists (and already
-            # lists segments) when the player opens it.
-            self._live_rewrite(variant_url, self._LIVE_PLAYLIST)
+            self._live_variant = variant_url
+            # Warm the cache synchronously so the first demuxer poll is
+            # served from memory instead of stalling on a WAN round-trip.
+            self._live_get_playlist()
+            self._live_proxy_start()
         except Exception as e:
             xbmc.executebuiltin('Dialog.Close(busydialognocancel)')
             xbmc.log('Akasha Aura: live tune failed: {}'.format(e),
@@ -5148,29 +5213,52 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'Akasha Aura', i18n.tr(33075),
                 xbmcgui.NOTIFICATION_INFO, 2000)
             return
-        # Kill any pump from a previous tune before starting ours.
-        self._live_pump_stop[0] = True
-        flag = [False]
-        self._live_pump_stop = flag
-        threading.Thread(
-            target=self._live_pump_run,
-            args=(variant_url, self._LIVE_PLAYLIST, flag),
-            daemon=True).start()
-        li = xbmcgui.ListItem(item.get('title') or '')
-        # setPath is what the player actually opens when a ListItem is
-        # handed over -- for a local file the `item` argument alone is
-        # ignored and the tune silently no-ops.
-        li.setPath(self._LIVE_PLAYLIST)
-        li.setMimeType('application/vnd.apple.mpegurl')
         self.playback_started = True
         self._playback_item = item
         self.close()
+        # FAST channel streams (SSAI ad-slate transitions, parameter
+        # changes mid-programme) wedge the bcm2835 V4L2 decoder: buffers
+        # leak on stop_streaming, component creation fails with -62 and
+        # in the worst case the whole GPU path freezes. Decode live TV
+        # in software instead -- the supervisor restores HW decode when
+        # playback ends (and on every UI re-show, covering crashes).
+        home = xbmcgui.Window(10000)
+        home.setProperty('AuraLiveNoHw', '1')
         try:
-            xbmc.Player().play(self._LIVE_PLAYLIST, li)
-            xbmc.log('Akasha Aura: live play() returned', xbmc.LOGINFO)
+            open(self._LIVE_NOHW_FLAG, 'w').close()
         except Exception as e:
-            xbmc.log('Akasha Aura: live play() raised: {!r}'.format(e),
+            xbmc.log('Akasha Aura: live_nohw flag write failed: {}'
+                     .format(e), xbmc.LOGWARNING)
+        xbmc.executeJSONRPC(json.dumps({
+            'jsonrpc': '2.0', 'id': 1,
+            'method': 'Settings.SetSettingValue',
+            'params': {'setting': 'videoplayer.useprimedecoder',
+                       'value': False}}))
+        # A media-play request posted while the modal busy dialog is
+        # topmost is swallowed -- close it first (messenger FIFO keeps
+        # the order). play() only reaches the player when the ListItem
+        # carries inputstream.adaptive properties; without them it is a
+        # silent no-op in this addon context, which is also why the
+        # ffmpeg path through PlayMedia was ruled out -- it stalls the
+        # V4L2 decoder on SSAI discontinuities.
+        xbmc.executebuiltin('Dialog.Close(busydialognocancel)')
+        play_url = 'http://127.0.0.1:{}/live.m3u8'.format(
+            self._live_proxy_port)
+        try:
+            xbmcaddon.Addon('inputstream.adaptive')
+        except Exception:
+            xbmc.executebuiltin('PlayMedia("{}")'.format(play_url))
+            xbmc.log('Akasha Aura: live tune via PlayMedia (no ISA)',
                      xbmc.LOGWARNING)
+            return
+        li = xbmcgui.ListItem(item.get('title') or '')
+        li.setPath(play_url)
+        li.setMimeType('application/vnd.apple.mpegurl')
+        li.setProperty('inputstream', 'inputstream.adaptive')
+        li.setProperty('inputstream.adaptive.live', 'true')
+        xbmc.Player().play(play_url, li)
+        xbmc.log('Akasha Aura: live tune issued (proxy + ISA)',
+                 xbmc.LOGINFO)
 
     def _manage_libraries(self):
         """Show a dialog to pin/unpin and reorder every library section."""

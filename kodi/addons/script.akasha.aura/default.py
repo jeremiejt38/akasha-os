@@ -17,6 +17,7 @@ evolve independently from this thin entry point — same pattern as
 script.akasha.ambient (see docs/ambient-mode/decisions.md) and
 docs/aura/decisions.md.
 """
+import json
 import os
 import sys
 import threading
@@ -25,6 +26,7 @@ import time
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 
 ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
 sys.path.insert(0, os.path.join(ADDON_PATH, 'resources', 'lib'))
@@ -126,6 +128,76 @@ def _player_alive():
                 or xbmcgui.getCurrentWindowId() == 12005)  # video fullscreen
     except Exception:
         return False
+
+
+# getAddonInfo('profile') returns a special:// path, which plain
+# os.path.exists()/open() cannot touch -- translate it to the real
+# FS path once at module level.
+_LIVE_NOHW_FLAG = os.path.join(
+    xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('profile')),
+    'live_nohw.flag')
+
+
+def _restore_hw_decode():
+    """Live TV tunes force software decode (the bcm2835 V4L2 decoder
+    wedges on FAST-channel discontinuities); turn hardware decoding
+    back on as soon as Aura is on screen again. Flag-scoped so only a
+    toggle Aura itself issued is ever reverted. The on-disk flag
+    survives a Kodi restart, when the persisted setting could
+    otherwise be left off with no window property to remember it."""
+    home = xbmcgui.Window(10000)
+    flagged = bool(home.getProperty('AuraLiveNoHw')) \
+        or os.path.exists(_LIVE_NOHW_FLAG)
+    if not flagged:
+        return
+    home.clearProperty('AuraLiveNoHw')
+    try:
+        os.remove(_LIVE_NOHW_FLAG)
+    except OSError:
+        pass
+    res = xbmc.executeJSONRPC(json.dumps({
+        'jsonrpc': '2.0', 'id': 1,
+        'method': 'Settings.SetSettingValue',
+        'params': {'setting': 'videoplayer.useprimedecoder',
+                   'value': True}}))
+    xbmc.log('Akasha Aura: HW decode restored after live tune '
+             '({})'.format(res), xbmc.LOGINFO)
+
+
+def _watch_stray_video(stop):
+    """Stop any video still playing while Aura's UI is on screen.
+
+    Kodi lets playback survive fullscreen exits that bypass the keymap
+    (JSON-RPC/CEC actions, dialog-scoped Back, a stalled re-open), so
+    the soundtrack keeps running behind menus and the loading veil.
+    Aura owns the whole UI: a video that is playing while window 12005
+    (video fullscreen) is not the active window is by definition stray
+    and is stopped. Real fullscreen playback keeps 12005 active and is
+    never touched; a fresh external start activates 12005 as its first
+    frame lands, well inside the confirmation delay, so casting is not
+    killed either. Audio-only music is untouched on purpose: Plex keeps
+    a background mini-player while browsing."""
+    stray = 0
+    while not stop.is_set():
+        try:
+            # Exempt the busy dialog: a live stream negotiates for
+            # several seconds before the fullscreen window activates,
+            # and isPlayingVideo() can latch a beat before 12005 does.
+            busy = xbmcgui.getCurrentWindowDialogId() in (10138, 10160)
+            if (xbmc.Player().isPlayingVideo()
+                    and xbmcgui.getCurrentWindowId() != 12005
+                    and not busy):
+                stray += 1
+                if stray >= 4:
+                    xbmc.log('Akasha Aura: stopping background video -- '
+                             'Aura UI is on screen', xbmc.LOGWARNING)
+                    xbmc.Player().stop()
+                    stray = 0
+            else:
+                stray = 0
+        except Exception:
+            stray = 0
+        stop.wait(0.5)
 
 
 def _watch_modal_activation(window):
@@ -251,7 +323,16 @@ if __name__ == '__main__':
             # Home was pressed again. Supervise the window and reopen it
             # whenever it closes outside of a playback handoff.
             monitor = xbmc.Monitor()
+            # Runs for the whole supervision lifetime, not just while the
+            # modal is up: a video escaped from fullscreen during the
+            # wait-for-end phase leaves sound behind the veiled Home --
+            # exactly the "audio in a menu" case this guard exists for.
+            stray_stop = threading.Event()
+            threading.Thread(
+                target=_watch_stray_video, args=(stray_stop,),
+                daemon=True).start()
             while not monitor.abortRequested():
+                _restore_hw_decode()
                 _run_window()
                 # Playback started from Aura: the window closed itself
                 # because a modal dialog would otherwise cover the
@@ -387,6 +468,11 @@ if __name__ == '__main__':
                         # mode and keep supervising the new item.
                         continue
                     window.playback_started = False
+                    # Restore HW decode the moment the live stream ends:
+                    # waiting for the next outer-loop pass would leave
+                    # software decoding on for the whole Aura session and
+                    # the next regular (non-live) video would pay for it.
+                    _restore_hw_decode()
                     _run_window()
                 # Playback session over: commit the last stream selection
                 # (B15), then the final state=stopped report commits the
@@ -411,6 +497,10 @@ if __name__ == '__main__':
             except Exception:
                 pass
             heartbeat_stop.set()
+            try:
+                stray_stop.set()
+            except Exception:
+                pass
             # Shutdown-hang diagnostic: the invoker's "waiting on thread
             # <ident>" line names no Python name, so pair it with this
             # dump -- the still-alive thread's ident identifies the code
