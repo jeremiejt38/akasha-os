@@ -8,10 +8,11 @@ import sys
 import types
 import unittest
 
-for mod in ('xbmc', 'xbmcgui', 'xbmcaddon'):
+for mod in ('xbmc', 'xbmcgui', 'xbmcaddon', 'xbmcvfs'):
     if mod not in sys.modules:
         sys.modules[mod] = types.ModuleType(mod)
 sys.modules['xbmcgui'].WindowXMLDialog = object
+sys.modules['xbmcvfs'].translatePath = lambda p: p
 
 import aura_detail  # noqa: E402
 

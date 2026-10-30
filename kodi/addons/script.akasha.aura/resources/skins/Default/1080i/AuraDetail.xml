@@ -39,13 +39,15 @@
             <fadetime>200</fadetime>
             <texture background="true"></texture>
         </control>
-        <!-- Dim + left gradient over the backdrop -->
+        <!-- Dim + left gradient over the backdrop (fallback only; the
+             baked field veil 7004 replaces it when a palette exists) -->
         <control type="image">
             <left>0</left>
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
             <texture>scrim-hero.png</texture>
+            <visible>String.IsEmpty(Window.Property(AuraDetailVeil))</visible>
         </control>
         <control type="image" id="7002">
             <left>0</left>
@@ -53,6 +55,7 @@
             <width>1920</width>
             <height>1080</height>
             <texture colordiffuse="5C1A1310">white.png</texture>
+            <visible>String.IsEmpty(Window.Property(AuraDetailVeil))</visible>
         </control>
         <control type="image" id="7003">
             <left>0</left>
@@ -60,6 +63,18 @@
             <width>1920</width>
             <height>460</height>
             <texture colordiffuse="FF1A1310">scrim-bottom.png</texture>
+        </control>
+        <!-- 7004: baked UltraBlurColors field veil (same model as the
+             hero's 5022: bilinear 4-corner palette under the Plex
+             scrim mask), written per-palette by field_veil. -->
+        <control type="image" id="7004">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <fadetime>200</fadetime>
+            <texture background="true">$INFO[Window.Property(AuraDetailVeil)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailVeil))</visible>
         </control>
 
         <!-- Clear logo (when available) or text title -->

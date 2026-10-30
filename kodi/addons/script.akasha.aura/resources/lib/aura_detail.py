@@ -19,8 +19,10 @@ import time
 
 import xbmc
 import xbmcgui
+import xbmcvfs
 import gui_guard
 import aura_menu
+import field_veil
 import i18n
 
 import osd_menu
@@ -416,14 +418,27 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 item.get('fanart_url') or item.get('art_url') or '', useCache=False)
         except RuntimeError:
             pass
-        # Plex tints the page field with the item's UltraBlurColors: the
-        # flat dim layer and the (now white) bottom gradient both pick up
-        # the topLeft palette color, neutral navy fallback.
+        # Plex tints the page field with the item's UltraBlurColors.
+        # The official veil is the raw 4-corner palette under a fixed
+        # scrim mask -- baked as an RGBA PNG (see field_veil). Without a
+        # palette/PIL the flat dim + bottom gradient keep the topLeft
+        # tint, neutral navy fallback.
+        veil = ''
+        try:
+            veil = field_veil.bake_field_veil(
+                xbmcvfs.translatePath(
+                    'special://profile/addon_data/script.akasha.aura/'),
+                item.get('blur_colors'))
+        except Exception as e:
+            xbmc.log('Akasha Aura Detail: field veil error: {}'.format(e),
+                     xbmc.LOGERROR)
+        _set(self, 'AuraDetailVeil', veil)
         tint = str((item.get('blur_colors') or {}).get('topLeft') or '')
         tint = tint.lstrip('#')[-6:].upper() if tint else '10131A'
         for cid, alpha in ((7002, '73'), (7003, 'FF')):
             try:
-                self.getControl(cid).setColorDiffuse(alpha + tint)
+                self.getControl(cid).setColorDiffuse(
+                    '00000000' if veil else alpha + tint)
             except (RuntimeError, AttributeError):
                 pass
         self._paint_hero(item)
