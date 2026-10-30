@@ -907,10 +907,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         if item.get('type') == 'channel' and epg.get('now'):
             summary = epg['now'].get('summary') or summary
         # The synopsis box holds exactly 3 lines of font_aura_plot in
-        # 800px -- measure-trim to fill them (~1950px PIL * ~1.2 Kodi
-        # width factor = ~2.9 rendered lines) so no overflow fades the
-        # edges; the 240-char cap stays as a no-PIL fallback.
-        summary = i18n.ellipsize(summary, 25, budget_px=1950)
+        # 800px -- measure-trim to fill them (Kodi renders Inter ~0.95x
+        # PIL here, and word-wrap fills ~90% of each line, so ~2250px
+        # PIL lands a full 3 rendered lines; verified on The Rookie's
+        # 2041px summary against official-live/44). The 240-char cap
+        # stays as a no-PIL fallback.
+        summary = i18n.ellipsize(summary, 25, budget_px=2250)
         if summary.endswith('…') and ' ' in summary:
             # Plex breaks the ellipsis on a word boundary.
             summary = summary[:-1].rsplit(' ', 1)[0].rstrip(',. ') + '…'
