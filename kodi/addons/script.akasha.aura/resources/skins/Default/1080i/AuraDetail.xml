@@ -1005,7 +1005,7 @@
             <top>658</top>
             <width>56</width>
             <height>56</height>
-            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTintMid)]">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
         </control>
         <!-- Second account avatar, overlapping the first like Plex's
@@ -1024,7 +1024,7 @@
             <top>658</top>
             <width>56</width>
             <height>56</height>
-            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTintMid)]">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
         </control>
         <!-- Initial fallback for slot 2: colored disc + letter, like
@@ -1064,7 +1064,7 @@
             <top>658</top>
             <width>56</width>
             <height>56</height>
-            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTintMid)]">cast-mask.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
         </control>
         <!-- Initial fallback for slot 3. -->
@@ -1156,7 +1156,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>182</left>
@@ -1181,7 +1181,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1227,7 +1227,7 @@
                     <top>0</top>
                     <width>512</width>
                     <height>288</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>416</left>
@@ -1286,7 +1286,7 @@
                     <top>0</top>
                     <width>512</width>
                     <height>288</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1362,7 +1362,7 @@
                     <top>0</top>
                     <width>230</width>
                     <height>230</height>
-                    <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1401,7 +1401,7 @@
                     <top>0</top>
                     <width>230</width>
                     <height>230</height>
-                    <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">cast-mask.png</texture>
                 </control>
                 <control type="image">
                     <left>23</left>
@@ -1461,7 +1461,7 @@
                     <top>0</top>
                     <width>512</width>
                     <height>288</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1500,7 +1500,7 @@
                     <top>0</top>
                     <width>512</width>
                     <height>288</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1561,7 +1561,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>182</left>
@@ -1608,7 +1608,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
@@ -1675,7 +1675,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                 </control>
                 <control type="image">
                     <left>182</left>
@@ -1722,7 +1722,7 @@
                     <top>0</top>
                     <width>240</width>
                     <height>360</height>
-                    <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">

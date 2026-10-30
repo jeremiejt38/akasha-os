@@ -29,6 +29,33 @@ def _blur_hex(value):
     return s.upper() if len(s) == 6 else ''
 
 
+def veil_color(blur, u, v):
+    """Bilinear sample of the UltraBlurColors palette field at
+    normalised position (u, v) -- same interpolation PIL applies to
+    the baked veil. Returns 'RRGGBB', or '' when the palette is
+    incomplete.
+
+    Used to tint the opaque corner-cover masks (poster-corners,
+    cast-mask) so they merge into the veil band they sit on instead of
+    showing the fixed dark colour they had when the background was
+    flat.
+    """
+    hexes = [_blur_hex((blur or {}).get(k)) for k in
+             ('topLeft', 'topRight', 'bottomLeft', 'bottomRight')]
+    if not all(hexes):
+        return ''
+    u = max(0.0, min(1.0, u))
+    v = max(0.0, min(1.0, v))
+    (tl, tr, bl, br) = (tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+                        for h in hexes)
+    out = []
+    for c in range(3):
+        top = tl[c] * (1 - u) + tr[c] * u
+        bot = bl[c] * (1 - u) + br[c] * u
+        out.append(int(round(top * (1 - v) + bot * v)))
+    return '{:02X}{:02X}{:02X}'.format(*out)
+
+
 def bake_field_veil(profile_dir, blur):
     """Bake the Plex field veil PNG for a palette; returns its path, or
     '' when the palette is incomplete or PIL is unavailable -- callers

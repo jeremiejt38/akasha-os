@@ -433,6 +433,24 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura Detail: field veil error: {}'.format(e),
                      xbmc.LOGERROR)
         _set(self, 'AuraDetailVeil', veil)
+        # The corner-cover masks (poster-corners, cast-mask) are opaque
+        # overlays meant to hide the square image beneath: they only
+        # stay invisible when tinted to whatever the page shows behind
+        # the card. On the baked veil that is the palette colour at the
+        # band the control occupies -- a fixed dark tint reads as black
+        # wedges once the background is no longer flat (0.60.x veil).
+        # Rows live around v~0.82, the activity avatars around v~0.63;
+        # both bands sit under the opaque part of the scrim mask.
+        blur = item.get('blur_colors')
+        if veil:
+            row_tint = field_veil.veil_color(blur, 0.5, 0.82)
+            mid_tint = field_veil.veil_color(blur, 0.5, 0.63)
+        else:
+            row_tint = mid_tint = ''
+        _set(self, 'AuraDetailMaskTint',
+             'FF' + row_tint if row_tint else 'FF1A1310')
+        _set(self, 'AuraDetailMaskTintMid',
+             'FF' + mid_tint if mid_tint else 'FF1A1310')
         tint = str((item.get('blur_colors') or {}).get('topLeft') or '')
         tint = tint.lstrip('#')[-6:].upper() if tint else '10131A'
         for cid, alpha in ((7002, '73'), (7003, 'FF')):
