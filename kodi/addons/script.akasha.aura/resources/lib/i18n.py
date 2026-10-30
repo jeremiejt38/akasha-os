@@ -600,16 +600,37 @@ def _measure_font(size):
     return None
 
 
+# Both helpers below are pure (same input -> same output) yet called per
+# rendered label: a 50-card page issues ~100 measurements, each a PIL
+# getbbox (~binary search for ellipsize). Memoizing on (text, size,
+# budget) collapses repeat measurements when the same titles re-render
+# (hero swap, row re-label, view revisit). Bounded so library browsing
+# cannot grow it without limit.
+_MEASURE_CACHE = {}
+_MEASURE_CACHE_MAX = 2000
+
+
+def _measure_cache_put(key, value):
+    if len(_MEASURE_CACHE) >= _MEASURE_CACHE_MAX:
+        _MEASURE_CACHE.clear()
+    _MEASURE_CACHE[key] = value
+
+
 def text_width(text, size):
     """Rendered pixel width of `text` in the skin's Inter face at `size`
     -- or None when PIL/the TTF is unavailable (tests, stripped builds)."""
     if not text:
         return 0
+    key = (text, size)
+    if key in _MEASURE_CACHE:
+        return _MEASURE_CACHE[key]
     try:
         font = _measure_font(size)
-        return font.getbbox(text)[2] if font else None
+        width = font.getbbox(text)[2] if font else None
     except Exception:
-        return None
+        width = None
+    _measure_cache_put(key, width)
+    return width
 
 
 def ellipsize(text, size, budget_px=190):
@@ -620,9 +641,13 @@ def ellipsize(text, size, budget_px=190):
     """
     if not text:
         return text
+    key = (text, size, budget_px)
+    if key in _MEASURE_CACHE:
+        return _MEASURE_CACHE[key]
     try:
         font = _measure_font(size)
         if font is None or font.getbbox(text)[2] <= budget_px:
+            _measure_cache_put(key, text)
             return text
         lo, hi = 0, len(text)
         while lo < hi:
@@ -631,7 +656,9 @@ def ellipsize(text, size, budget_px=190):
                 lo = mid
             else:
                 hi = mid - 1
-        return text[:lo].rstrip() + '…'
+        trimmed = text[:lo].rstrip() + '…'
+        _measure_cache_put(key, trimmed)
+        return trimmed
     except Exception:
         return text
 

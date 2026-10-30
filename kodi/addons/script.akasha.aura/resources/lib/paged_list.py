@@ -16,6 +16,8 @@ issuing a separate "count" request.
 No dependency on xbmc*, testable with plain `python3 -m unittest`.
 """
 
+import threading
+
 DEFAULT_PAGE_SIZE = 30
 DEFAULT_PREFETCH_MARGIN = 15
 
@@ -42,6 +44,10 @@ class PagedList:
         self.items = []
         self.exhausted = False
         self.total = None
+        # Serializes fetches and arms the async prefetch worker -- two
+        # overlapping page loads would race on `self.items` offsets.
+        self._fetch_lock = threading.Lock()
+        self._inflight = False
 
     def load_initial(self):
         """Fetch the first page. Returns the newly-loaded items."""
@@ -52,35 +58,68 @@ class PagedList:
 
         Returns the newly-loaded items (possibly empty if nothing was
         fetched, either because we're not close enough to the end yet, or
-        because the list is already exhausted).
+        because the list is already exhausted). Blocks the caller for the
+        duration of the network fetch -- GUI-driven callers should prefer
+        `prefetch_async` so input handling is never stalled by latency.
         """
-        if self.exhausted:
+        if self._inflight or self.exhausted:
             return []
         if selected_position < len(self.items) - self.prefetch_margin:
             return []
         return self._load_next_page()
 
+    def prefetch_async(self, selected_position, on_page, on_error=None):
+        """Non-blocking `maybe_load_more` for input-driven callers.
+
+        If `selected_position` is near the loaded end and no fetch is
+        already in flight, a daemon thread fetches the next page and then
+        invokes `on_page(new_items)` **on the worker thread**. The
+        callback must not touch Kodi GUI objects: callers should stash
+        the page and render it from the next input event -- the prefetch
+        margin leaves plenty of loaded items to scroll through meanwhile.
+        `on_error(exception)` is invoked instead when the fetch raises.
+        """
+        if self._inflight or self.exhausted:
+            return
+        if selected_position < len(self.items) - self.prefetch_margin:
+            return
+        self._inflight = True
+
+        def work():
+            try:
+                page = self._load_next_page()
+                if page and on_page:
+                    on_page(page)
+            except Exception as e:
+                if on_error:
+                    on_error(e)
+            finally:
+                self._inflight = False
+
+        threading.Thread(target=work, daemon=True).start()
+
     def _load_next_page(self):
-        if self.max_items is not None and len(self.items) >= self.max_items:
-            self.exhausted = True
-            return []
-        result = self.fetch_page(len(self.items), self.page_size)
-        if isinstance(result, tuple):
-            page, total = result
-        else:
-            page, total = result, None
-        page = page or []
-        if total is not None:
-            self.total = total
-        if self.max_items is not None and len(self.items) + len(page) >= self.max_items:
-            page = page[:max(0, self.max_items - len(self.items))]
-            self.exhausted = True
-        self.items.extend(page)
-        if len(page) < self.page_size:
-            self.exhausted = True
-            if self.total is None:
-                self.total = len(self.items)
-        return page
+        with self._fetch_lock:
+            if self.max_items is not None and len(self.items) >= self.max_items:
+                self.exhausted = True
+                return []
+            result = self.fetch_page(len(self.items), self.page_size)
+            if isinstance(result, tuple):
+                page, total = result
+            else:
+                page, total = result, None
+            page = page or []
+            if total is not None:
+                self.total = total
+            if self.max_items is not None and len(self.items) + len(page) >= self.max_items:
+                page = page[:max(0, self.max_items - len(self.items))]
+                self.exhausted = True
+            self.items.extend(page)
+            if len(page) < self.page_size:
+                self.exhausted = True
+                if self.total is None:
+                    self.total = len(self.items)
+            return page
 
 
 def series_dedup_key(item):

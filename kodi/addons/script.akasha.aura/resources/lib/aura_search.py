@@ -73,6 +73,13 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self._suggested = None
         self._server_name = None
         self._yield_stop = threading.Event()
+        # Search concurrency discipline: a collect can take seconds on a
+        # slow WAN path, so keystrokes debounce (~350ms settle), at most
+        # one collect runs at a time, and a burst typed during it folds
+        # into a single refetch of the latest query.
+        self._search_lock = threading.Lock()
+        self._search_inflight = False
+        self._search_pending = False
 
     def onInit(self):
         # The window is a cached singleton: a past close() leaves
@@ -221,7 +228,14 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             _set(self, 'AuraSearchEmpty', '')
             self._results = []
             self._render_recent()
-            self._launch_search(self._search_gen)
+            # Debounce: fire the fetch only once typing settles -- a
+            # per-keystroke collect stacks WAN requests on a slow path.
+            # Stale timers bail on the generation check inside
+            # _launch_search, so no explicit cancel is needed.
+            timer = threading.Timer(
+                0.35, self._launch_search, args=(self._search_gen,))
+            timer.daemon = True
+            timer.start()
         else:
             _set(self, 'AuraSearchHasQuery', '')
             # Plex fills the empty results zone with suggested content.
@@ -229,17 +243,40 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._render_results()
 
     def _launch_search(self, gen):
+        if gen != self._search_gen or self._yield_stop.is_set():
+            return
+        with self._search_lock:
+            if self._search_inflight:
+                # A collect is already running: fold this launch into a
+                # single refetch of the latest query when it finishes
+                # instead of stacking WAN requests.
+                self._search_pending = True
+                return
+            self._search_inflight = True
+
         def worker():
-            try:
-                results = self._collect_results()
-            except Exception as e:
-                xbmc.log('Akasha Aura Search: collect failed: {}'.format(
-                    e), xbmc.LOGERROR)
+            while True:
+                g = self._search_gen
+                try:
+                    results = self._collect_results()
+                except Exception as e:
+                    xbmc.log('Akasha Aura Search: collect failed: {}'.format(
+                        e), xbmc.LOGERROR)
+                    results = None
+                with self._search_lock:
+                    if self._search_pending:
+                        self._search_pending = False
+                        rerun = True
+                    else:
+                        self._search_inflight = False
+                        rerun = False
+                if rerun:
+                    continue
+                if results is not None and g == self._search_gen \
+                        and not self._yield_stop.is_set():
+                    self._results = results[:24]
+                    self._render_results()
                 return
-            if gen != self._search_gen or self._yield_stop.is_set():
-                return
-            self._results = results[:24]
-            self._render_results()
         threading.Thread(target=worker, daemon=True).start()
 
     def _collect_results(self):

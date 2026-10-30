@@ -282,11 +282,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # real items -- see _sync_placeholders().
         self._divert_placeholder_count = 0
         self._reco_placeholder_counts = {}
+        # Pages fetched by PagedList.prefetch_async workers wait here
+        # (control_id -> [items]) until the next input event renders them
+        # -- worker threads must never touch Kodi controls directly.
+        self._pending_appends = {}
+        self._pending_appends_lock = threading.Lock()
         # Plex-style hub rows (see RECO_SLOT_IDS): every row slot binds to a
         # hub descriptor {'title', 'paged'}; _hub_offset is the hub shown in
         # the top slot. Both the Plex /hubs source and the legacy 3-row
         # fallback produce the same shape.
         self._hub_rows = []
+        # Async view loads (tab/section clicks no longer fetch on the
+        # input path): every loader bumps this and the worker checks it
+        # before rendering, so a superseded load never paints over the
+        # view the user already moved on to.
+        self._view_load_gen = 0
         self._hub_offset = 0
         # Plex home tab strip ("For You" / "Trending" / "Activity").
         # 0 = Pour vous (local /hubs/promoted), 1 = Tendances (Discover
@@ -671,24 +681,35 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         titles as the official Android TV client (see docs/plex-parity/).
         The connector has no hubs endpoint yet, so connector mode keeps the
         previous hand-built 3-row layout as a fallback; all rows bind
-        through the same slot mechanism either way.
+        through the same slot mechanism either way. The hub build runs
+        on a worker -- the tab click returns instantly and only paints
+        once the fetch lands (generation-guarded against fast re-clicks).
         """
-        rows, fatal = self._reco_hub_rows(section)
-        if rows is None:
-            if fatal is None or not isinstance(fatal, OFFLINE_ERROR_TYPES):
-                rows = self._reco_legacy_rows(section)
-            else:
-                # Offline hub failure: the legacy fallback would hit the
-                # same dead host -- keep a synthetic error row instead so
-                # _apply_reco_state() surfaces the Plex-style offline
-                # state without burning more timeouts.
-                rows = [{'title': '', 'paged': None, 'error': fatal}]
-        self._hub_rows = rows
-        self._hub_offset = 0
-        self._reco_rows = {}
-        self._apply_reco_state(section)
-        self._rebind_reco_slots()
-        self._update_hero(clear_if_empty=True)
+        self._view_load_gen += 1
+        gen = self._view_load_gen
+
+        def work():
+            rows, fatal = self._reco_hub_rows(section)
+            if rows is None:
+                if fatal is None or not isinstance(fatal, OFFLINE_ERROR_TYPES):
+                    rows = self._reco_legacy_rows(section)
+                else:
+                    # Offline hub failure: the legacy fallback would hit the
+                    # same dead host -- keep a synthetic error row instead so
+                    # _apply_reco_state() surfaces the Plex-style offline
+                    # state without burning more timeouts.
+                    rows = [{'title': '', 'paged': None, 'error': fatal}]
+            if gen != self._view_load_gen:
+                return
+            self._hub_rows = rows
+            self._hub_offset = 0
+            self._reco_rows = {}
+            self._apply_reco_state(section)
+            self._rebind_reco_slots()
+            self._update_hero(clear_if_empty=True)
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _set_home_tab(self, index):
         """Switch the Accueil tab (Pour vous / Tendances / Activité) and
@@ -1640,14 +1661,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             position = gui_guard.selpos(self, list_control_id)
         except RuntimeError:
             return
-        try:
-            new_items = paged.maybe_load_more(position)
-        except Exception as e:
-            xbmc.log('Akasha Aura: recommendations pagination failed for {}: {}'
-                     .format(title, e), xbmc.LOGWARNING)
+        paged.prefetch_async(
+            position,
+            lambda items: self._queue_pending_append(
+                list_control_id, paged, items),
+            on_error=lambda e: xbmc.log(
+                'Akasha Aura: recommendations pagination failed for {}: {}'
+                .format(title, e), xbmc.LOGWARNING))
+
+    def _render_reco_append(self, list_control_id, new_items):
+        row = self._reco_rows.get(list_control_id)
+        if not row:
             return
-        if not new_items:
-            return
+        _label, title, _suffix, paged = row
         try:
             lst = self.getControl(list_control_id)
             for _ in range(self._reco_placeholder_counts.get(list_control_id, 0)):
@@ -1662,6 +1688,38 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._reco_placeholder_counts[list_control_id] = self._sync_placeholders(
             list_control_id, 0, paged)
         self._render_reco_row_label(list_control_id)
+
+    def _queue_pending_append(self, control_id, paged, new_items):
+        """Stash a prefetched page for rendering by the next input event.
+
+        Called on PagedList worker threads -- GUI mutation is deferred to
+        _drain_pending_appends(), which runs on the regular input path.
+        `paged` tags the batch with its source so a view switch mid-fetch
+        drops the stale page instead of grafting it onto the new view.
+        """
+        with self._pending_appends_lock:
+            self._pending_appends.setdefault(
+                control_id, []).append((paged, new_items))
+
+    def _drain_pending_appends(self):
+        """Render pages asynchronously fetched since the last keypress."""
+        with self._pending_appends_lock:
+            pending = self._pending_appends
+            self._pending_appends = {}
+        for control_id, batches in pending.items():
+            for paged, new_items in batches:
+                if not new_items:
+                    continue
+                if control_id == DIVERT_PANEL_ID:
+                    if paged is not self._divert_paged:
+                        continue
+                    self._divert_items = paged.items
+                    self._divert_append_new(new_items)
+                elif control_id in RECO_ALL_LIST_IDS:
+                    row = self._reco_rows.get(control_id)
+                    if not row or row[3] is not paged:
+                        continue
+                    self._render_reco_append(control_id, new_items)
 
     def _reco_fetch_on_deck_page(self, section, offset, limit):
         key = local_cache.page_cache_key(
@@ -1749,51 +1807,62 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if status:
                 status.setLabel(i18n.tr(33067))
             return
-        error = None
-        try:
-            if section.get('type') in ('playlist', 'livetv'):
-                genres = []  # no genre directory for playlists/live TV
-            elif self._connector_client:
-                genres = divert_source.parse_genres(
-                    self._connector_client.section_genres(section['key']))
+        self._view_load_gen += 1
+        gen = self._view_load_gen
+
+        def work():
+            error = None
+            try:
+                if section.get('type') in ('playlist', 'livetv'):
+                    genres = []  # no genre directory for playlists/live TV
+                elif self._connector_client:
+                    genres = divert_source.parse_genres(
+                        self._connector_client.section_genres(section['key']))
+                else:
+                    genres = self._plex_client.section_genres(section['key'])
+            except Exception as e:
+                xbmc.log('Akasha Aura: categories load failed: {}'.format(e), xbmc.LOGERROR)
+                genres = []
+                error = e
+            if gen != self._view_load_gen:
+                return
+            # Kept untranslated for _on_category_genre_selected() -- the Plex/
+            # connector genre filter API expects the original (English) tag,
+            # only the on-screen label is translated (Plex's metadata agents
+            # report genre names in the source database's language, English
+            # regardless of Akasha's own French interface). Junk tags with no
+            # letters/digits (';;' seen on the real server) are dropped --
+            # Plex never renders them.
+            genres = [g for g in genres if any(ch.isalnum() for ch in g or '')]
+            self._category_genres = genres
+            # Plex's Categories tab is a bare 4-column tile grid -- no
+            # "N categories" heading at all.
+            if status:
+                status.setLabel('')
+            try:
+                panel = self.getControl(CATEGORY_PANEL_ID)
+                panel.reset()
+                items = []
+                for genre in genres:
+                    li = xbmcgui.ListItem(divert_source.display_genre(genre))
+                    li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
+                    items.append(li)
+                panel.addItems(items)
+            except RuntimeError:
+                pass
+            if error is not None:
+                self._state_for_error(
+                    error, lambda: self._load_categories(section))
+            elif not genres:
+                self._set_divert_state(
+                    'empty', title=i18n.tr(33560), message='',
+                    action_label=i18n.tr(33020), action=self._focus_sidebar)
             else:
-                genres = self._plex_client.section_genres(section['key'])
-        except Exception as e:
-            xbmc.log('Akasha Aura: categories load failed: {}'.format(e), xbmc.LOGERROR)
-            genres = []
-            error = e
-        # Kept untranslated for _on_category_genre_selected() -- the Plex/
-        # connector genre filter API expects the original (English) tag,
-        # only the on-screen label is translated (Plex's metadata agents
-        # report genre names in the source database's language, English
-        # regardless of Akasha's own French interface). Junk tags with no
-        # letters/digits (';;' seen on the real server) are dropped --
-        # Plex never renders them.
-        genres = [g for g in genres if any(ch.isalnum() for ch in g or '')]
-        self._category_genres = genres
-        # Plex's Categories tab is a bare 4-column tile grid -- no
-        # "N categories" heading at all.
-        if status:
-            status.setLabel('')
-        try:
-            panel = self.getControl(CATEGORY_PANEL_ID)
-            panel.reset()
-            for genre in genres:
-                li = xbmcgui.ListItem(divert_source.display_genre(genre))
-                li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
-                panel.addItem(li)
-        except RuntimeError:
-            pass
-        if error is not None:
-            self._state_for_error(
-                error, lambda: self._load_categories(section))
-        elif not genres:
-            self._set_divert_state(
-                'empty', title=i18n.tr(33560), message='',
-                action_label=i18n.tr(33020), action=self._focus_sidebar)
-        else:
-            self._set_divert_state(None)
-            self._fetch_category_art(section, genres)
+                self._set_divert_state(None)
+                self._fetch_category_art(section, genres)
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _fetch_category_art(self, section, genres):
         """Fill each genre tile's backdrop with a sample item's fanart --
@@ -2082,8 +2151,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             panel.reset()
-            for item in self._divert_items:
-                panel.addItem(_build_divert_list_item(item))
+            panel.addItems([_build_divert_list_item(item)
+                            for item in self._divert_items])
             # Kodi keeps a stale "selected" marker across reset() (observed
             # on-device: getSelectedPosition() returned a deep index like 96
             # while the visible cursor sat on the first poster, until the
@@ -2101,26 +2170,36 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         one card per collection."""
         self._divert_collection_key = None
         self._divert_items_source = 'collections'
-        self._divert_paged = self._collections_paged(section)
+        paged = self._collections_paged(section)
+        self._divert_paged = paged
         self._skeleton_divert_panel()
-        error = None
-        try:
-            self._divert_paged.load_initial()
-        except Exception as e:
-            xbmc.log('Akasha Aura: collections load failed: {}'.format(e), xbmc.LOGERROR)
-            error = e
-        self._divert_items = self._divert_paged.items
-        self._render_divert_status(section, error)
-        self._fill_divert_panel()
-        if error is not None:
-            self._state_for_error(
-                error, lambda: self._load_collections(section))
-        elif not self._divert_items:
-            self._set_divert_state(
-                'empty', title=i18n.tr(33560), message='',
-                action_label=i18n.tr(33020), action=self._focus_sidebar)
-        else:
-            self._set_divert_state(None)
+        self._view_load_gen += 1
+        gen = self._view_load_gen
+
+        def work():
+            error = None
+            try:
+                paged.load_initial()
+            except Exception as e:
+                xbmc.log('Akasha Aura: collections load failed: {}'.format(e), xbmc.LOGERROR)
+                error = e
+            if gen != self._view_load_gen:
+                return
+            self._divert_items = paged.items
+            self._render_divert_status(section, error)
+            self._fill_divert_panel()
+            if error is not None:
+                self._state_for_error(
+                    error, lambda: self._load_collections(section))
+            elif not self._divert_items:
+                self._set_divert_state(
+                    'empty', title=i18n.tr(33560), message='',
+                    action_label=i18n.tr(33020), action=self._focus_sidebar)
+            else:
+                self._set_divert_state(None)
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _open_collection(self, item):
         """Drill into a Plex collection: the grid shows its children until
@@ -2132,28 +2211,39 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return self._plex_client.collection_items_with_total(
                 item['rating_key'], limit=limit, offset=offset)
         self._divert_items_source = 'collection'
-        self._divert_paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        self._divert_paged = paged
         self._skeleton_divert_panel()
-        try:
-            self._divert_paged.load_initial()
-        except Exception as e:
-            xbmc.log('Akasha Aura: collection children load failed: {}'.format(e), xbmc.LOGERROR)
+        self._view_load_gen += 1
+        gen = self._view_load_gen
+
+        def work():
             try:
-                self.getControl(DIVERT_PANEL_ID).reset()
-            except Exception:
+                paged.load_initial()
+            except Exception as e:
+                xbmc.log('Akasha Aura: collection children load failed: {}'.format(e), xbmc.LOGERROR)
+                if gen == self._view_load_gen:
+                    try:
+                        self.getControl(DIVERT_PANEL_ID).reset()
+                    except Exception:
+                        pass
+                return
+            if gen != self._view_load_gen:
+                return
+            self._divert_items = paged.items
+            self._divert_collection_key = item['rating_key']
+            self._fill_divert_panel()
+            self._set_divert_state(None)
+            try:
+                self.getControl(DIVERT_STATUS_ID).setLabel(
+                    '{} — {}'.format(item['title'],
+                                i18n.tr_count(len(self._divert_items), 33069)))
+                self.getControl(DIVERT_PANEL_ID).selectItem(0)
+            except RuntimeError:
                 pass
-            return
-        self._divert_items = self._divert_paged.items
-        self._divert_collection_key = item['rating_key']
-        self._fill_divert_panel()
-        self._set_divert_state(None)
-        try:
-            self.getControl(DIVERT_STATUS_ID).setLabel(
-                '{} — {}'.format(item['title'],
-                            i18n.tr_count(len(self._divert_items), 33069)))
-            self.getControl(DIVERT_PANEL_ID).selectItem(0)
-        except RuntimeError:
-            pass
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _open_playlist(self, item):
         """Drill into a server playlist (B10): the grid shows its items
@@ -2165,30 +2255,41 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return self._plex_client.playlist_items_with_total(
                 item['rating_key'], limit=limit, offset=offset)
         self._divert_items_source = 'playlist'
-        self._divert_paged = paged_list.PagedList(
+        paged = paged_list.PagedList(
             fetch, page_size=50, prefetch_margin=50)
+        self._divert_paged = paged
         self._skeleton_divert_panel()
-        try:
-            self._divert_paged.load_initial()
-        except Exception as e:
-            xbmc.log('Akasha Aura: playlist items load failed: {}'.format(e),
-                     xbmc.LOGERROR)
+        self._view_load_gen += 1
+        gen = self._view_load_gen
+
+        def work():
             try:
-                self.getControl(DIVERT_PANEL_ID).reset()
-            except Exception:
+                paged.load_initial()
+            except Exception as e:
+                xbmc.log('Akasha Aura: playlist items load failed: {}'.format(e),
+                         xbmc.LOGERROR)
+                if gen == self._view_load_gen:
+                    try:
+                        self.getControl(DIVERT_PANEL_ID).reset()
+                    except Exception:
+                        pass
+                return
+            if gen != self._view_load_gen:
+                return
+            self._divert_items = paged.items
+            self._divert_collection_key = item['rating_key']
+            self._fill_divert_panel()
+            self._set_divert_state(None)
+            try:
+                self.getControl(DIVERT_STATUS_ID).setLabel(
+                    '{} — {}'.format(item['title'],
+                                i18n.tr_count(len(self._divert_items), 33069)))
+                self.getControl(DIVERT_PANEL_ID).selectItem(0)
+            except RuntimeError:
                 pass
-            return
-        self._divert_items = self._divert_paged.items
-        self._divert_collection_key = item['rating_key']
-        self._fill_divert_panel()
-        self._set_divert_state(None)
-        try:
-            self.getControl(DIVERT_STATUS_ID).setLabel(
-                '{} — {}'.format(item['title'],
-                            i18n.tr_count(len(self._divert_items), 33069)))
-            self.getControl(DIVERT_PANEL_ID).selectItem(0)
-        except RuntimeError:
-            pass
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _open_music_node(self, item):
         """Drill into an artist/album (B16): the grid shows its children
@@ -2199,31 +2300,42 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not client or not item.get('rating_key') \
                 or not hasattr(client, 'metadata_children'):
             return
-        try:
-            children = client.metadata_children(item['rating_key'])
-        except Exception as e:
-            xbmc.log('Akasha Aura: music children load failed: {}'.format(e),
-                     xbmc.LOGERROR)
-            return
-        children = children or []
+        self._skeleton_divert_panel()
+        self._view_load_gen += 1
+        gen = self._view_load_gen
 
-        def fetch(offset, limit):
-            return children[offset:offset + limit], len(children)
-        self._divert_items_source = 'music'
-        self._divert_paged = paged_list.PagedList(
-            fetch, page_size=50, prefetch_margin=50)
-        self._divert_paged.load_initial()
-        self._divert_items = self._divert_paged.items
-        self._divert_collection_key = item['rating_key']
-        self._fill_divert_panel()
-        self._set_divert_state(None)
-        try:
-            self.getControl(DIVERT_STATUS_ID).setLabel(
-                '{} — {}'.format(item['title'],
-                            i18n.tr_count(len(self._divert_items), 33069)))
-            self.getControl(DIVERT_PANEL_ID).selectItem(0)
-        except RuntimeError:
-            pass
+        def work():
+            try:
+                children = client.metadata_children(item['rating_key'])
+            except Exception as e:
+                xbmc.log('Akasha Aura: music children load failed: {}'.format(e),
+                         xbmc.LOGERROR)
+                return
+            if gen != self._view_load_gen:
+                return
+            children = children or []
+
+            def fetch(offset, limit):
+                return children[offset:offset + limit], len(children)
+            self._divert_items_source = 'music'
+            paged = paged_list.PagedList(
+                fetch, page_size=50, prefetch_margin=50)
+            self._divert_paged = paged
+            paged.load_initial()
+            self._divert_items = paged.items
+            self._divert_collection_key = item['rating_key']
+            self._fill_divert_panel()
+            self._set_divert_state(None)
+            try:
+                self.getControl(DIVERT_STATUS_ID).setLabel(
+                    '{} — {}'.format(item['title'],
+                                i18n.tr_count(len(self._divert_items), 33069)))
+                self.getControl(DIVERT_PANEL_ID).selectItem(0)
+            except RuntimeError:
+                pass
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _play_track(self, item):
         """Audio track from a music library (B16): Kodi plays it in the
@@ -2352,6 +2464,31 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._divert_sections = list(self._all_divert_sections)
 
         self._populate_sidebar()
+
+        # Warm the per-section collections probe off the input path:
+        # _apply_collections_tab reads _divert_collections_probe when a
+        # library tab is clicked, and a cold probe costs a WAN round-trip
+        # (~7s) right in the click handler. Sequential, low pressure.
+        client = self._plex_client
+        if client and hasattr(client, 'section_collections_with_total'):
+            sections = list(self._divert_sections)
+
+            def warm_probes():
+                for s in sections:
+                    if s.get('type') not in ('movie', 'show'):
+                        continue
+                    key = s.get('key') or ''
+                    if key in self._divert_collections_probe:
+                        continue
+                    try:
+                        _items, total = \
+                            client.section_collections_with_total(
+                                key, limit=1)
+                        self._divert_collections_probe[key] = bool(total)
+                    except Exception:
+                        pass
+
+            threading.Thread(target=warm_probes, daemon=True).start()
 
         # Which library (if any) becomes active is decided by the caller
         # (onInit restores the persisted Accueil/library state, _show_tab's
@@ -2561,42 +2698,52 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # is forward-progressive loading rather than a true sliding window.
         # See docs/aura/decisions.md.
         self._divert_items_source = 'browse'
-        self._load_az_rail(section)
-        self._divert_paged = paged_list.PagedList(
+        paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
             page_size=50, prefetch_margin=50)
+        self._divert_paged = paged
         self._skeleton_divert_panel()
-        error = None
-        try:
-            self._divert_paged.load_initial()
-        except Exception as e:
-            xbmc.log('Akasha Aura: section items load failed: {}'.format(e), xbmc.LOGERROR)
-            error = e
-        self._divert_items = self._divert_paged.items
+        self._view_load_gen += 1
+        gen = self._view_load_gen
 
-        self._render_divert_toolbar(section)
-        self._render_divert_status(section, error)
+        def work():
+            self._load_az_rail(section)
+            error = None
+            try:
+                paged.load_initial()
+            except Exception as e:
+                xbmc.log('Akasha Aura: section items load failed: {}'.format(e), xbmc.LOGERROR)
+                error = e
+            if gen != self._view_load_gen:
+                return
+            self._divert_items = paged.items
 
-        try:
-            panel = self.getControl(DIVERT_PANEL_ID)
-            panel.reset()
-            for item in self._divert_items:
-                panel.addItem(_build_divert_list_item(item))
-            # Same stale-marker resync as _fill_divert_panel.
-            if self._divert_items:
-                panel.selectItem(0)
-        except Exception as e:
-            xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
-        self._divert_placeholder_count = self._sync_placeholders(
-            DIVERT_PANEL_ID, 0, self._divert_paged)
+            self._render_divert_toolbar(section)
+            self._render_divert_status(section, error)
 
-        if error is not None:
-            self._state_for_error(
-                error, lambda: self._load_divert_section_items(section))
-        elif not self._divert_items:
-            self._apply_grid_empty_state(section)
-        else:
-            self._set_divert_state(None)
+            try:
+                panel = self.getControl(DIVERT_PANEL_ID)
+                panel.reset()
+                panel.addItems([_build_divert_list_item(item)
+                                for item in self._divert_items])
+                # Same stale-marker resync as _fill_divert_panel.
+                if self._divert_items:
+                    panel.selectItem(0)
+            except Exception as e:
+                xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
+            self._divert_placeholder_count = self._sync_placeholders(
+                DIVERT_PANEL_ID, 0, paged)
+
+            if error is not None:
+                self._state_for_error(
+                    error, lambda: self._load_divert_section_items(section))
+            elif not self._divert_items:
+                self._apply_grid_empty_state(section)
+            else:
+                self._set_divert_state(None)
+            self._sync_navigation()
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _render_divert_toolbar(self, section):
         try:
@@ -3019,16 +3166,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             position = gui_guard.selpos(self, DIVERT_PANEL_ID)
         except RuntimeError:
             return
-        try:
-            new_items = self._divert_paged.maybe_load_more(position)
-        except Exception as e:
-            xbmc.log('Akasha Aura: Divertissement pagination fetch failed: {}'.format(e),
-                     xbmc.LOGWARNING)
-            return
-        if not new_items:
-            return
-        self._divert_items = self._divert_paged.items
-        self._divert_append_new(new_items)
+        paged = self._divert_paged
+        paged.prefetch_async(
+            position,
+            lambda items: self._queue_pending_append(
+                DIVERT_PANEL_ID, paged, items),
+            on_error=lambda e: xbmc.log(
+                'Akasha Aura: Divertissement pagination fetch failed: {}'
+                .format(e), xbmc.LOGWARNING))
 
     def _divert_append_new(self, new_items):
         """Append freshly fetched items to the grid after swapping out the
@@ -3354,6 +3499,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # A real keypress cancels any pending deferred focus -- the
             # user's own navigation always wins over a stale target.
             self._focus_generation += 1
+            # Render pages the async prefetch workers finished fetching
+            # since the last keypress (keeps network latency off the
+            # input path -- see PagedList.prefetch_async).
+            self._drain_pending_appends()
         if aid == ACTION_MENU:
             self._open_settings_panel()
             return
