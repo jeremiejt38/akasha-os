@@ -752,8 +752,14 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 label_ctl.setPosition(128, 1005)
             else:
                 label_ctl.setLabel(self._section_title(self._bottom))
-                label_ctl.setPosition(128, t + 120)
-            row_top = 590 if season_cards else t + 171
+                # The show page carries the activity line between the
+                # actions and the section heading, so Plex parks its
+                # 'N Saisons' title ~85px deeper than the movie's
+                # (official-live/32 vs 18).
+                title_off = 204 if self.mode == 'show' else 120
+                label_ctl.setPosition(128, t + title_off)
+            row_top = 590 if season_cards \
+                else t + (264 if self.mode == 'show' else 171)
             if deep:
                 active_list = self._section_list(self._bottom)
                 row_top = 1070 - _ROW_H.get(active_list, 300)
@@ -1108,7 +1114,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         try:
             # The window is reused across modes: always re-seat the
             # heading on the current vertical rhythm.
-            self.getControl(7060).setPosition(128, self._flow_top + 120)
+            self.getControl(7060).setPosition(128, self._flow_top + 204)
             self.getControl(7060).setLabel(i18n.tr(33103).format(
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         except RuntimeError:
