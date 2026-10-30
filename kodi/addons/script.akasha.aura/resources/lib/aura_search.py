@@ -80,6 +80,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self._search_lock = threading.Lock()
         self._search_inflight = False
         self._search_pending = False
+        # Same discipline as the main window: worker-side result renders
+        # must serialize against gui_guard selection reads on the input
+        # path (reset()-vs-getSelectedPosition crash class), and bail on
+        # teardown so no stale native pointer is touched.
+        self._ui_lock = threading.RLock()
+        self._closing = False
 
     def onInit(self):
         # The window is a cached singleton: a past close() leaves
@@ -88,6 +94,8 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         # Fresh event + fresh query state on every open, like Plex's
         # blank search page.
         self._yield_stop = threading.Event()
+        with self._ui_lock:
+            self._closing = False
         self.query = ''
         self._results = []
         self._filter_index = 0
@@ -109,6 +117,8 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def close(self):
         self._yield_stop.set()
+        with self._ui_lock:
+            self._closing = True
         super().close()
 
     def _watch_playback(self):
@@ -182,32 +192,36 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         # With a query, Plex swaps the left column's search history for
         # plain-text suggestions -- the top hits (people/genres/titles
         # already merged by _run_search) as tappable rows, no icon.
-        if self.query:
-            rows = self._results[:7]
-            _set(self, 'AuraSearchHasRecent', '1' if rows else '')
+        with self._ui_lock:
+            if self._closing:
+                return
+            if self.query:
+                rows = self._results[:7]
+                _set(self, 'AuraSearchHasRecent', '1' if rows else '')
+                try:
+                    lst = self.getControl(RECENT_LIST_ID)
+                    lst.reset()
+                    lst.addItems([self._suggest_row(item) for item in rows])
+                except RuntimeError:
+                    pass
+                return
+            _set(self, 'AuraSearchHasRecent', '1' if self.recent else '')
             try:
                 lst = self.getControl(RECENT_LIST_ID)
                 lst.reset()
-                for item in rows:
-                    li = xbmcgui.ListItem(
-                        item.get('title') or item.get('name') or '')
-                    li.setProperty('suggest', '1')
-                    lst.addItem(li)
+                rows = [xbmcgui.ListItem(query) for query in self.recent[:8]]
+                if self.recent:
+                    clear = xbmcgui.ListItem(i18n.tr(33580))
+                    clear.setProperty('clear', '1')
+                    rows.append(clear)
+                lst.addItems(rows)
             except RuntimeError:
                 pass
-            return
-        _set(self, 'AuraSearchHasRecent', '1' if self.recent else '')
-        try:
-            lst = self.getControl(RECENT_LIST_ID)
-            lst.reset()
-            for query in self.recent[:8]:
-                lst.addItem(xbmcgui.ListItem(query))
-            if self.recent:
-                clear = xbmcgui.ListItem(i18n.tr(33580))
-                clear.setProperty('clear', '1')
-                lst.addItem(clear)
-        except RuntimeError:
-            pass
+
+    def _suggest_row(self, item):
+        li = xbmcgui.ListItem(item.get('title') or item.get('name') or '')
+        li.setProperty('suggest', '1')
+        return li
 
     def _refresh_query(self):
         try:
@@ -404,56 +418,63 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         return merged
 
     def _render_results(self):
-        _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
-        _set(self, 'AuraSearchEmpty',
-             '1' if self.query and not self._results else '')
-        try:
-            self.getControl(EMPTY_LABEL_ID).setLabel(
-                i18n.tr(33072).format(self.query))
-        except RuntimeError:
-            pass
-        try:
-            # Plex swaps the results zone layout with the query state:
-            # poster grid for Popular Searches, media cards once typed.
-            panel = self.getControl(
-                RESULTS_PANEL_ID if self.query else SUGGEST_PANEL_ID)
-            panel.reset()
-            for item in self._results:
-                if item.get('_genre'):
-                    import divert_source
-                    li = xbmcgui.ListItem(
-                        divert_source.display_genre(item.get('name') or ''),
-                        item.get('section_title') or i18n.tr(33581))
-                    li.setArt({'poster': 'DefaultGenre.png'})
-                    li.setProperty('genre', '1')
-                elif item.get('_person'):
-                    li = xbmcgui.ListItem(item.get('name') or '',
-                                          item.get('role') or i18n.tr(33127))
-                    li.setArt({'poster': item.get('thumb_url')
-                                       or 'actor-fallback.png'})
-                    li.setProperty('person', '1')
-                else:
-                    li = xbmcgui.ListItem(
-                        i18n.ellipsize(item.get('title') or '', 22),
-                        i18n.ellipsize(_result_sub(item) if self.query
-                                       else _suggest_sub(item), 19))
-                    thumb = item.get('poster_url') or item.get('landscape_url') \
-                        or item.get('thumb_url') or 'DefaultVideo.png'
-                    li.setArt({'poster': thumb})
-                    # Plex's amber line names the server that owns the
-                    # result, not the library section.
-                    li.setProperty('server', self._server_label())
-                    # Episode cards carry a fourth line: the show name
-                    # between title and 'S5 E1 • Episode'.
-                    if item.get('type') == 'episode' \
-                            and item.get('show_title'):
-                        li.setProperty('parent', item['show_title'])
-                panel.addItem(li)
-        except RuntimeError:
-            pass
-        # The left column mirrors the query state too (suggestions once
-        # typed, history while empty) -- refresh it with the results.
-        self._render_recent()
+        # ListItems are pure data -- build them outside the UI lock so the
+        # serialized mutation below stays short.
+        items = []
+        for item in self._results:
+            if item.get('_genre'):
+                import divert_source
+                li = xbmcgui.ListItem(
+                    divert_source.display_genre(item.get('name') or ''),
+                    item.get('section_title') or i18n.tr(33581))
+                li.setArt({'poster': 'DefaultGenre.png'})
+                li.setProperty('genre', '1')
+            elif item.get('_person'):
+                li = xbmcgui.ListItem(item.get('name') or '',
+                                      item.get('role') or i18n.tr(33127))
+                li.setArt({'poster': item.get('thumb_url')
+                                   or 'actor-fallback.png'})
+                li.setProperty('person', '1')
+            else:
+                li = xbmcgui.ListItem(
+                    i18n.ellipsize(item.get('title') or '', 22),
+                    i18n.ellipsize(_result_sub(item) if self.query
+                                   else _suggest_sub(item), 19))
+                thumb = item.get('poster_url') or item.get('landscape_url') \
+                    or item.get('thumb_url') or 'DefaultVideo.png'
+                li.setArt({'poster': thumb})
+                # Plex's amber line names the server that owns the
+                # result, not the library section.
+                li.setProperty('server', self._server_label())
+                # Episode cards carry a fourth line: the show name
+                # between title and 'S5 E1 • Episode'.
+                if item.get('type') == 'episode' \
+                        and item.get('show_title'):
+                    li.setProperty('parent', item['show_title'])
+            items.append(li)
+        with self._ui_lock:
+            if self._closing:
+                return
+            _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
+            _set(self, 'AuraSearchEmpty',
+                 '1' if self.query and not self._results else '')
+            try:
+                self.getControl(EMPTY_LABEL_ID).setLabel(
+                    i18n.tr(33072).format(self.query))
+            except RuntimeError:
+                pass
+            try:
+                # Plex swaps the results zone layout with the query state:
+                # poster grid for Popular Searches, media cards once typed.
+                panel = self.getControl(
+                    RESULTS_PANEL_ID if self.query else SUGGEST_PANEL_ID)
+                panel.reset()
+                panel.addItems(items)
+            except RuntimeError:
+                pass
+            # The left column mirrors the query state too (suggestions once
+            # typed, history while empty) -- refresh it with the results.
+            self._render_recent()
 
     # ------------------------------------------------------------- search
 

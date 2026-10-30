@@ -31,6 +31,9 @@ class FakeControl:
     def addItem(self, li):
         self.items.append(li)
 
+    def addItems(self, items):
+        self.items.extend(items)
+
     def reset(self):
         self.items = []
 

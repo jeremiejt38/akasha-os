@@ -21,14 +21,42 @@ raising.
 """
 import xbmcgui  # noqa: F401  (kept for the Kodi runtime contract)
 
+_LOCK_TIMEOUT_SECONDS = 0.25
+
+
+def _acquire(window):
+    """Take the window's UI lock for the duration of one guarded call.
+
+    Selection reads race worker-side list rebuilds (the SEGV signature in
+    the crash logs): a getSelectedPosition() landing between a worker's
+    reset() and addItems() reads a dead boundary. Windows that expose a
+    `_ui_lock` (RLock shared with their render path) are serialized here;
+    a held lock times out rather than blocking input -- the caller gets
+    its benign value and the user keeps control.
+
+    Returns the acquired lock, ``False`` on timeout, or ``None`` when the
+    window carries no lock.
+    """
+    lock = getattr(window, '_ui_lock', None)
+    if lock is None or not hasattr(lock, 'acquire'):
+        return None
+    return lock if lock.acquire(timeout=_LOCK_TIMEOUT_SECONDS) else False
+
 
 def selpos(window, control_id):
     """getSelectedPosition() guarded: -1 when the control is missing,
-    empty, or the window is being torn down."""
-    try:
-        return pos(window.getControl(control_id))
-    except RuntimeError:
+    empty, the window is being torn down, or the UI lock is busy."""
+    lock = _acquire(window)
+    if lock is False:
         return -1
+    try:
+        try:
+            return pos(window.getControl(control_id))
+        except RuntimeError:
+            return -1
+    finally:
+        if lock is not None:
+            lock.release()
 
 
 def _empty(control):
@@ -53,14 +81,22 @@ def pos(control):
 
 
 def selitem(window, control_id):
-    """getSelectedItem() guarded: None on missing/empty/dead control."""
-    try:
-        c = window.getControl(control_id)
-        if c is None or _empty(c):
-            return None
-        return c.getSelectedItem()
-    except (RuntimeError, AttributeError):
+    """getSelectedItem() guarded: None on missing/empty/dead control or
+    a busy UI lock."""
+    lock = _acquire(window)
+    if lock is False:
         return None
+    try:
+        try:
+            c = window.getControl(control_id)
+            if c is None or _empty(c):
+                return None
+            return c.getSelectedItem()
+        except (RuntimeError, AttributeError):
+            return None
+    finally:
+        if lock is not None:
+            lock.release()
 
 
 def focus(window, control_id):
@@ -68,32 +104,46 @@ def focus(window, control_id):
     holds at least one item -- focusing an empty Python-fed list logs a
     focus failure and leaves the dialog without a selection target.
     Returns True when focus was actually moved."""
-    try:
-        c = window.getControl(control_id)
-    except RuntimeError:
+    lock = _acquire(window)
+    if lock is False:
         return False
     try:
-        if _empty(c):
+        try:
+            c = window.getControl(control_id)
+        except RuntimeError:
             return False
-        window.setFocus(c)
-        return True
-    except RuntimeError:
-        return False
+        try:
+            if _empty(c):
+                return False
+            window.setFocus(c)
+            return True
+        except RuntimeError:
+            return False
+    finally:
+        if lock is not None:
+            lock.release()
 
 
 def select(window, control_id, position):
     """selectItem() guarded by existence + bounds. Returns True on
     success."""
-    try:
-        c = window.getControl(control_id)
-        if c is None:
-            return False
-        size = c.size()
-        if position < 0:
-            return False
-        if isinstance(size, int) and position >= size:
-            return False
-        c.selectItem(position)
-        return True
-    except (RuntimeError, AttributeError):
+    lock = _acquire(window)
+    if lock is False:
         return False
+    try:
+        try:
+            c = window.getControl(control_id)
+            if c is None:
+                return False
+            size = c.size()
+            if position < 0:
+                return False
+            if isinstance(size, int) and position >= size:
+                return False
+            c.selectItem(position)
+            return True
+        except (RuntimeError, AttributeError):
+            return False
+    finally:
+        if lock is not None:
+            lock.release()
