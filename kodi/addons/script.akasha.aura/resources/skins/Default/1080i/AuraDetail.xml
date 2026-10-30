@@ -178,15 +178,17 @@
             <font>font_aura_meta</font>
             <textcolor>EEFFFFFF</textcolor>
         </control>
-        <!-- Content-rating box trailing the meta line, like Plex's small
-             bordered square ("2018 43m Crime, Drame [10]"). Position and
-             width are computed in Python from the rendered meta width. -->
+        <!-- Content-rating box trailing the meta line. Plex draws the
+             detail-page rating square as a solid near-black box without
+             the pale edge used by the home hero chip (44-after-back).
+             Position and width are computed in Python from the rendered
+             meta width. -->
         <control type="image" id="7190">
             <left>0</left>
             <top>296</top>
             <width>40</width>
             <height>36</height>
-            <texture border="10">meta-rating-box.png</texture>
+            <texture border="10">meta-rating-box-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailMetaRating))</visible>
         </control>
         <control type="label" id="7191">
