@@ -291,6 +291,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # holds browse items.
         self._divert_items_source = 'browse'
         self._divert_paged = None
+        self._divert_browse_inflight = False
         # Letters actually present in the active section (Plex shows only
         # those on the A-Z rail, not the full alphabet); None keeps the
         # static <content> fallback and the '#'..'Z' position map.
@@ -2241,6 +2242,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         a tab switch that reloads nothing -- otherwise an 'empty'/'error'
         state set by another tab would linger over valid content. An
         error state set by the grid's own failed load is kept as-is."""
+        if getattr(self, '_divert_browse_inflight', False):
+            # The grid is mid-load: whatever terminal state it reaches is
+            # decided by _load_divert_section_items' own drain, not by a
+            # snapshot of the previous section's items.
+            return
         if self._divert_items:
             self._set_divert_state(None)
         elif self._divert_state not in ('offline', 'error'):
@@ -3000,6 +3006,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.setProperty('DivertLibraryTab',
                              str(DIVERT_SUBTAB_BIBLIOTHEQUES))
         self._apply_collections_tab(section)
+        # Re-render the pills row synchronously and drop the previous
+        # section's terminal state: without this the old layout/overlay
+        # stays up for the whole WAN fetch and a pseudo->real switch
+        # flashes overlapped pills plus a stale 'empty' state for ~5s.
+        self._render_divert_toolbar(section)
+        self._set_divert_state(None)
         self._load_divert_section_items(section)
 
     def _apply_collections_tab(self, section):
@@ -3098,6 +3110,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # is forward-progressive loading rather than a true sliding window.
         # See docs/aura/decisions.md.
         self._divert_items_source = 'browse'
+        # In-flight marker: _apply_browse_restate() must not re-derive an
+        # 'empty' state while the new section's first page is still
+        # loading -- the work thread below sets the terminal state.
+        self._divert_browse_inflight = True
         paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
             page_size=50, prefetch_margin=50)
@@ -3113,7 +3129,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # letters over the view the user already moved to.
             if gen != self._view_load_gen:
                 return
-            self._load_az_rail(section)
+            try:
+                self._load_az_rail(section)
+            except Exception as e:
+                # A rail failure must not kill the grid load (or leave
+                # _divert_browse_inflight stuck True).
+                xbmc.log('Akasha Aura: A-Z rail load failed: {}'.format(e), xbmc.LOGERROR)
             error = None
             try:
                 paged.load_initial()
@@ -3125,6 +3146,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             with self._ui_lock:
                 if self._closing or gen != self._view_load_gen:
                     return
+                # A superseding load already set its own flag -- only the
+                # owning generation may clear it.
+                self._divert_browse_inflight = False
                 if error is not None:
                     self._drop_pending_appends(DIVERT_PANEL_ID)
                 self._divert_items = paged.items
