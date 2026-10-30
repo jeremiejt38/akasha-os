@@ -108,6 +108,77 @@ class TestLocalCache(unittest.TestCase):
         self.assertEqual(items1, items2)
         self.assertIsNone(total2)
 
+    def test_get_stale_returns_expired_row_flagged(self):
+        self.cache.set('key1', {'v': 1}, ttl_seconds=-10)
+        value, expired = self.cache.get_stale('key1')
+        self.assertEqual(value, {'v': 1})
+        self.assertTrue(expired)
+
+    def test_get_stale_marks_fresh_row_not_expired(self):
+        self.cache.set('key1', {'v': 1}, ttl_seconds=60)
+        value, expired = self.cache.get_stale('key1')
+        self.assertEqual(value, {'v': 1})
+        self.assertFalse(expired)
+
+    def test_get_stale_missing_key(self):
+        self.assertEqual(self.cache.get_stale('nope'), (None, True))
+
+    def test_wal_mode_enabled(self):
+        conn = sqlite3.connect(self.db_path)
+        mode = conn.execute('PRAGMA journal_mode').fetchone()[0]
+        conn.close()
+        self.assertEqual(mode, 'wal')
+
+    def test_expired_rows_purged_on_write_when_due(self):
+        self.cache.set('old', {'v': 1}, ttl_seconds=-10)
+        self.cache._next_purge = 0  # force the opportunistic purge
+        self.cache.set('new', {'v': 2}, ttl_seconds=60)
+        conn = sqlite3.connect(self.db_path)
+        keys = [r[0] for r in conn.execute('SELECT key FROM cache')]
+        conn.close()
+        self.assertNotIn('old', keys)
+        self.assertIn('new', keys)
+
+    def test_concurrent_readers_and_writer(self):
+        import threading
+
+        errors = []
+
+        def writer():
+            try:
+                for i in range(30):
+                    self.cache.set('k%d' % (i % 5), {'i': i}, ttl_seconds=60)
+            except Exception as e:
+                errors.append(e)
+
+        def reader():
+            try:
+                for i in range(30):
+                    self.cache.get('k%d' % (i % 5))
+                    self.cache.get_stale('k%d' % (i % 5))
+            except Exception as e:
+                errors.append(e)
+
+        threads = ([threading.Thread(target=writer)] +
+                   [threading.Thread(target=reader) for _ in range(4)])
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertEqual(errors, [])
+
+    def test_non_schema_operational_error_is_a_miss_not_an_exception(self):
+        # 'no such table' self-heals; any other OperationalError (locked
+        # db, corrupt file...) must still degrade to a miss, not raise.
+        from unittest import mock
+
+        conn = mock.MagicMock()
+        conn.execute.side_effect = sqlite3.OperationalError('database is locked')
+        with mock.patch.object(self.cache, '_connect', return_value=conn):
+            self.assertIsNone(self.cache.get('key1'))
+            self.assertEqual(self.cache.get_stale('key1'), (None, True))
+            self.cache.set('key1', {'v': 1})  # silently skipped, no raise
+
 
 if __name__ == '__main__':
     unittest.main()
