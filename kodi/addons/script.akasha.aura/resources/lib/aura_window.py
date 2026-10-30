@@ -963,6 +963,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         see RECO_SLOT_IDS. Slots without a hub are emptied rather than
         hidden so their ondown/left navigation stays consistent.
         """
+        self._drop_pending_appends(*RECO_ALL_LIST_IDS)
         for i, (label_id, list_id) in enumerate(RECO_SLOT_IDS):
             index = self._hub_offset + i
             row = self._hub_rows[index] if index < len(self._hub_rows) else None
@@ -1689,6 +1690,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             list_control_id, 0, paged)
         self._render_reco_row_label(list_control_id)
 
+    def _drop_pending_appends(self, *control_ids):
+        """Discard queued prefetch pages -- a full re-render or a failed
+        load makes them redundant (and they would duplicate otherwise)."""
+        with self._pending_appends_lock:
+            for cid in control_ids:
+                self._pending_appends.pop(cid, None)
+
     def _queue_pending_append(self, control_id, paged, new_items):
         """Stash a prefetched page for rendering by the next input event.
 
@@ -2148,6 +2156,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _fill_divert_panel(self):
+        # A full rebuild supersedes every queued prefetch append: the
+        # panel is repainted from paged.items wholesale, so a drained
+        # batch afterwards would render the same items twice.
+        self._drop_pending_appends(DIVERT_PANEL_ID)
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             panel.reset()
@@ -2223,10 +2235,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except Exception as e:
                 xbmc.log('Akasha Aura: collection children load failed: {}'.format(e), xbmc.LOGERROR)
                 if gen == self._view_load_gen:
-                    try:
-                        self.getControl(DIVERT_PANEL_ID).reset()
-                    except Exception:
-                        pass
+                    self._drop_pending_appends(DIVERT_PANEL_ID)
+                    self._state_for_error(
+                        e, lambda: self._open_collection(item))
                 return
             if gen != self._view_load_gen:
                 return
@@ -2269,10 +2280,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log('Akasha Aura: playlist items load failed: {}'.format(e),
                          xbmc.LOGERROR)
                 if gen == self._view_load_gen:
-                    try:
-                        self.getControl(DIVERT_PANEL_ID).reset()
-                    except Exception:
-                        pass
+                    self._drop_pending_appends(DIVERT_PANEL_ID)
+                    self._state_for_error(
+                        e, lambda: self._open_playlist(item))
                 return
             if gen != self._view_load_gen:
                 return
@@ -2310,6 +2320,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except Exception as e:
                 xbmc.log('Akasha Aura: music children load failed: {}'.format(e),
                          xbmc.LOGERROR)
+                if gen == self._view_load_gen:
+                    self._drop_pending_appends(DIVERT_PANEL_ID)
+                    self._state_for_error(
+                        e, lambda: self._open_music_node(item))
                 return
             if gen != self._view_load_gen:
                 return
@@ -2707,6 +2721,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         gen = self._view_load_gen
 
         def work():
+            # Bail before doing anything if this load was superseded --
+            # even the A-Z rail render must not paint another section's
+            # letters over the view the user already moved to.
+            if gen != self._view_load_gen:
+                return
             self._load_az_rail(section)
             error = None
             try:
@@ -2716,6 +2735,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 error = e
             if gen != self._view_load_gen:
                 return
+            if error is not None:
+                self._drop_pending_appends(DIVERT_PANEL_ID)
             self._divert_items = paged.items
 
             self._render_divert_toolbar(section)

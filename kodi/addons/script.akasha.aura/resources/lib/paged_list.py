@@ -17,6 +17,7 @@ No dependency on xbmc*, testable with plain `python3 -m unittest`.
 """
 
 import threading
+import time
 
 DEFAULT_PAGE_SIZE = 30
 DEFAULT_PREFETCH_MARGIN = 15
@@ -48,10 +49,30 @@ class PagedList:
         # overlapping page loads would race on `self.items` offsets.
         self._fetch_lock = threading.Lock()
         self._inflight = False
+        self._inflight_lock = threading.Lock()
+        # A scroll prefetch that arms before load_initial() lands would
+        # race the first fill (page 2 rendered, then repainted over).
+        self._initial_loaded = False
+        # Failed fetches back off exponentially so an offline path does
+        # not burn a WAN request on every subsequent keypress.
+        self._retry_after = 0.0
+        self._retry_delay = 5.0
 
     def load_initial(self):
         """Fetch the first page. Returns the newly-loaded items."""
-        return self._load_next_page()
+        page = self._load_next_page()
+        self._initial_loaded = True
+        return page
+
+    def _ready_for_prefetch(self):
+        """Exhaustion/first-page/retry gate shared by both load paths."""
+        if not self._initial_loaded or self.exhausted:
+            return False
+        return time.monotonic() >= self._retry_after
+
+    def _note_fetch_error(self):
+        self._retry_after = time.monotonic() + self._retry_delay
+        self._retry_delay = min(30.0, self._retry_delay * 2)
 
     def maybe_load_more(self, selected_position):
         """If `selected_position` is near the loaded end, fetch another page.
@@ -62,11 +83,19 @@ class PagedList:
         duration of the network fetch -- GUI-driven callers should prefer
         `prefetch_async` so input handling is never stalled by latency.
         """
-        if self._inflight or self.exhausted:
-            return []
         if selected_position < len(self.items) - self.prefetch_margin:
             return []
-        return self._load_next_page()
+        with self._inflight_lock:
+            if self._inflight or not self._ready_for_prefetch():
+                return []
+            self._inflight = True
+        try:
+            return self._load_next_page()
+        except Exception:
+            self._note_fetch_error()
+            raise
+        finally:
+            self._inflight = False
 
     def prefetch_async(self, selected_position, on_page, on_error=None):
         """Non-blocking `maybe_load_more` for input-driven callers.
@@ -79,11 +108,12 @@ class PagedList:
         margin leaves plenty of loaded items to scroll through meanwhile.
         `on_error(exception)` is invoked instead when the fetch raises.
         """
-        if self._inflight or self.exhausted:
-            return
         if selected_position < len(self.items) - self.prefetch_margin:
             return
-        self._inflight = True
+        with self._inflight_lock:
+            if self._inflight or not self._ready_for_prefetch():
+                return
+            self._inflight = True
 
         def work():
             try:
@@ -91,6 +121,7 @@ class PagedList:
                 if page and on_page:
                     on_page(page)
             except Exception as e:
+                self._note_fetch_error()
                 if on_error:
                     on_error(e)
             finally:
@@ -104,6 +135,8 @@ class PagedList:
                 self.exhausted = True
                 return []
             result = self.fetch_page(len(self.items), self.page_size)
+            self._retry_after = 0.0
+            self._retry_delay = 5.0
             if isinstance(result, tuple):
                 page, total = result
             else:
