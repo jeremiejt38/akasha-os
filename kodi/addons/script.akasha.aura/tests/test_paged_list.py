@@ -206,7 +206,7 @@ class TestDedupFetch(unittest.TestCase):
             return dataset[offset:offset + limit], len(dataset)
 
         wrapped = dedup_fetch(fetch)
-        page, _ = wrapped(0, 10)
+        page, _, _ = wrapped(0, 10)
         self.assertEqual([series_dedup_key(i) for i in page],
                          ['100', '200', '300'])
 
@@ -222,7 +222,7 @@ class TestDedupFetch(unittest.TestCase):
             return page, (len(dataset) if offset >= 25 else None)
 
         wrapped = dedup_fetch(fetch, raw_page_size=32)
-        page, _ = wrapped(0, 10)
+        page, _, _ = wrapped(0, 10)
         # 1 unique episode + 9 shows -> stream continued past the inline.
         self.assertEqual(len(page), 10)
         self.assertEqual(page[0]['rating_key'], 'e0')
@@ -234,7 +234,7 @@ class TestDedupFetch(unittest.TestCase):
             return dataset[offset:offset + limit], len(dataset)
 
         wrapped = dedup_fetch(fetch, raw_page_size=8)
-        page, _ = wrapped(0, 10)
+        page, _, _ = wrapped(0, 10)
         self.assertEqual(len(page), 2)
 
     def test_max_raw_fetches_caps_requests(self):
@@ -245,9 +245,31 @@ class TestDedupFetch(unittest.TestCase):
             return [ep('100', 'e%d' % offset)], None  # infinite dupes
 
         wrapped = dedup_fetch(fetch, raw_page_size=32, max_raw_fetches=3)
-        page, _ = wrapped(0, 10)
+        page, _, _ = wrapped(0, 10)
         self.assertEqual(len(calls), 3)
         self.assertEqual(len(page), 1)
+
+    def test_short_page_from_fetch_cap_does_not_exhaust(self):
+        # 3 raw fetches of all-dupes produce a 1-item batch while the
+        # stream still has unique shows behind -- `done=False` must keep
+        # the PagedList paginating instead of truncating the row.
+        dataset = [ep('100', 'e%d' % i) for i in range(20)] + \
+                  [show('s%d' % i) for i in range(40)]
+
+        def fetch(offset, limit):
+            return dataset[offset:offset + limit], len(dataset)
+
+        pl = PagedList(dedup_fetch(fetch, raw_page_size=4, max_raw_fetches=3),
+                       page_size=10, prefetch_margin=3)
+        pl.load_initial()
+        # First call: 12 raw items read, all collapse to one card ->
+        # short page (1 < 10) but the stream is not done.
+        self.assertFalse(pl.exhausted)
+        while not pl.exhausted:
+            pl.maybe_load_more(len(pl.items) - 1)
+        # The whole unique stream eventually surfaces: 1 show card for
+        # the episodes + 40 real shows.
+        self.assertEqual(len(pl.items), 41)
 
     def test_integrates_with_paged_list(self):
         dataset = [ep('100', 'e%d' % i) for i in range(20)] + \

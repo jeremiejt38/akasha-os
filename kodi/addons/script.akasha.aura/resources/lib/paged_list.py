@@ -137,8 +137,12 @@ class PagedList:
             result = self.fetch_page(len(self.items), self.page_size)
             self._retry_after = 0.0
             self._retry_delay = 5.0
+            done = None
             if isinstance(result, tuple):
-                page, total = result
+                if len(result) >= 3:
+                    page, total, done = result[0], result[1], result[2]
+                else:
+                    page, total = result
             else:
                 page, total = result, None
             page = page or []
@@ -149,9 +153,13 @@ class PagedList:
                 self.exhausted = True
             self.items.extend(page)
             if len(page) < self.page_size:
-                self.exhausted = True
-                if self.total is None:
-                    self.total = len(self.items)
+                # `done is False` = the wrapper hit its raw-fetch budget,
+                # not the end of the stream -- the row continues on the
+                # next call instead of being silently truncated.
+                if done is not False:
+                    self.exhausted = True
+                    if self.total is None:
+                        self.total = len(self.items)
             return page
 
 
@@ -178,8 +186,9 @@ def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
     The wrapper owns the raw stream position: PagedList offsets count
     deduped items, so the raw offset must be tracked separately. It keeps
     fetching raw pages until it has `limit` unique items (or the raw
-    stream ends), so a short returned page still means "exhausted" to
-    PagedList semantics.
+    stream ends). A short returned page therefore comes back with
+    `done=False` so PagedList keeps paginating instead of silently
+    truncating the row when the raw-fetch cap is hit.
 
     Raw exhaustion: a *short page is not* the end -- a hub's inline page
     is shorter than the raw page size yet continues through its `key`
@@ -189,10 +198,15 @@ def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
     `max_raw_fetches` caps requests per call on pathological hubs.
     """
     seen = set()
-    state = {'offset': 0, 'done': False, 'total': None}
+    state = {'offset': 0, 'done': False, 'total': None, 'backlog': []}
 
     def fetch(offset, limit):
         batch = []
+        # Overflow from a previous call's raw page comes first -- raw
+        # offsets already advanced past it, so dropping it would lose
+        # items permanently.
+        while len(batch) < limit and state['backlog']:
+            batch.append(state['backlog'].pop(0))
         fetches = 0
         while len(batch) < limit and not state['done'] \
                 and fetches < max_raw_fetches:
@@ -211,11 +225,16 @@ def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
                 if key in seen:
                     continue
                 seen.add(key)
-                batch.append(item)
-                if len(batch) >= limit:
-                    break
+                if len(batch) < limit:
+                    batch.append(item)
+                else:
+                    state['backlog'].append(item)
         # The raw total is an upper bound for the deduped count -- enough
         # for end-of-row placeholders (extras drop when the stream ends).
-        return batch, state['total']
+        # Third element tells PagedList whether the stream really ended;
+        # hitting `max_raw_fetches` with a short batch -- or a backlog
+        # still pending -- is NOT exhaustion.
+        return batch, state['total'], \
+            state['done'] and not state['backlog']
 
     return fetch
