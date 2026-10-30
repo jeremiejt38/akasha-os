@@ -105,6 +105,10 @@ DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 4
 DIVERT_SIDEBAR_LIBS_OFFSET = 5
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
+# Boot sidebar data (section list): library membership barely changes,
+# so a stale list painted at startup then revalidated in background is
+# far better than ~7s of black screen per serial WAN fetch.
+BOOT_CACHE_TTL_SECONDS = 3600
 # Skeleton loaders (plan a3f9c2e1 phase 5): capped regardless of how large
 # the real remainder is, so a huge library doesn't balloon a panel/list
 # control with thousands of extra placeholder items just to convey "there's
@@ -2502,67 +2506,79 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # menu's "Se connecter (Connector)" entry (_reconnect_connector()),
         # which does prompt. See docs/aura/decisions.md.
         connector = self._get_connector_client(prompt_if_missing=False)
-        if connector:
-            try:
-                self._divert_sections = divert_source.parse_sections(connector.sections(), section_types=('movie', 'show', 'artist'))
+        source_id = 'conn' if connector else \
+            (self.addon.getSetting('plex.server_url') or '')
+        sections_key = local_cache.page_cache_key(
+            'boot-sections', source_id)
+        cached_sections, _expired = self._cache.get_stale(sections_key)
+
+        if cached_sections is not None:
+            # Stale-while-revalidate: the sidebar paints instantly from
+            # the cached (already-parsed) section list, then a bounded
+            # background pass refetches the real one and refreshes the
+            # rail only if it actually changed.
+            if connector:
                 self._connector_client = connector
                 self._plex_client = None
-            except connector_client.ConnectorAPIError as e:
-                xbmc.log('Akasha Aura: connector sections load failed, falling back to Plex '
-                         'direct: {}'.format(e), xbmc.LOGWARNING)
-                self.addon.setSetting('connector.session_token', '')
-                self._connector_client = None
-
-        if not self._connector_client:
-            server_url = self.addon.getSetting('plex.server_url')
-            token = self.addon.getSetting('plex.token')
-            if not config.is_plex_configured(server_url, token):
-                xbmc.log('Akasha Aura: Plex not configured, skipping Divertissement', xbmc.LOGINFO)
-                # Keep the fixed sidebar entries usable and surface the
-                # config state instead of the old bare status label.
-                self._populate_sidebar()
-                self._set_divert_state('config',
-                                       action=self._open_settings_menu)
-                return
-            try:
-                self._plex_client = plex_client.PlexClient(server_url, token, timeout=12)
-                self._divert_sections = self._plex_client.library_sections()
-            except Exception as e:
-                xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
-                self._divert_sections = []
-
-        # Server-local playlists (B10): Plex always surfaces a "Playlists"
-        # sidebar entry (the rail shows it even when the list is empty --
-        # the page then renders its empty state). Direct Plex only -- the
-        # connector exposes no /playlists proxy. The pseudo-section joins
-        # the ordered pool before pinning so its rail position follows
-        # divert.library_order like a real section instead of being
-        # forced last.
-        self._divert_playlists = []
-        if self._plex_client:
-            try:
-                self._divert_playlists = self._plex_client.playlists()
-            except Exception as e:
-                xbmc.log('Akasha Aura: playlists fetch failed: {}'.format(e),
-                         xbmc.LOGWARNING)
-            self._divert_sections.append({
-                'key': 'playlists', 'type': 'playlist',
-                'title': i18n.tr(33582)})
-
-        self._all_divert_sections = config.ordered_items(
-            self._divert_sections, self._divert_library_order)
-        pinned_set = set(self._divert_pinned_libraries)
-        if pinned_set:
-            self._divert_sections = [
-                s for s in self._all_divert_sections if s['key'] in pinned_set]
-            if not self._divert_sections:
-                # All libraries were unpinned; fall back to showing everything
-                # so the sidebar never stays empty.
-                self._divert_sections = list(self._all_divert_sections)
+            else:
+                if not self._init_divert_plex_client():
+                    return
+            self._divert_sections = list(cached_sections)
+            self._adopt_playlists([])
+            self._order_and_pin_sections()
+            self._populate_sidebar()
+            self._view_pool.submit(
+                lambda: self._revalidate_boot_sections(sections_key))
         else:
-            self._divert_sections = list(self._all_divert_sections)
+            if connector:
+                try:
+                    self._divert_sections = divert_source.parse_sections(
+                        connector.sections(),
+                        section_types=('movie', 'show', 'artist'))
+                    self._connector_client = connector
+                    self._plex_client = None
+                except connector_client.ConnectorAPIError as e:
+                    xbmc.log('Akasha Aura: connector sections load failed, falling back to Plex '
+                             'direct: {}'.format(e), xbmc.LOGWARNING)
+                    self.addon.setSetting('connector.session_token', '')
+                    self._connector_client = None
+                    self._divert_sections = []
 
-        self._populate_sidebar()
+            if not self._connector_client:
+                if not self._init_divert_plex_client():
+                    return
+                # Server-local playlists (B10): Plex always surfaces a
+                # "Playlists" sidebar entry (the rail shows it even when
+                # the list is empty -- the page then renders its empty
+                # state). Direct Plex only -- the connector exposes no
+                # /playlists proxy. Sections and playlists are independent
+                # boot fetches: run them in parallel on the bounded pool
+                # instead of serializing two WAN round-trips.
+                sections_f = self._view_pool.submit(
+                    self._plex_client.library_sections)
+                playlists_f = self._view_pool.submit(
+                    self._plex_client.playlists)
+                try:
+                    self._divert_sections = sections_f.result()
+                except Exception as e:
+                    xbmc.log('Akasha Aura: Plex sections load failed: {}'.format(e), xbmc.LOGERROR)
+                    self._divert_sections = []
+                try:
+                    playlists = playlists_f.result()
+                except Exception as e:
+                    xbmc.log('Akasha Aura: playlists fetch failed: {}'.format(e),
+                             xbmc.LOGWARNING)
+                    playlists = []
+                self._adopt_playlists(playlists)
+            else:
+                self._divert_playlists = []
+
+            self._cache.set(sections_key, [
+                s for s in self._divert_sections
+                if s.get('key') != 'playlists'],
+                BOOT_CACHE_TTL_SECONDS)
+            self._order_and_pin_sections()
+            self._populate_sidebar()
 
         # Warm the per-section collections probe off the input path:
         # _apply_collections_tab reads _divert_collections_probe when a
@@ -2607,6 +2623,88 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # (onInit restores the persisted Accueil/library state, _show_tab's
         # empty-sections retry re-activates Accueil) -- this only loads and
         # orders the sidebar's data, it never picks a view on its own.
+
+    def _init_divert_plex_client(self):
+        """Create the direct-Plex client from settings. Returns False when
+        Plex is not configured (the caller then shows the config state)."""
+        server_url = self.addon.getSetting('plex.server_url')
+        token = self.addon.getSetting('plex.token')
+        if not config.is_plex_configured(server_url, token):
+            xbmc.log('Akasha Aura: Plex not configured, skipping Divertissement', xbmc.LOGINFO)
+            # Keep the fixed sidebar entries usable and surface the
+            # config state instead of the old bare status label.
+            self._populate_sidebar()
+            self._set_divert_state('config',
+                                   action=self._open_settings_menu)
+            return False
+        self._plex_client = plex_client.PlexClient(server_url, token, timeout=12)
+        return True
+
+    def _adopt_playlists(self, playlists):
+        """Attach the fetched playlists + the 'Mes listes' pseudo-section.
+
+        The pseudo-section joins the raw pool before ordering/pinning so
+        its rail position follows divert.library_order like a real
+        section instead of being forced last."""
+        self._divert_playlists = playlists or []
+        if self._plex_client:
+            self._divert_sections.append({
+                'key': 'playlists', 'type': 'playlist',
+                'title': i18n.tr(33582)})
+
+    def _order_and_pin_sections(self):
+        self._all_divert_sections = config.ordered_items(
+            self._divert_sections, self._divert_library_order)
+        pinned_set = set(self._divert_pinned_libraries)
+        if pinned_set:
+            self._divert_sections = [
+                s for s in self._all_divert_sections if s['key'] in pinned_set]
+            if not self._divert_sections:
+                # All libraries were unpinned; fall back to showing everything
+                # so the sidebar never stays empty.
+                self._divert_sections = list(self._all_divert_sections)
+        else:
+            self._divert_sections = list(self._all_divert_sections)
+
+    def _revalidate_boot_sections(self, sections_key):
+        """Background half of the boot SWR: refetch sections (+ playlists
+        on direct Plex) and refresh the rail only when membership changed."""
+        try:
+            if self._connector_client:
+                sections = divert_source.parse_sections(
+                    self._connector_client.sections(),
+                    section_types=('movie', 'show', 'artist'))
+            elif self._plex_client:
+                sections = self._plex_client.library_sections()
+            else:
+                return
+        except Exception as e:
+            xbmc.log('Akasha Aura: boot sections revalidate failed: {}'.format(e),
+                     xbmc.LOGWARNING)
+            return
+        playlists = []
+        if self._plex_client:
+            try:
+                playlists = self._plex_client.playlists()
+            except Exception:
+                pass
+        raw = [s for s in sections if s.get('key') != 'playlists']
+        self._cache.set(sections_key, raw, BOOT_CACHE_TTL_SECONDS)
+        with self._ui_lock:
+            if self._closing:
+                return
+            self._divert_playlists = playlists
+            current = [s.get('key') for s in self._divert_sections
+                       if s.get('key') != 'playlists']
+            if [s.get('key') for s in raw] == current:
+                return
+            self._divert_sections = list(raw)
+            if self._plex_client:
+                self._divert_sections.append({
+                    'key': 'playlists', 'type': 'playlist',
+                    'title': i18n.tr(33582)})
+            self._order_and_pin_sections()
+            self._populate_sidebar()
 
     @_ui_locked
     def _populate_sidebar(self):
