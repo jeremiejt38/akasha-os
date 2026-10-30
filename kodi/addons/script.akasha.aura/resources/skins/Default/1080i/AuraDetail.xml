@@ -1123,7 +1123,7 @@
         <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
         <control type="label" id="7060">
             <left>128</left>
-            <top>726</top>
+            <top>684</top>
             <width>800</width>
             <height>44</height>
             <font>font_aura_section_bold</font>
@@ -1341,34 +1341,34 @@
         </control>
         <control type="list" id="7110">
             <left>128</left>
-            <top>828</top>
+            <top>733</top>
             <width>1800</width>
-            <height>250</height>
+            <height>330</height>
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
             <visible>String.IsEqual(Window.Property(AuraDetailCastRow),1)</visible>
-            <itemlayout width="215" height="244">
+            <itemlayout width="280" height="330">
                 <control type="image">
-                    <left>12</left>
+                    <left>25</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>190</height>
+                    <width>230</width>
+                    <height>230</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>12</left>
+                    <left>25</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>190</height>
+                    <width>230</width>
+                    <height>230</height>
                     <texture colordiffuse="FF1A1310">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>196</top>
-                    <width>215</width>
-                    <height>26</height>
+                    <top>257</top>
+                    <width>280</width>
+                    <height>28</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
@@ -1377,9 +1377,9 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>222</top>
-                    <width>215</width>
-                    <height>24</height>
+                    <top>295</top>
+                    <width>280</width>
+                    <height>26</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
@@ -1387,35 +1387,35 @@
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="215" height="244">
+            <focusedlayout width="280" height="330">
                 <control type="image">
-                    <left>12</left>
+                    <left>25</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>190</height>
+                    <width>230</width>
+                    <height>230</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>12</left>
+                    <left>25</left>
                     <top>0</top>
-                    <width>190</width>
-                    <height>190</height>
+                    <width>230</width>
+                    <height>230</height>
                     <texture colordiffuse="FF1A1310">cast-mask.png</texture>
                 </control>
                 <control type="image">
-                    <left>10</left>
+                    <left>23</left>
                     <top>-2</top>
-                    <width>194</width>
-                    <height>194</height>
+                    <width>234</width>
+                    <height>234</height>
                     <texture>cast-ring.png</texture>
                     <visible>Control.HasFocus(7110)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>196</top>
-                    <width>215</width>
-                    <height>26</height>
+                    <top>257</top>
+                    <width>280</width>
+                    <height>28</height>
                     <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
@@ -1424,9 +1424,9 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>222</top>
-                    <width>215</width>
-                    <height>24</height>
+                    <top>295</top>
+                    <width>280</width>
+                    <height>26</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>

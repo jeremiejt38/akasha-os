@@ -587,7 +587,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                  '1' if item.get('cast') else '')
             try:
                 self.getControl(7060).setPosition(128,
-                                                self._flow_top + 202)
+                                                self._flow_top + 120)
                 self.getControl(7060).setLabel(i18n.tr(33100))
             except RuntimeError:
                 pass
@@ -709,7 +709,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 200, act_top + 13 if not (self.mode == 'season' or deep)
                 else 2200)
             self._badge_top = (2200 if deep
-                               else t - 40 if season_cards else t + 108)
+                               else t - 40 if season_cards else t + 24)
             # On the season cards view Plex shows no section heading --
             # only the NEXT section's title peeking at the bottom edge
             # above its cropped row ('Cast & Crew' sliver, or extras/
@@ -725,7 +725,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # bottom-anchored ~10px off the screen edge like Plex's
             # fully-scrolled state.
             _ROW_H = {SEASONS_LIST_ID: 380, EPISODES_LIST_ID: 296,
-                      CAST_LIST_ID: 250, EXTRAS_ROW_ID: 380,
+                      CAST_LIST_ID: 330, EXTRAS_ROW_ID: 380,
                       RELATED_LIST_ID: 430, RELATED2_LIST_ID: 430}
             if season_cards:
                 nxt = secs[1] if len(secs) > 1 else None
@@ -734,8 +734,8 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 label_ctl.setPosition(128, 1005)
             else:
                 label_ctl.setLabel(self._section_title(self._bottom))
-                label_ctl.setPosition(128, t + 202)
-            row_top = 590 if season_cards else t + 264
+                label_ctl.setPosition(128, t + 120)
+            row_top = 590 if season_cards else t + 171
             if deep:
                 active_list = self._section_list(self._bottom)
                 row_top = 1070 - _ROW_H.get(active_list, 300)
@@ -1090,7 +1090,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         try:
             # The window is reused across modes: always re-seat the
             # heading on the current vertical rhythm.
-            self.getControl(7060).setPosition(128, self._flow_top + 202)
+            self.getControl(7060).setPosition(128, self._flow_top + 120)
             self.getControl(7060).setLabel(i18n.tr(33103).format(
                 len(self._seasons), 's' if len(self._seasons) > 1 else ''))
         except RuntimeError:
@@ -1169,7 +1169,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
     def _render_episodes(self):
         season = self._seasons[self._active_season]
         try:
-            self.getControl(7060).setPosition(128, self._flow_top + 202)
+            self.getControl(7060).setPosition(128, self._flow_top + 120)
             self.getControl(7060).setLabel(self._season_label(season))
         except RuntimeError:
             pass
