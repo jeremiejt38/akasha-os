@@ -328,6 +328,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._view_pool = ThreadPoolExecutor(
             max_workers=2, thread_name_prefix='aura-views')
         self._warm_probe_timer = None
+        self._az_jump_active = False
         self._hub_offset = 0
         # Plex home tab strip ("For You" / "Trending" / "Activity").
         # 0 = Pour vous (local /hubs/promoted), 1 = Tendances (Discover
@@ -3158,7 +3159,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _divert_az_jump(self):
         """A-Z rail: jump the grid to the first loaded item starting with
-        the selected letter (Plex only offers the rail on title sort)."""
+        the selected letter (Plex only offers the rail on title sort).
+
+        All network work runs on the bounded view pool -- the
+        firstCharacter lookup plus up to 40 x 500-item chunk fetches is a
+        ~70s worst case that must never sit on the input path. The jump
+        aborts as soon as the view generation changes (a tab/section
+        click), and an in-flight guard serializes repeated rail presses.
+        """
         # The control-level getters misbehave on this rail list
         # (getSelectedPosition -> -1, getSelectedItem may raise),
         # but Kodi's infolabels report the selection correctly.
@@ -3171,103 +3179,131 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not (0 <= pos < len(letters)):
             return
         letter = letters[pos]
-
-        # Server ground truth for the letter boundary: raw-title matching
-        # is unreliable (this server sorts 'The Amateur' under 'A' but
-        # 'The Tower' under 'T'), so ask Plex which item opens the letter
-        # section -- /firstCharacter applies the same sort + filters as the
-        # grid -- then locate THAT item in the loaded window by ratingKey.
-        target_key = None
         try:
             section = self._divert_sections[self._divert_active_section]
         except (AttributeError, IndexError, TypeError):
             section = None
-        if (self._plex_client and section
-                and section.get('type') in ('movie', 'show', 'artist')
-                and not self._divert_search_query
-                and str(self._divert_sort).startswith('titleSort')):
+        paged = self._divert_paged
+        with self._ui_lock:
+            if self._az_jump_active:
+                return
+            self._az_jump_active = True
+            gen = self._view_load_gen
+
+        def work():
             try:
-                params = {
-                    'sort': self._divert_sort,
-                    'X-Plex-Container-Size': 1,
-                }
-                if self._divert_filter_genre:
-                    params['genre'] = self._divert_filter_genre
-                unwatched = self._divert_filter_unwatched
-                if unwatched is True:
-                    params['unwatched'] = 1
-                elif unwatched is False:
-                    params['unwatched'] = 0
-                for key, value in (self._divert_filter_params() or {}).items():
-                    params[key] = value
-                data = self._plex_client._request(
-                    '/library/sections/{}/firstCharacter/{}'.format(
-                        section['key'], urllib.parse.quote(letter)),
-                    params)
-                md = plex_client.PlexClient._media_container(data).get(
-                    'Metadata') or []
-                if md:
-                    target_key = str(md[0].get('ratingKey') or '')
-            except Exception as e:
-                xbmc.log('Akasha Aura: AZ firstCharacter failed: {}'.format(e),
-                         xbmc.LOGWARNING)
+                # Server ground truth for the letter boundary: raw-title
+                # matching is unreliable (this server sorts 'The Amateur'
+                # under 'A' but 'The Tower' under 'T'), so ask Plex which
+                # item opens the letter section -- /firstCharacter applies
+                # the same sort + filters as the grid -- then locate THAT
+                # item in the loaded window by ratingKey.
                 target_key = None
+                if (self._plex_client and section
+                        and section.get('type') in ('movie', 'show', 'artist')
+                        and not self._divert_search_query
+                        and str(self._divert_sort).startswith('titleSort')):
+                    try:
+                        params = {
+                            'sort': self._divert_sort,
+                            'X-Plex-Container-Size': 1,
+                        }
+                        if self._divert_filter_genre:
+                            params['genre'] = self._divert_filter_genre
+                        unwatched = self._divert_filter_unwatched
+                        if unwatched is True:
+                            params['unwatched'] = 1
+                        elif unwatched is False:
+                            params['unwatched'] = 0
+                        for key, value in \
+                                (self._divert_filter_params() or {}).items():
+                            params[key] = value
+                        data = self._plex_client._request(
+                            '/library/sections/{}/firstCharacter/{}'.format(
+                                section['key'], urllib.parse.quote(letter)),
+                            params)
+                        md = plex_client.PlexClient._media_container(data).get(
+                            'Metadata') or []
+                        if md:
+                            target_key = str(md[0].get('ratingKey') or '')
+                    except Exception as e:
+                        xbmc.log('Akasha Aura: AZ firstCharacter failed: {}'.format(e),
+                                 xbmc.LOGWARNING)
+                        target_key = None
 
-        def find_index():
-            for i, item in enumerate(self._divert_items):
-                if target_key is not None:
-                    if str(item.get('rating_key') or '') == target_key:
-                        return i
-                    continue
-                # Plex sorts by titleSort (articles stripped, diacritics
-                # folded): 'The Amateur' lives under 'A', 'À contre-sens'
-                # under 'A' too -- the rail must match that sort key or
-                # it lands on raw-title false positives.
-                title = (item.get('sort_title') or item.get('title') or '')
-                title = title.strip()
-                if not title:
-                    continue
-                first = unicodedata.normalize('NFKD', title)[0].upper()
-                if letter == '#' and first.isdigit():
-                    return i
-                if first == letter:
-                    return i
-            return None
+                def find_index():
+                    for i, item in enumerate(self._divert_items):
+                        if target_key is not None:
+                            if str(item.get('rating_key') or '') == target_key:
+                                return i
+                            continue
+                        # Plex sorts by titleSort (articles stripped,
+                        # diacritics folded): 'The Amateur' lives under 'A',
+                        # 'À contre-sens' under 'A' too -- the rail must
+                        # match that sort key or it lands on raw-title
+                        # false positives.
+                        title = (item.get('sort_title')
+                                 or item.get('title') or '')
+                        title = title.strip()
+                        if not title:
+                            continue
+                        first = unicodedata.normalize('NFKD', title)[0].upper()
+                        if letter == '#' and first.isdigit():
+                            return i
+                        if first == letter:
+                            return i
+                    return None
 
-        target = find_index()
-        # The rail must also reach items beyond the loaded window: pull
-        # the list forward through the same fetch pipeline (same filters
-        # and sort) until the letter appears or the source is exhausted.
-        # 500-item chunks keep a 5k-title library to ~10 requests instead
-        # of ~100, so the jump stays under a few seconds; scanning only
-        # what was already loaded left the rail dead past the first page.
-        guard = 0
-        while (target is None and self._divert_paged
-               and not self._divert_paged.exhausted and guard < 40):
-            try:
-                chunk = self._divert_paged.fetch_page(
-                    len(self._divert_items), 500)
-            except Exception as e:
-                xbmc.log('Akasha Aura: AZ chunk fetch failed: {}'.format(e),
-                         xbmc.LOGWARNING)
-                break
-            page, _total = chunk if isinstance(chunk, tuple) else (chunk, None)
-            if not page:
-                self._divert_paged.exhausted = True
-                break
-            self._divert_paged.items.extend(page)
-            self._divert_items = self._divert_paged.items
-            self._divert_append_new(page)
-            target = find_index()
-            guard += 1
-        if target is None:
-            return
-        try:
-            panel = self.getControl(DIVERT_PANEL_ID)
-            panel.selectItem(target)
-            self.setFocus(panel)
-        except RuntimeError:
-            pass
+                target = find_index()
+                # The rail must also reach items beyond the loaded window:
+                # pull the list forward through the same fetch pipeline
+                # (same filters and sort) until the letter appears or the
+                # source is exhausted. 500-item chunks keep a 5k-title
+                # library to ~10 requests instead of ~100; each chunk's
+                # render is sliced so no single critical section starves
+                # input reads for hundreds of ms.
+                guard = 0
+                while (target is None and paged is not None
+                       and not paged.exhausted and guard < 40):
+                    if self._closing or gen != self._view_load_gen:
+                        return
+                    try:
+                        chunk = paged.fetch_page(len(paged.items), 500)
+                    except Exception as e:
+                        xbmc.log('Akasha Aura: AZ chunk fetch failed: {}'.format(e),
+                                 xbmc.LOGWARNING)
+                        break
+                    page, _total = chunk if isinstance(chunk, tuple) \
+                        else (chunk, None)
+                    if not page:
+                        paged.exhausted = True
+                        break
+                    for i in range(0, len(page), 100):
+                        sl = page[i:i + 100]
+                        with self._ui_lock:
+                            if self._closing or gen != self._view_load_gen:
+                                return
+                            paged.items.extend(sl)
+                            self._divert_items = paged.items
+                            self._divert_append_new(sl)
+                    target = find_index()
+                    guard += 1
+                if target is None:
+                    return
+                with self._ui_lock:
+                    if self._closing or gen != self._view_load_gen:
+                        return
+                    try:
+                        panel = self.getControl(DIVERT_PANEL_ID)
+                        panel.selectItem(target)
+                        self.setFocus(panel)
+                    except RuntimeError:
+                        pass
+            finally:
+                with self._ui_lock:
+                    self._az_jump_active = False
+
+        self._view_pool.submit(work)
 
     def _divert_play_item(self, item):
         # Playback resolution for Divertissement items is not decided yet
