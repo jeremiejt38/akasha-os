@@ -517,6 +517,7 @@ STRINGS = {
     33637: ('Se déconnecter', 'Sign Out'),
     33638: ('Supprimer le compte', 'Delete Account'),
     33639: ('En direct', 'Live'),
+    33640: ('Chaînes', 'Channels'),
 }
 
 MONTH_ABBRS = {

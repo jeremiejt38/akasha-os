@@ -722,21 +722,33 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def _divert_current_section(self):
+        """Active library section dict, or None when none is loaded.
+
+        _divert_active_section indexes a list that gets repopulated in
+        different shapes (SWR revalidate, pin/unpin, live-TV pseudo tail)
+        -- a stored index can point past the end or at the wrong row, so
+        it is re-resolved by the last-activated library key whenever the
+        list or the pointed row no longer matches."""
+        sections = self._divert_sections
+        if not sections:
+            return None
+        cur = (sections[self._divert_active_section]
+               if 0 <= self._divert_active_section < len(sections)
+               else None)
+        if cur is not None and cur.get('key') == self._divert_last_library_key:
+            return cur
+        self._divert_active_section = next(
+            (i for i, s in enumerate(sections)
+             if s.get('key') == self._divert_last_library_key), 0)
+        return sections[self._divert_active_section]
+
     def _select_library_tab(self, index, focus=True):
         """Switch the contextual tab (Recommande/Bibliotheque/Categories) of the
         currently selected library. No-op if no library is selected."""
-        if not self._divert_sections:
+        section = self._divert_current_section()
+        if section is None:
             return
-        # _divert_active_section can go stale when _divert_sections is
-        # repopulated in a different order/shape (pin/unpin, playlists
-        # pseudo-entry) -- re-resolve by the library key instead of
-        # blindly indexing (observed: IndexError on Recommande click).
-        if not (0 <= self._divert_active_section
-                < len(self._divert_sections)):
-            self._divert_active_section = next(
-                (i for i, s in enumerate(self._divert_sections)
-                 if s['key'] == self._divert_last_library_key), 0)
-        section = self._divert_sections[self._divert_active_section]
         if index == DIVERT_SUBTAB_COLLECTIONS \
                 and not self._divert_collections_probe.get(section['key']):
             index = DIVERT_SUBTAB_RECOMMANDE
@@ -1214,8 +1226,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         # State view's action button (B17): Up reaches whichever contextual
         # strip is active, Left exits to the sidebar like every content
-        # edge; Down/Right stay on itself.
-        nav(DIVERT_STATE_BUTTON_ID, up=strip_up, down=DIVERT_STATE_BUTTON_ID,
+        # edge; Down/Right stay on itself. Pseudo-sections hide the strip
+        # -- aim at the module tab list explicitly rather than relying on
+        # Kodi skipping the invisible target.
+        pseudo = self.getProperty('DivertPseudo')
+        nav(DIVERT_STATE_BUTTON_ID,
+            up=TAB_LIST_ID if pseudo else strip_up,
+            down=DIVERT_STATE_BUTTON_ID,
             left=DIVERT_SIDEBAR_ID, right=DIVERT_STATE_BUTTON_ID)
 
         first_sub = self._first_content_id()
@@ -1226,24 +1243,49 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Bibliotheque tab the row above is the filter chips; on
         # Collections/Categories it is the contextual tab itself. Right
         # edge reaches the A-Z rail only where it is rendered (tab 1).
-        grid_up = (DIVERT_FILTER_BUTTON_ID
+        # Pseudo-sections (playlists, live TV) hide the filter and sort
+        # pills -- they page over a prefetched pool where both are
+        # no-ops. The '...' overflow is then the row's only focusable
+        # control for playlists; live TV has none at all (no per-section
+        # actions), so Up there reaches the module tab list directly.
+        toolbar_top = (TAB_LIST_ID if pseudo == 'livetv'
+                       else (DIVERT_RESET_BUTTON_ID if pseudo
+                             else DIVERT_FILTER_BUTTON_ID))
+        grid_up = (toolbar_top
                    if self._divert_library_tab == DIVERT_SUBTAB_BIBLIOTHEQUES
                    else strip_up)
         grid_right = (DIVERT_AZ_RAIL_ID
-                      if self._divert_library_tab == DIVERT_SUBTAB_BIBLIOTHEQUES
+                      if (self._divert_library_tab
+                          == DIVERT_SUBTAB_BIBLIOTHEQUES and not pseudo)
                       else DIVERT_PANEL_ID)
         nav(DIVERT_PANEL_ID, up=grid_up, down=DIVERT_PANEL_ID,
             left=DIVERT_SIDEBAR_ID, right=grid_right)
 
+        # The overflow pill's declared onleft points at the sort pill,
+        # which is hidden for pseudo-sections -- keep Left inside the
+        # row then (and mirror the DivertFiltered chain for real
+        # libraries). Pseudo-sections also hide the whole sub-tab strip,
+        # so Up reaches the module tab list and Down the grid.
+        nav(DIVERT_RESET_BUTTON_ID,
+            up=TAB_LIST_ID if pseudo else DIVERT_RESET_BUTTON_ID,
+            down=DIVERT_PANEL_ID if pseudo else DIVERT_RESET_BUTTON_ID,
+            left=(DIVERT_RESET_BUTTON_ID if pseudo
+                  else (DIVERT_CLEAR_BUTTON_ID
+                        if self._divert_has_active_filters()
+                        else DIVERT_SORT_BUTTON_ID)),
+            right=(DIVERT_RESET_BUTTON_ID if pseudo
+                   else DIVERT_AZ_RAIL_ID))
+
         # Library subtabs: Down lands on the chips when they are rendered
         # (Bibliotheque), straight on the content otherwise -- the XML's
         # static 3211 target is invisible on Collections/Categories and
-        # would swallow the press entirely.
-        subtab_down = (DIVERT_FILTER_BUTTON_ID
+        # would swallow the press entirely. Pseudo-sections hide the
+        # strip altogether, so nothing is wired.
+        subtab_down = (toolbar_top
                        if self._divert_library_tab == DIVERT_SUBTAB_BIBLIOTHEQUES
                        else first_sub) \
             if self._divert_view == 'library' else None
-        if subtab_down is not None:
+        if subtab_down is not None and not pseudo:
             subtab_lr = ((3050, DIVERT_SIDEBAR_ID, 3100),
                          (3100, 3050, 3075),
                          (3075, 3100, 3060),
@@ -2712,8 +2754,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'title': i18n.tr(33582)})
 
     def _order_and_pin_sections(self):
+        # The live-TV pseudo-section renders no sidebar row and must stay
+        # tail-appended so pos->index mapping resolves every visible row
+        # (same contract as _open_more): exclude it from ordering/pinning
+        # and re-append it at the end.
+        livetv_tail = [s for s in self._divert_sections
+                       if s.get('type') == 'livetv']
+        sortable = [s for s in self._divert_sections
+                    if s.get('type') != 'livetv']
         self._all_divert_sections = config.ordered_items(
-            self._divert_sections, self._divert_library_order)
+            sortable, self._divert_library_order)
         pinned_set = set(self._divert_pinned_libraries)
         if pinned_set:
             self._divert_sections = [
@@ -2724,6 +2774,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._divert_sections = list(self._all_divert_sections)
         else:
             self._divert_sections = list(self._all_divert_sections)
+        # The tail goes back on the displayed list only -- the full pool
+        # feeds More/manage-libraries where live TV must never appear.
+        self._divert_sections.extend(livetv_tail)
 
     def _revalidate_boot_sections(self, sections_key):
         """Background half of the boot SWR: refetch sections (+ playlists
@@ -2754,14 +2807,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return
             self._divert_playlists = playlists
             current = [s.get('key') for s in self._divert_sections
-                       if s.get('key') != 'playlists']
+                       if s.get('key') not in ('playlists', 'livetv')]
             if [s.get('key') for s in raw] == current:
                 return
+            # Keep the live-TV pseudo tail appended (same contract as
+            # _open_more): dropping it would strand
+            # _divert_active_section past the list end or onto the wrong
+            # section while the user is on the live grid.
+            livetv_tail = [s for s in self._divert_sections
+                           if s.get('type') == 'livetv']
             self._divert_sections = list(raw)
             if self._plex_client:
                 self._divert_sections.append({
                     'key': 'playlists', 'type': 'playlist',
                     'title': i18n.tr(33582)})
+            self._divert_sections.extend(livetv_tail)
             self._order_and_pin_sections()
             self._populate_sidebar()
 
@@ -2925,6 +2985,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_filter_unwatched = None
         self._divert_filters = {}
         self._divert_search_query = ''
+        # Pseudo-sections (playlists, live TV) page over a prefetched
+        # pool: the watched-filter and the sort menu are no-ops there,
+        # and they have no recommendation hubs or genre directory, so
+        # their toolbar and tab strip collapse to what is real. The
+        # property carries the pseudo type so the skin can still
+        # distinguish playlist (keeps the overflow's play actions) from
+        # livetv (no per-section actions at all).
+        pseudo = section.get('type')
+        pseudo = pseudo if pseudo in ('playlist', 'livetv') else ''
+        self.setProperty('DivertPseudo', pseudo)
+        if pseudo and self._divert_library_tab != DIVERT_SUBTAB_BIBLIOTHEQUES:
+            self._divert_library_tab = DIVERT_SUBTAB_BIBLIOTHEQUES
+            self.setProperty('DivertLibraryTab',
+                             str(DIVERT_SUBTAB_BIBLIOTHEQUES))
         self._apply_collections_tab(section)
         self._load_divert_section_items(section)
 
@@ -2935,6 +3009,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         cached limit=1 probe per section; the Catégories pill and its
         overlays reseat onto the freed slot via DivertHasCollections."""
         key = section.get('key') or ''
+        if section.get('type') in ('playlist', 'livetv'):
+            # Pseudo-sections never have a collections directory --
+            # skipping also avoids a guaranteed-404 probe on the WAN.
+            self.setProperty('DivertHasCollections', '')
+            return
         has = self._divert_collections_probe.get(key)
         if has is None:
             # Never probe synchronously here (~7s WAN on the click path):
@@ -3078,8 +3157,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
     def _render_divert_toolbar(self, section):
         try:
-            type_label = (i18n.tr(33050) if section.get('type') == 'show'
-                          else i18n.tr(33051))
+            section_type = section.get('type')
+            if section_type == 'livetv':
+                type_label = i18n.tr(33640)
+            elif section_type == 'playlist':
+                type_label = i18n.tr(33582)
+            else:
+                type_label = (i18n.tr(33050) if section_type == 'show'
+                              else i18n.tr(33051))
             self.getControl(DIVERT_TYPE_LABEL_ID).setLabel(type_label)
         except RuntimeError:
             pass
@@ -3131,6 +3216,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         y = 190
         x = 127
+        pseudo = self.getProperty('DivertPseudo')
+        if pseudo:
+            # Pseudo-sections page over a prefetched pool: only the type
+            # pill, the counter and the overflow are real controls.
+            w = pill_w(label_of(3210))
+            put(3221, x, y, w)
+            put(3210, x, y, w)
+            x += w + 16
+            w = max(44, int(round(9.7 * len(label_of(3220)))) + 16)
+            put(3220, x, 198, w)
+            x += w + 16
+            put(3218, x, y)
+            put(3226, x + 12, 202)
+            put(3227, x + 12, 202)
+            return
         w = pill_w(label_of(DIVERT_FILTER_BUTTON_ID))
         for cid in (DIVERT_FILTER_BUTTON_ID, 3241, 3242):
             put(cid, x, y, w)
@@ -3192,27 +3292,31 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if idx < 0:
             return
         self._divert_filter_unwatched = DIVERT_FILTER_OPTIONS[idx][0]
-        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+        section = self._divert_current_section()
+        if section is not None:
+            self._load_divert_section_items(section)
 
     def _divert_open_sort_menu(self):
-        if not self._divert_sections:
+        section = self._divert_current_section()
+        if section is None:
             return
         idx = aura_menu.select(
             self, i18n.tr(33062), [label for _, label in DIVERT_SORT_OPTIONS])
         if idx < 0:
             return
         self._divert_sort = DIVERT_SORT_OPTIONS[idx][0]
-        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+        self._load_divert_section_items(section)
 
     def _divert_reset_filters(self):
-        if not self._divert_sections:
+        section = self._divert_current_section()
+        if section is None:
             return
         self._divert_sort = DIVERT_SORT_OPTIONS[0][0]
         self._divert_filter_genre = None
         self._divert_filter_unwatched = None
         self._divert_filters = {}
         self._divert_search_query = ''
-        self._load_divert_section_items(self._divert_sections[self._divert_active_section])
+        self._load_divert_section_items(section)
 
     def _divert_filter_params(self):
         """B4: {filter_key: value} params for the dynamic filters, only
@@ -3224,9 +3328,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _divert_open_advanced_filters(self):
         """B4: generic server-driven filter picker -- Plex's filter
         panel reduced to a two-step select (category, then value)."""
-        if not self._divert_sections:
+        section = self._divert_current_section()
+        if section is None:
             return
-        section = self._divert_sections[self._divert_active_section]
         client = self._plex_client
         if client is None:
             return  # connector path has no /filters endpoint
@@ -3290,9 +3394,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         actions = [
             (i18n.tr(33064), self._divert_play_first),
             (i18n.tr(33065), self._divert_play_random),
-            (i18n.tr(33571), self._divert_open_advanced_filters),
-            (i18n.tr(33066), self._divert_reset_filters),
         ]
+        if not self.getProperty('DivertPseudo'):
+            # Pseudo-sections have no /filters endpoint and no effective
+            # filter state, so the picker and the reset would be no-ops.
+            actions += [
+                (i18n.tr(33571), self._divert_open_advanced_filters),
+                (i18n.tr(33066), self._divert_reset_filters),
+            ]
         idx = aura_menu.contextmenu(self, [label for label, _ in actions])
         if idx < 0:
             return
@@ -3352,10 +3461,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not (0 <= pos < len(letters)):
             return
         letter = letters[pos]
-        try:
-            section = self._divert_sections[self._divert_active_section]
-        except (AttributeError, IndexError, TypeError):
-            section = None
+        section = self._divert_current_section()
         paged = self._divert_paged
         with self._ui_lock:
             if self._az_jump_active:
@@ -3567,8 +3673,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                      xbmc.LOGERROR)
         self._divert_placeholder_count = self._sync_placeholders(
             DIVERT_PANEL_ID, 0, self._divert_paged)
-        section = self._divert_sections[self._divert_active_section]
-        self._render_divert_status(section)
+        section = self._divert_current_section()
+        if section is not None:
+            self._render_divert_status(section)
 
     def _load_other_games(self):
         for i, control_id in enumerate(GAME_BUTTON_IDS):
@@ -5393,8 +5500,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._play_track(item)
             return
 
-        section = self._divert_sections[self._divert_active_section]
-        if section['type'] == 'show':
+        section = self._divert_current_section()
+        if section is not None and section['type'] == 'show':
             self._open_show(item)
         else:
             self._open_detail(item)

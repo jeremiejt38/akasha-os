@@ -1959,3 +1959,8 @@ msgstr "Supprimer le compte"
 msgctxt "#33639"
 msgid "Live"
 msgstr "En direct"
+
+# Chaînes
+msgctxt "#33640"
+msgid "Channels"
+msgstr "Chaînes"

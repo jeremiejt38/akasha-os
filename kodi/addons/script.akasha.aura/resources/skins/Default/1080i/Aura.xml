@@ -658,6 +658,9 @@
                     <width>695</width>
                     <height>64</height>
                     <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
+                    <!-- Pseudo-sections (playlists, live TV) have exactly
+                         one tab; the whole strip is hidden for them. -->
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <!-- Active-tab outline (visible when the strip is not
@@ -668,7 +671,7 @@
                     <width>174</width>
                     <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
-                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="image">
                     <left>326</left>
@@ -676,7 +679,7 @@
                     <width>161</width>
                     <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
-                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="image">
                     <left>504</left>
@@ -684,7 +687,7 @@
                     <width>148</width>
                     <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
-                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections)) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="image" id="3091">
                     <left>669</left>
@@ -692,7 +695,7 @@
                     <width>145</width>
                     <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
-                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <control type="button" id="3050">
@@ -712,6 +715,7 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <control type="button" id="3100">
@@ -732,6 +736,7 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <!-- Plex "Collections" tab: the official strip only shows
@@ -754,7 +759,7 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
-                    <visible>!String.IsEmpty(Window.Property(DivertHasCollections))</visible>
+                    <visible>!String.IsEmpty(Window.Property(DivertHasCollections)) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <control type="button" id="3060">
@@ -775,6 +780,7 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus>-</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
             
@@ -788,7 +794,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>326</left>
@@ -800,7 +806,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>504</left>
@@ -812,7 +818,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
+                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections)) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label" id="3092">
                     <left>669</left>
@@ -824,7 +830,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
+                    <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>135</left>
@@ -836,7 +842,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
                     <textcolor>9BFFFFFF</textcolor>
-                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050)</visible>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),0) + !Control.HasFocus(3050) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>135</left>
@@ -848,7 +854,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33008]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3050)</visible>
+                    <visible>Control.HasFocus(3050) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>326</left>
@@ -860,7 +866,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
                     <textcolor>9BFFFFFF</textcolor>
-                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100)</visible>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),1) + !Control.HasFocus(3100) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>326</left>
@@ -872,7 +878,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33010]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3100)</visible>
+                    <visible>Control.HasFocus(3100) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>504</left>
@@ -884,7 +890,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <textcolor>9BFFFFFF</textcolor>
-                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),2) + !Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections)) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label">
                     <left>504</left>
@@ -896,7 +902,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33011]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections))</visible>
+                    <visible>Control.HasFocus(3075) + !String.IsEmpty(Window.Property(DivertHasCollections)) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label" id="3093">
                     <left>669</left>
@@ -908,7 +914,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
                     <textcolor>9BFFFFFF</textcolor>
-                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060)</visible>
+                    <visible>!String.IsEqual(Window.Property(DivertLibraryTab),3) + !Control.HasFocus(3060) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label" id="3094">
                     <left>669</left>
@@ -920,7 +926,7 @@
                     <aligny>center</aligny>
                     <label>$ADDON[script.akasha.aura 33009]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3060)</visible>
+                    <visible>Control.HasFocus(3060) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 </control>
 
@@ -1172,6 +1178,9 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <!-- Pseudo-sections (playlists, live TV) have no
+                         watched state; the filter menu is a no-op. -->
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <!-- Type: informational pill, a Plex library section is
@@ -1206,6 +1215,7 @@
                     <align>left</align>
                     <aligny>center</aligny>
                     <textcolor>CCFFFFFF</textcolor>
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <control type="image" id="3223">
@@ -1214,7 +1224,7 @@
                     <width>22</width>
                     <height>20</height>
                     <texture colordiffuse="CCFFFFFF">icon-sort.png</texture>
-                    <visible>!Control.HasFocus(3212)</visible>
+                    <visible>!Control.HasFocus(3212) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="image" id="3224">
                     <left>489</left>
@@ -1222,7 +1232,7 @@
                     <width>22</width>
                     <height>20</height>
                     <texture colordiffuse="FF1A1A1A">icon-sort.png</texture>
-                    <visible>Control.HasFocus(3212)</visible>
+                    <visible>Control.HasFocus(3212) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="button" id="3212">
                     <left>473</left>
@@ -1242,6 +1252,9 @@
                     <focusedcolor>00FFFFFF</focusedcolor>
                     <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <!-- Pseudo-sections sort by title only; the menu's
+                         other choices silently no-op, so it is hidden. -->
+                    <visible>String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
 
                 <!-- 'Clear' pill: Plex renders it between the item counter
@@ -1323,6 +1336,9 @@
                     <focusedcolor>FF1A1A1A</focusedcolor>
                     <texturenofocus colordiffuse="1AFFFFFF" border="24">cap-r24.png</texturenofocus>
                     <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+                    <!-- Live TV has no per-section overflow actions:
+                         play-first/shuffle are meaningless on channels. -->
+                    <visible>!String.IsEqual(Window.Property(DivertPseudo),livetv)</visible>
                 </control>
                 <control type="image" id="3226">
                     <left>952</left>
@@ -1331,7 +1347,7 @@
                     <height>24</height>
                     <aspectratio>keep</aspectratio>
                     <texture>icon-dots.png</texture>
-                    <visible>!Control.HasFocus(3218)</visible>
+                    <visible>!Control.HasFocus(3218) + !String.IsEqual(Window.Property(DivertPseudo),livetv)</visible>
                 </control>
                 <control type="image" id="3227">
                     <left>952</left>
@@ -1340,7 +1356,7 @@
                     <height>24</height>
                     <aspectratio>keep</aspectratio>
                     <texture>icon-dots-dark.png</texture>
-                    <visible>Control.HasFocus(3218)</visible>
+                    <visible>Control.HasFocus(3218) + !String.IsEqual(Window.Property(DivertPseudo),livetv)</visible>
                 </control>
                 <control type="label" id="3241">
                     <left>127</left>
@@ -1352,7 +1368,7 @@
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3211)]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>!Control.HasFocus(3211)</visible>
+                    <visible>!Control.HasFocus(3211) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label" id="3242">
                     <left>127</left>
@@ -1364,7 +1380,7 @@
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3211)]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3211)</visible>
+                    <visible>Control.HasFocus(3211) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label" id="3243">
                     <left>527</left>
@@ -1376,7 +1392,7 @@
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3212)]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                    <visible>!Control.HasFocus(3212)</visible>
+                    <visible>!Control.HasFocus(3212) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <control type="label" id="3244">
                     <left>527</left>
@@ -1388,7 +1404,7 @@
                     <aligny>center</aligny>
                     <label>$INFO[Control.GetLabel(3212)]</label>
                     <textcolor>FF1A1A1A</textcolor>
-                    <visible>Control.HasFocus(3212)</visible>
+                    <visible>Control.HasFocus(3212) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 </control>
                 <!-- The genre chip was removed for Plex parity: Plex's
                      Browse toolbar is "All | type | by | sort | N items |
@@ -1400,7 +1416,7 @@
                  a letter jumps the grid to the first matching title; see
                  _divert_az_jump(). -->
             <control type="list" id="3250">
-                <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1)</visible>
+                <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 <left>1820</left>
                 <top>96</top>
                 <width>70</width>
