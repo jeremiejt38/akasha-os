@@ -321,6 +321,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # no control is touched while the window is being torn down
         # (the stale native-pointer half of the crash class).
         self._closing = False
+        # View-load jobs share a bounded pool: two WAN fetches in flight
+        # at most, so a burst of tab clicks cannot stack unbounded
+        # threads on the shared Plex/Unraid path. Each job re-checks the
+        # view generation when it is finally dequeued.
+        self._view_pool = ThreadPoolExecutor(
+            max_workers=2, thread_name_prefix='aura-views')
+        self._warm_probe_timer = None
         self._hub_offset = 0
         # Plex home tab strip ("For You" / "Trending" / "Activity").
         # 0 = Pour vous (local /hubs/promoted), 1 = Tendances (Discover
@@ -338,6 +345,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Per-section 'has collections' probe: Plex only shows the
         # Collections tab on libraries that actually have some.
         self._divert_collections_probe = {}
+        self._collection_probe_inflight = set()
         self._divert_search_query = ''
         # Recommande/Categories, rendered inline like Bibliotheque -- see
         # docs/aura/decisions.md ("recommandations et categories inlinees").
@@ -729,6 +737,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             gen = self._view_load_gen
 
         def work():
+            if gen != self._view_load_gen:
+                return  # superseded while queued on the bounded pool
             rows, fatal = self._reco_hub_rows(section)
             if rows is None:
                 if fatal is None or not isinstance(fatal, OFFLINE_ERROR_TYPES):
@@ -1863,6 +1873,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             gen = self._view_load_gen
 
         def work():
+            if gen != self._view_load_gen:
+                return  # superseded while queued on the bounded pool
             error = None
             try:
                 if section.get('type') in ('playlist', 'livetv'):
@@ -2241,6 +2253,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             gen = self._view_load_gen
 
         def work():
+            if gen != self._view_load_gen:
+                return  # superseded while queued on the bounded pool
             error = None
             try:
                 paged.load_initial()
@@ -2286,6 +2300,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             gen = self._view_load_gen
 
         def work():
+            if gen != self._view_load_gen:
+                return  # superseded while queued on the bounded pool
             try:
                 paged.load_initial()
             except Exception as e:
@@ -2333,6 +2349,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             gen = self._view_load_gen
 
         def work():
+            if gen != self._view_load_gen:
+                return  # superseded while queued on the bounded pool
             try:
                 paged.load_initial()
             except Exception as e:
@@ -2377,6 +2395,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             gen = self._view_load_gen
 
         def work():
+            if gen != self._view_load_gen:
+                return  # superseded while queued on the bounded pool
             try:
                 children = client.metadata_children(item['rating_key'])
             except Exception as e:
@@ -2546,13 +2566,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Warm the per-section collections probe off the input path:
         # _apply_collections_tab reads _divert_collections_probe when a
         # library tab is clicked, and a cold probe costs a WAN round-trip
-        # (~7s) right in the click handler. Sequential, low pressure.
+        # (~7s) right in the click handler. Deferred until after the
+        # first screen can render, de-duplicated across repeated calls,
+        # and run on the bounded view pool rather than a bare thread.
         client = self._plex_client
         if client and hasattr(client, 'section_collections_with_total'):
             sections = list(self._divert_sections)
 
             def warm_probes():
                 for s in sections:
+                    if self._closing:
+                        return
                     if s.get('type') not in ('movie', 'show'):
                         continue
                     key = s.get('key') or ''
@@ -2566,7 +2590,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     except Exception:
                         pass
 
-            threading.Thread(target=warm_probes, daemon=True).start()
+            if self._warm_probe_timer is not None:
+                self._warm_probe_timer.cancel()
+
+            def arm_probes():
+                self._warm_probe_timer = None
+                if not self._closing:
+                    self._view_pool.submit(warm_probes)
+
+            self._warm_probe_timer = threading.Timer(3.0, arm_probes)
+            self._warm_probe_timer.daemon = True
+            self._warm_probe_timer.start()
 
         # Which library (if any) becomes active is decided by the caller
         # (onInit restores the persisted Accueil/library state, _show_tab's
@@ -2740,17 +2774,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         key = section.get('key') or ''
         has = self._divert_collections_probe.get(key)
         if has is None:
+            # Never probe synchronously here (~7s WAN on the click path):
+            # default to hidden and re-apply once the background probe
+            # lands -- same contract as the warm-up after
+            # _load_divertissement.
             has = False
-            client = self._plex_client
-            if client and section.get('type') in ('movie', 'show') \
-                    and hasattr(client, 'section_collections_with_total'):
-                try:
-                    _items, total = client.section_collections_with_total(
-                        key, limit=1)
-                    has = bool(total)
-                except Exception:
-                    has = False
-            self._divert_collections_probe[key] = has
+            self._probe_collections_async(section)
         self.setProperty('DivertHasCollections', '1' if has else '')
         if not has and self._divert_library_tab == DIVERT_SUBTAB_COLLECTIONS:
             self._divert_library_tab = DIVERT_SUBTAB_RECOMMANDE
@@ -2765,6 +2794,45 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self.getControl(3095).setWidth(695 if has else 530)
         except RuntimeError:
             pass
+
+    def _probe_collections_async(self, section):
+        """Cold collections probe off the click path. One in-flight probe
+        per section; on completion the tab strip re-applies itself only
+        if this section is still the active one (staleness is decided by
+        section identity, not the view generation -- a probe must not
+        invalidate an unrelated view load)."""
+        key = section.get('key') or ''
+        client = self._plex_client
+        if not client or section.get('type') not in ('movie', 'show') \
+                or not hasattr(client, 'section_collections_with_total'):
+            self._divert_collections_probe[key] = False
+            return
+        if key in self._collection_probe_inflight:
+            return
+        self._collection_probe_inflight.add(key)
+
+        def probe():
+            found = False
+            try:
+                _items, total = client.section_collections_with_total(
+                    key, limit=1)
+                found = bool(total)
+            except Exception:
+                pass
+            self._divert_collections_probe[key] = found
+            self._collection_probe_inflight.discard(key)
+            with self._ui_lock:
+                if self._closing:
+                    return
+                try:
+                    active = self._divert_sections[
+                        self._divert_active_section]
+                except (AttributeError, IndexError, TypeError):
+                    active = None
+                if active is not None and active.get('key') == key:
+                    self._apply_collections_tab(active)
+
+        self._view_pool.submit(probe)
 
     def _load_divert_section_items(self, section):
         # page_size/prefetch_margin=50: only the visible portion of the grid
