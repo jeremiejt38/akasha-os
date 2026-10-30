@@ -41,12 +41,14 @@
                 <width>1920</width>
                 <height>1080</height>
                 <texture>scrim-hero.png</texture>
+                <visible>String.IsEmpty(Window.Property(AuraFieldVeil))</visible>
             </control>
 
             <!-- Plex tints the whole field with the focused item's
                  UltraBlurColors palette (left/bottom colored veils over
                  the dark scrim). Colors are applied from Python via
-                 setColorDiffuse, synced with the debounced fanart swap. -->
+                 setColorDiffuse, synced with the debounced fanart swap.
+                 Kept as the fallback when no baked field veil exists. -->
             <control type="image" id="5020">
                 <left>0</left>
                 <top>0</top>
@@ -60,6 +62,19 @@
                 <width>1920</width>
                 <height>1080</height>
                 <texture>scrim-tint-bottom.png</texture>
+            </control>
+            <!-- 5022: baked UltraBlurColors field veil (RGBA PNG written
+                 per-palette by _bake_field_veil): bilinear 4-corner
+                 gradient under the Plex scrim mask. Replaces the dark
+                 scrim and both single-tint veils when present. -->
+            <control type="image" id="5022">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <fadetime>350</fadetime>
+                <texture background="true">$INFO[Window.Property(AuraFieldVeil)]</texture>
+                <visible>!String.IsEmpty(Window.Property(AuraFieldVeil))</visible>
             </control>
 
             <!-- Texture prewarmers: invisible 1px images that decode+upload

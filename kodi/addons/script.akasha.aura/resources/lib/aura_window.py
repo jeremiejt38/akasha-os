@@ -1566,7 +1566,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         tint_bottom = _tint_hex(blur.get('bottomLeft'),
                                 blur.get('bottomRight'),
                                 blur.get('topLeft'))
-        self._schedule_hero_fanart(fanart, tint_left, tint_bottom)
+        self._schedule_hero_fanart(fanart, tint_left, tint_bottom, blur)
         self.setProperty('AuraHeroLogo', item.get('logo_url') or '')
         self.setProperty('AuraHeroTitle', title)
         self.setProperty('AuraHeroSubtitle', subtitle)
@@ -1607,7 +1607,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                      'AuraHeroLogo', 'AuraHeroLogoPreload',
                      'AuraHeroTitle', 'AuraHeroSubtitle', 'AuraHeroMeta',
                      'AuraHeroRating', 'AuraHeroChipSolid',
-                     'AuraHeroPlot', 'AuraHeroCast'):
+                     'AuraHeroPlot', 'AuraHeroCast', 'AuraFieldVeil'):
             try:
                 self.setProperty(prop, '')
             except RuntimeError:
@@ -1618,7 +1618,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except (RuntimeError, AttributeError):
                 pass
 
-    def _schedule_hero_fanart(self, url, tint_left='', tint_bottom=''):
+    def _schedule_hero_fanart(self, url, tint_left='', tint_bottom='',
+                              blur=None):
         """Debounce the 1080p backdrop swap while the user scrolls.
 
         Without this every keypress pushes a new fanart URL into the skin
@@ -1640,21 +1641,38 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return
             self._hero_fanart_timer = threading.Timer(
                 0.3, self._apply_hero_fanart,
-                args=(url, tint_left, tint_bottom))
+                args=(url, tint_left, tint_bottom, blur))
             self._hero_fanart_timer.daemon = True
             self._hero_fanart_timer.start()
 
-    def _apply_hero_fanart(self, url, tint_left='', tint_bottom=''):
+    def _apply_hero_fanart(self, url, tint_left='', tint_bottom='',
+                           blur=None):
         with self._hero_fanart_lock:
             self._hero_fanart_timer = None
             changed = url != self._hero_fanart_current
             self._hero_fanart_current = url
-        # 5020: left veil tinted topLeft; 5021: bottom veil tinted
-        # bottomLeft. No palette (cloud items) -> alpha 0, neutral field.
+        # The Plex field veil is the raw 4-corner palette under a fixed
+        # scrim mask -- baked to a PNG (Kodi cannot gradient-tint a
+        # texture). When no file could be produced (no palette, no PIL),
+        # fall back to the two single-tint veils 5020/5021.
+        veil = ''
+        if blur:
+            try:
+                veil = _bake_field_veil(
+                    xbmcvfs.translatePath(
+                        self.addon.getAddonInfo('profile')), blur)
+            except Exception as e:
+                xbmc.log('Akasha Aura: field veil error: {}'.format(e),
+                         xbmc.LOGERROR)
+        try:
+            self.setProperty('AuraFieldVeil', veil)
+        except RuntimeError:
+            pass
         for cid, col in ((5020, tint_left), (5021, tint_bottom)):
             try:
                 self.getControl(cid).setColorDiffuse(
-                    ('FF' + col) if col else '00000000')
+                    '00000000' if veil else
+                    (('FF' + col) if col else '00000000'))
             except (RuntimeError, AttributeError):
                 pass
         if changed:
@@ -5677,6 +5695,77 @@ def _blur_hex(value):
     'RRGGBB' for setColorDiffuse, '' when absent."""
     s = str(value or '').lstrip('#')[-6:]
     return s.upper() if len(s) == 6 else ''
+
+
+_FIELD_VEIL_DIR = 'fields'
+_FIELD_VEIL_CAP = 24
+
+
+def _bake_field_veil(profile_dir, blur):
+    """Bake the Plex field veil: a bilinear UltraBlurColors gradient
+    (the four palette corners) under the scrim alpha mask, cached as a
+    PNG in the addon profile.
+
+    Measured on official-live/17 + 53: the veil IS the raw palette
+    field -- bottom-left pixel == bottomLeft, bottom-right ==
+    bottomRight, top-left == topLeft, all at ~full alpha -- under a
+    fixed mask that stays opaque on the left ~45%/bottom and opens a
+    diagonal window toward the top-right where the fanart shows
+    through. Kodi cannot gradient-tint a texture, so the composite
+    RGBA is generated here (PIL is present in the Kodi runtime).
+    Returns the PNG path, or '' when the palette is incomplete or PIL
+    is unavailable -- the caller then falls back to the tinted
+    scrim-tint-left/bottom veils.
+    """
+    hexes = [_blur_hex(blur.get(k)) for k in
+             ('topLeft', 'topRight', 'bottomLeft', 'bottomRight')]
+    if not all(hexes):
+        return ''
+    # The mask revision rides in the filename: Kodi's texture cache
+    # keys on the path, so a mask tweak must produce a new file.
+    name = 'field-v2-{}.png'.format(''.join(h.lower() for h in hexes))
+    base = os.path.join(profile_dir, _FIELD_VEIL_DIR)
+    path = os.path.join(base, name)
+    if os.path.exists(path):
+        return path
+    try:
+        from PIL import Image
+        corners = Image.new('RGB', (2, 2))
+        corners.putpixel((0, 0), tuple(int(hexes[0][i:i + 2], 16) for i in (0, 2, 4)))
+        corners.putpixel((1, 0), tuple(int(hexes[1][i:i + 2], 16) for i in (0, 2, 4)))
+        corners.putpixel((0, 1), tuple(int(hexes[2][i:i + 2], 16) for i in (0, 2, 4)))
+        corners.putpixel((1, 1), tuple(int(hexes[3][i:i + 2], 16) for i in (0, 2, 4)))
+        rgb = corners.resize((480, 270), Image.BILINEAR)
+        # Diagonal scrim mask: opaque left/bottom, linear opening
+        # toward the top-right (fitted on official 17 -- the window
+        # closes fast going down: alpha hits ~1.0 on the right edge
+        # by y~0.5).
+        mw, mh = 96, 54
+        alpha = Image.new('L', (mw, mh))
+        alpha.putdata([
+            int(round(255 * max(0.0, min(1.0,
+                (0.90 + 1.1 * (y / (mh - 1)) - x / (mw - 1)) / 0.45))))
+            for y in range(mh) for x in range(mw)])
+        veil = rgb.copy()
+        veil.putalpha(alpha.resize((480, 270), Image.BILINEAR))
+        if not os.path.isdir(base):
+            os.makedirs(base, exist_ok=True)
+        veil.save(path)
+        # Cap the cache: one tiny PNG per palette, oldest evicted.
+        try:
+            files = sorted(
+                (os.path.join(base, f) for f in os.listdir(base)
+                 if f.startswith('field-') or f.startswith('field-v')),
+                key=os.path.getmtime)
+            for stale in files[:-_FIELD_VEIL_CAP]:
+                os.unlink(stale)
+        except OSError:
+            pass
+        return path
+    except Exception as e:
+        xbmc.log('Akasha Aura: field veil bake failed: {}'.format(e),
+                 xbmc.LOGERROR)
+        return ''
 
 
 def _tint_hex(*values):
