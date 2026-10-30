@@ -16,4 +16,26 @@ windows. The native Home window remains reachable via Back from within Aura
       <home>RunScript(script.akasha.aura)</home>
     </remote>
   </global>
+  <!-- Plex parity: Back during playback stops the stream and the Aura
+  supervisor re-opens the UI where the user left it. Kodi's default is
+  a two-step Back (exit fullscreen first, stop later) which strands the
+  viewer on the veiled native Home with the audio still running in the
+  background -- Aura launches everything fullscreen and has no windowed
+  context to fall back to. OSD overlays (VideoOSD, AuraOsdMenu, ...)
+  live in their own window contexts and keep closing on Back first. -->
+  <FullscreenVideo>
+    <remote>
+      <back>Stop</back>
+    </remote>
+    <keyboard>
+      <escape>Stop</escape>
+      <backspace>Stop</backspace>
+    </keyboard>
+    <joystick profile="game.controller.default">
+      <b>Stop</b>
+    </joystick>
+    <mouse>
+      <back>Stop</back>
+    </mouse>
+  </FullscreenVideo>
 </keymap>

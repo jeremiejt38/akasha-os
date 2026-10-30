@@ -5021,10 +5021,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._select_library_tab(DIVERT_SUBTAB_BIBLIOTHEQUES)
 
     def _play_channel(self, item):
-        """Linear Plex channel: tune the HLS URL. Needs
-        inputstream.adaptive for demuxing -- absent on the LibreELEC
-        build, so the stream drops back to the grid (documented
-        limitation, same class as cloud trailers)."""
+        """Linear Plex channel: tune the HLS URL. Uses
+        inputstream.adaptive when the binary is installed (LibreELEC
+        repo) so the player demuxes the variant playlist properly;
+        without it the stream drops back to the grid."""
         url = item.get('tune_url')
         if not url:
             xbmcgui.Dialog().notification(
@@ -5033,6 +5033,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         li = xbmcgui.ListItem(item.get('title') or '')
         li.setMimeType('application/vnd.apple.mpegurl')
+        try:
+            xbmcaddon.Addon('inputstream.adaptive')
+        except RuntimeError:
+            pass
+        else:
+            li.setProperty('inputstream', 'inputstream.adaptive')
+            li.setProperty('inputstream.adaptive.live', 'true')
         self.playback_started = True
         self._playback_item = item
         self.close()

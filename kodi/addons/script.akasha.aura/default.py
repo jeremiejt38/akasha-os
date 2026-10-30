@@ -103,6 +103,31 @@ SCRIPT_WINDOW_ID_MIN = 13000
 _MODAL_ACTIVATION_GRACE_S = 10.0
 
 
+def _player_alive():
+    """True while the player owns the screen, including stream opening.
+
+    isPlayingVideo() only reports once video frames actually flow -- a
+    live HLS channel negotiates manifest/segments for ~30s before that
+    (observed 33s from play() to first frame on epg.provider.plex.tv),
+    and isPlaying() itself only latches around demuxer creation. Waiting
+    on either alone lets the silent counter trip and re-open Aura over
+    the still-loading stream. The busy dialog is up for the whole open
+    phase, so it doubles as the startup liveness signal; a dead URL
+    fails fast and closes it, ending the wait early like before.
+    """
+    try:
+        p = xbmc.Player()
+        if p.isPlaying() or p.isPlayingVideo() or p.isPlayingAudio():
+            return True
+    except Exception:
+        pass
+    try:
+        return (xbmcgui.getCurrentWindowDialogId() == 10138  # busy dialog
+                or xbmcgui.getCurrentWindowId() == 12005)  # video fullscreen
+    except Exception:
+        return False
+
+
 def _watch_modal_activation(window):
     """Force-close a doModal() that never made any script dialog active.
 
@@ -254,7 +279,7 @@ if __name__ == '__main__':
                     # "Aura closed for playback" apart from "Aura just closed"
                     # and ignore presses that should not open dialogs.
                     waited = 0
-                    while not xbmc.Player().isPlayingVideo() and waited < 15000:
+                    while not _player_alive() and waited < 30000:
                         xbmc.sleep(200)
                         waited += 200
                     # Track how much video is left while it plays: when the
@@ -274,7 +299,7 @@ if __name__ == '__main__':
                     latest_item = None
                     last_capture = 0.0
                     while silent < 4:
-                        if xbmc.Player().isPlayingVideo():
+                        if _player_alive():
                             silent = 0
                             if not was_playing:
                                 # Play-start transition: report now, Plex-style,

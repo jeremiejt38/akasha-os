@@ -2,6 +2,11 @@
 <addon id="script.akasha.aura" name="Akasha Aura" version="0.1.0" provider-name="Akasha">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
+        <!-- Live TV ("Sur Plex" > TV en direct) plays Plex FAST channels
+             as HLS; inputstream.adaptive does the demuxing. Optional so
+             installs without the LibreELEC repo still work -- the tuner
+             just falls back when the binary is missing. -->
+        <import addon="inputstream.adaptive" optional="true"/>
     </requires>
     <extension point="xbmc.python.script" library="default.py">
         <provides>executable</provides>
