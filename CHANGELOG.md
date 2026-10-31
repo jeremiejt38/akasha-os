@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.70.0...akasha-os-v0.70.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **aura-detail:** drop stale bg fetch maps on detail reopen ([#230](https://github.com/jeremiejt38/akasha-os/issues/230)) ([277c219](https://github.com/jeremiejt38/akasha-os/commit/277c219d1ab2464e9a3fe76f43784ced54bb0cd3))
+
 ## [0.70.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.69.10...akasha-os-v0.70.0) (2026-10-31)
 
 
