@@ -1773,6 +1773,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         detail._next_episode = None
         detail._active_season = 0
         detail._pending_season_index = season_index
+        detail._clear_fetch_state()
         detail.exit_to_sidebar = False
         # The detail instance is cached: reset the flag it raises when a
         # video starts, otherwise every later visit would close the whole

@@ -322,6 +322,17 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         done.wait(timeout)
         return self._bg_results.get(key)
 
+    def _clear_fetch_state(self):
+        """Drop fetch state keyed to the previous page. The window
+        instance is cached and the caller swaps self.item seconds
+        before onInit -> _render() re-seeds these maps: a deferred
+        reader (hero hydrate, action-row sync) must not join the
+        previous page's fetches in that gap -- it once served an Alya
+        season on Black Butler's page."""
+        self._seasons_key = None
+        self._bg_done = {}
+        self._bg_results = {}
+
     def _render(self):
         item = self.item
         self.watched = bool(item.get('watched'))
