@@ -1,0 +1,10 @@
+[Unit]
+Description=Akasha OS cpufreq governor tuning
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/storage/.config/akasha-cpufreq.sh
+
+[Install]
+WantedBy=multi-user.target
