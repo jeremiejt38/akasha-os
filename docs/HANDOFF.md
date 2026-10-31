@@ -1,10 +1,11 @@
 # HANDOFF — Reprise de session (akasha-os)
 
-> Passation pour une nouvelle session Devin, au `2026-10-24` (tag
-> `akasha-os-v0.59.0`), **actualisée au 2026-10-25** (tag
-> `akasha-os-v0.69.0`, déployée sur le Pi). Complète
-> `docs/plex-parity/HANDOFF.md` (focus parité Plex, détails outils/pièges) et
-> `docs/plex-parity/PARITY.md` (audit d'écrans + backlog).
+> Passation pour une nouvelle session Devin, **actualisée au 2026-10-31**
+> (2e « refresh » de conversation — la précédente pesait ~5 Go à cause des
+> captures base64 ; la règle 960×540 d'`AGENTS.md` corrige désormais le
+> problème à la source). Complète `docs/plex-parity/HANDOFF.md` (focus
+> parité Plex, outils/pièges) et `docs/plex-parity/PARITY.md` (audit
+> d'écrans + backlog, quasi entièrement vert).
 
 ## État du projet
 
@@ -12,235 +13,195 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `0.69.6` (tags `akasha-os-vX.Y.Z`, Release Please).
-- **Version réellement sur le Pi** : `0.69.6` — **déployée le 2026-10-25**
-  (push ciblé de `script.akasha.aura` + restart Kodi ; le flux complet
-  reste tarball → `install.sh`). v0.68.1 :
-  (le déploiement a d'abord poussé 0.59.0 depuis un `main` local périmé,
-  puis 0.68.0, puis le fix aura → refaire `git pull` avant tout déploiement,
-  le repo avance vite : une session parallèle a livré 0.60 → 0.68 pendant la
-  passation). Pi joignable : `root@192.168.3.77` (WiFi `Freebox-37FD5E`,
-  LAN `192.168.3.0/24`, SSH par clé OK). L'IP `192.168.1.88` citée dans
-  `AGENTS.md` est **obsolète** — migration réseau du 2026-10-23, source de
-  vérité : `atlas/docs/hosts.md`.
+- **Version livrée** : `akasha-os-v0.69.10` (tag, Release Please,
+  2026-10-26).
+- **Version sur le Pi** : `0.69.10` (label Guide vérifié dans le splash
+  log : `local=0.69.10, remote=0.69.10`) **+ working copy de
+  `aura_detail.py` poussée par scp** (fix staleness saisons, hash
+  `c13a4b86f5ac25129a0c4be68ea81aa0` identique repo↔Pi) — **déployée mais
+  NON commitée**. Le Pi tourne en avance sur git.
+- **Branche active** : `fix/aura-search-rail` — ~200 commits d'avance sur
+  `origin/main` (accumulation de plusieurs sessions de parité ; le cycle
+  release est en retard, voir TODO n°1).
+- Pi joignable : `root@192.168.3.77` (SSH par clé OK, WiFi
+  `Freebox-37FD5E`, LAN `192.168.3.0/24`). L'IP `192.168.1.88` citée dans
+  `AGENTS.md` est **obsolète** — source de vérité : `atlas/docs/hosts.md`.
 - Fonctionne : lecture Plex (reprise, notes, watched), fiches détail
-  films/séries/épisodes/personnes, recherche, bibliothèque A-Z, Store +
-  apps externes, OSD minimaliste Plex, menu Paramètres unifié façon
-  Android TV, Mode Ambiant (diaporama Ken Burns + horloge/météo + veille
-  CEC), télécommande service (volume CEC, bouton Power),
-  `analyser-de-performances` (collecteur perf + rapport), overlay de
-  chargement sur les menus natifs Kodi.
-- Statut de travail : `active` (source canonique : ariane, voir `ARIANE.md`).
-- Tests : ~410 unitaires verts (aura 265, ambient 67, perfanalyzer 20,
-  remote 28, quickstart 22, cloud.gaming 8), CI par addon dans
-  `.github/workflows/test.yml`.
+  films/séries/saisons/épisodes/personnes, recherche, bibliothèque A-Z,
+  Catégories + drill-in filtré, Store + apps externes, OSD Plex complet
+  (cercles queue+gear, thumb, badge −10, overlay chapitres/queue, menu
+  pistes), FAST Live TV + EPG now/next (238 chaînes), pseudo-sections
+  livetv/playlists à chrome collapsé, menu Paramètres unifié, Mode
+  Ambiant, télécommande service, perfanalyzer.
+- Statut de travail : `active` (source canonique : ariane, `ARIANE.md`).
+- Tests : **443 unitaires verts** (dernier run 2026-10-31).
 
-## Décisions prises
+## Décisions prises (depuis le handoff 2026-10-25)
 
-- **Pas de screensaver Kodi natif** : le watchdog CPythonInvoker tue les
-  screensavers Python ~20 s → Ambiant = `WindowXML` + service idle
-  (`service.akasha.ambient`).
-- **Instance de fenêtre unique/réutilisée** : chaque `WindowXML` construit
-  consomme définitivement un ID dynamique (~100/session) → windows cachées
-  via `_get_sub_window()` (Aura) et instance unique (Ambient).
-- **Menus natifs = écran de chargement permanent** plutôt que chasser
-  chaque flash (handoff vidéo inclus).
-- **Ken Burns par 2 slots `image` alternés** au lieu de `multiimage` :
-  l'animation `Visible` repart à zéro par photo, aucune dérive de timer.
-- **Préchargement texture 1×1/1,5 s** pour tout swap d'image : un decode+
-  upload 1080p sur le thread de rendu gèle ~200 ms (~25 fps GUI max sur Pi4).
-- **Paramètres unifiés dans Aura** (`settings_engine.py` + catalogue) au
-  lieu de raccourcis vers les écrans Kodi/LibreELEC — pile
-  catégories → réglages → picker radio, façon Android TV.
-- **i18n une seule source** (`i18n.py` → `.po` générés, `LANGUAGES` prêt
-  pour ajouter des langues ; français d'abord, tests de garde CI).
-- **Endpoints publics** `plex.akasha.ing` / `connector.akasha.ing` (pas de
-  VPN) ; UA custom obligatoire (Cloudflare 1010 bannit `urllib`).
-- **Mutations Plex uniquement via le client direct** (rate/scrobble/
-  removeFromContinueWatching) — le connector n'a pas de mutations.
-- **Dedup par série** dans les rangées de reco (épisode→série via
-  `grandparent_rating_key`).
-- **Focus « Plex » au premier contenu** : Down depuis la barre atterrit
-  sur la première rangée/grille (pas les sous-onglets), sélection d'un
-  onglet focus la grille, fiche série → saison en cours, saison → prochain
-  épisode, Back centré sur la carte quittée (v0.69.0).
-- **Focus différé par thread + génération** plutôt que `setFocus` au clic :
-  un `setFocus` dans le même tick qu'un toggle `<visible>` est annulé par
-  la revalidation Kodi → délai 0,3 s + compteur de génération (toute
-  action utilisateur invalide le focus en attente) (v0.69.0).
-- **Nav Up/Down entre slots reco chaînée en Python** : le contre-slide de
-  l'animation de sortie rend les rangées sorties *sous* la rangée focusée
-  → le navigateur géométrique Kodi lit un ordre inversé (Down rebouclait
-  sur la rangée du dessus, Up sautait une rangée / les sous-onglets).
-  Chaînage explicite vers le slot rempli le plus proche (v0.69.2).
-- **Labels des pilules d'action via overlays `label`** :
-  `ControlButton.setLabel` écrit un champ que ce build Kodi 21.3 ne rend
-  jamais (le `<label>` XML est figé au parsing) → les labels dynamiques
-  vivent sur des contrôles `label` frères (7150-7156), positionnés par
-  `_sync_action_row()` comme les overlays d'icônes (v0.69.3).
-- **`border="32"` sur `rounded-solid.png` (source 64 px) = artefact de
-  couture** : le milieu étirable tombe à 0 px → utiliser `border="16"`
-  sur toutes les textures 9-slice étirées (v0.69.3).
-- **Kebab `⋯` par bibliothèque dans la sidebar** : Left sur un item
-  bibliothèque (marqué `is_library`) ouvre le menu Épingler/Désépingler
-  + Monter/Descendre ; réutilise `divert.pinned_libraries` /
-  `divert.library_order` existants (v0.69.3).
-- **Masks de coins = teintes par `colordiffuse`, jamais de couleur
-  figée** : `poster/landscape-corners.png` et `cast-mask.png` étaient
-  cuits en `#0A0C10` → blocs noirs sur les fonds réels (`#0D1017`
-  fenêtre, `#10131A` fiches/sheets). Textures régénérées en blanc +
-  `colordiffuse` par surface ; Kodi ne clippe pas nativement, le mask
-  doit épouser le fond local (v0.69.4).
+- **Coins arrondis des cartes = PNG alpha réel via proxy loopback**
+  (`resources/lib/art_proxy.py`, commit `91248c5`) : Kodi ne clippe pas
+  l'alpha et les covers `*-corners.png` teintées laissaient des pixels
+  opaques visibles sur fond clair/voile coloré. Le proxy
+  `http://127.0.0.1:8194/art` wrap `plex_client.image_url` /
+  `connector_client.image_url` via le param `radius` (poster 16 px,
+  landscape 22 px, catégorie 26 px), fetch upstream, arrondit avec PIL,
+  sert du PNG caché sur disque (dédup par lock). Les covers XML se
+  masquent quand l'URL art pointe sur `127.0.0.1`. Validé au pixel près
+  sur grilles, recherche, fiche, voile coloré et tuiles catégories.
+- **Log proxy sans secrets** : les URLs Plex portent `X-Plex-Token` en
+  query → les logs d'erreur masquent la query (commit inclus dans
+  `91248c5`).
+- **Saisons fiche = appartenance par `rating_key`** (`_seasons_key`) +
+  **garde `parent_rating_key`** : la fenêtre détail est réutilisée entre
+  pages et `_load_seasons` court-circuitait sur `self._seasons` non vide
+  → Black Butler affichait le poster de saison d'Alya (metadata 81486).
+  Deuxième couche : le backend `show_seasons(82547)` a **réellement servi
+  1 saison étrangère** → les saisons dont `parent_rating_key` ≠ rk du
+  show sont droppées avec warning. Validé live : Black Butler →
+  « 5 Saisons » correctes, log `dropped 1 foreign seasons (rk=82547)`
+  (non commité, voir « En cours »).
+- **Captures légères obligatoires** (`AGENTS.md` commit `9aaf80b`) :
+  ~960×540 JPEG par défaut (`convert -resize 960x540 -quality 70`),
+  1080p uniquement pour texte fin/pixels (le dire), jamais deux captures
+  du même écran, dossier dédié `/tmp/akasha-shots`.
+- **Restart Kodi par `systemctl restart kodi`** : `Application.Quit`
+  JSON-RPC est **ignoré** sur ce build (retourne OK, process inchangé).
+- **Décodage logiciel Live TV restauré** : après un passage en soft
+  decode pour les chaînes FAST, `useprimedecoder` est remis à `true` à la
+  sortie (sinon la lecture VOD HW suivante casse).
+- **Fetches détail en parallèle + maps bg reset par render** :
+  `_render()` reset `_bg_done`/`_bg_results` et `_bg_start()` capture le
+  dict courant → un thread tardif d'un render précédent ne peut pas
+  écrire dans la page suivante (architecture anti-staleness, v0.69.x).
 - **`/status/sessions/history/all` ignore `X-Plex-Container-Size`** :
-  un appel non scopé répond **tout** l'historique (~25 Mo ici) → pic
-  `json.loads` qui a OOM-tué `kodi.bin` (Pi4, ~100 Mo libres). Toujours
-  scoper via `watch_history(rating_key=)` (`metadataItemID`, ~1 Ko) ou
-  borner `since_days=` (`viewedAt>=` marche, ~4 Mo/180 j) + trancher
-  AVANT normalisation. `lastViewedAt` sur l'item évite l'appel entier.
-- **Fetches détail en parallèle + dédup in-flight** : `_render` lance
-  extras/history/ondeck/seasons sur des threads daemon joints au point
-  de consommation (rendu 4,6-13 s → ~1-2 s) ; `_request` déduplique les
-  requêtes identiques en vol (prefetch focus 250 ms + render) pour ne
-  jamais fetcher 2× la même URL ; les params du prefetch DOIVENT égaler
-  ceux du render (clé de cache = path+params triés → `on_deck limit=60`).
-- **`InfoTagVideo.setPlaycount` (c minuscule)** : `setPlayCount` lève
-  AttributeError sur Kodi 21 → getattr avec fallback (v0.69.6).
-- **Décodage UTF-8 tolérant** (`errors='replace'`) : des titres Latin-1
-  font planter le décodage strict HORS de tout except → endpoint en
-  échec à chaque appel + refetch permanent.
-- **Voile de révélation fiche** (`AuraDetailReady`/`AuraDetailFanart`) :
-  masque le paint contrôle-par-contrôle ; reset dans `onInit` seulement
-  (les transitions internes saison↔épisode re-rendent sans re-voiler).
+  appel non scopé = tout l'historique (~25 Mo) → OOM `kodi.bin` sur Pi4.
+  Toujours `watch_history(rating_key=)` ou `since_days=` borné.
 
-- **Mission active** : boucle de parité visuelle/comportementale
-  Plex Android TV ↔ Aura (consigne utilisateur : « continuer en boucle le
-  cycle tant que tout n'est pas identique… polish visuel le plus parfait
-  possible »). Audit complet dans `docs/plex-parity/PARITY.md`.
-- **Prochaine étape prévue** : **vérification visuelle sur la TV** —
-  v0.69.3 déployée : pilules d'action labelisées (overlay + police
-  28 px, coins stade propres), panneau latéral en police 32 px,
-  kebab `⋯` sidebar (Left → épingler/désépingler/réordonner,
-  vérifié à l'écran). Reste à valider : flux de focus Plex (barre →
-  contenu, onglet → grille, saison/épisode en cours, retour centré),
-  animation de sortie de rangée adoucie (moitié distance + fade +
-  ease-in/out), cadre de focus plus fin (4 px), semi-opaque (`B3FFFFFF`)
-  et zoomé avec la carte + coins arrondis conservés. Puis reprendre le
-  backlog dans `docs/plex-parity/PARITY.md` — attention, il avance vite
-  (session parallèle : B8, B10, B12, B15, B16, B17 livrés entre 0.60 et
-  0.68 ; le flux de focus v0.69.0 couvre l'item « restauration du focus »
-  partiellement). L'IP dans `AGENTS.md` est corrigée (`.77`).
-- **Travail non commité** : aucun dans le repo (`git status` propre sauf
-  `ARIANE.md` régénérable).
-- **Stash orphelin** : `stash@{0}` « wip-fix-aura-interruptions » (guide/
-  sleep-timer/keymaps) — quasi-certainement obsolète (sleep-timer mergé
-  via PR #133) : vérifier puis supprimer.
-- **Branche `feature/voice-commands`** : pushée sur origin pour
-  préservation ; projet commandes vocales en pause (fiche Atlas
-  `akasha-os-voice-commands`) — ne pas reprendre sans réactivation ariane.
-- Claude bridge : session `plex-parity` persistante (MCP `claude-bridge`,
-  param `session="plex-parity"` obligatoire) à continuer pour les
-  arbitrages design.
+## En cours (au moment du refresh)
 
-## TODO / prochaines étapes
+- **Chantier actif** : boucle de parité Plex Android TV ↔ Aura, consigne
+  « continuer en boucle tant que tout n'est pas identique, polish visuel
+  le plus parfait possible ». `PARITY.md` quasi entièrement vert.
+- **Travail NON commité** (un seul fichier) :
+  `kodi/addons/script.akasha.aura/resources/lib/aura_detail.py` —
+  fix staleness saisons (`_seasons_key` + garde `parent_rating_key`,
+  diff ~35 lignes, commentaires français dans le code expliquant le cas
+  Alya→Black Butler observé live). **Déjà déployé et validé sur le Pi**
+  (hash identique, restart Kodi fait, reproduction A→B propre).
+  Reste à faire : tests auto puis commit.
+- **Prochaine étape prévue** : écrire les tests `_seasons_key` /
+  foreign-season dans `tests/test_aura_detail.py` (pattern existant :
+  méthodes unbound appelées sur un `SimpleNamespace`, xbmc stubbé) →
+  suite 443 → commit `fix(aura-detail):` → cycle release complet →
+  reprendre la boucle parité sur les écarts restants de `PARITY.md`.
 
-1. ~~Déployer~~ **fait 2026-10-25** (v0.68.1 sur le Pi). Reste :
-   vérification visuelle TV + `analyser-de-performances` après quelques
-   heures d'usage (rapport sur les stalls/erreurs réels).
-2. Backlog parité : se référer à `docs/plex-parity/PARITY.md` — **la
-   session parallèle a déjà livré B8, B10, B12, B15, B16, B17** (v0.60 →
-   v0.68) ; revérifier chaque item avant de l'attaquer.
-3. **B1** — comportement « On Deck / Up Next » Plex (si non livré).
-4. **B14** — chapitres dans l'OSD (si non livré).
-5. Restauration du focus au retour de fiche/recherche/sheet ; refresh de
-   rangée après action ; threads touchant l'UI après fermeture de fenêtre
-   — **partiellement couvert par le flux de focus v0.69.0** ; à revérifier
-   sur device (le focus différé tourne dans un thread Python — vérifier
-   qu'il ne subsiste pas d'erreur « asked to focus, but it can't » liée à
-   notre code ; celle de `defaultcontrol 2007` au chargement est
-   préexistante et bénigne).
-6. Appuis longs : personnes, résultats recherche, tuiles app, store,
-   épisodes de la fiche.
-7. États vides/erreur/chargement sur device ; Back à la racine (sortie
-   confirmation façon Plex ?) ; mémoire textures sur sessions longues.
-8. Ambiant reculés (volontaire) : crédit photo, fond flou non-16:9,
+## TODO / prochaines étapes (ordonné)
+
+1. **Commit + release du lot `fix/aura-search-rail`** : ~200 commits
+   d'avance, dont le fix staleness déjà sur le Pi. Flux KSP : tests →
+   commit → push → PR/merge → Release Please PR → merge → pull →
+   `./scripts/apply.sh <pi> <password>` (ou équivalent key-auth : tarball
+   → scp → `install.sh` → restart Kodi) → **vérif label version dans le
+   menu Guide**. Ne pas déclarer le déploiement fait tant que le label
+   n'est pas vu à l'écran.
+2. **Investiguer le backend `show_seasons`** : `show_seasons(82547)` a
+   retourné 1 saison d'un autre show (log `dropped 1 foreign seasons`) —
+   vérifier le connecteur (`connector_client.py` / endpoint Plex
+   children) : cache croisé, clé de cache mal scopée, ou réponse Plex
+   réellement polluée.
+3. Reprendre la boucle parité (surfaces restantes à revérifier dans
+   `PARITY.md` : états vides/erreur sur device, appuis longs restants,
+   mémoire textures sessions longues, Back à la racine = sortie
+   confirmation façon Plex ?).
+4. Vérification TV réelle + rapport `analyser-de-performances` après
+   quelques heures d'usage.
+5. Ménage : stash orphelin `wip-fix-aura-interruptions`, ~20 branches
+   locales stale, IP obsolète `192.168.1.88` encore dans `AGENTS.md`.
+6. Ambiant reculés (volontaire) : crédit photo, fond non-16:9,
    appariement portrait, luminosité nocturne.
-9. Ménage : stash orphelin, ~20 branches locales stale, IP dans `AGENTS.md`.
 
-## Blocages / points d'attention
+## Blocages / pièges connus
 
-- **Deux IPs circulent pour le Pi** : `192.168.3.77` = la vraie (Atlas
-  `docs/hosts.md`, testée 2026-10-24) ; `192.168.1.88` = obsolète (encore
-  dans `AGENTS.md` et de vieux docs — toujours vérifier `docs/hosts.md`
-  d'Atlas avant de déployer).
-- SSH **par clé** fonctionne (pas besoin du mot de passe attendu par
-  `apply.sh`).
-- GUI Kodi ~**25 fps en animation** sur Pi4 (~40 ms/frame même en governor
-  performance) — optimiser en réduisant les animations concurrentes.
-- `System.FPS` lissé = inutilisable ; mesurer via `drm_prof.py` (hash des
-  frames présentées, ~90 fps de capture).
-- Kodi résout la navigation géométriquement malgré `<onup>` → intercepter
-  avant `super().onAction()` + `setFocus`.
-- `NotifyAll` arrive en `onNotification` préfixé `Other.`.
-- **Pas de parenthèses dans les conditions skin Kodi** (`visible`,
-  `condition` d'animation) : le parseur coupe sur `|` et log « unmatched
-  parentheses », la règle est ignorée silencieusement. Écrire la forme DNF :
-  `(A|B)+C` → `A+C | B+C`, `!(A|B)` → `!A + !B` (corrigé dans Aura.xml,
-  v0.68.1).
-- **Nouveaux services à activer dans `install.sh`** : la liste `INSERT ...
-  enabled` d'`install.sh` doit inclure tout nouvel addon service sinon il
-  reste désactivé dans Addons33.db et ne démarre jamais (bug trouvé sur
-  perfanalyzer, corrigé v0.68.1).
-- **La navigation géométrique Kodi utilise les bornes animées** : une
-  animation slide qui déplace un contrôle au-delà de son voisin inverse
-  l'ordre Up/Down perçu — chaîner explicitement en `onAction` quand une
-  animation déplace des contrôles navigables (v0.69.2).
-- **Focus et `<visible>` en même tick** : `setFocus` juste après avoir
-  rendu un contrôle visible est annulé par la revalidation Kodi → pattern
-  focus différé dans `aura_window.py::_defer_focus` (thread 0,3 s +
-  garde de génération ; `AlarmClock` inadapté, granularité `hh:mm`).
-  Vérifier sur device que le thread ne viole pas la règle UI-thread.
-- `tail -1`-style de matching fragile dans les patchs skin : les fenêtres
-  AH2 finissent par `</controls>\n\n</window>` (ligne vide) — insérer avant
-  le dernier `</controls>` plutôt que de matcher une fin exacte.
-- **Ne jamais déclarer une parité visuelle** sans capture émulateur/Pi.
-- Le Pi est une vraie TV de salon : pas de reboot/poweroff/CEC sans
-  confirmation ; préférer « Redémarrer Akasha » (Kodi seul).
-- Repo **public** : aucun secret ; `ARIANE.md` généré par ariane (ne pas
-  éditer à la main, il est tracké).
-- `/tmp` du Pi (tmpfs) se remplit vite — éviter d'y stocker des captures.
+- **Kodi ne redémarre pas via `Application.Quit`** → `ssh root@192.168.3.77
+  'systemctl restart kodi'` (non destructif, TV de salon : jamais de
+  reboot/poweroff sans confirmation).
+- **PixelCamera** (`http://192.168.3.77:8088/frame.jpg`) : doit tourner
+  avec `KODI_SCREENSHOT_DIR=/storage/screenshots` (sinon 503/timeout —
+  il attend un `screenshot*.png` stable). Relance :
+  `export KODI_SCREENSHOT_DIR=/storage/screenshots; python3 -u /storage/pixelcamera.py`.
+  Si mort après reboot, le relancer par SSH.
+- **ffmpeg absent en local** (poste dev) → downscale via ImageMagick :
+  `convert cap.jpg -resize 960x540 -quality 70 cap-s.jpg` (PIL dispo
+  aussi). Sur le Pi, kodi-send `TakeScreenshot` écrit dans
+  `/storage/screenshots/`.
+- **`Input.SendText` ne remplit pas le clavier custom d'Aura** (la
+  recherche gère `onClick` sur le panneau 8100 touche par touche) →
+  naviguer les touches à la télécommande ou cliquer une entrée de
+  l'historique (liste 8110).
+- **Back à la racine quitte Aura** et relance le boot splash
+  (~20 s) — ne pas Back une fois de trop ; la fenêtre active se vérifie
+  via JSON-RPC `GUI.GetProperties` (`currentwindow` : 13002 =
+  AuraDetail).
+- **Items Discover/cloud à clés hex** : `rating_key` provider hex →
+  404 attendus sur `/library/metadata/<hex>` (extras/related/stream
+  labels/markers/chapters) — pas un bug local ; un trailer IVA peut
+  démarrer en fond (comportement Plex).
+- **Posters manquants côté serveur** : certains items (Baki 2018, Baki
+  the Grappler) n'ont aucun thumb upstream → carte noire + titre, ce
+  n'est **pas** une régression du proxy (vérifié via JSON-RPC
+  `ListItem.Art(thumb)` vide).
+- **Vignettes chapitres noires dans l'overlay OSD** quand le serveur n'a
+  pas d'index BIF (`/library/parts/<id>/indexes/sd` → 404) — limitation
+  Plex, placeholder sombre acceptable.
+- **Genres doublés** (« Comédie/Comedie », « Drame/Drama ») : viennent
+  des agents FR+EN du serveur — Plex officiel les affiche pareil.
+- **Focus et `<visible>` en même tick** : `setFocus` juste après un
+  toggle visible est annulé par Kodi → `_defer_focus` (thread 0,3 s +
+  génération).
+- **Pas de parenthèses dans les conditions skin** (`visible`) : parseur
+  Kodi casse silencieusement → forme DNF (`A+C | B+C`).
+- `/tmp` du Pi = tmpfs qui se remplit vite → captures en
+  `/storage/screenshots`, jamais `/tmp`.
+- Repo **public** : aucun secret, pas de captures/IPs dans git.
+  `ARIANE.md` généré, ne pas éditer.
+- SSH **par clé** OK ; `apply.sh` attend un mot de passe → reproduire
+  ses étapes en key-auth si besoin.
 
 ## Fichiers clés
 
 | Chemin | Rôle |
 |---|---|
-| `kodi/addons/script.akasha.aura/resources/lib/aura_window.py` | dispatcher principal, top-bar, rangées reco, grille biblio, sheets appui long, handoff lecture |
-| `…/lib/aura_detail.py`, `aura_search.py`, `aura_person.py`, `aura_app.py`, `aura_store.py`, `osd_menu.py` | écrans Aura |
-| `…/lib/plex_client.py` | client Plex (cache, mutations, breaker+UA, removeFromContinueWatching) |
-| `…/lib/i18n.py` | source unique des chaînes → régénère les `.po` |
-| `…/lib/settings_engine.py` + `settings_catalog.py` + `aura_settings_panel.py` | menu Paramètres unifié |
-| `kodi/addons/script.akasha.ambient/` + `service.akasha.ambient/` | Mode Ambiant (fenêtre + trigger idle) |
-| `kodi/addons/service.akasha.perfanalyzer/` | collecteur perf + `resources/lib/report.py` |
-| `kodi/scripts/analyser-de-performances.py` | CLI rapport perf |
-| `skin-patches/` | patchs skin AH2 appliqués par `install.sh` (`patch_native_loading.py` = overlay chargement) |
-| `scripts/install.sh`, `scripts/apply.sh` | installation/déploiement Pi |
-| `docs/plex-parity/` | audit, captures, outils (`emu.sh`, `drm_prof.py`, `pi.sh`, `compare.py`) |
-| `docs/perf-analyzer.md` | doc analyseur + overlay de chargement |
-| `docs/ambient-mode/`, `docs/settings/` | specs et décisions des features |
+| `kodi/addons/script.akasha.aura/resources/lib/aura_window.py` | dispatcher principal, top-bar, rangées, grille biblio, `_open_detail` (reset état fiche), sheets appui long |
+| `…/lib/aura_detail.py` | fiche détail (modes item/show/season, fetches bg parallèles, `_seasons_key`) — **fichier du fix non commité** |
+| `…/lib/art_proxy.py` | proxy loopback `127.0.0.1:8194/art` → PNG coins arrondis (PIL, cache disque, dédup lock) |
+| `…/lib/plex_client.py`, `connector_client.py` | clients API (`image_url(..., radius=)` wrap proxy) |
+| `…/lib/aura_search.py`, `aura_person.py`, `aura_menu.py`, `osd_menu.py` | écrans Aura |
+| `…/lib/i18n.py` | source unique des chaînes → `.po` |
+| `…/lib/gui_guard.py`, `divert_source.py`, `field_veil.py` | verrous UI, items vidéo, voile fiche |
+| `kodi/addons/script.akasha.aura/tests/test_aura_detail.py` | tests fiche (xbmc stubbé, méthodes unbound) |
+| `skin-patches/plex-osd/VideoOSD.xml` | OSD Plex (cercles queue/gear, thumb, −10) |
+| `docs/plex-parity/` | `PARITY.md` (backlog), `HANDOFF.md` (détails outils), `scripts/pi.sh` (cap/key/ssh), refs officielles |
+| `scripts/install.sh`, `scripts/apply.sh` | installation / déploiement Pi |
 
 ## Contexte machine
 
-- **Pi** : `root@192.168.3.77` (LibreELEC, SSH par clé OK, WiFi
-  Freebox-37FD5E). ~~192.168.1.88~~ obsolète. TV = écran via CEC/HDMI ;
-  Pi allumé + TV éteinte = SSH joignable quand même.
-- **Déploiement** : `apply.sh` exige un mot de passe → reproduire ses
-  étapes en key-auth : tarball (`scripts/install.sh` + addons + media) →
-  scp → `install.sh` sur le Pi → restart Kodi.
-- **Vérifs** : label version dans le menu Guide ; `kodi-send`/`pi.sh` pour
-  commandes ; `drm_film.py`/`drm_prof.py` pour captures/profiling ;
-  `analyser-de-performances` sur le Pi pour le rapport perf.
-- **Émulateur** : AVD `google-tv` (Android TV + Plex) via `emu.sh` —
-  références dans `docs/plex-parity/reference/`.
-- **Workflow** : branche courte → PR → squash merge → Release Please PR →
-  tag. Commits anglais, docs projet en français OK. Atlas : consulter
-  `projects/akasha-os.md`, journaliser dans `journal/session-*` sur
-  branche `session/*`.
+- **Pi** : `root@192.168.3.77` (LibreELEC, SSH clé, Pi allumé + TV
+  éteinte = SSH joignable). JSON-RPC `http://192.168.3.77:8080/jsonrpc`.
+- **Captures** : `curl http://192.168.3.77:8088/frame.jpg` (PixelCamera,
+  port 8088) → `/tmp/akasha-shots/<nom>-s.jpg` en 960×540. Viewer :
+  `http://192.168.3.77:8088/frame`.
+- **Navigation** : `kodi-send --host=192.168.3.77 --action="Left"` ou
+  `docs/plex-parity/scripts/pi.sh key <action>`.
+- **Vérif fenêtre/contrôle** : JSON-RPC `GUI.GetProperties`
+  (`currentwindow`, `currentcontrol`) ; `ListItem.Art(thumb)` via
+  `XBMC.GetInfoLabels` pour l'URL art réelle d'une carte.
+- **Log** : `/storage/.kodi/temp/kodi.log` (les warnings `Akasha Aura
+  Detail:` y tracent les drops/échecs).
+- **Déploiement ponctuel** : `scp` direct vers
+  `/storage/.kodi/addons/script.akasha.aura/resources/lib/` +
+  `systemctl restart kodi` (hash md5 à comparer après).
+- **Workflow** : branche courte → tests → PR → Release Please → tag →
+  `apply.sh` → vérif label version. Commits anglais, docs FR OK.
+- **Atlas** : fiche `projects/akasha-os.md`, journal de cette session
+  dans `journal/session-2026-10-31-*` (branche `session/*` du worktree
+  `/tmp/atlas-sess`).
