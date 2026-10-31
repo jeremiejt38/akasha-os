@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.2...akasha-os-v0.72.3) (2026-10-31)
+
+
+### Performance Improvements
+
+* **system:** pin the performance governor for instant UI reactivity ([#241](https://github.com/jeremiejt38/akasha-os/issues/241)) ([75ff6db](https://github.com/jeremiejt38/akasha-os/commit/75ff6db8b40e6462421d0130da4de1de10e2680e))
+
 ## [0.72.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.1...akasha-os-v0.72.2) (2026-10-31)
 
 
