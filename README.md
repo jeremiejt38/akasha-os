@@ -12,7 +12,7 @@ Custom LibreELEC 12 (Omega) distribution for Raspberry Pi 4, focused on HTPC, me
 - **Custom Skin**: Arctic Horizon 2 with Akasha branding, reorganized menus (Films / Series / Music / Games / Akasha Settings)
 - **Controller Support**: Xbox Wireless Controller with corrected axis mapping
 - **Akasha Settings Panel**: System info, fan test, CEC test, sleep timers, reboot/shutdown from Kodi UI
-- **Argon One Case**: Fan control via I2C (`akasha-fan.service`: stopped below 48C, 30% at 48C ramping linearly to 100% at 70C), power button shutdown with CEC. Ondemand governor tuned to boost only on >1s sustained heavy load (`akasha-cpufreq.service`)
+- **Argon One Case**: Fan control via I2C (`akasha-fan.service`: stopped below 48C, 30% at 48C ramping linearly to 100% at 70C), power button shutdown with CEC. Performance governor for instant UI reactivity, pinned 2 GHz (`akasha-cpufreq.service`)
 
 ## Hardware
 
