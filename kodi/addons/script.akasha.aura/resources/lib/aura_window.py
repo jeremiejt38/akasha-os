@@ -152,6 +152,11 @@ RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
 # navigation resolves against the effective id (_reco_slot_list_id).
 RECO_LANDSCAPE_IDS = tuple(list_id + 1 for _, list_id in RECO_SLOT_IDS)
 RECO_ALL_LIST_IDS = RECO_LIST_IDS + RECO_LANDSCAPE_IDS
+# Plex's Tendances tab ends with a full-width promo card ("Find What To
+# Watch, Anywhere!") after the last hub row. It binds as a synthetic
+# trailing hub row rendered by one focusable button per slot, wherever the
+# sliding viewport lands it -- the same slot mechanism as real rows.
+RECO_PROMO_IDS = tuple(list_id + 5 for _, list_id in RECO_SLOT_IDS)
 # Home tab strip (Plex "For You" / "Trending" / "Activity"), only on the
 # Divertissement Accueil view -- the library view has its own strip
 # (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
@@ -315,6 +320,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # the top slot. Both the Plex /hubs source and the legacy 3-row
         # fallback produce the same shape.
         self._hub_rows = []
+        # Slot indexes currently bound to the synthetic promo row
+        # (Tendances footer) -- drives _reco_slot_list_id's effective id.
+        self._slot_promo = set()
         # Async view loads (tab/section clicks no longer fetch on the
         # input path): every loader bumps this and the worker checks it
         # before rendering, so a superseded load never paints over the
@@ -822,12 +830,22 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     # _apply_reco_state() surfaces the Plex-style offline
                     # state without burning more timeouts.
                     rows = [{'title': '', 'paged': None, 'error': fatal}]
+            # Plex's Tendances tab ends with the full-width "Find What To
+            # Watch, Anywhere!" promo card below the last hub row --
+            # appended as a synthetic row so the viewport scrolls it in
+            # like real content. Tendances global only: never on Pour
+            # vous/Activité, library sections, or an empty/failed load.
+            if section is None and self._home_tab == HOME_TAB_TRENDING \
+                    and any(not r.get('error') and r.get('paged')
+                            and r['paged'].items for r in rows):
+                rows.append({'title': '', 'paged': None, 'promo': True})
             with self._ui_lock:
                 if self._closing or gen != self._view_load_gen:
                     return
                 self._hub_rows = rows
                 self._hub_offset = 0
                 self._reco_rows = {}
+                self.setProperty('AuraFocusSlot', '')
                 self._apply_reco_state(section)
                 self._rebind_reco_slots()
                 self._update_hero(clear_if_empty=True)
@@ -1069,6 +1087,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return RECO_LIST_IDS.index(list_control_id)
         if list_control_id in RECO_LANDSCAPE_IDS:
             return RECO_LANDSCAPE_IDS.index(list_control_id)
+        if list_control_id in RECO_PROMO_IDS:
+            return RECO_PROMO_IDS.index(list_control_id)
         return -1
 
     def _reco_slot_list_id(self, slot_index):
@@ -1077,7 +1097,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         Plex Android TV renders Continue Watching (the only style='hero'
         hub) as a poster shelf like every other row -- the landscape twin
         lists stay bound but permanently hidden (neutralised in
-        _rebind_reco_slots), so this always resolves to the poster id."""
+        _rebind_reco_slots), so this always resolves to the poster id.
+        The synthetic Tendances promo row resolves to the slot's promo
+        button instead."""
+        if slot_index in self._slot_promo:
+            return RECO_PROMO_IDS[slot_index]
         return RECO_LIST_IDS[slot_index]
 
     @_ui_locked
@@ -1098,12 +1122,29 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 land_lst = self.getControl(land_id)
             except RuntimeError:
                 continue
+            self._slot_promo.discard(i)
             if row is None:
                 poster_lst.reset()
                 land_lst.reset()
                 self._reco_rows.pop(list_id, None)
                 self._reco_rows.pop(land_id, None)
                 self.setProperty('AuraRowStyle{}'.format(i), '')
+                try:
+                    self.getControl(label_id).setLabel('')
+                    self.getControl(label_id + 1).setLabel('')
+                except RuntimeError:
+                    pass
+                continue
+            if row.get('promo'):
+                # Synthetic Tendances promo row: no items, no row label --
+                # the slot's focusable promo button (RECO_PROMO_IDS,
+                # visible on AuraRowStyle{i}==promo) renders the card.
+                poster_lst.reset()
+                land_lst.reset()
+                self._reco_rows.pop(list_id, None)
+                self._reco_rows.pop(land_id, None)
+                self.setProperty('AuraRowStyle{}'.format(i), 'promo')
+                self._slot_promo.add(i)
                 try:
                     self.getControl(label_id).setLabel('')
                     self.getControl(label_id + 1).setLabel('')
@@ -1148,23 +1189,46 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if new_offset == self._hub_offset:
             return False
         self._hub_offset = new_offset
-        self._rebind_reco_slots()
-        # Rebinding resets the focused slot's list; if Kodi parked focus
-        # elsewhere during the empty window (observed: Up at offset>0
-        # landed on the sub-tab strip instead of the re-entered row),
-        # bring it back to the slot the scroll was anchored on.
         slot = 0 if delta < 0 else len(RECO_SLOT_IDS) - 1
+        # Resetting the focused list drops focus, and every slot list's
+        # <visible> requires an in-range reco focus -- so with focus lost
+        # the deferred SetFocus below would hit an invisible control and
+        # Kodi would park on the top bar (observed on-device: Down at the
+        # bottom edge bounced to search). AuraFocusSlot force-renders the
+        # anchor slot until the deferred focus lands.
+        self.setProperty('AuraFocusSlot', str(slot))
+        self._rebind_reco_slots()
         try:
             if self.getFocusId() != self._reco_slot_list_id(slot):
                 self._defer_focus(self._reco_slot_list_id(slot))
         except RuntimeError:
             self._defer_focus(self._reco_slot_list_id(slot))
+        self._clear_focus_slot_later()
         return True
+
+    def _clear_focus_slot_later(self, delay=0.45):
+        """Drop the AuraFocusSlot override once the deferred focus landed."""
+        generation = self._focus_generation
+
+        def worker():
+            time.sleep(delay)
+            if generation != self._focus_generation:
+                return
+            try:
+                self.setProperty('AuraFocusSlot', '')
+            except Exception:
+                pass
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def _reco_slot_has_row(self, slot_index):
         return self._hub_offset + slot_index < len(self._hub_rows)
 
     def _reco_list_has_items(self, list_id):
+        if list_id in RECO_PROMO_IDS:
+            # Promo slots carry a focusable button, not an item list --
+            # they count as filled for nav chaining exactly when bound.
+            return RECO_PROMO_IDS.index(list_id) in self._slot_promo
         try:
             return self.getControl(list_id).size() > 0
         except RuntimeError:
@@ -1221,10 +1285,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             up = (before[-1] if before
                   else (eff_id if self._hub_offset > 0 else strip_up))
             down = after[0] if after else eff_id
-            # Wire both variants of the slot: setNavigation() persists on
-            # the hidden twin too, so flipping a hub's style between
-            # poster and landscape needs no extra sync.
-            for lid in (list_id, RECO_LANDSCAPE_IDS[i]):
+            # Wire all three variants of the slot: setNavigation()
+            # persists on the hidden twin and the promo button too, so
+            # flipping a hub's style between poster, landscape and the
+            # promo card needs no extra sync.
+            for lid in (list_id, RECO_LANDSCAPE_IDS[i], RECO_PROMO_IDS[i]):
                 nav(lid, up=up, down=down, left=DIVERT_SIDEBAR_ID)
 
         # State view's action button (B17): Up reaches whichever contextual
@@ -2213,6 +2278,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         """
         if not self._plex_client and not self._connector_client:
             self._hub_rows = []
+            self._slot_promo.clear()
+            self.setProperty('AuraFocusSlot', '')
             self._set_divert_state('config', action=self._open_settings_menu)
             return
         retry = (self._retry_divertissement if not self._divert_sections
@@ -2231,6 +2298,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             offline = any(isinstance(row['error'], OFFLINE_ERROR_TYPES)
                           for row in failed)
             self._hub_rows = []
+            self._slot_promo.clear()
+            self.setProperty('AuraFocusSlot', '')
             self._set_divert_state('offline' if offline else 'error',
                                    action=retry)
             return
@@ -4181,14 +4250,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # row at a fixed screen position -- focus stays on a slot while its
         # contents slide by one hub when scrolling past an edge.
         if aid == ACTION_MOVE_DOWN and \
-                focused in (RECO_LIST_IDS[-1], RECO_LANDSCAPE_IDS[-1]) \
+                focused in (RECO_LIST_IDS[-1], RECO_LANDSCAPE_IDS[-1],
+                            RECO_PROMO_IDS[-1]) \
                 and self._reco_slot_has_row(len(RECO_SLOT_IDS)):
             self._reco_scroll(+1)
             self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_UP and \
-                focused in (RECO_LIST_IDS[0], RECO_LANDSCAPE_IDS[0]) \
+                focused in (RECO_LIST_IDS[0], RECO_LANDSCAPE_IDS[0],
+                            RECO_PROMO_IDS[0]) \
                 and self._hub_offset > 0:
             self._reco_scroll(-1)
             self._defer_hero()
@@ -4392,6 +4463,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._open_more()
         elif controlID == DIVERT_PANEL_ID:
             self._on_divert_item_selected()
+        elif controlID in RECO_PROMO_IDS:
+            # Plex's promo card upsells cross-service Discover -- a cloud
+            # surface Aura has no equivalent of; the explicit stub matches
+            # the other non-routable cloud entries.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', i18n.tr(33642),
+                xbmcgui.NOTIFICATION_INFO, 2000)
         elif controlID in RECO_ALL_LIST_IDS:
             self._on_reco_item_selected(controlID)
         elif controlID == CATEGORY_PANEL_ID:

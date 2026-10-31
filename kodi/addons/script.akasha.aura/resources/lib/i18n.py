@@ -518,6 +518,11 @@ STRINGS = {
     33638: ('Supprimer le compte', 'Delete Account'),
     33639: ('En direct', 'Live'),
     33640: ('Chaînes', 'Channels'),
+    33641: ("Trouvez quoi regarder, n'importe où\xa0!",
+            'Find What To Watch, Anywhere!'),
+    33642: ('La découverte multi-services est une fonctionnalité Plex '
+            'Cloud',
+            'Cross-service discovery is a Plex cloud feature'),
 }
 
 MONTH_ABBRS = {

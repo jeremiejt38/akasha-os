@@ -1733,16 +1733,16 @@
                      is hidden (visible conditions) since Kodi cannot clip a
                      scrolled-off row behind the hero zone. -->
                 <control type="group">
-                    <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211)" reversible="true">
+                    <animation type="Conditional" condition="[Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)]" reversible="true">
                         <effect type="slide" start="0,0" end="0,-472" time="250" tween="quadratic" easing="inout"/>
                     </animation>
-                    <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                    <animation type="Conditional" condition="[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)]" reversible="true">
                         <effect type="slide" start="0,0" end="0,-944" time="250" tween="quadratic" easing="inout"/>
                     </animation>
-                    <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411)" reversible="true">
+                    <animation type="Conditional" condition="[Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)]" reversible="true">
                         <effect type="slide" start="0,0" end="0,-1416" time="250" tween="quadratic" easing="inout"/>
                     </animation>
-                    <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                    <animation type="Conditional" condition="[Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                         <effect type="slide" start="0,0" end="0,-1888" time="250" tween="quadratic" easing="inout"/>
                     </animation>
 
@@ -1754,7 +1754,7 @@
                         <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
@@ -1769,7 +1769,7 @@
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                                                     <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                                                     <effect type="fade" start="100" end="0" time="200"/>
                                                 </animation>
@@ -1784,11 +1784,11 @@
                         <onup>2007</onup>
                         <onleft>3310</onleft>
                         <ondown>5210</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>!String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
+                        <visible>!String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5315) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | String.IsEqual(Window.Property(AuraFocusSlot),0)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -1894,11 +1894,11 @@
                         <onup>2007</onup>
                         <onleft>3310</onleft>
                         <ondown>5210</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5210) | Control.HasFocus(5211)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5315) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | String.IsEqual(Window.Property(AuraFocusSlot),0)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2054,6 +2054,43 @@
                             </control>
                         </focusedlayout>
                     </control>
+                    <!-- Plex's "Find What To Watch, Anywhere!" promo card:
+                         full-width dark banner rendered where the synthetic
+                         Tendances footer row binds (AuraRowStyle{i}==promo).
+                         The button carries focus like Plex's clickable card;
+                         the trailing image is its focus ring. -->
+                    <control type="image">
+                        <left>127</left>
+                        <top>516</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <texture colordiffuse="FF232323" border="14">rounded-solid.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle0),promo)</visible>
+                    </control>
+                    <control type="button" id="5115">
+                        <left>127</left>
+                        <top>516</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <label>$ADDON[script.akasha.aura 33641]</label>
+                        <font>font_aura_rowhead</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <focusedcolor>FFFFFFFF</focusedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <texturenofocus colordiffuse="FF232323" border="14">rounded-solid.png</texturenofocus>
+                        <texturefocus colordiffuse="FF232323" border="14">rounded-solid.png</texturefocus>
+                        <onleft>3310</onleft>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle0),promo)</visible>
+                    </control>
+                    <control type="image">
+                        <left>119</left>
+                        <top>508</top>
+                        <width>1712</width>
+                        <height>128</height>
+                        <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle0),promo) + Control.HasFocus(5115)</visible>
+                    </control>
 
                     <control type="label" id="5200">
                         <left>127</left>
@@ -2063,7 +2100,7 @@
                         <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
@@ -2078,7 +2115,7 @@
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                                                     <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                                                     <effect type="fade" start="100" end="0" time="200"/>
                                                 </animation>
@@ -2093,11 +2130,11 @@
                         <onup>5110</onup>
                         <onleft>3310</onleft>
                         <ondown>5310</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>!String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
+                        <visible>!String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | String.IsEqual(Window.Property(AuraFocusSlot),1)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2203,11 +2240,11 @@
                         <onup>5110</onup>
                         <onleft>3310</onleft>
                         <ondown>5310</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5510) + !Control.HasFocus(5511)</visible>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | String.IsEqual(Window.Property(AuraFocusSlot),1)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2363,6 +2400,38 @@
                             </control>
                         </focusedlayout>
                     </control>
+                    <control type="image">
+                        <left>127</left>
+                        <top>988</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <texture colordiffuse="FF232323" border="14">rounded-solid.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle1),promo)</visible>
+                    </control>
+                    <control type="button" id="5215">
+                        <left>127</left>
+                        <top>988</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <label>$ADDON[script.akasha.aura 33641]</label>
+                        <font>font_aura_rowhead</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <focusedcolor>FFFFFFFF</focusedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <texturenofocus colordiffuse="FF232323" border="14">rounded-solid.png</texturenofocus>
+                        <texturefocus colordiffuse="FF232323" border="14">rounded-solid.png</texturefocus>
+                        <onleft>3310</onleft>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle1),promo)</visible>
+                    </control>
+                    <control type="image">
+                        <left>119</left>
+                        <top>980</top>
+                        <width>1712</width>
+                        <height>128</height>
+                        <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle1),promo) + Control.HasFocus(5215)</visible>
+                    </control>
 
                     <control type="label" id="5300">
                         <left>127</left>
@@ -2372,7 +2441,7 @@
                         <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
@@ -2380,7 +2449,7 @@
                              5210 the row peeks at y=1040, on itself at 568;
                              otherwise it sits below the viewport and would
                              decode its posters for nothing. -->
-                        <visible>Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>[Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]</visible>
                     </control>
                     <!-- Server suffix (~". Akasha") rendered at ~60% of the
                          row title size, positioned at runtime by Aura. -->
@@ -2392,7 +2461,7 @@
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                                                     <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                                                     <effect type="fade" start="100" end="0" time="200"/>
                                                 </animation>
@@ -2407,11 +2476,11 @@
                         <onup>5210</onup>
                         <onleft>3310</onleft>
                         <ondown>5410</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>!String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5210) | !String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
+                        <visible>!String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5210) | Control.HasFocus(5215)] | !String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | String.IsEqual(Window.Property(AuraFocusSlot),2)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2517,11 +2586,11 @@
                         <onup>5210</onup>
                         <onleft>3310</onleft>
                         <ondown>5410</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5410) | Control.HasFocus(5411)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5210) | String.IsEqual(Window.Property(AuraRowStyle2),hero) + Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411)</visible>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5210) | Control.HasFocus(5215)] | String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | String.IsEqual(Window.Property(AuraFocusSlot),2)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2677,6 +2746,38 @@
                             </control>
                         </focusedlayout>
                     </control>
+                    <control type="image">
+                        <left>127</left>
+                        <top>1460</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <texture colordiffuse="FF232323" border="14">rounded-solid.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle2),promo)</visible>
+                    </control>
+                    <control type="button" id="5315">
+                        <left>127</left>
+                        <top>1460</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <label>$ADDON[script.akasha.aura 33641]</label>
+                        <font>font_aura_rowhead</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <focusedcolor>FFFFFFFF</focusedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <texturenofocus colordiffuse="FF232323" border="14">rounded-solid.png</texturenofocus>
+                        <texturefocus colordiffuse="FF232323" border="14">rounded-solid.png</texturefocus>
+                        <onleft>3310</onleft>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle2),promo)</visible>
+                    </control>
+                    <control type="image">
+                        <left>119</left>
+                        <top>1452</top>
+                        <width>1712</width>
+                        <height>128</height>
+                        <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle2),promo) + Control.HasFocus(5315)</visible>
+                    </control>
 
                     <control type="label" id="5400">
                         <left>127</left>
@@ -2686,11 +2787,11 @@
                         <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]</visible>
                     </control>
                     <!-- Server suffix (~". Akasha") rendered at ~60% of the
                          row title size, positioned at runtime by Aura. -->
@@ -2702,7 +2803,7 @@
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                                                     <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                                                     <effect type="fade" start="100" end="0" time="200"/>
                                                 </animation>
@@ -2717,11 +2818,11 @@
                         <onup>5310</onup>
                         <onleft>3310</onleft>
                         <ondown>5510</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>!String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5310) | !String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>!String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315)] | !String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)] | String.IsEqual(Window.Property(AuraFocusSlot),3)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2827,11 +2928,11 @@
                         <onup>5310</onup>
                         <onleft>3310</onleft>
                         <ondown>5510</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5510) | Control.HasFocus(5511)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]" reversible="true">
                             <effect type="slide" start="0,0" end="0,236" time="250" tween="quadratic" easing="in"/>
                             <effect type="fade" start="100" end="0" time="200"/>
                         </animation>
-                        <visible>String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5310) | String.IsEqual(Window.Property(AuraRowStyle3),hero) + Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315)] | String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)] | String.IsEqual(Window.Property(AuraFocusSlot),3)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -2987,6 +3088,38 @@
                             </control>
                         </focusedlayout>
                     </control>
+                    <control type="image">
+                        <left>127</left>
+                        <top>1932</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <texture colordiffuse="FF232323" border="14">rounded-solid.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle3),promo)</visible>
+                    </control>
+                    <control type="button" id="5415">
+                        <left>127</left>
+                        <top>1932</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <label>$ADDON[script.akasha.aura 33641]</label>
+                        <font>font_aura_rowhead</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <focusedcolor>FFFFFFFF</focusedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <texturenofocus colordiffuse="FF232323" border="14">rounded-solid.png</texturenofocus>
+                        <texturefocus colordiffuse="FF232323" border="14">rounded-solid.png</texturefocus>
+                        <onleft>3310</onleft>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle3),promo)</visible>
+                    </control>
+                    <control type="image">
+                        <left>119</left>
+                        <top>1924</top>
+                        <width>1712</width>
+                        <height>128</height>
+                        <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle3),promo) + Control.HasFocus(5415)</visible>
+                    </control>
 
                     <control type="label" id="5500">
                         <left>127</left>
@@ -2996,10 +3129,10 @@
                         <font>font_aura_rowhead</font>
                         <label>-</label>
                         <textcolor>FFFFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5110) | Control.HasFocus(5111) | Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5110) | Control.HasFocus(5115)] | [Control.HasFocus(5111) | Control.HasFocus(5115)] | [Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)]" reversible="true">
                             <effect type="fade" start="100" end="0" time="160"/>
                         </animation>
-                        <visible>Control.HasFocus(5310) | Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>[Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)]</visible>
                     </control>
                     <!-- Server suffix (~". Akasha") rendered at ~60% of the
                          row title size, positioned at runtime by Aura. -->
@@ -3011,7 +3144,7 @@
                         <font>font_aura_meta</font>
                         <label>-</label>
                         <textcolor>99FFFFFF</textcolor>
-                        <animation type="Conditional" condition="Control.HasFocus(5110) | Control.HasFocus(5111) | Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5110) | Control.HasFocus(5115)] | [Control.HasFocus(5111) | Control.HasFocus(5115)] | [Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)]" reversible="true">
                                                     <effect type="fade" start="100" end="0" time="160"/>
                                                 </animation>
                     </control>
@@ -3025,10 +3158,10 @@
                         <onup>5410</onup>
                         <onleft>3310</onleft>
                         <ondown>5510</ondown>
-                        <animation type="Conditional" condition="Control.HasFocus(5110) | Control.HasFocus(5111) | Control.HasFocus(5210) | Control.HasFocus(5211) | Control.HasFocus(5310) | Control.HasFocus(5311)" reversible="true">
+                        <animation type="Conditional" condition="[Control.HasFocus(5110) | Control.HasFocus(5115)] | [Control.HasFocus(5111) | Control.HasFocus(5115)] | [Control.HasFocus(5210) | Control.HasFocus(5215)] | [Control.HasFocus(5211) | Control.HasFocus(5215)] | [Control.HasFocus(5310) | Control.HasFocus(5315)] | [Control.HasFocus(5311) | Control.HasFocus(5315)]" reversible="true">
                             <effect type="fade" start="100" end="0" time="160"/>
                         </animation>
-                        <visible>!String.IsEqual(Window.Property(AuraRowStyle4),hero) + Control.HasFocus(5310) | !String.IsEqual(Window.Property(AuraRowStyle4),hero) + Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>!String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315)] | !String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)] | String.IsEqual(Window.Property(AuraFocusSlot),4)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -3134,7 +3267,7 @@
                         <onup>5410</onup>
                         <onleft>3310</onleft>
                         <ondown>5510</ondown>
-                        <visible>String.IsEqual(Window.Property(AuraRowStyle4),hero) + Control.HasFocus(5310) | String.IsEqual(Window.Property(AuraRowStyle4),hero) + Control.HasFocus(5311) | Control.HasFocus(5410) | Control.HasFocus(5411) | Control.HasFocus(5510) | Control.HasFocus(5511)</visible>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315)] | String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315)] | [Control.HasFocus(5410) | Control.HasFocus(5415)] | [Control.HasFocus(5411) | Control.HasFocus(5415)] | [Control.HasFocus(5510) | Control.HasFocus(5515)] | [Control.HasFocus(5511) | Control.HasFocus(5515)] | String.IsEqual(Window.Property(AuraFocusSlot),4)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
                                 <left>0</left>
@@ -3289,6 +3422,38 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                         </focusedlayout>
+                    </control>
+                    <control type="image">
+                        <left>127</left>
+                        <top>2404</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <texture colordiffuse="FF232323" border="14">rounded-solid.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle4),promo)</visible>
+                    </control>
+                    <control type="button" id="5515">
+                        <left>127</left>
+                        <top>2404</top>
+                        <width>1696</width>
+                        <height>112</height>
+                        <label>$ADDON[script.akasha.aura 33641]</label>
+                        <font>font_aura_rowhead</font>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <focusedcolor>FFFFFFFF</focusedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <texturenofocus colordiffuse="FF232323" border="14">rounded-solid.png</texturenofocus>
+                        <texturefocus colordiffuse="FF232323" border="14">rounded-solid.png</texturefocus>
+                        <onleft>3310</onleft>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle4),promo)</visible>
+                    </control>
+                    <control type="image">
+                        <left>119</left>
+                        <top>2396</top>
+                        <width>1712</width>
+                        <height>128</height>
+                        <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
+                        <visible>String.IsEqual(Window.Property(AuraRowStyle4),promo) + Control.HasFocus(5515)</visible>
                     </control>
 
                 </control>

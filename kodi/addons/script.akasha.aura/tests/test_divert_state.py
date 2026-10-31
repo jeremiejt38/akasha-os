@@ -151,6 +151,7 @@ def _make_window():
     w._divert_search_query = ''
     w._divert_state = None
     w._divert_state_action = None
+    w._slot_promo = set()
     return w
 
 
@@ -349,6 +350,134 @@ class EmptyHubRowsTests(unittest.TestCase):
         w._props['AuraHeroTitle'] = 'Kept Title'
         w._update_hero()  # focus-time call: hero must not blank
         self.assertEqual(w._props['AuraHeroTitle'], 'Kept Title')
+
+
+PROMO_IDS = aura_window.RECO_PROMO_IDS
+LIST_IDS = aura_window.RECO_LIST_IDS
+
+
+class TrendingPromoTests(unittest.TestCase):
+    """Plex's Tendances tab ends with a full-width promo card ("Find What
+    To Watch, Anywhere!"). It binds as a synthetic trailing hub row
+    rendered by a focusable button per slot -- these cover the binding,
+    the effective-id resolution and the nav bookkeeping."""
+
+    def _promo_window(self, rows):
+        import threading
+        w = _make_window()
+        w._ui_lock = threading.RLock()
+        w._hub_rows = rows
+        w._hub_offset = 0
+        # _rebind_reco_slots tails out to nav/label/pagination helpers not
+        # under test here.
+        w._drop_pending_appends = lambda *a: None
+        w._sync_navigation = lambda: None
+        w._render_reco_row_label = lambda *a, **k: None
+        w._sync_placeholders = lambda *a, **k: 0
+        return w
+
+    def test_promo_row_binds_button_and_style_property(self):
+        w = self._promo_window(
+            [_row([{'a': 1}]), {'title': '', 'paged': None, 'promo': True}])
+        w._rebind_reco_slots()
+        self.assertEqual(w._props['AuraRowStyle1'], 'promo')
+        self.assertEqual(w._slot_promo, {1})
+        # The slot's lists stay empty -- the promo button renders the card.
+        self.assertEqual(w._controls[LIST_IDS[1]].size(), 0)
+        self.assertNotIn(LIST_IDS[1], w._reco_rows)
+        self.assertNotIn(LIST_IDS[1] + 1, w._reco_rows)
+        self.assertEqual(w._controls[5200].label, '')
+        self.assertEqual(w._controls[5201].label, '')
+
+    def test_promo_slot_effective_id_is_the_button(self):
+        w = self._promo_window(
+            [_row([{'a': 1}]), {'title': '', 'paged': None, 'promo': True}])
+        w._rebind_reco_slots()
+        self.assertEqual(w._reco_slot_list_id(1), PROMO_IDS[1])
+        self.assertEqual(w._reco_slot_list_id(0), LIST_IDS[0])
+
+    def test_bound_promo_counts_as_filled_for_nav(self):
+        w = self._promo_window(
+            [_row([{'a': 1}]), {'title': '', 'paged': None, 'promo': True}])
+        w._rebind_reco_slots()
+        self.assertTrue(w._reco_list_has_items(PROMO_IDS[1]))
+        self.assertFalse(w._reco_list_has_items(PROMO_IDS[2]))
+
+    def test_slot_index_maps_promo_button_ids(self):
+        w = _make_window()
+        for i, pid in enumerate(PROMO_IDS):
+            self.assertEqual(w._reco_slot_index(pid), i)
+        self.assertEqual(w._reco_slot_index(999999), -1)
+
+    def test_rebind_without_promo_clears_slot_state(self):
+        w = self._promo_window(
+            [_row([{'a': 1}]), {'title': '', 'paged': None, 'promo': True}])
+        w._rebind_reco_slots()
+        w._hub_rows = [_row([{'a': 1}]), _row([{'b': 2}])]
+        w._rebind_reco_slots()
+        self.assertEqual(w._slot_promo, set())
+        self.assertEqual(w._reco_slot_list_id(1), LIST_IDS[1])
+        self.assertFalse(w._reco_list_has_items(PROMO_IDS[1]))
+
+    def test_promo_not_appended_to_error_only_load(self):
+        # The append guard requires at least one row with items -- a fully
+        # errored Tendances load must not end on the promo card.
+        w = _make_window()
+        fatal = plex_client.PlexOfflineError('down')
+        w._hub_rows = [_row([], error=fatal)]
+        w._apply_reco_state(None)
+        self.assertEqual(w._props['DivertState'], 'offline')
+        self.assertEqual(w._hub_rows, [])
+
+
+class RecoScrollFocusSlotTests(unittest.TestCase):
+    """Scrolling the hub viewport resets the focused slot's list, which
+    drops focus; slot lists are only <visible> while a reco control holds
+    focus, so the deferred restore would hit an invisible control and
+    Kodi would park on the top bar. _reco_scroll publishes AuraFocusSlot
+    to force-render the anchor slot until the deferred SetFocus lands."""
+
+    def _scroll_window(self, row_count=7):
+        import threading
+        w = _make_window()
+        w._ui_lock = threading.RLock()
+        w._hub_rows = [_row([{'i': i}]) for i in range(row_count)]
+        w._hub_offset = 0
+        w._drop_pending_appends = lambda *a: None
+        w._sync_navigation = lambda: None
+        w._render_reco_row_label = lambda *a, **k: None
+        w._sync_placeholders = lambda *a, **k: 0
+        w._clear_focus_slot_later = lambda: None
+        return w
+
+    def test_scroll_down_publishes_last_slot_until_focus_lands(self):
+        w = self._scroll_window()
+        deferred = []
+        w._defer_focus = lambda cid, delay=0.3: deferred.append(cid)
+        self.assertTrue(w._reco_scroll(+1))
+        self.assertEqual(w._props['AuraFocusSlot'],
+                         str(len(LIST_IDS) - 1))
+        self.assertEqual(deferred,
+                         [w._reco_slot_list_id(len(LIST_IDS) - 1)])
+
+    def test_scroll_up_publishes_first_slot(self):
+        w = self._scroll_window()
+        w._hub_offset = 2
+        w._defer_focus = lambda cid, delay=0.3: None
+        self.assertTrue(w._reco_scroll(-1))
+        self.assertEqual(w._props['AuraFocusSlot'], '0')
+
+    def test_no_scroll_when_already_at_edge_publishes_nothing(self):
+        w = self._scroll_window()
+        self.assertFalse(w._reco_scroll(-1))
+        self.assertEqual(w._props.get('AuraFocusSlot', ''), '')
+
+    def test_focus_slot_cleared_on_state_paths(self):
+        w = _make_window()
+        w._props['AuraFocusSlot'] = '4'
+        w._hub_rows = [_row([], error=plex_client.PlexOfflineError('x'))]
+        w._apply_reco_state(None)
+        self.assertEqual(w._props['AuraFocusSlot'], '')
 
 
 if __name__ == '__main__':
