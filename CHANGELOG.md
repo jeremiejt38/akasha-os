@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.71.0...akasha-os-v0.72.0) (2026-10-31)
+
+
+### Features
+
+* **aura-home:** Plex promo tile at the end of Tendances ([#235](https://github.com/jeremiejt38/akasha-os/issues/235)) ([a1a51a2](https://github.com/jeremiejt38/akasha-os/commit/a1a51a234f305e19972ccd9cefdac5b66e5290dd))
+
 ## [0.71.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.70.1...akasha-os-v0.71.0) (2026-10-31)
 
 
