@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.1...akasha-os-v0.72.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* **aura-home:** treat the promo card as content for Back navigation ([#239](https://github.com/jeremiejt38/akasha-os/issues/239)) ([53087ff](https://github.com/jeremiejt38/akasha-os/commit/53087ff0c2ceee09045cade76af7a518e67c99d8))
+
 ## [0.72.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.0...akasha-os-v0.72.1) (2026-10-31)
 
 
