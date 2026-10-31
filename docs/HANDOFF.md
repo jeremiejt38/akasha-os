@@ -13,16 +13,14 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `akasha-os-v0.69.10` (tag, Release Please,
-  2026-10-26).
-- **Version sur le Pi** : `0.69.10` (label Guide vérifié dans le splash
-  log : `local=0.69.10, remote=0.69.10`) **+ working copy de
-  `aura_detail.py` poussée par scp** (fix staleness saisons, hash
-  `c13a4b86f5ac25129a0c4be68ea81aa0` identique repo↔Pi) — **déployée mais
-  NON commitée**. Le Pi tourne en avance sur git.
-- **Branche active** : `fix/aura-search-rail` — ~200 commits d'avance sur
-  `origin/main` (accumulation de plusieurs sessions de parité ; le cycle
-  release est en retard, voir TODO n°1).
+- **Version livrée** : `akasha-os-v0.70.1` (tag, Release Please,
+  2026-10-31).
+- **Version sur le Pi** : `0.70.1` (label Guide vérifié à l'écran +
+  splash log : `local=0.70.1, remote=0.70.1`). Repo et Pi alignés —
+  aucun fix « scp-only » en circulation.
+- **Branche active** : `main` — `fix/aura-search-rail` (~215 commits)
+  a été mergée via PR #229 puis releasée (PR #224 → `0.70.0`,
+  PR #231 → `0.70.1`).
 - Pi joignable : `root@192.168.3.77` (SSH par clé OK, WiFi
   `Freebox-37FD5E`, LAN `192.168.3.0/24`). L'IP `192.168.1.88` citée dans
   `AGENTS.md` est **obsolète** — source de vérité : `atlas/docs/hosts.md`.
@@ -52,14 +50,18 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   query → les logs d'erreur masquent la query (commit inclus dans
   `91248c5`).
 - **Saisons fiche = appartenance par `rating_key`** (`_seasons_key`) +
-  **garde `parent_rating_key`** : la fenêtre détail est réutilisée entre
-  pages et `_load_seasons` court-circuitait sur `self._seasons` non vide
-  → Black Butler affichait le poster de saison d'Alya (metadata 81486).
-  Deuxième couche : le backend `show_seasons(82547)` a **réellement servi
-  1 saison étrangère** → les saisons dont `parent_rating_key` ≠ rk du
-  show sont droppées avec warning. Validé live : Black Butler →
-  « 5 Saisons » correctes, log `dropped 1 foreign seasons (rk=82547)`
-  (non commité, voir « En cours »).
+  **garde `parent_rating_key`** (v0.70.0) : la fenêtre détail est
+  réutilisée entre pages et `_load_seasons` court-circuitait sur
+  `self._seasons` non vide → Black Butler affichait le poster de saison
+  d'Alya (metadata 81486). **Cause racine élucidée (v0.70.1,
+  forensique logs Plex)** : ce n'était **pas** une réponse Plex polluée
+  — zéro trafic au timestamp du warning et réponses `children(82547)`
+  byte-identiques propres. Un thread différé de la page précédente
+  joignait l'Event `'seasons'` encore présent dans `_bg_done` entre le
+  swap `detail.item` (`_open_detail`) et le reset de `_render()`
+  (`onInit`, ~5 s plus tard). `_clear_fetch_state()` vide désormais
+  `_bg_done`/`_bg_results`/`_seasons_key` au swap ; la garde
+  `parent_rating_key` reste en dernier rempart.
 - **Captures légères obligatoires** (`AGENTS.md` commit `9aaf80b`) :
   ~960×540 JPEG par défaut (`convert -resize 960x540 -quality 70`),
   1080p uniquement pour texte fin/pixels (le dire), jamais deux captures
@@ -73,6 +75,9 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   `_render()` reset `_bg_done`/`_bg_results` et `_bg_start()` capture le
   dict courant → un thread tardif d'un render précédent ne peut pas
   écrire dans la page suivante (architecture anti-staleness, v0.69.x).
+  Depuis v0.70.1, `_open_detail` vide en plus les maps au swap d'item
+  (`_clear_fetch_state()`) — le créneau item-swap → `onInit`/`_render`
+  ne peut plus servir les fetches de la page précédente.
 - **`/status/sessions/history/all` ignore `X-Plex-Container-Size`** :
   appel non scopé = tout l'historique (~25 Mo) → OOM `kodi.bin` sur Pi4.
   Toujours `watch_history(rating_key=)` ou `since_days=` borné.
@@ -81,19 +86,19 @@ type Plex Android TV (modules Divertissement / Jeux / App).
 
 - **Chantier actif** : boucle de parité Plex Android TV ↔ Aura, consigne
   « continuer en boucle tant que tout n'est pas identique, polish visuel
-  le plus parfait possible ». `PARITY.md` quasi entièrement vert.
-- **Travail NON commité** (un seul fichier) :
-  `kodi/addons/script.akasha.aura/resources/lib/aura_detail.py` —
-  fix staleness saisons (`_seasons_key` + garde `parent_rating_key`,
-  diff ~35 lignes, commentaires français dans le code expliquant le cas
-  Alya→Black Butler observé live). **Déjà déployé et validé sur le Pi**
-  (hash identique, restart Kodi fait, reproduction A→B propre).
-  Reste à faire : tests auto puis commit.
-- **Prochaine étape prévue** : écrire les tests `_seasons_key` /
-  foreign-season dans `tests/test_aura_detail.py` (pattern existant :
-  méthodes unbound appelées sur un `SimpleNamespace`, xbmc stubbé) →
-  suite 443 → commit `fix(aura-detail):` → cycle release complet →
-  reprendre la boucle parité sur les écarts restants de `PARITY.md`.
+  le plus parfait possible ». `PARITY.md` quasi entièrement vert — les
+  divergences restantes sont des limitations cloud documentées (feed
+  social GraphQL privé, badges services vides côté compte, chip âge
+  Common Sense Media, tuile promo non reproduite).
+- **Rien de non commité** : le fix staleness saisons est livré en
+  0.70.0 (+6 tests, 443 → 449) et le fix racine `_clear_fetch_state()`
+  en 0.70.1 (+1 test de régression, → 450). Les deux sont sur le Pi.
+- **Constat annex 2026-10-31 — DB Plex corrompue** :
+  `com.plexapp.plugins.library.db` répond `database disk image is
+  malformed (11)` sur les scans d'index (`updated_at` ranges,
+  `COUNT(*)`) ; les lookups par PK passent. Sans lien avec l'incident
+  saisons. Aucune action (prod partagée) — une réparation
+  `REINDEX`/dump-restore demande une fenêtre de maintenance validée.
 
 ## TODO / prochaines étapes (ordonné)
 
