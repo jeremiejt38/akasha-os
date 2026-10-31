@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.70.1...akasha-os-v0.71.0) (2026-10-31)
+
+
+### Features
+
+* **system:** Argon fan curve daemon + conservative governor tuning ([#233](https://github.com/jeremiejt38/akasha-os/issues/233)) ([3537c96](https://github.com/jeremiejt38/akasha-os/commit/3537c9678a1d4f317e61f0c843f7d4f4a0f62655))
+
 ## [0.70.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.70.0...akasha-os-v0.70.1) (2026-10-31)
 
 
