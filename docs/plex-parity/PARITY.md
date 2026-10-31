@@ -247,8 +247,16 @@ Plex's `For You | Trending | Activity` strip. Delivered:
 Remaining divergences: service badges (prime/tv) on Trending cards
 need Plex's availability API -- `metadata.provider.plex.tv/library/metadata/<id>/availabilities` exists but returns an empty container for every item on this account (no streaming services selected), so there is no badge data to render; the cloud
 detail page opens hydrated but its local follow-up calls (extras,
-history) no-op — no playable file exists locally; the
-"Find What To Watch, Anywhere!" promo tile is not reproduced.
+history) no-op — no playable file exists locally.
+
+The "Find What To Watch, Anywhere!" promo tile at the end of the
+Tendances feed is reproduced as a synthetic trailing hub row
+(`promo` descriptor): a full-width (1696 px) dark rounded card with
+centered white bold text, focusable with the Aura focus ring, scrolled
+in by the same five-slot viewport as real rows. Plex's tile opens the
+cross-service Discover surface — a cloud feature with no local
+equivalent — so clicking it shows the explicit Plex Cloud notification
+like the other non-routable cloud entries.
 
 Cloud detail pages (verified on Pi, VisionQuest): trailer/clip cards
 hydrate into their PARENT record wholesale (type + key), so a cloud

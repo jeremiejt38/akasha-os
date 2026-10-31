@@ -1964,3 +1964,13 @@ msgstr ""
 msgctxt "#33640"
 msgid "Channels"
 msgstr ""
+
+# Trouvez quoi regarder, n'importe où !
+msgctxt "#33641"
+msgid "Find What To Watch, Anywhere!"
+msgstr ""
+
+# La découverte multi-services est une fonctionnalité Plex Cloud
+msgctxt "#33642"
+msgid "Cross-service discovery is a Plex cloud feature"
+msgstr ""
