@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.0...akasha-os-v0.72.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **aura-home:** always defer the scroll focus restore ([#237](https://github.com/jeremiejt38/akasha-os/issues/237)) ([d73e05f](https://github.com/jeremiejt38/akasha-os/commit/d73e05fd2014db5f40671815bef51b99d926851d))
+
 ## [0.72.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.71.0...akasha-os-v0.72.0) (2026-10-31)
 
 
