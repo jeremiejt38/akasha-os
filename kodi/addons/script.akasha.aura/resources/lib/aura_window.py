@@ -1198,26 +1198,42 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # anchor slot until the deferred focus lands.
         self.setProperty('AuraFocusSlot', str(slot))
         self._rebind_reco_slots()
-        try:
-            if self.getFocusId() != self._reco_slot_list_id(slot):
-                self._defer_focus(self._reco_slot_list_id(slot))
-        except RuntimeError:
-            self._defer_focus(self._reco_slot_list_id(slot))
-        self._clear_focus_slot_later()
+        target = self._reco_slot_list_id(slot)
+        # Always defer the restore: right after reset() getFocusId() can
+        # still report the just-cleared control, so a "skip if already
+        # there" guard would leave Kodi parked on the top bar.
+        self._defer_focus(target)
+        self._clear_focus_slot_later(target)
         return True
 
-    def _clear_focus_slot_later(self, delay=0.45):
-        """Drop the AuraFocusSlot override once the deferred focus landed."""
+    def _clear_focus_slot_later(self, target, settle=0.4, timeout=2.0):
+        """Drop the AuraFocusSlot override once the deferred focus landed.
+
+        Two traps: the builtin SetFocus is queued on Kodi's message pump
+        and can take longer than the nominal delay under load, and
+        getFocusId() can still report the just-reset control right after
+        _rebind_reco_slots. Wait past the defer delay before polling so a
+        stale focus id does not clear the override early; then release
+        the moment the landing confirms (or at the timeout)."""
         generation = self._focus_generation
 
         def worker():
-            time.sleep(delay)
-            if generation != self._focus_generation:
-                return
-            try:
-                self.setProperty('AuraFocusSlot', '')
-            except Exception:
-                pass
+            time.sleep(settle)
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                if generation != self._focus_generation:
+                    return
+                try:
+                    if self.getFocusId() == target:
+                        break
+                except RuntimeError:
+                    break
+                time.sleep(0.05)
+            if generation == self._focus_generation:
+                try:
+                    self.setProperty('AuraFocusSlot', '')
+                except Exception:
+                    pass
 
         threading.Thread(target=worker, daemon=True).start()
 

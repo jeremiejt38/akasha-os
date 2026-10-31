@@ -447,7 +447,7 @@ class RecoScrollFocusSlotTests(unittest.TestCase):
         w._sync_navigation = lambda: None
         w._render_reco_row_label = lambda *a, **k: None
         w._sync_placeholders = lambda *a, **k: 0
-        w._clear_focus_slot_later = lambda: None
+        w._clear_focus_slot_later = lambda *a, **k: None
         return w
 
     def test_scroll_down_publishes_last_slot_until_focus_lands(self):
