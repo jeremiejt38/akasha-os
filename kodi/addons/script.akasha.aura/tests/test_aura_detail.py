@@ -13,6 +13,9 @@ for mod in ('xbmc', 'xbmcgui', 'xbmcaddon', 'xbmcvfs'):
         sys.modules[mod] = types.ModuleType(mod)
 sys.modules['xbmcgui'].WindowXMLDialog = object
 sys.modules['xbmcvfs'].translatePath = lambda p: p
+sys.modules['xbmc'].log = lambda *args, **kwargs: None
+sys.modules['xbmc'].LOGWARNING = 3
+sys.modules['xbmc'].LOGERROR = 4
 
 import aura_detail  # noqa: E402
 
@@ -66,6 +69,110 @@ class TestSeasonLabel(unittest.TestCase):
         self.assertEqual(
             aura_detail.AuraDetailWindow._season_label(season),
             'Saison Specials')
+
+
+class _SeasonsClient:
+    """Minimal client stub recording show_seasons calls."""
+
+    def __init__(self, seasons):
+        self.seasons = seasons
+        self.calls = []
+
+    def show_seasons(self, rating_key):
+        self.calls.append(rating_key)
+        return self.seasons
+
+
+class TestLoadSeasons(unittest.TestCase):
+    """_load_seasons keys its cache by rating_key (the window instance
+    is reused across detail pages) and drops seasons whose
+    parentRatingKey names another show — the backend once served an
+    Alya season on Black Butler's page (rk=82547)."""
+
+    def _window(self, rk='82547', seasons=None, seasons_key=None,
+                client=None, bg_seasons=None):
+        win = types.SimpleNamespace()
+        win.item = {'rating_key': rk}
+        win.client = client
+        win._seasons = list(seasons) if seasons else []
+        win._seasons_key = seasons_key
+        win._bg_done = {}
+        win._bg_results = {}
+        if bg_seasons is not None:
+            win._bg_done['seasons'] = True
+            win._bg_get = lambda key, timeout=12.0: bg_seasons
+        return win
+
+    def _load(self, win):
+        aura_detail.AuraDetailWindow._load_seasons(win)
+
+    def test_short_circuits_only_for_the_same_show(self):
+        client = _SeasonsClient([{'index': 9}])
+        win = self._window(
+            seasons=[{'index': 1, 'parent_rating_key': '82547'}],
+            seasons_key='82547', client=client)
+        self._load(win)
+        self.assertEqual(client.calls, [])
+        self.assertEqual(win._seasons[0]['index'], 1)
+
+    def test_refetches_when_cached_list_belongs_to_another_show(self):
+        client = _SeasonsClient(
+            [{'index': 1, 'parent_rating_key': '82547'}])
+        win = self._window(
+            seasons=[{'index': 3, 'parent_rating_key': '81486'}],
+            seasons_key='81486', client=client)
+        self._load(win)
+        self.assertEqual(client.calls, ['82547'])
+        self.assertEqual(win._seasons_key, '82547')
+        self.assertEqual(win._seasons[0]['parent_rating_key'], '82547')
+
+    def test_prefetched_background_result_wins_and_stamps_key(self):
+        client = _SeasonsClient([])
+        win = self._window(
+            client=client,
+            bg_seasons=[{'index': 5, 'parent_rating_key': '82547'}])
+        self._load(win)
+        self.assertEqual(client.calls, [])
+        self.assertEqual(win._seasons[0]['index'], 5)
+        self.assertEqual(win._seasons_key, '82547')
+
+    def test_drops_seasons_parented_to_another_show(self):
+        client = _SeasonsClient([
+            {'index': 1, 'parent_rating_key': '82547'},
+            {'index': 2, 'parent_rating_key': '82547'},
+            {'index': 1, 'parent_rating_key': '81486'},
+        ])
+        win = self._window(client=client)
+        logs = []
+        original_log = aura_detail.xbmc.log
+        aura_detail.xbmc.log = lambda msg, level=None: logs.append(msg)
+        try:
+            self._load(win)
+        finally:
+            aura_detail.xbmc.log = original_log
+        self.assertEqual(
+            [s['parent_rating_key'] for s in win._seasons],
+            ['82547', '82547'])
+        self.assertTrue(any('foreign seasons' in m for m in logs))
+
+    def test_keeps_seasons_without_or_with_matching_parent(self):
+        client = _SeasonsClient([
+            {'index': 1, 'parent_rating_key': 82547},  # int == str rk
+            {'index': 2},                            # no parent key
+        ])
+        win = self._window(client=client)
+        self._load(win)
+        self.assertEqual(len(win._seasons), 2)
+
+    def test_failed_fetch_resets_seasons_and_key(self):
+        class BoomClient:
+            def show_seasons(self, rating_key):
+                raise RuntimeError('boom')
+
+        win = self._window(client=BoomClient())
+        self._load(win)
+        self.assertEqual(win._seasons, [])
+        self.assertIsNone(win._seasons_key)
 
 
 class TestFormatDuration(unittest.TestCase):

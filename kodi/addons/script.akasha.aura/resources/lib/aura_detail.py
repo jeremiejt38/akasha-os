@@ -224,6 +224,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
         self.addon_path = args[1] if len(args) > 1 else ''
         self._show_item = None      # saved show item while in episode mode
         self._seasons = []
+        self._seasons_key = None    # rating_key the seasons were fetched for
         self._episodes = []
         self._extras = []
         self._extras_key = None
@@ -1095,7 +1096,13 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _load_seasons(self):
-        if self._seasons or not self.client or not self.item.get('rating_key'):
+        rk = self.item.get('rating_key')
+        if not self.client or not rk:
+            return
+        # The window is reused across pages: a non-empty list must only
+        # short-circuit the fetch when it was loaded for THIS show --
+        # otherwise the previous page's seasons (and posters) persist.
+        if self._seasons and self._seasons_key == rk:
             return
         try:
             if 'seasons' in self._bg_done:
@@ -1105,14 +1112,29 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
                 self._seasons = self.client.provider_children(
                     self.item.get('key') or '') or []
             else:
-                self._seasons = self.client.show_seasons(
-                    self.item['rating_key'])
+                self._seasons = self.client.show_seasons(rk)
+            self._seasons_key = rk
         except Exception as e:
             xbmc.log('Akasha Aura Detail: seasons failed: {}'.format(e), xbmc.LOGERROR)
             self._seasons = []
+            self._seasons_key = None
         if self.item.get('cloud'):
             self._seasons = [s for s in self._seasons
                              if s.get('type') == 'season']
+        else:
+            # Cross-check the payload: a season's parentRatingKey names
+            # the show it belongs to. Anything else means the backend
+            # served another show's children (observed live: an Alya
+            # season rendered on Black Butler's page).
+            foreign = [s for s in self._seasons
+                       if s.get('parent_rating_key')
+                       and str(s['parent_rating_key']) != str(rk)]
+            if foreign:
+                xbmc.log('Akasha Aura Detail: dropped {} foreign seasons '
+                         '(rk={})'.format(len(foreign), rk),
+                         xbmc.LOGWARNING)
+                self._seasons = [s for s in self._seasons
+                                 if s not in foreign]
 
     def _render_seasons(self):
         try:
