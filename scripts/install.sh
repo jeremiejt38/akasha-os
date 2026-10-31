@@ -50,6 +50,9 @@ cp "$SCRIPT_DIR/system/cec-standby.sh" /storage/.config/cec-standby.sh
 cp "$SCRIPT_DIR/system/cec-wakeup.sh" /storage/.config/cec-wakeup.sh
 cp "$SCRIPT_DIR/system/wifi-silent-agent.py" /storage/.config/wifi-silent-agent.py
 cp "$SCRIPT_DIR/system/wifi-watchdog.sh" /storage/.config/wifi-watchdog.sh
+cp "$SCRIPT_DIR/system/akasha-fan.sh" /storage/.config/akasha-fan.sh
+cp "$SCRIPT_DIR/system/akasha-cpufreq.sh" /storage/.config/akasha-cpufreq.sh
+chmod +x /storage/.config/akasha-fan.sh /storage/.config/akasha-cpufreq.sh
 cp "$SCRIPT_DIR/system/splash-video.sh" /storage/splash-video.sh
 cp "$SCRIPT_DIR/system/connman/connman_main.conf.example" /storage/.config/connman_main.conf
 cp "$SCRIPT_DIR/system/akasha-disable-official-updates.sh" /storage/.config/akasha-os/disable-official-updates.sh
@@ -66,6 +69,8 @@ cp "$SCRIPT_DIR/system/system.d/splash-override.service" /storage/.config/system
 cp "$SCRIPT_DIR/system/system.d/wifi-watchdog.service" /storage/.config/system.d/wifi-watchdog.service
 cp "$SCRIPT_DIR/system/system.d/wifi-regdomain.service" /storage/.config/system.d/wifi-regdomain.service
 cp "$SCRIPT_DIR/system/system.d/wifi-silent-agent.service" /storage/.config/system.d/wifi-silent-agent.service
+cp "$SCRIPT_DIR/system/system.d/akasha-fan.service" /storage/.config/system.d/akasha-fan.service
+cp "$SCRIPT_DIR/system/system.d/akasha-cpufreq.service" /storage/.config/system.d/akasha-cpufreq.service
 cp "$SCRIPT_DIR/system/system.d/kodi.service.d/splash-restart.conf" /storage/.config/system.d/kodi.service.d/splash-restart.conf
 
 chmod +x /storage/.config/autostart.sh \
@@ -446,7 +451,10 @@ echo 'Akasha OS' > /storage/.cache/hostname
 systemctl daemon-reload
 systemctl enable splash-video.service splash-poweroff.service splash-reboot.service \
                  splash-override.service wifi-regdomain.service \
-                 akasha-disable-official-updates.service wifi-silent-agent.service 2>/dev/null || true
+                 akasha-disable-official-updates.service wifi-silent-agent.service \
+                 akasha-fan.service akasha-cpufreq.service 2>/dev/null || true
+# Apply fan curve + governor tuning now too (no reboot needed).
+systemctl restart akasha-fan.service akasha-cpufreq.service 2>/dev/null || true
 # Dead unit from an earlier release (idle-shutdown watchdog, superseded by
 # the Guide menu's "Temporisation" script): drop it if still deployed.
 rm -f /storage/.config/system.d/sleep-timer.service

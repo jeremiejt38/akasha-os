@@ -1,0 +1,13 @@
+[Unit]
+Description=Akasha OS Argon ONE fan curve
+
+[Service]
+Type=simple
+ExecStart=/storage/.config/akasha-fan.sh
+ExecStopPost=/storage/.kodi/addons/virtual.system-tools/bin/i2cset -y 1 0x1a 0
+Restart=always
+RestartSec=10
+Nice=19
+
+[Install]
+WantedBy=multi-user.target
