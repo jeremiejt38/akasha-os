@@ -174,6 +174,24 @@ class TestLoadSeasons(unittest.TestCase):
         self.assertEqual(win._seasons, [])
         self.assertIsNone(win._seasons_key)
 
+    def test_clear_fetch_state_forces_a_fresh_fetch_for_the_new_item(self):
+        """Regression: _open_detail swaps self.item while the window's
+        bg maps still hold the previous page's fetches; a deferred
+        reader joining them once served an Alya season on Black
+        Butler's page. Clearing the state forces a fresh fetch."""
+        client = _SeasonsClient(
+            [{'index': 1, 'parent_rating_key': '82547'}])
+        win = self._window(
+            client=client,
+            bg_seasons=[{'index': 1, 'parent_rating_key': '81486'}])
+        aura_detail.AuraDetailWindow._clear_fetch_state(win)
+        self._load(win)
+        self.assertEqual(client.calls, ['82547'])
+        self.assertEqual(
+            [s['parent_rating_key'] for s in win._seasons], ['82547'])
+        self.assertEqual(win._seasons_key, '82547')
+        self.assertEqual(win._bg_done, {})
+
 
 class TestFormatDuration(unittest.TestCase):
     def test_minutes(self):
