@@ -419,6 +419,12 @@ class TrendingPromoTests(unittest.TestCase):
         self.assertEqual(w._reco_slot_list_id(1), LIST_IDS[1])
         self.assertFalse(w._reco_list_has_items(PROMO_IDS[1]))
 
+    def test_promo_back_goes_to_sidebar_like_content(self):
+        # A focused promo card is still content: Back must hop to the
+        # nav rail (Plex level 1), not close the window.
+        for pid in PROMO_IDS:
+            self.assertIn(pid, aura_window._CONTENT_BACK_IDS)
+
     def test_promo_not_appended_to_error_only_load(self):
         # The append guard requires at least one row with items -- a fully
         # errored Tendances load must not end on the promo card.

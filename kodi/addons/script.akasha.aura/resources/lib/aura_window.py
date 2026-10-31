@@ -201,7 +201,7 @@ DIVERT_AZ_RAIL_ID = 3250
 # Surfaces whose Back press re-roots focus on the sidebar instead of
 # closing the window (Plex two-level Back convention).
 _CONTENT_BACK_IDS = frozenset(
-    list(RECO_ALL_LIST_IDS)
+    list(RECO_ALL_LIST_IDS) + list(RECO_PROMO_IDS)
     + [DIVERT_PANEL_ID, CATEGORY_PANEL_ID, DIVERT_AZ_RAIL_ID])
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID,
