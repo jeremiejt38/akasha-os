@@ -12,8 +12,11 @@ Caller sets before doModal():
 - `on_person`    — callback(person dict) for people results
 - `on_genre`     — callback(genre dict) for genre results
 """
+import threading
+
 import xbmc
 import xbmcgui
+import gui_guard
 import i18n
 
 ACTION_PREVIOUS_MENU = 10
@@ -30,15 +33,25 @@ BACKSPACE_BUTTON_ID = 8116
 CLEAR_BUTTON_ID = 8117
 QUERY_LABEL_ID = 8200
 EMPTY_LABEL_ID = 8201
+RAIL_LIST_ID = 8140
 
 _KEYS = list('abcdefghijklmnopqrstuvwxyz') + list('1234567890')
+# Plex 2026.19.1's filter rail, in order: All / Movies / TV / Music /
+# Live TV / People / Services. Live TV and Services rarely match on a
+# local library -- Plex still shows the pills and an empty state.
 _FILTERS = (
     (i18n.tr(33052), None),
     (i18n.tr(33051), 'movie'),
     (i18n.tr(33150), 'show'),
-    (i18n.tr(33151), 'episode'),
+    (i18n.tr(33609), 'music'),
+    (i18n.tr(33615), 'livetv'),
     (i18n.tr(33152), 'person'),
+    (i18n.tr(33614), 'services'),
 )
+
+_MUSIC_TYPES = ('artist', 'album', 'track')
+_LIVETV_TYPES = ('livetv', 'channel')
+_SERVICE_TYPES = ('service', 'cloud', 'online')
 
 
 class AuraSearchWindow(xbmcgui.WindowXMLDialog):
@@ -52,15 +65,48 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self.addon = None
         self.query = ''
         self.recent = []
+        self._search_gen = 0
         self._results = []
         self._filter_index = 0
         self._recent_loaded = False
         self._genres = None
         self._suggested = None
+        self._server_name = None
+        self._yield_stop = threading.Event()
+        # Search concurrency discipline: a collect can take seconds on a
+        # slow WAN path, so keystrokes debounce (~350ms settle), at most
+        # one collect runs at a time, and a burst typed during it folds
+        # into a single refetch of the latest query.
+        self._search_lock = threading.Lock()
+        self._search_inflight = False
+        self._search_pending = False
+        # Same discipline as the main window: worker-side result renders
+        # must serialize against gui_guard selection reads on the input
+        # path (reset()-vs-getSelectedPosition crash class), and bail on
+        # teardown so no stale native pointer is touched.
+        self._ui_lock = threading.RLock()
+        self._closing = False
 
     def onInit(self):
+        # The window is a cached singleton: a past close() leaves
+        # _yield_stop set, which makes every later search worker bail
+        # out before rendering (results freeze on the previous query).
+        # Fresh event + fresh query state on every open, like Plex's
+        # blank search page.
+        self._yield_stop = threading.Event()
+        with self._ui_lock:
+            self._closing = False
+        self.query = ''
+        self._results = []
+        self._filter_index = 0
+        # Same yield-to-playback rule as the main window's
+        # _watch_external_playback watchdog: a modal dialog would
+        # otherwise keep rendering over the fullscreen video when
+        # playback starts from the detail window stacked on top.
+        threading.Thread(target=self._watch_playback, daemon=True).start()
         try:
             self._load_recent()
+            self._render_rail()
             self._render_keyboard()
             self._render_pills()
             self._render_recent()
@@ -69,7 +115,46 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura Search: init error: {}'.format(e), xbmc.LOGERROR)
 
+    def close(self):
+        self._yield_stop.set()
+        with self._ui_lock:
+            self._closing = True
+        super().close()
+
+    def _watch_playback(self):
+        while not self._yield_stop.is_set():
+            try:
+                if xbmc.Player().isPlayingVideo():
+                    self.close()
+                    return
+            except Exception:
+                return
+            self._yield_stop.wait(1.0)
+
     # ----------------------------------------------------------- rendering
+
+    def _render_rail(self):
+        """The collapsed 4-icon rail Plex keeps on the search page.
+        Icons mirror the main window's sidebar shortcuts; avatar and
+        search are informational here, Home/More leave the dialog."""
+        try:
+            rail = self.getControl(RAIL_LIST_ID)
+            rail.reset()
+            avatar = xbmcgui.Window(10000).getProperty('AuraAvatar')
+            icons = ['avatar-plex.png', 'icon-search.png',
+                     'icon-home.png', 'icon-more.png']
+            if avatar:
+                icons[0] = avatar
+            kinds = ('avatar', 'search', 'home', 'menu')
+            for i, icon in enumerate(icons):
+                li = xbmcgui.ListItem('')
+                li.setArt({'icon': icon})
+                li.setProperty('iconkind', kinds[i])
+                if i == 0 and avatar:
+                    li.setProperty('avatar', '1')
+                rail.addItem(li)
+        except RuntimeError:
+            pass
 
     def _render_keyboard(self):
         try:
@@ -81,29 +166,62 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _render_pills(self):
-        try:
-            pills = self.getControl(PILLS_LIST_ID)
-            pills.reset()
-            for i, (label, _type) in enumerate(_FILTERS):
-                li = xbmcgui.ListItem(label)
-                li.setProperty('selected', '1' if i == self._filter_index else '0')
-                pills.addItem(li)
-        except RuntimeError:
-            pass
+        # Plex's filter pills hug their text: measure each label and
+        # chain the static buttons (overlay labels 815x/816x draw the
+        # white / amber-selected / dark-on-focus states).
+        x = 686
+        for i, (label, _type) in enumerate(_FILTERS):
+            w = int((i18n.text_width(label, 19) or len(label) * 11)
+                    * 0.96) + 56
+            try:
+                btn = self.getControl(PILLS_LIST_ID + i)
+                btn.setPosition(x, 48)
+                btn.setWidth(w)
+                for base in (8150, 8160, 8170):
+                    lbl = self.getControl(base + i)
+                    lbl.setPosition(x, 48)
+                    lbl.setWidth(w)
+                    lbl.setLabel(label)
+            except RuntimeError:
+                pass
+            _set(self, 'AuraSearchPillSel{}'.format(i),
+                 '1' if i == self._filter_index else '')
+            x += w + 16
 
     def _render_recent(self):
-        _set(self, 'AuraSearchHasRecent', '1' if self.recent else '')
-        try:
-            lst = self.getControl(RECENT_LIST_ID)
-            lst.reset()
-            for query in self.recent[:8]:
-                lst.addItem(xbmcgui.ListItem(query))
-            if self.recent:
-                clear = xbmcgui.ListItem(i18n.tr(33580))
-                clear.setProperty('clear', '1')
-                lst.addItem(clear)
-        except RuntimeError:
-            pass
+        # With a query, Plex swaps the left column's search history for
+        # plain-text suggestions -- the top hits (people/genres/titles
+        # already merged by _run_search) as tappable rows, no icon.
+        with self._ui_lock:
+            if self._closing:
+                return
+            if self.query:
+                rows = self._results[:7]
+                _set(self, 'AuraSearchHasRecent', '1' if rows else '')
+                try:
+                    lst = self.getControl(RECENT_LIST_ID)
+                    lst.reset()
+                    lst.addItems([self._suggest_row(item) for item in rows])
+                except RuntimeError:
+                    pass
+                return
+            _set(self, 'AuraSearchHasRecent', '1' if self.recent else '')
+            try:
+                lst = self.getControl(RECENT_LIST_ID)
+                lst.reset()
+                rows = [xbmcgui.ListItem(query) for query in self.recent[:8]]
+                if self.recent:
+                    clear = xbmcgui.ListItem(i18n.tr(33580))
+                    clear.setProperty('clear', '1')
+                    rows.append(clear)
+                lst.addItems(rows)
+            except RuntimeError:
+                pass
+
+    def _suggest_row(self, item):
+        li = xbmcgui.ListItem(item.get('title') or item.get('name') or '')
+        li.setProperty('suggest', '1')
+        return li
 
     def _refresh_query(self):
         try:
@@ -112,86 +230,253 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 self.query or i18n.tr(33001))
         except RuntimeError:
             pass
+        # Serial searches blocked the whole dialog per keystroke on a
+        # slow server path (~5s per section); the fetch now runs on a
+        # worker and the generation counter drops stale results.
+        self._search_gen = getattr(self, '_search_gen', 0) + 1
         if self.query:
-            self._run_search()
+            # Plex flips the page instantly: pills replace "Popular
+            # Searches" and the left column swaps history for text
+            # suggestions -- neither waits on the network fetch.
+            _set(self, 'AuraSearchHasQuery', '1')
+            _set(self, 'AuraSearchEmpty', '')
+            self._results = []
+            self._render_recent()
+            # Debounce: fire the fetch only once typing settles -- a
+            # per-keystroke collect stacks WAN requests on a slow path.
+            # Stale timers bail on the generation check inside
+            # _launch_search, so no explicit cancel is needed.
+            timer = threading.Timer(
+                0.35, self._launch_search, args=(self._search_gen,))
+            timer.daemon = True
+            timer.start()
         else:
+            _set(self, 'AuraSearchHasQuery', '')
             # Plex fills the empty results zone with suggested content.
             self._results = self._suggestions()
             self._render_results()
 
-    def _render_results(self):
-        _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
-        _set(self, 'AuraSearchEmpty',
-             '1' if self.query and not self._results else '')
-        try:
-            self.getControl(EMPTY_LABEL_ID).setLabel(
-                i18n.tr(33072).format(self.query))
-        except RuntimeError:
-            pass
-        try:
-            # Plex swaps the results zone layout with the query state:
-            # poster grid for Popular Searches, media cards once typed.
-            panel = self.getControl(
-                RESULTS_PANEL_ID if self.query else SUGGEST_PANEL_ID)
-            panel.reset()
-            for item in self._results:
-                if item.get('_genre'):
-                    import divert_source
-                    li = xbmcgui.ListItem(
-                        divert_source.display_genre(item.get('name') or ''),
-                        item.get('section_title') or i18n.tr(33581))
-                    li.setArt({'poster': 'DefaultGenre.png'})
-                    li.setProperty('genre', '1')
-                elif item.get('_person'):
-                    li = xbmcgui.ListItem(item.get('name') or '',
-                                          item.get('role') or i18n.tr(33127))
-                    li.setArt({'poster': item.get('thumb_url')
-                                       or 'actor-fallback.png'})
-                    li.setProperty('person', '1')
-                else:
-                    li = xbmcgui.ListItem(item.get('title') or '',
-                                          _result_sub(item))
-                    thumb = item.get('poster_url') or item.get('landscape_url') \
-                        or item.get('thumb_url') or 'DefaultVideo.png'
-                    li.setArt({'poster': thumb})
-                    li.setProperty('server', item.get('_source') or 'Akasha')
-                panel.addItem(li)
-        except RuntimeError:
-            pass
+    def _launch_search(self, gen):
+        if gen != self._search_gen or self._yield_stop.is_set():
+            return
+        with self._search_lock:
+            if self._search_inflight:
+                # A collect is already running: fold this launch into a
+                # single refetch of the latest query when it finishes
+                # instead of stacking WAN requests.
+                self._search_pending = True
+                return
+            self._search_inflight = True
 
-    # ------------------------------------------------------------- search
+        def worker():
+            while True:
+                g = self._search_gen
+                try:
+                    results = self._collect_results()
+                except Exception as e:
+                    xbmc.log('Akasha Aura Search: collect failed: {}'.format(
+                        e), xbmc.LOGERROR)
+                    results = None
+                with self._search_lock:
+                    if self._search_pending:
+                        self._search_pending = False
+                        rerun = True
+                    else:
+                        self._search_inflight = False
+                        rerun = False
+                if rerun:
+                    continue
+                if results is not None and g == self._search_gen \
+                        and not self._yield_stop.is_set():
+                    self._results = results[:24]
+                    self._render_results()
+                return
+        threading.Thread(target=worker, daemon=True).start()
 
-    def _run_search(self):
+    def _collect_results(self):
+        """Section fetches run in parallel (bounded by the slowest one)
+        then get filtered/sorted like Plex's All view."""
         wanted = _FILTERS[self._filter_index][1]
         if wanted == 'person':
-            self._results = self._search_people()[:24]
-            self._render_results()
-            return
+            return self._search_people()[:24]
+        # The All view uses Plex's own /hubs/search (relevance-ranked,
+        # cast-associated people) when the client exposes it -- the
+        # connector path falls back to per-section title scans below.
+        if wanted is None and getattr(self.client, 'hub_search', None):
+            try:
+                merged = self._collect_results_hub()
+            except Exception as e:
+                xbmc.log('Akasha Aura Search: hub search failed: {}'
+                         .format(e), xbmc.LOGWARNING)
+                merged = None
+            if merged is not None:
+                return merged[:24]
+        # Server-side `title=` is a raw substring filter: stray
+        # whitespace would exclude exact-title hits, so the API sees
+        # the stripped query like Plex's own client sends.
+        term = self.query.strip()
         results = []
-        for section in self.sections:
+        lock = threading.Lock()
+        # 'Tout' also merges people/genre cards; both are per-section
+        # directory walks that must overlap the title searches, not
+        # queue behind them.
+        side = {}
+        if wanted is None:
+            for name, fn in (('people', self._search_people),
+                             ('genres', self._search_genres)):
+                side[name] = threading.Thread(
+                    target=lambda f=fn, n=name: side.__setitem__(
+                        n + '_r', f()),
+                    daemon=True)
+                side[name].start()
+
+        def hit(section):
             try:
                 items, _total = self.client.search_with_total(
-                    section['key'], self.query, limit=12)
+                    section['key'], term, limit=12)
             except Exception as e:
                 xbmc.log('Akasha Aura Search: {} failed: {}'.format(
                     section.get('title'), e), xbmc.LOGWARNING)
-                continue
-            for item in items:
-                item['_source'] = section.get('title') or 'Akasha'
-            results.extend(items)
-        if wanted:
+                return
+            with lock:
+                for item in items:
+                    item['_source'] = section.get('title') or 'Akasha'
+                results.extend(items)
+
+        threads = [threading.Thread(target=hit, args=(section,),
+                                    daemon=True)
+                   for section in self.sections]
+        for t in threads:
+            t.start()
+        # Cap the wait at the slowest section; a hung request must not
+        # keep the results frozen when the rest already landed.
+        for t in threads:
+            t.join(15.0)
+        if wanted == 'music':
+            results = [r for r in results
+                       if r.get('type') in _MUSIC_TYPES]
+        elif wanted == 'livetv':
+            results = [r for r in results
+                       if r.get('type') in _LIVETV_TYPES]
+        elif wanted == 'services':
+            results = [r for r in results
+                       if r.get('type') in _SERVICE_TYPES]
+        elif wanted:
             results = [r for r in results if r.get('type') == wanted]
         # Plex sorts roughly by relevance; keep title-prefix hits first.
-        q = self.query.lower()
+        q = term.lower()
         results.sort(key=lambda r: 0 if (r.get('title') or '').lower()
                      .startswith(q) else 1)
         # 'Tout' merges matching people and genres first, like Plex's
         # People/genre result cards.
         if wanted is None:
-            results = (self._search_people()[:8]
-                       + self._search_genres()[:4] + results)
-        self._results = results[:24]
-        self._render_results()
+            side['people'].join(15.0)
+            side['genres'].join(15.0)
+            results = (side.get('people_r', [])[:8]
+                       + side.get('genres_r', [])[:4] + results)
+        return results[:24]
+
+    def _collect_results_hub(self):
+        """'/hubs/search' path for the All tab: Plex's own relevance order
+        (shows/episodes/movies first) plus the name-matched people the
+        official app paints in the right column (official-live/30:
+        'rook' yields Michael Rooker / Chad Rook). Items are interleaved
+        content/person so the two-column panel fills media on the left
+        and people on the right like Plex's flat merged list."""
+        hub = self.client.hub_search(self.query.strip())
+        content = hub.get('content') or []
+        people = hub.get('people') or []
+        if not content and not people:
+            return None
+        # The same person comes back once per section (and once per
+        # kind): dedupe by name, combining roles so an actor/director
+        # shows "Actor, Director" like Plex's card.
+        seen = {}
+        for p in people:
+            nm = p.get('name')
+            if not nm:
+                continue
+            prev = seen.get(nm)
+            if prev is None:
+                seen[nm] = p
+            elif p.get('role') and p['role'] not in prev['role']:
+                prev['role'] = '{}, {}'.format(prev['role'], p['role'])
+                if not prev.get('person_filter'):
+                    prev['person_filter'] = p.get('person_filter') or ''
+        people = list(seen.values())
+        try:
+            genres = self._search_genres()[:4]
+        except Exception:
+            genres = []
+        side_items = people + genres
+        merged = []
+        for i in range(max(len(content), len(side_items))):
+            if i < len(content):
+                merged.append(content[i])
+            if i < len(side_items):
+                merged.append(side_items[i])
+        return merged
+
+    def _render_results(self):
+        # ListItems are pure data -- build them outside the UI lock so the
+        # serialized mutation below stays short.
+        items = []
+        for item in self._results:
+            if item.get('_genre'):
+                import divert_source
+                li = xbmcgui.ListItem(
+                    divert_source.display_genre(item.get('name') or ''),
+                    item.get('section_title') or i18n.tr(33581))
+                li.setArt({'poster': 'DefaultGenre.png'})
+                li.setProperty('genre', '1')
+            elif item.get('_person'):
+                li = xbmcgui.ListItem(item.get('name') or '',
+                                      item.get('role') or i18n.tr(33127))
+                li.setArt({'poster': item.get('thumb_url')
+                                   or 'actor-fallback.png'})
+                li.setProperty('person', '1')
+            else:
+                li = xbmcgui.ListItem(
+                    i18n.ellipsize(item.get('title') or '', 22),
+                    i18n.ellipsize(_result_sub(item) if self.query
+                                   else _suggest_sub(item), 19))
+                thumb = item.get('poster_url') or item.get('landscape_url') \
+                    or item.get('thumb_url') or 'DefaultVideo.png'
+                li.setArt({'poster': thumb})
+                # Plex's amber line names the server that owns the
+                # result, not the library section.
+                li.setProperty('server', self._server_label())
+                # Episode cards carry a fourth line: the show name
+                # between title and 'S5 E1 • Episode'.
+                if item.get('type') == 'episode' \
+                        and item.get('show_title'):
+                    li.setProperty('parent', item['show_title'])
+            items.append(li)
+        with self._ui_lock:
+            if self._closing:
+                return
+            _set(self, 'AuraSearchHasQuery', '1' if self.query else '')
+            _set(self, 'AuraSearchEmpty',
+                 '1' if self.query and not self._results else '')
+            try:
+                self.getControl(EMPTY_LABEL_ID).setLabel(
+                    i18n.tr(33072).format(self.query))
+            except RuntimeError:
+                pass
+            try:
+                # Plex swaps the results zone layout with the query state:
+                # poster grid for Popular Searches, media cards once typed.
+                panel = self.getControl(
+                    RESULTS_PANEL_ID if self.query else SUGGEST_PANEL_ID)
+                panel.reset()
+                panel.addItems(items)
+            except RuntimeError:
+                pass
+            # The left column mirrors the query state too (suggestions once
+            # typed, history while empty) -- refresh it with the results.
+            self._render_recent()
+
+    # ------------------------------------------------------------- search
 
     def _search_genres(self):
         """Genre-name matches, client-side over the per-section genre
@@ -200,7 +485,9 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._genres = []
             if self.client and getattr(self.client, 'section_genres', None):
                 import divert_source
-                for section in self.sections:
+                lock = threading.Lock()
+
+                def pull(section):
                     try:
                         raw = self.client.section_genres(section['key'])
                         names = (divert_source.parse_genres(raw)
@@ -209,13 +496,21 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                         xbmc.log('Akasha Aura Search: genres failed for {}: {}'
                                  .format(section.get('title'), e),
                                  xbmc.LOGWARNING)
-                        continue
-                    for name in names or []:
-                        self._genres.append({
-                            '_genre': True, 'name': name,
-                            'section_key': section['key'],
-                            'section_title': section.get('title') or ''})
-        q = self.query.lower()
+                        return
+                    with lock:
+                        for name in names or []:
+                            self._genres.append({
+                                '_genre': True, 'name': name,
+                                'section_key': section['key'],
+                                'section_title': section.get('title') or ''})
+
+                ts = [threading.Thread(target=pull, args=(s,), daemon=True)
+                      for s in self.sections]
+                for t in ts:
+                    t.start()
+                for t in ts:
+                    t.join(15.0)
+        q = self.query.strip().lower()
         return [g for g in self._genres if q in (g['name'] or '').lower()]
 
     def _suggestions(self):
@@ -247,7 +542,50 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 except Exception as e:
                     xbmc.log('Akasha Aura Search: suggestions failed: {}'
                              .format(e), xbmc.LOGWARNING)
+            # Plex's cloud provider returns nothing without a plex.tv
+            # Discover account: fall back to the server's own promoted
+            # hubs (skipping Continue Watching / On Deck so the grid is
+            # fresh suggestions, not things already in flight).
+            if not self._suggested:
+                local = getattr(self.client, 'home_hubs', None)
+                if local:
+                    try:
+                        for hub in local(hub_count=6, per_hub=8):
+                            if (hub.get('identifier') or '').startswith(
+                                    'home.'):
+                                continue
+                            items = list(hub.get('items') or [])
+                            key = hub.get('key') or ''
+                            if not items and key and \
+                                    hasattr(self.client,
+                                            'hub_items_with_total'):
+                                try:
+                                    items, _ = \
+                                        self.client.hub_items_with_total(
+                                            key, limit=8)
+                                except Exception:
+                                    items = []
+                            self._suggested.extend(items)
+                            if len(self._suggested) >= 12:
+                                break
+                    except Exception as e:
+                        xbmc.log('Akasha Aura Search: local suggestions '
+                                 'failed: {}'.format(e), xbmc.LOGWARNING)
         return self._suggested[:12]
+
+    def _server_label(self):
+        """The Plex server's friendlyName for the amber line on result
+        cards ('Akasha' on the reference screen). Fetched once; the
+        connector client does not expose it so it falls back."""
+        if self._server_name is None:
+            self._server_name = 'Akasha'
+            fetch = getattr(self.client, 'server_friendly_name', None)
+            if fetch:
+                try:
+                    self._server_name = fetch() or 'Akasha'
+                except Exception:
+                    pass
+        return self._server_name
 
     def _search_people(self):
         """People matching the query (client-side over the per-section
@@ -255,7 +593,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if not self.client or not hasattr(self.client, 'search_people'):
             return []
         try:
-            return self.client.search_people(self.query)
+            return self.client.search_people(self.query.strip())
         except Exception as e:
             xbmc.log('Akasha Aura Search: people failed: {}'.format(e),
                      xbmc.LOGWARNING)
@@ -275,6 +613,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
                 self.addon.getSetting('search.recent') or '[]')
             if not isinstance(self.recent, list):
                 self.recent = []
+            # Normalise: stray whitespace makes 'x' and 'x ' look like
+            # distinct entries while the stripped query matches the same
+            # titles.
+            cleaned = []
+            for entry in self.recent:
+                entry = str(entry).strip()
+                if entry and entry not in cleaned:
+                    cleaned.append(entry)
+            self.recent = cleaned
         except Exception:
             self.recent = []
 
@@ -289,6 +636,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _push_recent(self, query):
+        query = (query or '').strip()
         if query and query not in self.recent:
             self.recent.insert(0, query)
             del self.recent[8:]
@@ -299,7 +647,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlID):
         if controlID == KEYS_PANEL_ID:
             try:
-                pos = self.getControl(KEYS_PANEL_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, KEYS_PANEL_ID)
             except RuntimeError:
                 return
             if 0 <= pos < len(_KEYS):
@@ -316,27 +664,39 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._refresh_query()
         elif controlID == RECENT_LIST_ID:
             try:
-                pos = self.getControl(RECENT_LIST_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, RECENT_LIST_ID)
             except RuntimeError:
                 return
-            if pos == len(self.recent[:8]) and self.recent:
+            if self.query:
+                # Suggestion row: opens the hit straight away, like the
+                # result card it mirrors.
+                if 0 <= pos < len(self._results[:7]):
+                    self._open_result(self._results[pos])
+            elif pos == len(self.recent[:8]) and self.recent:
                 self.recent = []
                 self._save_recent()
                 self._render_recent()
             elif 0 <= pos < len(self.recent):
                 self.query = self.recent[pos]
                 self._refresh_query()
-        elif controlID == PILLS_LIST_ID:
-            try:
-                pos = self.getControl(PILLS_LIST_ID).getSelectedPosition()
-            except RuntimeError:
-                return
-            self._filter_index = pos
+        elif PILLS_LIST_ID <= controlID < PILLS_LIST_ID + len(_FILTERS):
+            self._filter_index = controlID - PILLS_LIST_ID
             self._render_pills()
             if self.query:
-                self._run_search()
+                self._search_gen += 1
+                self._launch_search(self._search_gen)
         elif controlID in (RESULTS_PANEL_ID, SUGGEST_PANEL_ID):
             self._pick_result()
+        elif controlID == RAIL_LIST_ID:
+            # Plex rail over search: the active (search) entry and the
+            # avatar do nothing; Home/More leave to the main window.
+            try:
+                pos = gui_guard.selpos(self, RAIL_LIST_ID)
+            except RuntimeError:
+                return
+            if pos in (2, 3):
+                self._push_recent(self.query)
+                self.close()
 
     def onAction(self, action):
         if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
@@ -359,11 +719,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             # when the key grid's Right would leave it (last column);
             # mid-row Rights still move between letters.
             if focused == KEYS_PANEL_ID:
-                try:
-                    pos = self.getControl(KEYS_PANEL_ID) \
-                        .getSelectedPosition()
-                except RuntimeError:
-                    pos = -1
+                pos = gui_guard.selpos(self, KEYS_PANEL_ID)
                 if pos >= 0 and pos % 6 != 5:
                     super().onAction(action)
                     return
@@ -401,8 +757,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _result_sheet(self):
         try:
-            pos = self.getControl(
-                self._results_panel_id()).getSelectedPosition()
+            pos = gui_guard.selpos(self, self._results_panel_id())
         except RuntimeError:
             return
         if not (0 <= pos < len(self._results)):
@@ -420,13 +775,15 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
     def _pick_result(self):
         try:
-            pos = self.getControl(
-                self._results_panel_id()).getSelectedPosition()
+            pos = gui_guard.selpos(self, self._results_panel_id())
         except RuntimeError:
             return
         if not (0 <= pos < len(self._results)):
             return
         item = self._results[pos]
+        self._open_result(item)
+
+    def _open_result(self, item):
         if item.get('_person'):
             if self.on_person:
                 self.on_person(item)
@@ -443,6 +800,16 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
 
 def _set(window, prop, value):
     window.setProperty(prop, value or '')
+
+
+def _suggest_sub(item):
+    """Popular-Searches card subtitle like the Plex reference
+    (official-live/29-search-empty): 'N saison(s)' for a show, the bare
+    year otherwise -- including future releases ('De Gaulle: Liberte'
+    renders '2026', not the full date)."""
+    if item.get('type') == 'show' and item.get('child_count'):
+        return i18n.tr_count(item['child_count'], 33128)
+    return str(item.get('year') or '')
 
 
 def _result_sub(item):

@@ -12,6 +12,12 @@ prefers the Kodi-resolved string and falls back to the French entry so
 the addon stays usable (and unit-testable) without a live Kodi runtime.
 """
 
+import os
+
+try:
+    import xbmc
+except ImportError:
+    xbmc = None
 try:
     import xbmcaddon
 except ImportError:  # unit tests / generation outside Kodi
@@ -107,7 +113,7 @@ STRINGS = {
     33103: ('{} Saison{}', '{} Season{}'),
     33104: ('Regarder', 'Watch'),
     33105: ('Reprendre S{} E{}', 'Resume S{} E{}'),
-    33106: ('Reprendre · {} restantes', 'Resume · {} left'),
+    33106: ('Reprendre • {} restantes', 'Resume • {} left'),
     33107: ('Recommencer', 'Restart'),
     33108: ('Bande-annonce', 'Trailer'),
     33109: ('Bonus', 'Extras'),
@@ -448,6 +454,70 @@ STRINGS = {
     # Plex search hint line above Popular Searches
     33586: ('Titres, personnes, genres et plus encore…',
             'Search titles, people, genres and more…'),
+
+    # Dark confirm / message sheets (aura_menu.confirm / .message)
+    33587: ('Confirmer', 'Confirm'),
+    33588: ('OK', 'OK'),
+    33589: ('Bandes-annonces et bonus', 'Trailers & Extras'),
+
+    # Sidebar "My Lists" row (Plex parity -- lists the server playlists)
+    33590: ('Mes listes', 'My Lists'),
+    33591: ('Aucune liste', 'No lists yet'),
+    33592: ('Profil', 'Profile'),
+    33593: ('Serveur', 'Server'),
+    33594: ('Activité de vous', 'Activity by you'),
+    33595: ('Activité de vous et {}', 'Activity by you and {}'),
+    33596: ('Activité de {}', 'Activity by {}'),
+    33597: ('Vous avez regardé', 'You watched'),
+    33598: ('{} a regardé', '{} watched'),
+    33599: ('il y a {}', '{} ago'),
+    33600: ('Sortie le {}', 'Releasing {}'),
+    33601: ('Activité de vous, {} et 1 autre',
+            'Activity by you, {} and 1 other'),
+    33602: ('Activité de vous, {} et {} autres',
+            'Activity by you, {} and {} others'),
+    33603: ('Activité de {} et 1 autre', 'Activity by {} and 1 other'),
+    33604: ('Activité de {} et {} autres', 'Activity by {} and {} others'),
+    33605: ('Ajouter à une liste', 'Add to List'),
+    33606: ('Ajouter à une playlist / collection',
+            'Add to Playlist / Collection'),
+    33607: ('Gérer', 'Manage'),
+    33608: ('Autres façons de regarder', 'More Ways to Watch'),
+    33609: ('Musique', 'Music'),
+    33610: ('Changer de profil', 'Switch Profile'),
+    33611: ('Notifications', 'Notifications'),
+    33612: ('Amis', 'Friends'),
+    33613: ('Indisponible hors plex.tv', 'Requires plex.tv'),
+    33614: ('Services', 'Services'),
+    33615: ('TV en direct', 'Live TV'),
+    33616: ('File de lecture', 'Play Queue'),
+    33617: ('Qui regarde ?', 'Who\u2019s watching?'),
+    33618: ('Ajouter un utilisateur', 'Add user'),
+    33619: ('Saisir le code PIN', 'Enter your PIN'),
+    33620: ('Code PIN incorrect', 'Incorrect PIN'),
+    33621: ('Échec du changement de profil', 'Profile switch failed'),
+    33622: ('Profil : {}', 'Profile: {}'),
+    # On Plex rail segment (cloud entries below the libraries)
+    33623: ('Sur Plex', 'On Plex'),
+    33624: ('TV en direct', 'Live TV'),
+    33625: ('Découvrir', 'Discover'),
+    33626: ('Piste audio', 'Audio Stream'),
+    33627: ('Compte', 'Account'),
+    33628: ('E-mail', 'Email'),
+    33629: ('Nom d’utilisateur', 'Username'),
+    33630: ('Abonnements', 'Subscriptions'),
+    33631: ('Plex Pass', 'Plex Pass'),
+    33632: ('Connexion automatique', 'Automatically Sign In'),
+    33633: ('Langue', 'Language'),
+    33634: ('Gérer la confidentialité du profil', 'Manage Profile Privacy'),
+    33635: ('Synchroniser visionnage et notes',
+            'Sync Watch State and Ratings'),
+    33636: ('Langue des critiques et discussions',
+            'Review & Discussion Language Settings'),
+    33637: ('Se déconnecter', 'Sign Out'),
+    33638: ('Supprimer le compte', 'Delete Account'),
+    33639: ('En direct', 'Live'),
+    33640: ('Chaînes', 'Channels'),
 }
 
 MONTH_ABBRS = {
@@ -458,6 +528,23 @@ MONTH_ABBRS = {
 }
 
 _addon = None
+
+# msgid -> (fr singular, fr plural, en singular, en plural) for 'N noun'
+# labels Plex renders with proper agreement ('3 saisons', not '(s)').
+_PLURALS = {
+    33069: ('{} élément', '{} éléments', '{} item', '{} items'),
+    33128: ('{} saison', '{} saisons', '{} season', '{} seasons'),
+    33129: ('{} épisode', '{} épisodes', '{} episode', '{} episodes'),
+}
+
+
+def tr_count(count, msgid):
+    """Localized 'count noun' with proper singular/plural agreement.
+    French pluralizes only above 1; English pluralizes everything != 1."""
+    fr_one, fr_many, en_one, en_many = _PLURALS[msgid]
+    if _lang() == 'en':
+        return (en_one if count == 1 else en_many).format(count)
+    return (fr_one if count <= 1 else fr_many).format(count)
 
 
 def tr(msgid):
@@ -480,6 +567,102 @@ def _lang():
     if xbmcaddon is None:
         return 'fr'
     return 'en' if tr(33001) == STRINGS[33001][1] else 'fr'
+
+
+_MEASURE_FONTS = {}
+
+
+def _measure_font(size):
+    """PIL font matching the skin's Inter faces for text-width checks."""
+    if size in _MEASURE_FONTS:
+        return _MEASURE_FONTS[size]
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        return None
+    candidates = []
+    try:
+        if xbmc is not None:
+            candidates.append(os.path.join(
+                xbmc.translatePath('special://skin/fonts'),
+                'Inter-Unicode-Regular.ttf'))
+    except Exception:
+        pass
+    try:
+        if xbmcaddon is not None:
+            candidates.append(os.path.join(
+                xbmcaddon.Addon('skin.arctic.horizon.2').getAddonInfo('path'),
+                'fonts', 'Inter-Unicode-Regular.ttf'))
+    except Exception:
+        pass
+    for path in candidates:
+        if os.path.exists(path):
+            _MEASURE_FONTS[size] = ImageFont.truetype(path, size)
+            return _MEASURE_FONTS[size]
+    return None
+
+
+# Both helpers below are pure (same input -> same output) yet called per
+# rendered label: a 50-card page issues ~100 measurements, each a PIL
+# getbbox (~binary search for ellipsize). Memoizing on (text, size,
+# budget) collapses repeat measurements when the same titles re-render
+# (hero swap, row re-label, view revisit). Bounded so library browsing
+# cannot grow it without limit.
+_MEASURE_CACHE = {}
+_MEASURE_CACHE_MAX = 2000
+
+
+def _measure_cache_put(key, value):
+    if len(_MEASURE_CACHE) >= _MEASURE_CACHE_MAX:
+        _MEASURE_CACHE.clear()
+    _MEASURE_CACHE[key] = value
+
+
+def text_width(text, size):
+    """Rendered pixel width of `text` in the skin's Inter face at `size`
+    -- or None when PIL/the TTF is unavailable (tests, stripped builds)."""
+    if not text:
+        return 0
+    key = (text, size)
+    if key in _MEASURE_CACHE:
+        return _MEASURE_CACHE[key]
+    try:
+        font = _measure_font(size)
+        width = font.getbbox(text)[2] if font else None
+    except Exception:
+        width = None
+    _measure_cache_put(key, width)
+    return width
+
+
+def ellipsize(text, size, budget_px=190):
+    """Trim `text` to fit a card caption with a true '…' ellipsis, like
+    Plex -- Kodi's own truncation appends '...' plus a stray space.
+    Kodi renders Inter ~1.2x wider than PIL, so the PIL budget is 190px
+    for a 240px label. Returns the input untouched when measuring fails.
+    """
+    if not text:
+        return text
+    key = (text, size, budget_px)
+    if key in _MEASURE_CACHE:
+        return _MEASURE_CACHE[key]
+    try:
+        font = _measure_font(size)
+        if font is None or font.getbbox(text)[2] <= budget_px:
+            _measure_cache_put(key, text)
+            return text
+        lo, hi = 0, len(text)
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if font.getbbox(text[:mid] + '…')[2] <= budget_px:
+                lo = mid
+            else:
+                hi = mid - 1
+        trimmed = text[:lo].rstrip() + '…'
+        _measure_cache_put(key, trimmed)
+        return trimmed
+    except Exception:
+        return text
 
 
 def fmt_air_date(iso_date):

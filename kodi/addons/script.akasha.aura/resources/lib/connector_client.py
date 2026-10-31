@@ -12,6 +12,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import art_proxy
 import divert_source
 
 # Same circuit breaker as plex_client: an unreachable connector used to
@@ -21,6 +22,11 @@ _OFFLINE_BACKOFF_SECONDS = 30.0
 _CACHE_TTL_SECONDS = 30.0
 _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
+# Same soft/hard split as plex_client: a single read timeout under load
+# must not trip the breaker; only hard transport errors or 3 timeouts
+# in a row do.
+_fail_streak = {}
+_TIMEOUTS_TO_TRIP = 3
 _read_cache = {}
 # In-flight request dedup (see plex_client): concurrent callers join the
 # same fetch instead of duplicating it.
@@ -28,12 +34,16 @@ _inflight = {}
 _inflight_lock = threading.Lock()
 
 
-def _mark_offline(host):
-    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+def _mark_offline(host, soft=False):
+    streak = _fail_streak.get(host, 0) + 1
+    _fail_streak[host] = streak
+    if not soft or streak >= _TIMEOUTS_TO_TRIP:
+        _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
 
 
 def _mark_online(host):
     _offline_until.pop(host, None)
+    _fail_streak.pop(host, None)
 
 
 def _is_offline(host):
@@ -105,7 +115,7 @@ class ConnectorClient:
                         owner_ev = threading.Event()
                         _inflight[key] = owner_ev
                         break
-                if not ev.wait(15.0):
+                if not ev.wait(25.0):
                     with _inflight_lock:
                         if _inflight.get(key) is ev:
                             owner_ev = threading.Event()
@@ -125,8 +135,9 @@ class ConnectorClient:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise ConnectorAPIError('Connector API {} for {}: {}'.format(e.code, path, body)) from e
         except OSError as e:
-            _mark_offline(host)
             reason = getattr(e, 'reason', e)
+            _mark_offline(host, soft=isinstance(reason, TimeoutError) or
+                          'timed out' in str(reason).lower())
             raise ConnectorOfflineError('Connector URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise ConnectorAPIError('Connector JSON decode error for {}: {}'.format(path, e)) from e
@@ -191,12 +202,16 @@ class ConnectorClient:
         return divert_source.parse_metadata_list(
             self.metadata_children(season_rating_key), self.image_url)
 
-    def image_url(self, plex_path, width=None, height=None):
+    def image_url(self, plex_path, width=None, height=None, radius=None):
         """Build a Kodi-playable URL for a Plex image via the connector's proxy.
 
         `width`/`height` are accepted for signature parity with
         PlexClient's resolver (server-side transcode); the connector proxy
         currently has no resize support so the hints are ignored.
+
+        `radius` routes the image through the loopback art proxy, which
+        bakes alpha-rounded corners into a PNG (and downscales to the
+        requested size) -- the same treatment the direct Plex client gets.
 
         The admin Plex token never reaches the client: the connector resolves
         it server-side (see docs/api.md of akasha-os-connector). The session
@@ -211,6 +226,10 @@ class ConnectorClient:
         encoded_path = urllib.parse.quote(plex_path, safe='')
         base = '{}/api/plex/image?path={}'.format(self.server_url, encoded_path)
         if not self.token:
-            return base
-        header_value = urllib.parse.quote('Bearer {}'.format(self.token), safe='')
-        return '{}|Authorization={}'.format(base, header_value)
+            url = base
+        else:
+            header_value = urllib.parse.quote('Bearer {}'.format(self.token), safe='')
+            url = '{}|Authorization={}'.format(base, header_value)
+        if radius:
+            return art_proxy.wrap(url, radius, width, height)
+        return url

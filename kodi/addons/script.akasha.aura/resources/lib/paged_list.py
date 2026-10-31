@@ -16,6 +16,9 @@ issuing a separate "count" request.
 No dependency on xbmc*, testable with plain `python3 -m unittest`.
 """
 
+import threading
+import time
+
 DEFAULT_PAGE_SIZE = 30
 DEFAULT_PREFETCH_MARGIN = 15
 
@@ -42,45 +45,122 @@ class PagedList:
         self.items = []
         self.exhausted = False
         self.total = None
+        # Serializes fetches and arms the async prefetch worker -- two
+        # overlapping page loads would race on `self.items` offsets.
+        self._fetch_lock = threading.Lock()
+        self._inflight = False
+        self._inflight_lock = threading.Lock()
+        # A scroll prefetch that arms before load_initial() lands would
+        # race the first fill (page 2 rendered, then repainted over).
+        self._initial_loaded = False
+        # Failed fetches back off exponentially so an offline path does
+        # not burn a WAN request on every subsequent keypress.
+        self._retry_after = 0.0
+        self._retry_delay = 5.0
 
     def load_initial(self):
         """Fetch the first page. Returns the newly-loaded items."""
-        return self._load_next_page()
+        page = self._load_next_page()
+        self._initial_loaded = True
+        return page
+
+    def _ready_for_prefetch(self):
+        """Exhaustion/first-page/retry gate shared by both load paths."""
+        if not self._initial_loaded or self.exhausted:
+            return False
+        return time.monotonic() >= self._retry_after
+
+    def _note_fetch_error(self):
+        self._retry_after = time.monotonic() + self._retry_delay
+        self._retry_delay = min(30.0, self._retry_delay * 2)
 
     def maybe_load_more(self, selected_position):
         """If `selected_position` is near the loaded end, fetch another page.
 
         Returns the newly-loaded items (possibly empty if nothing was
         fetched, either because we're not close enough to the end yet, or
-        because the list is already exhausted).
+        because the list is already exhausted). Blocks the caller for the
+        duration of the network fetch -- GUI-driven callers should prefer
+        `prefetch_async` so input handling is never stalled by latency.
         """
-        if self.exhausted:
-            return []
         if selected_position < len(self.items) - self.prefetch_margin:
             return []
-        return self._load_next_page()
+        with self._inflight_lock:
+            if self._inflight or not self._ready_for_prefetch():
+                return []
+            self._inflight = True
+        try:
+            return self._load_next_page()
+        except Exception:
+            self._note_fetch_error()
+            raise
+        finally:
+            self._inflight = False
+
+    def prefetch_async(self, selected_position, on_page, on_error=None):
+        """Non-blocking `maybe_load_more` for input-driven callers.
+
+        If `selected_position` is near the loaded end and no fetch is
+        already in flight, a daemon thread fetches the next page and then
+        invokes `on_page(new_items)` **on the worker thread**. The
+        callback must not touch Kodi GUI objects: callers should stash
+        the page and render it from the next input event -- the prefetch
+        margin leaves plenty of loaded items to scroll through meanwhile.
+        `on_error(exception)` is invoked instead when the fetch raises.
+        """
+        if selected_position < len(self.items) - self.prefetch_margin:
+            return
+        with self._inflight_lock:
+            if self._inflight or not self._ready_for_prefetch():
+                return
+            self._inflight = True
+
+        def work():
+            try:
+                page = self._load_next_page()
+                if page and on_page:
+                    on_page(page)
+            except Exception as e:
+                self._note_fetch_error()
+                if on_error:
+                    on_error(e)
+            finally:
+                self._inflight = False
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _load_next_page(self):
-        if self.max_items is not None and len(self.items) >= self.max_items:
-            self.exhausted = True
-            return []
-        result = self.fetch_page(len(self.items), self.page_size)
-        if isinstance(result, tuple):
-            page, total = result
-        else:
-            page, total = result, None
-        page = page or []
-        if total is not None:
-            self.total = total
-        if self.max_items is not None and len(self.items) + len(page) >= self.max_items:
-            page = page[:max(0, self.max_items - len(self.items))]
-            self.exhausted = True
-        self.items.extend(page)
-        if len(page) < self.page_size:
-            self.exhausted = True
-            if self.total is None:
-                self.total = len(self.items)
-        return page
+        with self._fetch_lock:
+            if self.max_items is not None and len(self.items) >= self.max_items:
+                self.exhausted = True
+                return []
+            result = self.fetch_page(len(self.items), self.page_size)
+            self._retry_after = 0.0
+            self._retry_delay = 5.0
+            done = None
+            if isinstance(result, tuple):
+                if len(result) >= 3:
+                    page, total, done = result[0], result[1], result[2]
+                else:
+                    page, total = result
+            else:
+                page, total = result, None
+            page = page or []
+            if total is not None:
+                self.total = total
+            if self.max_items is not None and len(self.items) + len(page) >= self.max_items:
+                page = page[:max(0, self.max_items - len(self.items))]
+                self.exhausted = True
+            self.items.extend(page)
+            if len(page) < self.page_size:
+                # `done is False` = the wrapper hit its raw-fetch budget,
+                # not the end of the stream -- the row continues on the
+                # next call instead of being silently truncated.
+                if done is not False:
+                    self.exhausted = True
+                    if self.total is None:
+                        self.total = len(self.items)
+            return page
 
 
 def series_dedup_key(item):
@@ -106,8 +186,9 @@ def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
     The wrapper owns the raw stream position: PagedList offsets count
     deduped items, so the raw offset must be tracked separately. It keeps
     fetching raw pages until it has `limit` unique items (or the raw
-    stream ends), so a short returned page still means "exhausted" to
-    PagedList semantics.
+    stream ends). A short returned page therefore comes back with
+    `done=False` so PagedList keeps paginating instead of silently
+    truncating the row when the raw-fetch cap is hit.
 
     Raw exhaustion: a *short page is not* the end -- a hub's inline page
     is shorter than the raw page size yet continues through its `key`
@@ -117,10 +198,15 @@ def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
     `max_raw_fetches` caps requests per call on pathological hubs.
     """
     seen = set()
-    state = {'offset': 0, 'done': False, 'total': None}
+    state = {'offset': 0, 'done': False, 'total': None, 'backlog': []}
 
     def fetch(offset, limit):
         batch = []
+        # Overflow from a previous call's raw page comes first -- raw
+        # offsets already advanced past it, so dropping it would lose
+        # items permanently.
+        while len(batch) < limit and state['backlog']:
+            batch.append(state['backlog'].pop(0))
         fetches = 0
         while len(batch) < limit and not state['done'] \
                 and fetches < max_raw_fetches:
@@ -139,11 +225,16 @@ def dedup_fetch(fetch_page, raw_page_size=32, max_raw_fetches=5):
                 if key in seen:
                     continue
                 seen.add(key)
-                batch.append(item)
-                if len(batch) >= limit:
-                    break
+                if len(batch) < limit:
+                    batch.append(item)
+                else:
+                    state['backlog'].append(item)
         # The raw total is an upper bound for the deduped count -- enough
         # for end-of-row placeholders (extras drop when the stream ends).
-        return batch, state['total']
+        # Third element tells PagedList whether the stream really ended;
+        # hitting `max_raw_fetches` with a short batch -- or a backlog
+        # still pending -- is NOT exhaustion.
+        return batch, state['total'], \
+            state['done'] and not state['backlog']
 
     return fetch

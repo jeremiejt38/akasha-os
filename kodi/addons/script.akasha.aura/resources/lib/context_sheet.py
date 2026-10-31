@@ -16,6 +16,7 @@ the detail page does.
 
 import xbmc
 import xbmcgui
+import gui_guard
 import aura_menu
 import i18n
 import osd_menu
@@ -53,7 +54,7 @@ def open_sheet(win, client, item, control_id, open_default,
                                                control_id)))
         entries.append((i18n.tr(33111), lambda: rate(client, item, win)))
     if item.get('video_label') or item.get('audio_label'):
-        entries.append((i18n.tr(33116), lambda: file_info(item)))
+        entries.append((i18n.tr(33116), lambda: file_info(win, item)))
 
     idx = aura_menu.contextmenu(win,
                                 [label for label, _ in entries])
@@ -125,7 +126,7 @@ def toggle_watched(win, client, item, control_id):
         return
     item['view_count'] = 0 if watched else 1
     try:
-        li = win.getControl(control_id).getSelectedItem()
+        li = gui_guard.selitem(win, control_id)
         li.getVideoInfoTag().setPlayCount(item['view_count'])
     except Exception:
         pass
@@ -150,7 +151,7 @@ def remove_continue_watching(win, client, item, control_id,
     item['view_offset_ms'] = 0
     try:
         ctrl = win.getControl(control_id)
-        pos = ctrl.getSelectedPosition()
+        pos = gui_guard.pos(ctrl)
         if on_removed is not None:
             on_removed(pos)
         ctrl.removeItem(pos)
@@ -177,7 +178,7 @@ def rate(client, item, win):
         xbmc.log('Akasha Aura: rate failed: {}'.format(e), xbmc.LOGERROR)
 
 
-def file_info(item):
+def file_info(win, item):
     def _fmt_duration(duration_ms):
         if not duration_ms:
             return ''
@@ -196,4 +197,4 @@ def file_info(item):
                        (i18n.tr(33115), 'subtitle_label')):
         if item.get(key):
             lines.append('{} : {}'.format(label, item[key]))
-    xbmcgui.Dialog().ok(i18n.tr(33116), '[CR]'.join(lines))
+    aura_menu.message(win, i18n.tr(33116), '[CR]'.join(lines))

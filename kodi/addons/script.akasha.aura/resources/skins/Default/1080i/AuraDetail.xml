@@ -26,7 +26,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF10131A">white.png</texture>
+            <texture colordiffuse="FF1A1310">white.png</texture>
         </control>
 
         <!-- Backdrop, full-bleed right-anchored like Plex -->
@@ -39,100 +39,168 @@
             <fadetime>200</fadetime>
             <texture background="true"></texture>
         </control>
-        <!-- Dim + left gradient over the backdrop -->
+        <!-- Dim + left gradient over the backdrop (fallback only; the
+             baked field veil 7004 replaces it when a palette exists) -->
         <control type="image">
             <left>0</left>
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
             <texture>scrim-hero.png</texture>
+            <visible>String.IsEmpty(Window.Property(AuraDetailVeil))</visible>
         </control>
         <control type="image" id="7002">
             <left>0</left>
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="7310131A">white.png</texture>
+            <texture colordiffuse="5C1A1310">white.png</texture>
+            <visible>String.IsEmpty(Window.Property(AuraDetailVeil))</visible>
         </control>
-        <control type="image">
+        <control type="image" id="7003">
             <left>0</left>
             <top>620</top>
             <width>1920</width>
             <height>460</height>
-            <texture>scrim-bottom.png</texture>
+            <texture colordiffuse="FF1A1310">scrim-bottom.png</texture>
+        </control>
+        <!-- 7004: baked UltraBlurColors field veil (same model as the
+             hero's 5022: bilinear 4-corner palette under the Plex
+             scrim mask), written per-palette by field_veil. -->
+        <control type="image" id="7004">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <fadetime>200</fadetime>
+            <texture background="true">$INFO[Window.Property(AuraDetailVeil)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailVeil))</visible>
         </control>
 
         <!-- Clear logo (when available) or text title -->
         <control type="image" id="7010">
-            <left>105</left>
-            <top>140</top>
+            <left>128</left>
+            <top>128</top>
             <width>720</width>
-            <height>160</height>
+            <height>162</height>
             <aspectratio align="left" aligny="bottom">keep</aspectratio>
             <fadetime>150</fadetime>
             <texture background="true"></texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
         </control>
         <control type="label" id="7011">
-            <left>105</left>
-            <top>200</top>
+            <left>128</left>
+            <top>230</top>
             <width>1100</width>
             <height>70</height>
-            <font>font_head_bold</font>
+            <font>font_aura_info_black_doublerow</font>
             <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraDetailLogo))</visible>
+        </control>
+        <!-- Season hero: Plex paints the SHOW clearlogo with the episode
+             title as a heading right under it (official-live/27). -->
+        <control type="label" id="7013">
+            <left>128</left>
+            <top>230</top>
+            <width>1100</width>
+            <height>70</height>
+            <font>font_aura_info_black_doublerow</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Window.Property(AuraDetailEpTitle)]</label>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailEpTitle))</visible>
         </control>
 
         <!-- Plex keeps its collapsed rail visible on detail pages too.
                  Decorative here: Back still returns to the library. -->
         <control type="image">
-            <left>14</left>
-            <top>330</top>
-            <width>64</width>
-            <height>300</height>
-            <texture colordiffuse="B810131A" border="30">rounded-solid.png</texture>
-        </control>
-        <control type="image">
-            <left>25</left>
-            <top>352</top>
-            <width>42</width>
-            <height>42</height>
-            <aspectratio>keep</aspectratio>
-            <texture colordiffuse="FFE5A00D">circle.png</texture>
-        </control>
-        <control type="image">
             <left>28</left>
             <top>430</top>
-            <width>36</width>
-            <height>36</height>
+            <width>72</width>
+            <height>218</height>
+            <texture colordiffuse="B81A1310" border="36">rounded-solid.png</texture>
+        </control>
+        <control type="image">
+            <left>44</left>
+            <top>447</top>
+            <width>40</width>
+            <height>40</height>
+            <texture>avatar-plex.png</texture>
+            <visible>String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>44</left>
+            <top>447</top>
+            <width>40</width>
+            <height>40</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window(10000).Property(AuraAvatar)]</texture>
+            <visible>!String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>44</left>
+            <top>447</top>
+            <width>40</width>
+            <height>40</height>
+            <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image">
+            <left>49</left>
+            <top>509</top>
+            <width>30</width>
+            <height>30</height>
             <aspectratio>keep</aspectratio>
             <texture>icon-search.png</texture>
         </control>
         <control type="image">
-            <left>28</left>
-            <top>496</top>
-            <width>36</width>
-            <height>36</height>
+            <left>51</left>
+            <top>560</top>
+            <width>26</width>
+            <height>24</height>
             <aspectratio>keep</aspectratio>
             <texture>icon-home.png</texture>
         </control>
         <control type="image">
-            <left>28</left>
-            <top>562</top>
-            <width>36</width>
-            <height>36</height>
+            <left>47</left>
+            <top>609</top>
+            <width>34</width>
+            <height>22</height>
             <aspectratio>keep</aspectratio>
             <texture>icon-more.png</texture>
         </control>
 
         <!-- Meta line: year - duration - genres -->
         <control type="label" id="7020">
-            <left>105</left>
-            <top>310</top>
+            <left>128</left>
+            <top>296</top>
             <width>1100</width>
             <height>36</height>
-            <font>font_mini</font>
+            <font>font_aura_meta</font>
             <textcolor>EEFFFFFF</textcolor>
+        </control>
+        <!-- Content-rating box trailing the meta line. Plex draws the
+             detail-page rating square as a solid near-black box without
+             the pale edge used by the home hero chip (44-after-back).
+             Position and width are computed in Python from the rendered
+             meta width. -->
+        <control type="image" id="7190">
+            <left>0</left>
+            <top>296</top>
+            <width>40</width>
+            <height>36</height>
+            <texture border="10">meta-rating-box-solid.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailMetaRating))</visible>
+        </control>
+        <control type="label" id="7191">
+            <left>0</left>
+            <top>296</top>
+            <width>40</width>
+            <height>36</height>
+            <font>font_aura_tiny_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailMetaRating))</visible>
         </control>
 
         <!-- Rating chips row (positions/widths computed in Python):
@@ -140,15 +208,15 @@
              chips (IMDb / RT critic / RT audience / TMDB) -->
         <control type="image" id="7021">
             <left>105</left>
-            <top>356</top>
+            <top>344</top>
             <width>90</width>
-            <height>36</height>
-            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg0))</visible>
         </control>
         <control type="image" id="7045">
             <left>105</left>
-            <top>362</top>
+            <top>348</top>
             <width>24</width>
             <height>24</height>
             <aspectratio>keep</aspectratio>
@@ -157,10 +225,10 @@
         </control>
         <control type="label" id="7022">
             <left>105</left>
-            <top>356</top>
+            <top>344</top>
             <width>90</width>
-            <height>36</height>
-            <font>font_mini_bold</font>
+            <height>40</height>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -168,15 +236,15 @@
         </control>
         <control type="image" id="7023">
             <left>205</left>
-            <top>356</top>
+            <top>344</top>
             <width>120</width>
-            <height>36</height>
-            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg1))</visible>
         </control>
         <control type="image" id="7046">
             <left>205</left>
-            <top>362</top>
+            <top>348</top>
             <width>24</width>
             <height>24</height>
             <aspectratio>keep</aspectratio>
@@ -185,10 +253,10 @@
         </control>
         <control type="label" id="7024">
             <left>205</left>
-            <top>356</top>
+            <top>344</top>
             <width>120</width>
-            <height>36</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -196,15 +264,15 @@
         </control>
         <control type="image" id="7025">
             <left>335</left>
-            <top>356</top>
+            <top>344</top>
             <width>130</width>
-            <height>36</height>
-            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg2))</visible>
         </control>
         <control type="image" id="7047">
             <left>335</left>
-            <top>362</top>
+            <top>348</top>
             <width>24</width>
             <height>24</height>
             <aspectratio>keep</aspectratio>
@@ -213,10 +281,10 @@
         </control>
         <control type="label" id="7026">
             <left>335</left>
-            <top>356</top>
+            <top>344</top>
             <width>130</width>
-            <height>36</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -224,15 +292,15 @@
         </control>
         <control type="image" id="7027">
             <left>475</left>
-            <top>356</top>
+            <top>344</top>
             <width>130</width>
-            <height>36</height>
-            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg3))</visible>
         </control>
         <control type="image" id="7048">
             <left>475</left>
-            <top>362</top>
+            <top>348</top>
             <width>24</width>
             <height>24</height>
             <aspectratio>keep</aspectratio>
@@ -241,10 +309,10 @@
         </control>
         <control type="label" id="7028">
             <left>475</left>
-            <top>356</top>
+            <top>344</top>
             <width>130</width>
-            <height>36</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -252,15 +320,15 @@
         </control>
         <control type="image" id="7029">
             <left>615</left>
-            <top>356</top>
+            <top>344</top>
             <width>130</width>
-            <height>36</height>
-            <texture colordiffuse="3DFFFFFF" border="6">rounded-solid.png</texture>
+            <height>40</height>
+            <texture colordiffuse="3D000000" border="22">rounded-solid.png</texture>
             <visible>!String.IsEmpty(Window.Property(AuraDetailChipBg4))</visible>
         </control>
         <control type="image" id="7049">
             <left>615</left>
-            <top>362</top>
+            <top>348</top>
             <width>24</width>
             <height>24</height>
             <aspectratio>keep</aspectratio>
@@ -269,10 +337,10 @@
         </control>
         <control type="label" id="7032">
             <left>615</left>
-            <top>356</top>
+            <top>344</top>
             <width>130</width>
-            <height>36</height>
-            <font>font_mini</font>
+            <height>40</height>
+            <font>font_aura_tiny</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -281,21 +349,21 @@
 
         <!-- Synopsis (3 lines like Plex) -->
         <control type="textbox" id="7030">
-            <left>105</left>
-            <top>412</top>
-            <width>1150</width>
-            <height>96</height>
-            <font>font_mini</font>
+            <left>128</left>
+            <top>398</top>
+            <width>800</width>
+            <height>124</height>
+            <font>font_aura_plot</font>
             <textcolor>DDFFFFFF</textcolor>
         </control>
 
         <!-- Director / creator line -->
         <control type="label" id="7040">
-            <left>105</left>
-            <top>518</top>
+            <left>128</left>
+            <top>526</top>
             <width>1100</width>
             <height>32</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <textcolor>99FFFFFF</textcolor>
         </control>
 
@@ -306,108 +374,179 @@
          focused (focusedcolor + textoffsetx clears the icon zone). -->
     <control type="button" id="7100">
         <left>105</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onright>7106</onright>
         <ondown>7110</ondown>
     </control>
-    <control type="image" id="7089">
-        <left>125</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
-        <aspectratio>keep</aspectratio>
-        <texture>icon-play.png</texture>
-        <visible>!Control.HasFocus(7100) + !String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
-    </control>
-    <control type="image" id="7087">
-        <left>125</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
-        <aspectratio>keep</aspectratio>
-        <texture>icon-resume.png</texture>
-        <visible>!Control.HasFocus(7100) + String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+    <!-- White underlay over the unfocused circle when the Resume pill
+         stays expanded without focus (Plex keeps the labelled CTA a
+         full white pill even while the season strip holds the cursor
+         (official-live/44). Sized by _sync_action_row(). -->
+    <control type="image" id="7160">
+        <left>105</left>
+        <top>564</top>
+        <width>64</width>
+        <height>64</height>
+        <texture colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraPill7100))</visible>
     </control>
     <control type="image" id="7090">
         <left>125</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-play-dark.png</texture>
-        <visible>Control.HasFocus(7100) + !String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + !String.IsEqual(Window.Property(AuraDetailResume),1) + Control.HasFocus(7100)</visible>
+    </control>
+    <control type="image" id="7089">
+        <left>125</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-play.png</texture>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + !String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100)</visible>
     </control>
     <control type="image" id="7088">
         <left>125</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-resume-dark.png</texture>
-        <visible>Control.HasFocus(7100) + String.IsEqual(Window.Property(AuraDetailResume),1)</visible>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + String.IsEqual(Window.Property(AuraDetailResume),1) + [Control.HasFocus(7100) | !String.IsEmpty(Window.Property(AuraPill7100))]</visible>
     </control>
-    <control type="button" id="7106">
+    <control type="image" id="7091">
+        <left>125</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-resume.png</texture>
+        <visible>String.IsEmpty(Window.Property(AuraDetailCloud)) + String.IsEqual(Window.Property(AuraDetailResume),1) + !Control.HasFocus(7100) + String.IsEmpty(Window.Property(AuraPill7100))</visible>
+    </control>
+    <!-- Cloud (Discover) pages: the Watch circle becomes Plex's 'Add to
+         Watchlist' bookmark pill (official-live/56). The pill stays
+         expanded, so the dark glyph always rides on the white fill. -->
+    <control type="image" id="7163">
+        <left>125</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-bookmark-dark.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud))</visible>
+    </control>
+    <!-- Cloud pages only: 'Add to List' circle right after the
+         Watchlist pill (official-live/56). -->
+    <control type="button" id="7164">
         <left>375</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
+        <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+        <ondown>7110</ondown>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud))</visible>
+    </control>
+    <control type="image" id="7165">
+        <left>395</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-list.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud)) + !Control.HasFocus(7164)</visible>
+    </control>
+    <control type="image" id="7166">
+        <left>395</left>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <texture>icon-list-dark.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraDetailCloud)) + Control.HasFocus(7164)</visible>
+    </control>
+    <control type="button" id="7106">
+        <left>375</left>
+        <top>564</top>
+        <width>64</width>
+        <height>64</height>
+        <font>font_aura_tiny_bold</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsetx>66</textoffsetx>
+        <label></label>
+        <textcolor>00FFFFFF</textcolor>
+        <focusedcolor>FF1A1A1A</focusedcolor>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7100</onleft>
         <onright>7109</onright>
         <ondown>7110</ondown>
         <visible>String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
     </control>
+    <!-- Restart pill underlay: same permanent-white rule as Resume
+         (reference/lecteur/after_back_003). -->
+    <control type="image" id="7161">
+        <left>375</left>
+        <top>564</top>
+        <width>64</width>
+        <height>64</height>
+        <texture colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texture>
+        <visible>!String.IsEmpty(Window.Property(AuraPill7106))</visible>
+    </control>
     <control type="image" id="7107">
         <left>395</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-restart.png</texture>
-        <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1)</visible>
+        <visible>!Control.HasFocus(7106) + String.IsEqual(Window.Property(AuraDetailRestart),1) + String.IsEmpty(Window.Property(AuraPill7106))</visible>
     </control>
     <control type="image" id="7108">
         <left>395</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-restart-dark.png</texture>
-        <visible>Control.HasFocus(7106)</visible>
+        <visible>[Control.HasFocus(7106) | !String.IsEmpty(Window.Property(AuraPill7106))]</visible>
     </control>
     <!-- Bande-annonce / Bonus: only when /extras returns clips -->
     <control type="button" id="7109">
         <left>459</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7106</onleft>
         <onright>7103</onright>
@@ -416,35 +555,35 @@
     </control>
     <control type="image" id="7111">
         <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-film.png</texture>
         <visible>!Control.HasFocus(7109) + String.IsEqual(Window.Property(AuraDetailExtras),1)</visible>
     </control>
     <control type="image" id="7112">
         <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-film-dark.png</texture>
         <visible>Control.HasFocus(7109)</visible>
     </control>
     <control type="button" id="7103">
         <left>375</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7109</onleft>
         <onright>7104</onright>
@@ -452,35 +591,35 @@
     </control>
     <control type="image" id="7092">
         <left>395</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-bookmark.png</texture>
         <visible>!Control.HasFocus(7103)</visible>
     </control>
     <control type="image" id="7093">
         <left>395</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-bookmark-dark.png</texture>
         <visible>Control.HasFocus(7103)</visible>
     </control>
     <control type="button" id="7104">
         <left>459</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7103</onleft>
         <onright>7101</onright>
@@ -488,35 +627,35 @@
     </control>
     <control type="image" id="7099">
         <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-rate.png</texture>
         <visible>!Control.HasFocus(7104)</visible>
     </control>
     <control type="image" id="7105">
         <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-rate-dark.png</texture>
         <visible>Control.HasFocus(7104)</visible>
     </control>
     <control type="button" id="7101">
         <left>459</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7104</onleft>
         <onright>7102</onright>
@@ -524,61 +663,53 @@
     </control>
     <control type="image" id="7094">
         <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-watched.png</texture>
         <visible>!Control.HasFocus(7101)</visible>
     </control>
     <control type="image" id="7095">
         <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-watched-dark.png</texture>
         <visible>Control.HasFocus(7101)</visible>
     </control>
-    <control type="image" id="7096">
-        <left>479</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
-        <texture colordiffuse="FFE5A00D">icon-watched.png</texture>
-        <visible>String.IsEqual(Window.Property(AuraDetailWatched),1) + !Control.HasFocus(7101)</visible>
-    </control>
     <control type="button" id="7102">
         <left>543</left>
-        <top>576</top>
+        <top>564</top>
         <width>64</width>
         <height>64</height>
-        <font>font_tiny_bold</font>
+        <font>font_aura_tiny_bold</font>
         <align>left</align>
         <aligny>center</aligny>
         <textoffsetx>66</textoffsetx>
         <label></label>
         <textcolor>00FFFFFF</textcolor>
         <focusedcolor>FF1A1A1A</focusedcolor>
-        <texturenofocus colordiffuse="59FFFFFF">circle.png</texturenofocus>
+        <texturenofocus colordiffuse="26FFFFFF">circle.png</texturenofocus>
         <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
         <onleft>7101</onleft>
         <ondown>7110</ondown>
     </control>
     <control type="image" id="7097">
         <left>563</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-dots.png</texture>
         <visible>!Control.HasFocus(7102)</visible>
     </control>
     <control type="image" id="7098">
         <left>563</left>
-        <top>596</top>
-        <width>24</width>
-        <height>24</height>
+        <top>672</top>
+        <width>38</width>
+        <height>38</height>
         <aspectratio>keep</aspectratio>
         <texture>icon-dots-dark.png</texture>
         <visible>Control.HasFocus(7102)</visible>
@@ -593,31 +724,30 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
         <label></label>
-        <visible>Control.HasFocus(7100)</visible>
     </control>
     <control type="label" id="7151">
         <left>0</left>
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
         <label></label>
-        <visible>Control.HasFocus(7106)</visible>
+        <visible>Control.HasFocus(7106) | !String.IsEmpty(Window.Property(AuraPill7106))</visible>
     </control>
     <control type="label" id="7152">
         <left>0</left>
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -629,19 +759,31 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
         <label></label>
         <visible>Control.HasFocus(7103)</visible>
     </control>
+    <control type="label" id="7157">
+        <left>0</left>
+        <top>0</top>
+        <width>10</width>
+        <height>64</height>
+        <font>font_aura_mini</font>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textcolor>FF1A1A1A</textcolor>
+        <label></label>
+        <visible>Control.HasFocus(7164)</visible>
+    </control>
     <control type="label" id="7154">
         <left>0</left>
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -653,7 +795,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -665,7 +807,7 @@
         <top>0</top>
         <width>10</width>
         <height>64</height>
-        <font>font_mini_bold</font>
+        <font>font_aura_mini</font>
         <align>left</align>
         <aligny>center</aligny>
         <textcolor>FF1A1A1A</textcolor>
@@ -676,7 +818,7 @@
     <!-- Media badges (video / audio / subs), right side like Plex -->
         <control type="image" id="7050">
             <left>1150</left>
-            <top>584</top>
+            <top>672</top>
             <width>350</width>
             <height>44</height>
             <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
@@ -684,10 +826,10 @@
         </control>
         <control type="label" id="7051">
             <left>1150</left>
-            <top>584</top>
+            <top>672</top>
             <width>350</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -695,7 +837,7 @@
         </control>
         <control type="image" id="7052">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
             <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
@@ -703,10 +845,10 @@
         </control>
         <control type="label" id="7053">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -714,7 +856,7 @@
         </control>
         <control type="image" id="7054">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
             <texture colordiffuse="B3000000" border="8">rounded-solid.png</texture>
@@ -722,10 +864,10 @@
         </control>
         <control type="label" id="7055">
             <left>1510</left>
-            <top>584</top>
+            <top>672</top>
             <width>220</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
@@ -734,7 +876,7 @@
         <!-- badge glyphs (speaker / subtitle box); video pill stays text-only -->
         <control type="image" id="7056">
             <left>1522</left>
-            <top>592</top>
+            <top>680</top>
             <width>28</width>
             <height>28</height>
             <aspectratio>keep</aspectratio>
@@ -743,7 +885,7 @@
         </control>
         <control type="image" id="7057">
             <left>1522</left>
-            <top>592</top>
+            <top>680</top>
             <width>28</width>
             <height>28</height>
             <aspectratio>keep</aspectratio>
@@ -751,79 +893,242 @@
             <visible>!String.IsEmpty(Window.Property(AuraDetailSubsBadge))</visible>
         </control>
 
-        <!-- Season pill strip (show pages only): Show | Saison 1 | ... -->
+        <!-- Season pill strip (show pages only): Show | Saison 1 | ...
+             Plex draws the tab row inside one translucent container; the
+             active tab is an outlined pill, the focused one filled. The
+             container width follows the tab count (set from Python). -->
+        <control type="image" id="7135">
+            <left>128</left>
+            <top>32</top>
+            <width>216</width>
+            <height>64</height>
+            <texture colordiffuse="CC17100D" border="32">rounded-solid.png</texture>
+            <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
+        </control>
         <control type="list" id="7120">
-            <left>97</left>
-            <top>40</top>
-            <width>1700</width>
+            <left>128</left>
+            <top>36</top>
+            <width>820</width>
             <height>56</height>
             <orientation>horizontal</orientation>
             <scrolltime>150</scrolltime>
             <ondown>7100</ondown>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
-            <itemlayout width="200" height="56">
+            <itemlayout width="135" height="56">
                 <control type="image">
-                    <left>14</left>
+                    <left>8</left>
                     <top>4</top>
-                    <width>172</width>
+                    <width>119</width>
                     <height>48</height>
-                    <texture colordiffuse="33FFFFFF" border="24">chip-outline.png</texture>
+                    <texture colordiffuse="99FFFFFF" border="24">chip-outline.png</texture>
                     <visible>ListItem.IsSelected</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>200</width>
+                    <width>135</width>
                     <height>56</height>
-                    <font>font_mini</font>
+                    <font>font_aura_small</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>CCFFFFFF</textcolor>
                 </control>
             </itemlayout>
-            <focusedlayout width="200" height="56">
+            <focusedlayout width="135" height="56">
+                <!-- Kodi draws the selected item with the focused layout
+                     even when the strip isn't focused: the unfocused
+                     selected tab keeps Plex's thin outline, the truly
+                     focused one inverts to a filled white pill. -->
                 <control type="image">
-                    <left>14</left>
+                    <left>8</left>
                     <top>4</top>
-                    <width>172</width>
+                    <width>119</width>
+                    <height>48</height>
+                    <texture colordiffuse="99FFFFFF" border="24">chip-outline.png</texture>
+                    <visible>!Control.HasFocus(7120)</visible>
+                </control>
+                <control type="image">
+                    <left>8</left>
+                    <top>4</top>
+                    <width>119</width>
                     <height>48</height>
                     <texture colordiffuse="FFFFFFFF" border="24">rounded-solid.png</texture>
+                    <visible>Control.HasFocus(7120)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
                     <top>0</top>
-                    <width>200</width>
+                    <width>135</width>
                     <height>56</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_small</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <visible>!Control.HasFocus(7120)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>135</width>
+                    <height>56</height>
+                    <font>font_aura_small_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FF1A1A1A</textcolor>
+                    <visible>Control.HasFocus(7120)</visible>
                 </control>
             </focusedlayout>
         </control>
 
         <!-- "Vous l'avez regarde le..." line: Plex's "Activity by you"
-             hint under the action row, from the server watch history. -->
+             row shows overlapping circular avatars before the text. -->
+        <control type="image" id="7180">
+            <left>132</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture>avatar-plex.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image" id="7181">
+            <left>132</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window(10000).Property(AuraAvatar)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity)) + !String.IsEmpty(Window(10000).Property(AuraAvatar))</visible>
+        </control>
+        <control type="image" id="7182">
+            <left>132</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTintMid)]">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
+        </control>
+        <!-- Second account avatar, overlapping the first like Plex's
+             'Activity by you and X' stack. -->
+        <control type="image" id="7183">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window.Property(AuraDetailActivityAvatar2)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
+        </control>
+        <control type="image" id="7184">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTintMid)]">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar2))</visible>
+        </control>
+        <!-- Initial fallback for slot 2: colored disc + letter, like
+             Plex's generated avatars for accounts without a photo. -->
+        <control type="image" id="7187">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailActivityColor2)]">circle.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial2))</visible>
+        </control>
+        <control type="label" id="7188">
+            <left>178</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <font>font_aura_small_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Window.Property(AuraDetailActivityInitial2)]</label>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial2))</visible>
+        </control>
+        <!-- Third avatar in the stack ('by you, clara, and 1 other'). -->
+        <control type="image" id="7185">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true">$INFO[Window.Property(AuraDetailActivityAvatar3)]</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
+        </control>
+        <control type="image" id="7186">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTintMid)]">cast-mask.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityAvatar3))</visible>
+        </control>
+        <!-- Initial fallback for slot 3. -->
+        <control type="image" id="7189">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <texture colordiffuse="$INFO[Window.Property(AuraDetailActivityColor3)]">circle.png</texture>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial3))</visible>
+        </control>
+        <control type="label" id="7192">
+            <left>224</left>
+            <top>658</top>
+            <width>56</width>
+            <height>56</height>
+            <font>font_aura_small_bold</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Window.Property(AuraDetailActivityInitial3)]</label>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivityInitial3))</visible>
+        </control>
         <control type="label" id="7207">
-            <left>105</left>
-            <top>648</top>
+            <left>200</left>
+            <top>666</top>
             <width>1200</width>
             <height>30</height>
-            <font>font_tiny</font>
-            <textcolor>99FFFFFF</textcolor>
+            <font>font_aura_meta</font>
+            <label>$INFO[Window.Property(AuraDetailActivity)]</label>
+            <textcolor>D9FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>
             <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
         </control>
+        <!-- Activity row trigger: invisible button spanning the line.
+             Plex opens the right-column watch feed when it is pressed.
+             Navigation is wired in _sync_navigation (sits between the
+             action row and the bottom content row). -->
+        <control type="button" id="7196">
+            <left>128</left>
+            <top>650</top>
+            <width>760</width>
+            <height>64</height>
+            <font>font_aura_mini</font>
+            <label></label>
+            <textcolor>00FFFFFF</textcolor>
+            <texturenofocus></texturenofocus>
+            <texturefocus colordiffuse="14FFFFFF" border="26">rounded-solid.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailActivity))</visible>
+        </control>
+
+        <!-- Activity feed (Plex's right column): each watch event is a
+             floating rounded card with avatar + 'X watched' + item
+             title + date; no enclosing panel. -->
 
         <!-- Section title: "Cast &amp; Crew" / "8 Saisons" / "Saison 3" -->
         <control type="label" id="7060">
-            <left>105</left>
-            <top>690</top>
+            <left>128</left>
+            <top>684</top>
             <width>800</width>
             <height>44</height>
-            <font>font_mini_bold</font>
+            <font>font_aura_section_bold</font>
             <label>$ADDON[script.akasha.aura 33100]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraDetailSectionTitle))</visible>
@@ -831,86 +1136,72 @@
 
         <!-- Seasons poster row (show "Show" tab) -->
         <control type="list" id="7140">
-            <left>97</left>
-            <top>740</top>
+            <left>128</left>
+            <top>780</top>
             <width>1800</width>
-            <height>310</height>
+            <height>380</height>
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
             <visible>String.IsEqual(Window.Property(AuraDetailSeasonsRow),1)</visible>
-            <itemlayout width="212" height="310">
+            <itemlayout width="272" height="370">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>200</width>
-                    <height>300</height>
+                    <width>240</width>
+                    <height>360</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                 </control>
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>200</width>
-                    <height>300</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="image">
-                    <left>150</left>
-                    <top>10</top>
-                    <width>40</width>
-                    <height>40</height>
-                    <texture colordiffuse="CC10131A">circle.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
-                </control>
-                <control type="image">
-                    <left>158</left>
-                    <top>18</top>
-                    <width>24</width>
-                    <height>24</height>
-                    <texture>check.png</texture>
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
             </itemlayout>
-            <focusedlayout width="212" height="310">
+            <focusedlayout width="272" height="370">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>200</width>
-                    <height>300</height>
+                    <width>240</width>
+                    <height>360</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                 </control>
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>200</width>
-                    <height>300</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="image">
                     <left>-4</left>
                     <top>-4</top>
-                    <width>208</width>
-                    <height>308</height>
+                    <width>248</width>
+                    <height>368</height>
                     <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                                     <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
-                    <left>150</left>
-                    <top>10</top>
-                    <width>40</width>
-                    <height>40</height>
-                    <texture colordiffuse="CC10131A">circle.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
-                </control>
-                <control type="image">
-                    <left>158</left>
-                    <top>18</top>
-                    <width>24</width>
-                    <height>24</height>
-                    <texture>check.png</texture>
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
             </focusedlayout>
@@ -918,155 +1209,273 @@
 
         <!-- Episodes row (season tab): landscape cards -->
         <control type="list" id="7130">
-            <left>97</left>
+            <left>128</left>
             <top>740</top>
             <width>1800</width>
-            <height>310</height>
+            <height>296</height>
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
             <visible>String.IsEqual(Window.Property(AuraDetailEpisodesRow),1)</visible>
-            <itemlayout width="340" height="310">
+            <itemlayout width="544" height="296">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
+                    <width>512</width>
+                    <height>288</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
+                    <width>512</width>
+                    <height>288</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="image">
+                    <left>416</left>
+                    <top>0</top>
+                    <width>96</width>
+                    <height>40</height>
+                    <texture>ep-badge.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>422</left>
+                    <top>4</top>
+                    <width>76</width>
+                    <height>32</height>
+                    <font>font_aura_midi</font>
+                    <align>right</align>
+                    <label>$INFO[ListItem.Property(epnum)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <!-- Watched episodes get Plex's dark check tab in place
+                     of the number badge (official-live/46). -->
+                <control type="image">
+                    <left>452</left>
+                    <top>8</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="progress">
-                    <left>4</left>
-                    <top>170</top>
-                    <width>312</width>
-                    <height>6</height>
-                    <info>ListItem.PercentPlayed</info>
-                    <midtexture colordiffuse="FFFF9D00">white.png</midtexture>
+                    <left>12</left>
+                    <top>272</top>
+                    <width>488</width>
+                    <height>8</height>
+                    <info>ListItem.Property(PercentPlayed)</info>
+                    <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
-                    <texturebg colordiffuse="59FFFFFF">white.png</texturebg>
-                    <visible>ListItem.IsResumable</visible>
+                    <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                    <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
+                </control>
+            </itemlayout>
+            <focusedlayout width="544" height="296">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>512</width>
+                    <height>288</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>512</width>
+                    <height>288</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>520</width>
+                    <height>296</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>416</left>
+                    <top>0</top>
+                    <width>96</width>
+                    <height>40</height>
+                    <texture>ep-badge.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>422</left>
+                    <top>4</top>
+                    <width>76</width>
+                    <height>32</height>
+                    <font>font_aura_midi</font>
+                    <align>right</align>
+                    <label>$INFO[ListItem.Property(epnum)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <visible>!String.IsEmpty(ListItem.Property(epnum)) + !String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="image">
+                    <left>452</left>
+                    <top>8</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="progress">
+                    <left>12</left>
+                    <top>272</top>
+                    <width>488</width>
+                    <height>8</height>
+                    <info>ListItem.Property(PercentPlayed)</info>
+                    <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                    <lefttexture>-</lefttexture>
+                    <righttexture>-</righttexture>
+                    <overlaytexture>-</overlaytexture>
+                    <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                    <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
+                </control>
+            </focusedlayout>
+        </control>
+        <control type="list" id="7110">
+            <left>128</left>
+            <top>733</top>
+            <width>1800</width>
+            <height>330</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailCastRow),1)</visible>
+            <itemlayout width="280" height="330">
+                <control type="image">
+                    <left>25</left>
+                    <top>0</top>
+                    <width>230</width>
+                    <height>230</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>0</top>
+                    <width>230</width>
+                    <height>230</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>190</top>
-                    <width>320</width>
+                    <top>257</top>
+                    <width>280</width>
                     <height>28</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>DDFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>218</top>
-                    <width>320</width>
+                    <top>295</top>
+                    <width>280</width>
                     <height>26</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="340" height="310">
+            <focusedlayout width="280" height="330">
                 <control type="image">
-                    <left>0</left>
+                    <left>25</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
+                    <width>230</width>
+                    <height>230</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>0</left>
+                    <left>25</left>
                     <top>0</top>
-                    <width>320</width>
-                    <height>180</height>
-                    <texture colordiffuse="FF10131A">poster-corners.png</texture>
-                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                    <width>230</width>
+                    <height>230</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">cast-mask.png</texture>
                 </control>
                 <control type="image">
-                    <left>-4</left>
-                    <top>-4</top>
-                    <width>328</width>
-                    <height>188</height>
-                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
-                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
-                </control>
-                <control type="progress">
-                    <left>4</left>
-                    <top>170</top>
-                    <width>312</width>
-                    <height>6</height>
-                    <info>ListItem.PercentPlayed</info>
-                    <midtexture colordiffuse="FFFF9D00">white.png</midtexture>
-                    <lefttexture>-</lefttexture>
-                    <righttexture>-</righttexture>
-                    <overlaytexture>-</overlaytexture>
-                    <texturebg colordiffuse="59FFFFFF">white.png</texturebg>
-                    <visible>ListItem.IsResumable</visible>
+                    <left>23</left>
+                    <top>-2</top>
+                    <width>234</width>
+                    <height>234</height>
+                    <texture>cast-ring.png</texture>
+                    <visible>Control.HasFocus(7110)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>190</top>
-                    <width>320</width>
+                    <top>257</top>
+                    <width>280</width>
                     <height>28</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>218</top>
-                    <width>320</width>
+                    <top>295</top>
+                    <width>280</width>
                     <height>26</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
         </control>
-        <control type="list" id="7110">
-            <left>97</left>
-            <top>740</top>
+
+        <!-- Trailers & Extras row: landscape stills, title + subtype
+             caption under each card (official 24-detail-bottom2). -->
+        <control type="list" id="7170">
+            <left>128</left>
+            <top>828</top>
             <width>1800</width>
-            <height>240</height>
+            <height>380</height>
             <orientation>horizontal</orientation>
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
-            <visible>String.IsEqual(Window.Property(AuraDetailCastRow),1)</visible>
-            <itemlayout width="200" height="230">
+            <visible>String.IsEqual(Window.Property(AuraDetailExtrasRow),1)</visible>
+            <itemlayout width="544" height="380">
                 <control type="image">
-                    <left>20</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <width>512</width>
+                    <height>288</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>20</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
-                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                    <width>512</width>
+                    <height>288</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>168</top>
-                    <width>200</width>
-                    <height>26</height>
-                    <font>font_mini</font>
+                    <top>300</top>
+                    <width>512</width>
+                    <height>32</height>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>DDFFFFFF</textcolor>
@@ -1074,46 +1483,48 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>194</top>
-                    <width>200</width>
-                    <height>24</height>
-                    <font>font_mini</font>
+                    <top>332</top>
+                    <width>512</width>
+                    <height>28</height>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="200" height="230">
+            <focusedlayout width="544" height="380">
                 <control type="image">
-                    <left>20</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <width>512</width>
+                    <height>288</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>20</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>160</width>
-                    <height>160</height>
-                    <texture colordiffuse="FF10131A">cast-mask.png</texture>
+                    <width>512</width>
+                    <height>288</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="image">
-                    <left>18</left>
-                    <top>-2</top>
-                    <width>164</width>
-                    <height>164</height>
-                    <texture>cast-ring.png</texture>
-                    <visible>Control.HasFocus(7110)</visible>
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>520</width>
+                    <height>296</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>168</top>
-                    <width>200</width>
-                    <height>26</height>
-                    <font>font_mini_bold</font>
+                    <top>300</top>
+                    <width>512</width>
+                    <height>32</height>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
@@ -1121,16 +1532,370 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>194</top>
-                    <width>200</width>
-                    <height>24</height>
-                    <font>font_mini</font>
+                    <top>332</top>
+                    <width>512</width>
+                    <height>28</height>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
+        </control>
+
+        <!-- Related titles row: poster cards, title + year caption
+             (official 'Related Movies' / 'More with X', 24-detail-bottom2). -->
+        <control type="list" id="7175">
+            <left>128</left>
+            <top>828</top>
+            <width>1800</width>
+            <height>430</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailRelated1Row),1)</visible>
+            <itemlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>248</width>
+                    <height>368</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <control type="list" id="7176">
+            <left>128</left>
+            <top>828</top>
+            <width>1800</width>
+            <height>430</height>
+            <orientation>horizontal</orientation>
+            <scrolltime>200</scrolltime>
+            <onup>7100</onup>
+            <visible>String.IsEqual(Window.Property(AuraDetailRelated2Row),1)</visible>
+            <itemlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout width="272" height="430">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">poster-corners.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>248</width>
+                    <height>368</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>182</left>
+                    <top>6</top>
+                    <width>52</width>
+                    <height>52</height>
+                    <texture>watched-tab.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>370</top>
+                    <width>240</width>
+                    <height>30</height>
+                    <font>font_aura_mini_bold</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>400</top>
+                    <width>240</width>
+                    <height>26</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+        </control>
+
+        <control type="list" id="7197">
+            <left>930</left>
+            <top>110</top>
+            <width>660</width>
+            <height>870</height>
+            <orientation>vertical</orientation>
+            <scrolltime>140</scrolltime>
+            <onleft>7196</onleft>
+            <visible>!String.IsEmpty(Window.Property(AuraDetailFeed))</visible>
+            <itemlayout height="112">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>640</width>
+                    <height>96</height>
+                    <texture colordiffuse="FF1A1310" border="26">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture>$INFO[ListItem.Icon]</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <texture colordiffuse="FF1A1310">cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>12</top>
+                    <width>510</width>
+                    <height>26</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>38</top>
+                    <width>510</width>
+                    <height>28</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Property(entrytitle)]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>66</top>
+                    <width>510</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </itemlayout>
+            <focusedlayout height="112">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>640</width>
+                    <height>96</height>
+                    <texture colordiffuse="FFEDEAE8" border="26">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture>$INFO[ListItem.Icon]</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>20</top>
+                    <width>56</width>
+                    <height>56</height>
+                    <texture colordiffuse="FF2B221F">cast-mask.png</texture>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>12</top>
+                    <width>510</width>
+                    <height>26</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DD10131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>38</top>
+                    <width>510</width>
+                    <height>28</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Property(entrytitle)]</label>
+                    <textcolor>FF10131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>104</left>
+                    <top>66</top>
+                    <width>510</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>9910131A</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+            </focusedlayout>
+            <content />
         </control>
 
         <!-- "Plus d'actions" right-side panel (Plex More Actions sheet):
@@ -1147,202 +1912,425 @@
                 <texture colordiffuse="B3000000">white.png</texture>
             </control>
             <control type="image">
-                <left>1360</left>
-                <top>0</top>
-                <width>560</width>
-                <height>1080</height>
-                <texture colordiffuse="FB14161F">white.png</texture>
-            </control>
-            <control type="image">
-                <left>1352</left>
-                <top>0</top>
-                <width>16</width>
-                <height>1080</height>
-                <texture colordiffuse="33000000">white.png</texture>
+                <left>1250</left>
+                <top>34</top>
+                <width>636</width>
+                <height>1011</height>
+                <texture colordiffuse="FF000000" border="24">rounded-solid.png</texture>
             </control>
             <control type="label">
-                <left>1420</left>
-                <top>72</top>
-                <width>400</width>
+                <left>1317</left>
+                <top>102</top>
+                <width>560</width>
                 <height>40</height>
-                <font>font_tiny</font>
-                <textcolor>99FFFFFF</textcolor>
+                <font>font_aura_main_bold</font>
+                <textcolor>FFFFFFFF</textcolor>
                 <label>$ADDON[script.akasha.aura 33114]</label>
             </control>
             <control type="button" id="7200">
-                <left>1396</left>
-                <top>140</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_main_bold</font>
+                <left>1314</left>
+                <top>210</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
                 <label>$ADDON[script.akasha.aura 33115]</label>
                 <align>left</align>
                 <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
+                <textoffsetx>76</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7200</onup>
-                <ondown>7204</ondown>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onleft>7102</onleft>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>160</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7230">
+                <left>1338</left>
+                <top>230</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>badge-subs.png</texture>
                 <visible>!Control.HasFocus(7200)</visible>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>160</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7250">
+                <left>1338</left>
+                <top>230</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-subs-dark.png</texture>
                 <visible>Control.HasFocus(7200)</visible>
             </control>
-            <!-- Cloud-only Plex entries (list, playlist, manage, other
-                 ways) are hidden: they only produced "unavailable"
-                 notifications. -->
+            <control type="label" id="7260">
+                <left>1340</left>
+                <top>210</top>
+                <width>456</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <align>right</align>
+                <aligny>center</aligny>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(AuraDetailSubsValue)]</label>
+                <visible>!Control.HasFocus(7200)</visible>
+            </control>
+            <control type="label" id="7261">
+                <left>1340</left>
+                <top>210</top>
+                <width>456</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <align>right</align>
+                <aligny>center</aligny>
+                <textcolor>9914161F</textcolor>
+                <label>$INFO[Window.Property(AuraDetailSubsValue)]</label>
+                <visible>Control.HasFocus(7200)</visible>
+            </control>
+            <!-- Audio Stream: Plex's first More-actions entry, same
+                 icon + right-value row shape as Subtitles. -->
+            <control type="button" id="7211">
+                <left>1314</left>
+                <top>210</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33626]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image" id="7240">
+                <left>1338</left>
+                <top>230</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>badge-audio.png</texture>
+                <visible>!Control.HasFocus(7211)</visible>
+            </control>
+            <control type="image" id="7241">
+                <left>1338</left>
+                <top>230</top>
+                <width>24</width>
+                <height>24</height>
+                <texture colordiffuse="FF1F1614">badge-audio.png</texture>
+                <visible>Control.HasFocus(7211)</visible>
+            </control>
+            <control type="label" id="7262">
+                <left>1340</left>
+                <top>210</top>
+                <width>456</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <align>right</align>
+                <aligny>center</aligny>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(AuraDetailAudioValue)]</label>
+                <visible>!Control.HasFocus(7211)</visible>
+            </control>
+            <control type="label" id="7263">
+                <left>1340</left>
+                <top>210</top>
+                <width>456</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <align>right</align>
+                <aligny>center</aligny>
+                <textcolor>9914161F</textcolor>
+                <label>$INFO[Window.Property(AuraDetailAudioValue)]</label>
+                <visible>Control.HasFocus(7211)</visible>
+            </control>
+            <control type="button" id="7201">
+                <left>1314</left>
+                <top>287</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33605]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image" id="7231">
+                <left>1338</left>
+                <top>307</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-mylist.png</texture>
+                <visible>!Control.HasFocus(7201)</visible>
+            </control>
+            <control type="image" id="7251">
+                <left>1338</left>
+                <top>307</top>
+                <width>24</width>
+                <height>24</height>
+                <texture colordiffuse="FF1F1614">icon-mylist.png</texture>
+                <visible>Control.HasFocus(7201)</visible>
+            </control>
+            <control type="button" id="7202">
+                <left>1314</left>
+                <top>364</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33606]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image" id="7232">
+                <left>1338</left>
+                <top>384</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-playlists.png</texture>
+                <visible>!Control.HasFocus(7202)</visible>
+            </control>
+            <control type="image" id="7252">
+                <left>1338</left>
+                <top>384</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-playlists-dark.png</texture>
+                <visible>Control.HasFocus(7202)</visible>
+            </control>
+            <control type="button" id="7203">
+                <left>1314</left>
+                <top>441</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33607]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image" id="7233">
+                <left>1338</left>
+                <top>461</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-pencil.png</texture>
+                <visible>!Control.HasFocus(7203)</visible>
+            </control>
+            <control type="image" id="7253">
+                <left>1338</left>
+                <top>461</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-pencil-dark.png</texture>
+                <visible>Control.HasFocus(7203)</visible>
+            </control>
             <control type="button" id="7204">
-                <left>1396</left>
-                <top>228</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_main_bold</font>
+                <left>1314</left>
+                <top>518</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
                 <label>$ADDON[script.akasha.aura 33116]</label>
                 <align>left</align>
                 <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
+                <textoffsetx>76</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7200</onup>
-                <ondown>7206</ondown>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onleft>7102</onleft>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>248</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7234">
+                <left>1338</left>
+                <top>538</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-info.png</texture>
                 <visible>!Control.HasFocus(7204)</visible>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>248</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7254">
+                <left>1338</left>
+                <top>538</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-info-dark.png</texture>
                 <visible>Control.HasFocus(7204)</visible>
             </control>
-            <control type="button" id="7206">
-                <left>1396</left>
-                <top>316</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_main_bold</font>
-                <label>$ADDON[script.akasha.aura 33574]</label>
+            <control type="button" id="7205">
+                <left>1314</left>
+                <top>595</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33608]</label>
                 <align>left</align>
                 <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
+                <textoffsetx>76</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7204</onup>
-                <ondown>7208</ondown>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onleft>7102</onleft>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>336</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7235">
+                <left>1338</left>
+                <top>615</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-ways.png</texture>
+                <visible>!Control.HasFocus(7205)</visible>
+            </control>
+            <control type="image" id="7255">
+                <left>1338</left>
+                <top>615</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-ways-dark.png</texture>
+                <visible>Control.HasFocus(7205)</visible>
+            </control>
+            <control type="button" id="7206">
+                <left>1314</left>
+                <top>672</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33574]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+            </control>
+            <control type="image" id="7236">
+                <left>1338</left>
+                <top>692</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-discover.png</texture>
                 <visible>!Control.HasFocus(7206)</visible>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>336</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7256">
+                <left>1338</left>
+                <top>692</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-discover-dark.png</texture>
                 <visible>Control.HasFocus(7206)</visible>
             </control>
             <control type="button" id="7208">
-                <left>1396</left>
-                <top>396</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_main_bold</font>
+                <left>1314</left>
+                <top>749</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
                 <label>$ADDON[script.akasha.aura 33579]</label>
                 <align>left</align>
                 <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
+                <textoffsetx>76</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7206</onup>
-                <ondown>7209</ondown>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onleft>7102</onleft>
-                <visible>!String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>416</top>
-                <width>40</width>
-                <height>40</height>
+
+                <visible>!String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible></control>
+            <control type="image" id="7237">
+                <left>1338</left>
+                <top>769</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-tv.png</texture>
                 <visible>!Control.HasFocus(7208) + !String.IsEmpty(Window.Property(AuraDetailGoToShow))</visible>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>416</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7257">
+                <left>1338</left>
+                <top>769</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-tv-dark.png</texture>
                 <visible>Control.HasFocus(7208)</visible>
             </control>
             <control type="button" id="7209">
-                <left>1396</left>
-                <top>476</top>
-                <width>470</width>
-                <height>80</height>
-                <font>font_main_bold</font>
+                <left>1314</left>
+                <top>826</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
                 <label>$ADDON[script.akasha.aura 33583]</label>
                 <align>left</align>
                 <aligny>center</aligny>
-                <textoffsetx>84</textoffsetx>
+                <textoffsetx>76</textoffsetx>
                 <textcolor>CCFFFFFF</textcolor>
                 <focusedcolor>FF14161F</focusedcolor>
                 <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="2EFFFFFF" border="16">rounded-solid.png</texturenofocus>
-                <onup>7208</onup>
-                <ondown>7209</ondown>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
                 <onleft>7102</onleft>
-                <visible>!String.IsEmpty(Window.Property(AuraDetailVersions))</visible>
-            </control>
-            <control type="image">
-                <left>1422</left>
-                <top>496</top>
-                <width>40</width>
-                <height>40</height>
+
+                <visible>!String.IsEmpty(Window.Property(AuraDetailVersions))</visible></control>
+            <control type="image" id="7238">
+                <left>1338</left>
+                <top>846</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-play.png</texture>
                 <visible>!Control.HasFocus(7209) + !String.IsEmpty(Window.Property(AuraDetailVersions))</visible>
             </control>
-            <control type="image">
-                <left>1422</left>
-                <top>496</top>
-                <width>40</width>
-                <height>40</height>
+            <control type="image" id="7258">
+                <left>1338</left>
+                <top>846</top>
+                <width>24</width>
+                <height>24</height>
                 <texture>icon-play-dark.png</texture>
                 <visible>Control.HasFocus(7209)</visible>
+            </control>
+            <control type="button" id="7210">
+                <left>1314</left>
+                <top>903</top>
+                <width>508</width>
+                <height>64</height>
+                <font>font_aura_mini</font>
+                <label>$ADDON[script.akasha.aura 33589]</label>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>76</textoffsetx>
+                <textcolor>CCFFFFFF</textcolor>
+                <focusedcolor>FF14161F</focusedcolor>
+                <texturefocus colordiffuse="FFFFFFFF" border="16">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="01FFFFFF" border="16">rounded-solid.png</texturenofocus>
+                <onleft>7102</onleft>
+
+                <visible>!String.IsEmpty(Window.Property(AuraDetailExtras))</visible></control>
+            <control type="image" id="7239">
+                <left>1338</left>
+                <top>923</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-film.png</texture>
+                <visible>!Control.HasFocus(7210) + !String.IsEmpty(Window.Property(AuraDetailExtras))</visible>
+            </control>
+            <control type="image" id="7259">
+                <left>1338</left>
+                <top>923</top>
+                <width>24</width>
+                <height>24</height>
+                <texture>icon-film-dark.png</texture>
+                <visible>Control.HasFocus(7210)</visible>
             </control>
         </control>
         </control>
@@ -1359,7 +2347,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF10131A">white.png</texture>
+            <texture colordiffuse="FF1A1310">white.png</texture>
             <animation effect="fade" start="100" end="0" time="280" tween="quadratic" easing="out">Hidden</animation>
             <visible>String.IsEmpty(Window.Property(AuraDetailReady))</visible>
         </control>

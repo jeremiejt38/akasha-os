@@ -3,9 +3,11 @@
 import io
 import json
 import threading
+import time
 import unittest
 from unittest.mock import patch
 
+import art_proxy
 import plex_client
 
 
@@ -53,7 +55,7 @@ class TestPlexClient(unittest.TestCase):
         self.assertEqual(items[0]['title'], 'Inception')
         self.assertEqual(items[0]['rating_key'], '123')
         self.assertEqual(items[0]['year'], 2010)
-        self.assertIn('tok123', items[0]['thumb_url'])
+        self.assertIn('tok123', art_proxy.unwrap(items[0]['thumb_url']))
         self.assertIsNone(items[0]['section_id'])
 
     @patch('urllib.request.urlopen')
@@ -237,7 +239,8 @@ class TestPlexClient(unittest.TestCase):
 
         mock_urlopen.side_effect = fake_urlopen
         self.client.search('1', 'inception')
-        self.assertIn('search=inception', captured['url'])
+        # Plex's substring filter is `title=`; `search=` is ignored.
+        self.assertIn('title=inception', captured['url'])
 
     @patch('urllib.request.urlopen')
     def test_show_seasons_uses_children_endpoint(self, mock_urlopen):
@@ -442,10 +445,10 @@ class TestPlexClientPeople(unittest.TestCase):
         self.assertEqual(len(people), 2)
         self.assertEqual(people[0]['id'], '11550')
         self.assertEqual(people[0]['name'], 'Omar Sy')
-        self.assertEqual(people[0]['thumb_url'],
+        self.assertEqual(art_proxy.unwrap(people[0]['thumb_url']),
                          'https://metadata-static.plex.tv/x/p.jpg')
         # Server-relative thumbs get the base URL + token
-        self.assertTrue(people[1]['thumb_url'].startswith(
+        self.assertTrue(art_proxy.unwrap(people[1]['thumb_url']).startswith(
             'http://192.168.100.133:32400/:/resources/actor-icon.png'))
         # Second call served from cache: still one HTTP request
         self.client.people_directory('2')
@@ -511,6 +514,25 @@ class TestPlexErrorClassification(unittest.TestCase):
         with self.assertRaises(plex_client.PlexAPIError) as ctx:
             self.client.on_deck(limit=1)
         self.assertNotIsInstance(ctx.exception, plex_client.PlexOfflineError)
+
+    @patch('urllib.request.urlopen')
+    def test_single_timeout_does_not_trip_breaker(self, mock_urlopen):
+        """A read timeout under load must not fail the whole UI fast."""
+        mock_urlopen.side_effect = TimeoutError('timed out')
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        # Second call retries for real -- the breaker stays open.
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        self.assertEqual(mock_urlopen.call_count, 2)
+        # Third consecutive timeout trips the breaker; the next call
+        # fast-fails without a new HTTP attempt.
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        mock_urlopen.reset_mock()
+        with self.assertRaises(plex_client.PlexOfflineError):
+            self.client.on_deck(limit=1)
+        self.assertEqual(mock_urlopen.call_count, 0)
 
 
 class TestPlexClientTimeline(unittest.TestCase):
@@ -594,6 +616,33 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual([i['rating_key'] for i in items], ['1', '2', '3'])
 
     @patch('urllib.request.urlopen')
+    def test_item_related_keeps_hub_titles(self, mock_urlopen):
+        def video(rk, title):
+            return {'ratingKey': rk, 'title': title, 'type': 'show'}
+        mock_urlopen.return_value = MockHTTPResponse({
+            'MediaContainer': {'Hub': [
+                {'title': 'Related Shows',
+                 'Metadata': [video('7', 'A'), video('8', 'B')]},
+                {'title': 'More with Jane Doe',
+                 'Metadata': [video('9', 'C')]},
+                {'title': 'Empty hub', 'Metadata': []},
+            ]}})
+        hubs = self.client.item_related('42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('/library/metadata/42/related', url)
+        self.assertEqual([h['title'] for h in hubs],
+                         ['Related Shows', 'More with Jane Doe'])
+        self.assertEqual(
+            [[i['rating_key'] for i in h['items']] for h in hubs],
+            [['7', '8'], ['9']])
+
+    @patch('urllib.request.urlopen')
+    def test_item_related_empty_when_absent(self, mock_urlopen):
+        mock_urlopen.return_value = MockHTTPResponse(
+            {'MediaContainer': {'Metadata': [{'title': 'x'}]}})
+        self.assertEqual(self.client.item_related('42'), [])
+
+    @patch('urllib.request.urlopen')
     def test_item_markers_normalises_windows(self, mock_urlopen):
         mock_urlopen.return_value = MockHTTPResponse({
             'MediaContainer': {'Metadata': [{'Marker': [
@@ -675,7 +724,7 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual(len(items), 2)
         self.assertEqual(items[0]['type'], 'playlist')
         self.assertEqual(items[0]['count'], 12)
-        self.assertIn('transcode', items[0]['thumb_url'])
+        self.assertIn('transcode', art_proxy.unwrap(items[0]['thumb_url']))
         self.assertEqual(items[1]['thumb_url'], '')
 
     @patch('urllib.request.urlopen')
@@ -758,6 +807,74 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertFalse(t1.is_alive() or t2.is_alive())
         self.assertEqual(len(calls), 1)
         self.assertEqual(results, [[], []])
+
+
+class TestChannelEpg(unittest.TestCase):
+    """channel_epg() normalises the /grid payload: each event's schedule
+    lives in Media[0] (unix beginsAt/endsAt + onAir)."""
+
+    NOW = 1_700_000_000  # fixed instant for deterministic now/next
+
+    def setUp(self):
+        self.client = plex_client.PlexClient('http://x', 'tok123')
+        self._now = patch('time.time', return_value=self.NOW)
+        self._now.start()
+        self.addCleanup(self._now.stop)
+
+    @staticmethod
+    def _grid(events):
+        return MockHTTPResponse({'MediaContainer': {'Metadata': events}})
+
+    @staticmethod
+    def _ev(title, begin, end, on_air=False, **kw):
+        media = kw.pop('media', None)
+        ev = {'title': title, 'summary': 'plot', 'Media': media or [{
+            'beginsAt': begin, 'endsAt': end, 'onAir': on_air}]}
+        ev.update(kw)
+        return ev
+
+    @patch('urllib.request.urlopen')
+    def test_now_next_and_progress(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([
+            self._ev('Earlier', self.NOW - 7200, self.NOW - 3600),
+            self._ev('On Air', self.NOW - 1800, self.NOW + 1800,
+                     on_air=True, grandparentTitle='Show'),
+            self._ev('Later', self.NOW + 1800, self.NOW + 5400),
+        ])
+        epg = self.client.channel_epg('grid-key-1')
+        self.assertEqual(epg['now']['title'], 'Show')   # grandparent wins
+        self.assertEqual(epg['now']['episode_title'], 'On Air')
+        self.assertTrue(epg['now']['on_air'])
+        self.assertEqual(epg['next']['title'], 'Later')
+        self.assertEqual(epg['progress'], 50)           # midway through
+
+    @patch('urllib.request.urlopen')
+    def test_missing_media_is_tolerated(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([
+            {'title': 'No schedule', 'summary': 'x'},   # no Media at all
+            {'title': 'Empty', 'Media': []},            # empty Media
+        ])
+        epg = self.client.channel_epg('g')
+        self.assertIsNone(epg['now'])
+        self.assertIsNone(epg['next'])
+        self.assertIsNone(epg['progress'])
+
+    @patch('urllib.request.urlopen')
+    def test_empty_metadata(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([])
+        epg = self.client.channel_epg('g')
+        self.assertEqual(epg, {'now': None, 'next': None, 'progress': None})
+
+    @patch('urllib.request.urlopen')
+    def test_grid_params_are_encoded(self, mock_urlopen):
+        mock_urlopen.return_value = self._grid([])
+        self.client.channel_epg('key-42')
+        url = mock_urlopen.call_args[0][0].full_url
+        self.assertIn('epg.provider.plex.tv/grid?', url)
+        self.assertIn('channelGridKey=key-42', url)
+        self.assertIn('beginsAt%3C=', url)              # beginsAt<
+        self.assertIn('endsAt%3E=', url)                # endsAt>
+        self.assertIn('date=', url)
 
 
 if __name__ == '__main__':

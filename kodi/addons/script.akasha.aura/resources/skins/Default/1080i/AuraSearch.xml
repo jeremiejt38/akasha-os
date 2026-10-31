@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1201">
-    <defaultcontrol>8100</defaultcontrol>
+    <!-- The key grid (8100) is populated from Python, so it is empty
+         when Kodi resolves the default control. The static Space
+         button is always focusable; onInit moves focus to the grid
+         a beat later, so the boot behavior is unchanged. -->
+    <defaultcontrol>8115</defaultcontrol>
     <zorder>3</zorder>
     <controls>
         <!-- Plex-style search (docs/plex-parity/reference/recherche/):
@@ -12,85 +16,319 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF16171A">white.png</texture>
+            <texture colordiffuse="FF1A1A1A">white.png</texture>
+        </control>
+
+        <!-- Collapsed icon rail: Plex keeps it on the search page too
+             (reference/recherche/search_open_003). Focusable so Left off
+             the keyboard lands on it like the Plex sidebar; picking
+             Home/More leaves the dialog to the main window's rail. -->
+        <control type="image">
+            <left>28</left>
+            <top>432</top>
+            <width>72</width>
+            <height>216</height>
+            <texture colordiffuse="FF1A1A1A" border="36">cap-r36.png</texture>
+        </control>
+        <control type="list" id="8140">
+            <left>28</left>
+            <top>432</top>
+            <width>72</width>
+            <height>216</height>
+            <itemgap>0</itemgap>
+            <scrolltime>0</scrolltime>
+            <onleft>8140</onleft>
+            <onright>8100</onright>
+            <onup>8140</onup>
+            <ondown>8140</ondown>
+            <itemlayout width="72" height="54">
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="FF3E3B3A">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>22</top>
+                    <width>32</width>
+                    <height>32</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>22</top>
+                    <width>22</width>
+                    <height>20</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
+                </control>
+                <control type="image">
+                    <left>27</left>
+                    <top>20</top>
+                    <width>18</width>
+                    <height>14</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
+                </control>
+            </itemlayout>
+            <focusedlayout width="72" height="54" condition="Control.HasFocus(8140)">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>72</width>
+                    <height>54</height>
+                    <texture colordiffuse="FFFFFFFF" border="27">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <texture colordiffuse="FFFFFFFF">cast-mask.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>22</top>
+                    <width>32</width>
+                    <height>32</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>22</top>
+                    <width>22</width>
+                    <height>20</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
+                </control>
+                <control type="image">
+                    <left>27</left>
+                    <top>20</top>
+                    <width>18</width>
+                    <height>14</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
+                </control>
+            </focusedlayout>
+            <focusedlayout width="72" height="54" condition="!Control.HasFocus(8140)">
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>38</width>
+                    <height>38</height>
+                    <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
+                </control>
+                <control type="image">
+                    <left>16</left>
+                    <top>16</top>
+                    <width>40</width>
+                    <height>40</height>
+                    <texture colordiffuse="FF3E3B3A">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>20</left>
+                    <top>22</top>
+                    <width>32</width>
+                    <height>32</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
+                </control>
+                <control type="image">
+                    <left>25</left>
+                    <top>22</top>
+                    <width>22</width>
+                    <height>20</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
+                </control>
+                <control type="image">
+                    <left>27</left>
+                    <top>20</top>
+                    <width>18</width>
+                    <height>14</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
+                    <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
+                </control>
+            </focusedlayout>
         </control>
 
         <!-- Typed query -->
         <control type="label" id="8200">
-            <left>105</left>
-            <top>40</top>
-            <width>360</width>
+            <left>133</left>
+            <top>46</top>
+            <width>320</width>
             <height>56</height>
-            <font>font_mini</font>
-            <textcolor>FFFFFFFF</textcolor>
+            <font>font_aura_mini_bold</font>
+            <textcolor>CCFFFFFF</textcolor>
         </control>
         <!-- Mic + filter-tune icons (visual parity, non functional) -->
         <control type="image">
-            <left>380</left>
-            <top>52</top>
-            <width>32</width>
-            <height>32</height>
+            <left>450</left>
+            <top>58</top>
+            <width>28</width>
+            <height>44</height>
+            <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
         </control>
         <control type="image">
-            <left>428</left>
-            <top>52</top>
-            <width>32</width>
-            <height>32</height>
+            <left>505</left>
+            <top>58</top>
+            <width>46</width>
+            <height>44</height>
+            <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-tune.png</texture>
         </control>
 
+        <!-- Plex has no clock on the search page (verified against the
+             reference capture) — the pill only lives on the main window. -->
+
         <!-- Letter grid: a-z then 1-0, 6 columns -->
         <control type="panel" id="8100">
-            <left>105</left>
-            <top>110</top>
-            <width>396</width>
-            <height>440</height>
+            <left>129</left>
+            <top>124</top>
+            <width>432</width>
+            <height>432</height>
             <itemgap>0</itemgap>
             <scrolltime>120</scrolltime>
+            <onleft>8140</onleft>
             <onright>8130</onright>
             <ondown>8115</ondown>
-            <itemlayout width="66" height="72">
+                        <itemlayout width="72" height="72">
                 <control type="image">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
-                    <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
+                    <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
-                    <font>font_mini</font>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
-                </control>
-            </itemlayout>
-            <focusedlayout width="66" height="72">
+                </control></itemlayout>
+            <focusedlayout width="72" height="72" condition="Control.HasFocus(8100)">
                 <control type="image">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
                     <texture colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texture>
-                    <visible>Control.HasFocus(8100)</visible>
                 </control>
                 <control type="label">
-                    <left>7</left>
-                    <top>7</top>
-                    <width>52</width>
-                    <height>52</height>
-                    <font>font_mini_bold</font>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FF1A1A1A</textcolor>
+                </control></focusedlayout>
+            <focusedlayout width="72" height="72" condition="!Control.HasFocus(8100)">
+                <control type="image">
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
+                    <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
                 </control>
-            </focusedlayout>
+                <control type="label">
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                </control></focusedlayout>
         </control>
 
         <!-- Space / backspace / clear -->
@@ -98,50 +336,51 @@
              label-less button stays the focus target; the glyph is an
              overlay swapped for its dark variant on focus). -->
         <control type="button" id="8115">
-            <left>112</left>
-            <top>552</top>
-            <width>118</width>
-            <height>52</height>
+            <left>133</left>
+            <top>560</top>
+            <width>136</width>
+            <height>64</height>
             <label></label>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
+            <texturenofocus colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
+            <onleft>8140</onleft>
             <onright>8116</onright>
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>155</left>
-            <top>562</top>
+            <left>185</left>
+            <top>576</top>
             <width>32</width>
             <height>32</height>
             <texture>key-space.png</texture>
             <visible>!Control.HasFocus(8115)</visible>
         </control>
         <control type="image">
-            <left>155</left>
-            <top>562</top>
+            <left>185</left>
+            <top>576</top>
             <width>32</width>
             <height>32</height>
             <texture>key-space-dark.png</texture>
             <visible>Control.HasFocus(8115)</visible>
         </control>
         <control type="button" id="8116">
-            <left>244</left>
-            <top>552</top>
-            <width>118</width>
-            <height>52</height>
+            <left>277</left>
+            <top>560</top>
+            <width>136</width>
+            <height>64</height>
             <label></label>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
+            <texturenofocus colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
             <onleft>8115</onleft>
@@ -149,50 +388,50 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>287</left>
-            <top>562</top>
+            <left>329</left>
+            <top>576</top>
             <width>32</width>
             <height>32</height>
             <texture>key-backspace.png</texture>
             <visible>!Control.HasFocus(8116)</visible>
         </control>
         <control type="image">
-            <left>287</left>
-            <top>562</top>
+            <left>329</left>
+            <top>576</top>
             <width>32</width>
             <height>32</height>
             <texture>key-backspace-dark.png</texture>
             <visible>Control.HasFocus(8116)</visible>
         </control>
         <control type="button" id="8117">
-            <left>376</left>
-            <top>552</top>
-            <width>118</width>
-            <height>52</height>
+            <left>421</left>
+            <top>560</top>
+            <width>136</width>
+            <height>64</height>
             <label></label>
-            <font>font_mini_bold</font>
+            <font>font_aura_mini_bold</font>
             <align>center</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texturenofocus>
+            <texturenofocus colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
             <onleft>8116</onleft>
-            <onright>8130</onright>
+            <onright>8120</onright>
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>419</left>
-            <top>562</top>
+            <left>473</left>
+            <top>576</top>
             <width>32</width>
             <height>32</height>
             <texture>key-clear.png</texture>
             <visible>!Control.HasFocus(8117)</visible>
         </control>
         <control type="image">
-            <left>419</left>
-            <top>562</top>
+            <left>473</left>
+            <top>576</top>
             <width>32</width>
             <height>32</height>
             <texture>key-clear-dark.png</texture>
@@ -201,60 +440,118 @@
 
         <!-- Recent searches -->
         <control type="list" id="8110">
-            <left>105</left>
-            <top>630</top>
-            <width>390</width>
-            <height>400</height>
+            <left>96</left>
+            <top>640</top>
+            <width>432</width>
+            <height>440</height>
             <orientation>vertical</orientation>
             <scrolltime>120</scrolltime>
             <onup>8115</onup>
+            <onleft>8140</onleft>
             <onright>8130</onright>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
-            <itemlayout width="390" height="56">
+                        <itemlayout width="473" height="80">
+                <control type="image">
+                    <left>24</left>
+                    <top>25</top>
+                    <width>30</width>
+                    <height>30</height>
+                    <texture colordiffuse="80FFFFFF">icon-recent.png</texture>
+                    <visible>String.IsEmpty(ListItem.Property(clear)) + String.IsEmpty(ListItem.Property(suggest))</visible>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>25</top>
+                    <width>30</width>
+                    <height>30</height>
+                    <texture colordiffuse="80FFFFFF">key-clear.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
+                </control>
                 <control type="label">
-                    <left>0</left>
+                    <left>66</left>
                     <top>0</top>
-                    <width>390</width>
-                    <height>56</height>
-                    <font>font_mini</font>
+                    <width>360</width>
+                    <height>80</height>
+                    <font>font_aura_mini</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>CCFFFFFF</textcolor>
-                </control>
-            </itemlayout>
-            <focusedlayout width="390" height="56">
+                    <textcolor>DDFFFFFF</textcolor>
+                </control></itemlayout>
+            <focusedlayout width="473" height="80" condition="Control.HasFocus(8110)">
                 <control type="image">
-                    <left>-14</left>
-                    <top>4</top>
-                    <width>404</width>
-                    <height>48</height>
-                    <texture colordiffuse="FF3A3B3E" border="10">rounded-solid.png</texture>
+                    <left>0</left>
+                    <top>6</top>
+                    <width>432</width>
+                    <height>68</height>
+                    <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>25</top>
+                    <width>30</width>
+                    <height>30</height>
+                    <texture colordiffuse="CCFFFFFF">icon-recent.png</texture>
+                    <visible>String.IsEmpty(ListItem.Property(clear)) + String.IsEmpty(ListItem.Property(suggest))</visible>
+                </control>
+                <control type="image">
+                    <left>24</left>
+                    <top>25</top>
+                    <width>30</width>
+                    <height>30</height>
+                    <texture colordiffuse="CCFFFFFF">key-clear.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>0</left>
+                    <left>66</left>
                     <top>0</top>
-                    <width>390</width>
-                    <height>56</height>
-                    <font>font_mini_bold</font>
+                    <width>360</width>
+                    <height>80</height>
+                    <font>font_aura_mini</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
+                </control></focusedlayout>
+            <focusedlayout width="473" height="80" condition="!Control.HasFocus(8110)">
+                <control type="image">
+                    <left>24</left>
+                    <top>25</top>
+                    <width>30</width>
+                    <height>30</height>
+                    <texture colordiffuse="80FFFFFF">icon-recent.png</texture>
+                    <visible>String.IsEmpty(ListItem.Property(clear)) + String.IsEmpty(ListItem.Property(suggest))</visible>
                 </control>
-            </focusedlayout>
+                <control type="image">
+                    <left>24</left>
+                    <top>25</top>
+                    <width>30</width>
+                    <height>30</height>
+                    <texture colordiffuse="80FFFFFF">key-clear.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
+                </control>
+                <control type="label">
+                    <left>66</left>
+                    <top>0</top>
+                    <width>360</width>
+                    <height>80</height>
+                    <font>font_aura_mini</font>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>DDFFFFFF</textcolor>
+                </control></focusedlayout>
         </control>
 
         <!-- Plex hint line ("You can search titles, people, genres and
              more…") sitting above Popular Searches while the query is
              empty. -->
         <control type="label">
-            <left>560</left>
-            <top>4</top>
-            <width>1350</width>
-            <height>34</height>
-            <font>font_mini</font>
+            <left>686</left>
+            <top>47</top>
+            <width>1234</width>
+            <height>32</height>
+            <font>font_aura_small</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33586]</label>
-            <textcolor>99FFFFFF</textcolor>
+            <textcolor>C8FFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
         </control>
 
@@ -262,187 +559,704 @@
              grid while the query is empty; the filter pills take the same
              spot once a query is typed. -->
         <control type="label">
-            <left>560</left>
-            <top>44</top>
-            <width>1350</width>
-            <height>52</height>
-            <font>font_mini_bold</font>
+            <left>686</left>
+            <top>132</top>
+            <width>1234</width>
+            <height>56</height>
+            <font>font_aura_head_bold</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33584]</label>
             <textcolor>FFFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
         </control>
 
-        <!-- Filter pills: Tout | Films | Series | Episodes -->
-        <control type="list" id="8120">
-            <left>560</left>
-            <top>44</top>
-            <width>1350</width>
-            <height>52</height>
-            <orientation>horizontal</orientation>
-            <scrolltime>120</scrolltime>
-            <onleft>8100</onleft>
-            <ondown>8130</ondown>
+        <!-- Filter pills: variable-width Plex pills. Python measures
+             each label (i18n.text_width) and positions the five static
+             buttons; three overlay labels cover the states (white text,
+             amber when selected, dark on white focus). -->
+        <control type="group" id="8128">
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-            <itemlayout width="150" height="52">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_mini</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
-                </control>
-            </itemlayout>
-            <focusedlayout width="150" height="52">
-                <control type="image">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <texture colordiffuse="FF3A3B3E" border="26">rounded-solid.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(selected),1)</visible>
-                </control>
-                <control type="label">
-                    <left>0</left>
-                    <top>0</top>
-                    <width>136</width>
-                    <height>52</height>
-                    <font>font_mini_bold</font>
-                    <align>center</align>
-                    <aligny>center</aligny>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>FFFF9D00</textcolor>
-                </control>
-            </focusedlayout>
+            <control type="button" id="8120">
+                <left>686</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8100</onleft>
+                <onright>8121</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8150">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel0),1) + !Control.HasFocus(8120)</visible>
+            </control>
+            <control type="label" id="8160">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel0),1) + !Control.HasFocus(8120)</visible>
+            </control>
+            <control type="label" id="8170">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8120)</visible>
+            </control>
+            <control type="button" id="8121">
+                <left>852</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8120</onleft>
+                <onright>8122</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8151">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel1),1) + !Control.HasFocus(8121)</visible>
+            </control>
+            <control type="label" id="8161">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel1),1) + !Control.HasFocus(8121)</visible>
+            </control>
+            <control type="label" id="8171">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8121)</visible>
+            </control>
+            <control type="button" id="8122">
+                <left>1018</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8121</onleft>
+                <onright>8123</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8152">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel2),1) + !Control.HasFocus(8122)</visible>
+            </control>
+            <control type="label" id="8162">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel2),1) + !Control.HasFocus(8122)</visible>
+            </control>
+            <control type="label" id="8172">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8122)</visible>
+            </control>
+            <control type="button" id="8123">
+                <left>1184</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8122</onleft>
+                <onright>8124</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8153">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel3),1) + !Control.HasFocus(8123)</visible>
+            </control>
+            <control type="label" id="8163">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel3),1) + !Control.HasFocus(8123)</visible>
+            </control>
+            <control type="label" id="8173">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8123)</visible>
+            </control>
+            <control type="button" id="8124">
+                <left>1350</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8123</onleft>
+                <onright>8125</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8154">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel4),1) + !Control.HasFocus(8124)</visible>
+            </control>
+            <control type="label" id="8164">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel4),1) + !Control.HasFocus(8124)</visible>
+            </control>
+            <control type="label" id="8174">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8124)</visible>
+            </control>
+            <control type="button" id="8125">
+                <left>1516</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8124</onleft>
+                <onright>8126</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8155">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel5),1) + !Control.HasFocus(8125)</visible>
+            </control>
+            <control type="label" id="8165">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel5),1) + !Control.HasFocus(8125)</visible>
+            </control>
+            <control type="label" id="8175">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8125)</visible>
+            </control>
+            <control type="button" id="8126">
+                <left>1682</left>
+                <top>48</top>
+                <width>150</width>
+                <height>52</height>
+                <font>font_aura_mini</font>
+                <label></label>
+                <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
+                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <onleft>8125</onleft>
+                <onright>8130</onright>
+                <ondown>8130</ondown>
+            </control>
+            <control type="label" id="8156">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>BBFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>!String.IsEqual(Window.Property(AuraSearchPillSel6),1) + !Control.HasFocus(8126)</visible>
+            </control>
+            <control type="label" id="8166">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FFE5A00D</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>String.IsEqual(Window.Property(AuraSearchPillSel6),1) + !Control.HasFocus(8126)</visible>
+            </control>
+            <control type="label" id="8176">
+                <top>48</top><height>52</height>
+                <font>font_aura_mini_bold</font>
+                <align>center</align><aligny>center</aligny>
+                <textcolor>FF14161F</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+                <visible>Control.HasFocus(8126)</visible>
+            </control>
         </control>
-
         <!-- Results: 2-column card grid (typed query only — the empty
              query shows the poster-grid suggestions panel below instead,
              matching Plex's Popular Searches layout swap). -->
         <control type="panel" id="8130">
-            <left>560</left>
-            <top>120</top>
-            <width>1360</width>
+            <left>686</left>
+            <top>140</top>
+            <width>1172</width>
             <height>960</height>
             <itemgap>0</itemgap>
             <scrolltime>200</scrolltime>
             <onleft>8100</onleft>
             <onup>8120</onup>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-            <itemlayout width="680" height="220">
+                        <itemlayout width="584" height="300">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>660</width>
-                    <height>210</height>
-                    <texture colordiffuse="FF26272B" border="12">rounded-solid.png</texture>
+                    <width>555</width>
+                    <height>282</height>
+                    <texture colordiffuse="FF1F1F1F" border="12">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>10</left>
-                    <top>10</top>
-                    <width>132</width>
-                    <height>190</height>
+                    <left>18</left>
+                    <top>15</top>
+                    <width>160</width>
+                    <height>240</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>55</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(person))</visible>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>55</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <texture colordiffuse="FF1F1F1F">cast-mask.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(person))</visible>
+                </control>
+                <control type="image">
+                    <left>45</left>
+                    <top>80</top>
+                    <width>106</width>
+                    <height>110</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="99FFFFFF">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
-                    <left>160</left>
-                    <top>60</top>
-                    <width>480</width>
+                    <left>220</left>
+                    <top>82</top>
+                    <width>320</width>
                     <height>34</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_mini_bold</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
-                    <left>160</left>
-                    <top>98</top>
-                    <width>480</width>
+                    <left>220</left>
+                    <top>99</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <!-- Episode cards carry a fourth line like the Plex
+                     reference: title / show name / 'S5 E1 • Episode' /
+                     server. -->
+                <control type="label">
+                    <left>220</left>
+                    <top>120</top>
+                    <width>320</width>
                     <height>30</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(parent)]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>152</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
                 <control type="label">
-                    <left>160</left>
-                    <top>130</top>
-                    <width>480</width>
+                    <left>220</left>
+                    <top>184</top>
+                    <width>320</width>
                     <height>30</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
-            </itemlayout>
-            <focusedlayout width="680" height="220">
+                <control type="label">
+                    <left>220</left>
+                    <top>120</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>137</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>152</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(server)]</label>
+                    <textcolor>FFE5A00D</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
+                </control></itemlayout>
+            <focusedlayout width="584" height="300" condition="Control.HasFocus(8130)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
-                    <width>660</width>
-                    <height>210</height>
-                    <texture colordiffuse="FF3A3B40" border="12">rounded-solid.png</texture>
+                    <width>555</width>
+                    <height>282</height>
+                    <texture colordiffuse="FF2B2B2B" border="12">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>-4</left>
-                    <top>-4</top>
-                    <width>668</width>
-                    <height>218</height>
-                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
-                                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
-                </control>
-                <control type="image">
-                    <left>10</left>
-                    <top>10</top>
-                    <width>132</width>
-                    <height>190</height>
+                    <left>18</left>
+                    <top>15</top>
+                    <width>160</width>
+                    <height>240</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>55</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(person))</visible>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>55</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <texture colordiffuse="FF2B2B2B">cast-mask.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(person))</visible>
+                </control>
+                <control type="image">
+                    <left>45</left>
+                    <top>80</top>
+                    <width>106</width>
+                    <height>110</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="99FFFFFF">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
-                    <left>160</left>
-                    <top>60</top>
-                    <width>480</width>
+                    <left>220</left>
+                    <top>82</top>
+                    <width>320</width>
                     <height>34</height>
-                    <font>font_mini_bold</font>
+                    <font>font_aura_mini_bold</font>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
                 </control>
                 <control type="label">
-                    <left>160</left>
-                    <top>98</top>
-                    <width>480</width>
+                    <left>220</left>
+                    <top>99</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>120</top>
+                    <width>320</width>
                     <height>30</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(parent)]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>152</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>BBFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
                 <control type="label">
-                    <left>160</left>
-                    <top>130</top>
-                    <width>480</width>
+                    <left>220</left>
+                    <top>184</top>
+                    <width>320</width>
                     <height>30</height>
-                    <font>font_mini</font>
+                    <font>font_aura_mini</font>
                     <label>$INFO[ListItem.Property(server)]</label>
-                    <textcolor>FFFF9D00</textcolor>
+                    <textcolor>FFE5A00D</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
                 </control>
-            </focusedlayout>
+                <control type="label">
+                    <left>220</left>
+                    <top>120</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>137</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>152</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(server)]</label>
+                    <textcolor>FFE5A00D</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+
+                <control type="image">
+                    <left>-4</left>
+                    <top>-4</top>
+                    <width>563</width>
+                    <height>290</height>
+                    <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
+                    <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                </control></focusedlayout>
+            <focusedlayout width="584" height="300" condition="!Control.HasFocus(8130)">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>555</width>
+                    <height>282</height>
+                    <texture colordiffuse="FF1F1F1F" border="12">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>15</top>
+                    <width>160</width>
+                    <height>240</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>55</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(person))</visible>
+                </control>
+                <control type="image">
+                    <left>18</left>
+                    <top>55</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <texture colordiffuse="FF1F1F1F">cast-mask.png</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(person))</visible>
+                </control>
+                <control type="image">
+                    <left>45</left>
+                    <top>80</top>
+                    <width>106</width>
+                    <height>110</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture colordiffuse="99FFFFFF">$INFO[ListItem.Art(poster)]</texture>
+                    <visible>!String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>82</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>99</top>
+                    <width>320</width>
+                    <height>34</height>
+                    <font>font_aura_mini_bold</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <!-- Episode cards carry a fourth line like the Plex
+                     reference: title / show name / 'S5 E1 • Episode' /
+                     server. -->
+                <control type="label">
+                    <left>220</left>
+                    <top>120</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(parent)]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>152</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>184</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(server)]</label>
+                    <textcolor>FFE5A00D</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>120</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>137</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>99FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>!String.IsEmpty(ListItem.Property(person)) | !String.IsEmpty(ListItem.Property(genre))</visible>
+                </control>
+                <control type="label">
+                    <left>220</left>
+                    <top>152</top>
+                    <width>320</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <label>$INFO[ListItem.Property(server)]</label>
+                    <textcolor>FFE5A00D</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                    <visible>String.IsEmpty(ListItem.Property(person)) + String.IsEmpty(ListItem.Property(genre)) + String.IsEmpty(ListItem.Property(parent))</visible>
+                </control></focusedlayout>
         </control>
 
         <!-- Popular Suggestions poster grid (empty query): Plex renders
@@ -450,112 +1264,152 @@
              centered underneath, not the media-card list used for
              typed results. -->
         <control type="panel" id="8131">
-            <left>560</left>
-            <top>120</top>
-            <width>1360</width>
+            <left>686</left>
+            <top>192</top>
+            <width>1196</width>
             <height>960</height>
             <itemgap>0</itemgap>
             <scrolltime>200</scrolltime>
             <onleft>8100</onleft>
             <onup>8131</onup>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-            <itemlayout width="340" height="560">
+                        <itemlayout width="299" height="450">
                 <control type="image">
-                    <left>20</left>
-                    <top>10</top>
-                    <width>300</width>
-                    <height>450</height>
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
                     <aspectratio>scale</aspectratio>
                     <fadetime>150</fadetime>
                     <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                 </control>
                 <control type="image">
-                    <left>20</left>
-                    <top>10</top>
-                    <width>300</width>
-                    <height>450</height>
-                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="label">
-                    <left>20</left>
-                    <top>466</top>
-                    <width>300</width>
-                    <height>32</height>
-                    <font>font_mini</font>
+                    <left>0</left>
+                    <top>380</top>
+                    <width>240</width>
+                    <height>28</height>
+                    <font>font_aura_mini</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>BBFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
-                    <left>20</left>
-                    <top>502</top>
-                    <width>300</width>
-                    <height>28</height>
-                    <font>font_tiny</font>
+                    <left>0</left>
+                    <top>410</top>
+                    <width>240</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
-                </control>
-            </itemlayout>
-            <focusedlayout width="340" height="560">
+                </control></itemlayout>
+            <focusedlayout width="299" height="450" condition="Control.HasFocus(8131)">
                 <control type="image">
-                    <left>14</left>
-                    <top>4</top>
-                    <width>312</width>
-                    <height>462</height>
+                    <left>-6</left>
+                    <top>-6</top>
+                    <width>252</width>
+                    <height>372</height>
                     <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
                     <animation effect="zoom" start="100" end="103" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
-                    <left>20</left>
-                    <top>10</top>
-                    <width>300</width>
-                    <height>450</height>
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
                     <aspectratio>scale</aspectratio>
                     <fadetime>150</fadetime>
                     <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                 </control>
                 <control type="image">
-                    <left>20</left>
-                    <top>10</top>
-                    <width>300</width>
-                    <height>450</height>
-                    <texture colordiffuse="FF16171A">poster-corners.png</texture>
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="label">
-                    <left>20</left>
-                    <top>466</top>
-                    <width>300</width>
-                    <height>32</height>
-                    <font>font_mini_bold</font>
+                    <left>0</left>
+                    <top>380</top>
+                    <width>240</width>
+                    <height>28</height>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
-                    <left>20</left>
-                    <top>502</top>
-                    <width>300</width>
-                    <height>28</height>
-                    <font>font_tiny</font>
+                    <left>0</left>
+                    <top>410</top>
+                    <width>240</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
+                </control></focusedlayout>
+            <focusedlayout width="299" height="450" condition="!Control.HasFocus(8131)">
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <aspectratio>scale</aspectratio>
+                    <fadetime>150</fadetime>
+                    <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                 </control>
-            </focusedlayout>
+                <control type="image">
+                    <left>0</left>
+                    <top>0</top>
+                    <width>240</width>
+                    <height>360</height>
+                    <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>380</top>
+                    <width>240</width>
+                    <height>28</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>BBFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>410</top>
+                    <width>240</width>
+                    <height>24</height>
+                    <font>font_aura_tiny</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control></focusedlayout>
         </control>
 
         <!-- Empty state -->
         <control type="label" id="8201">
-            <left>560</left>
+            <left>686</left>
             <top>430</top>
-            <width>1360</width>
+            <width>1172</width>
             <height>40</height>
-            <font>font_mini</font>
+            <font>font_aura_mini</font>
             <align>center</align>
             <textcolor>77FFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraSearchEmpty))</visible>

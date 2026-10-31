@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1198">
+    <!-- The entry list (9010) is populated from Python, so it is empty
+         when Kodi resolves the default control; the dim backdrop
+         doubles as a focusable dismiss button (click-outside-to-close,
+         Plex sheet behavior) instead of a plain image. -->
+    <defaultcontrol>9001</defaultcontrol>
+    <zorder>4</zorder>
+    <controls>
+        <control type="group">
+            <left>0</left>
+            <top>0</top>
+            <animation effect="fade" start="0" end="100" time="180" tween="quadratic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="100" end="0" time="120" tween="quadratic" easing="in">WindowClose</animation>
+
+            <!-- Dim backdrop: starts right of the rail (x420) so the
+                 expanded sidebar stays readable behind the sheet, like
+                 Plex. -->
+            <control type="button" id="9001">
+                <left>420</left>
+                <top>0</top>
+                <width>1500</width>
+                <height>1080</height>
+                <texturenofocus colordiffuse="B3000000">white.png</texturenofocus>
+                <texturefocus colordiffuse="B3000000">white.png</texturefocus>
+                <onup>9010</onup>
+                <onleft>9010</onleft>
+                <onright>9010</onright>
+                <ondown>9010</ondown>
+            </control>
+
+            <!-- Expanded rail replica: Kodi dims the parent's window
+                 under a modal sheet, so Plex's always-readable rail is
+                 re-drawn here at full brightness (list 9020 is filled
+                 from aura_menu._sidebar_snapshot). -->
+            <control type="image">
+                <left>34</left>
+                <top>34</top>
+                <width>384</width>
+                <height>1006</height>
+                <texture colordiffuse="FF000000" border="26">cap-r26.png</texture>
+            </control>
+            <control type="list" id="9020">
+                <left>34</left>
+                <top>73</top>
+                <width>384</width>
+                <height>960</height>
+                <onleft>9020</onleft>
+                <onright>9010</onright>
+                <itemlayout width="384" height="68">
+                        <control type="image">
+                            <left>33</left>
+                            <top>3</top>
+                            <width>318</width>
+                            <height>62</height>
+                            <texture colordiffuse="FF1A1A1A" border="28">cap-r26.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>33</left>
+                            <top>3</top>
+                            <width>318</width>
+                            <height>62</height>
+                            <texture colordiffuse="AAFFFFFF" border="28">chip-outline.png</texture>
+                            <visible>String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
+                        </control>
+                        <control type="image">
+                            <left>50</left>
+                            <top>20</top>
+                            <width>28</width>
+                            <height>28</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture>$INFO[ListItem.Art(icon)]</texture>
+                            <visible>String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="label">
+                            <left>97</left>
+                            <top>0</top>
+                            <width>287</width>
+                            <height>68</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_tiny_bold</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>326</left>
+                            <top>22</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="AAFFFFFF">icon-chevron-right.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>322</left>
+                            <top>22</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="73FFFFFF">icon-dots.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_library)) + ListItem.IsSelected</visible>
+                        </control>
+                        <control type="label">
+                            <left>57</left>
+                            <top>0</top>
+                            <width>140</width>
+                            <height>68</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_hint</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <visible>!String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>116</left>
+                            <top>33</top>
+                            <width>219</width>
+                            <height>2</height>
+                            <texture colordiffuse="33FFFFFF">white.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                                            <control type="image">
+                            <left>44</left>
+                            <top>11</top>
+                            <width>46</width>
+                            <height>46</height>
+                            <texture>avatar-plex.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>44</left>
+                            <top>11</top>
+                            <width>46</width>
+                            <height>46</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>44</left>
+                            <top>11</top>
+                            <width>46</width>
+                            <height>46</height>
+                            <texture colordiffuse="FF000000">cast-mask.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="label">
+                            <left>114</left>
+                            <top>0</top>
+                            <width>230</width>
+                            <height>68</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_small_bold</font>
+                            <label>$INFO[Window.Property(AuraUserName)]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+</itemlayout>
+                <focusedlayout width="384" height="68">
+                        <control type="image">
+                            <left>33</left>
+                            <top>3</top>
+                            <width>318</width>
+                            <height>62</height>
+                            <texture colordiffuse="FF1A1A1A" border="28">cap-r26.png</texture>
+                            <visible>!Control.HasFocus(9020) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>33</left>
+                            <top>3</top>
+                            <width>318</width>
+                            <height>62</height>
+                            <texture colordiffuse="AAFFFFFF" border="28">chip-outline.png</texture>
+                            <visible>String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
+                        </control>
+                <control type="image">
+                                    <left>33</left>
+                                    <top>3</top>
+                                    <width>318</width>
+                                    <height>62</height>
+                                    <texture colordiffuse="FFFFFFFF" border="28">cap-r26.png</texture>
+                                    <visible>Control.HasFocus(9020) + String.IsEmpty(ListItem.Property(is_header))</visible>
+                                </control>
+                <control type="image">
+                            <left>50</left>
+                            <top>20</top>
+                            <width>28</width>
+                            <height>28</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture>$INFO[ListItem.Art(icon)]</texture>
+                            <visible>!Control.HasFocus(9020) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="label">
+                            <left>97</left>
+                            <top>0</top>
+                            <width>287</width>
+                            <height>68</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_tiny_bold</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>!Control.HasFocus(9020) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>326</left>
+                            <top>22</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="AAFFFFFF">icon-chevron-right.png</texture>
+                            <visible>!Control.HasFocus(9020) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                        <control type="image">
+                            <left>322</left>
+                            <top>22</top>
+                            <width>24</width>
+                            <height>24</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture colordiffuse="73FFFFFF">icon-dots.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_library)) + ListItem.IsSelected</visible>
+                        </control>
+                        <control type="label">
+                            <left>57</left>
+                            <top>0</top>
+                            <width>140</width>
+                            <height>68</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_hint</font>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>99FFFFFF</textcolor>
+                            <visible>!String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                        <control type="image">
+                            <left>116</left>
+                            <top>33</top>
+                            <width>219</width>
+                            <height>2</height>
+                            <texture colordiffuse="33FFFFFF">white.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_header))</visible>
+                        </control>
+                                            <control type="image">
+                            <left>44</left>
+                            <top>11</top>
+                            <width>46</width>
+                            <height>46</height>
+                            <texture>avatar-plex.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile)) + String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>44</left>
+                            <top>11</top>
+                            <width>46</width>
+                            <height>46</height>
+                            <aspectratio>scale</aspectratio>
+                            <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="image">
+                            <left>44</left>
+                            <top>11</top>
+                            <width>46</width>
+                            <height>46</height>
+                            <texture colordiffuse="FF000000">cast-mask.png</texture>
+                            <visible>!String.IsEmpty(ListItem.Property(is_profile)) + !String.IsEmpty(Window.Property(AuraAvatar))</visible>
+                        </control>
+                        <control type="label">
+                            <left>114</left>
+                            <top>0</top>
+                            <width>230</width>
+                            <height>68</height>
+                            <aligny>center</aligny>
+                            <font>font_aura_small_bold</font>
+                            <label>$INFO[Window.Property(AuraUserName)]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <visible>!Control.HasFocus(9020) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                        </control>
+                <control type="image">
+                                    <left>50</left>
+                                    <top>20</top>
+                                    <width>28</width>
+                                    <height>28</height>
+                                    <aspectratio>keep</aspectratio>
+                                    <texture colordiffuse="FF1A1310">$INFO[ListItem.Art(icon)]</texture>
+                                    <visible>Control.HasFocus(9020) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                                </control>
+                <control type="label">
+                                    <left>97</left>
+                                    <top>0</top>
+                                    <width>287</width>
+                                    <height>68</height>
+                                    <aligny>center</aligny>
+                                    <font>font_aura_tiny_bold</font>
+                                    <label>$INFO[ListItem.Label]</label>
+                                    <textcolor>FF10131A</textcolor>
+                                    <visible>Control.HasFocus(9020) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
+                                </control>
+                <control type="image">
+                                    <left>326</left>
+                                    <top>22</top>
+                                    <width>24</width>
+                                    <height>24</height>
+                                    <aspectratio>keep</aspectratio>
+                                    <texture colordiffuse="FF1A1310">icon-chevron-right.png</texture>
+                                    <visible>Control.HasFocus(9020) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                                </control>
+                <control type="label">
+                                    <left>114</left>
+                                    <top>0</top>
+                                    <width>230</width>
+                                    <height>68</height>
+                                    <aligny>center</aligny>
+                                    <font>font_aura_small_bold</font>
+                                    <label>$INFO[Window.Property(AuraUserName)]</label>
+                                    <textcolor>FF10131A</textcolor>
+                                    <visible>Control.HasFocus(9020) + !String.IsEmpty(ListItem.Property(is_profile))</visible>
+                                </control>
+            </focusedlayout>
+                <content />
+            </control>
+
+            <!-- Left-anchored dark panel (position/size set from Python) -->
+            <control type="image" id="9000">
+                <texture colordiffuse="FF000000" border="26">rounded-solid.png</texture>
+            </control>
+            <control type="label" id="9005">
+                <font>font_aura_mini_bold</font>
+                <textcolor>CCFFFFFF</textcolor>
+                <wrapmultiline>false</wrapmultiline>
+            </control>
+            <control type="textbox" id="9006">
+                <font>font_aura_mini</font>
+                <textcolor>CCFFFFFF</textcolor>
+            </control>
+            <control type="list" id="9010">
+                <scrolltime>140</scrolltime>
+                <onleft>9020</onleft>
+                <itemlayout height="76">
+                    <control type="image">
+                        <left>48</left>
+                        <top>21</top>
+                        <width>34</width>
+                        <height>34</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture colordiffuse="DDFFFFFF">$INFO[ListItem.Icon]</texture>
+                    </control>
+                    <control type="label">
+                        <left>106</left>
+                        <top>0</top>
+                        <width>276</width>
+                        <height>76</height>
+                        <aligny>center</aligny>
+                        <font>font_aura_mini</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>DDFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                </itemlayout>
+                <focusedlayout height="76">
+                    <control type="image">
+                        <left>16</left>
+                        <top>6</top>
+                        <width>366</width>
+                        <height>64</height>
+                        <texture colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>48</left>
+                        <top>21</top>
+                        <width>34</width>
+                        <height>34</height>
+                        <aspectratio>keep</aspectratio>
+                        <texture colordiffuse="FF1A1310">$INFO[ListItem.Icon]</texture>
+                    </control>
+                    <control type="label">
+                        <left>106</left>
+                        <top>0</top>
+                        <width>276</width>
+                        <height>76</height>
+                        <aligny>center</aligny>
+                        <font>font_aura_mini_bold</font>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FF10131A</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                </focusedlayout>
+                <content />
+            </control>
+        </control>
+    </controls>
+</window>

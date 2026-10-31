@@ -198,37 +198,50 @@ def _video_label(raw_item):
             hdr = 'HLG'
             break
     codec = str(media.get('videoCodec') or '').upper()
+    profile = str(media.get('videoProfile') or '')
+    inner = ' '.join(p for p in (codec, profile) if p)
     parts = [base]
     if hdr:
         parts.append(hdr)
-    if codec:
-        parts.append(codec)
+    if inner:
+        parts.append('({})'.format(inner))
     return ' '.join(parts)
 
 
 def _audio_label(raw_item):
-    """Plex-style audio badge, e.g. 'French EAC3 5.1'."""
+    """Plex-style audio badge, e.g. 'French (EAC3 5.1)'."""
     for stream in _streams(raw_item, 2):
         language = stream.get('language') or stream.get('languageTag') or ''
         codec = str(stream.get('codec') or '').upper()
         channels = stream.get('channels')
         layout = {2: '2.0', 6: '5.1', 8: '7.1'}.get(channels, str(channels) if channels else '')
-        label = ' '.join(p for p in (language, codec, layout) if p)
-        if label:
-            return label
+        inner = ' '.join(p for p in (codec, layout) if p)
+        if language and inner:
+            return '{} ({})'.format(language, inner)
+        if language or inner:
+            return language or inner
     return ''
 
 
 def _subtitle_label(raw_item):
-    """Short subtitle summary, e.g. 'French SRT' (first sub) or '3 sous-titres'."""
+    """Plex-style subtitle badge, e.g. 'French Forced (SRT)' -- selected
+    track's language + forced flag, codec in parens; 'Off' when a video
+    file carries no selected subtitle stream."""
     subs = _streams(raw_item, 3)
-    if not subs:
+    if not _first_media(raw_item):
         return ''
-    first = subs[0]
+    # Plex's badge is the SELECTED subtitle ('Off' when none) -- streams
+    # carry `selected` for the track the server/user picked.
+    first = next((s for s in subs if s.get('selected')), None)
+    if not first:
+        return 'Off'
     language = first.get('language') or first.get('languageTag') or ''
+    forced = first.get('forced')
+    if forced and str(forced).lower() not in ('0', 'false', 'none'):
+        language = '{} Forced'.format(language) if language else 'Forced'
     codec = str(first.get('codec') or first.get('format') or '').upper()
-    label = ' '.join(p for p in (language, codec) if p)
-    return label or '{} sous-titres'.format(len(subs))
+    inner = ' '.join(p for p in (language, '({})'.format(codec) if codec else '') if p)
+    return inner or '{} sous-titres'.format(len(subs))
 
 
 def _content_rating_display(raw_item):
@@ -262,7 +275,10 @@ def build_video_item(raw_item, image_resolver):
     # Plex TV cards show the *show* poster for episodes (2:3), the item's own
     # thumb for movies/shows/seasons; fanart falls back to the show's art.
     poster = grandparent_thumb if item_type == 'episode' and grandparent_thumb else thumb
-    fanart = art or grandparent_art
+    # Cloud/discover cards occasionally drop `art` but still carry a
+    # `background` entry inside Image[] (e.g. the '13' trailer card) --
+    # fall back to it so the hero backdrop is never flat.
+    fanart = art or grandparent_art or _image_of_type(raw_item, 'background')
 
     duration_ms = raw_item.get('duration')
     view_offset_ms = raw_item.get('viewOffset')
@@ -275,6 +291,11 @@ def build_video_item(raw_item, image_resolver):
     parts = media.get('Part') or []
     if parts:
         part_key = parts[0].get('key') or ''
+    # Cloud clips (Discover trailers) carry an absolute CDN url on the
+    # Media entry -- playable as-is, no token, no part_key resolution.
+    direct_url = str(media.get('url') or '')
+    if not direct_url.startswith('http'):
+        direct_url = ''
 
     # Multi-version items (B12): one playable version per Media entry,
     # labelled "1080p HEVC — film.1080p.mkv" like Plex's version picker.
@@ -305,8 +326,13 @@ def build_video_item(raw_item, image_resolver):
     view_count = raw_item.get('viewCount') or 0
     return {
         'title': raw_item.get('title') or i18n.tr(33328),
+        'sort_title': raw_item.get('titleSort') or '',
         'type': item_type,
         'rating_key': raw_item.get('ratingKey'),
+        # Raw metadata path ('/library/metadata/<id>' or
+        # '<parent>/extras/<clip>' for trailers) -- needed to hydrate
+        # Discover/cloud cards, whose parent id lives inside the key.
+        'key': raw_item.get('key') or '',
         'parent_rating_key': raw_item.get('parentRatingKey'),
         'grandparent_rating_key': raw_item.get('grandparentRatingKey'),
         'index': raw_item.get('index'),
@@ -314,9 +340,16 @@ def build_video_item(raw_item, image_resolver):
         'show_title': raw_item.get('grandparentTitle') or '',
         'year': raw_item.get('year'),
         'originally_available_at': raw_item.get('originallyAvailableAt'),
+        # Plex counts seasons under childCount on shows -- the search
+        # suggestion cards print it as "N saison(s)" like the reference
+        # client's "1 Season" caption.
+        'child_count': raw_item.get('childCount'),
         'tagline': raw_item.get('tagline') or '',
         'summary': raw_item.get('summary') or '',
         'content_rating': _content_rating_display(raw_item),
+        # Plex's "age N+" chip uses contentRatingAge, not the textual
+        # contentRating ('fr/10' would mislabel a 13+ item as 10+).
+        'content_rating_age': raw_item.get('contentRatingAge'),
         'rating': raw_item.get('rating'),
         'audience_rating': raw_item.get('audienceRating'),
         'rating_image': raw_item.get('ratingImage') or '',
@@ -356,18 +389,24 @@ def build_video_item(raw_item, image_resolver):
         # detail page's "Vous l'avez regardé le..." line uses it for
         # free instead of fetching the (unbounded) history endpoint.
         'last_viewed_at': raw_item.get('lastViewedAt'),
-        'thumb_url': image_resolver(thumb, 640, 360) if thumb else '',
+        # Card URLs carry a corner radius: the loopback art proxy serves
+        # them as alpha-rounded PNGs (Plex rounds cards; the old opaque
+        # corner covers read as dark boxes on light veils). Radius is in
+        # source pixels: 21@320w/31@640w ~= the skin's old 16px@240/22px@448
+        # covers. Fanart/logos/cast (dynamic-tint mask) stay unrounded.
+        'thumb_url': image_resolver(thumb, 640, 360, radius=31) if thumb else '',
         'art_url': image_resolver(art, 1920, 1080) if art else '',
-        'poster_url': image_resolver(poster, 320, 480) if poster else '',
+        'poster_url': image_resolver(poster, 320, 480, radius=21) if poster else '',
         'fanart_url': image_resolver(fanart, 1920, 1080) if fanart else '',
         # clearLogos are transparent PNGs -- Plex's photo transcoder emits
         # JPEG only, so logos keep the direct URL to preserve alpha.
         'logo_url': image_resolver(logo) if logo else '',
-        'landscape_url': image_resolver(thumb, 640, 360) if (thumb and item_type == 'episode') else '',
+        'landscape_url': image_resolver(thumb, 640, 360, radius=31) if (thumb and item_type == 'episode') else '',
         'video_label': _video_label(raw_item),
         'audio_label': _audio_label(raw_item),
         'subtitle_label': _subtitle_label(raw_item),
         'part_key': part_key,
+        'direct_url': direct_url,
         'versions': versions,
         'section_id': str(section_id) if section_id is not None else None,
         # Plex's per-item blur palette (corner hex colors, no alpha) --

@@ -9,7 +9,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF10131A">white.png</texture>
+            <texture colordiffuse="FF1A1310">white.png</texture>
         </control>
 
         <!-- Header -->
@@ -33,7 +33,7 @@
             <label>$ADDON[script.akasha.aura 33020]</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+            <texturefocus colordiffuse="FFFF8C6C" border="16">rounded-solid.png</texturefocus>
             <ondown>6010</ondown>
             <onleft>6001</onleft>
         </control>
@@ -51,7 +51,7 @@
             <label>$ADDON[script.akasha.aura 33318]</label>
             <textcolor>BBFFFFFF</textcolor>
             <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FF6C8CFF" border="16">rounded-solid.png</texturefocus>
+            <texturefocus colordiffuse="FFFF8C6C" border="16">rounded-solid.png</texturefocus>
             <onright>6030</onright>
             <ondown>6010</ondown>
         </control>

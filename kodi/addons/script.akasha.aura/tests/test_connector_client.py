@@ -6,6 +6,7 @@ import urllib.error
 import unittest
 from unittest.mock import patch
 
+import art_proxy
 import connector_client
 
 
@@ -161,7 +162,7 @@ class TestConnectorClient(unittest.TestCase):
 
         self.assertEqual(seasons[0]['rating_key'], '43')
         self.assertEqual(seasons[0]['title'], 'Saison 1')
-        self.assertIn('/api/plex/image?path=', seasons[0]['thumb_url'])
+        self.assertIn('/api/plex/image?path=', art_proxy.unwrap(seasons[0]['thumb_url']))
         self.assertEqual(episodes[0]['parent_rating_key'], '42')
 
     def test_image_url_includes_encoded_path_and_auth_header(self):
@@ -218,6 +219,23 @@ class TestConnectorErrorClassification(unittest.TestCase):
             self.client.sections()
         self.assertNotIsInstance(
             ctx.exception, connector_client.ConnectorOfflineError)
+
+    @patch('urllib.request.urlopen')
+    def test_single_timeout_does_not_trip_breaker(self, mock_urlopen):
+        mock_urlopen.side_effect = TimeoutError('timed out')
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        self.assertEqual(mock_urlopen.call_count, 2)
+        # Third consecutive timeout trips the breaker; next call
+        # fast-fails without a new HTTP attempt.
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        mock_urlopen.reset_mock()
+        with self.assertRaises(connector_client.ConnectorOfflineError):
+            self.client.sections()
+        self.assertEqual(mock_urlopen.call_count, 0)
 
 
 if __name__ == '__main__':

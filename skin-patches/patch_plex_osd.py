@@ -15,7 +15,11 @@ SRC = os.path.join(HERE, 'plex-osd')
 WINDOWS = ('VideoOSD.xml', 'DialogSeekBar.xml')
 TEXTURES = ('akasha-osd-scrim-top.png', 'akasha-osd-scrim-bottom.png',
             'akasha-circle.png', 'akasha-chev-down.png',
-            'akasha-chapters.png')
+            'akasha-chapters.png',
+            'osd-nib.png', 'osd-subs.png', 'osd-chev.png') + tuple(
+            'osd-tag-{}.png'.format(r)
+            for r in ('288', '480', '540', '576', '720', '900', '1080',
+                      '1440', '2160', '4K'))
 
 
 def patch(skin_dir):

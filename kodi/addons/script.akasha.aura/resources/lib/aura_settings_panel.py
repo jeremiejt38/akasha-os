@@ -18,6 +18,7 @@ import threading
 
 import xbmc
 import xbmcgui
+import gui_guard
 
 import i18n
 import settings_catalog
@@ -62,19 +63,60 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
         # own window, closed alongside this panel before firing a
         # native-window action (see the comment there for why).
         self.parent_window = None
+        # Rail replica snapshot (same mechanism as the profile menu):
+        # Plex keeps the expanded sidebar readable behind its settings
+        # sheet, but Kodi dims the parent window under a modal dialog.
+        self.rail_items = []
+        self.rail_props = {}
+        # Set when the user picks a row in the rail replica: the parent
+        # activates that real sidebar entry after the dialog closes.
+        self.rail_selection = -1
+        # 'account' opens the panel straight on the Plex-style Account
+        # sheet (official-live/51) instead of the OS categories; the
+        # caller passes the /api/v2/user dict via account_user.
+        self.start_view = None
+        self.account_user = {}
 
     # ------------------------------------------------------------------
     # Lifecycle / navigation
     # ------------------------------------------------------------------
 
+    def _populate_rail_replica(self):
+        try:
+            rail = self.getControl(9020)
+        except RuntimeError:
+            return
+        try:
+            rail.reset()
+        except (AttributeError, RuntimeError):
+            pass
+        for it in self.rail_items:
+            li = xbmcgui.ListItem(it.get('label', ''))
+            if it.get('icon'):
+                li.setArt({'icon': it['icon']})
+            for prop in ('is_profile', 'is_header', 'is_library'):
+                if it.get(prop):
+                    li.setProperty(prop, it[prop])
+            rail.addItem(li)
+        for key, val in self.rail_props.items():
+            try:
+                self.setProperty(key, val)
+            except RuntimeError:
+                pass
+
     def onInit(self):
-        self._push(_View('root', _tr(33019)))
+        if self.rail_items:
+            self._populate_rail_replica()
+        if self.start_view == 'account':
+            self._push(_View('account', _tr(33627)))
+        else:
+            self._push(_View('root', _tr(33019)))
 
     def _push(self, view):
         if self._stack:
             top = self._stack[-1]
             try:
-                top.pos = self.getControl(LIST_ID).getSelectedPosition()
+                top.pos = gui_guard.selpos(self, LIST_ID)
             except RuntimeError:
                 top.pos = 0
         self._stack.append(view)
@@ -121,6 +163,8 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
                      xbmc.LOGERROR)
 
     def _build_rows(self, view):
+        if view.kind == 'account':
+            return self._account_rows()
         if view.kind == 'root':
             return [self._category_row(cat) for cat in self.categories]
         if view.kind == 'category':
@@ -153,6 +197,41 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
                 {'kind': 'item', 'label': _tr(33538), 'op': 'remove'},
             ]
         return []
+
+    _AUTO_SIGN_IN_ITEM = {
+        'id': 'auto_sign_in', 'type': 'bool', 'label': 33632,
+        'source': ('addon', 'script.akasha.aura', 'plex.auto_sign_in'),
+    }
+
+    def _account_rows(self):
+        """Plex's Account sheet (official-live/51): identity rows from
+        plex.tv /api/v2/user, then the app-level preferences. Rows whose
+        counterpart lives on plex.tv only are stubbed like the account
+        menu's cloud entries."""
+        u = self.account_user or {}
+        rows = [
+            {'kind': 'info', 'label': _tr(33628),
+             'value': str(u.get('email') or '-')},
+            {'kind': 'info', 'label': _tr(33629),
+             'value': str(u.get('username') or u.get('title') or '-')},
+        ]
+        sub = u.get('subscription') or {}
+        if (isinstance(sub, dict) and sub.get('active')) \
+                or u.get('plexPass') or u.get('hasPlexPass'):
+            rows.append({'kind': 'info', 'label': _tr(33630),
+                         'value': _tr(33631)})
+        rows.append(self._item_row(self._AUTO_SIGN_IN_ITEM))
+        rows.append({'kind': 'info', 'label': _tr(33633),
+                     'value': xbmc.getLanguage() or '-'})
+        rows.append({'kind': 'stub', 'label': _tr(33634)})
+        # Aura always reports watch state/ratings back to the Plex
+        # server, so Plex's toggle is effectively On here.
+        rows.append({'kind': 'info', 'label': _tr(33635),
+                     'value': _tr(33530)})
+        rows.append({'kind': 'stub', 'label': _tr(33636)})
+        rows.append({'kind': 'stub', 'label': _tr(33637)})
+        rows.append({'kind': 'stub', 'label': _tr(33638)})
+        return [r for r in rows if r]
 
     def _category_row(self, cat):
         return {'kind': 'category', 'label': _tr(cat['title']),
@@ -354,7 +433,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             # Android TV: Right drills into the row like a click (except
             # inline switches, which Center alone toggles).
             try:
-                pos = self.getControl(LIST_ID).getSelectedPosition()
+                pos = gui_guard.selpos(self, LIST_ID)
                 rows = self._stack[-1].rows
                 if 0 <= pos < len(rows) and 'switch' not in rows[pos]:
                     self.onClick(LIST_ID)
@@ -367,7 +446,7 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
 
     def _refresh_help(self):
         try:
-            pos = self.getControl(LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, LIST_ID)
             rows = self._stack[-1].rows
             text = rows[pos].get('help', '') if 0 <= pos < len(rows) else ''
             self.getControl(HELP_LABEL_ID).setLabel(text)
@@ -375,10 +454,21 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def onClick(self, controlID):
+        if controlID == 9020:
+            # Rail replica row picked: hand the index back to the real
+            # sidebar, which activates the entry after close (Plex lets
+            # the rail stay interactive under the settings sheet).
+            try:
+                self.rail_selection = \
+                    gui_guard.selpos(self, 9020)
+            except RuntimeError:
+                self.rail_selection = -1
+            self.close()
+            return
         if controlID != LIST_ID or self._navigating:
             return
         try:
-            pos = self.getControl(LIST_ID).getSelectedPosition()
+            pos = gui_guard.selpos(self, LIST_ID)
         except RuntimeError:
             return
         view = self._stack[-1]
@@ -391,6 +481,13 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
             self._navigating = False
 
     def _activate(self, view, row, pos):
+        if view.kind == 'account':
+            item = row.get('item')
+            if row.get('kind') == 'stub':
+                self.backend.notify(_tr(33613))
+            elif item is not None and item['type'] == 'bool':
+                self._toggle_bool(view, row, pos, item)
+            return
         if view.kind == 'root':
             cat = row['category']
             self._push(_View('category', _tr(cat['title']), cat))

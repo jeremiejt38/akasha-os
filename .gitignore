@@ -34,3 +34,6 @@ docs/plex-parity/reference/
 docs/plex-parity/akasha-direct/
 docs/plex-parity/akasha-camera/
 docs/plex-parity/diff/
+
+# Official Plex Android TV reference captures (~66 MB of local comparison artifacts)
+docs/plex-parity/official-live/

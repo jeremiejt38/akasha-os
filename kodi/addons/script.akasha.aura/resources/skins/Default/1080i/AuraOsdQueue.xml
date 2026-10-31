@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Akasha Plex-style OSD chapters + play-queue overlay (Android TV:
+     press Down on the OSD). The video keeps playing behind a heavy
+     bottom scrim; a "Chapters" thumbnail row (BIF index frames) sits
+     above a "Play Queue" row. The queue section slides up when it
+     takes focus, exactly like the official panels. -->
+<window type="dialog" id="1204">
+    <defaultcontrol>900</defaultcontrol>
+    <controls>
+        <!-- Boot-focus pass-through (same trick as AuraOsdMenu). -->
+        <control type="button" id="900">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus>-</texturefocus>
+            <onup>1002</onup>
+            <onleft>1002</onleft>
+            <onright>1002</onright>
+            <ondown>1002</ondown>
+        </control>
+
+        <!-- Dim: light overall veil + heavy bottom gradient + a
+             near-solid slab under the rows so the transport bar of the
+             underlying VideoOSD does not bleed through. -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="40000000">white.png</texture>
+        </control>
+        <control type="image">
+            <left>0</left>
+            <top>280</top>
+            <width>1920</width>
+            <height>800</height>
+            <texture>akasha-osd-scrim-bottom.png</texture>
+        </control>
+        <control type="image">
+            <left>0</left>
+            <top>640</top>
+            <width>1920</width>
+            <height>440</height>
+            <texture colordiffuse="F2000000">white.png</texture>
+        </control>
+
+        <!-- Chapters block: title + horizontal thumb row. Slides up
+             345px when the queue list has focus (and chapters exist). -->
+        <control type="group" id="800">
+            <left>0</left>
+            <top>660</top>
+            <animation effect="slide" start="0,0" end="0,-345" time="220" tween="quadratic" easing="inout" condition="Control.HasFocus(1002) + !String.IsEmpty(Window.Property(haschapters))" reversible="true">Conditional</animation>
+            <visible>!String.IsEmpty(Window.Property(haschapters))</visible>
+            <control type="label" id="801">
+                <left>20</left>
+                <top>23</top>
+                <width>800</width>
+                <height>40</height>
+                <font>font_aura_head_bold</font>
+                <label>$ADDON[script.akasha.aura 33565]</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="list" id="1001">
+                <left>20</left>
+                <top>52</top>
+                <width>1900</width>
+                <height>340</height>
+                <orientation>horizontal</orientation>
+                <ondown>1002</ondown>
+                <itemlayout width="426" height="340">
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>404</width>
+                        <height>227</height>
+                        <aspectratio>scale</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>404</width>
+                        <height>227</height>
+                        <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>235</top>
+                        <width>404</width>
+                        <height>32</height>
+                        <font>font_aura_main_bold</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>270</top>
+                        <width>404</width>
+                        <height>28</height>
+                        <font>font_aura_mini</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>B3FFFFFF</textcolor>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="426" height="340">
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>404</width>
+                        <height>227</height>
+                        <aspectratio>scale</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>404</width>
+                        <height>227</height>
+                        <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>-4</left>
+                        <top>-4</top>
+                        <width>412</width>
+                        <height>235</height>
+                        <texture colordiffuse="FFFFFFFF" border="24">cap-outline-r24.png</texture>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>235</top>
+                        <width>404</width>
+                        <height>32</height>
+                        <font>font_aura_main_bold</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>270</top>
+                        <width>404</width>
+                        <height>28</height>
+                        <font>font_aura_mini</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>B3FFFFFF</textcolor>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+
+        <!-- Play Queue block: heading + horizontal episode row. Base
+             position is y1048 (just under the chapters block); it slides
+             up to y703 on focus, or to y700 when there are no chapters. -->
+        <control type="group" id="810">
+            <left>0</left>
+            <top>1048</top>
+            <animation effect="slide" start="0,0" end="0,-345" time="220" tween="quadratic" easing="inout" condition="Control.HasFocus(1002) + !String.IsEmpty(Window.Property(haschapters))" reversible="true">Conditional</animation>
+            <animation effect="slide" start="0,0" end="0,-348" time="0" condition="String.IsEmpty(Window.Property(haschapters))" reversible="true">Conditional</animation>
+            <control type="label" id="811">
+                <left>20</left>
+                <top>0</top>
+                <width>800</width>
+                <height>40</height>
+                <font>font_aura_head_bold</font>
+                <label>$ADDON[script.akasha.aura 33616]</label>
+                <textcolor>FFFFFFFF</textcolor>
+            </control>
+            <control type="list" id="1002">
+                <left>20</left>
+                <top>33</top>
+                <width>1900</width>
+                <height>340</height>
+                <orientation>horizontal</orientation>
+                <onup>1001</onup>
+                <itemlayout width="417" height="340">
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>396</width>
+                        <height>223</height>
+                        <aspectratio>scale</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>396</width>
+                        <height>223</height>
+                        <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>168</left>
+                        <top>81</top>
+                        <width>60</width>
+                        <height>60</height>
+                        <texture colordiffuse="99000000">circle.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(playing))</visible>
+                    </control>
+                    <control type="image">
+                        <left>181</left>
+                        <top>95</top>
+                        <width>34</width>
+                        <height>34</height>
+                        <texture colordiffuse="FFFFFFFF">icon-play.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(playing))</visible>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>231</top>
+                        <width>396</width>
+                        <height>32</height>
+                        <font>font_aura_main_bold</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>266</top>
+                        <width>396</width>
+                        <height>28</height>
+                        <font>font_aura_mini</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>B3FFFFFF</textcolor>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="417" height="340">
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>396</width>
+                        <height>223</height>
+                        <aspectratio>scale</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="image">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>396</width>
+                        <height>223</height>
+                        <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>-4</left>
+                        <top>-4</top>
+                        <width>404</width>
+                        <height>231</height>
+                        <texture colordiffuse="FFFFFFFF" border="24">cap-outline-r24.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>168</left>
+                        <top>81</top>
+                        <width>60</width>
+                        <height>60</height>
+                        <texture colordiffuse="99000000">circle.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(playing))</visible>
+                    </control>
+                    <control type="image">
+                        <left>181</left>
+                        <top>95</top>
+                        <width>34</width>
+                        <height>34</height>
+                        <texture colordiffuse="FFFFFFFF">icon-play.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(playing))</visible>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>231</top>
+                        <width>396</width>
+                        <height>32</height>
+                        <font>font_aura_main_bold</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>266</top>
+                        <width>396</width>
+                        <height>28</height>
+                        <font>font_aura_mini</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>B3FFFFFF</textcolor>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+    </controls>
+</window>

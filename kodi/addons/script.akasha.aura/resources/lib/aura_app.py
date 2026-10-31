@@ -11,7 +11,9 @@ import subprocess
 import xbmc
 import xbmcaddon
 import xbmcgui
+import gui_guard
 import i18n
+import aura_menu
 
 import addons_inventory
 import aura_store
@@ -133,7 +135,7 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
 
     def _selected_addon(self):
         try:
-            pos = self.getControl(5010).getSelectedPosition()
+            pos = gui_guard.selpos(self, 5010)
         except RuntimeError:
             return None
         if 0 <= pos < len(self.addons):
@@ -182,8 +184,8 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             addon = self._selected_addon()
             if addon:
                 if addon.get('is_external'):
-                    if xbmcgui.Dialog().yesno(
-                            i18n.tr(33319),
+                    if aura_menu.confirm(
+                            self, i18n.tr(33319),
                             i18n.tr(33305).format(addon['name'])):
                         store_registry.record_uninstall(addon['store_id'])
                         self._reload()
@@ -219,7 +221,7 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             return
         if aid in (ACTION_MOVE_LEFT, ACTION_MOVE_RIGHT, ACTION_MOVE_UP, ACTION_MOVE_DOWN):
             try:
-                pos = self.getControl(5010).getSelectedPosition()
+                pos = gui_guard.selpos(self, 5010)
             except RuntimeError:
                 pos = 0
             if self._paged:

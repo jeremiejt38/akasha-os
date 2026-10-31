@@ -241,8 +241,18 @@ def _kodi_categories():
     ]
 
 
+# Plex's settings sheet leads with Account, then Player Experience,
+# Video & Audio, Experience... and closes on Advanced (official
+# 49-settings). Aura's catalog covers the OS on top of Plex's scope,
+# so the order is echoed rather than the entries renamed.
+_PLEX_ORDER = ('accounts', 'playback', 'display_sound', 'appearance',
+               'network', 'controllers', 'power', 'system', 'advanced')
+
+
 def build_categories():
-    return _kodi_categories()
+    order = {cid: i for i, cid in enumerate(_PLEX_ORDER)}
+    return sorted(_kodi_categories(),
+                  key=lambda c: order.get(c['id'], 99))
 
 
 def kodi_setting_ids(categories=None):

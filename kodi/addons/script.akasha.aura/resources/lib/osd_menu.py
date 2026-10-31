@@ -20,6 +20,7 @@ time into Window(10000) properties via store_playback_context().
 import json
 import os
 import sys
+import threading
 import urllib.parse
 import urllib.request
 import uuid
@@ -27,6 +28,8 @@ import uuid
 import xbmc
 import xbmcaddon
 import xbmcgui
+import art_proxy
+import gui_guard
 import i18n
 
 try:
@@ -75,6 +78,30 @@ def _back_ids():
     # stub used by the unit tests (10=ACTION_PREVIOUS_MENU, 92=ACTION_NAV_BACK).
     return (getattr(xbmcgui, 'ACTION_PREVIOUS_MENU', 10),
             getattr(xbmcgui, 'ACTION_NAV_BACK', 92))
+
+
+def _close_on_playback_end(dialog):
+    """Self-close a transient playback dialog when the video stops.
+
+    These dialogs outlive their purpose the moment playback ends; if one is
+    still open while Kodi tears the GUI down for the Home transition, a
+    queued input callback can hit the window's controls mid-destruction --
+    that race is what SEGV'd ControlList::getSelectedPosition() on
+    2026-10-29. Closing on our own terms first shrinks the window to ~0."""
+    def worker():
+        while xbmc.Player().isPlayingVideo():
+            if getattr(dialog, '_closed', False):
+                return
+            xbmc.sleep(500)
+        if getattr(dialog, '_closed', False):
+            return
+        dialog._closed = True
+        try:
+            dialog.close()
+        except RuntimeError:
+            pass
+
+    threading.Thread(target=worker, daemon=True).start()
 
 
 def _home():
@@ -157,9 +184,20 @@ def store_chapters(client, item):
     fetch = getattr(client, 'item_chapters', None)
     if rk and fetch:
         try:
+            server = getattr(client, 'server_url', '') or ''
+            token = getattr(client, 'token', '') or ''
+            # Plex chapter cards show the BIF index frame at the chapter
+            # start: /library/parts/<id>/indexes/sd/<ms>.
+            part_bits = ((item or {}).get('part_key') or '').split('/')
+            part_id = part_bits[3] if len(part_bits) > 3 else ''
             chapters = [
                 {'name': ch.get('name') or '',
-                 'time': (ch.get('start_ms') or 0) / 1000.0}
+                 'time': (ch.get('start_ms') or 0) / 1000.0,
+                 'thumb': ('{}/library/parts/{}/indexes/sd/{}'
+                           '?X-Plex-Token={}'.format(
+                               server, part_id,
+                               int(ch.get('start_ms') or 0), token)
+                           if part_id and server and token else '')}
                 for ch in fetch(rk) or []
             ]
         except Exception as e:
@@ -337,6 +375,7 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
     mode = 'streams'
 
     def onInit(self):
+        self._closed = False
         self._actions = []
         lst = self.getControl(1000)
         lst.reset()
@@ -349,7 +388,14 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         else:
             self.getControl(10).setLabel(i18n.tr(33200))
             self._build_streams(lst)
-        self.setFocusId(1000)
+        gui_guard.focus(self, 1000)
+        # Land on the first actionable row -- headers carry no action
+        # and Plex never lets them take the selection pill.
+        for i, action in enumerate(self._actions):
+            if action:
+                lst.selectItem(i)
+                break
+        _close_on_playback_end(self)
 
     # -- item construction ------------------------------------------------
 
@@ -402,6 +448,10 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
         current = _home().getProperty(PROP_QUALITY) or 'original'
         _, _, rating_key, _ = _playback_context()
 
+        # Plex's gear sheet leads with track pickers (audio + subtitles)
+        # -- rebuild the same dialog in streams mode on click.
+        self._add(lst, i18n.tr(33200), action=('mode', 'streams'))
+
         self._add(lst, i18n.tr(33205), header=True)
         for pid, label, kbps, res in QUALITY_PRESETS:
             self._add(lst, label, selected=(pid == current),
@@ -439,26 +489,30 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
     # -- actions ----------------------------------------------------------
 
     def onClick(self, control_id):
-        if control_id != 1000:
+        if control_id != 1000 or self._closed:
             return
-        pos = self.getControl(1000).getSelectedPosition()
+        pos = gui_guard.selpos(self, 1000)
         if not (0 <= pos < len(self._actions)) or not self._actions[pos]:
             return
         kind = self._actions[pos][0]
         if kind == 'audio':
             _jsonrpc('Player.SetAudioStream',
                      {'playerid': 1, 'stream': self._actions[pos][1]})
+            self._closed = True
             self.close()
         elif kind == 'sub':
             _jsonrpc('Player.SetSubtitle', {
                 'playerid': 1, 'subtitle': self._actions[pos][1],
                 'enable': True})
+            self._closed = True
             self.close()
         elif kind == 'builtin':
+            self._closed = True
             self.close()
             xbmc.executebuiltin(
                 'ActivateWindow({})'.format(self._actions[pos][1]))
         elif kind == 'chapter':
+            self._closed = True
             self.close()
             try:
                 xbmc.Player().seekTime(float(self._actions[pos][1]))
@@ -466,11 +520,25 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
                 pass
         elif kind == 'quality':
             _, pid, kbps, res = self._actions[pos]
+            self._closed = True
             self.close()
             self._switch_quality(pid, kbps, res)
+        elif kind == 'mode':
+            self.mode = self._actions[pos][1]
+            lst = self.getControl(1000)
+            lst.reset()
+            self._actions = []
+            if self.mode == 'streams':
+                self.getControl(10).setLabel(i18n.tr(33200))
+                self._build_streams(lst)
+            for i, a in enumerate(self._actions):
+                if a:
+                    lst.selectItem(i)
+                    break
 
     def onAction(self, action):
         if action.getId() in _back_ids():
+            self._closed = True
             self.close()
 
     def _switch_quality(self, preset_id, kbps, resolution):
@@ -517,5 +585,169 @@ class AuraOsdMenuWindow(xbmcgui.WindowXMLDialog):
                     and xbmc.Player().isPlayingVideo()):
                 player.seekTime(position)
             win.setProperty(PROP_QUALITY, preset_id)
+        finally:
+            win.setProperty(PROP_SWITCHING, '')
+
+
+def _queue_items():
+    """[current item] + queued episodes, read from the playback props."""
+    win = _home()
+    try:
+        current = json.loads(win.getProperty(PROP_ITEM) or '{}')
+    except (ValueError, TypeError):
+        current = {}
+    try:
+        rest = json.loads(win.getProperty(PROP_QUEUE) or '[]')
+    except (ValueError, TypeError):
+        rest = []
+    items = [current] if current else []
+    items += [it for it in rest if isinstance(it, dict)]
+    return items
+
+
+def _queue_subtitle(item):
+    """'S7 • E13 • Show title' -- Plex's secondary line under queue cards."""
+    season, index, show = (item.get('season'), item.get('index'),
+                           item.get('show_title'))
+    if season is not None and index is not None:
+        head = 'S{} • E{}'.format(season, index)
+        return '{} • {}'.format(head, show) if show else head
+    return show or ''
+
+
+class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
+    """Down-on-OSD overlay: chapter thumbnails + the play queue, exactly
+    like Plex Android TV's bottom sheet. The video keeps playing behind
+    it; selecting a chapter seeks, selecting a queued episode jumps."""
+
+    def onInit(self):
+        self._closed = False
+        self._chapters = _current_chapters()
+        self._queue = _queue_items()
+        if self._chapters:
+            self.setProperty('haschapters', '1')
+            try:
+                position = xbmc.Player().getTime()
+            except RuntimeError:
+                position = 0
+            entries = chapter_entries(self._chapters, position)
+            lst = self.getControl(1001)
+            for (label, _seconds, _current), ch in zip(
+                    entries, self._chapters):
+                name, _, stamp = label.rpartition(' — ')
+                li = xbmcgui.ListItem(name or label, stamp)
+                if ch.get('thumb'):
+                    # BIF chapter frames get the same baked-in rounded
+                    # corners as every other card via the art proxy.
+                    card = art_proxy.wrap(ch['thumb'], 22)
+                    li.setArt({'thumb': card, 'icon': card})
+                lst.addItem(li)
+        qlst = self.getControl(1002)
+        for i, it in enumerate(self._queue):
+            li = xbmcgui.ListItem(it.get('title') or '',
+                                  _queue_subtitle(it))
+            art = (it.get('thumb_url') or it.get('art_url')
+                   or it.get('fanart_url') or '')
+            if art:
+                li.setArt({'thumb': art, 'icon': art})
+            if i == 0:
+                li.setProperty('playing', '1')
+            qlst.addItem(li)
+        if not self._chapters and not self._queue:
+            # Nothing to show: an open-but-unfocusable dialog is exactly the
+            # state that logged "Control 1002 has been asked to focus, but
+            # it can't" before the teardown SEGV -- bail immediately.
+            self._closed = True
+            self.close()
+            return
+        gui_guard.focus(self, 1001 if self._chapters else 1002)
+        _close_on_playback_end(self)
+
+    def onClick(self, control_id):
+        if self._closed:
+            return
+        if control_id == 1001:
+            pos = gui_guard.selpos(self, 1001)
+            if 0 <= pos < len(self._chapters):
+                self._closed = True
+                self.close()
+                try:
+                    xbmc.Player().seekTime(float(
+                        _chapter_time_seconds(
+                            self._chapters[pos].get('time'))))
+                except RuntimeError:
+                    pass
+        elif control_id == 1002:
+            pos = gui_guard.selpos(self, 1002)
+            self._closed = True
+            self.close()
+            if pos > 0:
+                self._play_queue_index(pos)
+
+    def onAction(self, action):
+        if self._closed:
+            return
+        if action.getId() in _back_ids():
+            self._closed = True
+            self.close()
+        elif action.getId() == getattr(xbmcgui, 'ACTION_MOVE_UP', 3):
+            try:
+                focus = self.getFocusId()
+            except RuntimeError:
+                return
+            if focus == 1002 and not self._chapters:
+                self._closed = True
+                self.close()
+            elif (focus == 1001
+                    and gui_guard.selpos(self, 1001) == 0):
+                self._closed = True
+                self.close()
+
+    def _play_queue_index(self, pos):
+        """Jump to queue[pos] (queue[0] is the playing item): the props
+        are rewritten exactly like the Up Next advance does, then the
+        part URL is played directly."""
+        win = _home()
+        server, token, _, _ = _playback_context()
+        item = self._queue[pos] if pos < len(self._queue) else None
+        if not item or not server or not token:
+            return
+        rest = self._queue[pos + 1:]
+        win.setProperty(PROP_QUEUE, json.dumps(rest))
+        win.setProperty(PROP_ITEM, json.dumps(item))
+        try:
+            import up_next
+            item = up_next._hydrate(item)
+        except Exception:
+            pass
+        part = item.get('part_key')
+        if not part:
+            return
+        joiner = '&' if '?' in part else '?'
+        url = '{}{}{}X-Plex-Token={}'.format(server, part, joiner, token)
+        win.setProperty(PROP_SWITCHING, '1')
+        try:
+            import plex_client
+            client = plex_client.PlexClient(server, token, timeout=5)
+            store_markers(client, item)
+            store_chapters(client, item)
+        except Exception:
+            pass
+        li = xbmcgui.ListItem(item.get('title') or '')
+        try:
+            import aura_detail
+            aura_detail.AuraDetailWindow._apply_info_tags(li, item)
+            aura_detail.apply_resume_point(li, item)
+        except Exception:
+            pass
+        li.setMimeType('video/mp4')
+        win.setProperty(PROP_QUALITY, 'original')
+        try:
+            player = xbmc.Player()
+            player.play(url, li)
+            waited = 0
+            while not player.isPlayingVideo() and waited < 12000:
+                xbmc.sleep(250)
+                waited += 250
         finally:
             win.setProperty(PROP_SWITCHING, '')

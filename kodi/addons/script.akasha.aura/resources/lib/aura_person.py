@@ -14,9 +14,11 @@ Caller sets before doModal():
 """
 import xbmc
 import xbmcgui
+import gui_guard
 import i18n
 
 ACTION_MOVE_LEFT = 1
+ACTION_MOVE_DOWN = 4
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
 ACTION_CONTEXT_MENU = 117
@@ -24,7 +26,9 @@ ACTION_CONTEXT_MENU = 117
 PHOTO_ID = 7301
 NAME_ID = 7302
 ROW_TITLE_ID = 7305
+ROW_TITLE2_ID = 7306
 FILMO_LIST_ID = 7310
+FILMO_LIST2_ID = 7311
 
 
 def _set(window, prop, value):
@@ -38,6 +42,7 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
         self.person = {}
         self.items = []
         self.addon_path = ''
+        self._rows = {}
 
     def onInit(self):
         try:
@@ -58,32 +63,56 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             pass
         try:
-            count = len(self.items)
-            row_title = getattr(self, 'row_title', None) \
-                or i18n.tr(33125).format(count, 's' if count != 1 else '')
-            self.getControl(ROW_TITLE_ID).setLabel(row_title)
-            _set(self, 'AuraPersonRowTitle', '1' if count else '')
-            _set(self, 'AuraPersonEmpty',
-                 '1' if not count else '')
-            lst = self.getControl(FILMO_LIST_ID)
-            lst.reset()
-            for item in self.items:
-                li = xbmcgui.ListItem(item.get('title') or '',
-                                      str(item.get('year') or ''))
-                li.setArt({'poster': item.get('poster_url')
-                                   or item.get('thumb_url') or ''})
-                li.setProperty('watched',
-                               '1' if item.get('watched') else '0')
-                lst.addItem(li)
+            if getattr(self, 'row_title', None):
+                # 'More Like This' keeps Plex's single mixed row.
+                groups = [(self.row_title, self.items)]
+            else:
+                # Plex groups a person's filmography by media type.
+                movies = [i for i in self.items
+                          if i.get('type') != 'show']
+                shows = [i for i in self.items
+                         if i.get('type') == 'show']
+                groups = []
+                if movies:
+                    groups.append((i18n.tr(33051), movies))
+                if shows:
+                    groups.append((i18n.tr(33050), shows))
+            groups = [g for g in groups if g[1]]
+            self._rows = {}
+            slots = ((ROW_TITLE_ID, FILMO_LIST_ID),
+                     (ROW_TITLE2_ID, FILMO_LIST2_ID))
+            for (title_id, list_id), (title, items) in zip(
+                    slots, groups):
+                self._rows[list_id] = items
+                try:
+                    self.getControl(title_id).setLabel(title)
+                except RuntimeError:
+                    pass
+                try:
+                    lst = self.getControl(list_id)
+                    lst.reset()
+                    for item in items:
+                        li = xbmcgui.ListItem(item.get('title') or '',
+                                              str(item.get('year') or ''))
+                        li.setArt({'poster': item.get('poster_url')
+                                           or item.get('thumb_url') or ''})
+                        li.setProperty(
+                            'watched',
+                            '1' if item.get('watched') else '0')
+                        lst.addItem(li)
+                except RuntimeError:
+                    pass
+            _set(self, 'AuraPersonRowTitle', '1' if groups else '')
+            _set(self, 'AuraPersonRow2', '1' if len(groups) > 1 else '')
+            _set(self, 'AuraPersonEmpty', '1' if not groups else '')
         except RuntimeError:
             pass
-        try:
-            self.setFocus(self.getControl(FILMO_LIST_ID))
-        except RuntimeError:
-            pass
+        gui_guard.focus(self,
+                        FILMO_LIST_ID if FILMO_LIST_ID in self._rows
+                        else FILMO_LIST2_ID)
 
     def onClick(self, controlID):
-        if controlID == FILMO_LIST_ID:
+        if controlID in (FILMO_LIST_ID, FILMO_LIST2_ID):
             self._open_item()
 
     def onAction(self, action):
@@ -94,7 +123,7 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             # Plex long-press: filmography cards open the option
             # sheet, anything else keeps long-press == click parity.
             try:
-                if self.getFocusId() == FILMO_LIST_ID:
+                if self.getFocusId() in (FILMO_LIST_ID, FILMO_LIST2_ID):
                     self._filmography_sheet()
                     return
                 self.onClick(self.getFocusId())
@@ -103,9 +132,19 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
             return
         if action.getId() == ACTION_MOVE_LEFT:
             try:
-                if self.getFocusId() == FILMO_LIST_ID and \
-                        self.getControl(FILMO_LIST_ID).getSelectedPosition() == 0:
+                focused = self.getFocusId()
+                if focused in (FILMO_LIST_ID, FILMO_LIST2_ID) and \
+                        gui_guard.selpos(self, focused) == 0:
                     self.close()
+                    return
+            except RuntimeError:
+                pass
+        if action.getId() == ACTION_MOVE_DOWN:
+            try:
+                # Without a second row the XML <ondown> still fires;
+                # swallow it so the focus can't land on a hidden list.
+                if self.getFocusId() == FILMO_LIST_ID and \
+                        FILMO_LIST2_ID not in self._rows:
                     return
             except RuntimeError:
                 pass
@@ -113,26 +152,30 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
 
     def _filmography_sheet(self):
         try:
-            pos = self.getControl(FILMO_LIST_ID).getSelectedPosition()
+            lid = self.getFocusId()
+            pos = gui_guard.selpos(self, lid)
         except RuntimeError:
             return
-        if not (0 <= pos < len(self.items)):
+        items = self._rows.get(lid, [])
+        if not (0 <= pos < len(items)):
             return
         import context_sheet
         context_sheet.open_sheet(
-            self, self.client, self.items[pos], FILMO_LIST_ID,
+            self, self.client, items[pos], lid,
             self._open_item,
-            on_removed=lambda p: self.items.pop(p)
-            if p < len(self.items) else None)
+            on_removed=lambda p: items.pop(p)
+            if p < len(items) else None)
 
     def _open_item(self):
         try:
-            pos = self.getControl(FILMO_LIST_ID).getSelectedPosition()
+            lid = self.getFocusId()
+            pos = gui_guard.selpos(self, lid)
         except RuntimeError:
             return
-        if not (0 <= pos < len(self.items)):
+        items = self._rows.get(lid, [])
+        if not (0 <= pos < len(items)):
             return
-        item = self.items[pos]
+        item = items[pos]
         # Hydrate like the reco rows do: hub/section items only carry
         # card-level fields, the detail page needs the full metadata.
         if self.client and item.get('rating_key'):
@@ -148,3 +191,9 @@ class AuraPersonWindow(xbmcgui.WindowXMLDialog):
         detail.item = item
         detail.mode = 'show' if item.get('type') == 'show' else 'item'
         detail.doModal()
+        # The detail page may have started playback: bubble it up so
+        # our own callers can close the whole stack like Plex does.
+        if getattr(detail, 'playback_started', False):
+            self.playback_started = True
+            self._playback_item = getattr(detail, '_playback_item', None)
+            self.close()

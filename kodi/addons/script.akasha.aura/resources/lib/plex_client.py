@@ -18,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import art_proxy
 import divert_source
 import i18n
 
@@ -31,6 +32,13 @@ _OFFLINE_BACKOFF_SECONDS = 30.0
 _CACHE_TTL_SECONDS = 30.0
 _CACHE_MAX_ENTRIES = 64
 _offline_until = {}
+# Read timeouts (server reachable but busy -- e.g. Plex transcoding)
+# must not trip the breaker on a single slow answer, or the whole UI
+# fails fast for 30 s during a transient load spike. Only genuinely
+# unreachable servers (refused/DNS/no route) or several timeouts in a
+# row arm it.
+_fail_streak = {}
+_TIMEOUTS_TO_TRIP = 3
 _read_cache = {}
 # In-flight request dedup: card-focus prefetch and the detail page's
 # parallel fetchers can ask for the same endpoint at the same time.
@@ -48,12 +56,16 @@ _PEOPLE_CACHE_TTL_SECONDS = 600.0
 _people_cache = {}
 
 
-def _mark_offline(host):
-    _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
+def _mark_offline(host, soft=False):
+    streak = _fail_streak.get(host, 0) + 1
+    _fail_streak[host] = streak
+    if not soft or streak >= _TIMEOUTS_TO_TRIP:
+        _offline_until[host] = time.time() + _OFFLINE_BACKOFF_SECONDS
 
 
 def _mark_online(host):
     _offline_until.pop(host, None)
+    _fail_streak.pop(host, None)
 
 
 def _is_offline(host):
@@ -137,7 +149,7 @@ class PlexClient:
                         break
                 # Another thread is already fetching this exact URL:
                 # join it and serve the result from the cache it fills.
-                if not ev.wait(15.0):
+                if not ev.wait(25.0):
                     # Owner stalled -- take over rather than hang.
                     with _inflight_lock:
                         if _inflight.get(key) is ev:
@@ -166,8 +178,11 @@ class PlexClient:
             body = e.read().decode('utf-8', errors='replace')[:500]
             raise PlexAPIError('Plex API {} for {}: {}'.format(e.code, path, body)) from e
         except OSError as e:
-            _mark_offline(host)
             reason = getattr(e, 'reason', e)
+            # A read timeout means the connection was established: the
+            # server is alive but slow, so it counts as a soft failure.
+            _mark_offline(host, soft=isinstance(reason, TimeoutError) or
+                          'timed out' in str(reason).lower())
             raise PlexOfflineError('Plex URL error for {}: {}'.format(path, reason)) from e
         except json.JSONDecodeError as e:
             raise PlexAPIError('Plex JSON decode error for {}: {}'.format(path, e)) from e
@@ -185,7 +200,8 @@ class PlexClient:
         return data.get('MediaContainer', data)
 
     @staticmethod
-    def _resolve_image(path, server_url, token, width=None, height=None):
+    def _resolve_image(path, server_url, token, width=None, height=None,
+                       radius=None):
         if not path:
             return ''
         # Cloud provider metadata (Discover/Trending hubs) carries
@@ -194,27 +210,32 @@ class PlexClient:
             sep = '&' if '?' in path else '?'
             if 'X-Plex-Token' not in path:
                 path += sep + 'X-Plex-Token=' + token
+            if radius:
+                return art_proxy.wrap(path, radius, width, height)
             return path
         # Sized requests go through Plex's own photo transcoder: a
         # 240px card used to pull the full 2000x3000 JPEG and make
         # the Pi4 decode it (visible scroll stutter). Server-side
         # downscale is what official Plex clients do anyway.
         if width and height:
-            return ('{}/photo/:/transcode?url={}&width={}&height={}'
-                    '&minSize=1&upscale=0&X-Plex-Token={}'.format(
-                        server_url, urllib.parse.quote(path),
-                        width, height, token))
+            url = ('{}/photo/:/transcode?url={}&width={}&height={}'
+                   '&minSize=1&upscale=0&X-Plex-Token={}'.format(
+                       server_url, urllib.parse.quote(path),
+                       width, height, token))
+            if radius:
+                return art_proxy.wrap(url, radius, width, height)
+            return url
         return '{}?X-Plex-Token={}'.format(server_url + path, token)
 
-    def image_url(self, path, width=None, height=None):
+    def image_url(self, path, width=None, height=None, radius=None):
         return self._resolve_image(
-            path, self.server_url, self.token, width, height)
+            path, self.server_url, self.token, width, height, radius)
 
     @staticmethod
     def _video_dict(item, server_url, token):
-        def image_url(path, width=None, height=None):
+        def image_url(path, width=None, height=None, radius=None):
             return PlexClient._resolve_image(
-                path, server_url, token, width, height)
+                path, server_url, token, width, height, radius)
 
         # Shared normaliser keeps connector and direct-Plex payloads identical
         # (see divert_source.build_video_item).
@@ -239,6 +260,23 @@ class PlexClient:
                  for item in mc.get('Metadata', [])]
         total = mc.get('totalSize', mc.get('size'))
         return items, total
+
+    def server_friendly_name(self):
+        """The Plex server's friendlyName ('Akasha') -- the amber line
+        Plex prints under each search-result card. The `/` root payload
+        is cheap and already flows through the read cache."""
+        # Retry while empty instead of caching '' forever: a transient
+        # miss at window init used to drop the ' · {server}' row-title
+        # suffix for the whole session. Cost stays bounded -- '/' is
+        # read-cached for 30 s on success and failures fail fast under
+        # the offline breaker.
+        if not getattr(self, '_friendly_name', None):
+            try:
+                mc = self._media_container(self._request('/'))
+                self._friendly_name = mc.get('friendlyName') or ''
+            except Exception:
+                pass
+        return getattr(self, '_friendly_name', '')
 
     def home_hubs(self, hub_count=24, per_hub=16):
         """The promoted "For You" hubs Plex TV renders as the home rows.
@@ -270,7 +308,139 @@ class PlexClient:
             # resolve the continuation endpoint against the provider base.
             if hub['key'] and not hub['key'].startswith('http'):
                 hub['key'] = self.DISCOVER_BASE + hub['key']
+            # Cloud cards are thin (no summary/Genre/Role) and live on the
+            # provider, not the local server -- flagged so the hero/detail
+            # hydrate them from provider_metadata() instead of local APIs.
+            hub['cloud'] = True
+            for it in hub.get('items') or []:
+                it['cloud'] = True
         return hubs
+
+    def provider_metadata(self, key):
+        """Full record for a Discover/cloud item (summary, genres, cast,
+        ratings) -- the promoted-hub payloads carry thin cards only."""
+        if not key:
+            return None
+        path = key if key.startswith('http') else self.DISCOVER_BASE + key
+        data = self._request(path, {'includeRatings': 1})
+        items = self._metadata_list(data)
+        if not items:
+            return None
+        for it in items:
+            it['cloud'] = True
+        return items[0]
+
+    def provider_children(self, key):
+        """All children of a Discover/cloud node (show seasons, season
+        episodes) -- the provider mirrors the /library/metadata/<hex>
+        path layout, so a node's own `key` is the children endpoint."""
+        if not key:
+            return []
+        path = key if key.startswith('http') else self.DISCOVER_BASE + key
+        data = self._request(path)
+        items = self._metadata_list(data)
+        for it in items:
+            it['cloud'] = True
+        return items
+
+    EPG_BASE = 'https://epg.provider.plex.tv'
+
+    def live_channels(self):
+        """Plex's free linear channels (the rail's On Plex > Live TV
+        entry): /lineups/plex/channels lists every FAST channel the
+        account can tune. Normalised to grid dicts (type 'channel')
+        carrying the HLS tune URL from the Media Part key -- playback
+        needs inputstream.adaptive (documented LibreELEC limitation,
+        same as cloud trailers)."""
+        data = self._request(self.EPG_BASE + '/lineups/plex/channels')
+        mc = self._media_container(data)
+        out = []
+        for raw in mc.get('Channel', []):
+            if raw.get('hidden') in (True, 'true', 'True', '1', 1):
+                continue
+            part_key = ''
+            for media in raw.get('Media', []):
+                for part in media.get('Part', []):
+                    if part.get('key'):
+                        part_key = part['key']
+                        break
+                if part_key:
+                    break
+            out.append({
+                'type': 'channel',
+                'title': raw.get('title') or '',
+                'channel_id': raw.get('id'),
+                'grid_key': raw.get('gridKey') or '',
+                'summary': raw.get('summary') or '',
+                'thumb_url': raw.get('thumb') or raw.get('coverPoster') or '',
+                'fanart_url': raw.get('art') or '',
+                'tune_url': self.EPG_BASE + part_key +
+                '?X-Plex-Token=' + self.token if part_key else '',
+            })
+        return out
+
+    def channel_epg(self, grid_key):
+        """Now/next programme for one FAST channel via the EPG grid.
+
+        /grid wants a `date` plus ISO-8601 beginsAt</endsAt> bounds; each
+        event's Media[0] carries unix beginsAt/endsAt and an onAir flag.
+        Returns {'now': ev|None, 'next': ev|None, 'progress': int|None}
+        with normalized programme dicts, or None on fetch failure. Kept
+        to a ~3h forward window -- the endpoint has no bulk multi-channel
+        mode (one channelGridKey per request), so callers fetch lazily.
+        """
+        now = int(time.time())
+
+        def ts(t):
+            return time.strftime('%Y-%m-%dT%H:%M:%S.000Z', time.gmtime(t))
+
+        data = self._request(self.EPG_BASE + '/grid', {
+            'date': ts(now)[:10],
+            'beginsAt<': ts(now + 3 * 3600),
+            'endsAt>': ts(now - 600),
+            'channelGridKey': grid_key,
+        })
+        # Each Metadata is a programme; its Media[] array lists EVERY
+        # airing slot for the window (channels without a real EPG get
+        # one placeholder entry with hourly Media slots). Flatten to
+        # per-slot events, then pick now/next across the timeline.
+        events = []
+        for raw in self._media_container(data).get('Metadata') or []:
+            prog = {
+                'title': (raw.get('grandparentTitle')
+                          or raw.get('title') or ''),
+                'episode_title': (raw.get('title') or ''
+                                  if raw.get('grandparentTitle') else ''),
+                'summary': raw.get('summary') or '',
+                'thumb': (raw.get('grandparentThumb')
+                          or raw.get('thumb') or ''),
+            }
+            for media in raw.get('Media') or [{}]:
+                events.append(dict(
+                    prog,
+                    begins_at=media.get('beginsAt'),
+                    ends_at=media.get('endsAt'),
+                    on_air=bool(media.get('onAir')),
+                ))
+        events.sort(key=lambda e: e.get('begins_at') or 0)
+        current = None
+        nxt = None
+        for ev in events:
+            begin = ev.get('begins_at') or 0
+            end = ev.get('ends_at') or 0
+            if begin <= now < end or (ev['on_air'] and current is None):
+                if current is None:
+                    current = ev
+            elif begin > now and nxt is None:
+                nxt = ev
+        progress = None
+        if current and current.get('begins_at') and current.get('ends_at'):
+            span = current['ends_at'] - current['begins_at']
+            if span > 0:
+                progress = max(0, min(100,
+                                      int((now - current['begins_at'])
+                                          * 100 / span)))
+        return {'now': current, 'next': nxt, 'progress': progress}
 
     def section_hubs(self, section_key, hub_count=24, per_hub=16):
         """The per-library hubs Plex shows on a library's Recommended tab."""
@@ -448,6 +618,20 @@ class PlexClient:
         data = self._request('/library/sections/{}/all'.format(section_key), params)
         return self._metadata_list_with_total(data)
 
+    def section_letters(self, section_key):
+        """Initials actually present in the section, for the A-Z rail:
+        `/library/sections/{id}/firstCharacter` returns one Directory
+        entry per letter with a count ('#' buckets non-alpha)."""
+        data = self._request(
+            '/library/sections/{}/firstCharacter'.format(section_key))
+        mc = self._media_container(data)
+        out = []
+        for d in mc.get('Directory', []):
+            title = d.get('title')
+            if title:
+                out.append(title)
+        return out
+
     def section_filters(self, section_key):
         """The filter categories the server exposes for a section
         (`/library/sections/{id}/filters` -- parity backlog B4).
@@ -484,9 +668,11 @@ class PlexClient:
         ]
 
     def search(self, section_key, query, limit=50, offset=0):
-        """Search items in a section by title (client-side filter)."""
+        """Search items in a section by title. Plex's real substring
+        filter is `title=` -- `search=` is silently ignored and dumps
+        the whole section."""
         data = self._request('/library/sections/{}/all'.format(section_key), {
-            'search': query,
+            'title': query,
             'X-Plex-Container-Size': limit,
             'X-Plex-Container-Start': offset,
         })
@@ -494,11 +680,50 @@ class PlexClient:
 
     def search_with_total(self, section_key, query, limit=50, offset=0):
         data = self._request('/library/sections/{}/all'.format(section_key), {
-            'search': query,
+            'title': query,
             'X-Plex-Container-Size': limit,
             'X-Plex-Container-Start': offset,
         })
         return self._metadata_list_with_total(data)
+
+    def hub_search(self, query, limit=50):
+        """Plex's /hubs/search: one relevance-ranked call returning typed
+        hubs (shows, movies, episodes, artists, tracks... plus actor /
+        director tag Directory entries) -- the same endpoint the Android
+        TV app's All tab uses. Returns
+        {'content': [video dicts], 'people': [_person dicts]}."""
+        data = self._request('/hubs/search', {
+            'query': query,
+            'limit': limit,
+        })
+        mc = self._media_container(data)
+        out = {'content': [], 'people': []}
+        for hub in mc.get('Hub') or []:
+            htype = hub.get('type')
+            for raw in hub.get('Metadata') or []:
+                out['content'].append(
+                    self._video_dict(raw, self.server_url, self.token))
+            for raw in hub.get('Directory') or []:
+                name = raw.get('tag') or raw.get('title')
+                if not name:
+                    continue
+                thumb = raw.get('thumb') or ''
+                # Hub Directory thumbs are already absolute URLs; relative
+                # paths resolve against the server like elsewhere.
+                if thumb and not thumb.startswith('http'):
+                    thumb = '{}{}?X-Plex-Token={}'.format(
+                        self.server_url, thumb, self.token)
+                if thumb:
+                    thumb = art_proxy.wrap(thumb, 21, 320, 480)
+                out['people'].append({
+                    '_person': True,
+                    'name': name,
+                    'thumb_url': thumb,
+                    'role': (i18n.tr(33154) if htype == 'director'
+                             else i18n.tr(33127)),
+                    'person_filter': raw.get('filter') or '',
+                })
+        return out
 
     def section_collections_with_total(self, section_key, limit=200, offset=0):
         """JSON payloads list collections under `Metadata` (only XML uses
@@ -540,19 +765,34 @@ class PlexClient:
         a person page, deduped and newest first."""
         seen = set()
         items = []
-        for section in self.video_sections():
+        lock = threading.Lock()
+
+        # One filtered page per video section (~seconds each on a slow
+        # server path) -- walked in parallel so a person page does not
+        # sit on a black window while sections queue.
+        def pull(section):
             try:
                 page, _total = self.items_by_filter_with_total(
                     section['key'], filter_str)
             except PlexAPIError:
+                return
+            with lock:
+                items.extend(page)
+
+        ts = [threading.Thread(target=pull, args=(s,), daemon=True)
+              for s in self.video_sections()]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(15.0)
+        deduped = []
+        for item in items:
+            if item.get('rating_key') in seen:
                 continue
-            for item in page:
-                if item.get('rating_key') in seen:
-                    continue
-                seen.add(item.get('rating_key'))
-                items.append(item)
-        items.sort(key=lambda i: i.get('year') or 0, reverse=True)
-        return items
+            seen.add(item.get('rating_key'))
+            deduped.append(item)
+        deduped.sort(key=lambda i: i.get('year') or 0, reverse=True)
+        return deduped
 
     def people_directory(self, section_key, kind='actor'):
         """Every person tagged in a section ('actor' or 'director').
@@ -594,25 +834,40 @@ class PlexClient:
             return []
         seen = set()
         out = []
-        for section in self.video_sections():
-            for kind in kinds:
-                try:
-                    people = self.people_directory(section['key'], kind)
-                except PlexAPIError:
+        lock = threading.Lock()
+
+        # Each (section, kind) is one directory fetch (~seconds on a
+        # slow server path); walking them serially froze the search.
+        def pull(section, kind):
+            try:
+                people = self.people_directory(section['key'], kind)
+            except PlexAPIError:
+                return
+            batch = []
+            for person in people:
+                if q not in person['name'].lower():
                     continue
-                for person in people:
-                    if q not in person['name'].lower() \
-                            or person['id'] in seen:
+                batch.append((person['id'], {
+                    'name': person['name'],
+                    'thumb_url': person['thumb_url'],
+                    'role': (i18n.tr(33154) if kind == 'director'
+                             else i18n.tr(33127)),
+                    'person_filter': '{}={}'.format(kind, person['id']),
+                    '_person': True,
+                }))
+            with lock:
+                for pid, p in batch:
+                    if pid in seen:
                         continue
-                    seen.add(person['id'])
-                    out.append({
-                        'name': person['name'],
-                        'thumb_url': person['thumb_url'],
-                        'role': (i18n.tr(33154) if kind == 'director'
-                                 else i18n.tr(33127)),
-                        'person_filter': '{}={}'.format(kind, person['id']),
-                        '_person': True,
-                    })
+                    seen.add(pid)
+                    out.append(p)
+
+        ts = [threading.Thread(target=pull, args=(s, k), daemon=True)
+              for s in self.video_sections() for k in kinds]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(15.0)
         return out[:20]
 
     def playlists(self):
@@ -631,7 +886,8 @@ class PlexClient:
                 'count': raw.get('leafCount') or 0,
                 'smart': bool(raw.get('smart')),
                 'summary': raw.get('summary') or '',
-                'thumb_url': self.image_url(raw.get('composite'), 640, 360)
+                'thumb_url': self.image_url(raw.get('composite'), 640, 360,
+                                            radius=31)
                 if raw.get('composite') else '',
             })
         return out
@@ -659,8 +915,14 @@ class PlexClient:
         """
         params = {'sort': 'viewedAt:desc',
                   'X-Plex-Container-Size': limit}
-        if rating_key:
+        if rating_key and str(rating_key).isdigit():
+            # Cloud GUIDs ('62d7d0c5...' on online/person items) make the
+            # endpoint answer 400 -- only numeric ratingKeys are valid.
             params['metadataItemID'] = rating_key
+        elif rating_key:
+            # Unscoped would download the entire history (~25MB): better
+            # an empty activity row than a stalled Pi.
+            return []
         elif since_days:
             # Bounding by recency shrinks the payload ~6x (25MB -> ~4MB
             # on this server) while still covering the activity row.
@@ -668,15 +930,109 @@ class PlexClient:
                 int(time.time() - since_days * 86400))] = ''
         data = self._request('/status/sessions/history/all', params)
         mc = self._media_container(data)
+        raw_meta = mc.get('Metadata', [])
+        # Plex's 'Activity by you, X, and N others' names EVERY account
+        # with history on the item -- not just the ones inside the
+        # normalisation window. Stash the full ordered distinct list so
+        # the detail page can name them all without a second fetch.
+        self._wh_accounts = (str(rating_key or ''),
+                             list(dict.fromkeys(
+                                 str(e.get('accountID') or '')
+                                 for e in raw_meta
+                                 if e.get('accountID'))))
         items = []
         # Slice BEFORE normalising: the endpoint ignores the container
         # size, so without this an unscoped call would build a full
         # video dict for every history entry ever recorded.
-        for raw in mc.get('Metadata', [])[:limit]:
+        for raw in raw_meta[:limit]:
             item = self._video_dict(raw, self.server_url, self.token)
             item['viewed_at'] = raw.get('viewedAt')
+            item['account_id'] = raw.get('accountID')
             items.append(item)
         return items
+
+    PLEX_TV_BASE = 'https://plex.tv'
+
+    def home_users(self):
+        """Plex Home members (cloud `api/v2/home/users`): [{id, title,
+        thumb, protected}] for the 'Who's watching?' profile picker."""
+        data = self._request(self.PLEX_TV_BASE + '/api/v2/home/users')
+        out = []
+        for u in data.get('users') or []:
+            out.append({'id': u.get('id'),
+                        'title': u.get('title') or '',
+                        'thumb': u.get('thumb') or '',
+                        'protected': bool(u.get('protected'))})
+        return out
+
+    def switch_home_user(self, user_id, pin=None):
+        """POST `api/v2/home/users/<id>/switch`; returns the member's
+        auth token. PIN-protected profiles need `pin`; a wrong PIN makes
+        plex.tv answer 4xx -> PlexAPIError. The response shape differs
+        between XML-era and JSON clients, so the token is searched
+        under both spellings."""
+        url = '{}/api/home/users/{}/switch'.format(
+            self.PLEX_TV_BASE, user_id)
+        if pin:
+            url += '?' + urllib.parse.urlencode({'pin': pin})
+        # Dedicated request: plex.tv may answer JSON {'authToken': ...}
+        # or XML <user authenticationToken="..."/> depending on the
+        # client product headers -- _request() would JSON-crash on XML.
+        req = urllib.request.Request(url, headers=self._headers(),
+                                     method='POST')
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                body = resp.read().decode('utf-8', errors='replace')
+        except urllib.error.HTTPError as e:
+            raise PlexAPIError(
+                'Plex API {} for home user switch'.format(e.code)) from e
+        except OSError as e:
+            raise PlexOfflineError(
+                'plex.tv unreachable for home user switch: {}'.format(e)) from e
+        token = ''
+        try:
+            data = json.loads(body) if body.strip() else {}
+            token = (data.get('authToken') or data.get('authenticationToken')
+                     or (data.get('user') or {}).get('authToken')
+                     or (data.get('user') or {}).get('authenticationToken')
+                     or '')
+        except ValueError:
+            pass
+        if not token:
+            try:
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(body)
+                token = (root.get('authenticationToken')
+                         or root.get('authToken') or '')
+            except (ValueError, ET.ParseError):
+                pass
+        if not token:
+            raise PlexAPIError('home user switch returned no token')
+        return token
+
+    def accounts(self):
+        """Server accounts (`/accounts`): Plex Home users and the owner --
+        used by the 'Activity by you and X' line to name the watchers."""
+        if hasattr(self, '_accounts_cache'):
+            return self._accounts_cache
+        out = {}
+        try:
+            mc = self._media_container(self._request('/accounts'))
+            for d in mc.get('Account', []):
+                acc_id = d.get('id')
+                if acc_id is not None:
+                    thumb = d.get('thumb') or ''
+                    if thumb and not thumb.startswith('http'):
+                        thumb = PlexClient._resolve_image(
+                            thumb, self.server_url, self.token)
+                    out[str(acc_id)] = {
+                        'name': d.get('name') or '',
+                        'thumb': thumb,
+                    }
+        except Exception:
+            pass
+        self._accounts_cache = out
+        return out
 
     def related_items(self, rating_key, limit=16):
         """'More Like This' titles (`/library/metadata/{id}/related`, B7).
@@ -709,6 +1065,22 @@ class PlexClient:
             item['subtype'] = raw.get('subtype') or ''
             items.append(item)
         return items
+
+    def item_related(self, rating_key):
+        """Related hubs stacked under a detail page (official
+        'Related Shows' / 'More with <actor>' rows). Each hub keeps its
+        server-localised title so the row heading matches Plex."""
+        data = self._request(
+            '/library/metadata/{}/related'.format(rating_key))
+        mc = self._media_container(data)
+        hubs = []
+        for hub in mc.get('Hub', []):
+            items = [self._video_dict(it, self.server_url, self.token)
+                     for it in hub.get('Metadata', [])]
+            if items:
+                hubs.append({'title': hub.get('title') or '',
+                             'items': items})
+        return hubs
 
     def item_markers(self, rating_key):
         """Playback markers (intro/credits) of an item.
@@ -822,10 +1194,33 @@ class PlexClient:
             return ''
         return str(data.get('thumb') or '')
 
+    def user_name(self):
+        """The plex.tv account title shown next to the sidebar avatar --
+        Plex TV renders it in the expanded drawer's profile row.
+        Returns '' when the endpoint is unreachable."""
+        try:
+            data = self._request(self.PLEX_TV_USER)
+        except PlexAPIError:
+            return ''
+        return str(data.get('title') or data.get('username') or '')
+
+    def user_info(self):
+        """Full plex.tv /api/v2/user dict for the Account sheet
+        (email, username, subscription). Returns {} on failure."""
+        try:
+            data = self._request(self.PLEX_TV_USER)
+        except PlexAPIError:
+            return {}
+        return data if isinstance(data, dict) else {}
+
     def metadata_item(self, rating_key):
         """Fetch and normalise a single item by rating key (used to hydrate
         thin items before opening the detail page)."""
-        data = self._request('/library/metadata/{}'.format(rating_key))
+        data = self._request('/library/metadata/{}'.format(rating_key), {
+            # Plex's provider chips (IMDb / RT / TMDB) only arrive through
+            # the opt-in Ratings array, not the legacy scalar fields.
+            'includeRatings': '1',
+        })
         items = self._metadata_list(data)
         return items[0] if items else None
 
@@ -834,6 +1229,44 @@ class PlexClient:
         episodes, artist albums and album tracks share the endpoint."""
         data = self._request('/library/metadata/{}/children'.format(rating_key))
         return self._metadata_list(data)
+
+    def item_subtitles(self, rating_key):
+        """Subtitle streams of the item's first playable part, for the
+        More-panel picker: (part_id, [raw Stream dicts, streamType=3])."""
+        data = self._request('/library/metadata/{}'.format(rating_key))
+        mc = self._media_container(data)
+        for video in mc.get('Metadata', []):
+            for media in video.get('Media', []):
+                for part in media.get('Part', []):
+                    subs = [s for s in part.get('Stream', [])
+                            if str(s.get('streamType')) == '3']
+                    return part.get('id'), subs
+        return None, []
+
+    def item_audio(self, rating_key):
+        """Audio streams of the item's first playable part, for the
+        More-panel picker: (part_id, [raw Stream dicts, streamType=2])."""
+        data = self._request('/library/metadata/{}'.format(rating_key))
+        mc = self._media_container(data)
+        for video in mc.get('Metadata', []):
+            for media in video.get('Media', []):
+                for part in media.get('Part', []):
+                    tracks = [s for s in part.get('Stream', [])
+                              if str(s.get('streamType')) == '2']
+                    return part.get('id'), tracks
+        return None, []
+
+    def select_audio(self, part_id, stream_id):
+        """Plex's default audio track picker:
+        PUT /library/parts/<id>?audioStreamID=<stream>."""
+        self._request('/library/parts/{}'.format(part_id),
+                      {'audioStreamID': stream_id or 0}, method='PUT')
+
+    def select_subtitle(self, part_id, stream_id):
+        """Plex's default subtitle track picker:
+        PUT /library/parts/<id>?subtitleStreamID=<stream> ('Off' = 0)."""
+        self._request('/library/parts/{}'.format(part_id),
+                      {'subtitleStreamID': stream_id or 0}, method='PUT')
 
     def show_seasons(self, show_rating_key):
         """Return the seasons of a TV show, ordered by Plex's default index."""
@@ -862,21 +1295,61 @@ class PlexClient:
             {'label': i18n.tr(33138), 'items': self.recently_added(limits['recently_added'])},
         ]
 
-        for section in self.movie_sections():
-            rr = self.recently_released(section['key'], limits['recently_released'])
+        # Per-section work is ~6 sequential requests (recently_released +
+        # genre directory + one page per genre); serialised across the
+        # movie sections it kept the loading veil up for minutes on a
+        # slow server path. Requests are cheap GETs already deduped by
+        # the in-flight cache -- fan them out through a bounded pool.
+        pool = threading.Semaphore(8)
+        rows_lock = threading.Lock()
+        section_rows = {}
+
+        def fetch(fn, *args):
+            try:
+                with pool:
+                    return fn(*args)
+            except Exception:
+                return None
+
+        def build_section(section):
+            srows = []
+            rr = fetch(self.recently_released,
+                       section['key'], limits['recently_released'])
             if rr:
-                rows.append({
+                srows.append({
                     'label': '{} — {}'.format(section['title'], i18n.tr(33139)),
                     'items': rr,
                 })
+            genres = fetch(self.section_genres, section['key']) or []
+            got = {}
+            gthreads = []
+            for pos, genre in enumerate(genres[:limits['genres_per_section']]):
+                def per_genre(g=genre, p=pos):
+                    items = fetch(self.by_genre, section['key'], g,
+                                  limits['per_genre'])
+                    if items:
+                        with rows_lock:
+                            got[p] = {
+                                'label': '{} — {}'.format(section['title'], g),
+                                'items': items,
+                            }
+                t = threading.Thread(target=per_genre, daemon=True)
+                t.start()
+                gthreads.append(t)
+            for t in gthreads:
+                t.join(15.0)
+            srows.extend(got[p] for p in sorted(got))
+            with rows_lock:
+                section_rows[section['key']] = srows
 
-            genres = self.section_genres(section['key'])
-            for genre in genres[:limits['genres_per_section']]:
-                items = self.by_genre(section['key'], genre, limits['per_genre'])
-                if items:
-                    rows.append({
-                        'label': '{} — {}'.format(section['title'], genre),
-                        'items': items,
-                    })
+        sections = self.movie_sections()
+        ts = [threading.Thread(target=build_section, args=(s,), daemon=True)
+              for s in sections]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(30.0)
+        for section in sections:
+            rows.extend(section_rows.get(section['key'], []))
 
         return rows

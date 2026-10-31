@@ -18,6 +18,7 @@ import sqlite3
 import time
 
 DEFAULT_TTL_SECONDS = 600
+PURGE_INTERVAL_SECONDS = 300
 
 
 class LocalCache:
@@ -25,10 +26,22 @@ class LocalCache:
 
     def __init__(self, db_path):
         self.db_path = db_path
+        self._next_purge = 0.0
         self._ensure_schema()
 
     def _connect(self):
-        return sqlite3.connect(self.db_path)
+        # WAL lets readers and the writer overlap instead of serialising
+        # on the db lock; NORMAL sync is safe in WAL (a crash loses at
+        # most the last transaction, which is just cache). Both pragmas
+        # are best-effort -- a read-only profile dir must not break the
+        # cache layer.
+        conn = sqlite3.connect(self.db_path, timeout=10)
+        try:
+            conn.execute('PRAGMA journal_mode=WAL')
+            conn.execute('PRAGMA synchronous=NORMAL')
+        except sqlite3.OperationalError:
+            pass
+        return conn
 
     def _ensure_schema(self):
         conn = self._connect()
@@ -37,58 +50,87 @@ class LocalCache:
                 'CREATE TABLE IF NOT EXISTS cache ('
                 'key TEXT PRIMARY KEY, value TEXT NOT NULL, expires_at REAL NOT NULL)'
             )
+            conn.execute(
+                'CREATE INDEX IF NOT EXISTS cache_expires ON cache(expires_at)'
+            )
+            self._purge_expired(conn)
             conn.commit()
         finally:
             conn.close()
 
+    def _purge_expired(self, conn):
+        conn.execute('DELETE FROM cache WHERE expires_at < ?', (time.time(),))
+
+    def _purge_if_due(self, conn):
+        if time.time() >= self._next_purge:
+            self._purge_expired(conn)
+            self._next_purge = time.time() + PURGE_INTERVAL_SECONDS
+
+    def _missing_table(self, error):
+        return 'no such table' in str(error)
+
     def get(self, key):
-        """Return the cached value for `key`, or None if missing/expired.
+        """Return the cached value for `key`, or None if missing/expired."""
+        value, expired = self.get_stale(key)
+        return None if expired else value
+
+    def get_stale(self, key):
+        """Return ``(value, expired)`` for `key`, or ``(None, True)`` absent.
+
+        Unlike `get`, an expired-but-present row comes back with
+        ``expired=True`` so callers can render it immediately and
+        revalidate in the background (stale-while-revalidate).
 
         The cache is a pure optimisation layer and must never break a
         feature that happens to hit it: if the underlying sqlite file is
         ever missing its table (found on a real device after an external
         process removed/truncated the db file while Kodi still held it
-        open -- "no such table: cache"), self-heal by recreating the schema
-        and treat this call as a cache miss rather than propagating the
-        error up to the caller.
+        open -- "no such table: cache"), self-heal by recreating the
+        schema and treat this call as a cache miss. Any other
+        OperationalError (e.g. a transient lock) is likewise a miss,
+        never an exception.
         """
         conn = self._connect()
         try:
             row = conn.execute(
                 'SELECT value, expires_at FROM cache WHERE key = ?', (key,)
             ).fetchone()
-        except sqlite3.OperationalError:
-            conn.close()
-            self._ensure_schema()
-            return None
+        except sqlite3.OperationalError as e:
+            if self._missing_table(e):
+                conn.close()
+                self._ensure_schema()
+            return None, True
         finally:
             conn.close()
         if row is None:
-            return None
+            return None, True
         value, expires_at = row
-        if expires_at < time.time():
-            return None
-        return json.loads(value)
+        return json.loads(value), expires_at < time.time()
 
     def set(self, key, value, ttl_seconds=DEFAULT_TTL_SECONDS):
         expires_at = time.time() + ttl_seconds
+        payload = json.dumps(value)
         conn = self._connect()
         try:
-            try:
-                conn.execute(
-                    'INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)',
-                    (key, json.dumps(value), expires_at),
-                )
-                conn.commit()
-            except sqlite3.OperationalError:
-                conn.close()
-                self._ensure_schema()
-                conn = self._connect()
-                conn.execute(
-                    'INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)',
-                    (key, json.dumps(value), expires_at),
-                )
-                conn.commit()
+            for attempt in range(2):
+                try:
+                    self._purge_if_due(conn)
+                    conn.execute(
+                        'INSERT OR REPLACE INTO cache (key, value, expires_at)'
+                        ' VALUES (?, ?, ?)',
+                        (key, payload, expires_at),
+                    )
+                    conn.commit()
+                    return
+                except sqlite3.OperationalError as e:
+                    # Self-heal only on a genuinely missing schema; a
+                    # locked or otherwise failing db just skips the write
+                    # -- a cache store must never break the caller.
+                    if attempt or not self._missing_table(e):
+                        return
+                    conn.close()
+                    self._ensure_schema()
+                    conn = self._connect()
         finally:
             conn.close()
 
