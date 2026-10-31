@@ -55,6 +55,7 @@
                 <width>220</width>
                 <height>220</height>
                 <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+            <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
             </control>
 
             <!-- Item title -->
@@ -115,6 +116,7 @@
                         <width>200</width>
                         <height>300</height>
                         <texture colordiffuse="FF1A1310">poster-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="image">
                         <left>150</left>
@@ -159,6 +161,7 @@
                         <height>300</height>
                         <texture colordiffuse="FF1A1310">poster-corners.png</texture>
                         <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="image">
                         <left>-4</left>

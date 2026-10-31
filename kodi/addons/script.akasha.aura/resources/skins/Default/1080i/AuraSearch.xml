@@ -1289,6 +1289,7 @@
                     <width>240</width>
                     <height>360</height>
                     <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1336,6 +1337,7 @@
                     <width>240</width>
                     <height>360</height>
                     <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
@@ -1375,6 +1377,7 @@
                     <width>240</width>
                     <height>360</height>
                     <texture colordiffuse="FF1A1A1A">poster-corners.png</texture>
+                <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>

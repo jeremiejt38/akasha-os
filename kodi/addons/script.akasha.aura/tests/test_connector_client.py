@@ -6,6 +6,7 @@ import urllib.error
 import unittest
 from unittest.mock import patch
 
+import art_proxy
 import connector_client
 
 
@@ -161,7 +162,7 @@ class TestConnectorClient(unittest.TestCase):
 
         self.assertEqual(seasons[0]['rating_key'], '43')
         self.assertEqual(seasons[0]['title'], 'Saison 1')
-        self.assertIn('/api/plex/image?path=', seasons[0]['thumb_url'])
+        self.assertIn('/api/plex/image?path=', art_proxy.unwrap(seasons[0]['thumb_url']))
         self.assertEqual(episodes[0]['parent_rating_key'], '42')
 
     def test_image_url_includes_encoded_path_and_auth_header(self):

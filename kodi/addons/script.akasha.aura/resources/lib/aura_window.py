@@ -34,6 +34,7 @@ import config
 import context_sheet
 import gui_guard
 import settings_press_handler
+import art_proxy
 import osd_menu
 import connector_client
 import divert_source
@@ -2107,8 +2108,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 li = xbmcgui.ListItem(divert_source.display_genre(genre))
                 li.setProperty('TileColor', 'B0' + _genre_tile_color(genre))
                 if genre in art_by_genre:
-                    li.setArt({'fanart': art_by_genre[genre],
-                               'thumb': art_by_genre[genre]})
+                    # Card art gets its corners baked in by the loopback
+                    # art proxy (real alpha, not the opaque corner cover).
+                    tile = art_proxy.wrap(art_by_genre[genre], 26, 376, 205)
+                    li.setArt({'fanart': tile, 'thumb': tile})
                 items.append(li)
             with self._ui_lock:
                 if self._closing or generation != self._category_art_generation:

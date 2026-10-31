@@ -44,7 +44,7 @@ class TestDivertSource(unittest.TestCase):
                 ]
             }
         }
-        resolver = lambda path, w=None, h=None: 'resolved:' + path
+        resolver = lambda path, w=None, h=None, radius=None: 'resolved:' + path
         items = divert_source.parse_metadata_list(raw, resolver)
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]['title'], 'Inception')
@@ -54,7 +54,7 @@ class TestDivertSource(unittest.TestCase):
     def test_parse_metadata_list_missing_images_skip_resolver(self):
         raw = {'MediaContainer': {'Metadata': [{'title': 'No Art'}]}}
         calls = []
-        resolver = lambda path, w=None, h=None: calls.append(path) or 'x'
+        resolver = lambda path, w=None, h=None, radius=None: calls.append(path) or 'x'
         items = divert_source.parse_metadata_list(raw, resolver)
         self.assertEqual(items[0]['thumb_url'], '')
         self.assertEqual(items[0]['art_url'], '')
@@ -86,14 +86,14 @@ class TestDivertSource(unittest.TestCase):
     def test_video_label_empty_without_media(self):
         item = divert_source.build_video_item(
             {'title': 'Lupin', 'type': 'season'},
-            lambda p, w=None, h=None: p)
+            lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(item['video_label'], '')
 
     def test_video_label_sd_with_real_media(self):
         item = divert_source.build_video_item(
             {'title': 'Ep', 'type': 'episode',
              'Media': [{'videoResolution': 'sd', 'Part': [{'key': '/x'}]}]},
-            lambda p, w=None, h=None: p)
+            lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(item['video_label'], 'SD')
 
     def test_parse_metadata_list_captures_episode_fields(self):
@@ -109,7 +109,7 @@ class TestDivertSource(unittest.TestCase):
                 ]
             }
         }
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(items[0]['season'], 9)
         self.assertEqual(items[0]['show_title'], 'Rick et Morty')
 
@@ -119,12 +119,12 @@ class TestDivertSource(unittest.TestCase):
 
     def test_parse_metadata_list_captures_section_id(self):
         raw = {'MediaContainer': {'Metadata': [{'title': 'Inception', 'librarySectionID': 1}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(items[0]['section_id'], '1')
 
     def test_parse_metadata_list_missing_section_id_is_none(self):
         raw = {'MediaContainer': {'Metadata': [{'title': 'No Section'}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertIsNone(items[0]['section_id'])
 
     def test_filter_by_section_keeps_matching_items(self):
@@ -162,7 +162,7 @@ class TestDivertSource(unittest.TestCase):
                 ]
             }
         }
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: 'r:' + p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: 'r:' + p)
         self.assertEqual(items[0]['poster_url'], 'r:/show/thumb')
         self.assertEqual(items[0]['fanart_url'], 'r:/show/art')
         self.assertEqual(items[0]['landscape_url'], 'r:/ep/thumb')
@@ -170,26 +170,26 @@ class TestDivertSource(unittest.TestCase):
     def test_movie_prefers_own_thumb_and_art(self):
         raw = {'MediaContainer': {'Metadata': [
             {'title': 'M', 'type': 'movie', 'thumb': '/m/thumb', 'art': '/m/art'}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: 'r:' + p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: 'r:' + p)
         self.assertEqual(items[0]['poster_url'], 'r:/m/thumb')
         self.assertEqual(items[0]['fanart_url'], 'r:/m/art')
 
     def test_progress_from_view_offset(self):
         raw = {'MediaContainer': {'Metadata': [
             {'title': 'M', 'duration': 1200000, 'viewOffset': 300000}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertAlmostEqual(items[0]['progress'], 0.25)
         self.assertEqual(items[0]['duration_ms'], 1200000)
         self.assertEqual(items[0]['view_offset_ms'], 300000)
 
     def test_progress_absent_without_view_offset(self):
         raw = {'MediaContainer': {'Metadata': [{'title': 'M', 'duration': 1200000}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertIsNone(items[0]['progress'])
 
     def test_content_rating_strips_locale_prefix(self):
         raw = {'MediaContainer': {'Metadata': [{'title': 'M', 'contentRating': 'fr/10'}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(items[0]['content_rating'], '10')
 
     def test_ratings_genres_cast_and_crew(self):
@@ -213,7 +213,7 @@ class TestDivertSource(unittest.TestCase):
                 ]
             }
         }
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: 'r:' + p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: 'r:' + p)
         item = items[0]
         self.assertEqual(item['rating'], 7.8)
         self.assertEqual(item['audience_rating'], 8.4)
@@ -235,7 +235,7 @@ class TestDivertSource(unittest.TestCase):
                 {'type': 'coverPoster', 'url': '/poster'},
                 {'type': 'clearLogo', 'url': '/logo'},
             ]}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: 'r:' + p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: 'r:' + p)
         self.assertEqual(items[0]['logo_url'], 'r:/logo')
 
     def test_media_labels(self):
@@ -257,7 +257,7 @@ class TestDivertSource(unittest.TestCase):
                 ]
             }
         }
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         item = items[0]
         self.assertEqual(item['video_label'], '4K HDR10 (HEVC)')
         self.assertEqual(item['audio_label'], 'French (EAC3 5.1)')
@@ -268,13 +268,13 @@ class TestDivertSource(unittest.TestCase):
     def test_watched_flag_from_view_count(self):
         raw = {'MediaContainer': {'Metadata': [
             {'title': 'A', 'viewCount': 1}, {'title': 'B'}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertTrue(items[0]['watched'])
         self.assertFalse(items[1]['watched'])
 
     def test_non_dict_item_does_not_raise(self):
         raw = {'MediaContainer': {'Metadata': [None, {'title': 'Ok'}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(len(items), 2)
         self.assertEqual(items[0]['title'], 'Sans titre')
 
@@ -288,7 +288,7 @@ class TestDivertSource(unittest.TestCase):
                  'Part': [{'key': '/part/2', 'file': '/x/a.4k.mkv'}]},
             ]}]}}
         item = divert_source.parse_metadata_list(
-            raw, lambda p, w=None, h=None: p)[0]
+            raw, lambda p, w=None, h=None, radius=None: p)[0]
         self.assertEqual(len(item['versions']), 2)
         self.assertEqual(item['versions'][0]['part_key'], '/part/1')
         self.assertIn('1080p', item['versions'][0]['label'])
@@ -298,14 +298,14 @@ class TestDivertSource(unittest.TestCase):
     def test_no_media_gives_empty_versions(self):
         raw = {'MediaContainer': {'Metadata': [{'title': 'B'}]}}
         item = divert_source.parse_metadata_list(
-            raw, lambda p, w=None, h=None: p)[0]
+            raw, lambda p, w=None, h=None, radius=None: p)[0]
         self.assertEqual(item['versions'], [])
 
     def test_blur_colors_normalised(self):
         raw = {'MediaContainer': {'Metadata': [
             {'title': 'A', 'UltraBlurColors': {'topLeft': '5f3b2a'}},
             {'title': 'B'}]}}
-        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None: p)
+        items = divert_source.parse_metadata_list(raw, lambda p, w=None, h=None, radius=None: p)
         self.assertEqual(items[0]['blur_colors'], {'topLeft': '5f3b2a'})
         self.assertEqual(items[1]['blur_colors'], {})
 

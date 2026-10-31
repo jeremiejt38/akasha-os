@@ -7,6 +7,7 @@ import time
 import unittest
 from unittest.mock import patch
 
+import art_proxy
 import plex_client
 
 
@@ -54,7 +55,7 @@ class TestPlexClient(unittest.TestCase):
         self.assertEqual(items[0]['title'], 'Inception')
         self.assertEqual(items[0]['rating_key'], '123')
         self.assertEqual(items[0]['year'], 2010)
-        self.assertIn('tok123', items[0]['thumb_url'])
+        self.assertIn('tok123', art_proxy.unwrap(items[0]['thumb_url']))
         self.assertIsNone(items[0]['section_id'])
 
     @patch('urllib.request.urlopen')
@@ -444,10 +445,10 @@ class TestPlexClientPeople(unittest.TestCase):
         self.assertEqual(len(people), 2)
         self.assertEqual(people[0]['id'], '11550')
         self.assertEqual(people[0]['name'], 'Omar Sy')
-        self.assertEqual(people[0]['thumb_url'],
+        self.assertEqual(art_proxy.unwrap(people[0]['thumb_url']),
                          'https://metadata-static.plex.tv/x/p.jpg')
         # Server-relative thumbs get the base URL + token
-        self.assertTrue(people[1]['thumb_url'].startswith(
+        self.assertTrue(art_proxy.unwrap(people[1]['thumb_url']).startswith(
             'http://192.168.100.133:32400/:/resources/actor-icon.png'))
         # Second call served from cache: still one HTTP request
         self.client.people_directory('2')
@@ -723,7 +724,7 @@ class TestPlexClientTimeline(unittest.TestCase):
         self.assertEqual(len(items), 2)
         self.assertEqual(items[0]['type'], 'playlist')
         self.assertEqual(items[0]['count'], 12)
-        self.assertIn('transcode', items[0]['thumb_url'])
+        self.assertIn('transcode', art_proxy.unwrap(items[0]['thumb_url']))
         self.assertEqual(items[1]['thumb_url'], '')
 
     @patch('urllib.request.urlopen')

@@ -28,6 +28,7 @@ import uuid
 import xbmc
 import xbmcaddon
 import xbmcgui
+import art_proxy
 import gui_guard
 import i18n
 
@@ -636,7 +637,10 @@ class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
                 name, _, stamp = label.rpartition(' — ')
                 li = xbmcgui.ListItem(name or label, stamp)
                 if ch.get('thumb'):
-                    li.setArt({'thumb': ch['thumb'], 'icon': ch['thumb']})
+                    # BIF chapter frames get the same baked-in rounded
+                    # corners as every other card via the art proxy.
+                    card = art_proxy.wrap(ch['thumb'], 22)
+                    li.setArt({'thumb': card, 'icon': card})
                 lst.addItem(li)
         qlst = self.getControl(1002)
         for i, it in enumerate(self._queue):

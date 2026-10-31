@@ -85,6 +85,7 @@
                         <width>404</width>
                         <height>227</height>
                         <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
@@ -123,6 +124,7 @@
                         <width>404</width>
                         <height>227</height>
                         <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="image">
                         <left>-4</left>
@@ -195,6 +197,7 @@
                         <width>396</width>
                         <height>223</height>
                         <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="image">
                         <left>168</left>
@@ -249,6 +252,7 @@
                         <width>396</width>
                         <height>223</height>
                         <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
+                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="image">
                         <left>-4</left>

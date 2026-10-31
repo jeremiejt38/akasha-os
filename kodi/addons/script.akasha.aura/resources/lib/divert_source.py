@@ -389,14 +389,19 @@ def build_video_item(raw_item, image_resolver):
         # detail page's "Vous l'avez regardé le..." line uses it for
         # free instead of fetching the (unbounded) history endpoint.
         'last_viewed_at': raw_item.get('lastViewedAt'),
-        'thumb_url': image_resolver(thumb, 640, 360) if thumb else '',
+        # Card URLs carry a corner radius: the loopback art proxy serves
+        # them as alpha-rounded PNGs (Plex rounds cards; the old opaque
+        # corner covers read as dark boxes on light veils). Radius is in
+        # source pixels: 21@320w/31@640w ~= the skin's old 16px@240/22px@448
+        # covers. Fanart/logos/cast (dynamic-tint mask) stay unrounded.
+        'thumb_url': image_resolver(thumb, 640, 360, radius=31) if thumb else '',
         'art_url': image_resolver(art, 1920, 1080) if art else '',
-        'poster_url': image_resolver(poster, 320, 480) if poster else '',
+        'poster_url': image_resolver(poster, 320, 480, radius=21) if poster else '',
         'fanart_url': image_resolver(fanart, 1920, 1080) if fanart else '',
         # clearLogos are transparent PNGs -- Plex's photo transcoder emits
         # JPEG only, so logos keep the direct URL to preserve alpha.
         'logo_url': image_resolver(logo) if logo else '',
-        'landscape_url': image_resolver(thumb, 640, 360) if (thumb and item_type == 'episode') else '',
+        'landscape_url': image_resolver(thumb, 640, 360, radius=31) if (thumb and item_type == 'episode') else '',
         'video_label': _video_label(raw_item),
         'audio_label': _audio_label(raw_item),
         'subtitle_label': _subtitle_label(raw_item),

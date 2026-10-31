@@ -1552,7 +1552,7 @@
                         <width>240</width>
                         <height>360</height>
                         <texture colordiffuse="FF242424">poster-corners.png</texture>
-                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="progress">
                         <left>24</left>
@@ -1654,7 +1654,7 @@
                         <width>240</width>
                         <height>360</height>
                         <texture colordiffuse="FF242424">poster-corners.png</texture>
-                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="progress">
@@ -1814,7 +1814,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -1857,7 +1857,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -1934,7 +1934,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2007,7 +2007,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -2123,7 +2123,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2166,7 +2166,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -2243,7 +2243,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2316,7 +2316,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -2437,7 +2437,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2480,7 +2480,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -2557,7 +2557,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2630,7 +2630,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -2747,7 +2747,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2790,7 +2790,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -2867,7 +2867,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -2940,7 +2940,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -3054,7 +3054,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -3097,7 +3097,7 @@
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -3170,7 +3170,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
                                 <left>12</left>
@@ -3243,7 +3243,7 @@
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
-                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
@@ -3343,6 +3343,7 @@
                             <width>376</width>
                             <height>212</height>
                             <texture colordiffuse="FF1C1C1C">category-corners.png</texture>
+                        <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                         </control>
                         <control type="label">
                             <left>0</left>
@@ -3379,6 +3380,7 @@
                             <width>376</width>
                             <height>212</height>
                             <texture colordiffuse="FF1C1C1C">category-corners.png</texture>
+                        <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                         </control>
                         <control type="image">
                             <left>0</left>

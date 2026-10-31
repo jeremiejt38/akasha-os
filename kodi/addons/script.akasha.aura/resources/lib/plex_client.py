@@ -18,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import art_proxy
 import divert_source
 import i18n
 
@@ -199,7 +200,8 @@ class PlexClient:
         return data.get('MediaContainer', data)
 
     @staticmethod
-    def _resolve_image(path, server_url, token, width=None, height=None):
+    def _resolve_image(path, server_url, token, width=None, height=None,
+                       radius=None):
         if not path:
             return ''
         # Cloud provider metadata (Discover/Trending hubs) carries
@@ -208,27 +210,32 @@ class PlexClient:
             sep = '&' if '?' in path else '?'
             if 'X-Plex-Token' not in path:
                 path += sep + 'X-Plex-Token=' + token
+            if radius:
+                return art_proxy.wrap(path, radius, width, height)
             return path
         # Sized requests go through Plex's own photo transcoder: a
         # 240px card used to pull the full 2000x3000 JPEG and make
         # the Pi4 decode it (visible scroll stutter). Server-side
         # downscale is what official Plex clients do anyway.
         if width and height:
-            return ('{}/photo/:/transcode?url={}&width={}&height={}'
-                    '&minSize=1&upscale=0&X-Plex-Token={}'.format(
-                        server_url, urllib.parse.quote(path),
-                        width, height, token))
+            url = ('{}/photo/:/transcode?url={}&width={}&height={}'
+                   '&minSize=1&upscale=0&X-Plex-Token={}'.format(
+                       server_url, urllib.parse.quote(path),
+                       width, height, token))
+            if radius:
+                return art_proxy.wrap(url, radius, width, height)
+            return url
         return '{}?X-Plex-Token={}'.format(server_url + path, token)
 
-    def image_url(self, path, width=None, height=None):
+    def image_url(self, path, width=None, height=None, radius=None):
         return self._resolve_image(
-            path, self.server_url, self.token, width, height)
+            path, self.server_url, self.token, width, height, radius)
 
     @staticmethod
     def _video_dict(item, server_url, token):
-        def image_url(path, width=None, height=None):
+        def image_url(path, width=None, height=None, radius=None):
             return PlexClient._resolve_image(
-                path, server_url, token, width, height)
+                path, server_url, token, width, height, radius)
 
         # Shared normaliser keeps connector and direct-Plex payloads identical
         # (see divert_source.build_video_item).
@@ -706,6 +713,8 @@ class PlexClient:
                 if thumb and not thumb.startswith('http'):
                     thumb = '{}{}?X-Plex-Token={}'.format(
                         self.server_url, thumb, self.token)
+                if thumb:
+                    thumb = art_proxy.wrap(thumb, 21, 320, 480)
                 out['people'].append({
                     '_person': True,
                     'name': name,
@@ -877,7 +886,8 @@ class PlexClient:
                 'count': raw.get('leafCount') or 0,
                 'smart': bool(raw.get('smart')),
                 'summary': raw.get('summary') or '',
-                'thumb_url': self.image_url(raw.get('composite'), 640, 360)
+                'thumb_url': self.image_url(raw.get('composite'), 640, 360,
+                                            radius=31)
                 if raw.get('composite') else '',
             })
         return out
