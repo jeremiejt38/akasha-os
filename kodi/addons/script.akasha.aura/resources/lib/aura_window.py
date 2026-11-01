@@ -830,15 +830,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     # _apply_reco_state() surfaces the Plex-style offline
                     # state without burning more timeouts.
                     rows = [{'title': '', 'paged': None, 'error': fatal}]
-            # Plex's Tendances tab ends with the full-width "Find What To
-            # Watch, Anywhere!" promo card below the last hub row --
-            # appended as a synthetic row so the viewport scrolls it in
-            # like real content. Tendances global only: never on Pour
-            # vous/Activité, library sections, or an empty/failed load.
+            # Plex's Tendances tab pins the full-width "Find What To
+            # Watch, Anywhere!" promo card right below the first hub row
+            # (measured on the official app across reloads: always slot 2
+            # of the feed, never the footer). Inserted as a synthetic row
+            # so the viewport scrolls it in like real content. Tendances
+            # global only: never on Pour vous/Activité, library sections,
+            # or an empty/failed load.
             if section is None and self._home_tab == HOME_TAB_TRENDING \
                     and any(not r.get('error') and r.get('paged')
                             and r['paged'].items for r in rows):
-                rows.append({'title': '', 'paged': None, 'promo': True})
+                rows.insert(1, {'title': '', 'paged': None, 'promo': True})
             with self._ui_lock:
                 if self._closing or gen != self._view_load_gen:
                     return
@@ -1697,7 +1699,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('AuraHeroSubtitle', subtitle)
         self.setProperty('AuraHeroMeta', _hero_meta_line(
             item, compact=(self._divert_view == 'library')))
-        rating = item.get('content_rating') or ''
+        rating = i18n.compact_rating(item.get('content_rating'))
         self.setProperty('AuraHeroRating', rating)
         # Library heroes paint the solid chip like episodes; only the home
         # movie/show hero keeps the bordered meta-rating-box.
@@ -4316,6 +4318,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Recommande row viewport (see RECO_SLOT_IDS): Plex pins the focused
         # row at a fixed screen position -- focus stays on a slot while its
         # contents slide by one hub when scrolling past an edge.
+        slot = self._reco_slot_index(focused)
+        if slot >= 0 and aid in (ACTION_MOVE_UP, ACTION_MOVE_DOWN) and \
+                (time.monotonic() -
+                 getattr(self, '_last_focus_change', 0)) < 0.05:
+            # A nav press hopping INTO a reco list is re-delivered to the
+            # newly focused list (same Kodi behaviour as the chip hops
+            # below): the chain/scroll already owned the hop, so the
+            # re-delivery would double-hop past the landed row -- observed
+            # on-device as Down from the promo card skipping a row.
+            return
         if aid == ACTION_MOVE_DOWN and \
                 focused in (RECO_LIST_IDS[-1], RECO_LANDSCAPE_IDS[-1],
                             RECO_PROMO_IDS[-1]) \
@@ -4335,7 +4347,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # Prevent Down landing on an empty slot when fewer hubs remain than
         # slots, and Up from the top slot reaching the right header control
         # (contextual tabs in a library, main tab bar on Accueil).
-        slot = self._reco_slot_index(focused)
         # Between slots, Up/Down must be explicit: while a lower row holds
         # focus the exited rows above play their counter-slide + fade and
         # the viewport group slides up, so their *rendered* bounds sit

@@ -486,6 +486,54 @@ class RecoScrollFocusSlotTests(unittest.TestCase):
         self.assertEqual(w._props['AuraFocusSlot'], '')
 
 
+class RecoNavRedeliveryTests(unittest.TestCase):
+    """Kodi re-delivers a nav press to the list it lands on (the same
+    re-delivery the chip hops guard against). A promo button is not a
+    list, so its declared hop lands ON one: without the recency guard the
+    reco chain treated the re-delivered press as fresh input and
+    double-hopped past the landed row (observed on-device: Down from the
+    promo card skipped a row)."""
+
+    def _nav_window(self, focused):
+        import time
+        w = _make_window()
+        w._focus_generation = 0
+        w._drain_pending_appends = lambda: None
+        w._defer_hero = lambda *a, **k: None
+        w._update_bar_focused = lambda *a, **k: None
+        w._last_focus_change = time.monotonic()
+        w._slot_promo = {1}
+        w.setFocusId(focused)
+        return w
+
+    def _press(self, w, aid):
+        action = MagicMock()
+        action.getId.return_value = aid
+        w.onAction(action)
+
+    def test_redelivered_down_on_reco_list_is_swallowed(self):
+        w = self._nav_window(LIST_IDS[2])
+        w.getControl(LIST_IDS[3])._size = 5
+        self._press(w, aura_window.ACTION_MOVE_DOWN)
+        self.assertEqual(w.getFocusId(), LIST_IDS[2])
+
+    def test_real_down_on_reco_list_chains_to_next_filled(self):
+        import time
+        w = self._nav_window(LIST_IDS[2])
+        w.getControl(LIST_IDS[3])._size = 5
+        w._last_focus_change = time.monotonic() - 1
+        self._press(w, aura_window.ACTION_MOVE_DOWN)
+        self.assertEqual(w.getFocusId(), LIST_IDS[3])
+
+    def test_real_down_on_promo_button_reaches_next_row(self):
+        import time
+        w = self._nav_window(PROMO_IDS[1])
+        w.getControl(LIST_IDS[2])._size = 5
+        w._last_focus_change = time.monotonic() - 1
+        self._press(w, aura_window.ACTION_MOVE_DOWN)
+        self.assertEqual(w.getFocusId(), LIST_IDS[2])
+
+
 class RecoRowItemCacheTests(unittest.TestCase):
     """Each scroll step rebinds all five slots to different rows, so built
     ListItems are cached on the row dict and only rebuilt when the paged
