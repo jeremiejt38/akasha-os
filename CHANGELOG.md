@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.73.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.5...akasha-os-v0.73.0) (2026-11-01)
+
+
+### Features
+
+* **divert:** full-width Tendances promo banner with primary/dismiss pills ([#249](https://github.com/jeremiejt38/akasha-os/issues/249)) ([9009c0f](https://github.com/jeremiejt38/akasha-os/commit/9009c0fbe7333d36feda88102a6e45dc207e7434))
+
+
+### Bug Fixes
+
+* **system:** anti-chatter fan curve -- 55C sustained start, 5C hysteresis, 60s min run ([#248](https://github.com/jeremiejt38/akasha-os/issues/248)) ([4bbfbca](https://github.com/jeremiejt38/akasha-os/commit/4bbfbcacefebed77b903bf34856d0a91714d34c2))
+
 ## [0.72.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.4...akasha-os-v0.72.5) (2026-11-01)
 
 
