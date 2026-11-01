@@ -157,6 +157,10 @@ RECO_ALL_LIST_IDS = RECO_LIST_IDS + RECO_LANDSCAPE_IDS
 # trailing hub row rendered by one focusable button per slot, wherever the
 # sliding viewport lands it -- the same slot mechanism as real rows.
 RECO_PROMO_IDS = tuple(list_id + 5 for _, list_id in RECO_SLOT_IDS)
+# Each promo slot carries a second focusable pill ("Ne plus afficher",
+# id + 6) next to the primary CTA -- same pair Plex renders on its
+# full-width banner.
+RECO_PROMO_DISMISS_IDS = tuple(list_id + 6 for _, list_id in RECO_SLOT_IDS)
 # Home tab strip (Plex "For You" / "Trending" / "Activity"), only on the
 # Divertissement Accueil view -- the library view has its own strip
 # (3050/3100/3060). "Activité" has no usable public endpoint (the feed is a
@@ -202,6 +206,7 @@ DIVERT_AZ_RAIL_ID = 3250
 # closing the window (Plex two-level Back convention).
 _CONTENT_BACK_IDS = frozenset(
     list(RECO_ALL_LIST_IDS) + list(RECO_PROMO_IDS)
+    + list(RECO_PROMO_DISMISS_IDS)
     + [DIVERT_PANEL_ID, CATEGORY_PANEL_ID, DIVERT_AZ_RAIL_ID])
 DIVERT_TOOLBAR_BUTTON_IDS = (
     DIVERT_FILTER_BUTTON_ID, DIVERT_SORT_BUTTON_ID,
@@ -838,6 +843,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # global only: never on Pour vous/Activité, library sections,
             # or an empty/failed load.
             if section is None and self._home_tab == HOME_TAB_TRENDING \
+                    and self.addon.getSetting('divert.show_promo') != 'false' \
                     and any(not r.get('error') and r.get('paged')
                             and r['paged'].items for r in rows):
                 rows.insert(1, {'title': '', 'paged': None, 'promo': True})
@@ -1091,6 +1097,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return RECO_LANDSCAPE_IDS.index(list_control_id)
         if list_control_id in RECO_PROMO_IDS:
             return RECO_PROMO_IDS.index(list_control_id)
+        if list_control_id in RECO_PROMO_DISMISS_IDS:
+            return RECO_PROMO_DISMISS_IDS.index(list_control_id)
         return -1
 
     def _reco_slot_list_id(self, slot_index):
@@ -1289,10 +1297,41 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # Promo slots carry a focusable button, not an item list --
             # they count as filled for nav chaining exactly when bound.
             return RECO_PROMO_IDS.index(list_id) in self._slot_promo
+        if list_id in RECO_PROMO_DISMISS_IDS:
+            return RECO_PROMO_DISMISS_IDS.index(list_id) in self._slot_promo
         try:
             return self.getControl(list_id).size() > 0
         except RuntimeError:
             return False
+
+    def _dismiss_promo(self):
+        """'Ne plus afficher' on the Tendances promo banner.
+
+        Persisted through the `divert.show_promo` addon setting so the
+        dismissal is reversible from the addon settings page -- Plex's
+        own "Don't show this again" offers no such restore path. The
+        synthetic row is dropped from the feed and focus lands on the
+        row that slides into the freed slot (the one above when the
+        promo was last).
+        """
+        self.addon.setSetting('divert.show_promo', 'false')
+        with self._ui_lock:
+            slot = next((i for i in range(len(RECO_SLOT_IDS))
+                         if self._hub_offset + i < len(self._hub_rows)
+                         and self._hub_rows[self._hub_offset + i].get('promo')),
+                        None)
+            self._hub_rows = [r for r in self._hub_rows
+                              if not r.get('promo')]
+            self._rebind_reco_slots()
+            self._sync_navigation()
+        if slot is not None:
+            target = self._reco_slot_list_id(slot)
+            if not self._reco_list_has_items(target) and slot > 0:
+                target = self._reco_slot_list_id(slot - 1)
+            try:
+                self.setFocus(self.getControl(target))
+            except RuntimeError:
+                pass
 
     def _sync_navigation(self):
         """Re-wire directional navigation targets to the current state.
@@ -1349,8 +1388,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # persists on the hidden twin and the promo button too, so
             # flipping a hub's style between poster, landscape and the
             # promo card needs no extra sync.
-            for lid in (list_id, RECO_LANDSCAPE_IDS[i], RECO_PROMO_IDS[i]):
+            for lid in (list_id, RECO_LANDSCAPE_IDS[i]):
                 nav(lid, up=up, down=down, left=DIVERT_SIDEBAR_ID)
+            # The promo banner carries two pills: primary CTA left,
+            # dismiss right. nav()'s unset directions self-pin, so Right
+            # on the primary must be wired to the dismiss pill explicitly
+            # (observed on-device: it otherwise stayed put).
+            nav(RECO_PROMO_IDS[i], up=up, down=down,
+                left=DIVERT_SIDEBAR_ID, right=RECO_PROMO_DISMISS_IDS[i])
+            nav(RECO_PROMO_DISMISS_IDS[i], up=up, down=down,
+                left=RECO_PROMO_IDS[i])
 
         # State view's action button (B17): Up reaches whichever contextual
         # strip is active, Left exits to the sidebar like every content
@@ -4330,7 +4377,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if aid == ACTION_MOVE_DOWN and \
                 focused in (RECO_LIST_IDS[-1], RECO_LANDSCAPE_IDS[-1],
-                            RECO_PROMO_IDS[-1]) \
+                            RECO_PROMO_IDS[-1], RECO_PROMO_DISMISS_IDS[-1]) \
                 and self._reco_slot_has_row(len(RECO_SLOT_IDS)):
             self._reco_scroll(+1)
             self._defer_hero()
@@ -4338,7 +4385,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         if aid == ACTION_MOVE_UP and \
                 focused in (RECO_LIST_IDS[0], RECO_LANDSCAPE_IDS[0],
-                            RECO_PROMO_IDS[0]) \
+                            RECO_PROMO_IDS[0], RECO_PROMO_DISMISS_IDS[0]) \
                 and self._hub_offset > 0:
             self._reco_scroll(-1)
             self._defer_hero()
@@ -4548,6 +4595,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmcgui.Dialog().notification(
                 'Akasha Aura', i18n.tr(33642),
                 xbmcgui.NOTIFICATION_INFO, 2000)
+        elif controlID in RECO_PROMO_DISMISS_IDS:
+            self._dismiss_promo()
         elif controlID in RECO_ALL_LIST_IDS:
             self._on_reco_item_selected(controlID)
         elif controlID == CATEGORY_PANEL_ID:

@@ -16,6 +16,7 @@
         <setting id="divert.pinned_libraries" type="text" label="Bibliotheques epinglees (interne)" default=""/>
         <setting id="divert.library_order" type="text" label="Ordre des bibliotheques (interne)" default=""/>
         <setting id="search.recent" type="text" label="Historique de recherche (interne)" default=""/>
+        <setting id="divert.show_promo" type="bool" label="Afficher la carte promo Tendances" default="true"/>
     </category>
     <category label="App">
         <setting id="app.pinned" type="text" label="Applications epinglees (interne)" default=""/>
