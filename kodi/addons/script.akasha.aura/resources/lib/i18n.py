@@ -527,6 +527,8 @@ STRINGS = {
             'importe où ils vivent',
             'With Plex, films and TV shows are one click away, no '
             'matter where they live'),
+    33644: ('Choisir mes services', 'Select my services'),
+    33645: ('Ne plus afficher', "Don't show this again"),
 }
 
 MONTH_ABBRS = {

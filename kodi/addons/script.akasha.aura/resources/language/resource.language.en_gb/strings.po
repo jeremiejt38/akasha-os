@@ -1979,3 +1979,13 @@ msgstr ""
 msgctxt "#33643"
 msgid "With Plex, films and TV shows are one click away, no matter where they live"
 msgstr ""
+
+# Choisir mes services
+msgctxt "#33644"
+msgid "Select my services"
+msgstr ""
+
+# Ne plus afficher
+msgctxt "#33645"
+msgid "Don't show this again"
+msgstr ""

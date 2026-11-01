@@ -44,6 +44,9 @@ class FakeControl:
     def addItem(self, item):
         self._size += 1
 
+    def addItems(self, items):
+        self._size += len(items)
+
     def size(self):
         return self._size
 
@@ -84,6 +87,9 @@ class FakeWindowXMLDialog:
 
 
 class _FakeAddon:
+    def __init__(self, *args):
+        self._settings = {}
+
     def getAddonInfo(self, key):
         return '/tmp/fake-addon'
 
@@ -91,7 +97,10 @@ class _FakeAddon:
         return ''
 
     def getSetting(self, key):
-        return ''
+        return self._settings.get(key, '')
+
+    def setSetting(self, key, value):
+        self._settings[key] = value
 
 
 xbmc = _StubModule('xbmc')
@@ -434,6 +443,46 @@ class TrendingPromoTests(unittest.TestCase):
         w._apply_reco_state(None)
         self.assertEqual(w._props['DivertState'], 'offline')
         self.assertEqual(w._hub_rows, [])
+
+    def test_dismiss_pill_ids_map_to_their_slot(self):
+        w = _make_window()
+        for i, did in enumerate(aura_window.RECO_PROMO_DISMISS_IDS):
+            self.assertEqual(w._reco_slot_index(did), i)
+        self.assertEqual(w._reco_slot_index(999999), -1)
+
+    def test_bound_promo_dismiss_pill_counts_as_filled(self):
+        w = self._promo_window(
+            [_row([{'a': 1}]), {'title': '', 'paged': None, 'promo': True}])
+        w._rebind_reco_slots()
+        dismiss = aura_window.RECO_PROMO_DISMISS_IDS
+        self.assertTrue(w._reco_list_has_items(dismiss[1]))
+        self.assertFalse(w._reco_list_has_items(dismiss[2]))
+
+    def test_dismiss_pill_back_goes_to_sidebar_like_content(self):
+        for did in aura_window.RECO_PROMO_DISMISS_IDS:
+            self.assertIn(did, aura_window._CONTENT_BACK_IDS)
+
+    def test_dismiss_promo_drops_row_and_restores_focus(self):
+        # 'Ne plus afficher' persists the setting, drops the synthetic row
+        # and lands focus on the row that slides into the freed slot.
+        w = self._promo_window(
+            [_row([{'a': 1}]), {'title': '', 'paged': None, 'promo': True},
+             _row([{'b': 2}]), _row([{'c': 3}]), _row([{'d': 4}]),
+             _row([{'e': 5}])])
+        w.addon = _FakeAddon()
+        synced = []
+        w._sync_navigation = lambda: synced.append(1)
+        with patch('aura_window._build_divert_list_item',
+                   side_effect=lambda it: it):
+            w._rebind_reco_slots()
+            self.assertEqual(w._slot_promo, {1})
+            w._dismiss_promo()
+        self.assertEqual(w.addon.getSetting('divert.show_promo'), 'false')
+        self.assertTrue(all(not r.get('promo') for r in w._hub_rows))
+        self.assertEqual(w._slot_promo, set())
+        self.assertTrue(synced)
+        # Slot 1 now binds the former row 2: focus follows it.
+        self.assertEqual(w._focus, LIST_IDS[1])
 
 
 class RecoScrollFocusSlotTests(unittest.TestCase):
