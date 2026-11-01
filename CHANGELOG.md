@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.3...akasha-os-v0.72.4) (2026-11-01)
+
+
+### Performance Improvements
+
+* **aura-home:** cache built ListItems and prewarm off-viewport hub rows ([#243](https://github.com/jeremiejt38/akasha-os/issues/243)) ([2f54546](https://github.com/jeremiejt38/akasha-os/commit/2f54546b3dc82b245f77cedf1cbd8b74bef0f585))
+
 ## [0.72.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.2...akasha-os-v0.72.3) (2026-10-31)
 
 
