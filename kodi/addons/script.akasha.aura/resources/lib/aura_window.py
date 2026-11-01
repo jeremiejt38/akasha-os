@@ -1173,14 +1173,56 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 continue
             try:
                 lst.reset()
-                for item in row['paged'].items:
-                    lst.addItem(_build_divert_list_item(item))
+                lst.addItems(self._reco_row_items(row))
             except Exception as e:
                 xbmc.log('Akasha Aura: recommendations row render error for {}: {}'
                          .format(row['title'], e), xbmc.LOGERROR)
             self._reco_placeholder_counts[effective_id] = self._sync_placeholders(
                 effective_id, 0, row['paged'])
         self._sync_navigation()
+        self._prewarm_reco_items()
+
+    @staticmethod
+    def _reco_row_items(row):
+        """Built ListItems for a hub row, cached on the row dict.
+
+        Every scroll step rebinds each slot to a *different* row, but the
+        rows themselves are unchanged -- rebuilding ~50 ListItems
+        (ListItem+InfoTag+Actor each) inside the input handler cost a
+        measured 300-1000 ms per press on the Pi 4. Invalidated by count:
+        a paginated append extends paged.items, forcing a rebuild of that
+        row only."""
+        built = row.get('_items')
+        if built is None or len(built) != len(row['paged'].items):
+            built = [_build_divert_list_item(item)
+                     for item in row['paged'].items]
+            row['_items'] = built
+        return built
+
+    def _prewarm_reco_items(self):
+        """Build ListItems for off-viewport hub rows on a worker thread so
+        the first scroll past each row hits a warm cache instead of paying
+        the item-build cost inside the input handler. ListItem objects are
+        plain data carriers -- safe to construct off the GUI thread."""
+        self._prewarm_gen = getattr(self, '_prewarm_gen', 0) + 1
+        gen = self._prewarm_gen
+
+        def worker():
+            for row in list(self._hub_rows):
+                if gen != self._prewarm_gen:
+                    return
+                if not row or row.get('promo') or row.get('error'):
+                    continue
+                try:
+                    if row.get('_items') is None:
+                        row['_items'] = [_build_divert_list_item(i)
+                                         for i in row['paged'].items]
+                except Exception:
+                    continue
+                # Yield between rows so the input thread keeps priority.
+                time.sleep(0.02)
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def _reco_scroll(self, delta):
         """Slide the hub viewport by `delta` (+1 down / -1 up), if possible."""
@@ -1940,7 +1982,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     lst.removeItem(lst.size() - 1)
                 except Exception:
                     break
-            lst.addItems([_build_divert_list_item(item) for item in new_items])
+            new_built = [_build_divert_list_item(item) for item in new_items]
+            lst.addItems(new_built)
+            # Keep the rebind cache in sync so a later viewport slide reuses
+            # the appended page instead of rebuilding the whole row.
+            for hub_row in self._hub_rows:
+                if hub_row and hub_row.get('paged') is paged:
+                    cached = hub_row.get('_items')
+                    if cached is not None:
+                        cached.extend(new_built)
+                    break
         except Exception as e:
             xbmc.log('Akasha Aura: recommendations append render error for {}: {}'
                      .format(title, e), xbmc.LOGERROR)

@@ -13,7 +13,7 @@ import os
 import sys
 import types
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'resources', 'lib'))
 
@@ -484,6 +484,35 @@ class RecoScrollFocusSlotTests(unittest.TestCase):
         w._hub_rows = [_row([], error=plex_client.PlexOfflineError('x'))]
         w._apply_reco_state(None)
         self.assertEqual(w._props['AuraFocusSlot'], '')
+
+
+class RecoRowItemCacheTests(unittest.TestCase):
+    """Each scroll step rebinds all five slots to different rows, so built
+    ListItems are cached on the row dict and only rebuilt when the paged
+    item count changes (paginated appends)."""
+
+    def _build(self, row):
+        with patch.object(aura_window, '_build_divert_list_item',
+                          side_effect=lambda it: object()) as _b:
+            return aura_window.AuraWindow._reco_row_items(row), _b
+
+    def test_cache_reuses_built_items(self):
+        row = _row([{'title': 'a'}, {'title': 'b'}])
+        first, calls = self._build(row)
+        self.assertEqual(len(first), 2)
+        self.assertEqual(calls.call_count, 2)
+        second, calls2 = self._build(row)
+        self.assertIs(second, first)
+        self.assertEqual(calls2.call_count, 0)
+
+    def test_cache_rebuilds_when_paged_items_grow(self):
+        row = _row([{'title': 'a'}])
+        first, _ = self._build(row)
+        row['paged'].items.append({'title': 'b'})
+        second, calls = self._build(row)
+        self.assertIsNot(second, first)
+        self.assertEqual(len(second), 2)
+        self.assertEqual(calls.call_count, 2)
 
 
 if __name__ == '__main__':
