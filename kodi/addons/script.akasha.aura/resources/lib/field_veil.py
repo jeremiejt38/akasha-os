@@ -19,7 +19,7 @@ import xbmc
 
 _FIELD_VEIL_DIR = 'fields'
 _FIELD_VEIL_CAP = 24
-_MASK_VERSION = 'v10'
+_MASK_VERSION = 'v11'
 
 
 def _blur_hex(value):
@@ -27,6 +27,43 @@ def _blur_hex(value):
     'RRGGBB' for setColorDiffuse, '' when absent."""
     s = str(value or '').lstrip('#')[-6:]
     return s.upper() if len(s) == 6 else ''
+
+
+def _harmonised_hexes(hexes):
+    """Pull the two bottom corners' hue ~65% toward the top corners'
+    mean hue, keeping each corner's own saturation and luminance.
+
+    Plex's detail page reads as a continuous wash: when the backdrop's
+    bottom palette runs warm (e.g. fire/tan under a teal top), the raw
+    UltraBlurColors corners bake a visible warm/cold edge across the
+    field. Harmonising the hue (not darkening -- Plex's bottom band is
+    no darker than the top) keeps the palette coherent while leaving
+    luminance untouched. Saturated top corners stay dominant; when the
+    top is near-grey the bottom is left alone.
+    """
+    import colorsys
+    import math
+    rgbs = [tuple(int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+            for h in hexes]
+    top_hsv = [colorsys.rgb_to_hsv(*c) for c in rgbs[:2]]
+    # Hue is circular: average on the unit circle, weighted by saturation
+    # so a grey top corner cannot steer the result.
+    sx = sum(math.cos(h * 6.2831853) * s for h, s, _ in top_hsv)
+    sy = sum(math.sin(h * 6.2831853) * s for h, s, _ in top_hsv)
+    if sx * sx + sy * sy < 0.01:
+        return list(hexes)
+    top_hue = math.atan2(sy, sx) / 6.2831853 % 1.0
+    out = list(hexes)
+    for idx in (2, 3):
+        h, s, v = colorsys.rgb_to_hsv(*rgbs[idx])
+        delta = (top_hue - h) % 1.0
+        if delta > 0.5:
+            delta -= 1.0
+        nh = (h + delta * 0.65) % 1.0
+        r, g, b = colorsys.hsv_to_rgb(nh, s, v)
+        out[idx] = '{:02X}{:02X}{:02X}'.format(
+            int(round(r * 255)), int(round(g * 255)), int(round(b * 255)))
+    return out
 
 
 def veil_color(blur, u, v):
@@ -44,6 +81,7 @@ def veil_color(blur, u, v):
              ('topLeft', 'topRight', 'bottomLeft', 'bottomRight')]
     if not all(hexes):
         return ''
+    hexes = _harmonised_hexes(hexes)
     u = max(0.0, min(1.0, u))
     v = max(0.0, min(1.0, v))
     (tl, tr, bl, br) = (tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
@@ -65,6 +103,7 @@ def bake_field_veil(profile_dir, blur):
              ('topLeft', 'topRight', 'bottomLeft', 'bottomRight')]
     if not all(hexes):
         return ''
+    hexes = _harmonised_hexes(hexes)
     # The mask revision rides in the filename: Kodi's texture cache
     # keys on the path, so a mask tweak must produce a new file.
     name = 'field-{}-{}.png'.format(

@@ -360,7 +360,7 @@
         <!-- Director / creator line -->
         <control type="label" id="7040">
             <left>128</left>
-            <top>526</top>
+            <top>510</top>
             <width>1100</width>
             <height>32</height>
             <font>font_aura_mini</font>
@@ -1354,26 +1354,26 @@
             <scrolltime>200</scrolltime>
             <onup>7100</onup>
             <visible>String.IsEqual(Window.Property(AuraDetailCastRow),1)</visible>
-            <itemlayout width="280" height="330">
+            <itemlayout width="272" height="330">
                 <control type="image">
-                    <left>25</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>230</width>
-                    <height>230</height>
+                    <width>240</width>
+                    <height>240</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>25</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>230</width>
-                    <height>230</height>
+                    <width>240</width>
+                    <height>240</height>
                     <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">cast-mask.png</texture>
                 </control>
                 <control type="label">
                     <left>0</left>
                     <top>257</top>
-                    <width>280</width>
+                    <width>272</width>
                     <height>28</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -1384,7 +1384,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>295</top>
-                    <width>280</width>
+                    <width>272</width>
                     <height>26</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -1393,34 +1393,34 @@
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="280" height="330">
+            <focusedlayout width="272" height="330">
                 <control type="image">
-                    <left>25</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>230</width>
-                    <height>230</height>
+                    <width>240</width>
+                    <height>240</height>
                     <aspectratio>scale</aspectratio>
                     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                 </control>
                 <control type="image">
-                    <left>25</left>
+                    <left>0</left>
                     <top>0</top>
-                    <width>230</width>
-                    <height>230</height>
+                    <width>240</width>
+                    <height>240</height>
                     <texture colordiffuse="$INFO[Window.Property(AuraDetailMaskTint)]">cast-mask.png</texture>
                 </control>
                 <control type="image">
-                    <left>23</left>
+                    <left>-2</left>
                     <top>-2</top>
-                    <width>234</width>
-                    <height>234</height>
+                    <width>244</width>
+                    <height>244</height>
                     <texture>cast-ring.png</texture>
                     <visible>Control.HasFocus(7110)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
                     <top>257</top>
-                    <width>280</width>
+                    <width>272</width>
                     <height>28</height>
                     <font>font_aura_mini_bold</font>
                     <align>center</align>
@@ -1431,7 +1431,7 @@
                 <control type="label">
                     <left>0</left>
                     <top>295</top>
-                    <width>280</width>
+                    <width>272</width>
                     <height>26</height>
                     <font>font_aura_mini</font>
                     <align>center</align>

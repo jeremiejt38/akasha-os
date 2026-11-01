@@ -39,6 +39,31 @@ class TestProviderLabel(unittest.TestCase):
         self.assertEqual(aura_detail._provider_label(None), '')
 
 
+class TestProviderIcon(unittest.TestCase):
+    RT = 'rottentomatoes://image.rating'
+
+    def test_fresh_tomato_at_60_and_above(self):
+        for v in (6.0, 60, 7.5, 100):
+            self.assertEqual(
+                aura_detail._provider_icon(self.RT, value=v), 'prov-rt.png',
+                v)
+
+    def test_splat_below_60(self):
+        for v in (4.1, 41, 59):
+            self.assertEqual(
+                aura_detail._provider_icon(self.RT, value=v),
+                'prov-rt-splat.png', v)
+
+    def test_audience_keeps_popcorn(self):
+        self.assertEqual(
+            aura_detail._provider_icon(self.RT, audience=True, value=20),
+            'prov-rt-aud.png')
+
+    def test_unparseable_score_defaults_fresh(self):
+        self.assertEqual(
+            aura_detail._provider_icon(self.RT, value='n/a'), 'prov-rt.png')
+
+
 class TestFormatRating(unittest.TestCase):
     def test_ten_scale(self):
         self.assertEqual(aura_detail._fmt_rating(6.9, 'imdb://x'), '6.9')
