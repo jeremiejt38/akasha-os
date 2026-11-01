@@ -894,7 +894,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             pass
         # Plex trails the meta line with a small bordered box holding the
         # content rating ("12" / "10" / "TV-MA"), ~16px after the text.
-        rating = (item.get('content_rating') or '').strip()
+        rating = i18n.compact_rating(item.get('content_rating'))
         _set(self, 'AuraDetailMetaRating', '1' if rating else '')
         if rating:
             # PIL under-measures Kodi's Inter ~1.0x here (see i18n.ellipsize)
@@ -1074,7 +1074,7 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
 
     @staticmethod
     def _rating_chip(value, rating_image, audience=False):
-        icon = _provider_icon(rating_image, audience)
+        icon = _provider_icon(rating_image, audience, value)
         # IMDb/TMDB are pill badges (64x32 texture at 48x24); the tomato
         # splat and popcorn stay bare glyphs.
         icon_w = {'prov-imdb.png': 34, 'prov-tmdb.png': 42}.get(icon, 24)
@@ -2900,16 +2900,28 @@ def _age_label(content_rating):
     return mapped or raw
 
 
-def _provider_icon(rating_image, audience=False):
+def _provider_icon(rating_image, audience=False, value=None):
     """Plex chips draw a provider glyph (IMDb yellow, RT splat, popcorn,
-    TMDB teal) before the value -- small generated textures in media/."""
+    TMDB teal) before the value -- small generated textures in media/.
+    The critics mark is the fresh tomato at >=60% and the green splat
+    below, matching the official app's threshold."""
     img = rating_image or ''
     if 'imdb' in img:
         return 'prov-imdb.png'
     if 'themoviedb' in img:
         return 'prov-tmdb.png'
     if 'rottentomatoes' in img:
-        return 'prov-rt-aud.png' if audience else 'prov-rt.png'
+        if audience:
+            return 'prov-rt-aud.png'
+        try:
+            pct = float(value)
+            if pct <= 10:
+                pct *= 10
+            if pct < 60:
+                return 'prov-rt-splat.png'
+        except (TypeError, ValueError):
+            pass
+        return 'prov-rt.png'
     return ''
 
 

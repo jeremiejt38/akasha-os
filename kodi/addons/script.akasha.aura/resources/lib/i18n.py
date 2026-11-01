@@ -523,6 +523,10 @@ STRINGS = {
     33642: ('La découverte multi-services est une fonctionnalité Plex '
             'Cloud',
             'Cross-service discovery is a Plex cloud feature'),
+    33643: ('Avec Plex, vos films et séries sont à portée de clic, peu '
+            'importe où ils vivent',
+            'With Plex, films and TV shows are one click away, no '
+            'matter where they live'),
 }
 
 MONTH_ABBRS = {
@@ -668,6 +672,30 @@ def ellipsize(text, size, budget_px=190):
         return trimmed
     except Exception:
         return text
+
+
+def compact_rating(value):
+    """Compact a content rating for the ~34px hero/detail chip.
+
+    Server items carry short codes ('10', 'R', 'TV-MA') once the locale
+    prefix is stripped, but cloud/Discover hydration can merge long
+    French phrases ('Tous publics avec avertissement', 'Interdit aux
+    moins de 16 ans') that would explode the chip width -- Plex always
+    renders the short form. 'Tous publics' variants collapse to 'TP';
+    age-bearing phrases keep just the number; anything else long falls
+    back to its first token.
+    """
+    s = (value or '').strip()
+    if len(s) <= 8:
+        return s
+    low = s.lower()
+    if 'tous publics' in low:
+        return 'TP'
+    import re
+    m = re.search(r'\d+', s)
+    if m:
+        return m.group(0)
+    return s.split(' ', 1)[0][:8]
 
 
 def fmt_air_date(iso_date):

@@ -95,5 +95,27 @@ class PoGenerationTests(unittest.TestCase):
         self.assertEqual(missing, [])
 
 
+
+
+class CompactRatingTests(unittest.TestCase):
+    def test_short_ratings_pass_through(self):
+        for v in ('10', 'R', 'TV-MA', 'TP'):
+            self.assertEqual(i18n.compact_rating(v), v, v)
+
+    def test_all_audiences_collapses_to_tp(self):
+        self.assertEqual(
+            i18n.compact_rating('Tous publics avec avertissement'), 'TP')
+        self.assertEqual(i18n.compact_rating('Tous publics'), 'TP')
+
+    def test_age_phrases_keep_the_number(self):
+        self.assertEqual(
+            i18n.compact_rating('Interdit aux moins de 16 ans'), '16')
+
+    def test_unknown_long_falls_back(self):
+        self.assertEqual(i18n.compact_rating('Déconseillé'), 'Déconsei')
+        self.assertEqual(i18n.compact_rating(''), '')
+        self.assertEqual(i18n.compact_rating(None), '')
+
+
 if __name__ == '__main__':
     unittest.main()
