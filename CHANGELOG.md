@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.4...akasha-os-v0.72.5) (2026-11-01)
+
+
+### Bug Fixes
+
+* **aura-home:** promo nav double-hop + Plex-parity polish batch ([#245](https://github.com/jeremiejt38/akasha-os/issues/245)) ([2f088d2](https://github.com/jeremiejt38/akasha-os/commit/2f088d27d5acc0b28188b3027165a1a0043587ba))
+
 ## [0.72.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.3...akasha-os-v0.72.4) (2026-11-01)
 
 
