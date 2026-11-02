@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.2...akasha-os-v0.73.3) (2026-11-02)
+
+
+### Bug Fixes
+
+* **aura:** visual parity polish round 4 — recalibrated sizes, search focus ([#261](https://github.com/jeremiejt38/akasha-os/issues/261)) ([e7bf970](https://github.com/jeremiejt38/akasha-os/commit/e7bf97004670317824ed4f3dbfe858fd2b9a8fb5))
+
 ## [0.73.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.1...akasha-os-v0.73.2) (2026-11-02)
 
 
