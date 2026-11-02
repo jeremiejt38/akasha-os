@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.75.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.74.0...akasha-os-v0.75.0) (2026-11-02)
+
+
+### Features
+
+* **aura:** landscape Store cards and app-page overview sheet ([#274](https://github.com/jeremiejt38/akasha-os/issues/274)) ([b8c3305](https://github.com/jeremiejt38/akasha-os/commit/b8c3305a4b0bf2e799fffba0f25f9432118f254a))
+
 ## [0.74.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.7...akasha-os-v0.74.0) (2026-11-02)
 
 
