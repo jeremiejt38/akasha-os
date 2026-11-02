@@ -337,7 +337,13 @@ def build_video_item(raw_item, image_resolver):
         'grandparent_rating_key': raw_item.get('grandparentRatingKey'),
         'index': raw_item.get('index'),
         'season': raw_item.get('parentIndex'),
-        'show_title': raw_item.get('grandparentTitle') or '',
+        # Seasons carry their show name on parentTitle (grandparentTitle is
+        # the episode->show link, absent on season nodes). Needed for the
+        # Plex-style art-less placeholder card, which prints the show name.
+        'show_title': (raw_item.get('grandparentTitle')
+                       or (raw_item.get('parentTitle')
+                           if item_type == 'season' else '')
+                       or ''),
         'year': raw_item.get('year'),
         'originally_available_at': raw_item.get('originallyAvailableAt'),
         # Plex counts seasons under childCount on shows -- the search

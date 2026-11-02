@@ -1551,6 +1551,48 @@
                         <top>30</top>
                         <width>240</width>
                         <height>360</height>
+                        <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                    </control>
+                    <control type="label">
+                        <left>28</left>
+                        <top>30</top>
+                        <width>208</width>
+                        <height>360</height>
+                        <font>font_aura_midi</font>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                    </control>
+                    <control type="label">
+                        <left>28</left>
+                        <top>168</top>
+                        <width>208</width>
+                        <height>38</height>
+                        <font>font_aura_midi</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                    </control>
+                    <control type="label">
+                        <left>28</left>
+                        <top>216</top>
+                        <width>208</width>
+                        <height>38</height>
+                        <font>font_aura_midi</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                    </control>
+                    <control type="image">
+                        <left>12</left>
+                        <top>30</top>
+                        <width>240</width>
+                        <height>360</height>
                         <texture colordiffuse="FF242424">poster-corners.png</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
@@ -1646,6 +1688,52 @@
                         <fadetime>150</fadetime>
                         <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.IsEmpty(ListItem.Property(IsChannel))</visible>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="image">
+                        <left>12</left>
+                        <top>30</top>
+                        <width>240</width>
+                        <height>360</height>
+                        <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="label">
+                        <left>28</left>
+                        <top>30</top>
+                        <width>208</width>
+                        <height>360</height>
+                        <font>font_aura_midi</font>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="label">
+                        <left>28</left>
+                        <top>168</top>
+                        <width>208</width>
+                        <height>38</height>
+                        <font>font_aura_midi</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="label">
+                        <left>28</left>
+                        <top>216</top>
+                        <width>208</width>
+                        <height>38</height>
+                        <font>font_aura_midi</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="image">
@@ -1813,6 +1901,48 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
@@ -1849,6 +1979,52 @@
                                 <fadetime>150</fadetime>
                                 <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
@@ -2194,6 +2370,48 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
@@ -2230,6 +2448,52 @@
                                 <fadetime>150</fadetime>
                                 <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
@@ -2580,6 +2844,48 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
@@ -2616,6 +2922,52 @@
                                 <fadetime>150</fadetime>
                                 <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
@@ -2962,6 +3314,48 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
@@ -2998,6 +3392,52 @@
                                 <fadetime>150</fadetime>
                                 <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
@@ -3341,6 +3781,48 @@
                                 <top>0</top>
                                 <width>240</width>
                                 <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
@@ -3377,6 +3859,52 @@
                                 <fadetime>150</fadetime>
                                 <texture background="true">$INFO[ListItem.Art(poster)]</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="image">
+                                <left>0</left>
+                                <top>0</top>
+                                <width>240</width>
+                                <height>360</height>
+                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>0</top>
+                                <width>208</width>
+                                <height>360</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <aligny>center</aligny>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>138</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
+                                <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
+                            </control>
+                            <control type="label">
+                                <left>16</left>
+                                <top>186</top>
+                                <width>208</width>
+                                <height>38</height>
+                                <font>font_aura_midi</font>
+                                <align>center</align>
+                                <label>$INFO[ListItem.Property(ArtPlaceholder2)]</label>
+                                <textcolor>FFFFFFFF</textcolor>
+                                <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">

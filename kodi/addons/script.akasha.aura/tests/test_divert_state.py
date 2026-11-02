@@ -612,5 +612,53 @@ class RecoRowItemCacheTests(unittest.TestCase):
         self.assertEqual(calls.call_count, 2)
 
 
+class ArtPlaceholderTests(unittest.TestCase):
+    """Art-less cards (Plex emits them for unmatched local:// items) get
+    the ArtPlaceholder property the skin renders as a dark tile with the
+    title pre-split into up to two lines -- itemlayout labels have no
+    multi-line renderer."""
+
+    def _props(self, item):
+        class _LI:
+            def __init__(self, *args, **kwargs):
+                self.props = {}
+                self.art = {}
+
+            def setProperty(self, k, v):
+                self.props[k] = v
+
+            def setArt(self, a):
+                self.art = a
+
+            def getVideoInfoTag(self):
+                return MagicMock()
+
+            def setInfo(self, *a):
+                pass
+
+        with patch.object(aura_window.xbmcgui, 'ListItem', _LI):
+            li = aura_window._build_divert_list_item(item)
+        return li.props
+
+    def test_no_poster_sets_placeholder_from_show_title(self):
+        item = {'title': 'Season 1', 'type': 'season',
+                'show_title': 'Baki the Grappler'}
+        props = self._props(item)
+        self.assertEqual(props.get('ArtPlaceholder'), 'Baki the')
+        self.assertEqual(props.get('ArtPlaceholder2'), 'Grappler')
+
+    def test_no_poster_short_title_single_line(self):
+        props = self._props({'title': 'M', 'type': 'movie'})
+        self.assertEqual(props.get('ArtPlaceholder'), 'M')
+        self.assertNotIn('ArtPlaceholder2', props)
+
+    def test_poster_present_no_placeholder(self):
+        item = {'title': 'X', 'type': 'movie',
+                'poster_url': 'http://p/x.png'}
+        props = self._props(item)
+        self.assertNotIn('ArtPlaceholder', props)
+
+
 if __name__ == '__main__':
     unittest.main()
+

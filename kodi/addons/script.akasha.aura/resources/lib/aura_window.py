@@ -6160,6 +6160,25 @@ def _build_divert_list_item(item):
         # switches to an aspect-fit variant (Aura.xml IsChannel) instead
         # of scale-cropping the logo top/bottom.
         li.setProperty('IsChannel', '1')
+    if not art.get('poster'):
+        # Plex draws art-less cards (unmatched local:// items) as a dark
+        # tile with the show/item title centered. List itemlayouts have
+        # no multi-line renderer (wrapmultiline and textbox both render
+        # single-line inside layouts), so the wrap is pre-split here --
+        # the skin stacks one label per line, ~16 chars per line at
+        # font_aura_midi in the 208 px text column.
+        text = item.get('show_title') or item['title']
+        line1 = ''
+        for word in text.split():
+            cand = (line1 + ' ' + word).strip()
+            if len(cand) <= 16 or not line1:
+                line1 = cand
+            else:
+                break
+        li.setProperty('ArtPlaceholder', line1)
+        rest = text[len(line1):].strip()
+        if rest:
+            li.setProperty('ArtPlaceholder2', rest)
 
     # Kodi 20+ InfoTagVideo API (setInfo/resumetime are deprecated and warn
     # in kodi.log); the legacy path stays as fallback for stubbed test runs.
