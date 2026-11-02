@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.3...akasha-os-v0.73.4) (2026-11-02)
+
+
+### Bug Fixes
+
+* **aura:** parity polish round 4b — rail alignment, chip, divider gap ([#263](https://github.com/jeremiejt38/akasha-os/issues/263)) ([4284992](https://github.com/jeremiejt38/akasha-os/commit/4284992884d21073a576ffac9db14d112d06ea66))
+
 ## [0.73.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.2...akasha-os-v0.73.3) (2026-11-02)
 
 
