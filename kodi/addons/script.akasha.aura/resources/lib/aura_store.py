@@ -33,6 +33,7 @@ import json
 import os
 import subprocess
 import tempfile
+import time
 import urllib.request
 
 import xbmc
@@ -61,6 +62,11 @@ STATUS_LABEL_ID = 6020
 LIST_ID = 6010
 BACK_BUTTON_ID = 6030
 
+# Overview dialog (AuraStoreDetail.xml)
+DETAIL_PRIMARY_ID = 7001
+DETAIL_SECONDARY_ID = 7002
+DETAIL_BACK_ID = 7003
+
 # Category chip strip: 6050 = "All", 6051..6055 = one chip per known
 # catalogue category. Chips whose category has no entry are hidden by the
 # skin (StoreCat_<slug> window property).
@@ -85,6 +91,88 @@ def category_label(category):
 
 def _now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+class AuraStoreDetailWindow(xbmcgui.WindowXMLDialog):
+    """App-page style overview sheet shown before installing an entry.
+
+    Mirrors the Play Store app page: icon tile, name, meta line, action
+    pills and a metadata block. The caller reads `action` after doModal():
+    'primary' (install / launch / uninstall per entry state), 'secondary'
+    (external-app uninstall) or None (closed without action).
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.action = None
+        self._armed_at = 0.0
+
+    def set_entry(self, entry):
+        """Populate the sheet for `entry`; call before doModal()."""
+        install = entry.get('install', {})
+        itype = install.get('type')
+        installed = entry['installed']
+        cat = category_label(entry.get('category', ''))
+        state = i18n.tr(33302) if installed else i18n.tr(33303)
+
+        self.setProperty('StoreDetName', entry.get('name', ''))
+        self.setProperty('StoreDetMeta', '{} • v{} • {}'.format(
+            cat, entry.get('version', '-'), state))
+        self.setProperty('StoreDetDesc', entry.get('description', ''))
+        icon = store_external.resolve_icon_url(
+            entry['id'], entry.get('icon', ''))
+        self.setProperty('StoreDetIcon', icon)
+
+        details = [
+            i18n.tr(33324).format(itype or '-'),
+            i18n.tr(33325).format(install.get('source_url') or '-'),
+            i18n.tr(33326).format(install.get('deep_link')
+                                  or entry.get('deep_link') or '-'),
+            i18n.tr(33337).format(entry.get('maintainer') or '-'),
+        ]
+        legal = (entry.get('legal_notice') or '').strip()
+        if legal:
+            details.append(legal)
+        self.setProperty('StoreDetDetails', '\n'.join(details))
+
+        if not installed:
+            primary = '' if itype == 'script' else i18n.tr(33144)
+        elif itype == 'external-app':
+            primary = i18n.tr(33021)
+        else:
+            primary = i18n.tr(33023)
+        self.setProperty('StoreDetPrimary', primary)
+        self.setProperty('StoreDetSecondary',
+                         '1' if installed and itype == 'external-app' else '')
+        self.action = None
+
+    def onInit(self):
+        # The Select keypress that opened this dialog can be re-dispatched
+        # into it and click the focused pill instantly; swallow clicks for
+        # a short arming window.
+        self._armed_at = time.monotonic() + 0.4
+        try:
+            if self.getProperty('StoreDetPrimary'):
+                self.setFocus(self.getControl(DETAIL_PRIMARY_ID))
+            else:
+                self.setFocus(self.getControl(DETAIL_BACK_ID))
+        except RuntimeError:
+            pass
+
+    def onClick(self, controlID):
+        if time.monotonic() < self._armed_at:
+            return
+        if controlID == DETAIL_PRIMARY_ID:
+            self.action = 'primary'
+        elif controlID == DETAIL_SECONDARY_ID:
+            self.action = 'secondary'
+        self.close()
+
+    def onAction(self, action):
+        if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK):
+            self.close()
+            return
+        super().onAction(action)
 
 
 def _fetch_json(url):
@@ -224,35 +312,19 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             return self.entries[pos]
         return None
 
-    def _show_detail(self, entry):
-        install = entry.get('install', {})
-        lines = [
-            entry.get('description', ''),
-            '',
-            i18n.tr(33304).format(entry.get('category', '-')),
-            i18n.tr(33323).format(entry.get('version', '-')),
-            i18n.tr(33324).format(install.get('type', '-')),
-            i18n.tr(33325).format(install.get('source_url', '-')),
-            i18n.tr(33326).format(install.get('deep_link') or '-'),
-            '',
-            entry.get('legal_notice', ''),
-        ]
-        xbmcgui.Dialog().textviewer(entry['name'], '\n'.join(lines))
-
     def _install(self, entry):
+        """Install/uninstall a non-external entry, invoked from the
+        overview sheet's primary pill."""
         install = entry.get('install', {})
         itype = install.get('type')
         xbmc.log('Akasha Aura Store: install requested for {} (type={})'
                   .format(entry['id'], itype), xbmc.LOGINFO)
 
         if entry['installed']:
-            if itype == 'external-app':
-                self._manage_external(entry)
-            else:
-                if aura_menu.confirm(
-                        self, 'Akasha Store',
-                        i18n.tr(33306).format(entry['name'])):
-                    self._uninstall(entry)
+            if aura_menu.confirm(
+                    self, 'Akasha Store',
+                    i18n.tr(33306).format(entry['name'])):
+                self._uninstall(entry)
             return
 
         if itype == 'kodi-repo':
@@ -279,13 +351,12 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         elif itype == 'zip-url':
             self._install_from_zip(entry, install)
         elif itype == 'external-app':
-            self._manage_external(entry)
-        elif itype == 'script':
-            # Informative only in V1 (plan section 3): never execute
-            # anything from a manifest field automatically.
-            self._show_detail(entry)
+            self._install_external(entry)
         else:
-            xbmc.log('Akasha Aura Store: unknown install type {} for {}'
+            # 'script' and unknown types are informative only (the
+            # overview sheet already shows every manifest field); never
+            # execute anything from a manifest field automatically.
+            xbmc.log('Akasha Aura Store: no install action for type {} ({})'
                       .format(itype, entry['id']), xbmc.LOGWARNING)
 
         self._reload()
@@ -355,34 +426,6 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         store_registry.record_uninstall(entry['id'])
         self._reload()
 
-    def _manage_external(self, entry):
-        """Context menu for an `external-app` Store entry.
-
-        Existing controls only give us a single list click, so we use a native
-        Kodi context menu to distinguish install / launch / detail / uninstall
-        as coherently as possible.
-        """
-        installed = entry['installed']
-        if installed:
-            options = [i18n.tr(33021), i18n.tr(33315), i18n.tr(33023)]
-        else:
-            options = [i18n.tr(33144), i18n.tr(33315)]
-
-        choice = aura_menu.contextmenu(self, options)
-        if choice < 0:
-            return
-
-        if options[choice] == i18n.tr(33021):
-            self._launch_external(entry)
-        elif options[choice] == i18n.tr(33315):
-            self._show_detail(entry)
-        elif options[choice] == i18n.tr(33144):
-            self._install_external(entry)
-            self._reload()
-        elif options[choice] == i18n.tr(33023):
-            self._uninstall_external(entry)
-            self._reload()
-
     def _install_external(self, entry):
         install = entry.get('install', {})
         source_url = install.get('source_url')
@@ -448,7 +491,41 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         elif controlID == LIST_ID:
             entry = self._selected_entry()
             if entry:
-                self._install(entry)
+                self._open_overview(entry)
+
+    def _open_overview(self, entry):
+        """Show the app-page overview sheet, then run the action the user
+        picked: install / launch / uninstall according to entry state."""
+        detail = AuraStoreDetailWindow(
+            'AuraStoreDetail.xml',
+            self.addon.getAddonInfo('path'), 'Default', '1080i')
+        detail.set_entry(entry)
+        detail.doModal()
+        action = detail.action
+        if action is None:
+            return
+
+        install = entry.get('install', {})
+        itype = install.get('type')
+        if action == 'primary':
+            if not entry['installed']:
+                if itype == 'external-app':
+                    self._install_external(entry)
+                    self._reload()
+                else:
+                    self._install(entry)
+            elif itype == 'external-app':
+                self._launch_external(entry)
+            elif aura_menu.confirm(
+                    self, 'Akasha Store',
+                    i18n.tr(33306).format(entry['name'])):
+                self._uninstall(entry)
+        elif action == 'secondary':
+            if aura_menu.confirm(
+                    self, 'Akasha Store',
+                    i18n.tr(33306).format(entry['name'])):
+                self._uninstall_external(entry)
+                self._reload()
 
     def onAction(self, action):
         aid = action.getId()

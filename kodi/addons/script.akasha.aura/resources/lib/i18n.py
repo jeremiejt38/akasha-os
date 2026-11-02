@@ -392,6 +392,8 @@ STRINGS = {
     33333: ('Musique', 'Music'),
     33334: ('Rafraîchir', 'Refresh'),
     33335: ('Épinglée', 'Pinned'),
+    33336: ('Détails', 'Details'),
+    33337: ('Mainteneur : {}', 'Maintainer: {}'),
 
     # --- divertissement state view (B17): offline / error / empty ---------
     33550: ('Serveur inaccessible', 'Server unreachable'),

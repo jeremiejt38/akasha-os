@@ -1090,6 +1090,16 @@ msgctxt "#33335"
 msgid "Pinned"
 msgstr "Épinglée"
 
+# Détails
+msgctxt "#33336"
+msgid "Details"
+msgstr "Détails"
+
+# Mainteneur : {}
+msgctxt "#33337"
+msgid "Maintainer: {}"
+msgstr "Mainteneur : {}"
+
 # État du réseau
 msgctxt "#33401"
 msgid "Network status"
