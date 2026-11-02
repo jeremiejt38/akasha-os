@@ -482,3 +482,37 @@ grille Films se remplit (5041 éléments) après le scénario complet.
 - OSD : états skip-marker, Up Next, file de lecture remplie en contexte
   réel (lecture lancée depuis Aura, pas par URL brute).
 - Grille Bibliothèque : positions des légendes titre/année.
+
+### Fiche détail série (vs `32-detail-show-top`, item comparable)
+
+Mesures bbox sur paire Plex The Rookie / Aura Mercredi — toutes les
+zones structurelles à ±2 px :
+
+| Zone | Plex | Aura |
+|---|---|---|
+| Logo/titre | y128-244 | y128-244 |
+| Ligne méta | 240-269 | 240-269 |
+| Rangée ratings | 275-287 | 275-289 |
+| Plot (l.1) | 351-369 | 352-368 |
+| Pill Resume | texte 443-460 | 444-457 |
+| Ligne activité | 524-544 | 524-544 |
+| Titre « N Saisons » | 616-629 | 618-629 |
+| Top 1re carte saison | 620 | 621 |
+
+Strip d'onglets (Série/Saison N), cercles d'action, avatars activité,
+check « vu » sur cartes : positions identiques. Écarts de contenu :
+nombre de badges ratings (tomato/popcorn séparés vs compteur Plex),
+texte localisé, nombre de saisons.
+
+### Grille : légendes (vs `15-lib-browse`)
+
+Titre centré ~y525 / année ~y565 des deux côtés (±5 px), blanc puis
+gris — conforme. Barre de progression orange en bas de carte sur item
+en cours, comme Plex.
+
+### Reste à auditer (mis à jour)
+
+- OSD en contexte réel Aura (file de lecture remplie, skip-marker,
+  Up Next) — nécessite une lecture lancée depuis Aura (le stream 4K
+  direct timeoute via WAN ; passer par un item 1080p via l'UI).
+- Diff masqué fiche détail même item (structure déjà à ±2 px).
