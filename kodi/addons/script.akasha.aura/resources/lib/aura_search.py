@@ -116,24 +116,24 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             # so the panel position and focus are forced once a tick later.
             self.setFocus(self.getControl(KEYS_PANEL_ID))
             def _reset_focus():
-                # Kodi re-applies its remembered focused control after
-                # onInit/activation finishes; keep correcting until the
-                # panel focus sticks (bounded ~1.5s) or the dialog dies.
-                steady = 0
-                for _ in range(10):
+                # Kodi applies the default/remembered control late --
+                # after onInit finishes and sometimes seconds later,
+                # once async renders settle. For ~7.5s, snap the focus
+                # back to 'a' only when it sits on the bottom buttons
+                # (where the stale restore always lands); a user who
+                # already navigated elsewhere keeps their focus.
+                for _ in range(80):
                     if self._yield_stop.is_set():
                         return
                     try:
-                        self.getControl(KEYS_PANEL_ID).selectItem(0)
-                        self.setFocusId(KEYS_PANEL_ID)
-                        if self.getFocusId() == KEYS_PANEL_ID:
-                            steady += 1
-                            if steady == 2:
-                                return
-                        else:
-                            steady = 0
-                    except RuntimeError as e:
-                        xbmc.log('Akasha Aura Search: focus reset failed: {}'.format(e), xbmc.LOGWARNING)
+                        fid = self.getFocusId()
+                        if fid in (SPACE_BUTTON_ID, BACKSPACE_BUTTON_ID,
+                                   CLEAR_BUTTON_ID):
+                            self.getControl(KEYS_PANEL_ID).selectItem(0)
+                            self.setFocusId(KEYS_PANEL_ID)
+                        elif fid not in (-1, KEYS_PANEL_ID):
+                            return
+                    except RuntimeError:
                         return
                     self._yield_stop.wait(0.15)
             threading.Thread(target=_reset_focus, daemon=True).start()
