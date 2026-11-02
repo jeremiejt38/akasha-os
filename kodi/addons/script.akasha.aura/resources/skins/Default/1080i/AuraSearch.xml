@@ -69,28 +69,28 @@
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>20</left>
-                    <top>22</top>
-                    <width>32</width>
-                    <height>32</height>
+                    <left>18</left>
+                    <top>9</top>
+                    <width>36</width>
+                    <height>36</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
                 </control>
                 <control type="image">
-                    <left>25</left>
-                    <top>22</top>
-                    <width>22</width>
-                    <height>20</height>
+                    <left>22</left>
+                    <top>13</top>
+                    <width>28</width>
+                    <height>28</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
                 </control>
                 <control type="image">
-                    <left>27</left>
-                    <top>20</top>
-                    <width>18</width>
-                    <height>14</height>
+                    <left>22</left>
+                    <top>16</top>
+                    <width>27</width>
+                    <height>21</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
@@ -131,28 +131,28 @@
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>20</left>
-                    <top>22</top>
-                    <width>32</width>
-                    <height>32</height>
+                    <left>18</left>
+                    <top>9</top>
+                    <width>36</width>
+                    <height>36</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
                 </control>
                 <control type="image">
-                    <left>25</left>
-                    <top>22</top>
-                    <width>22</width>
-                    <height>20</height>
+                    <left>22</left>
+                    <top>13</top>
+                    <width>28</width>
+                    <height>28</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
                 </control>
                 <control type="image">
-                    <left>27</left>
-                    <top>20</top>
-                    <width>18</width>
-                    <height>14</height>
+                    <left>22</left>
+                    <top>16</top>
+                    <width>27</width>
+                    <height>21</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
@@ -186,28 +186,28 @@
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>20</left>
-                    <top>22</top>
-                    <width>32</width>
-                    <height>32</height>
+                    <left>18</left>
+                    <top>9</top>
+                    <width>36</width>
+                    <height>36</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
                 </control>
                 <control type="image">
-                    <left>25</left>
-                    <top>22</top>
-                    <width>22</width>
-                    <height>20</height>
+                    <left>22</left>
+                    <top>13</top>
+                    <width>28</width>
+                    <height>28</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),home)</visible>
                 </control>
                 <control type="image">
-                    <left>27</left>
-                    <top>20</top>
-                    <width>18</width>
-                    <height>14</height>
+                    <left>22</left>
+                    <top>16</top>
+                    <width>27</width>
+                    <height>21</height>
                     <aspectratio>keep</aspectratio>
                     <texture colordiffuse="CCFFFFFF">$INFO[ListItem.Art(icon)]</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),menu)</visible>
@@ -452,11 +452,11 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>98</left>
+                    <left>104</left>
                     <top>0</top>
-                    <width>326</width>
+                    <width>320</width>
                     <height>80</height>
-                    <font>font_aura_rowhead</font>
+                    <font>font_aura_small</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
@@ -486,11 +486,11 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>98</left>
+                    <left>104</left>
                     <top>0</top>
-                    <width>326</width>
+                    <width>320</width>
                     <height>80</height>
-                    <font>font_aura_rowhead</font>
+                    <font>font_aura_small</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
@@ -513,11 +513,11 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>98</left>
+                    <left>104</left>
                     <top>0</top>
-                    <width>326</width>
+                    <width>320</width>
                     <height>80</height>
-                    <font>font_aura_rowhead</font>
+                    <font>font_aura_small</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
@@ -532,7 +532,7 @@
             <top>47</top>
             <width>1234</width>
             <height>40</height>
-            <font>font_aura_section_bold</font>
+            <font>font_aura_main_bold</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33586]</label>
             <textcolor>DCFFFFFF</textcolor>
@@ -544,10 +544,10 @@
              spot once a query is typed. -->
         <control type="label">
             <left>686</left>
-            <top>132</top>
+            <top>125</top>
             <width>1234</width>
             <height>56</height>
-            <font>font_aura_section_bold</font>
+            <font>font_aura_mid_bold</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33584]</label>
             <textcolor>FFFFFFFF</textcolor>

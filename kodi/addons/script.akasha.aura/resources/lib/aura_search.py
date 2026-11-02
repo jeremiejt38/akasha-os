@@ -111,7 +111,32 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             self._render_pills()
             self._render_recent()
             self._refresh_query()
+            # Plex opens with the cursor on 'a'. Kodi restores the
+            # remembered focused control/container position after onInit,
+            # so the panel position and focus are forced once a tick later.
             self.setFocus(self.getControl(KEYS_PANEL_ID))
+            def _reset_focus():
+                # Kodi re-applies its remembered focused control after
+                # onInit/activation finishes; keep correcting until the
+                # panel focus sticks (bounded ~1.5s) or the dialog dies.
+                steady = 0
+                for _ in range(10):
+                    if self._yield_stop.is_set():
+                        return
+                    try:
+                        self.getControl(KEYS_PANEL_ID).selectItem(0)
+                        self.setFocusId(KEYS_PANEL_ID)
+                        if self.getFocusId() == KEYS_PANEL_ID:
+                            steady += 1
+                            if steady == 2:
+                                return
+                        else:
+                            steady = 0
+                    except RuntimeError as e:
+                        xbmc.log('Akasha Aura Search: focus reset failed: {}'.format(e), xbmc.LOGWARNING)
+                        return
+                    self._yield_stop.wait(0.15)
+            threading.Thread(target=_reset_focus, daemon=True).start()
         except Exception as e:
             xbmc.log('Akasha Aura Search: init error: {}'.format(e), xbmc.LOGERROR)
 

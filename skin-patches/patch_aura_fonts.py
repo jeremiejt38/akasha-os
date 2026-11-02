@@ -42,6 +42,8 @@ FONTS = [
     'Inter-Unicode-Bold.ttf',35),
     ('font_aura_section_bold',
     'Inter-Unicode-Bold.ttf',32),
+    ('font_aura_mid_bold',
+    'Inter-Unicode-Bold.ttf',30),
     ('font_aura_small_bold',
     'Inter-Unicode-Bold.ttf',24),
     ('font_aura_main_bold',
