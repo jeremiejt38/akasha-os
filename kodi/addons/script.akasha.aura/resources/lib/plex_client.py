@@ -1118,6 +1118,7 @@ class PlexClient:
                 'name': ch.get('tag') or ch.get('title') or '',
                 'start_ms': int(ch.get('startTimeOffset') or 0),
                 'end_ms': int(ch.get('endTimeOffset') or 0),
+                'has_thumb': bool(ch.get('hasThumbnail')),
             }
             for ch in meta.get('Chapter') or []
             if ch.get('startTimeOffset') is not None
