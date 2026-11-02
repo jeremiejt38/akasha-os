@@ -354,3 +354,16 @@ Reste ouvert / documenté :
   (cosmétique, basse priorité).
 - Dégradé/horloge couleur hero : inchangé en attendant une
   référence Plex sur le même épisode.
+
+## Polish round 4b — retour de vérification Claude
+
+- **Rail recherche vs accueil** : les icônes loupe/home étaient ~12/5 px
+  plus hautes que sur l'accueil (slots 54 px ≠ géométrie absolue du rail
+  home). `top` internes recalés (loupe 9→21, home 13→18) dans les trois
+  layouts — positions identiques sur les deux écrans (`rail_fix_059`).
+- **Chip âge** : padding `+16` → `+10`, TV-MA ~79 px (cible Plex ~79).
+- **Divider « Bibliothèques »** : le trait démarrait collé au texte ;
+  décalé de 10 px (left 116→126, width 219→209).
+- **Gap hero replié** : comportement voulu — le bloc hero descend +50 px
+  sous la barre déployée (Plex pousse aussi le hero sous la barre
+  ouverte). Conservé, documenté.

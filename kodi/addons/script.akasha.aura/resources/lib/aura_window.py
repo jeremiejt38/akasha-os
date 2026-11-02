@@ -1755,7 +1755,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                                  self._divert_view == 'library') else '')
         # Plex's age chip hugs its text (~40px for "10"): resize the
         # chip group/image/label since Kodi cannot auto-size it.
-        chip_w = max(44, 13 * len(rating) + 16)
+        chip_w = max(44, 13 * len(rating) + 10)
         # 5005/5006/5007: chip group+image+label in the meta slot below the
         # episode subtitle; 5009/5010/5013/5012: same chip in the no-subtitle
         # (movie/show) meta slot.
