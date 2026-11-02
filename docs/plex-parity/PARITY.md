@@ -541,3 +541,62 @@ Chaîne complète validée end-to-end :
 
 Captures : `osd_queue_bars_183/184`, `osd_q_chfocus_185`,
 `osd_q_qfocus_186`, `skip_marker_187`, `post_skip_188`.
+
+## Passe visuelle Apps / Store / Jeux (style « TV store »)
+
+Audit + refonte des écrans hors-Divertissement, qui utilisaient encore
+le langage Estuary de départ (police `font12`, fond brun `FF1A1310`,
+focus orange `FF8C6C`) — incohérent avec le reste d'Aura.
+
+**Store (`AuraStore.xml`)** — remodelé façon TV store (Play Store TV) :
+
+- Fond/gradient sombre Aura, header « Akasha Store » + horloge.
+- Strip de catégories en pills (`Tous`, SVOD, Replay, TV en direct,
+  Sport, Musique, Rafraîchir) — mêmes trois états que les onglets
+  Divertissement : texte grisé inactif, outline sur l'actif, pill
+  blanche texte sombre au focus.
+- Grille 6 colonnes de cartes icônes (256×256 catalogue) avec nom +
+  catégorie localisée persistants, badge vert « Installé » ✓.
+- Bande détail en bas : nom, « Catégorie • version • état », description.
+- Filtre par catégorie fonctionnel (`store_client.filter_entries`,
+  testé) ; le filtre actif persiste à la réouverture (comportement
+  store, pas de reset forcé).
+- Pagination préservée (PagedList local sur le catalogue filtré).
+
+**Mes Apps (`AuraApp.xml`)** — même langage cartes :
+
+- Grille de cartes icônes : nom + version toujours visibles (avant :
+  label uniquement au focus), badge épinglée (marque-page), badge
+  provenance Store/Web en méta.
+- Strip d'actions en pills (Lancer / Épingler / Désinstaller / Retour)
+  et bande détail (nom, version • source, résumé).
+
+**Onglet App (`Aura.xml`)** — rangée « Applications épinglées » :
+
+- Tuiles texte remplacées par le même composant carte icône (icône +
+  nom + version).
+- Fix : `_load_pinned_apps` lit `app.pinned` via une instance `Addon`
+  fraîche — la copie mise en cache par Kodi était stale juste après
+  `doModal()`, la rangée restait vide après épinglage.
+- Fix : switcher « app » (`_HomePressAppSwitcher`) lisait
+  `app['thumbnail']` alors que l'inventaire expose `icon` — les icônes
+  n'y apparaissaient jamais.
+
+**Onglet Jeux (`Aura.xml`)** :
+
+- Sous-onglets SteamLink / Moonlight / Autres → strip pills façon
+  Divertissement (avant : boutons oranges pleins).
+- Posters jeux : coins arrondis (`poster-corners`), placeholder carte
+  sombre, fade 150 ms, zoom 5 % + anneau focus blanc au focus — même
+  idiom que la grille Bibliothèque (avant : focus = bloc orange).
+- « Autres » : boutons texte → cartes icônes (même composant que le
+  Store) ; les raccourcis couverts par les sous-onglets dédiés sont
+  dédupliqués.
+- États vides/non configurés : message de statut propre dans le strip.
+
+Vérifié live sur Pi (captures `storework/` 001-029) : Store « Tous »
+41 apps, filtre « Musique » 6 apps, badges installé, Mes Apps
+(noms/versions/badges), rangée épinglée, Jeux + Autres, réouvertures
+répétées sans état résiduel. Non vérifié live : grille posters
+Steam/Sunshine réelle (services non configurés sur le Pi de test —
+l'état « non configuré » est confirmé).
