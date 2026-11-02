@@ -738,7 +738,12 @@ class AuraDetailWindow(xbmcgui.WindowXMLDialog):
             # director line instead (~y530, official-live/27); elsewhere
             # they sit under the actions.
             self.getControl(7207).setPosition(
-                200, act_top + 13 if not (self.mode == 'season' or deep)
+                (296 if (self._activity_avatar3 or
+                         self._activity_initial3) else
+                 (248 if (self._activity_avatar2 or
+                          self._activity_initial2) else 200))
+                if not (self.mode == 'season' or deep) else 200,
+                act_top + 13 if not (self.mode == 'season' or deep)
                 else 2200)
             self._badge_top = (2200 if deep
                                else t - 40 if season_cards else t + 24)
