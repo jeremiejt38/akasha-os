@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.6...akasha-os-v0.73.7) (2026-11-02)
+
+
+### Bug Fixes
+
+* **aura:** OSD queue renders Plex-style chapter bars, gate BIF thumbs ([#270](https://github.com/jeremiejt38/akasha-os/issues/270)) ([7b571a4](https://github.com/jeremiejt38/akasha-os/commit/7b571a4ddeaa6be3e5c2e85c36017e30a0d2ebfc))
+
 ## [0.73.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.5...akasha-os-v0.73.6) (2026-11-02)
 
 
