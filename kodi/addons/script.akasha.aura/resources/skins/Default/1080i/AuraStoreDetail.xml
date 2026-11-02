@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1211">
+    <defaultcontrol>7001</defaultcontrol>
+    <zorder>4</zorder>
+    <controls>
+        <!-- Dimmer over the Store window below -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="CC000000">white.png</texture>
+        </control>
+
+        <!-- Overview sheet, Play-app-page style -->
+        <control type="image">
+            <left>200</left>
+            <top>180</top>
+            <width>1520</width>
+            <height>720</height>
+            <texture colordiffuse="F2171717" border="32">rounded-solid.png</texture>
+        </control>
+
+        <!-- App tile: same landscape card component as the grid -->
+        <control type="image">
+            <left>260</left>
+            <top>250</top>
+            <width>400</width>
+            <height>225</height>
+            <texture colordiffuse="FF242424" border="20">rounded-solid.png</texture>
+        </control>
+        <control type="image">
+            <left>380</left>
+            <top>282</top>
+            <width>160</width>
+            <height>160</height>
+            <aspectratio align="center" aligny="center">keep</aspectratio>
+            <fadetime>150</fadetime>
+            <texture background="true">$INFO[Window.Property(StoreDetIcon)]</texture>
+        </control>
+
+        <!-- Name + meta -->
+        <control type="label">
+            <left>700</left>
+            <top>250</top>
+            <width>960</width>
+            <height>54</height>
+            <font>font_aura_head_bold</font>
+            <label>$INFO[Window.Property(StoreDetName)]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <wrapmultiline>false</wrapmultiline>
+        </control>
+        <control type="label">
+            <left>700</left>
+            <top>308</top>
+            <width>960</width>
+            <height>32</height>
+            <font>font_aura_meta</font>
+            <label>$INFO[Window.Property(StoreDetMeta)]</label>
+            <textcolor>A0FFFFFF</textcolor>
+            <wrapmultiline>false</wrapmultiline>
+        </control>
+
+        <!-- Action pills: [primary] [Retour] [secondary]. The secondary
+             (uninstall, external apps only) sits rightmost; hidden
+             controls simply become dead edges in the nav chain. -->
+        <control type="button" id="7001">
+            <left>700</left>
+            <top>362</top>
+            <width>240</width>
+            <height>52</height>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <label>$INFO[Window.Property(StoreDetPrimary)]</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="4D000000" border="26">cap-r24.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="26">cap-r24.png</texturefocus>
+            <onright>7003</onright>
+            <ondown>7003</ondown>
+            <visible>!String.IsEmpty(Window.Property(StoreDetPrimary))</visible>
+        </control>
+        <control type="button" id="7003">
+            <left>956</left>
+            <top>362</top>
+            <width>200</width>
+            <height>52</height>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33020]</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="4D000000" border="26">cap-r24.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="26">cap-r24.png</texturefocus>
+            <onleft>7001</onleft>
+            <onright>7002</onright>
+            <ondown>7003</ondown>
+        </control>
+        <control type="button" id="7002">
+            <left>1172</left>
+            <top>362</top>
+            <width>240</width>
+            <height>52</height>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33023]</label>
+            <textcolor>BBFFFFFF</textcolor>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="4D000000" border="26">cap-r24.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="26">cap-r24.png</texturefocus>
+            <onleft>7003</onleft>
+            <ondown>7003</ondown>
+            <visible>String.IsEqual(Window.Property(StoreDetSecondary),1)</visible>
+        </control>
+
+        <!-- Divider -->
+        <control type="image">
+            <left>260</left>
+            <top>520</top>
+            <width>1400</width>
+            <height>2</height>
+            <texture colordiffuse="33FFFFFF">white.png</texture>
+        </control>
+
+        <!-- Details heading + description -->
+        <control type="label">
+            <left>700</left>
+            <top>540</top>
+            <width>960</width>
+            <height>32</height>
+            <font>font_aura_mini_bold</font>
+            <label>$ADDON[script.akasha.aura 33336]</label>
+            <textcolor>FFFFFFFF</textcolor>
+        </control>
+        <control type="label">
+            <left>700</left>
+            <top>578</top>
+            <width>960</width>
+            <height>110</height>
+            <font>font_aura_meta</font>
+            <label>$INFO[Window.Property(StoreDetDesc)]</label>
+            <textcolor>B3FFFFFF</textcolor>
+        </control>
+
+        <!-- Structured metadata block (textbox: wraps long lines and
+             scrolls if a legal notice runs long) -->
+        <control type="textbox">
+            <left>700</left>
+            <top>700</top>
+            <width>960</width>
+            <height>170</height>
+            <font>font_aura_tiny</font>
+            <label>$INFO[Window.Property(StoreDetDetails)]</label>
+            <textcolor>77FFFFFF</textcolor>
+            <autoscroll time="3000" delay="4000" repeat="5000">!Control.HasFocus(7001)</autoscroll>
+        </control>
+    </controls>
+</window>

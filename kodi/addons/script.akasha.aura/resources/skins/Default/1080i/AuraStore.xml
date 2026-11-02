@@ -429,34 +429,38 @@
             <onup>6050</onup>
             <ondown>6010</ondown>
             <onleft>6010</onleft>
-            <itemlayout width="300" height="280">
+            <itemlayout width="360" height="262">
+                <!-- Landscape banner card, Play-Store-TV style: rounded
+                     16:9 tile with the app icon centered (the catalogue
+                     has no banner art, so the icon plays that role),
+                     name and category under the card. -->
                 <control type="image">
-                    <left>50</left>
+                    <left>12</left>
                     <top>0</top>
-                    <width>200</width>
-                    <height>200</height>
-                    <texture colordiffuse="FF1E1E1E" border="24">rounded-solid.png</texture>
+                    <width>336</width>
+                    <height>189</height>
+                    <texture colordiffuse="FF1E1E1E" border="16">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>70</left>
-                    <top>20</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <left>116</left>
+                    <top>30</top>
+                    <width>128</width>
+                    <height>128</height>
                     <aspectratio align="center" aligny="center">keep</aspectratio>
                     <fadetime>150</fadetime>
                     <texture background="true">$INFO[ListItem.Art(icon)]</texture>
                 </control>
                 <control type="image">
-                    <left>204</left>
-                    <top>158</top>
+                    <left>304</left>
+                    <top>145</top>
                     <width>36</width>
                     <height>36</height>
                     <texture colordiffuse="FF2E9E4F">circle.png</texture>
                     <visible>String.IsEqual(ListItem.Property(installed),1)</visible>
                 </control>
                 <control type="image">
-                    <left>212</left>
-                    <top>166</top>
+                    <left>312</left>
+                    <top>153</top>
                     <width>20</width>
                     <height>20</height>
                     <texture colordiffuse="FFFFFFFF">check-bold.png</texture>
@@ -464,8 +468,8 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>206</top>
-                    <width>300</width>
+                    <top>197</top>
+                    <width>360</width>
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -475,8 +479,8 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>234</top>
-                    <width>300</width>
+                    <top>225</top>
+                    <width>360</width>
                     <height>26</height>
                     <font>font_aura_tiny</font>
                     <align>center</align>
@@ -485,42 +489,42 @@
                     <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="300" height="280">
+            <focusedlayout width="360" height="262">
                 <control type="image">
-                    <left>50</left>
+                    <left>12</left>
                     <top>0</top>
-                    <width>200</width>
-                    <height>200</height>
-                    <texture colordiffuse="FF2A2A2A" border="24">rounded-solid.png</texture>
+                    <width>336</width>
+                    <height>189</height>
+                    <texture colordiffuse="FF2A2A2A" border="16">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>70</left>
-                    <top>20</top>
-                    <width>160</width>
-                    <height>160</height>
+                    <left>116</left>
+                    <top>30</top>
+                    <width>128</width>
+                    <height>128</height>
                     <aspectratio align="center" aligny="center">keep</aspectratio>
                     <fadetime>150</fadetime>
                     <texture background="true">$INFO[ListItem.Art(icon)]</texture>
                     <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                 </control>
                 <control type="image">
-                    <left>44</left>
+                    <left>8</left>
                     <top>-6</top>
-                    <width>212</width>
-                    <height>212</height>
+                    <width>344</width>
+                    <height>201</height>
                     <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
                 </control>
                 <control type="image">
-                    <left>204</left>
-                    <top>158</top>
+                    <left>304</left>
+                    <top>145</top>
                     <width>36</width>
                     <height>36</height>
                     <texture colordiffuse="FF2E9E4F">circle.png</texture>
                     <visible>String.IsEqual(ListItem.Property(installed),1)</visible>
                 </control>
                 <control type="image">
-                    <left>212</left>
-                    <top>166</top>
+                    <left>312</left>
+                    <top>153</top>
                     <width>20</width>
                     <height>20</height>
                     <texture colordiffuse="FFFFFFFF">check-bold.png</texture>
@@ -528,8 +532,8 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>206</top>
-                    <width>300</width>
+                    <top>197</top>
+                    <width>360</width>
                     <height>30</height>
                     <font>font_aura_mini</font>
                     <align>center</align>
@@ -539,8 +543,8 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>234</top>
-                    <width>300</width>
+                    <top>225</top>
+                    <width>360</width>
                     <height>26</height>
                     <font>font_aura_tiny</font>
                     <align>center</align>
