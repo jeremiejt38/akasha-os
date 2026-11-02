@@ -275,3 +275,7 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/audit0731/home_foryou_042.png` | audit0731 | home_foryou | 064058 | pi |
 | `akasha-direct/audit0731/home_after_043.png` | audit0731 | home_after | 064117 | pi |
 | `akasha-direct/audit0731/search_polish_044.png` | audit0731 | search_polish | 064149 | pi |
+| `akasha-direct/audit0731/sidebar_order_045.png` | audit0731 | sidebar_order | 064321 | pi |
+| `akasha-direct/audit0731/sidebar_order2_046.png` | audit0731 | sidebar_order2 | 064341 | pi |
+| `akasha-direct/audit0731/sidebar_order3_047.png` | audit0731 | sidebar_order3 | 064401 | pi |
+| `akasha-direct/audit0731/sidebar_order4_048.png` | audit0731 | sidebar_order4 | 064429 | pi |
