@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.74.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.7...akasha-os-v0.74.0) (2026-11-02)
+
+
+### Features
+
+* **aura:** TV-store visual pass on Apps, Store and Games ([#272](https://github.com/jeremiejt38/akasha-os/issues/272)) ([e103fdf](https://github.com/jeremiejt38/akasha-os/commit/e103fdf450b392ed93341028778bb6e90faf4756))
+
 ## [0.73.7](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.6...akasha-os-v0.73.7) (2026-11-02)
 
 
