@@ -427,3 +427,58 @@ Diff pixel masqué final : **1,15 %** sur ~41 % de l'écran non masqué
 (masque ~59 % : en-tête, historique, posters et titres, bord contenu).
 Écrans couverts par la convergence : recherche, sidebar, accueil.
 Non audités par cette méthode : fiche détail, lecteur, bibliothèque.
+
+## Audit bibliothèque + OSD (session 0731)
+
+### Grille « Bibliothèque » (vs `15-lib-browse`)
+
+- Cartes ~240 px de large, pitch ~283 px, 6 colonnes, première carte
+  x~122, dernière se terminant x~1780 : géométrie identique à Plex
+  (carte focusée mesurée x121-372 des deux côtés).
+- Rail A-Z : colonne de lettres x~1845-1875 des deux côtés ; lettre
+  courante cerclée (« # » chez Aura quand le tri titre commence par
+  des items non-alphabétiques, « A » chez Plex — même logique).
+- Rangée de pills (Tout/Films/par/⇅ Titre/N éléments/⋮) et strip
+  d'onglets alignées ; Aura affiche 4 onglets (superset Collections
+  documenté, présent seulement si la section a des collections).
+- Écarts restants : titres/années sous les cartes pas encore mesurés
+  pixel-près (le squelette masquait tout avant le fix ci-dessous).
+
+### Bug fonctionnel trouvé et corrigé (PR #267)
+
+La grille Bibliothèque restait en squelettes indéfiniment après un
+changement de bibliothèque dont l'onglet par défaut est Recommandé :
+`_load_divert_section_items` était supplanté par `_load_recommendations`
+(bump de `_view_load_gen`), le worker abandonnait sans libérer
+`_divert_browse_inflight`, et `_apply_browse_restate` court-circuitait
+pour toujours. Fix : marqueur tagué par génération, libéré par les
+deux chemins d'abandon (bail précoce + drain), rechargement si
+`_divert_items` appartient à une autre section. Vérifié live : la
+grille Films se remplit (5041 éléments) après le scénario complet.
+
+### OSD lecteur (vs `35-osd`, `42-osd-level1`)
+
+- Barre de progression orange : **même ligne de pixels y969-980** des
+  deux côtés ; temps écoulé à gauche, restant « -MM:SS » à droite,
+  knob blanc, piste grise — conforme.
+- Titre 2 lignes haut-gauche (x73-74 des deux côtés) + badge HD ;
+  horloge haut-droite.
+- Cercle pause à gauche, cercles streams + gear en bas à droite,
+  chevron sous la barre — mêmes positions.
+- Menus OSD (Pistes, Paramètres/Qualité, File de lecture) : panneau
+  sombre arrondi centré, pill blanche sur la ligne focusée, ✓ sur la
+  sélection — conforme au pattern Plex (refs 36-41).
+- Limites de l'audit : le plan vidéo n'est pas capturable sur Pi
+  (rendu DRMPRIME hors framebuffer → fond noir sur les captures) ;
+  le titre « file.mkv » vient d'une lecture par URL brute — via Aura
+  le titre/épisode réel s'affiche (store_playback_context).
+- Empilement de menus OSD possible si invoqués par RunScript en série
+  (artefact de test — l'UI réelle n'ouvre qu'un menu modal à la fois).
+
+### Reste à auditer
+
+- Fiche détail : mesures faites sur items mixtes (±10 px sur les zones
+  structurelles) — reste à produire un diff masqué sur un même item.
+- OSD : états skip-marker, Up Next, file de lecture remplie en contexte
+  réel (lecture lancée depuis Aura, pas par URL brute).
+- Grille Bibliothèque : positions des légendes titre/année.
