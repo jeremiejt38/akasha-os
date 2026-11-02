@@ -92,6 +92,7 @@ de production quand l'endpoint est disponible ; `⚠️` = à confirmer avant im
 - **Accueil — round 25 (audit Claude r32, mesures pixel)** : champ de l'accueil **teinté par `UltraBlurColors`** comme Plex — deux voiles (`scrim-tint-left.png`/`scrim-tint-bottom.png`, teintés par `setColorDiffuse` sur `topLeft`/`bottomLeft` dans `_apply_hero_fanart`, synchronisé avec le swap debouncé du fanart) ; palette brute quasi-noire → `_tint_hex` booste saturation ~0.70 / valeur 0.42 uniquement si la source est colorée (s≥0.25, sinon repli sur le coin voisin le plus saturé — évite d'inventer une teinte sur `141314`) — vérifié à l'écran (voile olive sur Corneil & Bernie, teal/violet sur Mercredi) ; **« · Akasha »** : le « · » en tête de label est supprimé par le renderer Kodi → préfixe NBSP `\u00a0` (non trimmé) — point médian désormais visible, suffixe baseline +4 px, écart titre→suffixe 10 px ; hero variante A recalée au pixel (sous-titre 306-320 / méta 360-377 = officiel `53`), variante B (méta +14, cast +9 + gris `99FFFFFF`) = officiel `55` ; rail rétracté : capsule sombre translucide (`cap-r36` `73000000`, x28 y432 w72 h212) + icônes ~15 % plus grosses (avatar 46, loupe 38, maison 26, menu 22) comme l'officiel ; allégations Claude infirmées : la méta Plex **reflowe** bien sans sous-titre (mesure `55` vs `53`), le « cast » film est présent chez Plex.
 - **Accueil — round 26b (audit Claude r55/r58, re-mesuré au pixel)** : bloc hero remonté −47 px (logo ancré bas y=228, sous-titre 253-276, méta 306-321, plot 359+ = officiel `53` au pixel) ; le bloc texte **glisse +50 px quand la barre modules est déployée** (`AuraBarFocused`) pour dégager le strip contextuel ; scrim régénéré (haut-droite ~2× plus lumineux, fondu bas conservé) ; rampe de teinte avancée à y~500 pleine largeur ; **deux variantes de chip** : épisode = boîte noire opaque `rounded-solid` sans contour (`53`), film = `meta-rating-box` seul dont le bord clair intégré sert de contour (`55`) — `chip-outline.png` retiré (doublait le bord) ; écart méta→chip 14→24 px, texte chip Inter Regular 19 ; rail : icônes ~21 px aux centres officiels (524/572/620), capsule `border=34` (72 px < 2×38 px provoquait un filet sombre par chevauchement des tranches), avatar découpé en cercle par `_circle_avatar` (PIL dispo dans le runtime Kodi du Pi) avec repli URL+masque ; focus-ring régénéré rayon ~20 px ; suffixe « · Akasha » espacé ~8 px (officiel ~9) ; dates hero accentuées (« août » — `_MONTHS_FR` était volontairement ASCII).
 - **Accueil — round post-0.72.4 (audit Claude sur captures réelles)** : chip de classification hero = **label compact** — les libellés FR longs (« Tous publics avec avertissement ») produisaient une pill ~456 px ; `i18n.compact_rating()` normalise vers le badge court Plex (« Tous publics », « 12 », `TV-14`) avec troncature bornée pour les formes inconnues (accueil + fiche) ; chip RT **splat verte sous 60 %** (`prov-rt-splat.png`, tomate fraîche conservée ≥60 %, seuil mesuré sur la référence) ; voile de champ fiche : **harmonisation proportionnelle de teinte** des coins inférieurs vers la palette haute (luminance conservée — pas de teal forcé) appliquée au bake ET à `veil_color()` pour les masques ; cartes cast 240×230 px au **pitch 272 px** alignées x=128 (géométrie officielle) ; tuile promo Tendances refaite (carte 152 px, titre + sous-titre localisé 33643 centrés, anneau de focus). **Fix nav promo** : Down depuis la tuile sautait la rangée d'en dessous — Kodi re-livre la pression au contrôle `list` d'atterrissage et la chaîne reco la traitait comme une nouvelle saisie (double saut, `5115/5215 → 5310/5410`, Up cascadant vers le strip). `setNavigation()` n'est pas honoré sur les boutons : `onup`/`ondown`/`onright` désormais déclarés sur les 5 boutons promo + garde `_last_focus_change` (<50 ms) sur la chaîne reco, même motif que le fix chips. Vérifié live : `5110→5215→5310→5215` et promo en slot 0 (`5210→5115→5210`).
+- **Accueil — v0.73.0 (bannière promo pleine largeur)** : re-mesure émulateur — la tuile promo officielle n'est pas une carte mais une **bannière ~x127→1822 × ~310 px**, translucide à liseré clair, titre/sous-titre **centrés**, deux pills : CTA primaire gris translucide (blanc au focus) + « Don't show this again ». Aura remplace la carte par cette géométrie exacte (`promo-banner.png`, ids `RECO_PROMO_DISMISS_IDS = list_id+6`) ; le dismiss persiste `divert.show_promo=false` **réversible** via les réglages de l'addon (Plex n'offre aucun rappel). Right primaire→dismiss câblé dans `_sync_navigation` (`setNavigation` auto-épingle les directions non définies). Vérifié live v0.73.0 : `5110→5215→5216`, dismiss→focus 5210, promo réactivée, scroll slot0↔1 (`5210→Up→5115`, `5115→Up→5110`) sans saut de rangée.
 - **Icône « maison » fantôme** : ~~à investiguer~~ → corrigée en v0.69.5 — l'icône de l'item sélectionné dans la `focusedlayout` sidebar (3112) n'avait pas `Control.HasFocus(3310)` et se rendait hors focus.
 - **Hero** : suit le focus (vérifié). ~~Plex rend `home.continue` en cartes paysage~~ → **correction audit v0.69.5** : la référence rend Continue Watching en **posters** avec barres de progression — le jumeau paysage est neutralisé (`style='hero'` → shelf dans `_rebind_reco_slots`), et le hub `home.ondeck` est filtré de l'accueil (Plex le fusionne dans Continue Watching ; sa rangée dédiée doublait « Continuer à regarder »).
 - **Fiche — chips de notes** : ~~1 pilule unique~~ → v0.69.5 : chips **nues** multi-providers depuis le tableau `Rating[]` serveur (pilule âge + IMDb / RT critique / RT audience / TMDB, icônes + valeurs — 4 chips max + âge).
@@ -250,14 +251,27 @@ need Plex's availability API -- `metadata.provider.plex.tv/library/metadata/<id>
 detail page opens hydrated but its local follow-up calls (extras,
 history) no-op — no playable file exists locally.
 
-The "Find What To Watch, Anywhere!" promo tile at the end of the
-Tendances feed is reproduced as a synthetic trailing hub row
-(`promo` descriptor): a full-width (1696 px) dark rounded card with
-centered white bold text, focusable with the Aura focus ring, scrolled
-in by the same five-slot viewport as real rows. Plex's tile opens the
-cross-service Discover surface — a cloud feature with no local
-equivalent — so clicking it shows the explicit Plex Cloud notification
-like the other non-routable cloud entries.
+The "Find What To Watch, Anywhere!" promo banner — measured on the
+official app as a full-width (~x127→1822, ~310 px tall) translucent
+tile pinned at feed position 2, never the footer — is reproduced as a
+synthetic hub row (`promo` descriptor) scrolled in by the same
+five-slot viewport as real rows. The banner carries Plex's exact
+layout: centered bold title + gray subtitle over a translucent rounded
+veil (`promo-banner.png`), and two focusable pills — the grayed
+primary CTA (white when focused) and "Ne plus afficher" (Plex:
+"Don't show this again").
+
+- The primary pill opens Plex's cross-service Discover surface — a
+  cloud feature with no local equivalent — so clicking it shows the
+  explicit Plex Cloud notification like the other non-routable cloud
+  entries.
+- The dismiss pill persists `divert.show_promo=false` and drops the
+  synthetic row, refocusing the row that slides into the freed slot.
+  Plex offers no restore path once dismissed; Aura's dismissal is
+  reversible from the addon settings page (default: shown).
+- Focus/nav verified on-device end to end: `5110→5215→Right→5216→
+  Select→5210`, viewport scroll cycles the banner through slot 0↔1
+  (`5210→Up→5115`, `5115→Up→5110`) without skipped rows.
 
 Cloud detail pages (verified on Pi, VisionQuest): trailer/clip cards
 hydrate into their PARENT record wholesale (type + key), so a cloud
