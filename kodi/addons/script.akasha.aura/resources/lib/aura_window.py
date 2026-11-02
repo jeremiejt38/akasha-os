@@ -302,6 +302,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # re-entering Bibliotheque must reload when the cache no longer
         # holds browse items.
         self._divert_items_source = 'browse'
+        # Section key that produced _divert_items for the 'browse' source
+        # (a superseded load never sets it, so a stale skeleton can be
+        # detected and reloaded instead of resting in place forever).
+        self._divert_items_section = None
         self._divert_paged = None
         self._divert_browse_inflight = False
         # Letters actually present in the active section (Plex shows only
@@ -476,6 +480,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._closing = False
             self._view_load_gen += 1
             self._az_jump_active = False
+            self._divert_browse_inflight = False
             self._collection_probe_inflight.clear()
             if self._pools_shutdown:
                 self._view_pool = ThreadPoolExecutor(
@@ -797,7 +802,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # -- unless a Collections/Categories/drill-down visit clobbered the
         # shared _divert_items slot since (observed: the Bibliotheque tab
         # kept rendering collection collages after a Collections visit).
-        if self._divert_items_source != 'browse':
+        # The grid load can also have been superseded mid-flight (e.g. by
+        # the Recommande load _activate_library fires right after
+        # _select_divert_section): _divert_items_section then still names
+        # the previous owner while the panel shows skeletons -- reload
+        # instead of resting on a grid that will never fill.
+        if self._divert_items_source != 'browse' \
+                or (not self._browse_load_pending()
+                    and self._divert_items_section != section.get('key')):
             self._load_divert_section_items(section)
         else:
             self._apply_browse_restate(section)
@@ -2445,12 +2457,25 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'empty', title=i18n.tr(33555), message='',
                 action_label=i18n.tr(33020), action=self._focus_sidebar)
 
+    def _browse_load_pending(self):
+        """A browse grid fetch that can still legitimately fill the panel.
+
+        _divert_browse_inflight is tagged with the arming load's view
+        generation, so a superseded worker's marker no longer counts as
+        'loading' -- its result is discarded at the drain check and the
+        flag only reads as pending while the live generation owns it.
+        The brief True window before the gen re-tag counts as live.
+        """
+        flag = getattr(self, '_divert_browse_inflight', False)
+        return bool(flag) and (flag is True
+                               or flag == self._view_load_gen)
+
     def _apply_browse_restate(self, section):
         """Re-derive the state for the already-loaded Bibliotheque grid on
         a tab switch that reloads nothing -- otherwise an 'empty'/'error'
         state set by another tab would linger over valid content. An
         error state set by the grid's own failed load is kept as-is."""
-        if getattr(self, '_divert_browse_inflight', False):
+        if self._browse_load_pending():
             # The grid is mid-load: whatever terminal state it reaches is
             # decided by _load_divert_section_items' own drain, not by a
             # snapshot of the previous section's items.
@@ -3321,6 +3346,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # In-flight marker: _apply_browse_restate() must not re-derive an
         # 'empty' state while the new section's first page is still
         # loading -- the work thread below sets the terminal state.
+        # Re-tagged with the load generation inside the lock below so a
+        # superseded worker can release it only when it still owns it.
         self._divert_browse_inflight = True
         paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
@@ -3330,12 +3357,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         with self._ui_lock:
             self._view_load_gen += 1
             gen = self._view_load_gen
+            self._divert_browse_inflight = gen
 
         def work():
             # Bail before doing anything if this load was superseded --
             # even the A-Z rail render must not paint another section's
-            # letters over the view the user already moved to.
+            # letters over the view the user already moved to. The inflight
+            # marker must not stay latched though: a newer loader owns the
+            # panel but never clears the flag, which would leave the grid
+            # skeleton-state forever (observed: Bibliotheque tab staying
+            # dimmed after the Recommande load superseded the grid fetch).
             if gen != self._view_load_gen:
+                with self._ui_lock:
+                    if self._divert_browse_inflight == gen:
+                        self._divert_browse_inflight = False
                 return
             try:
                 self._load_az_rail(section)
@@ -3353,6 +3388,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             items = [_build_divert_list_item(item) for item in paged.items]
             with self._ui_lock:
                 if self._closing or gen != self._view_load_gen:
+                    # Superseded mid-fetch: release the inflight marker
+                    # this load armed, unless a newer browse load already
+                    # re-armed it -- otherwise the skeleton stays forever
+                    # (observed: Séries grid after a Recommande tab visit).
+                    if self._divert_browse_inflight == gen:
+                        self._divert_browse_inflight = False
                     return
                 # A superseding load already set its own flag -- only the
                 # owning generation may clear it.
@@ -3360,6 +3401,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 if error is not None:
                     self._drop_pending_appends(DIVERT_PANEL_ID)
                 self._divert_items = paged.items
+                self._divert_items_section = section.get('key')
 
                 self._render_divert_toolbar(section)
                 self._render_divert_status(section, error)
