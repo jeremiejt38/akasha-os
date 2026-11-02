@@ -121,7 +121,8 @@ class StoreChaptersTests(unittest.TestCase):
         client.server_url = 'https://plex.test'
         client.token = 'tok'
         client.item_chapters.return_value = [
-            {'name': 'Intro', 'start_ms': 0, 'end_ms': 584208},
+            {'name': 'Intro', 'start_ms': 0, 'end_ms': 584208,
+             'has_thumb': True},
         ]
         osd_menu.store_chapters(client, {
             'rating_key': '42',
@@ -131,6 +132,19 @@ class StoreChaptersTests(unittest.TestCase):
             stored[0]['thumb'],
             'https://plex.test/library/parts/123/indexes/sd/0'
             '?X-Plex-Token=tok')
+
+    def test_no_bif_index_keeps_thumb_empty(self):
+        client = MagicMock()
+        client.server_url = 'https://plex.test'
+        client.token = 'tok'
+        client.item_chapters.return_value = [
+            {'name': 'Intro', 'start_ms': 0, 'end_ms': 584208},
+        ]
+        osd_menu.store_chapters(client, {
+            'rating_key': '42',
+            'part_key': '/library/parts/123/abc/file.mkv'})
+        stored = json.loads(self.home.getProperty(osd_menu.PROP_CHAPTERS))
+        self.assertEqual(stored[0]['thumb'], '')
 
     def test_no_chapters_clears_property(self):
         self.home.setProperty(osd_menu.PROP_CHAPTERS, 'stale')

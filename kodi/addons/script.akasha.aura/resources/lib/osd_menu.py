@@ -197,7 +197,8 @@ def store_chapters(client, item):
                            '?X-Plex-Token={}'.format(
                                server, part_id,
                                int(ch.get('start_ms') or 0), token)
-                           if part_id and server and token else '')}
+                           if part_id and server and token
+                           and ch.get('has_thumb') else '')}
                 for ch in fetch(rk) or []
             ]
         except Exception as e:
@@ -641,6 +642,8 @@ class AuraOsdQueueWindow(xbmcgui.WindowXMLDialog):
                     # corners as every other card via the art proxy.
                     card = art_proxy.wrap(ch['thumb'], 22)
                     li.setArt({'thumb': card, 'icon': card})
+                else:
+                    li.setProperty('noart', '1')
                 lst.addItem(li)
         qlst = self.getControl(1002)
         for i, it in enumerate(self._queue):

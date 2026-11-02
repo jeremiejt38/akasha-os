@@ -676,8 +676,10 @@ class TestPlexClientTimeline(unittest.TestCase):
         url = mock_urlopen.call_args[0][0].full_url
         self.assertIn('includeChapters=1', url)
         self.assertEqual(chapters, [
-            {'name': 'Ouverture', 'start_ms': 0, 'end_ms': 584208},
-            {'name': '', 'start_ms': 584208, 'end_ms': 1200000}])
+            {'name': 'Ouverture', 'start_ms': 0, 'end_ms': 584208,
+             'has_thumb': False},
+            {'name': '', 'start_ms': 584208, 'end_ms': 1200000,
+             'has_thumb': False}])
 
     @patch('urllib.request.urlopen')
     def test_item_chapters_empty_when_absent(self, mock_urlopen):

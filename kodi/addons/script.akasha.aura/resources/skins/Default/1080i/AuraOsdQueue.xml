@@ -61,6 +61,9 @@
                 <font>font_aura_head_bold</font>
                 <label>$ADDON[script.akasha.aura 33565]</label>
                 <textcolor>FFFFFFFF</textcolor>
+                <!-- Plex collapses the chapters row to bare segment bars
+                     when the queue takes focus (no section heading). -->
+                <visible>!Control.HasFocus(1002)</visible>
             </control>
             <control type="list" id="1001">
                 <left>20</left>
@@ -78,6 +81,7 @@
                         <aspectratio>scale</aspectratio>
                         <fadetime>150</fadetime>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        <visible>String.IsEmpty(ListItem.Property(noart)) + !Control.HasFocus(1002)</visible>
                     </control>
                     <control type="image">
                         <left>0</left>
@@ -85,7 +89,18 @@
                         <width>404</width>
                         <height>227</height>
                         <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
-                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    <visible>String.IsEmpty(ListItem.Property(noart)) + !Control.HasFocus(1002) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    </control>
+                    <!-- Chapter collapse: when the queue takes focus (or no
+                         BIF frame exists) Plex renders thin segment bars
+                         instead of the 16:9 cards. -->
+                    <control type="image">
+                        <left>22</left>
+                        <top>212</top>
+                        <width>360</width>
+                        <height>12</height>
+                        <texture colordiffuse="FF2E2E2E">cap-r8.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(noart)) | Control.HasFocus(1002)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
@@ -117,6 +132,7 @@
                         <aspectratio>scale</aspectratio>
                         <fadetime>150</fadetime>
                         <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                        <visible>String.IsEmpty(ListItem.Property(noart)) + !Control.HasFocus(1002)</visible>
                     </control>
                     <control type="image">
                         <left>0</left>
@@ -124,7 +140,15 @@
                         <width>404</width>
                         <height>227</height>
                         <texture colordiffuse="FF0F0F0F">landscape-corners.png</texture>
-                    <visible>!String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    <visible>String.IsEmpty(ListItem.Property(noart)) + !Control.HasFocus(1002) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
+                    </control>
+                    <control type="image">
+                        <left>22</left>
+                        <top>212</top>
+                        <width>360</width>
+                        <height>12</height>
+                        <texture colordiffuse="FF5C5C5C">cap-r8.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(noart)) | Control.HasFocus(1002)</visible>
                     </control>
                     <control type="image">
                         <left>-4</left>
@@ -132,6 +156,7 @@
                         <width>412</width>
                         <height>235</height>
                         <texture colordiffuse="FFFFFFFF" border="24">cap-outline-r24.png</texture>
+                        <visible>String.IsEmpty(ListItem.Property(noart)) + !Control.HasFocus(1002)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
