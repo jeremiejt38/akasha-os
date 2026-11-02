@@ -5890,13 +5890,15 @@ def _circle_avatar(url, size=80):
         ImageDraw.Draw(mask).ellipse((0, 0, size - 1, size - 1), fill=255)
         im.putalpha(mask)
         path = os.path.join(
-            xbmc.translatePath('special://profile/addon_data/script.akasha.aura'),
+            xbmcvfs.translatePath('special://profile/addon_data/script.akasha.aura'),
             'avatar_circle.png')
         if not os.path.isdir(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
         im.save(path)
         return path
-    except Exception:
+    except Exception as e:
+        xbmc.log('Akasha Aura: avatar circle failed: {}'.format(e),
+                 xbmc.LOGWARNING)
         return ''
 
 
@@ -6106,13 +6108,29 @@ def _unreleased_label(item):
         i18n.tr(33600).format(i18n.fmt_air_date(str(oa)[:10])))
 
 
-def _truncate_plot(text, limit=130):
-    """Clamp the hero synopsis to roughly two lines (like Plex): cut at a
-    word boundary and append an ellipsis when truncated."""
+def _truncate_plot(text, limit=1400):
+    """Clamp the hero synopsis to the two-line textbox (like Plex). The
+    880px box wraps at font_aura_plot (Inter 25), so the budget is
+    ~2x880 rendered px measured by i18n.text_width (PIL scale -- Kodi
+    draws Inter ~1.2x wider). Char-count fallback when PIL is absent."""
     text = ' '.join((text or '').split())
-    if len(text) <= limit:
+    width = i18n.text_width(text, 25)
+    if width is None:
+        # Stripped build (no PIL/TTF): ~200 chars ~= the 1400px budget.
+        if len(text) <= 200:
+            return text
+        cut = text[:200].rsplit(' ', 1)[0].rstrip(',;:.')
+        return cut + '…'
+    if width <= limit:
         return text
-    cut = text[:limit].rsplit(' ', 1)[0].rstrip(',;:.')
+    lo, hi = 0, len(text)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if i18n.text_width(text[:mid], 25) <= limit:
+            lo = mid
+        else:
+            hi = mid - 1
+    cut = text[:lo].rsplit(' ', 1)[0].rstrip(',;:.')
     return cut + '…'
 
 
