@@ -15,7 +15,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture background="true">bg-gradient-search.png</texture>
+            <texture background="true">bg-gradient-search2.png</texture>
         </control>
 
         <!-- Collapsed icon rail: Plex keeps it on the search page too
@@ -257,10 +257,10 @@
             <ondown>8115</ondown>
                         <itemlayout width="72" height="72">
                 <control type="image">
-                    <left>3</left>
-                    <top>3</top>
-                    <width>66</width>
-                    <height>66</height>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
                     <texture colordiffuse="22FFFFFF" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
@@ -268,7 +268,7 @@
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_small</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -276,10 +276,10 @@
                 </control></itemlayout>
             <focusedlayout width="72" height="72" condition="Control.HasFocus(8100)">
                 <control type="image">
-                    <left>3</left>
-                    <top>3</top>
-                    <width>66</width>
-                    <height>66</height>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
                     <texture colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
@@ -287,7 +287,7 @@
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <font>font_aura_mini_bold</font>
+                    <font>font_aura_small_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -295,10 +295,10 @@
                 </control></focusedlayout>
             <focusedlayout width="72" height="72" condition="!Control.HasFocus(8100)">
                 <control type="image">
-                    <left>3</left>
-                    <top>3</top>
-                    <width>66</width>
-                    <height>66</height>
+                    <left>4</left>
+                    <top>4</top>
+                    <width>64</width>
+                    <height>64</height>
                     <texture colordiffuse="22FFFFFF" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
@@ -306,7 +306,7 @@
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_small</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -337,18 +337,18 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>185</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>179</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-space.png</texture>
             <visible>!Control.HasFocus(8115)</visible>
         </control>
         <control type="image">
-            <left>185</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>179</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-space-dark.png</texture>
             <visible>Control.HasFocus(8115)</visible>
         </control>
@@ -371,18 +371,18 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>329</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>323</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-backspace.png</texture>
             <visible>!Control.HasFocus(8116)</visible>
         </control>
         <control type="image">
-            <left>329</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>323</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-backspace-dark.png</texture>
             <visible>Control.HasFocus(8116)</visible>
         </control>
@@ -405,18 +405,18 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>473</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>467</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-clear.png</texture>
             <visible>!Control.HasFocus(8117)</visible>
         </control>
         <control type="image">
-            <left>473</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>467</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-clear-dark.png</texture>
             <visible>Control.HasFocus(8117)</visible>
         </control>
@@ -424,7 +424,7 @@
         <!-- Recent searches -->
         <control type="list" id="8110">
             <left>96</left>
-            <top>640</top>
+            <top>646</top>
             <width>432</width>
             <height>440</height>
             <orientation>vertical</orientation>
@@ -528,7 +528,7 @@
              empty. -->
         <control type="label">
             <left>686</left>
-            <top>47</top>
+            <top>45</top>
             <width>1234</width>
             <height>40</height>
             <font>font_aura_main_bold</font>
@@ -1256,7 +1256,7 @@
             <onleft>8100</onleft>
             <onup>8131</onup>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-                        <itemlayout width="299" height="450">
+                        <itemlayout width="293" height="460">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -1279,10 +1279,10 @@
                     <top>380</top>
                     <width>240</width>
                     <height>28</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
@@ -1296,7 +1296,7 @@
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control></itemlayout>
-            <focusedlayout width="299" height="450" condition="Control.HasFocus(8131)">
+            <focusedlayout width="293" height="460" condition="Control.HasFocus(8131)">
                 <control type="image">
                     <left>-6</left>
                     <top>-6</top>
@@ -1344,7 +1344,7 @@
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control></focusedlayout>
-            <focusedlayout width="299" height="450" condition="!Control.HasFocus(8131)">
+            <focusedlayout width="293" height="460" condition="!Control.HasFocus(8131)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -1367,10 +1367,10 @@
                     <top>380</top>
                     <width>240</width>
                     <height>28</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
