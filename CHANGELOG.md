@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.6](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.5...akasha-os-v0.73.6) (2026-11-02)
+
+
+### Bug Fixes
+
+* **aura:** browse grid stuck on skeletons after superseded load ([#267](https://github.com/jeremiejt38/akasha-os/issues/267)) ([1618b6d](https://github.com/jeremiejt38/akasha-os/commit/1618b6da52e12873bb959f0b1965e6c48d48fa95))
+
 ## [0.73.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.4...akasha-os-v0.73.5) (2026-11-02)
 
 
