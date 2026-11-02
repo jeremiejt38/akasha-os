@@ -211,3 +211,6 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/aura-postfix/banner-live/after_dismiss_010.png` | aura-postfix/banner-live | after_dismiss | 075856 | pi |
 | `akasha-direct/aura-promo/scroll_top_state_001.png` | aura-promo | scroll_top_state | 080822 | pi |
 | `akasha-direct/aura-promo/scrolled_back_top_002.png` | aura-promo | scrolled_back_top | 081225 | pi |
+| `akasha-direct/aura-promo/yesno_dialog_003.png` | aura-promo | yesno_dialog | 081835 | pi |
+| `akasha-direct/aura-promo/dd_dialog2_004.png` | aura-promo | dd_dialog2 | 181030 | pi |
+| `akasha-direct/aura-promo/v073_banner_005.png` | aura-promo | v073_banner | 035951 | pi |
