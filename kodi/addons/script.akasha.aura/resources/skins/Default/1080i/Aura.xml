@@ -171,7 +171,7 @@
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture colordiffuse="F214141A" border="10">rounded-solid.png</texture>
+                        <texture colordiffuse="F214141A" border="10">rating-chip-solid.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
@@ -224,7 +224,7 @@
                         <top>0</top>
                         <width>44</width>
                         <height>34</height>
-                        <texture colordiffuse="F214141A" border="10">rounded-solid.png</texture>
+                        <texture colordiffuse="F214141A" border="10">rating-chip-solid.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraHeroChipSolid))</visible>
                     </control>
                     <control type="label" id="5012">
