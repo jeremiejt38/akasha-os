@@ -316,3 +316,41 @@ logged at real script exit for the residual unknown worker.
 `HomePressMonitor`'s single-press Timer is now daemonized too.
 Verified on Pi: five rapid Backs return to a working home each time,
 Kodi shutdown stays prompt.
+
+## Polish round 4 — mesures Claude au pixel (v0.73.3)
+
+Deuxième passe de recalage après que la passe round 3 a dépassé
+plusieurs cibles Plex (corrections livrées dans cette branche,
+toutes vérifiées au pixel sur captures Pi `audit0731/round4_*`,
+`sidebar_r4_052`, `search_r4_053`, `search_focus_ok_058`) :
+
+- **Historique recherche** : labels en `font_aura_small` régulier
+  (24 px, texte démarrant ~x200) — la passe précédente les avait
+  rendus ~1,7× trop gros en Bold.
+- **Sidebar** : labels `font_aura_small` régulier ~24 px (cible Plex
+  23-24 px), boîtes icônes 41 px → glyphes ~28 px visibles (padding
+  intrinsèque des PNG mesuré à ~66-85 % du canvas).
+- **Recherche hint / titre** : hint en `font_aura_mid_bold` ~28 px
+  blanc (nouvelle face Inter Bold 30 injectée par
+  `patch_aura_fonts.py`), « Recherches populaires » ~30 px à y153.
+- **Rail replié (accueil + recherche)** : boîtes recalées pour un
+  glyphe uniforme ~24 px ; la capsule sombre `FF1A1A1A` était déjà
+  présente — le signalement Claude était un faux positif (pixel
+  identique `[26,26,26]` des deux côtés, même pour le fond écran).
+- **Strip onglets bibliothèque** : animation repliée −80 → −88,
+  alignée sur l'accueil (y~32 vérifié).
+- **Chip classification hero** : 32 px de haut, formule de largeur
+  resserrée `max(40, 14*len+16)` → TV-MA ~86×32 (cible ~79×32,
+  résidu d'arrondi acceptable).
+- **Focus initial recherche** : Kodi restaure le dernier contrôle
+  focusé après `onInit` (bouton espace 8115). Un thread de re-
+  assertion borné (~1,5 s) force `selectItem(0)` + focus panel 8100
+  jusqu'à ce que « a » tienne — vérifié live `search_focus_ok_058`.
+
+Reste ouvert / documenté :
+- Suffixe « · Akasha » sur certaines lignes méta : différence
+  intentionnelle en attente de décision.
+- Icône historique : disque horloge vs flèche-horloge Plex
+  (cosmétique, basse priorité).
+- Dégradé/horloge couleur hero : inchangé en attendant une
+  référence Plex sur le même épisode.

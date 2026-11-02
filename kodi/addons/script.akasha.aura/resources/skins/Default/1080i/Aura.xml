@@ -633,10 +633,11 @@
             <control type="group">
                 <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                 <!-- The strip recenters itself in the freed top space when
-                     the global bar recedes (y 118 -> 60), and slides back
-                     under it when the bar fades back in. -->
+                     the global bar recedes (y 120 -> 32, like the home
+                     strip), and slides back under it when the bar fades
+                     back in. -->
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
-                    <effect type="slide" start="0,0" end="0,-80" time="250" tween="quadratic" easing="out"/>
+                    <effect type="slide" start="0,0" end="0,-88" time="250" tween="quadratic" easing="out"/>
                 </animation>
 
                 <!-- Plex's library view has no big title block: the context
@@ -4437,26 +4438,26 @@
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar)) + String.IsEmpty(Window.Property(AuraAvatarRound))</visible>
                     </control>
                     <control type="image">
-                        <left>52</left>
-                        <top>514</top>
-                        <width>24</width>
-                        <height>24</height>
+                        <left>46</left>
+                        <top>507</top>
+                        <width>36</width>
+                        <height>36</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-search.png</texture>
                     </control>
                     <control type="image">
-                        <left>52</left>
-                        <top>561</top>
-                        <width>24</width>
-                        <height>24</height>
+                        <left>50</left>
+                        <top>558</top>
+                        <width>28</width>
+                        <height>28</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-home-o.png</texture>
                     </control>
                     <control type="image">
-                        <left>52</left>
-                        <top>612</top>
-                        <width>24</width>
-                        <height>20</height>
+                        <left>50</left>
+                        <top>611</top>
+                        <width>27</width>
+                        <height>21</height>
                         <texture colordiffuse="FFFFFFFF">icon-menu.png</texture>
                     </control>
                 </control>
@@ -4497,10 +4498,10 @@
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEqual(ListItem.Label,Window.Property(DivertActiveLibrary))</visible>
                         </control>
                         <control type="image">
-                            <left>50</left>
-                            <top>19</top>
-                            <width>30</width>
-                            <height>30</height>
+                            <left>47</left>
+                            <top>13</top>
+                            <width>41</width>
+                            <height>41</height>
                             <aspectratio>keep</aspectratio>
                             <texture>$INFO[ListItem.Art(icon)]</texture>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
@@ -4511,7 +4512,7 @@
                             <width>287</width>
                             <height>68</height>
                             <aligny>center</aligny>
-                            <font>font_aura_midi</font>
+                            <font>font_aura_small</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
@@ -4600,10 +4601,10 @@
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                         <control type="image">
-                            <left>50</left>
-                            <top>19</top>
-                            <width>30</width>
-                            <height>30</height>
+                            <left>47</left>
+                            <top>13</top>
+                            <width>41</width>
+                            <height>41</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
@@ -4614,7 +4615,7 @@
                             <width>287</width>
                             <height>68</height>
                             <aligny>center</aligny>
-                            <font>font_aura_midi</font>
+                            <font>font_aura_small</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FF1A1A1A</textcolor>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
