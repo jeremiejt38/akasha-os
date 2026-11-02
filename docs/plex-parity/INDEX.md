@@ -453,3 +453,4 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/storework/store_reopen_027.png` | storework | store_reopen | 164842 | pi |
 | `akasha-direct/storework/store_tous_028.png` | storework | store_tous | 164918 | pi |
 | `akasha-direct/storework/boot3_029.png` | storework | boot3 | 165130 | pi |
+| `akasha-direct/storework/v074_boot_030.png` | storework | v074_boot | 170119 | pi |
