@@ -392,3 +392,16 @@ Audit demandé par Claude : diff masqué contre `official-live/71-search.png`
 
 Résidu masqué ~1,4 % : anti-aliasing des glyphes, icônes du rail
 (glyphes différents, documenté), bords de contenu non masqué.
+
+### Round 5b — retouche finale
+
+- Titres/années sous posters remontés (−7/−6 px) : texte y571/602 vs
+  Plex y571/600. Interligne ~29 px des deux côtés.
+- Titre écran : `font_aura_main_bold` (glyphes ~19 px comme Plex),
+  bbox y70-89 vs Plex y71-89.
+- Clavier décalé −1 px (panel 128) ; icônes micro/filtre −2 px.
+- Diff masqué final **1,15 %** avec masque couvrant ~59 % de l'écran
+  (en-tête localisé, historique, posters+titres, bord contenu).
+  Résidu : AA des glyphes, icônes du rail, arêtes non masquées.
+  Différences d'icônes documentées : glyphe espace (tiret vs ⎵),
+  icônes horloge/avatar du rail.

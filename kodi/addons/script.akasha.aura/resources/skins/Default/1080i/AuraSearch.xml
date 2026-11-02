@@ -217,24 +217,24 @@
         <!-- Typed query -->
         <control type="label" id="8200">
             <left>133</left>
-            <top>46</top>
+            <top>52</top>
             <width>320</width>
             <height>56</height>
-            <font>font_aura_mini_bold</font>
+            <font>font_aura_main_bold</font>
             <textcolor>CCFFFFFF</textcolor>
         </control>
         <!-- Mic + filter-tune icons (visual parity, non functional) -->
         <control type="image">
-            <left>450</left>
-            <top>58</top>
-            <width>28</width>
+            <left>448</left>
+            <top>56</top>
+            <width>30</width>
             <height>44</height>
             <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
         </control>
         <control type="image">
-            <left>505</left>
-            <top>58</top>
+            <left>506</left>
+            <top>56</top>
             <width>46</width>
             <height>44</height>
             <aspectratio>keep</aspectratio>
@@ -246,7 +246,7 @@
 
         <!-- Letter grid: a-z then 1-0, 6 columns -->
         <control type="panel" id="8100">
-            <left>129</left>
+            <left>128</left>
             <top>124</top>
             <width>432</width>
             <height>432</height>
@@ -1276,7 +1276,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>380</top>
+                    <top>373</top>
                     <width>240</width>
                     <height>28</height>
                     <font>font_aura_mini_bold</font>
@@ -1287,7 +1287,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>410</top>
+                    <top>404</top>
                     <width>240</width>
                     <height>24</height>
                     <font>font_aura_tiny</font>
@@ -1324,7 +1324,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>380</top>
+                    <top>373</top>
                     <width>240</width>
                     <height>28</height>
                     <font>font_aura_mini_bold</font>
@@ -1335,7 +1335,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>410</top>
+                    <top>404</top>
                     <width>240</width>
                     <height>24</height>
                     <font>font_aura_tiny</font>
@@ -1364,7 +1364,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>380</top>
+                    <top>373</top>
                     <width>240</width>
                     <height>28</height>
                     <font>font_aura_mini_bold</font>
@@ -1375,7 +1375,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>410</top>
+                    <top>404</top>
                     <width>240</width>
                     <height>24</height>
                     <font>font_aura_tiny</font>

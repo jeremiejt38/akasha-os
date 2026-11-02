@@ -333,3 +333,4 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-camera/audit0731/diff_search_masked.png` | audit0731 | diff_search_masked | - | pi |
 | `akasha-camera/audit0731/diff_search_masked2.png` | audit0731 | diff_search_masked2 | - | pi |
 | `akasha-camera/audit0731/diff_search_final.png` | audit0731 | diff_search_final | - | pi |
+| `akasha-direct/audit0731/search_final_097.png` | audit0731 | search_final | 081846 | pi |
