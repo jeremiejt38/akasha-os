@@ -1,121 +1,587 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1197">
-    <defaultcontrol>6030</defaultcontrol>
+    <defaultcontrol>6050</defaultcontrol>
     <zorder>3</zorder>
     <controls>
-        <!-- Fullscreen background -->
+        <!-- Fullscreen background: same gradient as the main Aura window
+             and the search screen (Plex parity work). -->
         <control type="image">
             <left>0</left>
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF1A1310">white.png</texture>
+            <texture>bg-gradient.png</texture>
         </control>
 
         <!-- Header -->
         <control type="label" id="6000">
             <left>60</left>
-            <top>40</top>
+            <top>42</top>
             <width>1200</width>
-            <height>60</height>
-            <font>font16</font>
+            <height>46</height>
+            <font>font_aura_head_bold</font>
             <label>Akasha Store</label>
-            <textcolor>FF6C8CFF</textcolor>
+            <textcolor>FFFFFFFF</textcolor>
         </control>
 
-        <!-- Back button -->
-        <control type="button" id="6030">
+        <!-- Clock capsule, identical to the main window's -->
+        <control type="image">
             <left>1700</left>
             <top>40</top>
-            <width>160</width>
-            <height>50</height>
-            <font>font12</font>
+            <width>123</width>
+            <height>48</height>
+            <texture colordiffuse="D9000000" border="24">cap-r22.png</texture>
+        </control>
+        <control type="label">
+            <left>1700</left>
+            <top>40</top>
+            <width>123</width>
+            <height>48</height>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font_aura_mini</font>
+            <label>$INFO[System.Time(h:mm)]</label>
+            <textcolor>CCFFFFFF</textcolor>
+        </control>
+
+        <!-- Back pill -->
+        <control type="button" id="6030">
+            <left>1480</left>
+            <top>40</top>
+            <width>180</width>
+            <height>48</height>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33020]</label>
             <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FFFF8C6C" border="16">rounded-solid.png</texturefocus>
-            <ondown>6010</ondown>
+            <focusedcolor>FF1A1A1A</focusedcolor>
+            <texturenofocus colordiffuse="4D000000" border="24">cap-r22.png</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            <ondown>6050</ondown>
             <onleft>6001</onleft>
         </control>
 
-        <!-- Toolbar: manual catalogue refresh (plan f4e069bb section 1.4,
-             "cache local avec refresh manuel + refresh auto toutes les
-             24h"). Install/uninstall themselves happen directly from the
-             list below (clicking an item), not from this button. -->
-        <control type="button" id="6001">
+        <!-- Category strip: dark rounded container + plain-text chips,
+             same idiom as the Divertissement contextual tab strip.
+             Chips for categories absent from the catalogue stay hidden
+             (Window.Property(StoreCat_<slug>) is set by the window code). -->
+        <control type="image">
             <left>60</left>
             <top>120</top>
-            <width>320</width>
-            <height>50</height>
-            <font>font12</font>
-            <label>$ADDON[script.akasha.aura 33318]</label>
-            <textcolor>BBFFFFFF</textcolor>
-            <focusedcolor>FFFFFFFF</focusedcolor>
-            <texturefocus colordiffuse="FFFF8C6C" border="16">rounded-solid.png</texturefocus>
-            <onright>6030</onright>
-            <ondown>6010</ondown>
+            <width>1104</width>
+            <height>64</height>
+            <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
         </control>
 
-        <!-- Status line -->
+        <!-- Active-category outline (visible only while the chip row
+             itself does not carry focus; the white focus pill covers it
+             otherwise). -->
+        <control type="image">
+            <left>68</left>
+            <top>128</top>
+            <width>110</width>
+            <height>48</height>
+            <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+            <visible>String.IsEqual(Window.Property(StoreCat),0) + !Control.HasFocus(6050)</visible>
+        </control>
+        <control type="image">
+            <left>186</left>
+            <top>128</top>
+            <width>120</width>
+            <height>48</height>
+            <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+            <visible>String.IsEqual(Window.Property(StoreCat),1) + !Control.HasFocus(6051) + !String.IsEmpty(Window.Property(StoreCat_svod))</visible>
+        </control>
+        <control type="image">
+            <left>314</left>
+            <top>128</top>
+            <width>130</width>
+            <height>48</height>
+            <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+            <visible>String.IsEqual(Window.Property(StoreCat),2) + !Control.HasFocus(6052) + !String.IsEmpty(Window.Property(StoreCat_replay))</visible>
+        </control>
+        <control type="image">
+            <left>452</left>
+            <top>128</top>
+            <width>210</width>
+            <height>48</height>
+            <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+            <visible>String.IsEqual(Window.Property(StoreCat),3) + !Control.HasFocus(6053) + !String.IsEmpty(Window.Property(StoreCat_livetv))</visible>
+        </control>
+        <control type="image">
+            <left>670</left>
+            <top>128</top>
+            <width>120</width>
+            <height>48</height>
+            <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+            <visible>String.IsEqual(Window.Property(StoreCat),4) + !Control.HasFocus(6054) + !String.IsEmpty(Window.Property(StoreCat_sport))</visible>
+        </control>
+        <control type="image">
+            <left>798</left>
+            <top>128</top>
+            <width>150</width>
+            <height>48</height>
+            <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+            <visible>String.IsEqual(Window.Property(StoreCat),5) + !Control.HasFocus(6055) + !String.IsEmpty(Window.Property(StoreCat_musique))</visible>
+        </control>
+
+        <control type="button" id="6050">
+            <left>68</left>
+            <top>128</top>
+            <width>110</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33053]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onright>6051</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+        </control>
+        <control type="button" id="6051">
+            <left>186</left>
+            <top>128</top>
+            <width>120</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33329]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onleft>6050</onleft>
+            <onright>6052</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(StoreCat_svod))</visible>
+        </control>
+        <control type="button" id="6052">
+            <left>314</left>
+            <top>128</top>
+            <width>130</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33330]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onleft>6051</onleft>
+            <onright>6053</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(StoreCat_replay))</visible>
+        </control>
+        <control type="button" id="6053">
+            <left>452</left>
+            <top>128</top>
+            <width>210</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33331]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onleft>6052</onleft>
+            <onright>6054</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(StoreCat_livetv))</visible>
+        </control>
+        <control type="button" id="6054">
+            <left>670</left>
+            <top>128</top>
+            <width>120</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33332]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onleft>6053</onleft>
+            <onright>6055</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(StoreCat_sport))</visible>
+        </control>
+        <control type="button" id="6055">
+            <left>798</left>
+            <top>128</top>
+            <width>150</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33333]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onleft>6054</onleft>
+            <onright>6001</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            <visible>!String.IsEmpty(Window.Property(StoreCat_musique))</visible>
+        </control>
+        <control type="button" id="6001">
+            <left>956</left>
+            <top>128</top>
+            <width>200</width>
+            <height>48</height>
+            <label>$ADDON[script.akasha.aura 33334]</label>
+            <font>font_aura_mini</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onup>6030</onup>
+            <onleft>6055</onleft>
+            <onright>6030</onright>
+            <ondown>6010</ondown>
+            <textcolor>00FFFFFF</textcolor>
+            <focusedcolor>00FFFFFF</focusedcolor>
+            <texturenofocus>-</texturenofocus>
+            <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+        </control>
+
+        <!-- Chip labels: three overlaid states like the Divertissement
+             strip (active = bright, inactive = dimmed, focused = dark on
+             the white focus pill). -->
+        <control type="label">
+            <left>68</left><top>129</top><width>110</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33053]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEqual(Window.Property(StoreCat),0) + !Control.HasFocus(6050)</visible>
+        </control>
+        <control type="label">
+            <left>68</left><top>129</top><width>110</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33053]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!String.IsEqual(Window.Property(StoreCat),0) + !Control.HasFocus(6050)</visible>
+        </control>
+        <control type="label">
+            <left>68</left><top>129</top><width>110</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33053]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6050)</visible>
+        </control>
+
+        <control type="label">
+            <left>186</left><top>129</top><width>120</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33329]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEqual(Window.Property(StoreCat),1) + !Control.HasFocus(6051) + !String.IsEmpty(Window.Property(StoreCat_svod))</visible>
+        </control>
+        <control type="label">
+            <left>186</left><top>129</top><width>120</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33329]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!String.IsEqual(Window.Property(StoreCat),1) + !Control.HasFocus(6051) + !String.IsEmpty(Window.Property(StoreCat_svod))</visible>
+        </control>
+        <control type="label">
+            <left>186</left><top>129</top><width>120</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33329]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6051)</visible>
+        </control>
+
+        <control type="label">
+            <left>314</left><top>129</top><width>130</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33330]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEqual(Window.Property(StoreCat),2) + !Control.HasFocus(6052) + !String.IsEmpty(Window.Property(StoreCat_replay))</visible>
+        </control>
+        <control type="label">
+            <left>314</left><top>129</top><width>130</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33330]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!String.IsEqual(Window.Property(StoreCat),2) + !Control.HasFocus(6052) + !String.IsEmpty(Window.Property(StoreCat_replay))</visible>
+        </control>
+        <control type="label">
+            <left>314</left><top>129</top><width>130</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33330]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6052)</visible>
+        </control>
+
+        <control type="label">
+            <left>452</left><top>129</top><width>210</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33331]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEqual(Window.Property(StoreCat),3) + !Control.HasFocus(6053) + !String.IsEmpty(Window.Property(StoreCat_livetv))</visible>
+        </control>
+        <control type="label">
+            <left>452</left><top>129</top><width>210</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33331]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!String.IsEqual(Window.Property(StoreCat),3) + !Control.HasFocus(6053) + !String.IsEmpty(Window.Property(StoreCat_livetv))</visible>
+        </control>
+        <control type="label">
+            <left>452</left><top>129</top><width>210</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33331]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6053)</visible>
+        </control>
+
+        <control type="label">
+            <left>670</left><top>129</top><width>120</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33332]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEqual(Window.Property(StoreCat),4) + !Control.HasFocus(6054) + !String.IsEmpty(Window.Property(StoreCat_sport))</visible>
+        </control>
+        <control type="label">
+            <left>670</left><top>129</top><width>120</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33332]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!String.IsEqual(Window.Property(StoreCat),4) + !Control.HasFocus(6054) + !String.IsEmpty(Window.Property(StoreCat_sport))</visible>
+        </control>
+        <control type="label">
+            <left>670</left><top>129</top><width>120</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33332]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6054)</visible>
+        </control>
+
+        <control type="label">
+            <left>798</left><top>129</top><width>150</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33333]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <visible>String.IsEqual(Window.Property(StoreCat),5) + !Control.HasFocus(6055) + !String.IsEmpty(Window.Property(StoreCat_musique))</visible>
+        </control>
+        <control type="label">
+            <left>798</left><top>129</top><width>150</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33333]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!String.IsEqual(Window.Property(StoreCat),5) + !Control.HasFocus(6055) + !String.IsEmpty(Window.Property(StoreCat_musique))</visible>
+        </control>
+        <control type="label">
+            <left>798</left><top>129</top><width>150</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33333]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6055)</visible>
+        </control>
+
+        <control type="label">
+            <left>956</left><top>129</top><width>200</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33334]</label>
+            <textcolor>9BFFFFFF</textcolor>
+            <visible>!Control.HasFocus(6001)</visible>
+        </control>
+        <control type="label">
+            <left>956</left><top>129</top><width>200</width><height>46</height>
+            <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+            <label>$ADDON[script.akasha.aura 33334]</label>
+            <textcolor>FF1A1A1A</textcolor>
+            <visible>Control.HasFocus(6001)</visible>
+        </control>
+
+        <!-- Catalogue count, right-aligned next to the category strip -->
         <control type="label" id="6020">
-            <left>60</left>
-            <top>190</top>
-            <width>1800</width>
-            <height>40</height>
-            <font>font12</font>
+            <left>1200</left>
+            <top>134</top>
+            <width>620</width>
+            <height>48</height>
+            <font>font_aura_tiny</font>
+            <align>right</align>
+            <aligny>center</aligny>
             <label>-</label>
             <textcolor>77FFFFFF</textcolor>
         </control>
 
-        <!-- Main list -->
-        <control type="list" id="6010">
+        <!-- Catalogue grid: TV-store cards (icon tile + name + category) -->
+        <control type="panel" id="6010">
             <left>60</left>
-            <top>250</top>
+            <top>220</top>
             <width>1800</width>
-            <height>770</height>
-            <onup>6001</onup>
+            <height>660</height>
+            <onup>6050</onup>
             <ondown>6010</ondown>
-            <onleft>6030</onleft>
-            <itemlayout width="1800" height="60">
-                <control type="label">
-                    <left>0</left>
+            <onleft>6010</onleft>
+            <itemlayout width="300" height="280">
+                <control type="image">
+                    <left>50</left>
                     <top>0</top>
-                    <width>1800</width>
+                    <width>200</width>
+                    <height>200</height>
+                    <texture colordiffuse="FF1E1E1E" border="24">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>70</left>
+                    <top>20</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio align="center" aligny="center">keep</aspectratio>
+                    <fadetime>150</fadetime>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                </control>
+                <control type="image">
+                    <left>204</left>
+                    <top>158</top>
+                    <width>36</width>
                     <height>36</height>
-                    <font>font12</font>
-                    <label>$INFO[ListItem.Label]</label>
-                    <textcolor>77FFFFFF</textcolor>
+                    <texture colordiffuse="FF2E9E4F">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(installed),1)</visible>
+                </control>
+                <control type="image">
+                    <left>212</left>
+                    <top>166</top>
+                    <width>20</width>
+                    <height>20</height>
+                    <texture colordiffuse="FFFFFFFF">check-bold.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(installed),1)</visible>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>32</top>
-                    <width>1800</width>
-                    <height>28</height>
-                    <font>font10</font>
+                    <top>206</top>
+                    <width>300</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>CCFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
+                </control>
+                <control type="label">
+                    <left>0</left>
+                    <top>234</top>
+                    <width>300</width>
+                    <height>26</height>
+                    <font>font_aura_tiny</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>55FFFFFF</textcolor>
+                    <textcolor>77FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
                 </control>
             </itemlayout>
-            <focusedlayout width="1800" height="60">
+            <focusedlayout width="300" height="280">
+                <control type="image">
+                    <left>50</left>
+                    <top>0</top>
+                    <width>200</width>
+                    <height>200</height>
+                    <texture colordiffuse="FF2A2A2A" border="24">rounded-solid.png</texture>
+                </control>
+                <control type="image">
+                    <left>70</left>
+                    <top>20</top>
+                    <width>160</width>
+                    <height>160</height>
+                    <aspectratio align="center" aligny="center">keep</aspectratio>
+                    <fadetime>150</fadetime>
+                    <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                    <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                </control>
+                <control type="image">
+                    <left>44</left>
+                    <top>-6</top>
+                    <width>212</width>
+                    <height>212</height>
+                    <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                </control>
+                <control type="image">
+                    <left>204</left>
+                    <top>158</top>
+                    <width>36</width>
+                    <height>36</height>
+                    <texture colordiffuse="FF2E9E4F">circle.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(installed),1)</visible>
+                </control>
+                <control type="image">
+                    <left>212</left>
+                    <top>166</top>
+                    <width>20</width>
+                    <height>20</height>
+                    <texture colordiffuse="FFFFFFFF">check-bold.png</texture>
+                    <visible>String.IsEqual(ListItem.Property(installed),1)</visible>
+                </control>
                 <control type="label">
                     <left>0</left>
-                    <top>0</top>
-                    <width>1800</width>
-                    <height>36</height>
-                    <font>font12</font>
+                    <top>206</top>
+                    <width>300</width>
+                    <height>30</height>
+                    <font>font_aura_mini</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>32</top>
-                    <width>1800</width>
-                    <height>28</height>
-                    <font>font10</font>
+                    <top>234</top>
+                    <width>300</width>
+                    <height>26</height>
+                    <font>font_aura_tiny</font>
+                    <align>center</align>
                     <label>$INFO[ListItem.Label2]</label>
-                    <textcolor>77FFFFFF</textcolor>
+                    <textcolor>A0FFFFFF</textcolor>
+                    <wrapmultiline>false</wrapmultiline>
                 </control>
             </focusedlayout>
+        </control>
+
+        <!-- Focused-entry detail band: name + meta + description, fed by
+             the focused grid item's properties. -->
+        <control type="label">
+            <left>60</left>
+            <top>932</top>
+            <width>1800</width>
+            <height>42</height>
+            <font>font_aura_main_bold</font>
+            <label>$INFO[Container(6010).ListItem.Label]</label>
+            <textcolor>FFFFFFFF</textcolor>
+            <wrapmultiline>false</wrapmultiline>
+        </control>
+        <control type="label">
+            <left>60</left>
+            <top>974</top>
+            <width>1800</width>
+            <height>28</height>
+            <font>font_aura_tiny</font>
+            <label>$INFO[Container(6010).ListItem.Property(store_meta)]</label>
+            <textcolor>A0FFFFFF</textcolor>
+            <wrapmultiline>false</wrapmultiline>
+        </control>
+        <control type="label">
+            <left>60</left>
+            <top>1004</top>
+            <width>1800</width>
+            <height>30</height>
+            <font>font_aura_meta</font>
+            <label>$INFO[Container(6010).ListItem.Property(store_desc)]</label>
+            <textcolor>77FFFFFF</textcolor>
+            <wrapmultiline>false</wrapmultiline>
         </control>
     </controls>
 </window>

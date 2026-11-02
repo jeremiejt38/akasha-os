@@ -175,6 +175,28 @@ class TestEntriesByCategory(unittest.TestCase):
         self.assertEqual(list(grouped), ['autre'])
 
 
+class TestFilterEntries(unittest.TestCase):
+    def setUp(self):
+        self.entries = [
+            {'id': 'a', 'category': 'svod'},
+            {'id': 'b', 'category': 'replay'},
+            {'id': 'c', 'category': 'svod'},
+        ]
+
+    def test_filters_by_category(self):
+        result = store_client.filter_entries(self.entries, 'svod')
+        self.assertEqual([e['id'] for e in result], ['a', 'c'])
+
+    def test_falsy_category_returns_all(self):
+        for cat in (None, ''):
+            self.assertEqual(
+                [e['id'] for e in store_client.filter_entries(self.entries, cat)],
+                ['a', 'b', 'c'])
+
+    def test_unknown_category_returns_empty(self):
+        self.assertEqual(store_client.filter_entries(self.entries, 'nope'), [])
+
+
 class TestSearchEntries(unittest.TestCase):
     def setUp(self):
         self.index = SAMPLE_RAW_INDEX

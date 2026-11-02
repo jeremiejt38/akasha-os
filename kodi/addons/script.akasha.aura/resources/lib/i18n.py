@@ -385,6 +385,13 @@ STRINGS = {
     33327: ('Se connecter (Connector Akasha OS)',
             'Sign in (Akasha OS Connector)'),
     33328: ('Sans titre', 'Untitled'),
+    33329: ('SVOD', 'SVOD'),
+    33330: ('Replay', 'Replay'),
+    33331: ('TV en direct', 'Live TV'),
+    33332: ('Sport', 'Sport'),
+    33333: ('Musique', 'Music'),
+    33334: ('Rafraîchir', 'Refresh'),
+    33335: ('Épinglée', 'Pinned'),
 
     # --- divertissement state view (B17): offline / error / empty ---------
     33550: ('Serveur inaccessible', 'Server unreachable'),

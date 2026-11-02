@@ -244,8 +244,8 @@ DIVERT_FILTER_OPTIONS = [
     (False, i18n.tr(33055)),
 ]
 
-GAME_BUTTON_IDS = (2010, 2011, 2012)
-APP_TILE_IDS = (2030, 2031, 2032, 2033)
+GAME_LIST_ID = 2010        # 'Autres' launcher tiles (horizontal icon cards)
+APP_LIST_ID = 2030         # pinned apps row (horizontal icon cards)
 
 DIVERT_SUBTAB_IDS = (3050, 3100, 3075, 3060)
 DIVERT_SUBTAB_RECOMMANDE = 0
@@ -3952,15 +3952,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._render_divert_status(section)
 
     def _load_other_games(self):
-        for i, control_id in enumerate(GAME_BUTTON_IDS):
-            try:
-                btn = self.getControl(control_id)
-            except RuntimeError:
-                continue
-            if i < len(self._other_games):
-                btn.setLabel(self._other_games[i]['label'])
-            else:
-                btn.setLabel('')
+        try:
+            panel = self.getControl(GAME_LIST_ID)
+        except RuntimeError:
+            return
+        panel.reset()
+        for game in self._other_games:
+            li = xbmcgui.ListItem(game['label'], game.get('label2', ''))
+            if game.get('icon'):
+                li.setArt({'icon': game['icon'], 'thumb': game['icon']})
+            panel.addItem(li)
 
     def _select_jeux_subtab(self, index, interactive=True):
         self._jeux_active_subtab = index
@@ -3968,11 +3969,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._sync_navigation()
 
         if index == JEUX_SUBTAB_OTHERS:
+            self._jeux_items = []
             self._load_other_games()
             try:
                 self.getControl(JEUX_STATUS_ID).setLabel(i18n.tr(33082))
             except RuntimeError:
                 pass
+            if interactive and self._other_games:
+                self._defer_focus(GAME_LIST_ID)
             return
 
         if index == JEUX_SUBTAB_STEAMLINK:
@@ -4095,7 +4099,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         return server_url, username, password
 
     def _load_pinned_apps(self):
-        pinned_ids = addons_inventory.parse_pinned(self.addon.getSetting('app.pinned'))
+        # Read through a fresh Addon instance: the App dialog pins/unpins
+        # via its own Addon object, and Kodi caches settings per instance
+        # -- self.addon's copy can be stale right after doModal() returns.
+        pinned_ids = addons_inventory.parse_pinned(
+            xbmcaddon.Addon('script.akasha.aura').getSetting('app.pinned'))
         self._pinned_apps = []
 
         try:
@@ -4103,14 +4111,16 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except RuntimeError:
             status = None
 
+        try:
+            panel = self.getControl(APP_LIST_ID)
+        except RuntimeError:
+            panel = None
+
         if not pinned_ids:
             if status:
                 status.setLabel(i18n.tr(33316))
-            for control_id in APP_TILE_IDS:
-                try:
-                    self.getControl(control_id).setLabel('')
-                except RuntimeError:
-                    continue
+            if panel is not None:
+                panel.reset()
             return
 
         try:
@@ -4127,15 +4137,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if status:
             status.setLabel(i18n.tr(33317))
 
-        for i, control_id in enumerate(APP_TILE_IDS):
-            try:
-                btn = self.getControl(control_id)
-            except RuntimeError:
-                continue
-            if i < len(self._pinned_apps):
-                btn.setLabel(self._pinned_apps[i]['name'])
-            else:
-                btn.setLabel('')
+        if panel is not None:
+            panel.reset()
+            for addon in self._pinned_apps:
+                li = xbmcgui.ListItem(
+                    addon['name'], 'v{}'.format(addon['version']))
+                if addon.get('icon'):
+                    li.setArt({'icon': addon['icon'], 'thumb': addon['icon']})
+                li.setProperty('pinned', '1')
+                panel.addItem(li)
 
     def _get_sub_window(self, key, cls, xml_file):
         """Return a cached sub-window instance, constructing it only once.
@@ -4575,10 +4585,13 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                              self._reco_slot_list_id(i))),
                         DIVERT_SIDEBAR_ID)
         if self.active_tab == TAB_JEUX:
+            if self._jeux_active_subtab == JEUX_SUBTAB_OTHERS:
+                return (GAME_LIST_ID if self._other_games
+                        else JEUX_SUBTAB_IDS[JEUX_SUBTAB_OTHERS])
             return (JEUX_PANEL_ID if self._jeux_items
                     else JEUX_SUBTAB_IDS[self._jeux_active_subtab])
         if self.active_tab == TAB_APP:
-            return (APP_TILE_IDS[0] if self._pinned_apps
+            return (APP_LIST_ID if self._pinned_apps
                     else APP_SUBTAB_IDS[self._app_subtab])
         return None
 
@@ -4612,17 +4625,23 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._select_jeux_subtab(JEUX_SUBTAB_IDS.index(controlID))
         elif controlID in APP_SUBTAB_IDS:
             self._select_app_subtab(APP_SUBTAB_IDS.index(controlID))
-        elif controlID in GAME_BUTTON_IDS:
-            idx = GAME_BUTTON_IDS.index(controlID)
-            if idx < len(self._other_games):
+        elif controlID == GAME_LIST_ID:
+            try:
+                idx = gui_guard.selpos(self, GAME_LIST_ID)
+            except RuntimeError:
+                idx = -1
+            if 0 <= idx < len(self._other_games):
                 action = self._other_games[idx]['action']
                 if action:
                     xbmc.executebuiltin(action)
         elif controlID == JEUX_PANEL_ID:
             self._on_jeux_item_selected()
-        elif controlID in APP_TILE_IDS:
-            idx = APP_TILE_IDS.index(controlID)
-            if idx < len(self._pinned_apps):
+        elif controlID == APP_LIST_ID:
+            try:
+                idx = gui_guard.selpos(self, APP_LIST_ID)
+            except RuntimeError:
+                idx = -1
+            if 0 <= idx < len(self._pinned_apps):
                 xbmc.executebuiltin('RunAddon({})'.format(self._pinned_apps[idx]['addonid']))
         elif controlID == DIVERT_SIDEBAR_ID:
             self._on_sidebar_item_selected()
@@ -6383,8 +6402,8 @@ class _HomePressAppSwitcher(xbmcgui.WindowXMLDialog):
         apps = self.parent_window._pinned_apps if self.parent_window else []
         for app in apps:
             item = xbmcgui.ListItem(app['name'])
-            if app.get('thumbnail'):
-                item.setArt({'thumb': app['thumbnail']})
+            if app.get('icon'):
+                item.setArt({'thumb': app['icon']})
             panel.addItem(item)
             self._actions.append('RunAddon({})'.format(app['addonid']))
         for label, action, icon in (
