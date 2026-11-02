@@ -405,3 +405,25 @@ Résidu masqué ~1,4 % : anti-aliasing des glyphes, icônes du rail
   Résidu : AA des glyphes, icônes du rail, arêtes non masquées.
   Différences d'icônes documentées : glyphe espace (tiret vs ⎵),
   icônes horloge/avatar du rail.
+
+### Mesures bbox de référence (recherche, convergé)
+
+| Élément | Plex (ref 71) | Aura (mesuré) |
+|---|---|---|
+| Colonnes grille | 686 / 979 / 1271 / 1564 | 686 / 979 / 1272 / 1565 |
+| Rangée 2 posters (top) | y652 | y652 |
+| Titre poster rangée 1 | y571-588 | y571-586 |
+| Année rangée 1 | y600-614 | y602-615 |
+| Historique 1er item (icône) | y672 | y673 |
+| Hint | y54-69 | y54-69 |
+| Titre écran | y71-89 | y70-89 |
+| Icônes micro/filtre | y55-93 | y55-93 |
+| Glyphes barre du bas | y581-602 | y582-602 |
+| Cellule « a » focus | x132-196 | x132-196 |
+| Fond top-droite (lum.) | ~10 | ~15 |
+| Fond x30 y200/y500 | 47 / 26 | 46 / 25 |
+
+Diff pixel masqué final : **1,15 %** sur ~41 % de l'écran non masqué
+(masque ~59 % : en-tête, historique, posters et titres, bord contenu).
+Écrans couverts par la convergence : recherche, sidebar, accueil.
+Non audités par cette méthode : fiche détail, lecteur, bibliothèque.
