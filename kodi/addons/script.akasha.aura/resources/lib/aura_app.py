@@ -112,26 +112,37 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             lst = self.getControl(5010)
             lst.reset()
             for addon in self.addons:
-                marker = '* ' if addon['addonid'] in self.pinned_ids else '  '
-                if addon.get('is_external'):
-                    store_badge = ' [{}]'.format(i18n.tr(33322))
-                elif addon['addonid'] in self.store_ids:
-                    store_badge = ' [{}]'.format(i18n.tr(33013))
-                else:
-                    store_badge = ''
-                label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
-                li = xbmcgui.ListItem(label)
-                if addon.get('icon'):
-                    li.setArt({'icon': addon['icon'], 'thumb': addon['icon']})
-                li.setProperty(
-                    'fromstore', '1' if addon['addonid'] in self.store_ids else '0')
-                li.setProperty(
-                    'is_external', '1' if addon.get('is_external') else '0')
-                lst.addItem(li)
+                lst.addItem(self._make_list_item(addon))
             if self.addons:
                 self.setFocus(lst)
         except Exception as e:
             xbmc.log('Akasha Aura App: render error: {}'.format(e), xbmc.LOGERROR)
+
+    def _make_list_item(self, addon):
+        """Card item for the installed-apps grid: clean name, version as
+        the sub-line, provenance/state exposed as skin properties so the
+        layout can badge pinned/Store/web apps without parsing text."""
+        if addon.get('is_external'):
+            source = i18n.tr(33322)
+        elif addon['addonid'] in self.store_ids:
+            source = i18n.tr(33013)
+        else:
+            source = ''
+        li = xbmcgui.ListItem(addon['name'], 'v{}'.format(addon['version']))
+        if addon.get('icon'):
+            li.setArt({'icon': addon['icon'], 'thumb': addon['icon']})
+        li.setProperty(
+            'pinned', '1' if addon['addonid'] in self.pinned_ids else '0')
+        li.setProperty(
+            'fromstore', '1' if addon['addonid'] in self.store_ids else '0')
+        li.setProperty(
+            'is_external', '1' if addon.get('is_external') else '0')
+        meta = 'v{}'.format(addon['version'])
+        if source:
+            meta = '{} • {}'.format(meta, source)
+        li.setProperty('app_meta', meta)
+        li.setProperty('app_desc', addon.get('summary', ''))
+        return li
 
     def _selected_addon(self):
         try:
@@ -236,21 +247,6 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         try:
             lst = self.getControl(5010)
             for addon in new_items:
-                marker = '* ' if addon['addonid'] in self.pinned_ids else '  '
-                if addon.get('is_external'):
-                    store_badge = ' [{}]'.format(i18n.tr(33322))
-                elif addon['addonid'] in self.store_ids:
-                    store_badge = ' [{}]'.format(i18n.tr(33013))
-                else:
-                    store_badge = ''
-                label = '{}{} (v{}){}'.format(marker, addon['name'], addon['version'], store_badge)
-                li = xbmcgui.ListItem(label)
-                if addon.get('icon'):
-                    li.setArt({'icon': addon['icon'], 'thumb': addon['icon']})
-                li.setProperty(
-                    'fromstore', '1' if addon['addonid'] in self.store_ids else '0')
-                li.setProperty(
-                    'is_external', '1' if addon.get('is_external') else '0')
-                lst.addItem(li)
+                lst.addItem(self._make_list_item(addon))
         except Exception as e:
             xbmc.log('Akasha Aura App: append render error: {}'.format(e), xbmc.LOGERROR)

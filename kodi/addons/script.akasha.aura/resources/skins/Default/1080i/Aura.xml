@@ -516,105 +516,281 @@
              retracting top bar (group 100) into the content area, same
              pattern as Divertissement's own contextual tabs, since their
              old position (left=900) now collides with the wider module
-             pills above, plan 04bda1b4 phase 1. -->
+             pills above, plan 04bda1b4 phase 1. Visual treatment matches
+             the Divertissement tab strip exactly: dark rounded container,
+             active-tab outline, white focus pill with dark text. -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),1)</visible>
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                 <effect type="slide" start="0,0" end="0,-85" time="250" tween="quadratic" easing="out"/>
             </animation>
 
-            <control type="button" id="2050">
+            <control type="image">
                 <left>60</left>
-                <top>145</top>
-                <width>195</width>
-                <height>60</height>
+                <top>130</top>
+                <width>572</width>
+                <height>64</height>
+                <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
+            </control>
+
+            <control type="image">
+                <left>68</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
+                <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),0) + !Control.HasFocus(2050)</visible>
+            </control>
+            <control type="image">
+                <left>256</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
+                <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),1) + !Control.HasFocus(2051)</visible>
+            </control>
+            <control type="image">
+                <left>444</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
+                <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),2) + !Control.HasFocus(2052)</visible>
+            </control>
+
+            <control type="button" id="2050">
+                <left>68</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
                 <label>SteamLink</label>
-                <font>font12</font>
+                <font>font_aura_mini</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onright>2051</onright>
                 <onup>2002</onup>
                 <ondown>2060</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                <textcolor>00FFFFFF</textcolor>
+                <focusedcolor>00FFFFFF</focusedcolor>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
             </control>
 
             <control type="button" id="2051">
-                <left>270</left>
-                <top>145</top>
-                <width>195</width>
-                <height>60</height>
+                <left>256</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
                 <label>Moonlight</label>
-                <font>font12</font>
+                <font>font_aura_mini</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>2050</onleft>
                 <onright>2052</onright>
                 <onup>2002</onup>
                 <ondown>2060</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                <textcolor>00FFFFFF</textcolor>
+                <focusedcolor>00FFFFFF</focusedcolor>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
             </control>
 
             <control type="button" id="2052">
-                <left>480</left>
-                <top>145</top>
-                <width>195</width>
-                <height>60</height>
+                <left>444</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
                 <label>$ADDON[script.akasha.aura 33016]</label>
-                <font>font12</font>
+                <font>font_aura_mini</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>2051</onleft>
                 <onup>2002</onup>
                 <ondown>2010</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                <textcolor>00FFFFFF</textcolor>
+                <focusedcolor>00FFFFFF</focusedcolor>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            </control>
+
+            <!-- Chip labels: active = bright, inactive = dimmed, focused =
+                 dark on the white pill (same three-state idiom as the
+                 Divertissement strip). -->
+            <control type="label">
+                <left>68</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>SteamLink</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),0) + !Control.HasFocus(2050)</visible>
+            </control>
+            <control type="label">
+                <left>68</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>SteamLink</label>
+                <textcolor>9BFFFFFF</textcolor>
+                <visible>!String.IsEqual(Window.Property(JeuxActiveSubtab),0) + !Control.HasFocus(2050)</visible>
+            </control>
+            <control type="label">
+                <left>68</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>SteamLink</label>
+                <textcolor>FF1A1A1A</textcolor>
+                <visible>Control.HasFocus(2050)</visible>
+            </control>
+            <control type="label">
+                <left>256</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>Moonlight</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),1) + !Control.HasFocus(2051)</visible>
+            </control>
+            <control type="label">
+                <left>256</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>Moonlight</label>
+                <textcolor>9BFFFFFF</textcolor>
+                <visible>!String.IsEqual(Window.Property(JeuxActiveSubtab),1) + !Control.HasFocus(2051)</visible>
+            </control>
+            <control type="label">
+                <left>256</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>Moonlight</label>
+                <textcolor>FF1A1A1A</textcolor>
+                <visible>Control.HasFocus(2051)</visible>
+            </control>
+            <control type="label">
+                <left>444</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33016]</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),2) + !Control.HasFocus(2052)</visible>
+            </control>
+            <control type="label">
+                <left>444</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33016]</label>
+                <textcolor>9BFFFFFF</textcolor>
+                <visible>!String.IsEqual(Window.Property(JeuxActiveSubtab),2) + !Control.HasFocus(2052)</visible>
+            </control>
+            <control type="label">
+                <left>444</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33016]</label>
+                <textcolor>FF1A1A1A</textcolor>
+                <visible>Control.HasFocus(2052)</visible>
             </control>
         </control>
 
-        <!-- App sub-tabs: Mes Apps / Store. Same relocation as Jeux's above. -->
+        <!-- App sub-tabs: Mes Apps / Store. Same relocation and same
+             visual treatment as Jeux's strip above. -->
         <control type="group">
             <visible>String.IsEqual(Window.Property(AuraActiveTab),2)</visible>
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                 <effect type="slide" start="0,0" end="0,-85" time="250" tween="quadratic" easing="out"/>
             </animation>
 
-            <control type="button" id="2041">
+            <control type="image">
                 <left>60</left>
-                <top>145</top>
-                <width>195</width>
-                <height>60</height>
+                <top>130</top>
+                <width>350</width>
+                <height>64</height>
+                <texture colordiffuse="4D000000" border="32">cap-r32.png</texture>
+            </control>
+
+            <control type="image">
+                <left>68</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
+                <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+                <visible>String.IsEqual(Window.Property(AppActiveSubtab),0) + !Control.HasFocus(2041)</visible>
+            </control>
+            <control type="image">
+                <left>256</left>
+                <top>138</top>
+                <width>146</width>
+                <height>48</height>
+                <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
+                <visible>String.IsEqual(Window.Property(AppActiveSubtab),1) + !Control.HasFocus(2042)</visible>
+            </control>
+
+            <control type="button" id="2041">
+                <left>68</left>
+                <top>138</top>
+                <width>180</width>
+                <height>48</height>
                 <label>$ADDON[script.akasha.aura 33012]</label>
-                <font>font12</font>
+                <font>font_aura_mini</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onright>2042</onright>
                 <onup>2007</onup>
                 <ondown>2030</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                <textcolor>00FFFFFF</textcolor>
+                <focusedcolor>00FFFFFF</focusedcolor>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
             </control>
 
             <control type="button" id="2042">
-                <left>270</left>
-                <top>145</top>
-                <width>195</width>
-                <height>60</height>
+                <left>256</left>
+                <top>138</top>
+                <width>146</width>
+                <height>48</height>
                 <label>$ADDON[script.akasha.aura 33013]</label>
-                <font>font12</font>
+                <font>font_aura_mini</font>
                 <align>center</align>
                 <aligny>center</aligny>
                 <onleft>2041</onleft>
                 <onup>2007</onup>
                 <ondown>2030</ondown>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                <textcolor>00FFFFFF</textcolor>
+                <focusedcolor>00FFFFFF</focusedcolor>
+                <texturenofocus>-</texturenofocus>
+                <texturefocus colordiffuse="FFFFFFFF" border="24">cap-r24.png</texturefocus>
+            </control>
+
+            <control type="label">
+                <left>68</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33012]</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>String.IsEqual(Window.Property(AppActiveSubtab),0) + !Control.HasFocus(2041)</visible>
+            </control>
+            <control type="label">
+                <left>68</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33012]</label>
+                <textcolor>9BFFFFFF</textcolor>
+                <visible>!String.IsEqual(Window.Property(AppActiveSubtab),0) + !Control.HasFocus(2041)</visible>
+            </control>
+            <control type="label">
+                <left>68</left><top>139</top><width>180</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33012]</label>
+                <textcolor>FF1A1A1A</textcolor>
+                <visible>Control.HasFocus(2041)</visible>
+            </control>
+            <control type="label">
+                <left>256</left><top>139</top><width>146</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33013]</label>
+                <textcolor>FFFFFFFF</textcolor>
+                <visible>String.IsEqual(Window.Property(AppActiveSubtab),1) + !Control.HasFocus(2042)</visible>
+            </control>
+            <control type="label">
+                <left>256</left><top>139</top><width>146</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33013]</label>
+                <textcolor>9BFFFFFF</textcolor>
+                <visible>!String.IsEqual(Window.Property(AppActiveSubtab),1) + !Control.HasFocus(2042)</visible>
+            </control>
+            <control type="label">
+                <left>256</left><top>139</top><width>146</width><height>46</height>
+                <font>font_aura_mini</font><align>center</align><aligny>center</aligny>
+                <label>$ADDON[script.akasha.aura 33013]</label>
+                <textcolor>FF1A1A1A</textcolor>
+                <visible>Control.HasFocus(2042)</visible>
             </control>
         </control>
 
@@ -4806,20 +4982,22 @@
 
             <control type="label" id="2055">
                 <left>60</left>
-                <top>195</top>
+                <top>206</top>
                 <width>1800</width>
-                <height>30</height>
-                <font>font12</font>
+                <height>28</height>
+                <font>font_aura_tiny</font>
                 <label>-</label>
                 <textcolor>77FFFFFF</textcolor>
             </control>
 
-            <!-- SteamLink / Moonlight: poster library -->
+            <!-- SteamLink / Moonlight: poster library. Cards reuse the
+                 library-grid idiom: dark placeholder card, rounded poster
+                 corners, white focus ring. -->
             <control type="group">
                 <visible>!String.IsEqual(Window.Property(JeuxActiveSubtab),2)</visible>
                 <control type="list" id="2060">
                     <left>60</left>
-                    <top>235</top>
+                    <top>245</top>
                     <width>1800</width>
                     <height>360</height>
                     <orientation>horizontal</orientation>
@@ -4831,28 +5009,7 @@
                             <top>0</top>
                             <width>190</width>
                             <height>280</height>
-                            <aspectratio>scale</aspectratio>
-                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
-                        </control>
-                        <control type="label">
-                            <left>5</left>
-                            <top>284</top>
-                            <width>210</width>
-                            <height>26</height>
-                            <font>font10</font>
-                            <label>$INFO[ListItem.Label]</label>
-                            <textcolor>77FFFFFF</textcolor>
-                            <wrapmultiline>false</wrapmultiline>
-                        </control>
-                    </itemlayout>
-                    <focusedlayout width="220" height="330">
-                        <control type="image">
-                            <left>1</left>
-                            <top>-4</top>
-                            <width>198</width>
-                            <height>288</height>
-                            <texture colordiffuse="FFFF8C6C" border="16">cap-r16.png</texture>
-                            <visible>Control.HasFocus(2060)</visible>
+                            <texture colordiffuse="FF242424" border="10">rounded-solid.png</texture>
                         </control>
                         <control type="image">
                             <left>5</left>
@@ -4860,14 +5017,67 @@
                             <width>190</width>
                             <height>280</height>
                             <aspectratio>scale</aspectratio>
+                            <fadetime>150</fadetime>
                             <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
                         </control>
-                        <control type="label">
+                        <control type="image">
                             <left>5</left>
-                            <top>284</top>
-                            <width>210</width>
-                            <height>26</height>
-                            <font>font10</font>
+                            <top>0</top>
+                            <width>190</width>
+                            <height>280</height>
+                            <texture colordiffuse="FF242424">poster-corners.png</texture>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>288</top>
+                            <width>200</width>
+                            <height>28</height>
+                            <font>font_aura_tiny</font>
+                            <align>center</align>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>A0FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="220" height="330">
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>190</width>
+                            <height>280</height>
+                            <texture colordiffuse="FF2A2A2A" border="10">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>190</width>
+                            <height>280</height>
+                            <aspectratio>scale</aspectratio>
+                            <fadetime>150</fadetime>
+                            <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
+                            <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                        </control>
+                        <control type="image">
+                            <left>5</left>
+                            <top>0</top>
+                            <width>190</width>
+                            <height>280</height>
+                            <texture colordiffuse="FF242424">poster-corners.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>1</left>
+                            <top>-4</top>
+                            <width>198</width>
+                            <height>288</height>
+                            <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>288</top>
+                            <width>200</width>
+                            <height>28</height>
+                            <font>font_aura_tiny</font>
+                            <align>center</align>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FFFFFFFF</textcolor>
                             <wrapmultiline>false</wrapmultiline>
@@ -4876,55 +5086,107 @@
                 </control>
             </control>
 
-            <!-- Autres: tiles (Cloud Gaming, etc — excludes SteamLink/Moonlight) -->
+            <!-- Autres: launcher tiles (Cloud Gaming, etc — excludes
+                 SteamLink/Moonlight), same icon-card component as the
+                 Store and installed-apps grids. -->
             <control type="group">
                 <visible>String.IsEqual(Window.Property(JeuxActiveSubtab),2)</visible>
-
-                <control type="button" id="2010">
+                <control type="list" id="2010">
                     <left>60</left>
-                    <top>235</top>
-                    <width>400</width>
-                    <height>120</height>
-                    <font>font14</font>
-                    <label>-</label>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                    <top>245</top>
+                    <width>1800</width>
+                    <height>300</height>
+                    <orientation>horizontal</orientation>
                     <onup>2052</onup>
-                    <onright>2011</onright>
                     <ondown>2010</ondown>
-                </control>
-
-                <control type="button" id="2011">
-                    <left>480</left>
-                    <top>235</top>
-                    <width>400</width>
-                    <height>120</height>
-                    <font>font14</font>
-                    <label>-</label>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
-                    <onup>2052</onup>
-                    <onleft>2010</onleft>
-                    <onright>2012</onright>
-                    <ondown>2011</ondown>
-                </control>
-
-                <control type="button" id="2012">
-                    <left>900</left>
-                    <top>235</top>
-                    <width>400</width>
-                    <height>120</height>
-                    <font>font14</font>
-                    <label>-</label>
-                    <textcolor>BBFFFFFF</textcolor>
-                    <focusedcolor>FFFFFFFF</focusedcolor>
-                    <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
-                    <onup>2052</onup>
-                    <onleft>2011</onleft>
-                    <onright>2012</onright>
-                    <ondown>2012</ondown>
+                    <itemlayout width="300" height="280">
+                        <control type="image">
+                            <left>50</left>
+                            <top>0</top>
+                            <width>200</width>
+                            <height>200</height>
+                            <texture colordiffuse="FF1E1E1E" border="24">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>70</left>
+                            <top>20</top>
+                            <width>160</width>
+                            <height>160</height>
+                            <aspectratio align="center" aligny="center">keep</aspectratio>
+                            <fadetime>150</fadetime>
+                            <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>206</top>
+                            <width>300</width>
+                            <height>30</height>
+                            <font>font_aura_mini</font>
+                            <align>center</align>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>CCFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>234</top>
+                            <width>300</width>
+                            <height>26</height>
+                            <font>font_aura_tiny</font>
+                            <align>center</align>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>77FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="300" height="280">
+                        <control type="image">
+                            <left>50</left>
+                            <top>0</top>
+                            <width>200</width>
+                            <height>200</height>
+                            <texture colordiffuse="FF2A2A2A" border="24">rounded-solid.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>70</left>
+                            <top>20</top>
+                            <width>160</width>
+                            <height>160</height>
+                            <aspectratio align="center" aligny="center">keep</aspectratio>
+                            <fadetime>150</fadetime>
+                            <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                            <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                        </control>
+                        <control type="image">
+                            <left>44</left>
+                            <top>-6</top>
+                            <width>212</width>
+                            <height>212</height>
+                            <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>206</top>
+                            <width>300</width>
+                            <height>30</height>
+                            <font>font_aura_mini</font>
+                            <align>center</align>
+                            <label>$INFO[ListItem.Label]</label>
+                            <textcolor>FFFFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                        <control type="label">
+                            <left>0</left>
+                            <top>234</top>
+                            <width>300</width>
+                            <height>26</height>
+                            <font>font_aura_tiny</font>
+                            <align>center</align>
+                            <label>$INFO[ListItem.Label2]</label>
+                            <textcolor>A0FFFFFF</textcolor>
+                            <wrapmultiline>false</wrapmultiline>
+                        </control>
+                    </focusedlayout>
                 </control>
             </control>
         </control>
@@ -4935,74 +5197,112 @@
 
             <control type="label" id="2029">
                 <left>60</left>
-                <top>195</top>
+                <top>206</top>
                 <width>1800</width>
-                <height>36</height>
-                <font>font12</font>
+                <height>28</height>
+                <font>font_aura_tiny</font>
                 <label>-</label>
                 <textcolor>77FFFFFF</textcolor>
             </control>
 
-            <control type="button" id="2030">
+            <!-- Pinned apps: horizontal icon-card row, same component as
+                 the Store and installed-apps grids. -->
+            <control type="list" id="2030">
                 <left>60</left>
-                <top>240</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>-</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
+                <top>245</top>
+                <width>1800</width>
+                <height>300</height>
+                <orientation>horizontal</orientation>
                 <onup>2041</onup>
-                <onright>2031</onright>
                 <ondown>2030</ondown>
-            </control>
-
-            <control type="button" id="2031">
-                <left>480</left>
-                <top>240</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>-</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
-                <onup>2041</onup>
-                <onleft>2030</onleft>
-                <onright>2032</onright>
-                <ondown>2031</ondown>
-            </control>
-
-            <control type="button" id="2032">
-                <left>900</left>
-                <top>240</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>-</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
-                <onup>2041</onup>
-                <onleft>2031</onleft>
-                <onright>2033</onright>
-                <ondown>2032</ondown>
-            </control>
-
-            <control type="button" id="2033">
-                <left>1320</left>
-                <top>240</top>
-                <width>400</width>
-                <height>120</height>
-                <font>font14</font>
-                <label>-</label>
-                <textcolor>BBFFFFFF</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <texturefocus colordiffuse="FFFF8C6C" border="16">cap-r16.png</texturefocus>
-                <onup>2041</onup>
-                <onleft>2032</onleft>
-                <ondown>2033</ondown>
+                <itemlayout width="300" height="280">
+                    <control type="image">
+                        <left>50</left>
+                        <top>0</top>
+                        <width>200</width>
+                        <height>200</height>
+                        <texture colordiffuse="FF1E1E1E" border="24">rounded-solid.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>70</left>
+                        <top>20</top>
+                        <width>160</width>
+                        <height>160</height>
+                        <aspectratio align="center" aligny="center">keep</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>206</top>
+                        <width>300</width>
+                        <height>30</height>
+                        <font>font_aura_mini</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>CCFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>234</top>
+                        <width>300</width>
+                        <height>26</height>
+                        <font>font_aura_tiny</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>77FFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="300" height="280">
+                    <control type="image">
+                        <left>50</left>
+                        <top>0</top>
+                        <width>200</width>
+                        <height>200</height>
+                        <texture colordiffuse="FF2A2A2A" border="24">rounded-solid.png</texture>
+                    </control>
+                    <control type="image">
+                        <left>70</left>
+                        <top>20</top>
+                        <width>160</width>
+                        <height>160</height>
+                        <aspectratio align="center" aligny="center">keep</aspectratio>
+                        <fadetime>150</fadetime>
+                        <texture background="true">$INFO[ListItem.Art(icon)]</texture>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="image">
+                        <left>44</left>
+                        <top>-6</top>
+                        <width>212</width>
+                        <height>212</height>
+                        <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>206</top>
+                        <width>300</width>
+                        <height>30</height>
+                        <font>font_aura_mini</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>234</top>
+                        <width>300</width>
+                        <height>26</height>
+                        <font>font_aura_tiny</font>
+                        <align>center</align>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>A0FFFFFF</textcolor>
+                        <wrapmultiline>false</wrapmultiline>
+                    </control>
+                </focusedlayout>
             </control>
         </control>
 

@@ -61,6 +61,27 @@ STATUS_LABEL_ID = 6020
 LIST_ID = 6010
 BACK_BUTTON_ID = 6030
 
+# Category chip strip: 6050 = "All", 6051..6055 = one chip per known
+# catalogue category. Chips whose category has no entry are hidden by the
+# skin (StoreCat_<slug> window property).
+CHIP_IDS = (6050, 6051, 6052, 6053, 6054, 6055)
+# (catalogue slug, label msgid, window-property suffix) in strip order.
+KNOWN_CATEGORIES = (
+    ('svod', 33329, 'svod'),
+    ('replay', 33330, 'replay'),
+    ('live-tv', 33331, 'livetv'),
+    ('sport', 33332, 'sport'),
+    ('musique', 33333, 'musique'),
+)
+_CATEGORY_MSGIDS = {slug: msgid for slug, msgid, _ in KNOWN_CATEGORIES}
+
+
+def category_label(category):
+    """Localized display name for a catalogue category slug; falls back to
+    the raw slug for categories the skin doesn't know yet."""
+    return i18n.tr(_CATEGORY_MSGIDS.get(category, 0)) \
+        if category in _CATEGORY_MSGIDS else (category or '')
+
 
 def _now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -80,12 +101,14 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         self.addon = xbmcaddon.Addon('script.akasha.aura')
         self.entries = []
         self._all_entries = []
+        self._filtered = []
         self._paged = None
+        self._category_index = 0
 
     def _fetch_page(self, offset, limit):
-        """Local pagination: store catalogue is in memory; slice a page."""
-        page = self._all_entries[offset:offset + limit]
-        return page, len(self._all_entries)
+        """Local pagination: filtered catalogue is in memory; slice a page."""
+        page = self._filtered[offset:offset + limit]
+        return page, len(self._filtered)
 
     def onInit(self):
         try:
@@ -124,11 +147,55 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
                 installed = entry['id'] in registry
             self._all_entries.append(dict(entry, installed=installed))
 
+        # Category strip state: which categories actually have entries, and
+        # whether the active filter still exists after a refresh.
+        present = {e.get('category') for e in self._all_entries}
+        for slug, _, prop_suffix in KNOWN_CATEGORIES:
+            self.setProperty(
+                'StoreCat_{}'.format(prop_suffix),
+                '1' if slug in present else '')
+        if (self._category_index > 0 and
+                KNOWN_CATEGORIES[self._category_index - 1][0] not in present):
+            self._category_index = 0
+        self.setProperty('StoreCat', str(self._category_index))
+
+        self._apply_category()
+
+    def _apply_category(self):
+        """Filter the catalogue by the active category chip and re-render."""
+        slug = (KNOWN_CATEGORIES[self._category_index - 1][0]
+                if self._category_index > 0 else '')
+        self._filtered = store_client.filter_entries(self._all_entries, slug)
         self._paged = paged_list.PagedList(
             self._fetch_page, page_size=STORE_PAGE_SIZE)
         self._paged.load_initial()
         self.entries = self._paged.items
         self._render()
+
+    def _select_category(self, index):
+        if index != self._category_index:
+            self._category_index = index
+            self.setProperty('StoreCat', str(index))
+            self._apply_category()
+        if self.entries:
+            try:
+                self.setFocus(self.getControl(LIST_ID))
+            except RuntimeError:
+                pass
+
+    @staticmethod
+    def _make_list_item(entry):
+        cat = category_label(entry.get('category', ''))
+        state = i18n.tr(33302) if entry['installed'] else i18n.tr(33303)
+        li = xbmcgui.ListItem(entry['name'], cat)
+        icon = store_external.resolve_icon_url(entry['id'], entry.get('icon', ''))
+        if icon:
+            li.setArt({'icon': icon, 'thumb': icon})
+        li.setProperty('installed', '1' if entry['installed'] else '0')
+        li.setProperty('store_desc', entry.get('description', ''))
+        li.setProperty('store_meta', '{} • v{} • {}'.format(
+            cat, entry.get('version', '-'), state))
+        return li
 
     def _render(self):
         try:
@@ -142,12 +209,7 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             lst = self.getControl(LIST_ID)
             lst.reset()
             for entry in self.entries:
-                state = i18n.tr(33302) if entry['installed'] else i18n.tr(33303)
-                category = entry.get('category', '')
-                li = xbmcgui.ListItem(entry['name'], entry.get('description', ''))
-                li.setProperty('installed', '1' if entry['installed'] else '0')
-                li.setLabel2('{} — {} — {}'.format(category, entry.get('description', ''), state))
-                lst.addItem(li)
+                lst.addItem(self._make_list_item(entry))
             if self.entries:
                 self.setFocus(lst)
         except Exception as e:
@@ -381,6 +443,8 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             self._reload(force_refresh=True)
             xbmcgui.Dialog().notification(
                 'Akasha Store', i18n.tr(33314), xbmcgui.NOTIFICATION_INFO, 2000)
+        elif controlID in CHIP_IDS:
+            self._select_category(CHIP_IDS.index(controlID))
         elif controlID == LIST_ID:
             entry = self._selected_entry()
             if entry:
@@ -408,11 +472,6 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         try:
             lst = self.getControl(LIST_ID)
             for entry in new_items:
-                state = i18n.tr(33302) if entry['installed'] else i18n.tr(33303)
-                category = entry.get('category', '')
-                li = xbmcgui.ListItem(entry['name'], entry.get('description', ''))
-                li.setProperty('installed', '1' if entry['installed'] else '0')
-                li.setLabel2('{} — {} — {}'.format(category, entry.get('description', ''), state))
-                lst.addItem(li)
+                lst.addItem(self._make_list_item(entry))
         except Exception as e:
             xbmc.log('Akasha Aura Store: append render error: {}'.format(e), xbmc.LOGERROR)

@@ -119,6 +119,14 @@ def entries_by_category(index):
     return grouped
 
 
+def filter_entries(entries, category):
+    """Return only the entries in `category`; a falsy category disables
+    filtering (the "All" chip in the Store UI)."""
+    if not category:
+        return list(entries)
+    return [e for e in entries if e.get('category') == category]
+
+
 def search_entries(index, query):
     """Case-insensitive substring match against name/description, per
     plan section 4.2's "recherche"."""

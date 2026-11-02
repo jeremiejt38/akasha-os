@@ -1055,6 +1055,41 @@ msgctxt "#33328"
 msgid "Untitled"
 msgstr "Sans titre"
 
+# SVOD
+msgctxt "#33329"
+msgid "SVOD"
+msgstr "SVOD"
+
+# Replay
+msgctxt "#33330"
+msgid "Replay"
+msgstr "Replay"
+
+# TV en direct
+msgctxt "#33331"
+msgid "Live TV"
+msgstr "TV en direct"
+
+# Sport
+msgctxt "#33332"
+msgid "Sport"
+msgstr "Sport"
+
+# Musique
+msgctxt "#33333"
+msgid "Music"
+msgstr "Musique"
+
+# Rafraîchir
+msgctxt "#33334"
+msgid "Refresh"
+msgstr "Rafraîchir"
+
+# Épinglée
+msgctxt "#33335"
+msgid "Pinned"
+msgstr "Épinglée"
+
 # État du réseau
 msgctxt "#33401"
 msgid "Network status"
