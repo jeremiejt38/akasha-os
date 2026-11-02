@@ -4547,9 +4547,9 @@
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                         <control type="image">
-                            <left>116</left>
+                            <left>126</left>
                             <top>33</top>
-                            <width>219</width>
+                            <width>209</width>
                             <height>2</height>
                             <texture colordiffuse="33FFFFFF">white.png</texture>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
@@ -4650,9 +4650,9 @@
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                         <control type="image">
-                            <left>116</left>
+                            <left>126</left>
                             <top>33</top>
-                            <width>219</width>
+                            <width>209</width>
                             <height>2</height>
                             <texture colordiffuse="33FFFFFF">white.png</texture>
                             <visible>Control.HasFocus(3310) + !String.IsEmpty(ListItem.Property(is_header))</visible>
@@ -4752,9 +4752,9 @@
                             <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
                         </control>
                         <control type="image">
-                            <left>116</left>
+                            <left>126</left>
                             <top>33</top>
-                            <width>219</width>
+                            <width>209</width>
                             <height>2</height>
                             <texture colordiffuse="33FFFFFF">white.png</texture>
                             <visible>!String.IsEmpty(Window.Property(AuraSheetOpen)) + !String.IsEmpty(ListItem.Property(is_header))</visible>
