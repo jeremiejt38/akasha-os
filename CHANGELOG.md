@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.73.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.0...akasha-os-v0.73.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **divert:** Plex-style placeholder on art-less cards ([#252](https://github.com/jeremiejt38/akasha-os/issues/252)) ([4ef0345](https://github.com/jeremiejt38/akasha-os/commit/4ef0345bc056ee41107a71df105c6f3d0c811db4))
+* **ui:** smooth focus-ring corners, Plex-shaped rating chip ([#254](https://github.com/jeremiejt38/akasha-os/issues/254)) ([227c400](https://github.com/jeremiejt38/akasha-os/commit/227c40020bfb8981ec7643aaa75e31d56d64a178))
+
 ## [0.73.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.72.5...akasha-os-v0.73.0) (2026-11-01)
 
 
