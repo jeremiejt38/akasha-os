@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.4...akasha-os-v0.73.5) (2026-11-02)
+
+
+### Bug Fixes
+
+* **aura:** search parity — gradient bg, translucent keys, 'a' focus ([#265](https://github.com/jeremiejt38/akasha-os/issues/265)) ([f47647a](https://github.com/jeremiejt38/akasha-os/commit/f47647a6c365d2a7b6c184b27e04c35433f07096))
+
 ## [0.73.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.3...akasha-os-v0.73.4) (2026-11-02)
 
 
