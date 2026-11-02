@@ -221,3 +221,7 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/aura-animes/placeholder_v2_005.png` | aura-animes | placeholder_v2 | 042132 | pi |
 | `akasha-direct/aura-animes/placeholder_v2b_006.png` | aura-animes | placeholder_v2b | 042153 | pi |
 | `akasha-direct/aura-animes/placeholder_v3_007.png` | aura-animes | placeholder_v3 | 042505 | pi |
+| `akasha-direct/focuscheck/pre_focus_001.png` | focuscheck | pre_focus | 042910 | pi |
+| `akasha-direct/focuscheck/card_focused_002.png` | focuscheck | card_focused | 042927 | pi |
+| `akasha-direct/focuscheck/ring_smooth_003.png` | focuscheck | ring_smooth | 043208 | pi |
+| `akasha-direct/focuscheck/chip_fixed_004.png` | focuscheck | chip_fixed | 043505 | pi |
