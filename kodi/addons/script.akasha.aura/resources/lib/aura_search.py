@@ -142,7 +142,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             rail.reset()
             avatar = xbmcgui.Window(10000).getProperty('AuraAvatar')
             icons = ['avatar-plex.png', 'icon-search.png',
-                     'icon-home.png', 'icon-more.png']
+                     'icon-home.png', 'icon-menu.png']
             if avatar:
                 icons[0] = avatar
             kinds = ('avatar', 'search', 'home', 'menu')

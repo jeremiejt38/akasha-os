@@ -135,7 +135,7 @@
                 <width>1500</width>
                 <height>44</height>
                 <font>font_aura_main_bold</font>
-                <textcolor>FFFFFFFF</textcolor>
+                <textcolor>DDFFFFFF</textcolor>
                 <label>$INFO[Window.Property(AuraHeroSubtitle)]</label>
                 <visible>!String.IsEmpty(Window.Property(AuraHeroSubtitle))</visible>
             </control>
@@ -168,16 +168,16 @@
                          with no stroke (53-home-for-you). -->
                     <control type="image" id="5006">
                         <left>0</left>
-                        <top>0</top>
+                        <top>2</top>
                         <width>44</width>
-                        <height>34</height>
+                        <height>32</height>
                         <texture colordiffuse="F214141A" border="10">rating-chip-solid.png</texture>
                     </control>
                     <control type="label" id="5007">
                         <left>0</left>
-                        <top>0</top>
+                        <top>2</top>
                         <width>44</width>
-                        <height>34</height>
+                        <height>32</height>
                         <align>center</align>
                         <aligny>center</aligny>
                         <font>font_aura_tiny</font>
@@ -213,25 +213,25 @@
                          episodes instead (13-library-films). -->
                     <control type="image" id="5010">
                         <left>0</left>
-                        <top>0</top>
+                        <top>2</top>
                         <width>44</width>
-                        <height>34</height>
+                        <height>32</height>
                         <texture border="10">meta-rating-box.png</texture>
                         <visible>String.IsEmpty(Window.Property(AuraHeroChipSolid))</visible>
                     </control>
                     <control type="image" id="5013">
                         <left>0</left>
-                        <top>0</top>
+                        <top>2</top>
                         <width>44</width>
-                        <height>34</height>
+                        <height>32</height>
                         <texture colordiffuse="F214141A" border="10">rating-chip-solid.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraHeroChipSolid))</visible>
                     </control>
                     <control type="label" id="5012">
                         <left>0</left>
-                        <top>0</top>
+                        <top>2</top>
                         <width>44</width>
-                        <height>34</height>
+                        <height>32</height>
                         <align>center</align>
                         <aligny>center</aligny>
                         <font>font_aura_tiny</font>
@@ -494,7 +494,7 @@
                 <top>40</top>
                 <width>123</width>
                 <height>48</height>
-                <texture colordiffuse="4D000000" border="24">cap-r22.png</texture>
+                <texture colordiffuse="D9000000" border="24">cap-r22.png</texture>
             </control>
             <!-- Plex follows the device locale for its clock; so does
                  System.Time (12h on US, 24h on FR). No manual meridiem
@@ -508,7 +508,7 @@
                 <aligny>center</aligny>
                 <font>font_aura_mini</font>
                 <label>$INFO[System.Time(h:mm)]</label>
-                <textcolor>FFFFFFFF</textcolor>
+                <textcolor>CCFFFFFF</textcolor>
             </control>
         </control>
 
@@ -962,7 +962,7 @@
                     <left>127</left>
                     <top>120</top>
                     <width>470</width>
-                    <height>48</height>
+                    <height>64</height>
                     <texture colordiffuse="99000000" border="24">cap-r24.png</texture>
                 </control>
                 <!-- Active-tab outline (Plex shows a rounded outline on the
@@ -970,33 +970,33 @@
                      fill on focus covers it anyway). -->
                 <control type="image">
                     <left>135</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
-                    <height>46</height>
+                    <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),0) + !Control.HasFocus(3070)</visible>
                 </control>
                 <control type="image">
                     <left>295</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>151</width>
-                    <height>46</height>
+                    <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),1) + !Control.HasFocus(3071)</visible>
                 </control>
                 <control type="image">
                     <left>462</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>114</width>
-                    <height>46</height>
+                    <height>48</height>
                     <texture colordiffuse="A6FFFFFF" border="22">tab-outline.png</texture>
                     <visible>String.IsEqual(Window.Property(DivertHomeTab),2) + !Control.HasFocus(3072)</visible>
                 </control>
                 <control type="button" id="3070">
                     <left>135</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
-                    <height>46</height>
+                    <height>48</height>
                     <label></label>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1011,9 +1011,9 @@
                 </control>
                 <control type="button" id="3071">
                     <left>295</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>151</width>
-                    <height>46</height>
+                    <height>48</height>
                     <label></label>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1028,9 +1028,9 @@
                 </control>
                 <control type="button" id="3072">
                     <left>462</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>114</width>
-                    <height>46</height>
+                    <height>48</height>
                     <label></label>
                     <font>font_aura_tab</font>
                     <align>center</align>
@@ -1049,9 +1049,9 @@
                      double-draw or scroll offset. -->
                 <control type="label">
                     <left>135</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1061,9 +1061,9 @@
                 </control>
                 <control type="label">
                     <left>135</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1073,9 +1073,9 @@
                 </control>
                 <control type="label">
                     <left>135</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>144</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1085,9 +1085,9 @@
                 </control>
                 <control type="label">
                     <left>295</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>151</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1097,9 +1097,9 @@
                 </control>
                 <control type="label">
                     <left>295</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>151</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1109,9 +1109,9 @@
                 </control>
                 <control type="label">
                     <left>295</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>151</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1121,9 +1121,9 @@
                 </control>
                 <control type="label">
                     <left>462</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>114</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1133,9 +1133,9 @@
                 </control>
                 <control type="label">
                     <left>462</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>114</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1145,9 +1145,9 @@
                 </control>
                 <control type="label">
                     <left>462</left>
-                    <top>121</top>
+                    <top>129</top>
                     <width>114</width>
-                    <height>46</height>
+                    <height>48</height>
                     <font>font_aura_tab</font>
                     <align>center</align>
                     <aligny>center</aligny>
@@ -1863,10 +1863,10 @@
                                                 </animation>
                     </control>
                     <control type="list" id="5110">
-                        <left>127</left>
-                        <top>568</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>552</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>2007</onup>
@@ -1879,16 +1879,16 @@
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5315) | Control.HasFocus(5316) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) | Control.HasFocus(5416) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | Control.HasFocus(5516) | String.IsEqual(Window.Property(AuraFocusSlot),0)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -1897,16 +1897,16 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -1917,8 +1917,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -1928,8 +1928,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -1939,16 +1939,16 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -1961,8 +1961,8 @@
                             </control>
                         
                             <control type="image">
-                                <left>-11</left>
-                                <top>-13</top>
+                                <left>5</left>
+                                <top>3</top>
                                 <width>262</width>
                                 <height>386</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -1971,8 +1971,8 @@
 </itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -1982,8 +1982,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
@@ -1991,8 +1991,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -2004,8 +2004,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2016,8 +2016,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2028,8 +2028,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -2037,8 +2037,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2050,8 +2050,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-6</left>
-                                <top>-6</top>
+                                <left>10</left>
+                                <top>10</top>
                                 <width>252</width>
                                 <height>372</height>
                                 <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
@@ -2061,10 +2061,10 @@
                         </focusedlayout>
                     </control>
                     <control type="list" id="5111">
-                        <left>127</left>
-                        <top>568</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>552</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>2007</onup>
@@ -2077,16 +2077,16 @@
                         <visible>String.IsEqual(Window.Property(AuraRowStyle0),hero) + !Control.HasFocus(5310) + !Control.HasFocus(5311) + !Control.HasFocus(5315) | Control.HasFocus(5316) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) | Control.HasFocus(5416) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | Control.HasFocus(5516) | String.IsEqual(Window.Property(AuraFocusSlot),0)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2095,8 +2095,8 @@
                                 <visible>!String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2105,16 +2105,16 @@
                                 <visible>String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2126,8 +2126,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -2136,8 +2136,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -2146,8 +2146,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-10</left>
-                                <top>-10</top>
+                                <left>6</left>
+                                <top>6</top>
                                 <width>468</width>
                                 <height>272</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -2156,8 +2156,8 @@
                         </itemlayout>
                         <focusedlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2167,8 +2167,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2178,8 +2178,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
@@ -2187,8 +2187,8 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2200,8 +2200,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -2210,8 +2210,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -2220,8 +2220,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
+                                <left>12</left>
+                                <top>12</top>
                                 <width>456</width>
                                 <height>260</height>
                                 <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
@@ -2332,10 +2332,10 @@
                                                 </animation>
                     </control>
                     <control type="list" id="5210">
-                        <left>127</left>
-                        <top>1040</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>1024</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5110</onup>
@@ -2348,16 +2348,16 @@
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) | Control.HasFocus(5416) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | Control.HasFocus(5516) | String.IsEqual(Window.Property(AuraFocusSlot),1)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -2366,16 +2366,16 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -2386,8 +2386,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2397,8 +2397,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2408,16 +2408,16 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2430,8 +2430,8 @@
                             </control>
                         
                             <control type="image">
-                                <left>-11</left>
-                                <top>-13</top>
+                                <left>5</left>
+                                <top>3</top>
                                 <width>262</width>
                                 <height>386</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -2440,8 +2440,8 @@
 </itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -2451,8 +2451,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
@@ -2460,8 +2460,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -2473,8 +2473,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2485,8 +2485,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2497,8 +2497,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -2506,8 +2506,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2519,8 +2519,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-6</left>
-                                <top>-6</top>
+                                <left>10</left>
+                                <top>10</top>
                                 <width>252</width>
                                 <height>372</height>
                                 <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
@@ -2530,10 +2530,10 @@
                         </focusedlayout>
                     </control>
                     <control type="list" id="5211">
-                        <left>127</left>
-                        <top>1040</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>1024</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5110</onup>
@@ -2546,16 +2546,16 @@
                         <visible>String.IsEqual(Window.Property(AuraRowStyle1),hero) + !Control.HasFocus(5410) + !Control.HasFocus(5411) + !Control.HasFocus(5415) | Control.HasFocus(5416) + !Control.HasFocus(5510) + !Control.HasFocus(5511) + !Control.HasFocus(5515) | Control.HasFocus(5516) | String.IsEqual(Window.Property(AuraFocusSlot),1)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2564,8 +2564,8 @@
                                 <visible>!String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2574,16 +2574,16 @@
                                 <visible>String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2595,8 +2595,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -2605,8 +2605,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -2615,8 +2615,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-10</left>
-                                <top>-10</top>
+                                <left>6</left>
+                                <top>6</top>
                                 <width>468</width>
                                 <height>272</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -2625,8 +2625,8 @@
                         </itemlayout>
                         <focusedlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2636,8 +2636,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -2647,8 +2647,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
@@ -2656,8 +2656,8 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2669,8 +2669,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -2679,8 +2679,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -2689,8 +2689,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
+                                <left>12</left>
+                                <top>12</top>
                                 <width>456</width>
                                 <height>260</height>
                                 <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
@@ -2806,10 +2806,10 @@
                                                 </animation>
                     </control>
                     <control type="list" id="5310">
-                        <left>127</left>
-                        <top>1512</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>1496</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5210</onup>
@@ -2822,16 +2822,16 @@
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5210) | Control.HasFocus(5215) | Control.HasFocus(5216)] | !String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5211) | Control.HasFocus(5215) | Control.HasFocus(5216)] | [Control.HasFocus(5310) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5311) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5410) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5411) | Control.HasFocus(5415) | Control.HasFocus(5416)] | String.IsEqual(Window.Property(AuraFocusSlot),2)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -2840,16 +2840,16 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -2860,8 +2860,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2871,8 +2871,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2882,16 +2882,16 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2904,8 +2904,8 @@
                             </control>
                         
                             <control type="image">
-                                <left>-11</left>
-                                <top>-13</top>
+                                <left>5</left>
+                                <top>3</top>
                                 <width>262</width>
                                 <height>386</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -2914,8 +2914,8 @@
 </itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -2925,8 +2925,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
@@ -2934,8 +2934,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -2947,8 +2947,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2959,8 +2959,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -2971,8 +2971,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -2980,8 +2980,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -2993,8 +2993,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-6</left>
-                                <top>-6</top>
+                                <left>10</left>
+                                <top>10</top>
                                 <width>252</width>
                                 <height>372</height>
                                 <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
@@ -3004,10 +3004,10 @@
                         </focusedlayout>
                     </control>
                     <control type="list" id="5311">
-                        <left>127</left>
-                        <top>1512</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>1496</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5210</onup>
@@ -3020,16 +3020,16 @@
                         <visible>String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5210) | Control.HasFocus(5215) | Control.HasFocus(5216)] | String.IsEqual(Window.Property(AuraRowStyle2),hero) + [Control.HasFocus(5211) | Control.HasFocus(5215) | Control.HasFocus(5216)] | [Control.HasFocus(5310) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5311) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5410) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5411) | Control.HasFocus(5415) | Control.HasFocus(5416)] | String.IsEqual(Window.Property(AuraFocusSlot),2)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3038,8 +3038,8 @@
                                 <visible>!String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3048,16 +3048,16 @@
                                 <visible>String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3069,8 +3069,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -3079,8 +3079,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -3089,8 +3089,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-10</left>
-                                <top>-10</top>
+                                <left>6</left>
+                                <top>6</top>
                                 <width>468</width>
                                 <height>272</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -3099,8 +3099,8 @@
                         </itemlayout>
                         <focusedlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3110,8 +3110,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3121,8 +3121,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
@@ -3130,8 +3130,8 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3143,8 +3143,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -3153,8 +3153,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -3163,8 +3163,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
+                                <left>12</left>
+                                <top>12</top>
                                 <width>456</width>
                                 <height>260</height>
                                 <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
@@ -3276,10 +3276,10 @@
                                                 </animation>
                     </control>
                     <control type="list" id="5410">
-                        <left>127</left>
-                        <top>1984</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>1968</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5310</onup>
@@ -3292,16 +3292,16 @@
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315) | Control.HasFocus(5316)] | !String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5410) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5411) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5510) | Control.HasFocus(5515) | Control.HasFocus(5516)] | [Control.HasFocus(5511) | Control.HasFocus(5515) | Control.HasFocus(5516)] | String.IsEqual(Window.Property(AuraFocusSlot),3)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -3310,16 +3310,16 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -3330,8 +3330,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3341,8 +3341,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3352,16 +3352,16 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3374,8 +3374,8 @@
                             </control>
 
                             <control type="image">
-                                <left>-11</left>
-                                <top>-13</top>
+                                <left>5</left>
+                                <top>3</top>
                                 <width>262</width>
                                 <height>386</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -3384,8 +3384,8 @@
 </itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -3395,8 +3395,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
@@ -3404,8 +3404,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -3417,8 +3417,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3429,8 +3429,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3441,8 +3441,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -3450,8 +3450,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3463,8 +3463,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-6</left>
-                                <top>-6</top>
+                                <left>10</left>
+                                <top>10</top>
                                 <width>252</width>
                                 <height>372</height>
                                 <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
@@ -3474,10 +3474,10 @@
                         </focusedlayout>
                     </control>
                     <control type="list" id="5411">
-                        <left>127</left>
-                        <top>1984</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>1968</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5310</onup>
@@ -3490,16 +3490,16 @@
                         <visible>String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315) | Control.HasFocus(5316)] | String.IsEqual(Window.Property(AuraRowStyle3),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5410) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5411) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5510) | Control.HasFocus(5515) | Control.HasFocus(5516)] | [Control.HasFocus(5511) | Control.HasFocus(5515) | Control.HasFocus(5516)] | String.IsEqual(Window.Property(AuraFocusSlot),3)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3508,8 +3508,8 @@
                                 <visible>!String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3518,16 +3518,16 @@
                                 <visible>String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3539,8 +3539,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -3549,8 +3549,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -3559,8 +3559,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-10</left>
-                                <top>-10</top>
+                                <left>6</left>
+                                <top>6</top>
                                 <width>468</width>
                                 <height>272</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -3569,8 +3569,8 @@
                         </itemlayout>
                         <focusedlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3580,8 +3580,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3591,8 +3591,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
@@ -3600,8 +3600,8 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3613,8 +3613,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -3623,8 +3623,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -3633,8 +3633,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
+                                <left>12</left>
+                                <top>12</top>
                                 <width>456</width>
                                 <height>260</height>
                                 <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
@@ -3744,10 +3744,10 @@
                                                 </animation>
                     </control>
                     <control type="list" id="5510">
-                        <left>127</left>
-                        <top>2456</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>2440</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5410</onup>
@@ -3759,16 +3759,16 @@
                         <visible>!String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315) | Control.HasFocus(5316)] | !String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5410) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5411) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5510) | Control.HasFocus(5515) | Control.HasFocus(5516)] | [Control.HasFocus(5511) | Control.HasFocus(5515) | Control.HasFocus(5516)] | String.IsEqual(Window.Property(AuraFocusSlot),4)</visible>
                         <itemlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -3777,16 +3777,16 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -3797,8 +3797,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder)) + String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3808,8 +3808,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3819,16 +3819,16 @@
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder2))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3841,8 +3841,8 @@
                             </control>
 
                             <control type="image">
-                                <left>-11</left>
-                                <top>-13</top>
+                                <left>5</left>
+                                <top>3</top>
                                 <width>262</width>
                                 <height>386</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -3851,8 +3851,8 @@
 </itemlayout>
                         <focusedlayout width="272" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <aspectratio>scale</aspectratio>
@@ -3862,8 +3862,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
@@ -3871,8 +3871,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>0</top>
+                                <left>32</left>
+                                <top>16</top>
                                 <width>208</width>
                                 <height>360</height>
                                 <font>font_aura_midi</font>
@@ -3884,8 +3884,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>138</top>
+                                <left>32</left>
+                                <top>154</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3896,8 +3896,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="label">
-                                <left>16</left>
-                                <top>186</top>
+                                <left>32</left>
+                                <top>202</top>
                                 <width>208</width>
                                 <height>38</height>
                                 <font>font_aura_midi</font>
@@ -3908,8 +3908,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
                                 <texture colordiffuse="FF242424">poster-corners.png</texture>
@@ -3917,8 +3917,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>340</top>
+                                <left>28</left>
+                                <top>356</top>
                                 <width>216</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -3930,8 +3930,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="image">
-                                <left>-6</left>
-                                <top>-6</top>
+                                <left>10</left>
+                                <top>10</top>
                                 <width>252</width>
                                 <height>372</height>
                                 <texture colordiffuse="FFFFFFFF" border="20">focus-ring.png</texture>
@@ -3941,10 +3941,10 @@
                         </focusedlayout>
                     </control>
                     <control type="list" id="5511">
-                        <left>127</left>
-                        <top>2456</top>
-                        <width>1793</width>
-                        <height>372</height>
+                        <left>111</left>
+                        <top>2440</top>
+                        <width>1809</width>
+                        <height>388</height>
                         <orientation>horizontal</orientation>
                         <scrolltime tween="quadratic" easing="out">200</scrolltime>
                         <onup>5410</onup>
@@ -3953,16 +3953,16 @@
                         <visible>String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5310) | Control.HasFocus(5315) | Control.HasFocus(5316)] | String.IsEqual(Window.Property(AuraRowStyle4),hero) + [Control.HasFocus(5311) | Control.HasFocus(5315) | Control.HasFocus(5316)] | [Control.HasFocus(5410) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5411) | Control.HasFocus(5415) | Control.HasFocus(5416)] | [Control.HasFocus(5510) | Control.HasFocus(5515) | Control.HasFocus(5516)] | [Control.HasFocus(5511) | Control.HasFocus(5515) | Control.HasFocus(5516)] | String.IsEqual(Window.Property(AuraFocusSlot),4)</visible>
                         <itemlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3971,8 +3971,8 @@
                                 <visible>!String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -3981,16 +3981,16 @@
                                 <visible>String.IsEmpty(ListItem.Art(landscape)) + String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -4002,8 +4002,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -4012,8 +4012,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -4022,8 +4022,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-10</left>
-                                <top>-10</top>
+                                <left>6</left>
+                                <top>6</top>
                                 <width>468</width>
                                 <height>272</height>
                                 <texture colordiffuse="59FFFFFF" border="20">focus-ring.png</texture>
@@ -4032,8 +4032,8 @@
                         </itemlayout>
                         <focusedlayout width="472" height="372">
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -4043,8 +4043,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <aspectratio>scale</aspectratio>
@@ -4054,8 +4054,8 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="image">
-                                <left>0</left>
-                                <top>0</top>
+                                <left>16</left>
+                                <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
                                 <texture colordiffuse="FF1C1C1C">landscape-corners.png</texture>
@@ -4063,8 +4063,8 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>12</left>
-                                <top>232</top>
+                                <left>28</left>
+                                <top>248</top>
                                 <width>424</width>
                                 <height>8</height>
                                 <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
@@ -4076,8 +4076,8 @@
                                 <visible>!String.IsEmpty(ListItem.Property(AuraProgress)) + Integer.IsGreater(ListItem.Property(AuraProgress),0)</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>262</top>
+                                <left>20</left>
+                                <top>278</top>
                                 <width>440</width>
                                 <height>34</height>
                                 <font>font_aura_mini</font>
@@ -4086,8 +4086,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="label">
-                                <left>4</left>
-                                <top>298</top>
+                                <left>20</left>
+                                <top>314</top>
                                 <width>440</width>
                                 <height>30</height>
                                 <font>font_aura_mini</font>
@@ -4096,8 +4096,8 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
-                                <left>-4</left>
-                                <top>-4</top>
+                                <left>12</left>
+                                <top>12</top>
                                 <width>456</width>
                                 <height>260</height>
                                 <texture colordiffuse="B3FFFFFF" border="20">focus-ring.png</texture>
@@ -4406,10 +4406,10 @@
                         <texture colordiffuse="55000000" border="34">cap-r36.png</texture>
                     </control>
                     <control type="image">
-                        <left>44</left>
-                        <top>447</top>
-                        <width>40</width>
-                        <height>40</height>
+                        <left>41</left>
+                        <top>444</top>
+                        <width>46</width>
+                        <height>46</height>
                         <texture>avatar-plex.png</texture>
                         <visible>String.IsEmpty(Window.Property(AuraAvatar))</visible>
                     </control>
@@ -4417,10 +4417,10 @@
                          user's picture): fetched into AuraAvatar by
                          _load_avatar, circle-clipped by the cast mask. -->
                     <control type="image">
-                        <left>44</left>
-                        <top>447</top>
-                        <width>40</width>
-                        <height>40</height>
+                        <left>41</left>
+                        <top>444</top>
+                        <width>46</width>
+                        <height>46</height>
                         <aspectratio>scale</aspectratio>
                         <texture background="true">$INFO[Window.Property(AuraAvatar)]</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar))</visible>
@@ -4429,34 +4429,34 @@
                          square (pre-crop or no PIL): the AuraAvatarRound
                          PNG bakes the circle in. -->
                     <control type="image">
-                        <left>44</left>
-                        <top>447</top>
-                        <width>40</width>
-                        <height>40</height>
+                        <left>41</left>
+                        <top>444</top>
+                        <width>46</width>
+                        <height>46</height>
                         <texture colordiffuse="FF000000">cast-mask.png</texture>
                         <visible>!String.IsEmpty(Window.Property(AuraAvatar)) + String.IsEmpty(Window.Property(AuraAvatarRound))</visible>
                     </control>
                     <control type="image">
-                        <left>53</left>
+                        <left>52</left>
                         <top>514</top>
-                        <width>22</width>
-                        <height>22</height>
+                        <width>24</width>
+                        <height>24</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-search.png</texture>
                     </control>
                     <control type="image">
-                        <left>53</left>
+                        <left>52</left>
                         <top>561</top>
-                        <width>22</width>
-                        <height>22</height>
+                        <width>24</width>
+                        <height>24</height>
                         <aspectratio>keep</aspectratio>
                         <texture colordiffuse="FFFFFFFF">icon-home-o.png</texture>
                     </control>
                     <control type="image">
-                        <left>53</left>
-                        <top>611</top>
-                        <width>22</width>
-                        <height>18</height>
+                        <left>52</left>
+                        <top>612</top>
+                        <width>24</width>
+                        <height>20</height>
                         <texture colordiffuse="FFFFFFFF">icon-menu.png</texture>
                     </control>
                 </control>
@@ -4498,9 +4498,9 @@
                         </control>
                         <control type="image">
                             <left>50</left>
-                            <top>20</top>
-                            <width>28</width>
-                            <height>28</height>
+                            <top>19</top>
+                            <width>30</width>
+                            <height>30</height>
                             <aspectratio>keep</aspectratio>
                             <texture>$INFO[ListItem.Art(icon)]</texture>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
@@ -4511,7 +4511,7 @@
                             <width>287</width>
                             <height>68</height>
                             <aligny>center</aligny>
-                            <font>font_aura_tiny_bold</font>
+                            <font>font_aura_midi</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>CCFFFFFF</textcolor>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile)) | !String.IsEmpty(Window.Property(AuraSheetOpen)) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
@@ -4601,9 +4601,9 @@
                         </control>
                         <control type="image">
                             <left>50</left>
-                            <top>20</top>
-                            <width>28</width>
-                            <height>28</height>
+                            <top>19</top>
+                            <width>30</width>
+                            <height>30</height>
                             <aspectratio>keep</aspectratio>
                             <texture colordiffuse="FF1A1A1A">$INFO[ListItem.Art(icon)]</texture>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>
@@ -4614,7 +4614,7 @@
                             <width>287</width>
                             <height>68</height>
                             <aligny>center</aligny>
-                            <font>font_aura_tiny_bold</font>
+                            <font>font_aura_midi</font>
                             <label>$INFO[ListItem.Label]</label>
                             <textcolor>FF1A1A1A</textcolor>
                             <visible>Control.HasFocus(3310) + String.IsEmpty(ListItem.Property(is_header)) + String.IsEmpty(ListItem.Property(is_profile))</visible>

@@ -69,14 +69,6 @@
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
                 </control>
                 <control type="image">
-                    <left>16</left>
-                    <top>16</top>
-                    <width>40</width>
-                    <height>40</height>
-                    <texture colordiffuse="FF3E3B3A">circle.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
-                </control>
-                <control type="image">
                     <left>20</left>
                     <top>22</top>
                     <width>32</width>
@@ -192,14 +184,6 @@
                     <height>38</height>
                     <texture colordiffuse="FF1A1A1A">cast-mask.png</texture>
                     <visible>String.IsEqual(ListItem.Property(iconkind),avatar) + !String.IsEmpty(ListItem.Property(avatar))</visible>
-                </control>
-                <control type="image">
-                    <left>16</left>
-                    <top>16</top>
-                    <width>40</width>
-                    <height>40</height>
-                    <texture colordiffuse="FF3E3B3A">circle.png</texture>
-                    <visible>String.IsEqual(ListItem.Property(iconkind),search)</visible>
                 </control>
                 <control type="image">
                     <left>20</left>
@@ -452,30 +436,30 @@
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
                         <itemlayout width="473" height="80">
                 <control type="image">
-                    <left>24</left>
+                    <left>56</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
-                    <texture colordiffuse="80FFFFFF">icon-recent.png</texture>
+                    <texture colordiffuse="CCFFFFFF">icon-recent.png</texture>
                     <visible>String.IsEmpty(ListItem.Property(clear)) + String.IsEmpty(ListItem.Property(suggest))</visible>
                 </control>
                 <control type="image">
-                    <left>24</left>
+                    <left>56</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
-                    <texture colordiffuse="80FFFFFF">key-clear.png</texture>
+                    <texture colordiffuse="CCFFFFFF">key-clear.png</texture>
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>66</left>
+                    <left>98</left>
                     <top>0</top>
-                    <width>360</width>
+                    <width>326</width>
                     <height>80</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_rowhead</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>DDFFFFFF</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                 </control></itemlayout>
             <focusedlayout width="473" height="80" condition="Control.HasFocus(8110)">
                 <control type="image">
@@ -486,7 +470,7 @@
                     <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="image">
-                    <left>24</left>
+                    <left>56</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -494,7 +478,7 @@
                     <visible>String.IsEmpty(ListItem.Property(clear)) + String.IsEmpty(ListItem.Property(suggest))</visible>
                 </control>
                 <control type="image">
-                    <left>24</left>
+                    <left>56</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
@@ -502,41 +486,41 @@
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>66</left>
+                    <left>98</left>
                     <top>0</top>
-                    <width>360</width>
+                    <width>326</width>
                     <height>80</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_rowhead</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
                     <textcolor>FFFFFFFF</textcolor>
                 </control></focusedlayout>
             <focusedlayout width="473" height="80" condition="!Control.HasFocus(8110)">
                 <control type="image">
-                    <left>24</left>
+                    <left>56</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
-                    <texture colordiffuse="80FFFFFF">icon-recent.png</texture>
+                    <texture colordiffuse="CCFFFFFF">icon-recent.png</texture>
                     <visible>String.IsEmpty(ListItem.Property(clear)) + String.IsEmpty(ListItem.Property(suggest))</visible>
                 </control>
                 <control type="image">
-                    <left>24</left>
+                    <left>56</left>
                     <top>25</top>
                     <width>30</width>
                     <height>30</height>
-                    <texture colordiffuse="80FFFFFF">key-clear.png</texture>
+                    <texture colordiffuse="CCFFFFFF">key-clear.png</texture>
                     <visible>!String.IsEmpty(ListItem.Property(clear))</visible>
                 </control>
                 <control type="label">
-                    <left>66</left>
+                    <left>98</left>
                     <top>0</top>
-                    <width>360</width>
+                    <width>326</width>
                     <height>80</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_rowhead</font>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>DDFFFFFF</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                 </control></focusedlayout>
         </control>
 
@@ -547,11 +531,11 @@
             <left>686</left>
             <top>47</top>
             <width>1234</width>
-            <height>32</height>
-            <font>font_aura_small</font>
+            <height>40</height>
+            <font>font_aura_section_bold</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33586]</label>
-            <textcolor>C8FFFFFF</textcolor>
+            <textcolor>DCFFFFFF</textcolor>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
         </control>
 
@@ -563,7 +547,7 @@
             <top>132</top>
             <width>1234</width>
             <height>56</height>
-            <font>font_aura_head_bold</font>
+            <font>font_aura_section_bold</font>
             <aligny>center</aligny>
             <label>$ADDON[script.akasha.aura 33584]</label>
             <textcolor>FFFFFFFF</textcolor>
