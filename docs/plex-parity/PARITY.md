@@ -367,3 +367,63 @@ Reste ouvert / documenté :
 - **Gap hero replié** : comportement voulu — le bloc hero descend +50 px
   sous la barre déployée (Plex pousse aussi le hero sous la barre
   ouverte). Conservé, documenté.
+
+## Polish round 5 — écran Recherche pixel-diff
+
+Audit demandé par Claude : diff masqué contre `official-live/71-search.png`
+(masque = contenu dynamique : posters, textes localisés, historique).
+
+- **Fond** : l'écran utilisait un plat `#1A1A1A` ; Plex a un dégradé 2D
+  (luminosité ~51 en haut-gauche → ~7 bas-droite, décroissant sur les
+  deux axes). Nouvelle texture `bg-gradient-search2.png` interpolée sur
+  les mesures réelles de la référence. Diff masqué 60 % → ~19 % → 1,4 %.
+- **Touches clavier** : fill opaque `FF3E3B3A` → translucide `22FFFFFF`
+  (les touches Plex laissent voir le dégradé), cellules 66→64 px,
+  lettres `font_aura_mini`→`font_aura_small` (glyphes Plex ~17 px).
+- **Focus initial** : `defaultcontrol` 8115→8100 + boucle de re-assertion
+  ~7,5 s qui corrige uniquement un retour de focus sur les boutons du bas
+  (8115-8117) — respecte la navigation utilisateur.
+- **Grille « Recherches populaires »** : pitch d'items 299→293
+  (colonnes Plex 686/979/1271/1564), hauteur d'item 450→460 (rangée 2 à
+  y652), titres blancs gras `font_aura_mini_bold`/`FFFFFFFF`.
+- **Historique** : liste décalée +6 px (premier item y~673 vs Plex 672).
+- **Glyphes espace/⌫/×** : icônes 32→44 px (Plex ~21 px de haut vs 14).
+- **Hint** : top 47→45 (y54 = Plex).
+
+Résidu masqué ~1,4 % : anti-aliasing des glyphes, icônes du rail
+(glyphes différents, documenté), bords de contenu non masqué.
+
+### Round 5b — retouche finale
+
+- Titres/années sous posters remontés (−7/−6 px) : texte y571/602 vs
+  Plex y571/600. Interligne ~29 px des deux côtés.
+- Titre écran : `font_aura_main_bold` (glyphes ~19 px comme Plex),
+  bbox y70-89 vs Plex y71-89.
+- Clavier décalé −1 px (panel 128) ; icônes micro/filtre −2 px.
+- Diff masqué final **1,15 %** avec masque couvrant ~59 % de l'écran
+  (en-tête localisé, historique, posters+titres, bord contenu).
+  Résidu : AA des glyphes, icônes du rail, arêtes non masquées.
+  Différences d'icônes documentées : glyphe espace (tiret vs ⎵),
+  icônes horloge/avatar du rail.
+
+### Mesures bbox de référence (recherche, convergé)
+
+| Élément | Plex (ref 71) | Aura (mesuré) |
+|---|---|---|
+| Colonnes grille | 686 / 979 / 1271 / 1564 | 686 / 979 / 1272 / 1565 |
+| Rangée 2 posters (top) | y652 | y652 |
+| Titre poster rangée 1 | y571-588 | y571-586 |
+| Année rangée 1 | y600-614 | y602-615 |
+| Historique 1er item (icône) | y672 | y673 |
+| Hint | y54-69 | y54-69 |
+| Titre écran | y71-89 | y70-89 |
+| Icônes micro/filtre | y55-93 | y55-93 |
+| Glyphes barre du bas | y581-602 | y582-602 |
+| Cellule « a » focus | x132-196 | x132-196 |
+| Fond top-droite (lum.) | ~10 | ~15 |
+| Fond x30 y200/y500 | 47 / 26 | 46 / 25 |
+
+Diff pixel masqué final : **1,15 %** sur ~41 % de l'écran non masqué
+(masque ~59 % : en-tête, historique, posters et titres, bord contenu).
+Écrans couverts par la convergence : recherche, sidebar, accueil.
+Non audités par cette méthode : fiche détail, lecteur, bibliothèque.

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog" id="1201">
-    <!-- The key grid (8100) is populated from Python, so it is empty
-         when Kodi resolves the default control. The static Space
-         button is always focusable; onInit moves focus to the grid
-         a beat later, so the boot behavior is unchanged. -->
-    <defaultcontrol>8115</defaultcontrol>
+    <!-- Plex opens with the cursor on 'a': default to the key grid.
+         If Kodi cannot focus the (still empty) panel it falls back to
+         the Space button, and onInit's re-assertion loop snaps it back. -->
+    <defaultcontrol>8100</defaultcontrol>
     <zorder>3</zorder>
     <controls>
         <!-- Plex-style search (docs/plex-parity/reference/recherche/):
@@ -16,7 +15,7 @@
             <top>0</top>
             <width>1920</width>
             <height>1080</height>
-            <texture colordiffuse="FF1A1A1A">white.png</texture>
+            <texture background="true">bg-gradient-search2.png</texture>
         </control>
 
         <!-- Collapsed icon rail: Plex keeps it on the search page too
@@ -218,24 +217,24 @@
         <!-- Typed query -->
         <control type="label" id="8200">
             <left>133</left>
-            <top>46</top>
+            <top>52</top>
             <width>320</width>
             <height>56</height>
-            <font>font_aura_mini_bold</font>
+            <font>font_aura_main_bold</font>
             <textcolor>CCFFFFFF</textcolor>
         </control>
         <!-- Mic + filter-tune icons (visual parity, non functional) -->
         <control type="image">
-            <left>450</left>
-            <top>58</top>
-            <width>28</width>
+            <left>448</left>
+            <top>56</top>
+            <width>30</width>
             <height>44</height>
             <aspectratio>keep</aspectratio>
             <texture colordiffuse="CCFFFFFF">search-mic.png</texture>
         </control>
         <control type="image">
-            <left>505</left>
-            <top>58</top>
+            <left>506</left>
+            <top>56</top>
             <width>46</width>
             <height>44</height>
             <aspectratio>keep</aspectratio>
@@ -247,7 +246,7 @@
 
         <!-- Letter grid: a-z then 1-0, 6 columns -->
         <control type="panel" id="8100">
-            <left>129</left>
+            <left>128</left>
             <top>124</top>
             <width>432</width>
             <height>432</height>
@@ -262,14 +261,14 @@
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
+                    <texture colordiffuse="22FFFFFF" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
                     <left>4</left>
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_small</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -288,7 +287,7 @@
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <font>font_aura_mini_bold</font>
+                    <font>font_aura_small_bold</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -300,14 +299,14 @@
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
+                    <texture colordiffuse="22FFFFFF" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="label">
                     <left>4</left>
                     <top>4</top>
                     <width>64</width>
                     <height>64</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_small</font>
                     <align>center</align>
                     <aligny>center</aligny>
                     <label>$INFO[ListItem.Label]</label>
@@ -330,7 +329,7 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texturenofocus>
+            <texturenofocus colordiffuse="22FFFFFF" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
             <onleft>8140</onleft>
@@ -338,18 +337,18 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>185</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>179</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-space.png</texture>
             <visible>!Control.HasFocus(8115)</visible>
         </control>
         <control type="image">
-            <left>185</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>179</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-space-dark.png</texture>
             <visible>Control.HasFocus(8115)</visible>
         </control>
@@ -364,7 +363,7 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texturenofocus>
+            <texturenofocus colordiffuse="22FFFFFF" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
             <onleft>8115</onleft>
@@ -372,18 +371,18 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>329</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>323</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-backspace.png</texture>
             <visible>!Control.HasFocus(8116)</visible>
         </control>
         <control type="image">
-            <left>329</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>323</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-backspace-dark.png</texture>
             <visible>Control.HasFocus(8116)</visible>
         </control>
@@ -398,7 +397,7 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <focusedcolor>FF1A1A1A</focusedcolor>
-            <texturenofocus colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texturenofocus>
+            <texturenofocus colordiffuse="22FFFFFF" border="10">rounded-solid.png</texturenofocus>
             <texturefocus colordiffuse="FFFFFFFF" border="10">rounded-solid.png</texturefocus>
             <onup>8100</onup>
             <onleft>8116</onleft>
@@ -406,18 +405,18 @@
             <ondown>8110</ondown>
         </control>
         <control type="image">
-            <left>473</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>467</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-clear.png</texture>
             <visible>!Control.HasFocus(8117)</visible>
         </control>
         <control type="image">
-            <left>473</left>
-            <top>576</top>
-            <width>32</width>
-            <height>32</height>
+            <left>467</left>
+            <top>570</top>
+            <width>44</width>
+            <height>44</height>
             <texture>key-clear-dark.png</texture>
             <visible>Control.HasFocus(8117)</visible>
         </control>
@@ -425,7 +424,7 @@
         <!-- Recent searches -->
         <control type="list" id="8110">
             <left>96</left>
-            <top>640</top>
+            <top>646</top>
             <width>432</width>
             <height>440</height>
             <orientation>vertical</orientation>
@@ -467,7 +466,7 @@
                     <top>6</top>
                     <width>432</width>
                     <height>68</height>
-                    <texture colordiffuse="FF3E3B3A" border="10">rounded-solid.png</texture>
+                    <texture colordiffuse="22FFFFFF" border="10">rounded-solid.png</texture>
                 </control>
                 <control type="image">
                     <left>56</left>
@@ -529,7 +528,7 @@
              empty. -->
         <control type="label">
             <left>686</left>
-            <top>47</top>
+            <top>45</top>
             <width>1234</width>
             <height>40</height>
             <font>font_aura_main_bold</font>
@@ -568,7 +567,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8100</onleft>
                 <onright>8121</onright>
                 <ondown>8130</ondown>
@@ -605,7 +604,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8120</onleft>
                 <onright>8122</onright>
                 <ondown>8130</ondown>
@@ -642,7 +641,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8121</onleft>
                 <onright>8123</onright>
                 <ondown>8130</ondown>
@@ -679,7 +678,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8122</onleft>
                 <onright>8124</onright>
                 <ondown>8130</ondown>
@@ -716,7 +715,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8123</onleft>
                 <onright>8125</onright>
                 <ondown>8130</ondown>
@@ -753,7 +752,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8124</onleft>
                 <onright>8126</onright>
                 <ondown>8130</ondown>
@@ -790,7 +789,7 @@
                 <font>font_aura_mini</font>
                 <label></label>
                 <texturefocus colordiffuse="FFFFFFFF" border="26">rounded-solid.png</texturefocus>
-                <texturenofocus colordiffuse="FF3E3B3A" border="26">rounded-solid.png</texturenofocus>
+                <texturenofocus colordiffuse="22FFFFFF" border="26">rounded-solid.png</texturenofocus>
                 <onleft>8125</onleft>
                 <onright>8130</onright>
                 <ondown>8130</ondown>
@@ -1257,7 +1256,7 @@
             <onleft>8100</onleft>
             <onup>8131</onup>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
-                        <itemlayout width="299" height="450">
+                        <itemlayout width="293" height="460">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -1277,18 +1276,18 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>380</top>
+                    <top>373</top>
                     <width>240</width>
                     <height>28</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>410</top>
+                    <top>404</top>
                     <width>240</width>
                     <height>24</height>
                     <font>font_aura_tiny</font>
@@ -1297,7 +1296,7 @@
                     <textcolor>77FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control></itemlayout>
-            <focusedlayout width="299" height="450" condition="Control.HasFocus(8131)">
+            <focusedlayout width="293" height="460" condition="Control.HasFocus(8131)">
                 <control type="image">
                     <left>-6</left>
                     <top>-6</top>
@@ -1325,7 +1324,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>380</top>
+                    <top>373</top>
                     <width>240</width>
                     <height>28</height>
                     <font>font_aura_mini_bold</font>
@@ -1336,7 +1335,7 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>410</top>
+                    <top>404</top>
                     <width>240</width>
                     <height>24</height>
                     <font>font_aura_tiny</font>
@@ -1345,7 +1344,7 @@
                     <textcolor>99FFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control></focusedlayout>
-            <focusedlayout width="299" height="450" condition="!Control.HasFocus(8131)">
+            <focusedlayout width="293" height="460" condition="!Control.HasFocus(8131)">
                 <control type="image">
                     <left>0</left>
                     <top>0</top>
@@ -1365,18 +1364,18 @@
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>380</top>
+                    <top>373</top>
                     <width>240</width>
                     <height>28</height>
-                    <font>font_aura_mini</font>
+                    <font>font_aura_mini_bold</font>
                     <align>center</align>
                     <label>$INFO[ListItem.Label]</label>
-                    <textcolor>BBFFFFFF</textcolor>
+                    <textcolor>FFFFFFFF</textcolor>
                     <wrapmultiline>false</wrapmultiline>
                 </control>
                 <control type="label">
                     <left>0</left>
-                    <top>410</top>
+                    <top>404</top>
                     <width>240</width>
                     <height>24</height>
                     <font>font_aura_tiny</font>
