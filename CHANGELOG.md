@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.73.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.1...akasha-os-v0.73.2) (2026-11-02)
+
+
+### Bug Fixes
+
+* **aura:** visual parity polish round 3 ([#260](https://github.com/jeremiejt38/akasha-os/issues/260)) ([56dde70](https://github.com/jeremiejt38/akasha-os/commit/56dde702795d96fad603887ed85749beea2ab648))
+* **detail:** keep activity label clear of stacked avatars ([#257](https://github.com/jeremiejt38/akasha-os/issues/257)) ([0ebbe8e](https://github.com/jeremiejt38/akasha-os/commit/0ebbe8e3377ae8dfc76955285d6baf3282a896e7))
+
 ## [0.73.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.73.0...akasha-os-v0.73.1) (2026-11-02)
 
 
