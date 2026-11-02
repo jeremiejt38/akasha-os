@@ -516,3 +516,28 @@ en cours, comme Plex.
   Up Next) — nécessite une lecture lancée depuis Aura (le stream 4K
   direct timeoute via WAN ; passer par un item 1080p via l'UI).
 - Diff masqué fiche détail même item (structure déjà à ±2 px).
+
+### OSD en contexte réel (vérifié live sur Pi, Mercredi S2E3 1080p)
+
+Chaîne complète validée end-to-end :
+
+- **File de lecture** : reprise depuis la fiche épisode pose la file de
+  saison (E3→E7+). L'overlay `osdqueue` liste « Chapitres » + « File de
+  lecture » avec vignettes réelles, anneau focus blanc + icône lecture
+  sur l'item courant — structure identique à `39-osd-playqueue`.
+- **Chapitres** : Plex rend des **barres fines** (~360×10 px) quand il
+  n'y a pas de frame BIF — ou quand la file prend le focus — et des
+  cartes 16:9 avec titre « Chapters » quand les chapitres sont focusés
+  avec BIF (`41-osd-settings-menu`). Corrigé : `hasThumbnail` est
+  propagé, l'URL `/indexes/sd` n'est construite que si la vignette
+  existe, et les items sans art rendent une barre `cap-r8` au lieu
+  d'une carte noire vide.
+- **Seek par chapitre** : Select sur « Credits » saute à 52:44. ✓
+- **Skip-marker** : « Passer le générique » en pill blanche bas-droite
+  pendant la fenêtre du marqueur credits (`skip_marker_187`). ✓
+- **Up Next** : après skip, carte « À suivre » avec vignette, compte à
+  rebours 10 s, « Lire maintenant » / « Annuler », puis enchaînement
+  automatique sur E4 (`post_skip_188`). ✓
+
+Captures : `osd_queue_bars_183/184`, `osd_q_chfocus_185`,
+`osd_q_qfocus_186`, `skip_marker_187`, `post_skip_188`.
