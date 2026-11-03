@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.77.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.76.2...akasha-os-v0.77.0) (2026-11-03)
+
+
+### Features
+
+* **aura:** exclusive swap between top bar and contextual strips ([#293](https://github.com/jeremiejt38/akasha-os/issues/293)) ([cbbed64](https://github.com/jeremiejt38/akasha-os/commit/cbbed646c939deec87db505c95397ccc4fa07aa6))
+
 ## [0.76.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.76.1...akasha-os-v0.76.2) (2026-11-03)
 
 
