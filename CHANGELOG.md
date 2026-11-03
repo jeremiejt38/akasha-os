@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.76.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.3...akasha-os-v0.76.0) (2026-11-03)
+
+
+### Features
+
+* **aura:** modernise the A-Z rail and make letter jumps feel alive ([#284](https://github.com/jeremiejt38/akasha-os/issues/284)) ([8d0669c](https://github.com/jeremiejt38/akasha-os/commit/8d0669c11071367f1b4d36edd5e2b2073a530181))
+
 ## [0.75.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.2...akasha-os-v0.75.3) (2026-11-03)
 
 
