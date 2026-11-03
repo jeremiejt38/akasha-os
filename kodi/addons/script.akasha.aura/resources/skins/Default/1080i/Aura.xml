@@ -1692,20 +1692,34 @@
                          aura_window.py::_build_placeholder_list_item(). Real
                          poster/labels below are hidden for these items instead
                          of showing an empty thumb/label. -->
+                    <!-- Skeleton silhouettes mirror the real card
+                         geometry: skeleton-poster.png is a 240x360 matte
+                         with the same ~12px on-screen corner radius the
+                         art proxy bakes into real posters, and the two
+                         bars sit centred like the title (mini, top=402)
+                         and year (tiny, top=432) labels do. -->
                     <control type="image">
                         <left>12</left>
                         <top>30</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                        <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
-                        <left>12</left>
-                        <top>402</top>
-                        <width>180</width>
-                        <height>20</height>
-                        <texture colordiffuse="22FFFFFF" border="4">rounded-solid.png</texture>
+                        <left>52</left>
+                        <top>407</top>
+                        <width>160</width>
+                        <height>16</height>
+                        <texture colordiffuse="22FFFFFF" border="8">rounded-solid.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                    </control>
+                    <control type="image">
+                        <left>92</left>
+                        <top>436</top>
+                        <width>80</width>
+                        <height>13</height>
+                        <texture colordiffuse="1CFFFFFF" border="6">rounded-solid.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
@@ -1836,20 +1850,35 @@
                             </control>
 </itemlayout>
                 <focusedlayout width="283" height="460">
+                    <!-- Skeleton silhouettes mirror the real card
+                         geometry: skeleton-poster.png is a 240x360 matte
+                         with the same ~12px on-screen corner radius the
+                         art proxy bakes into real posters, and the two
+                         bars sit centred like the title (mini, top=402)
+                         and year (tiny, top=432) labels do. -->
                     <control type="image">
                         <left>12</left>
                         <top>30</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                        <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
+                        <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
+                        <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
+                    </control>
+                    <control type="image">
+                        <left>52</left>
+                        <top>407</top>
+                        <width>160</width>
+                        <height>16</height>
+                        <texture colordiffuse="22FFFFFF" border="8">rounded-solid.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
-                        <left>12</left>
-                        <top>402</top>
-                        <width>180</width>
-                        <height>20</height>
-                        <texture colordiffuse="22FFFFFF" border="4">rounded-solid.png</texture>
+                        <left>92</left>
+                        <top>436</top>
+                        <width>80</width>
+                        <height>13</height>
+                        <texture colordiffuse="1CFFFFFF" border="6">rounded-solid.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                     <control type="image">
