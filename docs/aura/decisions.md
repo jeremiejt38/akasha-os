@@ -900,3 +900,37 @@ pavé PIN + swap du `plex.token` en settings + rebuild `PlexClient` + flush
 utilisateur, comme dans l'app Plex TV. À planifier en phase dédiée — le PIN
 est saisi à la télécommande et le nouveau token persiste en settings, comme
 sur Plex.
+
+## InstallAddon / AddonInformation depuis une WindowXMLDialog (2026-11-03)
+
+Deux bugs natifs Kodi découverts en vérifiant le flux `kodi-repo` du Store sur
+le Pi réel (Kodi Omega 21.3, LibreELEC) :
+
+1. **`InstallAddon()` no-op silencieux sous modale** : depuis le Store
+   (`AuraStoreWindow`, `WindowXMLDialog` en `doModal()`), le builtin ne produit
+   ni dialogue, ni erreur, ni installation — le dialogue de confirmation
+   « Extension requise » ne peut pas s'ouvrir au-dessus de la pile modale.
+   Même comportement pour `RunAddon()`. **Solution** : pattern « pending
+   action » — la dialog se `close()`, et `run_pending_native()` est exécutée
+   par la fenêtre parente **après** le retour complet de `doModal()` (un
+   builtin lancé dans le même handler, même après `self.close()`, arrive trop
+   tôt et est avalé). Relayé un niveau de plus quand le Store est ouvert
+   depuis Mes Apps (`AuraAppWindow` est elle-même modale).
+
+2. **`ActivateWindow(AddonInformation, <id>, return)` segfaulte Kodi** :
+   `SIGSEGV` dans `CGUIDialogAddonInfo::BuildDependencyList()` via
+   `OnInitWindow`, **pour tout addon, modale ou non** (crashlogs
+   `kodi_crashlog_20261103014138/015127/015239` — le troisième depuis Home,
+   hors Aura). Le repli « fenêtre native AddonInformation » prévu pour la
+   désinstallation (cf. décision jalon 5 ci-dessus) est donc **inutilisable
+   sur ce build**, et la voie de l'onglet App était déjà cassée de la même
+   façon. Comme il n'existe ni méthode JSON-RPC `Addons.UninstallAddon` ni
+   builtin de désinstallation, `uninstall_kodi_addon()` (aura_store.py)
+   supprime le dossier `special://home/addons/<id>/` via `xbmcvfs` puis lance
+   `UpdateLocalAddons`, qui resynchronise `Addons33.db` — équivalent à une
+   désinstallation native, dépendances orphelines comprises. La réserve
+   initiale (« `rm -rf` sur un dossier d'addon en cours d'exécution
+   potentielle ») reste valable en théorie, mais les entrées `kodi-repo` du
+   catalogue sont des plugins/audio non résidents : à l'heure du clic
+   « Désinstaller » rien ne s'exécute dedans, et l'alternative n'existe pas
+   sur ce build.
