@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.75.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.2...akasha-os-v0.75.3) (2026-11-03)
+
+
+### Bug Fixes
+
+* **aura:** stop the library grid wrapping to the top mid-scroll ([#282](https://github.com/jeremiejt38/akasha-os/issues/282)) ([3670698](https://github.com/jeremiejt38/akasha-os/commit/36706987519b96305d4e530c9f393013a8c7f589))
+
 ## [0.75.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.1...akasha-os-v0.75.2) (2026-11-03)
 
 
