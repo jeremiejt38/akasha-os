@@ -4023,11 +4023,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self.setProperty('AppActiveSubtab', str(index))
         self._sync_navigation()
         if index == APP_SUBTAB_MES_APPS:
-            self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml').doModal()
+            app = self._get_sub_window('app', aura_app.AuraAppWindow, 'AuraApp.xml')
+            app.doModal()
             self._load_pinned_apps()
+            app.run_pending_native()
         elif index == APP_SUBTAB_STORE:
-            self._get_sub_window('store', aura_store.AuraStoreWindow, 'AuraStore.xml').doModal()
+            store = self._get_sub_window('store', aura_store.AuraStoreWindow, 'AuraStore.xml')
+            store.doModal()
             self._load_pinned_apps()
+            store.run_pending_native()
 
     def _set_jeux_panel(self, items, status_text):
         try:
