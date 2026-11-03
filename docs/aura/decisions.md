@@ -934,3 +934,31 @@ le Pi réel (Kodi Omega 21.3, LibreELEC) :
    catalogue sont des plugins/audio non résidents : à l'heure du clic
    « Désinstaller » rien ne s'exécute dedans, et l'alternative n'existe pas
    sur ce build.
+
+## Pré-chauffage du proxy d'art pour le défilement des bibliothèques (2026-11-03)
+
+Dans Bibliothèque → Films (~5000 fiches), le défilement laissait les
+cartes noires : chaque poster payait, **dans le chemin chaud du fetch
+d'image de Kodi**, un transcode Plex (~0,5–2 s) plus un rendu PIL
+masque-arrondi + encodage PNG (~150–200 ms sur le Pi4). Deux correctifs
+indépendants dans `art_proxy.py` / `aura_window.py` :
+
+- **`art_proxy.warm()`** pré-rend les URLs wrappées de chaque page
+  chargée/ajoutée sur un pool borné (4 workers + sémaphore global
+  `_warm_slots`, car les warms prioritaires au focus peuvent empiler
+  plusieurs files). `_render()` déduplique déjà par check-disque +
+  lock par fichier, donc les appels répétés sont des no-ops bon marché.
+  `_maybe_load_more_divert` ajoute un warm **prioritaire par position** :
+  ~deux rangées d'avance sur la carte focusée, déclenché seulement après
+  un déplacement ≥ 12 cartes — un défilement rapide ne dépasse plus la
+  file séquentielle de la page. Les fetches d'image à la demande de Kodi
+  ne passent jamais par `warm()` et ne sont pas mis en file derrière lui.
+- **`_round()` deux fois moins cher** : supersampling du masque 4×→2× +
+  `compress_level=1` → ~46 ms/poster 320×480 mesurés sur le Pi4, sans
+  dégradation visible des coins à distance TV. `MASK_VERSION` bumpé à 2
+  pour régénérer les rendus obsolètes (les anciens fichiers sont purgés
+  par la borne du cache).
+
+Vérifié live : 30 `Down` rapides dans Films — toutes les affiches
+rendues, aucune carte noire ; load average ~1,0 ; cache qui grossit en
+arrière-plan ; zéro erreur `artproxy` dans kodi.log.
