@@ -280,9 +280,11 @@
             <!-- Plex behavior: the global top bar disappears entirely
                  once the selection drops into the content, freeing the
                  whole strip for the contextual tabs below, and fades
-                 back in when focus climbs back to it. -->
+                 back in when focus climbs back to it. The slight
+                 vertical travel makes it re-enter from the top edge. -->
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                 <effect type="fade" start="100" end="0" time="220" tween="quadratic" easing="out"/>
+                <effect type="slide" start="0,0" end="0,-24" time="220" tween="quadratic" easing="out"/>
             </animation>
 
             <left>0</left>
@@ -524,6 +526,9 @@
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                 <effect type="slide" start="0,0" end="0,-85" time="250" tween="quadratic" easing="out"/>
             </animation>
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                <effect type="fade" start="100" end="0" time="250" tween="quadratic" easing="out"/>
+            </animation>
 
             <control type="image">
                 <left>60</left>
@@ -688,6 +693,9 @@
             <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                 <effect type="slide" start="0,0" end="0,-85" time="250" tween="quadratic" easing="out"/>
             </animation>
+            <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                <effect type="fade" start="100" end="0" time="250" tween="quadratic" easing="out"/>
+            </animation>
 
             <control type="image">
                 <left>60</left>
@@ -810,10 +818,13 @@
                 <visible>String.IsEqual(Window.Property(DivertView),library)</visible>
                 <!-- The strip recenters itself in the freed top space when
                      the global bar recedes (y 120 -> 32, like the home
-                     strip), and slides back under it when the bar fades
-                     back in. -->
+                     strip), and fades out while sliding back under it
+                     when the bar takes the top edge again. -->
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                     <effect type="slide" start="0,0" end="0,-88" time="250" tween="quadratic" easing="out"/>
+                </animation>
+                <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                    <effect type="fade" start="100" end="0" time="250" tween="quadratic" easing="out"/>
                 </animation>
 
                 <!-- Plex's library view has no big title block: the context
@@ -1131,9 +1142,13 @@
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>
                 <animation effect="fade" start="100" end="0" time="120" easing="in">Hidden</animation>
                 <!-- Same recentering as the library strip: y 118 -> 60
-                     while the global bar is recessed. -->
+                     while the global bar is recessed; it fades out when
+                     the bar reclaims the top edge. -->
                 <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),false)" reversible="true">
                     <effect type="slide" start="0,0" end="0,-88" time="250" tween="quadratic" easing="out"/>
+                </animation>
+                <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraBarFocused),true)" reversible="true">
+                    <effect type="fade" start="100" end="0" time="250" tween="quadratic" easing="out"/>
                 </animation>
                 <control type="image">
                     <left>127</left>
