@@ -1264,16 +1264,16 @@
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="progress">
-                    <left>12</left>
-                    <top>272</top>
-                    <width>488</width>
-                    <height>8</height>
+                    <left>8</left>
+                    <top>283</top>
+                    <width>496</width>
+                    <height>4</height>
                     <info>ListItem.Property(PercentPlayed)</info>
-                    <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                    <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
-                    <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                    <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
                     <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
                 </control>
             </itemlayout>
@@ -1331,16 +1331,16 @@
                     <visible>String.IsEqual(ListItem.Property(watched),1)</visible>
                 </control>
                 <control type="progress">
-                    <left>12</left>
-                    <top>272</top>
-                    <width>488</width>
-                    <height>8</height>
+                    <left>8</left>
+                    <top>283</top>
+                    <width>496</width>
+                    <height>4</height>
                     <info>ListItem.Property(PercentPlayed)</info>
-                    <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                    <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                     <lefttexture>-</lefttexture>
                     <righttexture>-</righttexture>
                     <overlaytexture>-</overlaytexture>
-                    <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
+                    <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
                     <visible>!String.IsEmpty(ListItem.Property(PercentPlayed)) + Integer.IsGreater(ListItem.Property(PercentPlayed),0)</visible>
                 </control>
             </focusedlayout>

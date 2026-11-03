@@ -1749,7 +1749,7 @@
                         <top>30</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                        <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                     </control>
                     <control type="label">
@@ -1795,12 +1795,12 @@
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                     </control>
                     <control type="progress">
-                        <left>24</left>
-                        <top>370</top>
-                        <width>216</width>
-                        <height>8</height>
-                        <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                        <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                        <left>18</left>
+                        <top>385</top>
+                        <width>228</width>
+                        <height>4</height>
+                        <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                        <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                         <lefttexture></lefttexture>
                         <righttexture></righttexture>
                         <overlaytexture></overlaytexture>
@@ -1908,7 +1908,7 @@
                         <top>30</top>
                         <width>240</width>
                         <height>360</height>
-                        <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                        <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                         <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
@@ -1959,12 +1959,12 @@
                         <animation effect="zoom" start="100" end="105" center="auto" time="150" reversible="true">Focus</animation>
                     </control>
                     <control type="progress">
-                        <left>24</left>
-                        <top>370</top>
-                        <width>216</width>
-                        <height>8</height>
-                        <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                        <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                        <left>18</left>
+                        <top>385</top>
+                        <width>228</width>
+                        <height>4</height>
+                        <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                        <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                         <lefttexture></lefttexture>
                         <righttexture></righttexture>
                         <overlaytexture></overlaytexture>
@@ -2115,7 +2115,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -2133,7 +2133,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
@@ -2179,12 +2179,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2218,7 +2218,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2269,12 +2269,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2313,7 +2313,7 @@
                                 <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-landscape.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -2345,12 +2345,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2419,12 +2419,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2584,7 +2584,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -2602,7 +2602,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
@@ -2648,12 +2648,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2687,7 +2687,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -2738,12 +2738,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2782,7 +2782,7 @@
                                 <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-landscape.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -2814,12 +2814,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -2888,12 +2888,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3058,7 +3058,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -3076,7 +3076,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
@@ -3122,12 +3122,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3161,7 +3161,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -3212,12 +3212,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3256,7 +3256,7 @@
                                 <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-landscape.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -3288,12 +3288,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3362,12 +3362,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3528,7 +3528,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -3546,7 +3546,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
@@ -3592,12 +3592,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3631,7 +3631,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -3682,12 +3682,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3726,7 +3726,7 @@
                                 <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-landscape.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -3758,12 +3758,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3832,12 +3832,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -3995,7 +3995,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -4013,7 +4013,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                             </control>
                             <control type="label">
@@ -4059,12 +4059,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -4098,7 +4098,7 @@
                                 <top>16</top>
                                 <width>240</width>
                                 <height>360</height>
-                                <texture colordiffuse="FF161623" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="FF161623">skeleton-poster.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(ArtPlaceholder))</visible>
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
@@ -4149,12 +4149,12 @@
                                 <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>356</top>
-                                <width>216</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>371</top>
+                                <width>228</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -4189,7 +4189,7 @@
                                 <top>16</top>
                                 <width>448</width>
                                 <height>252</height>
-                                <texture colordiffuse="26FFFFFF" border="6">rounded-solid.png</texture>
+                                <texture colordiffuse="26FFFFFF">skeleton-landscape.png</texture>
                                 <visible>!String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                             </control>
                             <control type="image">
@@ -4221,12 +4221,12 @@
                                 <visible>String.IsEmpty(ListItem.Property(IsPlaceholder)) + !String.Contains(ListItem.Art(poster),127.0.0.1) + !String.Contains(ListItem.Art(thumb),127.0.0.1) + !String.Contains(ListItem.Art(landscape),127.0.0.1) + !String.Contains(ListItem.Art(fanart),127.0.0.1)</visible>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
@@ -4295,12 +4295,12 @@
                                                             <animation effect="zoom" start="100" end="104" center="auto" time="150" reversible="true">Focus</animation>
                             </control>
                             <control type="progress">
-                                <left>28</left>
-                                <top>248</top>
-                                <width>424</width>
-                                <height>8</height>
-                                <texturebg colordiffuse="CC000000" border="4">prog-bar.png</texturebg>
-                                <midtexture colordiffuse="FFE5A00D" border="2">prog-fill.png</midtexture>
+                                <left>22</left>
+                                <top>263</top>
+                                <width>436</width>
+                                <height>4</height>
+                                <texturebg colordiffuse="B3000000" border="2">prog-bar.png</texturebg>
+                                <midtexture colordiffuse="FFE5A00D">white.png</midtexture>
                                 <lefttexture></lefttexture>
                                 <righttexture></righttexture>
                                 <overlaytexture></overlaytexture>
