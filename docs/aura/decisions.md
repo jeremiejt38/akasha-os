@@ -944,9 +944,10 @@ masque-arrondi + encodage PNG (~150–200 ms sur le Pi4). Deux correctifs
 indépendants dans `art_proxy.py` / `aura_window.py` :
 
 - **`art_proxy.warm()`** pré-rend les URLs wrappées de chaque page
-  chargée/ajoutée sur un pool borné (4 workers + sémaphore global
-  `_warm_slots`, car les warms prioritaires au focus peuvent empiler
-  plusieurs files). `_render()` déduplique déjà par check-disque +
+  chargée/ajoutée sur une **file partagée** `_warm_queue` bornée à
+  `WARM_WORKERS` (4) workers vivants maximum, comptés sous `_warm_lock` :
+  les warms prioritaires au focus s'insèrent en tête de file sans jamais
+  empiler la concurrence. `_render()` déduplique déjà par check-disque +
   lock par fichier, donc les appels répétés sont des no-ops bon marché.
   `_maybe_load_more_divert` ajoute un warm **prioritaire par position** :
   ~deux rangées d'avance sur la carte focusée, déclenché seulement après
@@ -962,3 +963,47 @@ indépendants dans `art_proxy.py` / `aura_window.py` :
 Vérifié live : 30 `Down` rapides dans Films — toutes les affiches
 rendues, aucune carte noire ; load average ~1,0 ; cache qui grossit en
 arrière-plan ; zéro erreur `artproxy` dans kodi.log.
+## Wrap-to-top de la grille bibliothèque : queue placeholder complète + `ondown` sans issue (2026-11-03)
+
+Dans Bibliothèque → Films, un défilement rapide finissait par renvoyer
+en haut de la grille, et les pages semblaient « arrêter de charger ».
+Deux mécanismes distincts se combinaient :
+
+- **Wrap natif du panel Kodi** — `CGUIPanelContainer` décide
+  `wrapAround` selon la cible `<ondown>` déclarée : `nav()` épinglait
+  `down` sur le panel **lui-même**, donc `Down` sur la dernière rangée
+  bouclait en tête (l'utilisateur voyait le retour à 1/7/13...).
+  Impossible à contrer en Python : Kodi applique le déplacement interne
+  **après** le retour d'`onAction()` — avaler l'action ne fait rien, et
+  `getSelectedPosition()`/`getSelectedItem()` renvoient encore
+  l'index pré-move même ~600 ms plus tard (animation `scrolltime` +
+  input bufferisé). Un « wrap-undo » différé était donc inutilisable.
+- **Ordonnancement des pages** — une queue placeholder bornée (~200)
+  rendait le wrap accessible dès la fin chargée ; à l'inverse une queue
+  complète + `addItems` en fin cassait l'ordre (les items réels
+  atterrissaient **après** les placeholders → sauts en arrière), et le
+  swap remove/re-add par page churnait ~800 items sur le chemin d'input
+  (touches avalées, curseur ré-ancré).
+
+Solution en deux volets :
+
+1. **Queue placeholder = total réel.** Plex connaît `total` :
+   `_fill_placeholder_tail()` couvre tout le reste non chargé
+   (plafond `DIVERT_PLACEHOLDER_CAP = 8000`) ; la dernière rangée n'est
+   plus atteinte qu'à la vraie fin de section. Les pages **matérialisent
+   les placeholders en place** (`_apply_divert_item` sur les `ListItem`
+   existants trackés dans `_divert_placeholder_items`, `IsPlaceholder`
+   effacé) — zéro mutation de liste, curseur jamais réévalué, ordre
+   préservé. `ControlList` n'a pas d'insert, c'est le seul chemin
+   correct.
+2. **`ondown` dead-end.** Le panel 3230 déclare désormais `<ondown>`
+   vers un label invisible (id 3260) au lieu de lui-même : cible non
+   self → `wrapAround` faux → `Down` en dernière rangée = touche morte,
+   comme Plex. `prefetch_margin` passe en plus à 150 pour garder les
+   fetches devant un doigt resté appuyé.
+
+Vérifié live : rafales de 60 `Down` comptent exactement
+(+360/+720/1441, jamais de recul), les items 200→4000 matérialisent en
+place, le saut A-Z « Z » sélectionne 5021, et 10 `Down` en fin de liste
+restent sur `Zoulou` (5041) au lieu de boucler à 43.
+`docs/plex-parity/akasha-camera/divert/grid-end-zoulou_033.png`.

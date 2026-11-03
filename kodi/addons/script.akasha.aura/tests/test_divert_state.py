@@ -624,6 +624,12 @@ class ArtPlaceholderTests(unittest.TestCase):
                 self.props = {}
                 self.art = {}
 
+            def setLabel(self, *a):
+                pass
+
+            def setLabel2(self, *a):
+                pass
+
             def setProperty(self, k, v):
                 self.props[k] = v
 
