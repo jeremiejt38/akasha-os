@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.76.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.76.1...akasha-os-v0.76.2) (2026-11-03)
+
+
+### Bug Fixes
+
+* **aura:** thin aligned progress bars and matching skeleton mattes ([#290](https://github.com/jeremiejt38/akasha-os/issues/290)) ([7e7eeef](https://github.com/jeremiejt38/akasha-os/commit/7e7eeef896274e1be0baf43ad46dd34a5197222f))
+
 ## [0.76.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.76.0...akasha-os-v0.76.1) (2026-11-03)
 
 
