@@ -590,3 +590,6 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/divert/skeleton-geometry_038.png` | divert | skeleton-geometry | 084300 | pi |
 | `akasha-direct/divert/progress-bar-thin_039.png` | divert | progress-bar-thin | 092000 | pi |
 | `akasha-direct/divert/progress-bar-thin-grid_040.png` | divert | progress-bar-thin-grid | 084500 | pi |
+| `akasha-direct/divert/topbar-swap-focused_041.jpg` | divert | topbar-swap-focused | 092800 | pi |
+| `akasha-direct/divert/topbar-swap-content_042.jpg` | divert | topbar-swap-content | 092800 | pi |
+| `akasha-direct/divert/topbar-swap-library_043.jpg` | divert | topbar-swap-library | 093100 | pi |
