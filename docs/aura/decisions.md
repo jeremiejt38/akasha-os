@@ -1007,3 +1007,40 @@ Vérifié live : rafales de 60 `Down` comptent exactement
 place, le saut A-Z « Z » sélectionne 5021, et 10 `Down` en fin de liste
 restent sur `Zoulou` (5041) au lieu de boucler à 43.
 `docs/plex-parity/akasha-camera/divert/grid-end-zoulou_033.png`.
+## Rail A-Z : redesign moderne + feedback de saut (2026-11-03)
+
+Deux retours utilisateur : le rail « ne fonctionne pas », et son
+sélecteur (anneau) faisait daté.
+
+**Le « ne fonctionne pas » était un problème de feedback, pas de
+fonction** — le saut marchait (vérifié : Select « F » atterrissait sur
+« F.B.I. Fausses Blondes »), mais pour une lettre lointaine il tire
+plusieurs chunks de 500 items (~35 s pour S) pendant lesquels l'écran
+restait figé sur le rail. Correctifs dans `_divert_az_jump` :
+
+- `Window.Property(AZJump)` alimente un **badge lettre géant**
+  (font_aura_azhero 120 px, contrôle 3261 déclaré **après** le panel
+  pour le z-order) — l'utilisateur voit que le saut est vivant.
+- Le focus repart sur la grille immédiatement (thread différé +
+  `setFocus()` direct — le builtin `SetFocus(3230)` no-op silencieusement
+  dans ce chemin) : les placeholders qui matérialisent rendent la
+  progression visible.
+- Le curseur **chevauche la matérialisation** : chaque tranche d'items
+  arrivée déplace la sélection au dernier item réel → le viewport
+  défile avec le fetch au lieu d'attendre la fin.
+- L'atterrissage ne reprend le focus que s'il est encore sur la
+  grille/le rail (un utilisateur parti dans la sidebar ou une fiche le
+  garde). Le badge s'efface dans le `finally` **avant** le flag
+  in-flight pour qu'un saut en file ne voie jamais la propriété blanchie.
+
+**Redesign du rail** : suppression de l'anneau `az-ring.png` — les
+lettres non-focusées sont petites et estompées (`font_aura_tiny`,
+blanc 40 %), la lettre focusée pop en gras blanc surdimensionné
+(`font_aura_section_bold`) avec animation zoom+fade à chaque changement
+de lettre — le look « letter scrubber » moderne demandé. `scrolltime`
+120 ms pour la fluidité.
+
+Vérif. live : saut « S » — badge visible par-dessus les posters, focus
+rendu à la grille instantanément, curseur 24→1250→2450→3650→4121
+(« S.O.S. Fantômes »), badge effacé. Captures
+`rail-modern-focus_034`, `azjump-badge_035`, `azjump-landed_036`.

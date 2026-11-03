@@ -583,3 +583,7 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/divert/revert-state_031.png` | divert | revert-state | 064751 | pi |
 | `akasha-direct/divert/revert-check_032.png` | divert | revert-check | 064927 | pi |
 | `akasha-direct/divert/grid-end-zoulou_033.png` | divert | grid-end-zoulou | 070615 | pi |
+| `akasha-direct/divert/rail-modern-focus_034.png` | divert | rail-modern-focus | 081910 | pi |
+| `akasha-direct/divert/azjump-badge_035.png` | divert | azjump-badge | 082030 | pi |
+| `akasha-direct/divert/azjump-landed_036.png` | divert | azjump-landed | 082600 | pi |
+| `akasha-direct/divert/azrail-v076_037.png` | divert | azrail-v076 | 083400 | pi |
