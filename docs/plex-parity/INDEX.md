@@ -548,3 +548,5 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/installfix/055_049.png` | installfix | 055 | 020602 | pi |
 | `akasha-direct/installfix/056-somafm-badge_050.png` | installfix | 056-somafm-badge | 020628 | pi |
 | `akasha-direct/installfix/057_051.png` | installfix | 057 | 020650 | pi |
+| `akasha-direct/installfix/060-app-tab_052.png` | installfix | 060-app-tab | 021601 | pi |
+| `akasha-direct/installfix/061-contextmenu_053.png` | installfix | 061-contextmenu | 021620 | pi |
