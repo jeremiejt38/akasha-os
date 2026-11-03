@@ -49,6 +49,39 @@ class WarmTest(unittest.TestCase):
         # Truncated/garbage base64 must not crash the worker thread.
         art_proxy.warm(['http://127.0.0.1:8194/art?u=%%%&r=x'])
 
+    def test_workers_capped_globally(self):
+        # Many warm() calls (page warm + position warms during a fast
+        # scroll) must never exceed WARM_WORKERS live threads.
+        url = _wrapped('https://plex.local/p.jpg')
+        with mock.patch.object(art_proxy, '_render',
+                               side_effect=lambda *a: __import__('time').sleep(0.2)):
+            try:
+                for _ in range(6):
+                    art_proxy.warm([url] * 20)
+                self.assertLessEqual(art_proxy._warm_live,
+                                     art_proxy.WARM_WORKERS)
+            finally:
+                # Drain the shared queue so later tests start clean.
+                with art_proxy._warm_lock:
+                    art_proxy._warm_queue.clear()
+
+    def test_priority_jumps_queue(self):
+        # Freeze worker spawn entirely: nothing drains the queue, so the
+        # insertion order under inspection is exactly what warm() wrote.
+        url_a = _wrapped('https://plex.local/a.jpg')
+        url_b = _wrapped('https://plex.local/b.jpg')
+        try:
+            with mock.patch.object(art_proxy.threading, 'Thread'):
+                art_proxy.warm([url_a] * 10)
+                art_proxy.warm([url_b], priority=True)
+                with art_proxy._warm_lock:
+                    first = art_proxy._warm_queue[0]
+                self.assertEqual(first, url_b)
+        finally:
+            with art_proxy._warm_lock:
+                art_proxy._warm_queue.clear()
+                art_proxy._warm_live = 0
+
 
 class WrapRoundTripTest(unittest.TestCase):
     def test_unwrap_reverses_wrap(self):

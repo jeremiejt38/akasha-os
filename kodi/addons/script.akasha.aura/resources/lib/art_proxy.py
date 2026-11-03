@@ -44,12 +44,14 @@ _start_lock = threading.Lock()
 _cache_dir = None
 _locks = {}
 _locks_lock = threading.Lock()
-# Global cap on concurrent warm renders: position-priority warms fire on
-# focus moves and can stack several queues at once -- this keeps total
-# concurrent Plex fetch+PIL work at WARM_WORKERS whatever the scroll
-# speed. On-demand Kodi image fetches bypass warm() entirely, so they
-# are never queued behind it.
-_warm_slots = threading.Semaphore(WARM_WORKERS)
+# Shared warm queue + live-worker counter: every warm() call feeds ONE
+# deque drained by at most WARM_WORKERS threads globally, so rapid
+# position-priority warms cannot stack dozens of threads on a 1.7GB Pi.
+# Priority calls push to the FRONT -- the cards right under the cursor
+# render before the page-order backlog.
+_warm_queue = collections.deque()
+_warm_lock = threading.Lock()
+_warm_live = 0
 
 
 def _dir():
@@ -164,47 +166,59 @@ def _file_lock(path):
         return lock
 
 
-def warm(wrapped_urls):
+def warm(wrapped_urls, priority=False):
     """Pre-render wrapped proxy URLs into the disk cache, off-thread.
 
     Called when a page of items lands: by the time the user scrolls to a
     card, its rounded PNG is already a disk read + Kodi texture decode
-    instead of a Plex fetch + PIL render (~150 ms/poster on a Pi4 before
-    the scale/compression tweaks below). _render()'s own disk check +
+    instead of a Plex fetch + PIL render (~46 ms/poster on a Pi4 with the
+    scale/compression tweaks below). _render()'s own disk check +
     per-file lock make repeat calls and duplicate keys cheap no-ops.
+    priority=True (position-ahead warms) jumps the shared queue.
     """
     urls = [u for u in wrapped_urls if u and '/art?' in u]
     if not urls:
         return
 
-    # Upstream Plex fetch dominates render cost (~0.5-2s/image on a Pi
-    # vs ~46ms PIL), so a single worker would take minutes to warm a
-    # page. A bounded pool keeps the Pi usable: at most WARM_WORKERS
-    # concurrent transcode requests against the Plex server.
-    queue = collections.deque(urls)
-    queue_lock = threading.Lock()
+    global _warm_live
+    with _warm_lock:
+        if priority:
+            _warm_queue.extendleft(reversed(urls))
+        else:
+            _warm_queue.extend(urls)
+        # Upstream Plex fetch dominates render cost (~0.5-2s/image on a
+        # Pi vs ~46ms PIL): a bounded pool keeps the Pi usable and caps
+        # concurrent transcode requests against the Plex server.
+        spawn = min(WARM_WORKERS - _warm_live, len(urls))
+        if spawn > 0:
+            _warm_live += spawn
 
-    def work():
+    for _ in range(max(0, spawn)):
+        threading.Thread(target=_warm_worker, daemon=True).start()
+
+
+def _warm_worker():
+    global _warm_live
+    try:
         while True:
-            with queue_lock:
-                if not queue:
+            with _warm_lock:
+                if not _warm_queue:
                     return
-                url = queue.popleft()
+                url = _warm_queue.popleft()
             try:
                 params = urllib.parse.parse_qs(
                     urllib.parse.urlparse(url).query)
                 upstream = base64.urlsafe_b64decode(
                     params['u'][0].encode()).decode()
-                with _warm_slots:
-                    _render(upstream,
-                            int(params['r'][0]),
-                            int(params.get('w', ['0'])[0]),
-                            int(params.get('h', ['0'])[0]))
+                _render(upstream,
+                        int(params['r'][0]),
+                        int(params.get('w', ['0'])[0]),
+                        int(params.get('h', ['0'])[0]))
             except Exception:
                 pass
-
-    for _ in range(min(WARM_WORKERS, len(urls))):
-        threading.Thread(target=work, daemon=True).start()
+    finally:
+        with _warm_lock:
+            _warm_live -= 1
 
 
 def _render(url, radius, width, height):
