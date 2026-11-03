@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.75.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.1...akasha-os-v0.75.2) (2026-11-03)
+
+
+### Performance Improvements
+
+* **aura:** warm the art proxy and halve card render cost ([#279](https://github.com/jeremiejt38/akasha-os/issues/279)) ([8a92622](https://github.com/jeremiejt38/akasha-os/commit/8a92622b286fc2245ec445678e3bf2760d16fd16))
+
 ## [0.75.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.0...akasha-os-v0.75.1) (2026-11-03)
 
 
