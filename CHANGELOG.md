@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.76.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.76.0...akasha-os-v0.76.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **aura:** match skeleton cards to the real card geometry ([#287](https://github.com/jeremiejt38/akasha-os/issues/287)) ([31933d3](https://github.com/jeremiejt38/akasha-os/commit/31933d3824de30743ef299696003d3dfa7b93738))
+
 ## [0.76.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.3...akasha-os-v0.76.0) (2026-11-03)
 
 
