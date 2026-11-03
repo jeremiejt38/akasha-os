@@ -2,8 +2,9 @@
 
 Milestone 5 (see docs/aura/roadmap.md): a WindowXMLDialog listing installed
 "app-like" addons (scripts, plugins), with pin/unpin, launch and uninstall
-actions. Uninstall is delegated to the native AddonInformation window
-(see docs/aura/decisions.md — no public JSON-RPC uninstall method exists).
+actions. Uninstall uses aura_store.uninstall_kodi_addon() — the native
+AddonInformation window segfaults on this Kodi build, and no public
+JSON-RPC uninstall method exists either.
 """
 import json
 import subprocess
@@ -43,6 +44,9 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         # Reused across opens rather than a fresh instance each time -- see
         # the note in aura_window.py's AuraWindow.__init__ about why.
         self._store_window = None
+        # ('run'|'store', payload): native actions are deferred until
+        # doModal() returns -- see run_pending_native().
+        self._pending = None
 
     def _fetch_page(self, offset, limit):
         """Local pagination: all addons are in memory; slice a page."""
@@ -182,7 +186,12 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
                 if addon.get('is_external'):
                     self._launch_external_app(addon)
                 else:
-                    xbmc.executebuiltin('RunAddon({})'.format(addon['addonid']))
+                    # RunAddon() needs the addon's own windows/dialogs on
+                    # top; they cannot open above this modal dialog (same
+                    # constraint as InstallAddon() in aura_store.py), so
+                    # defer it past doModal().
+                    self._pending = ('run', addon['addonid'])
+                    self.close()
 
         elif controlID == 5002:
             addon = self._selected_addon()
@@ -201,17 +210,22 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
                         store_registry.record_uninstall(addon['store_id'])
                         self._reload()
                 else:
-                    xbmc.executebuiltin(
-                        'ActivateWindow(AddonInformation,{},return)'.format(addon['addonid']))
-                    store_app_id = self.store_ids.get(addon['addonid'])
-                    if store_app_id:
-                        # Optimistic: same caveat as aura_store.py's own
-                        # install/uninstall bookkeeping -- AddonInformation's
-                        # uninstall confirmation is native Kodi UI we don't get
-                        # a direct callback from, so this assumes the user
-                        # went through with it. Corrected on next _reload() via
-                        # the real Addons.GetAddons() check anyway.
-                        store_registry.record_uninstall(store_app_id)
+                    # No AddonInformation route: it segfaults on this Kodi
+                    # build -- see aura_store.uninstall_kodi_addon().
+                    if aura_store.uninstall_kodi_addon(addon['addonid']):
+                        store_app_id = self.store_ids.get(addon['addonid'])
+                        if store_app_id:
+                            # Optimistic bookkeeping, same caveat as
+                            # aura_store.py's install/uninstall notes.
+                            store_registry.record_uninstall(store_app_id)
+                        xbmcgui.Dialog().notification(
+                            i18n.tr(33319), i18n.tr(33308).format(addon['name']),
+                            xbmcgui.NOTIFICATION_INFO, 3000)
+                    else:
+                        xbmcgui.Dialog().notification(
+                            i18n.tr(33319), i18n.tr(33310).format(addon['name']),
+                            xbmcgui.NOTIFICATION_ERROR, 4000)
+                    self._reload()
 
         elif controlID == 5010:
             addon = self._selected_addon()
@@ -223,7 +237,31 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
                 self._store_window = aura_store.AuraStoreWindow(
                     'AuraStore.xml', self.addon.getAddonInfo('path'), 'Default', '1080i')
             self._store_window.doModal()
+            if self._store_window._pending:
+                # The store was opened from this dialog: it cannot run its
+                # deferred native action here either, so forward it up one
+                # level -- the main window runs it after this doModal()
+                # returns too.
+                self._pending = ('store', self._store_window)
+                self.close()
+                return
             self._reload()
+
+    def run_pending_native(self):
+        """Run a deferred native addon action after doModal() has returned.
+
+        RunAddon()/ActivateWindow(AddonInformation)/InstallAddon() all fail
+        silently while an Aura WindowXMLDialog sits on the modal stack; the
+        caller runs this once every nested dialog has been unwound.
+        """
+        pending, self._pending = self._pending, None
+        if not pending:
+            return
+        verb, payload = pending
+        if verb == 'run':
+            xbmc.executebuiltin('RunAddon({})'.format(payload))
+        elif verb == 'store':
+            payload.run_pending_native()
 
     def onAction(self, action):
         aid = action.getId()

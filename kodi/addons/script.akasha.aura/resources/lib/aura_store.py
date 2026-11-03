@@ -39,6 +39,7 @@ import urllib.request
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 import gui_guard
 import aura_menu
 import i18n
@@ -91,6 +92,33 @@ def category_label(category):
 
 def _now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def uninstall_kodi_addon(addon_id):
+    """Remove a user-installed addon without the native AddonInformation
+    window.
+
+    ActivateWindow(AddonInformation, ...) segfaults on this Kodi build
+    (SIGSEGV in CGUIDialogAddonInfo::BuildDependencyList -- confirmed
+    2026-11-03 for every addon, modal dialog or not), so the native
+    uninstall UI is unusable on the device. We instead delete the addon's
+    folder under special://home/addons/ and ask Kodi to rescan:
+    UpdateLocalAddons() syncs Addons33.db and the addon drops out of
+    Addons.GetAddons -- equivalent to a native uninstall, orphaned
+    dependencies included (native uninstall keeps them too).
+    Returns False when the addon has no userdata folder (e.g. system
+    addons -- the store only ever installs under userdata anyway).
+    """
+    path = xbmcvfs.translatePath('special://home/addons/{}/'.format(addon_id))
+    if not xbmcvfs.exists(path):
+        xbmc.log('Akasha Aura Store: no local addon dir for {}'
+                 .format(addon_id), xbmc.LOGWARNING)
+        return False
+    xbmc.log('Akasha Aura Store: removing addon dir {}'
+             .format(path), xbmc.LOGINFO)
+    xbmcvfs.rmdir(path, True)
+    xbmc.executebuiltin('UpdateLocalAddons')
+    return True
 
 
 class AuraStoreDetailWindow(xbmcgui.WindowXMLDialog):
@@ -192,6 +220,9 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         self._filtered = []
         self._paged = None
         self._category_index = 0
+        # ('install'|'uninstall', entry): native kodi-repo/zip-url actions are
+        # deferred until doModal() returns -- see run_pending_native().
+        self._pending = None
 
     def _fetch_page(self, offset, limit):
         """Local pagination: filtered catalogue is in memory; slice a page."""
@@ -328,26 +359,15 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
             return
 
         if itype == 'kodi-repo':
-            addon_id = install.get('addon_id')
-            xbmc.executebuiltin('InstallAddon({})'.format(addon_id))
-            monitor = xbmc.Monitor()
-            installed = False
-            for _ in range(90):
-                if monitor.waitForAbort(1):
-                    break
-                if addon_id in self._fetch_installed_kodi_addon_ids():
-                    installed = True
-                    break
-            if installed:
-                store_registry.record_install(
-                    entry['id'], entry.get('version', ''), _now_iso(), addon_id=addon_id)
-                xbmcgui.Dialog().notification(
-                    'Akasha Store', i18n.tr(33307).format(entry['name']),
-                    xbmcgui.NOTIFICATION_INFO, 3000)
-            else:
-                xbmcgui.Dialog().notification(
-                    'Akasha Store', i18n.tr(33310).format(entry['name']),
-                    xbmcgui.NOTIFICATION_ERROR, 4000)
+            # InstallAddon() opens a native confirmation/progress dialog
+            # that cannot appear above this modal WindowXMLDialog -- it
+            # silently no-ops while the store (or even its closing
+            # transition) is on the dialog stack. Defer the whole flow to
+            # run_pending_native(), which the caller runs once doModal()
+            # has fully returned.
+            self._pending = ('install', entry)
+            self.close()
+            return
         elif itype == 'zip-url':
             self._install_from_zip(entry, install)
         elif itype == 'external-app':
@@ -418,13 +438,62 @@ class AuraStoreWindow(xbmcgui.WindowXMLDialog):
         install = entry.get('install', {})
         addon_id = install.get('addon_id')
         if install.get('type') in ('kodi-repo', 'zip-url') and addon_id:
-            # No public JSON-RPC uninstall method exists (see aura_app.py's
-            # own docstring) -- route through the native AddonInformation
-            # window, same as the App tab's uninstall action.
-            xbmc.executebuiltin(
-                'ActivateWindow(AddonInformation,{},return)'.format(addon_id))
-        store_registry.record_uninstall(entry['id'])
+            if uninstall_kodi_addon(addon_id):
+                # Give UpdateLocalAddons() a moment to drop the addon from
+                # Addons.GetAddons before refreshing the badge.
+                monitor = xbmc.Monitor()
+                for _ in range(10):
+                    if monitor.waitForAbort(1):
+                        break
+                    if addon_id not in self._fetch_installed_kodi_addon_ids():
+                        break
+                store_registry.record_uninstall(entry['id'])
+                xbmcgui.Dialog().notification(
+                    'Akasha Store', i18n.tr(33308).format(entry['name']),
+                    xbmcgui.NOTIFICATION_INFO, 3000)
+            else:
+                xbmcgui.Dialog().notification(
+                    'Akasha Store', i18n.tr(33310).format(entry['name']),
+                    xbmcgui.NOTIFICATION_ERROR, 4000)
+        else:
+            store_registry.record_uninstall(entry['id'])
         self._reload()
+
+    def run_pending_native(self):
+        """Run a deferred native kodi-repo install ('install', entry).
+
+        Must be called by the owner after this dialog's doModal() has
+        returned: InstallAddon()'s native confirmation/progress dialog
+        silently no-ops while an Aura WindowXMLDialog sits on the modal
+        stack (or is still unwinding). Uninstall doesn't need deferral --
+        uninstall_kodi_addon() opens no native dialog.
+        """
+        pending, self._pending = self._pending, None
+        if not pending:
+            return
+        verb, entry = pending
+        if verb != 'install':
+            return
+        addon_id = entry.get('install', {}).get('addon_id')
+        xbmc.executebuiltin('InstallAddon({})'.format(addon_id))
+        monitor = xbmc.Monitor()
+        installed = False
+        for _ in range(90):
+            if monitor.waitForAbort(1):
+                break
+            if addon_id in self._fetch_installed_kodi_addon_ids():
+                installed = True
+                break
+        if installed:
+            store_registry.record_install(
+                entry['id'], entry.get('version', ''), _now_iso(), addon_id=addon_id)
+            xbmcgui.Dialog().notification(
+                'Akasha Store', i18n.tr(33307).format(entry['name']),
+                xbmcgui.NOTIFICATION_INFO, 3000)
+        else:
+            xbmcgui.Dialog().notification(
+                'Akasha Store', i18n.tr(33310).format(entry['name']),
+                xbmcgui.NOTIFICATION_ERROR, 4000)
 
     def _install_external(self, entry):
         install = entry.get('install', {})
