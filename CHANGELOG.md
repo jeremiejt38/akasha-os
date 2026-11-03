@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.75.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.75.0...akasha-os-v0.75.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **aura:** make Store kodi-repo install/uninstall actually work ([#276](https://github.com/jeremiejt38/akasha-os/issues/276)) ([c44a96c](https://github.com/jeremiejt38/akasha-os/commit/c44a96c27fd1ebcadec0c188e8e1766bab68a78f))
+
 ## [0.75.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.74.0...akasha-os-v0.75.0) (2026-11-02)
 
 
