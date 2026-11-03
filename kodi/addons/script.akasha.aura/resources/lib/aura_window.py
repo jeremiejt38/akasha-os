@@ -96,6 +96,11 @@ ACTION_CONTEXT_MENU = 117
 DIVERT_SIDEBAR_ID = 3310
 DIVERT_STATUS_ID = 3220
 DIVERT_PANEL_ID = 3230
+# Position-priority art warming (see _maybe_load_more_divert): re-warm
+# whenever the focus moved at least DIVERT_WARM_STEP cards, looking
+# DIVERT_WARM_AHEAD cards ahead (roughly two viewport rows).
+DIVERT_WARM_STEP = 12
+DIVERT_WARM_AHEAD = 24
 # Plex's expanded rail puts fixed entries above the libraries: Search,
 # Home -- then a divider, the library sections and Plus. Plex cloud-only
 # entries (profile, My Lists, playlists, On Plex) are hidden: they only
@@ -307,6 +312,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # detected and reloaded instead of resting in place forever).
         self._divert_items_section = None
         self._divert_paged = None
+        self._divert_warm_pos = -1
+        self._divert_warm_paged = None
         self._divert_browse_inflight = False
         # Letters actually present in the active section (Plex shows only
         # those on the A-Z rail, not the full alphabet); None keeps the
@@ -3386,6 +3393,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 error = e
             # ListItems are pure data -- build them outside the lock.
             items = [_build_divert_list_item(item) for item in paged.items]
+            # Warm the art proxy for the whole loaded window off-thread:
+            # scrolling then hits disk-cached PNGs instead of paying a
+            # Plex fetch + PIL render per card (the visible scroll
+            # stutter on first pass through a library).
+            art_proxy.warm(_card_art_urls(paged.items))
             with self._ui_lock:
                 if self._closing or gen != self._view_load_gen:
                     # Superseded mid-fetch: release the inflight marker
@@ -3924,6 +3936,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             on_error=lambda e: xbmc.log(
                 'Akasha Aura: Divertissement pagination fetch failed: {}'
                 .format(e), xbmc.LOGWARNING))
+        # Priority-warm the cards the user is about to reach: the
+        # page-level warm drains its queue front-to-back, so without this
+        # a fast scroll outruns it and cards sit black while their proxy
+        # render blocks. Throttled -- this fires on every focus move.
+        if paged is not self._divert_warm_paged:
+            self._divert_warm_paged = paged
+            self._divert_warm_pos = -1
+        items = paged.items
+        if (items
+                and abs(position - self._divert_warm_pos)
+                >= DIVERT_WARM_STEP):
+            self._divert_warm_pos = position
+            art_proxy.warm(_card_art_urls(
+                items[position:position + DIVERT_WARM_AHEAD]))
 
     def _divert_append_new(self, new_items):
         """Append freshly fetched items to the grid after swapping out the
@@ -3945,6 +3971,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         except Exception as e:
             xbmc.log('Akasha Aura: Divertissement append render error: {}'.format(e),
                      xbmc.LOGERROR)
+        # Same art-proxy warm as the initial grid fill, for the newly
+        # fetched page.
+        art_proxy.warm(_card_art_urls(new_items))
         self._divert_placeholder_count = self._sync_placeholders(
             DIVERT_PANEL_ID, 0, self._divert_paged)
         section = self._divert_current_section()
@@ -6218,6 +6247,17 @@ def _set_resume_point(li, item):
     li.setProperty('totaltime',
                    str(float(item.get('duration_ms') or 0) / 1000.0))
     li.setProperty('StartOffset', str(offset))
+
+
+def _card_art_urls(items):
+    """The wrapped proxy URLs a grid card can actually display, matching
+    _build_divert_list_item's art selection (poster -> thumb fallback,
+    plus landscape for episodes/channels)."""
+    urls = []
+    for item in items:
+        urls.append(item.get('poster_url') or item.get('thumb_url'))
+        urls.append(item.get('landscape_url'))
+    return urls
 
 
 def _build_divert_list_item(item):
