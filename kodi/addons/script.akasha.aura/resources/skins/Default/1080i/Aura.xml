@@ -1661,6 +1661,15 @@
                  aura_window.py::_load_divert_section_items), not all
                  upfront, triggered as the selection approaches the loaded
                  end in any direction (Up/Down/Left/Right within the grid). -->
+            <!-- Bottom-edge dead key for the library grid: the panel's
+                 setNavigation() aims Down at this invisible control. Any
+                 target != the panel's own id makes Kodi's per-column
+                 wrapAround evaluate false, so a Down on the last row
+                 stops instead of bouncing the cursor to the top; the
+                 hop then goes nowhere because the target is invisible. -->
+            <control type="label" id="3260">
+                <visible>false</visible>
+            </control>
             <control type="panel" id="3230">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + [String.IsEqual(Window.Property(DivertLibraryTab),1) | String.IsEqual(Window.Property(DivertLibraryTab),2)]</visible>
                 <animation effect="fade" start="0" end="100" time="180" easing="out">Visible</animation>

@@ -101,6 +101,21 @@ DIVERT_PANEL_ID = 3230
 # DIVERT_WARM_AHEAD cards ahead (roughly two viewport rows).
 DIVERT_WARM_STEP = 12
 DIVERT_WARM_AHEAD = 24
+# The grid panel wraps natively: reaching the last loaded item on a Down
+# bounces the cursor back to position 0, which is what "scrolled and got
+# thrown back to the top" was. When the source reports its real total the
+# placeholder tail therefore spans the *entire* unfetched remainder (up to
+# this safety ceiling) so the list only "ends" at the real end of the
+# section. What stops the wrap at the bottom itself is the panel's
+# <ondown> pointing at a dead-end control (see _sync_navigation) -- a
+# non-self down target makes Kodi's wrapAround evaluate false.
+# PLACEHOLDER_ITEM_CAP stays small for horizontal reco rows.
+DIVERT_PREFETCH_MARGIN = 150
+DIVERT_PLACEHOLDER_CAP = 8000
+# Invisible label the panel's declared <ondown> aims at -- see the 3260
+# control in Aura.xml. A non-self down target is what disables Kodi's
+# per-column wraparound on the last row.
+DIVERT_GRID_DEADEND_ID = 3260
 # Plex's expanded rail puts fixed entries above the libraries: Search,
 # Home -- then a divider, the library sections and Plus. Plex cloud-only
 # entries (profile, My Lists, playlists, On Plex) are hidden: they only
@@ -325,6 +340,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # next render can remove exactly that many before appending fresh
         # real items -- see _sync_placeholders().
         self._divert_placeholder_count = 0
+        # The actual placeholder ListItem objects currently tailing the
+        # grid, when the tail spans the known remaining total (see
+        # _fill_placeholder_tail) -- _divert_append_new() materialises
+        # them in place instead of mutating the list. Empty on the
+        # unknown-total fallback path.
+        self._divert_placeholder_items = []
         self._reco_placeholder_counts = {}
         # Pages fetched by PagedList.prefetch_async workers wait here
         # (control_id -> [items]) until the next input event renders them
@@ -1452,7 +1473,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                       if (self._divert_library_tab
                           == DIVERT_SUBTAB_BIBLIOTHEQUES and not pseudo)
                       else DIVERT_PANEL_ID)
-        nav(DIVERT_PANEL_ID, up=grid_up, down=DIVERT_PANEL_ID,
+        # Down pins at the invisible dead-end label 3260, not the panel
+        # itself: wrapAround is true only when the declared down target
+        # is the panel's own id, so this is what stops the grid's
+        # per-column wrap-to-top at the last row (dead key like Plex's).
+        nav(DIVERT_PANEL_ID, up=grid_up, down=DIVERT_GRID_DEADEND_ID,
             left=DIVERT_SIDEBAR_ID, right=grid_right)
 
         # The overflow pill's declared onleft points at the sort pill,
@@ -2340,7 +2365,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # The connector has no collections proxy endpoint -- degrade to
             # an empty tab rather than failing hard.
             return [], 0
-        return paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        return paged_list.PagedList(fetch, page_size=50, prefetch_margin=DIVERT_PREFETCH_MARGIN)
 
     def _set_divert_state(self, kind, title=None, message=None,
                           action_label=None, action=None):
@@ -2558,11 +2583,15 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         paint the same dimmed silhouettes _sync_placeholders() uses while
         scrolling -- the real render below resets over them.
         """
+        # The skeleton silhouettes are transient and untracked: any
+        # previously tracked tail belongs to a panel reset() is about to
+        # clear, so materialising into it would silently eat real items.
+        self._divert_placeholder_items = []
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             panel.reset()
             panel.addItems([_build_placeholder_list_item()
-                            for _ in range(PLACEHOLDER_ITEM_CAP)])
+                            for _ in range(200)])
         except Exception:
             pass
 
@@ -2572,6 +2601,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # panel is repainted from paged.items wholesale, so a drained
         # batch afterwards would render the same items twice.
         self._drop_pending_appends(DIVERT_PANEL_ID)
+        panel = None
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
             panel.reset()
@@ -2586,8 +2616,49 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 panel.selectItem(0)
         except Exception as e:
             xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
-        self._divert_placeholder_count = self._sync_placeholders(
-            DIVERT_PANEL_ID, 0, self._divert_paged)
+        self._divert_placeholder_count = self._fill_placeholder_tail(
+            panel, self._divert_paged)
+
+    def _fill_placeholder_tail(self, panel, paged):
+        """Append the scrolling placeholder tail to a freshly filled
+        divert grid and return the count.
+
+        When the source reports its real total (Plex always does for
+        library sections), the tail spans the *entire* unfetched
+        remainder, safety-capped: the wrapping grid then never reaches
+        its last item -- and the native wrap-to-top -- before the real
+        end of the section. The objects are kept in
+        _divert_placeholder_items so _divert_append_new() materialises
+        them in place: ControlList has no insert primitive, and a
+        remove+re-add swap per page would churn hundreds of items on the
+        input path (and silently reorder the tail).
+
+        Unknown-total sources fall back to the bounded
+        _sync_placeholders tail, whose items are not tracked -- the
+        append path then uses the legacy remove/re-add swap.
+        """
+        self._divert_placeholder_items = []
+        if panel is None:
+            return 0
+        if paged is None or paged.exhausted or paged.total is None:
+            return self._sync_placeholders(
+                DIVERT_PANEL_ID, 0, paged, cap=PLACEHOLDER_ITEM_CAP)
+        remaining = paged.total - len(paged.items)
+        if paged.max_items is not None:
+            # A capped source (a "quick highlight" surface, not a full
+            # browse grid) never promises more placeholders than its own
+            # ceiling allows.
+            remaining = min(remaining, paged.max_items - len(paged.items))
+        tail = min(max(0, remaining), DIVERT_PLACEHOLDER_CAP)
+        if not tail:
+            return 0
+        items = [_build_placeholder_list_item() for _ in range(tail)]
+        try:
+            panel.addItems(items)
+        except Exception:
+            return 0
+        self._divert_placeholder_items = items
+        return tail
 
     def _load_collections(self, section):
         """Plex's Collections library tab: the same poster grid as Browse,
@@ -2641,7 +2712,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return self._plex_client.collection_items_with_total(
                 item['rating_key'], limit=limit, offset=offset)
         self._divert_items_source = 'collection'
-        paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=50)
+        paged = paged_list.PagedList(fetch, page_size=50, prefetch_margin=DIVERT_PREFETCH_MARGIN)
         self._divert_paged = paged
         self._skeleton_divert_panel()
         with self._ui_lock:
@@ -2690,7 +2761,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 item['rating_key'], limit=limit, offset=offset)
         self._divert_items_source = 'playlist'
         paged = paged_list.PagedList(
-            fetch, page_size=50, prefetch_margin=50)
+            fetch, page_size=50, prefetch_margin=DIVERT_PREFETCH_MARGIN)
         self._divert_paged = paged
         self._skeleton_divert_panel()
         with self._ui_lock:
@@ -2766,7 +2837,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     return children[offset:offset + limit], len(children)
                 self._divert_items_source = 'music'
                 paged = paged_list.PagedList(
-                    fetch, page_size=50, prefetch_margin=50)
+                    fetch, page_size=50, prefetch_margin=DIVERT_PREFETCH_MARGIN)
                 self._divert_paged = paged
                 paged.load_initial()
                 self._divert_items = paged.items
@@ -3340,9 +3411,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             pass
 
     def _load_divert_section_items(self, section):
-        # page_size/prefetch_margin=50: only the visible portion of the grid
-        # plus roughly the next/previous 50 items are ever fetched from the
-        # server at once, matching the "50 before / 50 after" smoothness
+        # page_size=50 / prefetch_margin=DIVERT_PREFETCH_MARGIN: only the
+        # visible portion of the grid plus the next ~150 items are ever
+        # fetched from the server at once -- the deep margin keeps fast
+        # scrolls ahead of the wrapping grid's loaded end.
         # requested -- items already loaded are kept (no eviction of
         # earlier pages once fetched, Kodi's panel control has no supported
         # way to evict/re-virtualize arbitrary items from the middle of an
@@ -3358,7 +3430,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_browse_inflight = True
         paged = paged_list.PagedList(
             lambda offset, limit: self._divert_section_page(section, offset, limit),
-            page_size=50, prefetch_margin=50)
+            page_size=50, prefetch_margin=DIVERT_PREFETCH_MARGIN)
         self._divert_paged = paged
         self._skeleton_divert_panel()
         with self._ui_lock:
@@ -3418,6 +3490,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self._render_divert_toolbar(section)
                 self._render_divert_status(section, error)
 
+                panel = None
                 try:
                     panel = self.getControl(DIVERT_PANEL_ID)
                     panel.reset()
@@ -3427,8 +3500,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                         panel.selectItem(0)
                 except Exception as e:
                     xbmc.log('Akasha Aura: panel render error: {}'.format(e), xbmc.LOGERROR)
-                self._divert_placeholder_count = self._sync_placeholders(
-                    DIVERT_PANEL_ID, 0, paged)
+                self._divert_placeholder_count = self._fill_placeholder_tail(
+                    panel, paged)
 
                 if error is not None:
                     self._state_for_error(
@@ -3887,7 +3960,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if self._divert_items:
             self._divert_play_item(random.choice(self._divert_items))
 
-    def _sync_placeholders(self, control_id, current_placeholder_count, paged):
+    def _sync_placeholders(self, control_id, current_placeholder_count, paged,
+                           cap=None):
         """Skeleton loaders (plan a3f9c2e1 phase 5): replace whatever
         trailing placeholder items a control already has with a freshly
         sized run reflecting how many more items are actually left to load,
@@ -3895,6 +3969,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         instead of the list abruptly stopping. No-op (returns 0) once the
         source is exhausted or its real total is unknown -- a placeholder
         implies "more is coming", which would be misleading otherwise.
+
+        `cap` defaults to PLACEHOLDER_ITEM_CAP; the known-total library
+        grid bypasses this for its full remainder tail -- see
+        _fill_placeholder_tail().
         """
         try:
             control = self.getControl(control_id)
@@ -3913,7 +3991,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # (a "quick highlight" row, not a full browse surface) --
             # never promise more placeholders than that cap allows.
             remaining = min(remaining, max(0, paged.max_items - len(paged.items)))
-        new_count = min(remaining, PLACEHOLDER_ITEM_CAP)
+        new_count = min(remaining, cap or PLACEHOLDER_ITEM_CAP)
         if new_count:
             try:
                 control.addItems([_build_placeholder_list_item() for _ in range(new_count)])
@@ -3949,33 +4027,54 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 >= DIVERT_WARM_STEP):
             self._divert_warm_pos = position
             art_proxy.warm(_card_art_urls(
-                items[position:position + DIVERT_WARM_AHEAD]))
+                items[position:position + DIVERT_WARM_AHEAD]),
+                priority=True)
 
     def _divert_append_new(self, new_items):
-        """Append freshly fetched items to the grid after swapping out the
-        stale trailing placeholders they replace."""
+        """Fold a freshly fetched page into the grid.
+
+        Preferred path: the next placeholder tail items are materialised
+        *in place* (see _fill_placeholder_tail) -- zero list mutation, so
+        Kodi's cursor/anchor never re-evaluates mid-scroll and page
+        landing order stays contiguous. When no tracked tail exists
+        (unknown-total source) or the page overruns it, the remainder
+        falls back to the remove/re-add swap of _sync_placeholders."""
         try:
             panel = self.getControl(DIVERT_PANEL_ID)
-            # Remove the stale trailing placeholders first: they were
-            # standing in for exactly the items `new_items` now replaces
-            # (see _sync_placeholders() -- ControlList has no "insert
-            # before" primitive, so the real items are appended after
-            # removal, then a fresh, shorter run of placeholders is added
-            # back to represent whatever remains).
-            for _ in range(self._divert_placeholder_count):
-                try:
-                    panel.removeItem(panel.size() - 1)
-                except Exception:
-                    break
-            panel.addItems([_build_divert_list_item(item) for item in new_items])
+            tracked = self._divert_placeholder_items
+            n = min(len(new_items), len(tracked))
+            for i in range(n):
+                li = tracked[i]
+                # Clearing the flag flips the card from dimmed silhouette
+                # to real item; the skin tests IsEmpty(IsPlaceholder).
+                li.setProperty('IsPlaceholder', '')
+                _apply_divert_item(li, new_items[i])
+            if n:
+                del self._divert_placeholder_items[:n]
+                self._divert_placeholder_count = len(
+                    self._divert_placeholder_items)
+            if len(new_items) > n:
+                # Past the tail (or no tracked tail at all): swap the
+                # placeholders out and append the rest, then re-sync a
+                # bounded tail. ControlList has no insert primitive, so
+                # real items can only land after placeholder removal.
+                for _ in range(self._divert_placeholder_count):
+                    try:
+                        panel.removeItem(panel.size() - 1)
+                    except Exception:
+                        break
+                panel.addItems([_build_divert_list_item(item)
+                                for item in new_items[n:]])
+                self._divert_placeholder_items = []
+                self._divert_placeholder_count = self._sync_placeholders(
+                    DIVERT_PANEL_ID, 0, self._divert_paged,
+                    cap=PLACEHOLDER_ITEM_CAP)
         except Exception as e:
             xbmc.log('Akasha Aura: Divertissement append render error: {}'.format(e),
                      xbmc.LOGERROR)
         # Same art-proxy warm as the initial grid fill, for the newly
         # fetched page.
         art_proxy.warm(_card_art_urls(new_items))
-        self._divert_placeholder_count = self._sync_placeholders(
-            DIVERT_PANEL_ID, 0, self._divert_paged)
         section = self._divert_current_section()
         if section is not None:
             self._render_divert_status(section)
@@ -6261,11 +6360,20 @@ def _card_art_urls(items):
 
 
 def _build_divert_list_item(item):
+    li = xbmcgui.ListItem()
+    _apply_divert_item(li, item)
+    return li
+
+
+def _apply_divert_item(li, item):
+    """Fill an existing ListItem with a divert item's labels/art/info --
+    either a fresh object (via _build_divert_list_item) or a trailing
+    placeholder being materialised in place by _divert_append_new."""
     # Plex home rows carry no per-card text: the hero (driven by the focused
     # item, see Aura.xml "Plex hero" group) shows title/meta/plot. Labels are
     # still filled so grid-type views keep their two-line caption.
-    li = xbmcgui.ListItem(i18n.ellipsize(item['title'], 22),
-                          i18n.ellipsize(divert_source.item_subtitle(item), 19))
+    li.setLabel(i18n.ellipsize(item['title'], 22))
+    li.setLabel2(i18n.ellipsize(divert_source.item_subtitle(item), 19))
     art = {}
     if item.get('poster_url') or item.get('thumb_url'):
         art['poster'] = item.get('poster_url') or item.get('thumb_url')
@@ -6420,7 +6528,6 @@ def _build_divert_list_item(item):
     li.setProperty('AuraLandSubtitle', land_sub)
     li.setProperty('AuraDuration', _format_duration(item.get('duration_ms')))
     li.setProperty('AuraType', item.get('type') or 'video')
-    return li
 
 
 def _build_placeholder_list_item():
