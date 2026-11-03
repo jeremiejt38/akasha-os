@@ -3827,6 +3827,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 return
             self._az_jump_active = True
             gen = self._view_load_gen
+            # The giant letter badge (XML control 3261) covers the wait:
+            # a far letter can pull several 500-item chunks before its
+            # boundary resolves, and a static screen is what made the
+            # rail look dead. Focus also moves back to the grid right
+            # away so the materialising placeholders show the jump
+            # progressing, like Plex's rail scrub.
+            self.setProperty('AZJump', letter)
+
+        def focus_grid():
+            # SetFocus(3230) as a builtin silently no-ops here, so the
+            # hop reuses the same direct setFocus() as the landing.
+            time.sleep(0.25)
+            try:
+                self.setFocus(self.getControl(DIVERT_PANEL_ID))
+            except RuntimeError:
+                pass
+
+        threading.Thread(target=focus_grid, daemon=True).start()
 
         def work():
             try:
@@ -3924,6 +3942,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                             paged.items.extend(sl)
                             self._divert_items = paged.items
                             self._divert_append_new(sl)
+                            # The cursor rides the freshly materialised
+                            # tail while focus is on the grid, so the
+                            # viewport scrolls along with the fetch
+                            # instead of sitting still until the end.
+                            if self.getFocusId() == DIVERT_PANEL_ID:
+                                try:
+                                    self.getControl(
+                                        DIVERT_PANEL_ID).selectItem(
+                                        max(0, len(paged.items) - 1))
+                                except RuntimeError:
+                                    pass
                     target = find_index()
                     guard += 1
                 if target is None:
@@ -3934,11 +3963,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     try:
                         panel = self.getControl(DIVERT_PANEL_ID)
                         panel.selectItem(target)
-                        self.setFocus(panel)
+                        # Landing focus only if the user is still in the
+                        # jump surface -- someone who moved on to the
+                        # sidebar or a detail sheet keeps their focus.
+                        if self.getFocusId() in (
+                                DIVERT_PANEL_ID, DIVERT_AZ_RAIL_ID):
+                            self.setFocus(panel)
                     except RuntimeError:
                         pass
             finally:
                 with self._ui_lock:
+                    # Clearing the badge before the in-flight flag keeps
+                    # a queued follow-up jump from seeing a blanked
+                    # property under its own.
+                    self.setProperty('AZJump', '')
                     self._az_jump_active = False
 
         self._view_pool.submit(work)

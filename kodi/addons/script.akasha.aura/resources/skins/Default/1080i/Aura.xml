@@ -1606,7 +1606,9 @@
 
             <!-- A-Z quick-jump rail on the right edge (Plex Browse). Selecting
                  a letter jumps the grid to the first matching title; see
-                 _divert_az_jump(). -->
+                 _divert_az_jump(). Modern scrubber styling: quiet dim
+                 letters, the focused one pops oversized and bright white
+                 with a zoom-in animation on each letter change. -->
             <control type="list" id="3250">
                 <visible>String.IsEqual(Window.Property(DivertView),library) + String.IsEqual(Window.Property(DivertLibraryTab),1) + String.IsEmpty(Window.Property(DivertPseudo))</visible>
                 <left>1820</left>
@@ -1614,38 +1616,34 @@
                 <width>70</width>
                 <height>864</height>
                 <orientation>vertical</orientation>
+                <scrolltime tween="quadratic" easing="out">120</scrolltime>
                 <onleft>3250</onleft>
                 <itemlayout width="70" height="32">
                     <control type="label">
                         <left>0</left>
-                        <top>6</top>
+                        <top>0</top>
                         <width>70</width>
                         <height>32</height>
-                        <font>font_aura_mini</font>
+                        <font>font_aura_tiny</font>
                         <align>center</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>FF9D9D9D</textcolor>
+                        <textcolor>66FFFFFF</textcolor>
                     </control>
                 </itemlayout>
                 <focusedlayout width="70" height="32">
-                    <control type="image">
-                        <left>13</left>
-                        <top>0</top>
-                        <width>44</width>
-                        <height>44</height>
-                        <texture>az-ring.png</texture>
-                    </control>
                     <control type="label">
                         <left>0</left>
-                        <top>6</top>
+                        <top>-5</top>
                         <width>70</width>
-                        <height>32</height>
-                        <font>font_aura_mini_bold</font>
+                        <height>42</height>
+                        <font>font_aura_section_bold</font>
                         <align>center</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
                         <textcolor>FFFFFFFF</textcolor>
+                        <animation effect="zoom" start="55" end="100" center="auto" time="130" tween="quadratic" easing="out">Focus</animation>
+                        <animation effect="fade" start="0" end="100" time="100">Focus</animation>
                     </control>
                 </focusedlayout>
                 <!-- No static <content>: Kodi appends programmatic items
@@ -1988,6 +1986,25 @@
                         <visible>String.IsEmpty(ListItem.Property(IsPlaceholder))</visible>
                     </control>
                 </focusedlayout>
+            </control>
+            <!-- Big-letter badge shown while an A-Z jump resolves (the
+                 grid may pull several 500-item chunks before the letter
+                 boundary is found; the badge + materialising posters
+                 tell the user the jump is alive). Declared after the
+                 grid so it renders on top of the posters. -->
+            <control type="label" id="3261">
+                <visible>!String.IsEmpty(Window.Property(AZJump)) + String.IsEqual(Window.Property(DivertView),library)</visible>
+                <left>660</left>
+                <top>330</top>
+                <width>600</width>
+                <height>280</height>
+                <font>font_aura_azhero</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <label>$INFO[Window.Property(AZJump)]</label>
+                <textcolor>B3FFFFFF</textcolor>
+                <animation effect="fade" start="0" end="100" time="140">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="180">Hidden</animation>
             </control>
             <!-- Recommande content: inline (Accueil, unscoped, or a library's own
                  Recommande tab), previously opened AuraRecommendations.xml as a
