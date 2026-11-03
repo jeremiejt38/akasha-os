@@ -588,3 +588,5 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/divert/azjump-landed_036.png` | divert | azjump-landed | 082600 | pi |
 | `akasha-direct/divert/azrail-v076_037.png` | divert | azrail-v076 | 083400 | pi |
 | `akasha-direct/divert/skeleton-geometry_038.png` | divert | skeleton-geometry | 084300 | pi |
+| `akasha-direct/divert/progress-bar-thin_039.png` | divert | progress-bar-thin | 092000 | pi |
+| `akasha-direct/divert/progress-bar-thin-grid_040.png` | divert | progress-bar-thin-grid | 084500 | pi |
