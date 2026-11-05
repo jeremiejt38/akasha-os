@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.77.0...akasha-os-v0.78.0) (2026-11-05)
+
+
+### Features
+
+* **os:** strip unused network services and stock addons ([#296](https://github.com/jeremiejt38/akasha-os/issues/296)) ([86eeb7d](https://github.com/jeremiejt38/akasha-os/commit/86eeb7d87894739702a4b654cae06ba012efbaa5))
+
 ## [0.77.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.76.2...akasha-os-v0.77.0) (2026-11-03)
 
 
