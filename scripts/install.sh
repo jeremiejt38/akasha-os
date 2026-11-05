@@ -72,6 +72,7 @@ cp "$SCRIPT_DIR/system/system.d/wifi-silent-agent.service" /storage/.config/syst
 cp "$SCRIPT_DIR/system/system.d/akasha-fan.service" /storage/.config/system.d/akasha-fan.service
 cp "$SCRIPT_DIR/system/system.d/akasha-cpufreq.service" /storage/.config/system.d/akasha-cpufreq.service
 cp "$SCRIPT_DIR/system/system.d/kodi.service.d/splash-restart.conf" /storage/.config/system.d/kodi.service.d/splash-restart.conf
+rm -f /storage/.config/system.d/kodi.service.d/disable-stock-addons.conf
 
 chmod +x /storage/.config/autostart.sh \
           /storage/.config/cec-standby.sh \
@@ -504,19 +505,17 @@ for akasha_setting in services.upnpserver services.upnpannounce services.upnpcon
         -d "{\"jsonrpc\":\"2.0\",\"method\":\"Settings.SetSettingValue\",\"params\":{\"setting\":\"$akasha_setting\",\"value\":false},\"id\":1}" >/dev/null 2>&1 || true
 done
 
-# Stock addons with no role in a Plex client: the Chorus web UI (the empty
-# page Windows opens from the network icon -- JSON-RPC is core, unaffected),
-# the media scrapers (Aura reads Plex, never the Kodi library), and the
-# weather icon set. Kodi 21's Addons.SetAddonEnabled rejects false/"toggle",
-# so the enabled flag is written straight into Addons33.db -- Kodi reads it
-# back at the next startup (which apply.sh triggers right after install).
-sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
-    "UPDATE installed SET enabled=0 WHERE addonID IN
-        ('webinterface.default',
-         'metadata.local', 'metadata.generic.albums', 'metadata.generic.artists',
-         'metadata.album.universal', 'metadata.artists.universal',
-         'metadata.themoviedb.org.python', 'metadata.tvshows.themoviedb.org.python',
-         'resource.images.weathericons.default')" 2>/dev/null || true
+# Stock media-scraper and weather-icon addons have no role in a Plex
+# client (Aura reads Plex, never the Kodi library), but they cannot be
+# disabled or hidden: they live in the read-only system addon dir, so
+# CAddonDatabase::SyncInstalled rewrites enabled=1 into Addons33.db at
+# every boot, and addon-manifest.xml declares them required -- masking
+# their directories makes CAddonMgr::Init fail and crashes Kodi during
+# startup. They stay inert: nothing in Aura ever invokes them.
+# webinterface.default is also left alone: Kodi force-enables a
+# webinterface addon whenever the webserver is on, and port 8080 stays
+# for JSON-RPC diagnostics -- the page stops being discoverable once the
+# device is no longer advertised anyway.
 
 python3 - <<'PY'
 import re
