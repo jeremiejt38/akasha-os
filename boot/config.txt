@@ -25,10 +25,12 @@ include distroconfig.txt
 # Analog audio
 dtparam=audio=on
 
-# Overclock CPU 2GHz + GPU 750MHz
-over_voltage=6
-arm_freq=2000
-gpu_freq=750
+# Overclock conservateur: arm_freq=2000 + gpu_freq=750 a provoqué des
+# freezes/reboots sous charge CPU+GPU (changement de bibliothèque Aura).
+# gpu_freq=750 est hors zone stable sur la plupart des Pi4.
+over_voltage=4
+arm_freq=1800
+gpu_freq=600
 
 # TV Philips 42PFL7403H (1080p, HDMI 1.3, 2008)
 hdmi_force_hotplug=1

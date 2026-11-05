@@ -128,6 +128,7 @@ DIVERT_SIDEBAR_LIBS_HEADER_INDEX = 4
 DIVERT_SIDEBAR_LIBS_OFFSET = 5
 DIVERT_SIDEBAR_MORE_INDEX = 999  # placeholder, added dynamically
 DIVERT_CACHE_TTL_SECONDS = 300
+AZ_LETTERS_CACHE_TTL_SECONDS = 3600
 # Boot sidebar data (section list): library membership barely changes,
 # so a stale list painted at startup then revalidated in background is
 # far better than ~7s of black screen per serial WAN fetch.
@@ -334,6 +335,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # those on the A-Z rail, not the full alphabet); None keeps the
         # static <content> fallback and the '#'..'Z' position map.
         self._divert_az_letters = None
+        self._divert_sections_warmed = False
         self._divert_az_section = None
         # Skeleton loaders (plan a3f9c2e1 phase 5): how many trailing
         # placeholder ListItems are currently in each list/panel, so the
@@ -3259,6 +3261,32 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             self._cache, key, DIVERT_CACHE_TTL_SECONDS,
             lambda: self._divert_section_page_uncached(section, offset, limit))
 
+    def _warm_divert_sections(self):
+        """Pre-fetch page 0 + A-Z letters of the other real library
+        sections in the background, once per session. The next sidebar
+        click then lands on page-cache hits instead of paying the WAN
+        round-trips on the click path. Only runs while the current mode
+        key is the default one: with a user filter/sort active the warm
+        would fill pages under keys a fresh switch never reads (a switch
+        resets the toolbar state to defaults)."""
+        if self._divert_sections_warmed:
+            return
+        self._divert_sections_warmed = True
+        if self._divert_cache_mode_key() != ('all', DIVERT_SORT_OPTIONS[0][0],
+                                             None, ()):
+            return
+        for s in list(self._divert_sections):
+            if self._closing:
+                return
+            if s.get('type') not in ('movie', 'show'):
+                continue
+            try:
+                self._divert_section_page(s, 0, 50)
+                if self._plex_client:
+                    self._section_letters_cached(s)
+            except Exception:
+                pass
+
     def _divert_section_page_uncached(self, section, offset, limit):
         if section.get('type') in ('playlist', 'livetv'):
             # Both pseudo-sections page over a prefetched list --
@@ -3451,12 +3479,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     if self._divert_browse_inflight == gen:
                         self._divert_browse_inflight = False
                 return
-            try:
-                self._load_az_rail(section)
-            except Exception as e:
-                # A rail failure must not kill the grid load (or leave
-                # _divert_browse_inflight stuck True).
-                xbmc.log('Akasha Aura: A-Z rail load failed: {}'.format(e), xbmc.LOGERROR)
+            # A-Z rail fetch runs parallel to the first page -- it used to
+            # sit serially ahead of load_initial() and delayed every cold
+            # library switch by a full WAN round-trip.
+            def rail():
+                try:
+                    self._load_az_rail(section, gen=gen)
+                except Exception as e:
+                    # A rail failure must not kill the grid load (or leave
+                    # _divert_browse_inflight stuck True).
+                    xbmc.log('Akasha Aura: A-Z rail load failed: {}'.format(e), xbmc.LOGERROR)
+            self._submit_bg(rail)
             error = None
             try:
                 paged.load_initial()
@@ -3511,6 +3544,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 else:
                     self._set_divert_state(None)
                 self._sync_navigation()
+                # Pre-warm the other libraries' first pages + rail letters
+                # so the next sidebar switch lands on cache hits.
+                if error is None:
+                    self._submit_bg(self._warm_divert_sections)
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -3766,7 +3803,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
         actions[idx][1]()
 
-    def _load_az_rail(self, section):
+    def _section_letters_cached(self, section):
+        """firstCharacter initials via the persistent page cache: the rail's
+        letter set changes almost never, so one fetch per section per hour
+        replaces a WAN request on every library switch."""
+        key = section.get('key')
+        return local_cache.get_or_set_page(
+            self._cache, local_cache.page_cache_key('az-letters', key),
+            AZ_LETTERS_CACHE_TTL_SECONDS,
+            lambda: self._plex_client.section_letters(key))[0]
+
+    def _load_az_rail(self, section, gen=None):
         """A-Z rail: Plex shows only the initials actually present in the
         library (/firstCharacter buckets), not the full alphabet. The rail
         has no static <content> (Kodi appends programmatic items after
@@ -3781,13 +3828,20 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if (self._plex_client and section
                 and section.get('type') in ('movie', 'show', 'artist')):
             try:
-                letters = self._plex_client.section_letters(key)
+                letters = self._section_letters_cached(section)
             except Exception as e:
                 xbmc.log('Akasha Aura: A-Z letters fetch failed: {}'.format(e), xbmc.LOGERROR)
         rail_items = [xbmcgui.ListItem(label=letter)
                       for letter in (letters or '#ABCDEFGHIJKLMNOPQRSTUVWXYZ')]
         with self._ui_lock:
-            if self._closing:
+            # Stale render guard: the rail fetch runs parallel to the grid
+            # load -- a newer view must not have another section's letters
+            # painted over it when this lands late. Clear the dedup marker
+            # too: otherwise a later same-section switch would early-return
+            # on `key == _divert_az_section` and keep the previous rail.
+            if self._closing or (gen is not None and gen != self._view_load_gen):
+                if self._divert_az_section == key:
+                    self._divert_az_section = None
                 return
             self._divert_az_letters = letters or None
             try:
