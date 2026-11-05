@@ -485,6 +485,17 @@ systemctl stop wsdd2.service smbd.service nmbd.service 2>/dev/null || true
 systemctl disable rpcbind.service rpcbind.socket 2>/dev/null || true
 systemctl stop rpcbind.service rpcbind.socket 2>/dev/null || true
 
+# Static host pins (see system/hosts.conf): bypasses a dead RDNSS-advertised
+# resolver that added ~5 s to every DNS lookup, i.e. to every Plex fetch.
+cp "$SCRIPT_DIR/system/hosts.conf" /storage/.config/hosts.conf
+# Apply live too: append each missing pin individually so a redeploy that
+# adds addresses still lands them without a reboot.
+grep -v '^[[:space:]]*#\|^[[:space:]]*$' /storage/.config/hosts.conf | \
+while read -r akasha_ip akasha_host akasha_rest; do
+    grep -q "$akasha_ip $akasha_host" /etc/hosts 2>/dev/null || \
+        echo "$akasha_ip $akasha_host" >> /etc/hosts
+done 2>/dev/null || true
+
 # Kodi service settings. The appliance keeps the HTTP webserver on 8080
 # (documented JSON-RPC diagnostics endpoint in docs/HANDOFF.md) but turns
 # off every announcer and remote-control listener Akasha does not use:

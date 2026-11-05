@@ -1044,3 +1044,35 @@ Vérif. live : saut « S » — badge visible par-dessus les posters, focus
 rendu à la grille instantanément, curseur 24→1250→2450→3650→4121
 (« S.O.S. Fantômes »), badge effacé. Captures
 `rail-modern-focus_034`, `azjump-badge_035`, `azjump-landed_036`.
+
+## Transitions de bibliothèque lentes + reboots sous charge (2026-11-05)
+
+Symptômes : chaque switch Films ↔ Séries mettait ~10 s, et le Pi rebootait
+pendant les switches lourds (Séries → Cartoons, uptime reset, `kodi.old.log`
+vide — Kodi mort avant de pouvoir écrire).
+
+Trois causes identifiées, trois correctifs :
+
+1. **Résolveur DNS mort en tête de `resolv.conf`.** Le RDNSS du routeur
+   annonce `fd0f:ee:b0::1` (MagicDNS Tailscale, `tailscaled` inactif) :
+   chaque lookup paie ~5 s de timeout avant le fallback. Mesure :
+   `time_namelookup=5.01 s` alors que le connect+requête = ~200 ms.
+   Fix : pin statique de `plex.akasha.ing`/`connector.akasha.ing` dans
+   `system/hosts.conf` → `/storage/.config/hosts.conf` (mécanisme
+   LibreELEC natif, appliqué à chaud par install.sh) — lookup = 0,8 ms.
+2. **Overclock hors zone stable.** `boot/config.txt` poussait
+   `arm_freq=2000` + **`gpu_freq=750`** + `over_voltage=6` ; `gpu_freq=750`
+   est au-delà de ce que la plupart des Pi4 tiennent — freeze hard sous
+   burst CPU+GPU (exactement un switch de bibliothèque, pics à ~180 % CPU),
+   sans log (mort avant flush). `throttled=0x0` écartait l'alim.
+   Fix : profil conservateur `arm_freq=1800` / `gpu_freq=600` /
+   `over_voltage=4` — boost conservé, zone généralement stable.
+3. **Chemin de fetch série.** Le rail A-Z (`/firstCharacter`) était
+   téléchargé **avant** la première page sur le chemin critique, et sans
+   cache — une requête WAN à chaque switch. Fix : fetch du rail en
+   parallèle via `_submit_bg` (guard `gen` anti-stale-render), lettres en
+   cache persistant 1 h (`az-letters:*`), et `_warm_divert_sections()`
+   pré-chauffe la page 0 + les lettres des autres sections après le
+   premier chargement réussi — les switchs suivants sont des hits de
+   cache. `_bg_pool` est `max_workers=1` : le warm se sérialise derrière
+   le rail, borné (~10 sections × 2 GET).
