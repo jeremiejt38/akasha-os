@@ -468,4 +468,81 @@ fi
 # profile instead of a hardcoded SSID): safe to keep enabled everywhere.
 systemctl enable wifi-watchdog.service 2>/dev/null || true
 
+# ---------------------------------------------------------------------------
+# Network surface reduction: Akasha OS is a dedicated Plex client, so the
+# usual "appliance announces itself" services only expose an empty Kodi web
+# page and Samba shares nobody uses (they show up as the "Akasha OS" device
+# in the Windows network view). Disable them via LibreELEC's own flag file
+# (smbd.service / nmbd.service both carry ConditionPathExists=!<flag>, and
+# wsdd2.service is BindsTo=smbd.service, so one flag stops the trio).
+# ---------------------------------------------------------------------------
+mkdir -p /storage/.cache/services
+touch /storage/.cache/services/samba.disabled
+systemctl stop wsdd2.service smbd.service nmbd.service 2>/dev/null || true
+
+# rpcbind is only needed for NFS mounts; Akasha OS mounts none.
+systemctl disable rpcbind.service rpcbind.socket 2>/dev/null || true
+systemctl stop rpcbind.service rpcbind.socket 2>/dev/null || true
+
+# Kodi service settings. The appliance keeps the HTTP webserver on 8080
+# (documented JSON-RPC diagnostics endpoint in docs/HANDOFF.md) but turns
+# off every announcer and remote-control listener Akasha does not use:
+# UPnP/DLNA (server, SSDP announce, controller, client), zeroconf service
+# announcements, the EventServer (already bound to localhost only), and RSS
+# feeds (background network polling). Edits go through JSON-RPC so Kodi
+# persists them itself on the next clean shutdown -- direct
+# guisettings.xml writes while Kodi runs are silently clobbered by the
+# exit flush (observed: general.addonupdates stayed at 0). A file edit is
+# still attempted as a fallback for images where the webserver was never
+# enabled; harmless if Kodi overwrites it.
+curl -s -m 3 -X POST http://127.0.0.1:8080/jsonrpc \
+    -H 'Content-Type: application/json' \
+    -d '{"jsonrpc":"2.0","method":"Settings.SetSettingValue","params":{"setting":"services.upnp","value":false},"id":1}' >/dev/null 2>&1 || true
+for akasha_setting in services.upnpserver services.upnpannounce services.upnpcontroller services.upnprenderer services.zeroconf services.esenabled services.airplay lookandfeel.enablerssfeeds; do
+    curl -s -m 3 -X POST http://127.0.0.1:8080/jsonrpc \
+        -H 'Content-Type: application/json' \
+        -d "{\"jsonrpc\":\"2.0\",\"method\":\"Settings.SetSettingValue\",\"params\":{\"setting\":\"$akasha_setting\",\"value\":false},\"id\":1}" >/dev/null 2>&1 || true
+done
+
+# Stock addons with no role in a Plex client: the Chorus web UI (the empty
+# page Windows opens from the network icon -- JSON-RPC is core, unaffected),
+# the media scrapers (Aura reads Plex, never the Kodi library), and the
+# weather icon set. Kodi 21's Addons.SetAddonEnabled rejects false/"toggle",
+# so the enabled flag is written straight into Addons33.db -- Kodi reads it
+# back at the next startup (which apply.sh triggers right after install).
+sqlite3 /storage/.kodi/userdata/Database/Addons33.db \
+    "UPDATE installed SET enabled=0 WHERE addonID IN
+        ('webinterface.default',
+         'metadata.local', 'metadata.generic.albums', 'metadata.generic.artists',
+         'metadata.album.universal', 'metadata.artists.universal',
+         'metadata.themoviedb.org.python', 'metadata.tvshows.themoviedb.org.python',
+         'resource.images.weathericons.default')" 2>/dev/null || true
+
+python3 - <<'PY'
+import re
+path = "/storage/.kodi/userdata/guisettings.xml"
+try:
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+except FileNotFoundError:
+    exit(0)
+for sid, val in [
+    ("services.upnp", "false"),
+    ("services.upnpserver", "false"),
+    ("services.upnpannounce", "false"),
+    ("services.upnpcontroller", "false"),
+    ("services.upnprenderer", "false"),
+    ("services.zeroconf", "false"),
+    ("services.esenabled", "false"),
+    ("services.airplay", "false"),
+    ("lookandfeel.enablerssfeeds", "false"),
+]:
+    if 'id="{}"'.format(sid) not in data:
+        data = data.replace("</settings>", '    <setting id="{}">{}</setting>\n</settings>'.format(sid, val))
+    else:
+        data = re.sub(r'id="{}"[^>]*>[^<]*<'.format(sid), 'id="{}" default="true">{}<'.format(sid, val), data)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+
 log "=== Akasha OS install complete ==="
