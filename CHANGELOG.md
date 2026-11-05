@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.0...akasha-os-v0.78.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **os:** drop unusable stock-addon disabling, document upstream constraint ([#298](https://github.com/jeremiejt38/akasha-os/issues/298)) ([2e1b151](https://github.com/jeremiejt38/akasha-os/commit/2e1b15170083c8d328b8b74769d02450764a8f82))
+
 ## [0.78.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.77.0...akasha-os-v0.78.0) (2026-11-05)
 
 
