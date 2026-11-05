@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.1...akasha-os-v0.78.2) (2026-11-05)
+
+
+### Performance Improvements
+
+* **os:** stabilize library switches (DNS pin, safer clocks, parallel rail) ([#300](https://github.com/jeremiejt38/akasha-os/issues/300)) ([41d208f](https://github.com/jeremiejt38/akasha-os/commit/41d208f6c228e22874f58ea4068946dee2c396e7))
+
 ## [0.78.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.0...akasha-os-v0.78.1) (2026-11-05)
 
 
