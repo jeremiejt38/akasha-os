@@ -427,8 +427,9 @@
             <width>1800</width>
             <height>660</height>
             <onup>6050</onup>
-            <ondown>6010</ondown>
-            <onleft>6010</onleft>
+            <ondown>6099</ondown>
+            <onleft>6099</onleft>
+            <onright>6099</onright>
             <itemlayout width="360" height="262">
                 <!-- Landscape banner card, Play-Store-TV style: rounded
                      16:9 tile with the app icon centered (the catalogue
@@ -587,5 +588,6 @@
             <textcolor>77FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>
         </control>
+        <control type="label" id="6099"><visible>false</visible></control>
     </controls>
 </window>

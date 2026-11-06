@@ -98,7 +98,7 @@
             </control>
 
             <!-- Filmography poster row -->
-            <control type="list" id="7310">
+            <control type="fixedlist" id="7310">
                 <left>142</left>
                 <top>490</top>
                 <width>1800</width>
@@ -222,7 +222,7 @@
                     <effect type="slide" start="0,0" end="0,-480" time="250" tween="quadratic" easing="inout"/>
                 </animation>
             </control>
-            <control type="list" id="7311">
+            <control type="fixedlist" id="7311">
                 <left>142</left>
                 <top>920</top>
                 <width>1800</width>

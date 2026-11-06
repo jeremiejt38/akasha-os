@@ -52,7 +52,7 @@
                 <label>$ADDON[script.akasha.aura 33200]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
-            <control type="list" id="1000">
+            <control type="fixedlist" id="1000">
                 <left>30</left>
                 <top>90</top>
                 <width>720</width>
