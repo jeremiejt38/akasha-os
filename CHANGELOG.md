@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.3...akasha-os-v0.78.4) (2026-11-06)
+
+
+### Bug Fixes
+
+* **aura:** scroll polish -- no-wrap, hold-left gate, glide, progress bar ([#304](https://github.com/jeremiejt38/akasha-os/issues/304)) ([86de818](https://github.com/jeremiejt38/akasha-os/commit/86de818f4c5086eaae0933bb2e705c76fff3189e))
+
 ## [0.78.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.2...akasha-os-v0.78.3) (2026-11-06)
 
 
