@@ -905,7 +905,7 @@
             <texture colordiffuse="CC17100D" border="32">rounded-solid.png</texture>
             <visible>String.IsEqual(Window.Property(AuraDetailShowStrip),1)</visible>
         </control>
-        <control type="list" id="7120">
+        <control type="fixedlist" id="7120">
             <left>128</left>
             <top>36</top>
             <width>820</width>
@@ -1135,7 +1135,7 @@
         </control>
 
         <!-- Seasons poster row (show "Show" tab) -->
-        <control type="list" id="7140">
+        <control type="fixedlist" id="7140">
             <left>128</left>
             <top>780</top>
             <width>1800</width>
@@ -1208,7 +1208,7 @@
         </control>
 
         <!-- Episodes row (season tab): landscape cards -->
-        <control type="list" id="7130">
+        <control type="fixedlist" id="7130">
             <left>128</left>
             <top>740</top>
             <width>1800</width>
@@ -1345,7 +1345,7 @@
                 </control>
             </focusedlayout>
         </control>
-        <control type="list" id="7110">
+        <control type="fixedlist" id="7110">
             <left>128</left>
             <top>733</top>
             <width>1800</width>
@@ -1444,7 +1444,7 @@
 
         <!-- Trailers & Extras row: landscape stills, title + subtype
              caption under each card (official 24-detail-bottom2). -->
-        <control type="list" id="7170">
+        <control type="fixedlist" id="7170">
             <left>128</left>
             <top>828</top>
             <width>1800</width>
@@ -1546,7 +1546,7 @@
 
         <!-- Related titles row: poster cards, title + year caption
              (official 'Related Movies' / 'More with X', 24-detail-bottom2). -->
-        <control type="list" id="7175">
+        <control type="fixedlist" id="7175">
             <left>128</left>
             <top>828</top>
             <width>1800</width>
@@ -1662,7 +1662,7 @@
             </focusedlayout>
         </control>
 
-        <control type="list" id="7176">
+        <control type="fixedlist" id="7176">
             <left>128</left>
             <top>828</top>
             <width>1800</width>
@@ -1778,7 +1778,7 @@
             </focusedlayout>
         </control>
 
-        <control type="list" id="7197">
+        <control type="fixedlist" id="7197">
             <left>930</left>
             <top>110</top>
             <width>660</width>

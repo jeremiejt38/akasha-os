@@ -40,7 +40,9 @@
                 <font>font_aura_mini</font>
                 <textcolor>CCFFFFFF</textcolor>
             </control>
-            <control type="list" id="9010">
+            <control type="fixedlist" id="9010">
+                <onup>9099</onup>
+                <ondown>9099</ondown>
                 <scrolltime>140</scrolltime>
                 <itemlayout height="64">
                     <control type="label">
@@ -78,5 +80,6 @@
                 <content />
             </control>
         </control>
+        <control type="label" id="9099"><visible>false</visible></control>
     </controls>
 </window>

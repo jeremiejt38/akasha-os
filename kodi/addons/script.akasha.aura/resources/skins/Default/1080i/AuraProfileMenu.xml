@@ -40,7 +40,7 @@
                 <height>1006</height>
                 <texture colordiffuse="FF000000" border="26">cap-r26.png</texture>
             </control>
-            <control type="list" id="9020">
+            <control type="fixedlist" id="9020">
                 <left>34</left>
                 <top>73</top>
                 <width>384</width>
@@ -333,7 +333,7 @@
                 <font>font_aura_mini</font>
                 <textcolor>CCFFFFFF</textcolor>
             </control>
-            <control type="list" id="9010">
+            <control type="fixedlist" id="9010">
                 <scrolltime>140</scrolltime>
                 <onleft>9020</onleft>
                 <itemlayout height="76">

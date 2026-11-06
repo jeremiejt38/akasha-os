@@ -93,7 +93,9 @@
             </control>
 
             <!-- Poster row -->
-            <control type="list" id="7310">
+            <control type="fixedlist" id="7310">
+                <onleft>7399</onleft>
+                <onright>7399</onright>
                 <left>142</left>
                 <top>490</top>
                 <width>1800</width>
@@ -200,5 +202,6 @@
                 </focusedlayout>
             </control>
         </control>
+        <control type="label" id="7399"><visible>false</visible></control>
     </controls>
 </window>

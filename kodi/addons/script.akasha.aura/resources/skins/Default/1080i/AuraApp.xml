@@ -226,8 +226,9 @@
             <width>1800</width>
             <height>660</height>
             <onup>5001</onup>
-            <ondown>5010</ondown>
-            <onleft>5010</onleft>
+            <ondown>5099</ondown>
+            <onleft>5099</onleft>
+            <onright>5099</onright>
             <itemlayout width="300" height="280">
                 <control type="image">
                     <left>50</left>
@@ -382,5 +383,6 @@
             <textcolor>77FFFFFF</textcolor>
             <wrapmultiline>false</wrapmultiline>
         </control>
+        <control type="label" id="5099"><visible>false</visible></control>
     </controls>
 </window>

@@ -42,13 +42,15 @@
             <height>1006</height>
             <texture colordiffuse="FF000000" border="26">cap-r26.png</texture>
         </control>
-        <control type="list" id="9020">
+        <control type="fixedlist" id="9020">
             <left>34</left>
             <top>73</top>
             <width>384</width>
             <height>960</height>
             <onleft>9020</onleft>
             <onright>100</onright>
+            <onup>9999</onup>
+            <ondown>9999</ondown>
             <itemlayout width="384" height="68">
                 <control type="image">
                     <left>33</left>
@@ -349,12 +351,14 @@
                  x502-1169 (w668), h64, 76px pitch, first row y134.
                  Values right-aligned to x1141; switch = 51x32 track
                  with a 26px knob. -->
-            <control type="list" id="100">
+            <control type="fixedlist" id="100">
                 <left>502</left>
                 <top>128</top>
                 <width>668</width>
                 <height>912</height>
                 <onleft>9020</onleft>
+                <onup>9999</onup>
+                <ondown>9999</ondown>
                 <itemlayout width="668" height="76">
                     <control type="label">
                         <left>28</left>
@@ -507,5 +511,6 @@
                 <visible>false</visible>
             </control>
         </control>
+        <control type="label" id="9999"><visible>false</visible></control>
     </controls>
 </window>

@@ -65,13 +65,15 @@
                      when the queue takes focus (no section heading). -->
                 <visible>!Control.HasFocus(1002)</visible>
             </control>
-            <control type="list" id="1001">
+            <control type="fixedlist" id="1001">
                 <left>20</left>
                 <top>52</top>
                 <width>1900</width>
                 <height>340</height>
                 <orientation>horizontal</orientation>
                 <ondown>1002</ondown>
+                <onleft>1099</onleft>
+                <onright>1099</onright>
                 <itemlayout width="426" height="340">
                     <control type="image">
                         <left>0</left>
@@ -199,13 +201,15 @@
                 <label>$ADDON[script.akasha.aura 33616]</label>
                 <textcolor>FFFFFFFF</textcolor>
             </control>
-            <control type="list" id="1002">
+            <control type="fixedlist" id="1002">
                 <left>20</left>
                 <top>33</top>
                 <width>1900</width>
                 <height>340</height>
                 <orientation>horizontal</orientation>
                 <onup>1001</onup>
+                <onleft>1099</onleft>
+                <onright>1099</onright>
                 <itemlayout width="417" height="340">
                     <control type="image">
                         <left>0</left>
@@ -325,5 +329,6 @@
                 </focusedlayout>
             </control>
         </control>
+        <control type="label" id="1099"><visible>false</visible></control>
     </controls>
 </window>

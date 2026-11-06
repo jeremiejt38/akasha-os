@@ -29,7 +29,7 @@
             <height>216</height>
             <texture colordiffuse="FF1A1A1A" border="36">cap-r36.png</texture>
         </control>
-        <control type="list" id="8140">
+        <control type="fixedlist" id="8140">
             <left>28</left>
             <top>432</top>
             <width>72</width>
@@ -38,8 +38,8 @@
             <scrolltime>0</scrolltime>
             <onleft>8140</onleft>
             <onright>8100</onright>
-            <onup>8140</onup>
-            <ondown>8140</ondown>
+            <onup>8199</onup>
+            <ondown>8199</ondown>
             <itemlayout width="72" height="54">
                 <control type="image">
                     <left>16</left>
@@ -255,6 +255,7 @@
             <onleft>8140</onleft>
             <onright>8130</onright>
             <ondown>8115</ondown>
+            <onup>8199</onup>
                         <itemlayout width="72" height="72">
                 <control type="image">
                     <left>4</left>
@@ -422,7 +423,7 @@
         </control>
 
         <!-- Recent searches -->
-        <control type="list" id="8110">
+        <control type="fixedlist" id="8110">
             <left>96</left>
             <top>646</top>
             <width>432</width>
@@ -432,6 +433,7 @@
             <onup>8115</onup>
             <onleft>8140</onleft>
             <onright>8130</onright>
+            <ondown>8199</ondown>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasRecent))</visible>
                         <itemlayout width="473" height="80">
                 <control type="image">
@@ -831,6 +833,8 @@
             <scrolltime>200</scrolltime>
             <onleft>8100</onleft>
             <onup>8120</onup>
+            <ondown>8199</ondown>
+            <onright>8199</onright>
             <visible>!String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
                         <itemlayout width="584" height="300">
                 <control type="image">
@@ -1254,7 +1258,9 @@
             <itemgap>0</itemgap>
             <scrolltime>200</scrolltime>
             <onleft>8100</onleft>
-            <onup>8131</onup>
+            <onup>8199</onup>
+            <ondown>8199</ondown>
+            <onright>8199</onright>
             <visible>String.IsEmpty(Window.Property(AuraSearchHasQuery))</visible>
                         <itemlayout width="293" height="460">
                 <control type="image">
@@ -1397,5 +1403,6 @@
             <textcolor>77FFFFFF</textcolor>
             <visible>!String.IsEmpty(Window.Property(AuraSearchEmpty))</visible>
         </control>
+        <control type="label" id="8199"><visible>false</visible></control>
     </controls>
 </window>

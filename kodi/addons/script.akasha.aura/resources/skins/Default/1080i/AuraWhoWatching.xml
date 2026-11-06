@@ -53,10 +53,10 @@
                 <width>900</width>
                 <height>350</height>
                 <orientation>horizontal</orientation>
-                <onleft>9100</onleft>
-                <onright>9100</onright>
-                <onup>9100</onup>
-                <ondown>9100</ondown>
+                <onleft>9199</onleft>
+                <onright>9199</onright>
+                <onup>9199</onup>
+                <ondown>9199</ondown>
                 <itemlayout width="300" height="350">
                     <control type="image">
                         <left>40</left>
@@ -152,5 +152,6 @@
                 </focusedlayout>
             </control>
         </control>
+        <control type="label" id="9199"><visible>false</visible></control>
     </controls>
 </window>

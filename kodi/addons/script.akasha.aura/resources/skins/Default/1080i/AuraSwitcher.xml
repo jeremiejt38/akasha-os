@@ -51,8 +51,10 @@
                 <top>210</top>
                 <width>1800</width>
                 <height>700</height>
-                <onup>100</onup>
-                <ondown>100</ondown>
+                <onup>999</onup>
+                <ondown>999</ondown>
+                <onleft>999</onleft>
+                <onright>999</onright>
                 <itemlayout width="300" height="230">
                     <control type="image">
                         <left>15</left>
@@ -105,5 +107,6 @@
                 </focusedlayout>
             </control>
         </control>
+        <control type="label" id="999"><visible>false</visible></control>
     </controls>
 </window>
