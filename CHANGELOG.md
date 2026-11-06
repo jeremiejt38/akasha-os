@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.3](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.2...akasha-os-v0.78.3) (2026-11-06)
+
+
+### Performance Improvements
+
+* **aura:** pre-warm horizontal row art ahead of the cursor ([#302](https://github.com/jeremiejt38/akasha-os/issues/302)) ([c04fea6](https://github.com/jeremiejt38/akasha-os/commit/c04fea671f9a938bf5d2f718395e4d1a1b9b8118))
+
 ## [0.78.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.1...akasha-os-v0.78.2) (2026-11-05)
 
 
