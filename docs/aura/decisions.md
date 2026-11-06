@@ -1162,3 +1162,58 @@ avec un court fade-in — le contenu arrive en mouvement au lieu
 d'apparaître. Capture de frames : `xbmc.RenderCapture` est mort sur ce
 build (readback GBM non supporté) — méthode retenue : anim ralentie à
 ~2200 ms + rafale `screenshot` JSON-RPC (~60 ms).
+
+## Animations rangée→rangée : sticky focus, rebind en deux phases, dissolve-in-place (2026-11-06)
+
+Analyse frame-par-frame Plex (screenrecord ~35 fps, émulateur) vs Akasha
+(slow-mo ×8 + captures espacées) — voir `docs/plex-parity/ANIM.md`.
+
+**Cause racine du void multi-hop** : le `reset()` du rebind parque le focus
+hors des rangées ~0,3 s ; pendant le park les `Conditional reversible="true"`
+de la colonne reprennent en sens inverse vers 0 puis re-glissent à
+l'atterrissage → aller-retour géant + zone vide. `AuraFocusSlot` existait
+déjà mais ne couvrait que les `<visible>` ; il est maintenant substitué dans
+**toutes** les conditions `HasFocus(5Nxx)` du groupe reco (positif :
+`HasFocus | AuraFocusSlot=N` ; négatif : `!HasFocus + !AuraFocusSlot=N`),
+ce qui fait évaluer l'ensemble « comme si l'ancre était focusée » pendant
+le park — colonne ancrée, anims cohérentes, peek stable.
+
+**Rebind en deux phases** (le rebind complet coûtait ~1 s sur Pi 4 :
+`addItems` ~0,3 ms grâce au cache `row['_items']`, mais reset+labels+
+placeholders ~80 ms/slot et `_sync_navigation` ~0,5 s) : le slot d'ancrage
+est rebindé immédiatement (~100 ms), les 4 autres dans un worker à +120 ms
+ordonné ancre-vers-extérieur (le slot encore dans le viewport en premier),
+gardé par génération → une salve ne paie le passage coûteux qu'une fois.
+
+**Squelettes permanents** : les items liés restaient invisibles ~200-400 ms
+le temps du décodage texture — le squelette `skeleton-poster/landscape`
+(26 % de diffuse) est maintenant rendu sous chaque carte en permanence, le
+poster opaque le recouvre une fois décodé → shimmer à la Plex au lieu du vide.
+
+**Dissolve-in-place de la rangée sortante** : le contre-slide `+236 px`
+(easing in) laissait la rangée dériver ~-236 px en fondu *par-dessus* le
+hero. Porté à `+472 px` avec `easing="out"` — la même courbe que le slide
+colonne → offset net exactement nul pendant toute l'animation : la rangée
+se dissout sur place au lieu de voyager, sans toucher au z-order. (Piste
+d'un voile opaque écartée : il faudrait re-z-ordonner hero/colonne/sidebar,
+risqué.)
+
+**Hero optimiste** : `_update_hero(list_id=cible)` peint l'item d'arrivée
+connu dès l'émission du hop (crossfade pendant le slide, comme Plex) ;
+`_hero_after_landing()` poll `getFocusId` (30 ms / 0,7 s, latest-wins) +
+repaint à l'atterrissage confirmée. Remplace le `_defer_hero(0,08 s)` qui
+pouvait lire l'ancien focus et ne retentait jamais.
+
+**Fuite d'`AuraFocusSlot` corrigée** : le worker de libération utilisait
+`_focus_generation` partagé avec `_defer_focus` — tout defer ultérieur tuait
+le worker avant le clear → propriété collée → deux conditions de slide
+vraies → colonne hors écran (rangées invisibles, focus sain). Compteur
+dédié `_fslot_gen` + watchdog qui libère à `settle+timeout` si non repris.
+
+**Durées** : 250 → 280 ms (slides colonne + contre-slides + glides) —
+Plex mesure ~300 ms, Kodi rend snappier légèrement en dessous.
+
+**Concession assumée** : le glide `AuraRowSwap` plonge la colonne à ~30 %
+d'opacité pendant le swap — le dip masque les resets restants ; Plex garde
+le contenu opaque en continu, ce qui exigerait une rangée pré-liée
+supplémentaire hors écran (architecture à part).

@@ -593,3 +593,6 @@ PixelCamera HTTP — voir SPEC.md, note "camera").
 | `akasha-direct/divert/topbar-swap-focused_041.jpg` | divert | topbar-swap-focused | 092800 | pi |
 | `akasha-direct/divert/topbar-swap-content_042.jpg` | divert | topbar-swap-content | 092800 | pi |
 | `akasha-direct/divert/topbar-swap-library_043.jpg` | divert | topbar-swap-library | 093100 | pi |
+| `reference/_video/home_nav_down_x3.mp4` | accueil | nav_down_x3 | 0557 | screenrecord ~35fps : 3 hops rangée→rangée, durée ~300ms, ease-out, hero crossfade |
+| `reference/_video/home_nav_up_x2.mp4` | accueil | nav_up_x2 | 0600 | symétrique au Down |
+| `reference/_video/home_nav_rapid_down4_up2.mp4` | accueil | nav_rapid | 0602 | presses rapides : anims complètes en file, contenu toujours visible |
