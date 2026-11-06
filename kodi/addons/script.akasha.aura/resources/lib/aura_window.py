@@ -1192,15 +1192,35 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         return RECO_LIST_IDS[slot_index]
 
     @_ui_locked
-    def _rebind_reco_slots(self):
+    def _rebind_reco_slots(self, only_slot=None, finalize=True,
+                           skip_slot=None, near_first=None):
         """Bind each visible row slot to `_hub_rows[_hub_offset + i]`.
 
         Called on (re)load and every time the viewport slides by one hub --
         see RECO_SLOT_IDS. Slots without a hub are emptied rather than
         hidden so their ondown/left navigation stays consistent.
-        """
+
+        `only_slot` restricts the pass to a single slot index: _reco_scroll
+        rebinds the anchor slot immediately (the row the eye is on must
+        appear fast) and defers the four others ~120ms so their OLD cards
+        keep rendering through the start of the glide instead of all five
+        lists going empty at once -- the multi-hop "void" measured
+        on-device. `skip_slot` skips one index; combined with
+        `near_first` the deferred pass works anchor-outward so the slot
+        still inside the viewport rebinds FIRST, not last. `finalize`
+        runs the shared tail (navigation rewire + prewarm kick), skipped
+        on the anchor pass and paid once by the deferred pass -- also
+        saving ~0.5s of _sync_navigation under a rapid-press burst where
+        only the last pass survives."""
         self._drop_pending_appends(*RECO_ALL_LIST_IDS)
-        for i, (label_id, list_id) in enumerate(RECO_SLOT_IDS):
+        order = range(len(RECO_SLOT_IDS)) if near_first is None else \
+            sorted(range(len(RECO_SLOT_IDS)), key=lambda j: abs(j - near_first))
+        for i in order:
+            if only_slot is not None and i != only_slot:
+                continue
+            if skip_slot is not None and i == skip_slot:
+                continue
+            label_id, list_id = RECO_SLOT_IDS[i]
             index = self._hub_offset + i
             row = self._hub_rows[index] if index < len(self._hub_rows) else None
             land_id = RECO_LANDSCAPE_IDS[i]
@@ -1266,8 +1286,30 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                          .format(row['title'], e), xbmc.LOGERROR)
             self._reco_placeholder_counts[effective_id] = self._sync_placeholders(
                 effective_id, 0, row['paged'])
-        self._sync_navigation()
-        self._prewarm_reco_items()
+        if finalize:
+            self._sync_navigation()
+            self._prewarm_reco_items()
+
+    def _rebind_reco_slots_later(self, anchor_slot, delay=0.12):
+        """Deferred second pass of the two-phase rebind (see
+        _rebind_reco_slots(only_slot=)). Generation-guarded so a burst of
+        scroll presses pays the 4-slot pass + navigation rewire only once,
+        for the final offset."""
+        self._rebind_gen = getattr(self, '_rebind_gen', 0) + 1
+        gen = self._rebind_gen
+
+        def worker():
+            time.sleep(delay)
+            if gen != self._rebind_gen:
+                return
+            try:
+                self._rebind_reco_slots(skip_slot=anchor_slot,
+                                        finalize=True,
+                                        near_first=anchor_slot)
+            except Exception:
+                pass
+
+        threading.Thread(target=worker, daemon=True).start()
 
     @staticmethod
     def _reco_row_items(row):
@@ -1343,16 +1385,26 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # bottom edge bounced to search). AuraFocusSlot force-renders the
         # anchor slot until the deferred focus lands.
         self.setProperty('AuraFocusSlot', str(slot))
-        self._rebind_reco_slots()
+        # Two-phase rebind: the anchor slot right away (~100ms, the row
+        # the eye tracks), the other four on a deferred worker so their
+        # old cards keep rendering through the start of the glide instead
+        # of the whole column going empty -- the multi-hop void.
+        self._rebind_reco_slots(only_slot=slot, finalize=False)
         target = self._reco_slot_list_id(slot)
+        # Optimistic hero paint: the destination item is already known
+        # (slots just rebound), so the hero crossfades at slide start
+        # instead of waiting ~300ms for the deferred focus to land.
+        self._update_hero(list_id=target)
         # Always defer the restore: right after reset() getFocusId() can
         # still report the just-cleared control, so a "skip if already
         # there" guard would leave Kodi parked on the top bar.
         self._defer_focus(target)
-        self._clear_focus_slot_later(target)
+        self._clear_focus_slot_later(target, slot)
+        self._rebind_reco_slots_later(slot)
         return True
 
-    def _clear_focus_slot_later(self, target, settle=0.4, timeout=2.0):
+    def _clear_focus_slot_later(self, target, slot, settle=0.4,
+                                timeout=2.0):
         """Drop the AuraFocusSlot override once the deferred focus landed.
 
         Two traps: the builtin SetFocus is queued on Kodi's message pump
@@ -1360,14 +1412,24 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         getFocusId() can still report the just-reset control right after
         _rebind_reco_slots. Wait past the defer delay before polling so a
         stale focus id does not clear the override early; then release
-        the moment the landing confirms (or at the timeout)."""
-        generation = self._focus_generation
+        the moment the landing confirms (or at the timeout).
+
+        Uses its OWN generation counter: _defer_focus bumps
+        _focus_generation on every call, so sharing it let an unrelated
+        focus defer kill this worker before the clear -- leaving
+        AuraFocusSlot stuck forever, which makes every sticky slide
+        condition for that slot true and slides the whole reco column
+        off-screen (observed on-device: fully empty rows with a healthy
+        focus). A hard watchdog then clears the property unconditionally
+        at settle+timeout if no newer rebind has taken ownership."""
+        self._fslot_gen = getattr(self, '_fslot_gen', 0) + 1
+        generation = self._fslot_gen
 
         def worker():
             time.sleep(settle)
             deadline = time.monotonic() + timeout
             while time.monotonic() < deadline:
-                if generation != self._focus_generation:
+                if generation != self._fslot_gen:
                     return
                 try:
                     if self.getFocusId() == target:
@@ -1375,13 +1437,39 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 except RuntimeError:
                     break
                 time.sleep(0.05)
-            if generation == self._focus_generation:
+            if generation == self._fslot_gen:
+                # Repaint now that the landing is confirmed -- the
+                # optimistic paint issued at scroll time targeted the
+                # same item, but this covers rerouted/failed landings.
+                try:
+                    self._update_hero()
+                except Exception:
+                    pass
+                # Grace before dropping the sticky override: HasFocus()
+                # only evaluates on the next rendered frame, so clearing
+                # at the same tick the focus lands would open a
+                # false-false window where the column's Conditional
+                # slides see neither HasFocus nor AuraFocusSlot and
+                # reverse toward 0 for a frame.
+                time.sleep(0.06)
+                if generation != self._fslot_gen:
+                    return
                 try:
                     self.setProperty('AuraFocusSlot', '')
                 except Exception:
                     pass
 
+        def watchdog():
+            time.sleep(settle + timeout + 0.3)
+            if generation != self._fslot_gen:
+                return
+            try:
+                self.setProperty('AuraFocusSlot', '')
+            except Exception:
+                pass
+
         threading.Thread(target=worker, daemon=True).start()
+        threading.Thread(target=watchdog, daemon=True).start()
 
     def _reco_slot_has_row(self, slot_index):
         return self._hub_offset + slot_index < len(self._hub_rows)
@@ -1656,14 +1744,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             focused = self.getFocusId()
         except RuntimeError:
             return None
-        if focused not in self._reco_rows:
+        return self._reco_item_for(focused)
+
+    def _reco_item_for(self, list_id):
+        """The selected item dict of a bound reco list, focus-agnostic --
+        used to paint the hero for a KNOWN landing target before Kodi has
+        applied the just-issued setFocus (Plex starts the hero crossfade
+        at slide start, not after landing)."""
+        if list_id not in self._reco_rows:
             return None
-        _, _, _, paged = self._reco_rows[focused]
+        _, _, _, paged = self._reco_rows[list_id]
         try:
-            li = gui_guard.selitem(self, focused)
+            li = gui_guard.selitem(self, list_id)
             if li is not None and li.getProperty('IsPlaceholder'):
                 return None
-            pos = gui_guard.selpos(self, focused)
+            pos = gui_guard.selpos(self, list_id)
         except RuntimeError:
             return None
         if not (0 <= pos < len(paged.items)):
@@ -1818,12 +1913,46 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
 
         threading.Thread(target=worker, daemon=True).start()
 
-    def _update_hero(self, clear_if_empty=False):
+    def _hero_after_landing(self, target, timeout=0.7):
+        """Repaint the hero once Kodi confirms focus landed on `target`.
+
+        _update_hero(list_id=...) paints the known destination item the
+        moment the hop is issued, but if that hop never lands (dead key,
+        rerouted focus) nothing would ever correct the stale paint -- the
+        8s-stale-hero failure observed on-device. Poll getFocusId until it
+        reports the target (or the timeout), then reconcile; the
+        generation counter keeps only the latest request under rapid nav.
+        """
+        self._hero_generation = getattr(self, '_hero_generation', 0) + 1
+        generation = self._hero_generation
+
+        def worker():
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                if generation != self._hero_generation:
+                    return
+                try:
+                    if self.getFocusId() == target:
+                        break
+                except RuntimeError:
+                    break
+                time.sleep(0.03)
+            if generation == self._hero_generation:
+                try:
+                    self._update_hero()
+                except Exception:
+                    pass
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _update_hero(self, clear_if_empty=False, list_id=None):
         """Sync the Plex hero (backdrop/logo/meta/plot/cast) with the item
         currently focused in a Recommande row -- Plex repaints the whole
         header every time the focused card changes, including while
-        scrolling horizontally inside one row."""
-        item = self._focused_reco_item()
+        scrolling horizontally inside one row. `list_id` paints the known
+        landing target directly (optimistic paint at hop issue)."""
+        item = self._reco_item_for(list_id) if list_id is not None \
+            else self._focused_reco_item()
         if item is None:
             # Nothing focused yet (fresh load, focus still on the top bar):
             # seed the hero with the first item of the first row, matching
@@ -4778,7 +4907,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                             RECO_PROMO_IDS[-1], RECO_PROMO_DISMISS_IDS[-1]) \
                 and self._reco_slot_has_row(len(RECO_SLOT_IDS)):
             self._reco_scroll(+1)
-            self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_UP and \
@@ -4786,7 +4914,6 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                             RECO_PROMO_IDS[0], RECO_PROMO_DISMISS_IDS[0]) \
                 and self._hub_offset > 0:
             self._reco_scroll(-1)
-            self._defer_hero()
             self._update_bar_focused()
             return
         # Prevent Down landing on an empty slot when fewer hubs remain than
@@ -4809,7 +4936,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     self.setFocus(self.getControl(prev))
                 except RuntimeError:
                     pass
-            self._defer_hero()
+                self._update_hero(list_id=prev)
+                self._hero_after_landing(prev)
+            else:
+                self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_DOWN and 0 <= slot < len(RECO_SLOT_IDS) - 1:
@@ -4822,7 +4952,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     self.setFocus(self.getControl(nxt))
                 except RuntimeError:
                     pass
-            self._defer_hero()
+                self._update_hero(list_id=nxt)
+                self._hero_after_landing(nxt)
+            else:
+                self._defer_hero()
             self._update_bar_focused()
             return
         if aid == ACTION_MOVE_UP and \
