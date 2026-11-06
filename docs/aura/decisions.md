@@ -1101,3 +1101,64 @@ Même schéma que la grille, adapté aux shelves (~7 cartes visibles) :
 Reste volontairement inchangé : `prefetch_margin=15` par défaut des
 PagedList de rangées suffit (~2 viewports de données d'avance) — le
 symptôme était l'art, pas les items.
+
+## Polish scroll : fixedlist, gating gauche, glide de rebind (2026-11-06)
+
+Trois retours utilisateur livrés ensemble (PLAN-1c4561df).
+
+### Barre de progression « Continuer à regarder »
+
+Barre `AuraProgress` 4 px → 6 px (`prog-bar.png` régénéré en 24×6) et
+même animation `zoom` que le poster dans chaque `focusedlayout`, avec un
+`center` explicite = centre du poster — la barre suit l'échelle et reste
+collée au bord bas au lieu de flotter.
+
+### Fin de wrap-around : `fixedlist` partout
+
+Les `type="list"` Kodi wrappent en interne dès que la navigation déclarée
+échoue (cible non-focusable → fallback spatial). Conversion de toutes les
+listes en `type="fixedlist"` — dead keys natifs aux deux bouts, focus et
+ring conservés. Le label invisible 3260 reste le dead-end des directions
+`panel`. Vérifié live : rangée de 53 items, 6 Right de trop → pos 53.
+
+### Gating de la sidebar (hold-Left)
+
+Exigence : un Left maintenu jusqu'au premier item ne doit PAS ouvrir le
+rail — il faut relâcher puis ré-appuyer. Tentatives écartées (toutes
+mesurées en live) :
+
+- dead-end non-focusable en cible `left` → fallback spatial → rail.
+- dead-end focusable + rewire `controlLeft` à `onAction` → Kodi capture
+  la cible de nav à l'envoi de la pression ET fusionne les répétitions
+  rapides : la pression du bord peut n'atteindre `onAction` que... jamais.
+  Le rewire arrive toujours un coup trop tard.
+
+Mécanisme final — 100 % déclaratif : chaque rangée déclare
+`onleft`/`setNavigation` vers un **bouton guard dédié** (`RECO_GUARD_IDS`
+= lid+80, 10 guards pour poster+landscape) positionné sur la première
+carte avec le même `focus-ring.png` + même zoom 104 % → le parc est
+indiscernable d'une carte focusée. `left` du guard = lui-même (dead key
+natif pour toutes les répétitions, coalescées ou non), `right` = sa
+rangée, `up`/`down` = la chaîne de la rangée. Toutes les conditions
+`Control.HasFocus(5x1x)` des slides/masques incluent l'id du guard pour
+garder la colonne translatée en état parqué.
+
+Sortie : `_gate_left_edge` — un LEFT parqué espacé de >`LEFT_GATE_HOLD_S`
+(0,5 s) arme un timer de confirmation de 250 ms ; une autre pression qui
+arrive avant l'annule (toujours en hold), sinon `setFocusId(3310)` ouvre
+le rail. Double condition (silence avant ET après) immunisée aux trous de
+livraison de la coalescence. Vérifié : 3 cycles de soak 50×85 ms → parc
+systématique, ouverture uniquement sur pression fraîche.
+
+### Glide de rebind vertical (`AuraRowSwap`)
+
+Le slide de colonne existait déjà (groupe translaté par `HasFocus`) ;
+la dureté venait de l'`easing="inout"`, des anims simultanées et du
+rebind instantané au dernier slot (téléport + squelettes). `easing`
+passé à `out` partout, et `_reco_scroll` pulse une propriété alternée
+`AuraRowSwap` (d1/d2/u1/u2) qui déclenche une anim conditionnelle
+one-shot : la colonne rebindée glisse d'un pitch de rangée (~472 px)
+avec un court fade-in — le contenu arrive en mouvement au lieu
+d'apparaître. Capture de frames : `xbmc.RenderCapture` est mort sur ce
+build (readback GBM non supporté) — méthode retenue : anim ralentie à
+~2200 ms + rafale `screenshot` JSON-RPC (~60 ms).

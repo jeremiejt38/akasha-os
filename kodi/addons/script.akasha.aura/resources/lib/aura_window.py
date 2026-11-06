@@ -119,8 +119,16 @@ DIVERT_PREFETCH_MARGIN = 150
 DIVERT_PLACEHOLDER_CAP = 8000
 # Invisible label the panel's declared <ondown> aims at -- see the 3260
 # control in Aura.xml. A non-self down target is what disables Kodi's
-# per-column wraparound on the last row.
+# per-column wraparound on the last row. The same label is reused as the
+# dead-end target for every scroll axis that must stop at its last item
+# instead of wrapping (row Right, rail Up/Down, ...).
 DIVERT_GRID_DEADEND_ID = 3260
+# Hold-Left edge gate: a LEFT key held down repeats ACTION_MOVE_LEFT
+# every ~80 ms, so an inter-press gap under LEFT_GATE_HOLD_S means the
+# same hold is still arriving. Containers whose left edge exits to the
+# sidebar rail dead-end while a hold is in flight -- the rail only opens
+# on a fresh press after a real release (see _gate_left_edge).
+LEFT_GATE_HOLD_S = 0.5
 # Plex's expanded rail puts fixed entries above the libraries: Search,
 # Home -- then a divider, the library sections and Plus. Plex cloud-only
 # entries (profile, My Lists, playlists, On Plex) are hidden: they only
@@ -178,6 +186,14 @@ RECO_LIST_IDS = tuple(list_id for _, list_id in RECO_SLOT_IDS)
 # navigation resolves against the effective id (_reco_slot_list_id).
 RECO_LANDSCAPE_IDS = tuple(list_id + 1 for _, list_id in RECO_SLOT_IDS)
 RECO_ALL_LIST_IDS = RECO_LIST_IDS + RECO_LANDSCAPE_IDS
+# Invisible guard button parked one hop left of each row's first card,
+# drawn with the same focus ring texture: a fixedlist cannot dead-key a
+# held LEFT at pos0 by itself (a non-focusable declared target falls
+# through to spatial nav and hops to the sidebar rail anyway), so the
+# hold-Left gate rewires the row's left to this guard. Parked focus then
+# looks exactly like the first card keeping its ring; the guard's own
+# left toggles between dead (hold) and the sidebar (fresh press).
+RECO_GUARD_IDS = {list_id: list_id + 80 for list_id in RECO_ALL_LIST_IDS}
 # Plex's Tendances tab ends with a full-width promo card ("Find What To
 # Watch, Anywhere!") after the last hub row. It binds as a synthetic
 # trailing hub row rendered by one focusable button per slot, wherever the
@@ -204,6 +220,10 @@ RECO_MAX_ITEMS_PER_ROW = 100
 # (previously aura_genres.AuraGenresWindow).
 CATEGORY_STATUS_ID = 6020
 CATEGORY_PANEL_ID = 6010
+
+# Horizontal lists reach their left edge at position 0, where their
+# declared left hops to a ringed RECO_GUARD_IDS guard button instead of
+# the rail -- see _gate_left_edge for the release-and-press gate.
 
 # Divertissement state view (B17, Plex's "server unreachable" pattern):
 # centered icon + title + message + one contextual action button over the
@@ -476,6 +496,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._divert_state = None
         self._divert_state_action = None
         self._focus_generation = 0
+        # Content-swap glide state (see _reco_scroll).
+        self._reco_swap_ts = 0.0
+        self._reco_swap_tick = 0
+        # Hold-Left edge gate state (see _gate_left_edge).
+        self._left_gate_ts = 0.0
+        self._left_gate_dt = 1.0
         # Listen for repeated Home presses while Aura is already open so we can
         # distinguish simple press (return to Divertissement tab) from double
         # press (open app switcher). See docs/remote/decisions.md.
@@ -1296,6 +1322,19 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if new_offset == self._hub_offset:
             return False
         self._hub_offset = new_offset
+        # Glide the swapped column by one row pitch: the rebind above is
+        # instant and the HasFocus-anchored group slide cannot move (the
+        # focus stays on the same slot), so without this the whole column
+        # teleports. AuraRowSwap alternates d1/d2/u1/u2 to retrigger the
+        # matching one-shot slide in Aura.xml. Skipped while the key is
+        # held (<0.18 s between scrolls): at repeat speed an instant swap
+        # reads better than restarting the slide every press.
+        if time.monotonic() - getattr(self, '_reco_swap_ts', 0.0) >= 0.18:
+            self._reco_swap_tick = getattr(self, '_reco_swap_tick', 0) ^ 1
+            self.setProperty('AuraRowSwap',
+                             ('d' if delta > 0 else 'u')
+                             + str(self._reco_swap_tick + 1))
+        self._reco_swap_ts = time.monotonic()
         slot = 0 if delta < 0 else len(RECO_SLOT_IDS) - 1
         # Resetting the focused list drops focus, and every slot list's
         # <visible> requires an in-range reco focus -- so with focus lost
@@ -1444,7 +1483,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # flipping a hub's style between poster, landscape and the
             # promo card needs no extra sync.
             for lid in (list_id, RECO_LANDSCAPE_IDS[i]):
-                nav(lid, up=up, down=down, left=DIVERT_SIDEBAR_ID)
+                nav(lid, up=up, down=down, left=RECO_GUARD_IDS[lid],
+                    right=DIVERT_GRID_DEADEND_ID)
+                # Guard buttons: invisible dead keys parked one hop left
+                # of the first card, drawn with the same focus ring so a
+                # LEFT at the edge looks exactly like the card keeping
+                # focus. Right returns to its row; Up/Down mirror the
+                # row's chain; Left stays self-pinned -- the gate opens
+                # the rail with setFocusId() on a fresh press, not
+                # through declared nav (see _gate_left_edge).
+                nav(RECO_GUARD_IDS[lid], up=up, down=down,
+                    left=RECO_GUARD_IDS[lid], right=lid)
             # The promo banner carries two pills: primary CTA left,
             # dismiss right. nav()'s unset directions self-pin, so Right
             # on the primary must be wired to the dismiss pill explicitly
@@ -1487,13 +1536,18 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         grid_right = (DIVERT_AZ_RAIL_ID
                       if (self._divert_library_tab
                           == DIVERT_SUBTAB_BIBLIOTHEQUES and not pseudo)
-                      else DIVERT_PANEL_ID)
+                      else DIVERT_GRID_DEADEND_ID)
         # Down pins at the invisible dead-end label 3260, not the panel
         # itself: wrapAround is true only when the declared down target
         # is the panel's own id, so this is what stops the grid's
         # per-column wrap-to-top at the last row (dead key like Plex's).
         nav(DIVERT_PANEL_ID, up=grid_up, down=DIVERT_GRID_DEADEND_ID,
             left=DIVERT_SIDEBAR_ID, right=grid_right)
+        # Category panel: the XML pins Down/Right to the dead end and Up
+        # to the contextual strip; Left exits to the rail like the grid.
+        nav(CATEGORY_PANEL_ID, up=strip_up,
+            down=DIVERT_GRID_DEADEND_ID,
+            left=DIVERT_SIDEBAR_ID, right=DIVERT_GRID_DEADEND_ID)
 
         # The overflow pill's declared onleft points at the sort pill,
         # which is hidden for pseudo-sections -- keep Left inside the
@@ -1560,6 +1614,41 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             left=GEAR_BUTTON_ID, right=TAB_LIST_ID)
         nav(9000, up=TAB_LIST_ID, down=escape,
             left=escape, right=escape)
+
+    def _gate_left_edge(self, focused):
+        """Keep a held LEFT from escaping a reco row into the rail.
+
+        Reco rows declare left=guard permanently: any edge press parks
+        the focus on the row's guard button, which draws the same focus
+        ring over the first card so the park is invisible. The guard is
+        self-pinned on the left, so held repeats are dead keys no matter
+        how many of them Kodi coalesces before onAction sees them.
+
+        Opening the rail still needs a fresh press, but coalescing can
+        leave delivery gaps over LEFT_GATE_HOLD_S mid-hold -- a parked
+        repeat then looks like a fresh press. So a candidate press only
+        arms a short confirm timer: if another LEFT arrives first the
+        hold is still on and the timer aborts; if the quiet holds the
+        press was real and the rail opens.
+        """
+        if focused not in RECO_GUARD_IDS.values():
+            return
+        self._left_gate_gen = getattr(self, '_left_gate_gen', 0) + 1
+        if self._left_gate_dt < LEFT_GATE_HOLD_S:
+            return
+        gen = self._left_gate_gen
+
+        def worker():
+            time.sleep(0.25)
+            if gen != self._left_gate_gen:
+                return
+            try:
+                if self.getFocusId() in RECO_GUARD_IDS.values():
+                    self.setFocusId(DIVERT_SIDEBAR_ID)
+            except RuntimeError:
+                pass
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def _focused_reco_item(self):
         """The item dict currently focused in a Recommande row slot."""
@@ -4541,15 +4630,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             elif focused == DIVERT_SIDEBAR_ID:
                 self._on_sidebar_item_selected()
             return
+        if aid == ACTION_MOVE_LEFT:
+            prev = self._left_gate_ts
+            self._left_gate_ts = time.monotonic()
+            self._left_gate_dt = self._left_gate_ts - prev
+            self._gate_left_edge(focused)
         # Sidebar kebab: Plex-style per-library '...' menu, reachable by
         # pressing Left on a sidebar library item (Left is otherwise a
         # dead key on the rail). Offers pin/unpin plus move up/down when
         # the library is pinned.
         if aid == ACTION_MOVE_LEFT and focused == DIVERT_SIDEBAR_ID:
             # A LEFT re-delivered to the sidebar right after a hop into it
-            # (grid Left / chip Left / rail Left) must not pop the kebab.
-            if (time.monotonic() -
-                    getattr(self, '_last_focus_change', 0)) >= 0.05:
+            # (grid Left / chip Left / rail Left) must not pop the kebab;
+            # neither must the repeats of a key that is still held -- the
+            # kebab opens only on a fresh press after a real release.
+            if self._left_gate_dt >= LEFT_GATE_HOLD_S:
                 self._sidebar_item_menu()
             self._update_bar_focused()
             return
