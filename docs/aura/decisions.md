@@ -1076,3 +1076,28 @@ Trois causes identifiées, trois correctifs :
    premier chargement réussi — les switchs suivants sont des hits de
    cache. `_bg_pool` est `max_workers=1` : le warm se sérialise derrière
    le rail, borné (~10 sections × 2 GET).
+
+## Pré-chargement des posters des rangées horizontales (2026-11-05)
+
+Retour utilisateur : en scrollant à droite dans « Continuer à regarder »,
+les posters n'étaient chargés qu'à l'arrivée du curseur — chaque carte
+payait le fetch Plex + rendu PIL (~0,2-2 s) à sa première apparition.
+
+La grille verticale avait déjà le warm `art_proxy` (page entière +
+prioritaire devant le curseur via `_divert_warm_pos`) ; les rangées
+horizontales n'avaient **rien** — les cartes reco utilisent les mêmes
+URLs proxy mais aucun warm n'était jamais déclenché pour elles.
+
+Même schéma que la grille, adapté aux shelves (~7 cartes visibles) :
+
+- `_prewarm_reco_items()` warm l'art de chaque rangée en tâche de fond
+  (la boucle itérait déjà `_hub_rows` pour les ListItems).
+- `_maybe_load_more_reco()` : warm **prioritaire** `RECO_WARM_AHEAD=12`
+  cartes devant le curseur, tous les `RECO_WARM_STEP=6` déplacements
+  (suivi par `_reco_warm_pos[control_id]` — la rangée réordonne sa
+  position selon le slot, la file globale reste bornée à 4 workers).
+- `_render_reco_append()` warm aussi la page qui vient d'arriver.
+
+Reste volontairement inchangé : `prefetch_margin=15` par défaut des
+PagedList de rangées suffit (~2 viewports de données d'avance) — le
+symptôme était l'art, pas les items.
