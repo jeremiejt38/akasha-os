@@ -101,6 +101,11 @@ DIVERT_PANEL_ID = 3230
 # DIVERT_WARM_AHEAD cards ahead (roughly two viewport rows).
 DIVERT_WARM_STEP = 12
 DIVERT_WARM_AHEAD = 24
+# Same position-priority warm for horizontal hub rows: a shelf shows ~7
+# cards, so warm ~1.5 viewport ahead of the cursor (was missing entirely
+# -- posters right of the first screen paid fetch+PIL on first paint).
+RECO_WARM_STEP = 6
+RECO_WARM_AHEAD = 12
 # The grid panel wraps natively: reaching the last loaded item on a Down
 # bounces the cursor back to position 0, which is what "scrolled and got
 # thrown back to the top" was. When the source reports its real total the
@@ -349,6 +354,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # unknown-total fallback path.
         self._divert_placeholder_items = []
         self._reco_placeholder_counts = {}
+        # Per-row cursor position of the last priority art warm (same
+        # step/ahead scheme as the grid's _divert_warm_pos, keyed by the
+        # row's list control id).
+        self._reco_warm_pos = {}
         # Pages fetched by PagedList.prefetch_async workers wait here
         # (control_id -> [items]) until the next input event renders them
         # -- worker threads must never touch Kodi controls directly.
@@ -1269,6 +1278,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                     if row.get('_items') is None:
                         row['_items'] = [_build_divert_list_item(i)
                                          for i in row['paged'].items]
+                    # Queue the row's card art too: without this a
+                    # horizontal scroll discovered each poster's
+                    # fetch+PIL render on first paint (black -> late pop).
+                    art_proxy.warm(_card_art_urls(row['paged'].items))
                 except Exception:
                     continue
                 # Yield between rows so the input thread keeps priority.
@@ -2064,6 +2077,17 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             on_error=lambda e: xbmc.log(
                 'Akasha Aura: recommendations pagination failed for {}: {}'
                 .format(title, e), xbmc.LOGWARNING))
+        # Priority-warm the cards just ahead of the cursor (same scheme as
+        # _maybe_load_more_divert for the vertical grid): the row-level
+        # warm drains its queue in page order, so a fast Right scroll
+        # outruns it and posters would paint late without this.
+        items = paged.items
+        last = self._reco_warm_pos.get(list_control_id, -RECO_WARM_STEP)
+        if items and abs(position - last) >= RECO_WARM_STEP:
+            self._reco_warm_pos[list_control_id] = position
+            art_proxy.warm(
+                _card_art_urls(items[position:position + RECO_WARM_AHEAD]),
+                priority=True)
 
     def _render_reco_append(self, list_control_id, new_items):
         row = self._reco_rows.get(list_control_id)
@@ -2093,6 +2117,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         self._reco_placeholder_counts[list_control_id] = self._sync_placeholders(
             list_control_id, 0, paged)
         self._render_reco_row_label(list_control_id)
+        # Same art-proxy warm as the row's initial fill, for the newly
+        # appended page.
+        art_proxy.warm(_card_art_urls(new_items))
 
     def _drop_pending_appends(self, *control_ids):
         """Discard queued prefetch pages -- a full re-render or a failed
