@@ -1,11 +1,17 @@
 # HANDOFF — Reprise de session (akasha-os)
 
-> Passation pour une nouvelle session Devin, **actualisée au 2026-10-31**
+> Passation pour une nouvelle session Devin, **actualisée au 2026-11-07**
 > (2e « refresh » de conversation — la précédente pesait ~5 Go à cause des
 > captures base64 ; la règle 960×540 d'`AGENTS.md` corrige désormais le
 > problème à la source). Complète `docs/plex-parity/HANDOFF.md` (focus
 > parité Plex, outils/pièges) et `docs/plex-parity/PARITY.md` (audit
 > d'écrans + backlog, quasi entièrement vert).
+>
+> **Session 2026-11-07 (audit Claude + exécution tracker, lots L0–L7)** :
+> le journal détaillé vit dans `docs/aura/PLAN-90bcc434-suivi-global.md`
+> (source de vérité des statuts) et la fiche de session Atlas
+> `journal/session-2026-11-07-akashaos-aura-audit-execution.md`.
+> Releases v0.79.x → **v0.82.1** — détails plus bas.
 
 ## État du projet
 
@@ -13,14 +19,14 @@ Distribution LibreELEC/Kodi custom pour Raspberry Pi 4 en mode appliance
 salon : l'addon `script.akasha.aura` remplace l'interface Kodi par une UI
 type Plex Android TV (modules Divertissement / Jeux / App).
 
-- **Version livrée** : `akasha-os-v0.70.1` (tag, Release Please,
-  2026-10-31).
-- **Version sur le Pi** : `0.70.1` (label Guide vérifié à l'écran +
-  splash log : `local=0.70.1, remote=0.70.1`). Repo et Pi alignés —
-  aucun fix « scp-only » en circulation.
-- **Branche active** : `main` — `fix/aura-search-rail` (~215 commits)
-  a été mergée via PR #229 puis releasée (PR #224 → `0.70.0`,
-  PR #231 → `0.70.1`).
+- **Version livrée** : `akasha-os-v0.82.1` (tag, Release Please,
+  2026-11-07).
+- **Version sur le Pi** : `0.82.1` (VERSION + libellé skin stampés ;
+  v0.82.0 auto-appliquée par l'OTA pendant la session, v0.82.1 déployée
+  par scp du seul fichier changé `service.akasha.ambient/service.py`).
+- **Branche active** : `main` — tout passe par PR + Release Please
+  (dernières : #327 ambient H8/H10 → v0.82.0, #329 guard modals natifs
+  → v0.82.1).
 - Pi joignable : `root@192.168.3.77` (SSH par clé OK, WiFi
   `Freebox-37FD5E`, LAN `192.168.3.0/24`). L'IP `192.168.1.88` citée dans
   `AGENTS.md` est **obsolète** — source de vérité : `atlas/docs/hosts.md`.
@@ -32,7 +38,8 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   livetv/playlists à chrome collapsé, menu Paramètres unifié, Mode
   Ambiant, télécommande service, perfanalyzer.
 - Statut de travail : `active` (source canonique : ariane, `ARIANE.md`).
-- Tests : **443 unitaires verts** (dernier run 2026-10-31).
+- Tests : **~690 unitaires verts** (507 aura + 104 ambient + quickstart/
+  cloud-gaming/perf/remote/splash, dernier run 2026-11-07).
 
 ## Décisions prises (depuis le handoff 2026-10-25)
 
@@ -171,6 +178,26 @@ type Plex Android TV (modules Divertissement / Jeux / App).
   `ARIANE.md` généré, ne pas éditer.
 - SSH **par clé** OK ; `apply.sh` attend un mot de passe → reproduire
   ses étapes en key-auth si besoin.
+- **`CAddonSettings` par-instance** : un réglage écrit via un autre
+  dialogue (panneau Paramètres unifié) n'est jamais relu par
+  l'`xbmcaddon.Addon()` créé au démarrage du script — et au shutdown
+  l'instance figée peut réécrire le fichier. Helper `_live_setting`
+  (instance fraîche) dans `aura_window.py`/`aura_app.py` pour toute
+  lecture de réglage éditable en session.
+- **Modales natives ≠ modales script** : `getCurrentWindowDialogId()`
+  renvoie `9999` quand rien n'est actif (pas `0`), et tout dialogue
+  natif <13000 resté ouvert sous Aura (DialogOK mise à jour OTA,
+  DialogSelect…) fait refuser `doModal()` d'Ambient — le service
+  attend qu'aucune modale ne soit active ou saute l'activation.
+- **`kodi-send --action='NotifyAll(...)'` envoie une *action*, pas un
+  builtin** → les `xbmc.Monitor` ne le reçoivent pas. Pour déclencher
+  l'Ambiant à la main : `Addons.ExecuteAddon(script.akasha.ambient)`
+  via JSON-RPC (écrit le ts + notifie le service).
+- **L'OTA auto-applique les releases** : le service splash télécharge
+  et installe la dernière release GitHub au boot (dialogue progression
+  + redémarrage Kodi), puis affiche « Mise à jour réussie » — le
+  dialogue peut rester ouvert sous Aura et bloquer l'Ambiant tant que
+  l'utilisateur ne l'a pas quitté.
 
 ## Fichiers clés
 
