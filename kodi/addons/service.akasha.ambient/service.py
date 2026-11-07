@@ -192,11 +192,27 @@ class AmbientTriggerMonitor(xbmc.Monitor):
                 dialog = xbmcgui.getCurrentWindowDialogId()
             except Exception:
                 break
-            if dialog < SCRIPT_MODAL_ID_MIN:
+            if dialog in (0, 9999):
+                # No dialog active at all (9999 is Kodi's "invalid/none").
                 break
-            if time.time() >= force_close_after:
-                xbmc.executebuiltin('Dialog.Close({})'.format(dialog), wait=False)
+            if dialog >= SCRIPT_MODAL_ID_MIN:
+                if time.time() >= force_close_after:
+                    xbmc.executebuiltin('Dialog.Close({})'.format(dialog), wait=False)
+            # A *native* modal below the script range (DialogOK, DialogSelect,
+            # the OTA update prompts, ...) also refuses Ambient's own modal
+            # activation -- keep waiting for it to clear on its own rather
+            # than stealing a user-facing prompt by force-closing it.
             time.sleep(0.2)
+        try:
+            still_active = xbmcgui.getCurrentWindowDialogId()
+        except Exception:
+            still_active = 0
+        if still_active not in (0, 9999):
+            xbmc.log('Akasha Ambient Trigger: a modal dialog is still active '
+                      '(id={}), skipping this activation'.format(still_active),
+                      xbmc.LOGINFO)
+            _remove_lock()
+            return
         try:
             if self._window is None:
                 self._window = AmbientWindow(
