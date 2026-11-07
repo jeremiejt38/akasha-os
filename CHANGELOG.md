@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.80.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.79.2...akasha-os-v0.80.0) (2026-11-07)
+
+
+### Features
+
+* **ambient:** photo credits, portrait pairing, night dim, schedule, geo (H3/H6/H13) ([#320](https://github.com/jeremiejt38/akasha-os/issues/320)) ([71a33f3](https://github.com/jeremiejt38/akasha-os/commit/71a33f3f16ecca9b96e9ac428a1cb60088ca9d15))
+
+
+### Bug Fixes
+
+* **ambient:** suspend Aura's modal before activating (E2E unblock) ([#322](https://github.com/jeremiejt38/akasha-os/issues/322)) ([5bd2826](https://github.com/jeremiejt38/akasha-os/commit/5bd2826db7d745f92f4798f70bee0fd1b1ef13c8))
+
 ## [0.79.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.79.1...akasha-os-v0.79.2) (2026-11-07)
 
 
