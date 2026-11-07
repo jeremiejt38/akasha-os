@@ -62,6 +62,11 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         self.on_select = None
         self.on_person = None
         self.on_genre = None
+        # E11: optional provider returning game-catalog hits
+        # ({'_game': True, title, thumb_url, action}) merged into the
+        # All view; None when the caller has no games to search.
+        self.game_provider = None
+        self.on_game = None
         self.addon = None
         self.query = ''
         self.recent = []
@@ -347,8 +352,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         # queue behind them.
         side = {}
         if wanted is None:
-            for name, fn in (('people', self._search_people),
-                             ('genres', self._search_genres)):
+            providers = [('people', self._search_people),
+                         ('genres', self._search_genres)]
+            if self.game_provider:
+                providers.append(
+                    ('games', lambda: self.game_provider(term)))
+            for name, fn in providers:
                 side[name] = threading.Thread(
                     target=lambda f=fn, n=name: side.__setitem__(
                         n + '_r', f()),
@@ -395,10 +404,11 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         # 'Tout' merges matching people and genres first, like Plex's
         # People/genre result cards.
         if wanted is None:
-            side['people'].join(15.0)
-            side['genres'].join(15.0)
+            for name in side:
+                side[name].join(15.0)
             results = (side.get('people_r', [])[:8]
-                       + side.get('genres_r', [])[:4] + results)
+                       + side.get('genres_r', [])[:4]
+                       + side.get('games_r', [])[:8] + results)
         return results[:24]
 
     def _collect_results_hub(self):
@@ -433,7 +443,12 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             genres = self._search_genres()[:4]
         except Exception:
             genres = []
-        side_items = people + genres
+        try:
+            games = self.game_provider(self.query.strip())[:8] \
+                if self.game_provider else []
+        except Exception:
+            games = []
+        side_items = people + genres + games
         merged = []
         for i in range(max(len(content), len(side_items))):
             if i < len(content):
@@ -788,7 +803,7 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
         if not (0 <= pos < len(self._results)):
             return
         item = self._results[pos]
-        if item.get('_person') or item.get('_genre'):
+        if item.get('_person') or item.get('_genre') or item.get('_game'):
             self._pick_result()
             return
         import context_sheet
@@ -818,6 +833,11 @@ class AuraSearchWindow(xbmcgui.WindowXMLDialog):
             if self.on_genre:
                 self.on_genre(item)
             return
+        if item.get('_game'):
+            self._push_recent(self.query)
+            if self.on_game:
+                self.on_game(item)
+            return
         self._push_recent(self.query)
         if self.on_select:
             self.on_select(item)
@@ -840,7 +860,8 @@ def _suggest_sub(item):
 def _result_sub(item):
     """Plex-style subtitle: '2018 • Show', 'S5 E1 • Episode'."""
     kind = {'movie': i18n.tr(33133), 'show': i18n.tr(33101),
-            'season': i18n.tr(33135), 'episode': i18n.tr(33136)}.get(
+            'season': i18n.tr(33135), 'episode': i18n.tr(33136),
+            'game': i18n.tr(33655)}.get(
             item.get('type'), i18n.tr(33132))
     if item.get('type') == 'episode' and item.get('season') is not None:
         return 'S{} E{} • {}'.format(item.get('season'), item.get('index'), kind)

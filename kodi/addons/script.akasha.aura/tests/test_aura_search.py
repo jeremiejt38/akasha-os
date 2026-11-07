@@ -267,5 +267,36 @@ class TestReopenResetsState(unittest.TestCase):
         self.assertEqual(win._filter_index, 0)
 
 
+class TestGameResults(unittest.TestCase):
+    """E11: game-catalog hits merge into the All view and dispatch to
+    on_game instead of the Plex detail path."""
+
+    def test_game_provider_merged_into_hub_results(self):
+        win = _window()
+        win.client = MagicMock()
+        win.client.hub_search.return_value = {
+            'content': [{'type': 'movie', 'title': 'Steam'}],
+            'people': []}
+        win.client.section_genres.return_value = []
+        win.query = 'steam'
+        win.game_provider = lambda term: [
+            {'_game': True, 'type': 'game', 'title': 'Steam Link'}]
+        results = win._collect_results()
+        self.assertIn('Steam Link', [r['title'] for r in results])
+
+    def test_game_hit_dispatches_to_on_game(self):
+        win = _window()
+        win.query = 'steam'
+        win.on_game = MagicMock()
+        win._open_result({'_game': True, 'type': 'game',
+                          'title': 'Steam Link'})
+        win.on_game.assert_called_once()
+
+    def test_game_subtitle_is_jeu(self):
+        sub = aura_search._result_sub({'_game': True, 'type': 'game',
+                                       'title': 'X'})
+        self.assertIn(sub, ('Jeu', 'Game'))
+
+
 if __name__ == '__main__':
     unittest.main()
