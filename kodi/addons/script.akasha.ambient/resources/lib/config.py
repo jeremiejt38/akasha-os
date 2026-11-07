@@ -32,6 +32,7 @@ DEFAULTS = {
     'schedule_enabled': False,
     'schedule_start_hour': 8,
     'schedule_end_hour': 23,
+    'public_mode': False,
 }
 
 # Bounds used to reject nonsensical settings values (e.g. corrupted addon
@@ -58,7 +59,7 @@ class AmbientConfig:
         'weather_auto_coords', 'credit_enabled', 'pair_portraits',
         'night_dim_enabled', 'night_start_hour', 'night_end_hour',
         'night_dim_percent', 'schedule_enabled', 'schedule_start_hour',
-        'schedule_end_hour', 'weather_cache_path',
+        'schedule_end_hour', 'weather_cache_path', 'public_mode',
     )
 
     def __init__(self, content_path, fallback_folder, inactivity_timeout_minutes,
@@ -66,7 +67,8 @@ class AmbientConfig:
                  weather_latitude, weather_longitude, weather_auto_coords,
                  credit_enabled, pair_portraits, night_dim_enabled, night_start_hour,
                  night_end_hour, night_dim_percent, schedule_enabled,
-                 schedule_start_hour, schedule_end_hour, weather_cache_path):
+                 schedule_start_hour, schedule_end_hour, weather_cache_path,
+                 public_mode):
         self.content_path = content_path
         self.fallback_folder = fallback_folder
         self.inactivity_timeout_minutes = inactivity_timeout_minutes
@@ -87,6 +89,7 @@ class AmbientConfig:
         self.schedule_start_hour = schedule_start_hour
         self.schedule_end_hour = schedule_end_hour
         self.weather_cache_path = weather_cache_path
+        self.public_mode = public_mode
 
     @property
     def inactivity_timeout_seconds(self):
@@ -237,4 +240,5 @@ def load_config(settings):
             _MIN_HOUR, _MAX_HOUR,
         ),
         weather_cache_path=str(settings.get('weather_cache_path') or DEFAULT_WEATHER_CACHE_PATH),
+        public_mode=_as_bool(settings.get('public_mode'), DEFAULTS['public_mode']),
     )

@@ -141,5 +141,45 @@ class ResolveImagePathsTests(unittest.TestCase):
             self.assertEqual(content_manager.resolve_image_paths(content, fallback), [])
 
 
+class RemoteSourceTests(unittest.TestCase):
+    """H8: content folder may point at a Kodi VFS share (smb://...)."""
+
+    def test_remote_listing_uses_xbmcvfs(self):
+        import types
+        fake = types.ModuleType('xbmcvfs')
+        fake.listdir = lambda path: ([], ['b.png', 'a.jpg', 'skip.txt'])
+        sys.modules['xbmcvfs'] = fake
+        try:
+            self.assertEqual(
+                content_manager.list_images('smb://nas/photos'),
+                ['a.jpg', 'b.png'],
+            )
+        finally:
+            del sys.modules['xbmcvfs']
+
+    def test_remote_without_xbmcvfs_reports_no_content(self):
+        sys.modules.pop('xbmcvfs', None)
+        self.assertEqual(content_manager.list_images('smb://nas/photos'), [])
+        self.assertFalse(content_manager.has_content('nfs://nas/photos'))
+
+    def test_remote_vfs_failure_falls_back_cleanly(self):
+        import types
+        fake = types.ModuleType('xbmcvfs')
+
+        def _boom(path):
+            raise RuntimeError('share unreachable')
+        fake.listdir = _boom
+        sys.modules['xbmcvfs'] = fake
+        try:
+            with tempfile.TemporaryDirectory() as fallback:
+                open(os.path.join(fallback, 'fb.png'), 'w').close()
+                self.assertEqual(
+                    content_manager.resolve_image_paths('smb://nas/photos', fallback),
+                    [os.path.join(fallback, 'fb.png')],
+                )
+        finally:
+            del sys.modules['xbmcvfs']
+
+
 if __name__ == '__main__':
     unittest.main()

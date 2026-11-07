@@ -91,6 +91,7 @@ def _load_raw_settings():
         'night_start_hour': addon.getSetting('night_start_hour'),
         'night_end_hour': addon.getSetting('night_end_hour'),
         'night_dim_percent': addon.getSetting('night_dim_percent'),
+        'public_mode': addon.getSetting('public_mode'),
     }
 
 
@@ -159,8 +160,12 @@ class AmbientWindow(xbmcgui.WindowXML):
         self.exit()
 
     def _setup_background(self):
+        # 'Ambiant public' (H10): never surface the user's own folder —
+        # only the bundled neutral pack renders while guests are around.
+        configured = self.cfg.fallback_folder if self.cfg.public_mode \
+            else self.cfg.content_path
         media_type, content = content_manager.resolve_media(
-            self.cfg.content_path, self.cfg.fallback_folder,
+            configured, self.cfg.fallback_folder,
         )
         if media_type == 'videos':
             self._is_video_mode = True

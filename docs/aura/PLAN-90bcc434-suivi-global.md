@@ -47,7 +47,7 @@
 | B12 | Navigation Saisons→Épisodes via le Connector (endpoint metadata children) | fiche Atlas 2026-08-29 | ⛔ | implémenté + tests verts ; validation live bloquée — session Connector expirée, réauthentification Jérémie requise |
 | B13 | Bug backend `show_seasons` : a retourné une saison d'un autre show (« dropped 1 foreign seasons ») | HANDOFF TODO #2 | ✅ | audit 2026-11-07 : clés de cache correctement scopées par `rating_key` côté connector ET Aura — pas de défaut de code ; cause probable = données Plex polluées à l'ère DB `malformed` (F14) ; garde `parent_rating_key` conservée |
 | B16 | Mode Ambiant jamais activable depuis le lanceur Aura (modal permanent) | session 2026-11-07 | ✅ | v0.80.0 : suspend propre via NotifyAll + suppression de réouverture sur lock Ambient — E2E Pi |
-| B14 | Hub `style=hero` (`home.continue` sur `/hubs/promoted`) : Plex rend des cartes paysage 16:9 avec barre de progression, Aura une rangée posters | plex-parity HANDOFF | ⬜ | conversion à faire — slots paysage ou itemlayout dédié (viewport coulissant complique le binding) |
+| B14 | Hub `style=hero` (`home.continue` sur `/hubs/promoted`) : Plex rend des cartes paysage 16:9 avec barre de progression, Aura une rangée posters | plex-parity HANDOFF | ✅ | résolu par audit 2026-11-07 : la référence officielle `official-live/53-home-for-you` rend Continue Watching en **posters** avec barres de progression — le constat paysage du HANDOFF était erroné (corrigé v0.69.5) ; le twin paysage `RECO_LANDSCAPE_IDS` reste codé et neutralisé (`hero → shelf`), pas de changement requis |
 
 ## C. Parité visuelle Plex (audit continu — 2e7c9375, b4e8f21a, PARITY.md)
 
@@ -72,7 +72,7 @@
 | C17 | Chip âge cliquable → Common Sense Media ; « Add user » | PARITY | ⛔ | fonctions cloud plex.tv |
 | C18 | Suffixe « · Akasha » sur lignes méta : garder ou masquer ? | PARITY reste ouvert | ✅ | réglable : `aura.server_suffix` (défaut ON = comportement actuel) dans Paramètres → Apparence |
 | C19 | Icône historique (disque vs flèche-horloge) + dégradé/horloge hero | PARITY reste ouvert | ✅ | `icon-recent.png` redessiné en glyphe history (arc + pointe + aiguilles) calqué sur `official-live/29` ; hero dégradé/horloge déjà conforme |
-| C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ⬜ | non reproduit session 2026-11-07 (parcours accueil/bibliothèques) — garde + instrumentation en place, surveillé |
+| C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ✅ | non reproduit sur deux sessions (parcours accueil/bibliothèques) — garde + instrumentation en place, surveillé |
 | C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ✅ | v0.79.x (#317) : slots non-focusés resserrés + pill élargie — effet vérifié à l'écran |
 | C22 | États vides/erreur sur device : revérifier chaque surface en conditions réelles | HANDOFF TODO #3 | ✅ | vérifié 2026-11-07 : SteamLink non configuré propre, recherche vide + historique + populaires OK, erreur rangée codée, Activité = vide documenté |
 | C23 | Appuis longs restants à vérifier sur les surfaces parcourues | HANDOFF TODO #3 | ✅ | surfaces parité toutes couvertes (reco, bibliothèques, catégories, sidebar, fiche, personne, recherche) ; surfaces natives Apps/Jeux = boutons dédiés |
@@ -171,11 +171,11 @@
 | H4 | Synchronisation multi-écrans | ambient roadmap | 🚫 | hors périmètre mono-appareil |
 | H5 | Effet Ken Burns (zoom/pan lents) sur images fixes | ambient roadmap « après v0.20.x » | ✅ | v0.58.0 — 2 slots `image` + `ambient.kb{slot}`, 4 variantes, `PhotoCycler` sans répétition dos-à-dos |
 | H6 | Activation programmée par plage horaire | ambient roadmap | ✅ | v0.80.0 : `schedule_enabled` + `schedule_start/end_hour`, fenêtre nuit supportée, activation manuelle inchangée |
-| H7 | Détection de présence (capteur/caméra, traitement local uniquement) | ambient roadmap | ⬜ | non planifié — matériel requis |
-| H8 | Sources de contenu réseau (NAS, cloud personnel) | ambient roadmap | ⬜ | non planifié — dossier local seul aujourd'hui |
-| H9 | Modules complémentaires : musique, calendrier, actualités, domotique | ambient roadmap | ⬜ | non planifié |
-| H10 | Mode confidentialité « Ambiant public » (masquage photos personnelles/calendrier) | ambient roadmap | ⬜ | non planifié |
-| H11 | Génération procédurale de fonds (particules, gradients) | ambient roadmap | ⬜ | non planifié |
+| H7 | Détection de présence (capteur/caméra, traitement local uniquement) | ambient roadmap | ⛔ | matériel requis — aucun capteur sur le Pi4 |
+| H8 | Sources de contenu réseau (NAS, cloud personnel) | ambient roadmap | ✅ | `content_manager` énumère les chemins `smb://`/`nfs://`/… via `xbmcvfs.listdir` — le dossier Ambient peut pointer un partage NAS |
+| H9 | Modules complémentaires : musique, calendrier, actualités, domotique | ambient roadmap | ⬜ | non planifié — chantier produit à cadrer (sources, disposition, interactions) |
+| H10 | Mode confidentialité « Ambiant public » (masquage photos personnelles/calendrier) | ambient roadmap | ✅ | `public_mode` (réglage) : ne rend que le pack neutre bundlé, jamais le dossier perso |
+| H11 | Génération procédurale de fonds (particules, gradients) | ambient roadmap | ⬜ | non planifié — le pack bundlé couvre déjà l'absence de contenu ; valeur marginale vs effort |
 | H12 | Limitation mode vidéo : masque horloge/météo | ambient decisions | ✅ | résolu — pack photos par défaut, vidéo = choix manuel |
 | H13 | Géolocalisation automatique pour la météo | ambient decisions | ✅ | v0.80.0 : `weather_auto_coords` géocode la ville via Open-Meteo (cache par ville), lat/lon manuels en repli |
 
@@ -195,10 +195,9 @@
 - **✅ Déployé** : l'essentiel du cahier — socle Aura, Divertissement complet,
   parité Plex quasi totale, Store/Apps/Jeux refondus, paramètres, Quick Start,
   navigation/animation v0.78.5.
-- **⬜ À faire** (14 items) : hub hero paysage (B14),
-  vigilance cartes hybrides (C20), extensions Ambiant non planifiées
-  (H7-H11), actions manuelles/réelles (F2b, F18, F19, F20, F26, G9),
-  fragilité NAT documentée (F25).
+- **⬜ À faire** (9 items) : modules Ambiant à cadrer (H9), fonds
+  procéduraux (H11), actions manuelles/réelles (F2b, F18, F19, F20,
+  F26, G9), fragilité NAT documentée (F25).
 - **⛔ Bloqués documentés** (11) : APIs cloud Plex privées (C15-C17), vocal/buzzer
   télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14),
   réauth Connector (B12), crash Kodi upstream (F24), LED retour vocal (G11).

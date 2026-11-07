@@ -129,3 +129,13 @@ class ScheduleAllowsTests(unittest.TestCase):
         self.assertTrue(config.schedule_allows(23, 20, 8, True))
         self.assertTrue(config.schedule_allows(2, 20, 8, True))
         self.assertFalse(config.schedule_allows(12, 20, 8, True))
+
+
+class PublicModeTests(unittest.TestCase):
+    def test_default_off(self):
+        cfg = config.load_config({})
+        self.assertFalse(cfg.public_mode)
+
+    def test_truthy_strings_enable(self):
+        cfg = config.load_config({'public_mode': 'true'})
+        self.assertTrue(cfg.public_mode)
