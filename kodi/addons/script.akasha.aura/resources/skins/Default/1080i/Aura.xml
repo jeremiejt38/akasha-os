@@ -353,17 +353,16 @@
                 <height>60</height>
                 <orientation>horizontal</orientation>
                 <scrolltime tween="quadratic">400</scrolltime>
-                <itemlayout height="60" width="100">
+                <itemlayout height="60" width="76">
                     <control type="image">
-                        <left>10</left>
-                        <width>80</width>
+                        <width>76</width>
                         <height>60</height>
                         <aspectratio>keep</aspectratio>
                         <bordersize>4</bordersize>
                         <texture colordiffuse="B3FFFFFF">$INFO[ListItem.Icon]</texture>
                     </control>
                 </itemlayout>
-                <focusedlayout height="60" width="360" condition="Control.HasFocus(2007)">
+                <focusedlayout height="60" width="384" condition="Control.HasFocus(2007)">
                     <control type="image">
                         <top>-67</top>
                         <width>360</width>
@@ -388,7 +387,7 @@
                         <label>$INFO[ListItem.Label]</label>
                     </control>
                 </focusedlayout>
-                <focusedlayout height="60" width="360" condition="!Control.HasFocus(2007)">
+                <focusedlayout height="60" width="384" condition="!Control.HasFocus(2007)">
                     <control type="image">
                         <top>-67</top>
                         <width>360</width>
@@ -2097,19 +2096,19 @@
                          up and the skeleton cards still filling in. -->
                     <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraRowSwap),d1)" reversible="false">
                         <effect type="slide" start="0,472" end="0,0" time="280" tween="quadratic" easing="out"/>
-                        <effect type="fade" start="30" end="100" time="240"/>
+                        <effect type="fade" start="15" end="100" time="320"/>
                     </animation>
                     <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraRowSwap),d2)" reversible="false">
                         <effect type="slide" start="0,472" end="0,0" time="280" tween="quadratic" easing="out"/>
-                        <effect type="fade" start="30" end="100" time="240"/>
+                        <effect type="fade" start="15" end="100" time="320"/>
                     </animation>
                     <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraRowSwap),u1)" reversible="false">
                         <effect type="slide" start="0,-472" end="0,0" time="280" tween="quadratic" easing="out"/>
-                        <effect type="fade" start="30" end="100" time="240"/>
+                        <effect type="fade" start="15" end="100" time="320"/>
                     </animation>
                     <animation type="Conditional" condition="String.IsEqual(Window.Property(AuraRowSwap),u2)" reversible="false">
                         <effect type="slide" start="0,-472" end="0,0" time="280" tween="quadratic" easing="out"/>
-                        <effect type="fade" start="30" end="100" time="240"/>
+                        <effect type="fade" start="15" end="100" time="320"/>
                     </animation>
 
                     <control type="label" id="5100">
