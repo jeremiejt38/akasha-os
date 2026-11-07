@@ -44,6 +44,9 @@
 | B9 | Pagination + total réel immédiat | a3f9c2e1 | ✅ | v0.35.0 (`totalSize`) |
 | B10 | Catégories : grille de genres → bibliothèque pré-filtrée | interface-plex Ph2.3 | ✅ | `AuraGenres` (v0.30/31) |
 | B11 | Bibliothèques non-vidéo (musique) dans la sidebar + lecture audio | PARITY B16 | ✅ | v0.69.x |
+| B12 | Navigation Saisons→Épisodes via le Connector (endpoint metadata children) | fiche Atlas 2026-08-29 | ⛔ | implémenté + tests verts ; validation live bloquée — session Connector expirée, réauthentification Jérémie requise |
+| B13 | Bug backend `show_seasons` : a retourné une saison d'un autre show (« dropped 1 foreign seasons ») | HANDOFF TODO #2 | ⬜ | investiguer connector — cache croisé, clé mal scopée ou réponse Plex polluée ; garde-fou déjà en place |
+| B14 | Hub `style=hero` (`home.continue` sur `/hubs/promoted`) : Plex rend des cartes paysage 16:9 avec barre de progression, Aura une rangée posters | plex-parity HANDOFF | ⬜ | conversion à faire — slots paysage ou itemlayout dédié (viewport coulissant complique le binding) |
 
 ## C. Parité visuelle Plex (audit continu — 2e7c9375, b4e8f21a, PARITY.md)
 
@@ -70,6 +73,9 @@
 | C19 | Icône historique (disque vs flèche-horloge) + dégradé/horloge hero | PARITY reste ouvert | ⬜ | cosmétique, en attente référence Plex même item |
 | C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ⬜ | observé une fois, non reproduit — instrumentation prête à redéployer |
 | C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ⬜ | espacement fixe actuel ; effet référence non reproduit |
+| C22 | États vides/erreur sur device : revérifier chaque surface en conditions réelles | HANDOFF TODO #3 | ⬜ | recette parité résiduelle |
+| C23 | Appuis longs restants à vérifier sur les surfaces parcourues | HANDOFF TODO #3 | ⬜ | recette parité résiduelle |
+| C24 | Ghost icon près du hero (non identifié) + confirmer le fix du trou ~90 px titre/méta sans clearlogo | plex-parity HANDOFF | ⬜ | à confirmer à l'écran |
 
 ## D. Navigation & animation (conv3 — v0.75→v0.78.5)
 
@@ -103,6 +109,7 @@
 | E10 | « Mes Apps » : filtre strict « installées via le Store » | aura decisions | ⬜ | à trancher par Jérémie — filtre `visible_app_ids()` écrit/testé, prêt à brancher ; badge `[Store]` déjà posé |
 | E11 | Recherche unifiée : couvrir aussi le catalogue Steam/Sunshine | aura decisions | ⬜ | périmètre actuel = contenu Plex seul |
 | E12 | Exécution auto `script`/`external-app` du manifest Store | aura decisions | 🚫 | volontairement non automatisé (sécurité) ; fiche info uniquement |
+| E13 | Connectivité Pi → NZXT/Sunshine : `192.168.1.100` = « No route to host », Sunshine OK via VPN `10.20.0.4` | fiche Atlas v0.26.1 | ⬜ | corriger le routage LAN ou pointer Sunshine sur l'IP VPN |
 
 ## F. Paramètres, assistant, système d'exploitation
 
@@ -125,13 +132,17 @@
 | F13 | Rapport perf-analyzer après heures d'usage réel | HANDOFF TODO | ⬜ | `akasha-perfanalyzer` installé, rapport à produire |
 | F14 | DB Plex `malformed` sur le serveur | HANDOFF constat | ⛔ | REINDEX/dump-restore = fenêtre maintenance prod à valider |
 | F15 | Ménage : stash `wip-fix-aura-interruptions`, ~20 branches stale | HANDOFF TODO | ⬜ | ménage repo |
-| F16 | `HEAD /api/plex/image` → 405 (nettoyage) | roadmap note | ⬜ | mineur, connector |
+| F16 | `HEAD /api/plex/image` → 405 (nettoyage) | roadmap note | ✅ | résolu — HEAD supporté sans re-télécharger l'image (fiche connector) |
 | F17 | Compteur « 771 » section / taille hub non honorée | roadmap note | ✅ | pagination `X-Plex-Container-Start` (v0.33) |
-| F18 | Validation physique manette Xbox Wireless + télécommande IR | decisions.md | ⬜ | matériel requis, jamais testé (accès distant seul) |
+| F18 | Validation physique manette Xbox Wireless + télécommande IR + mapping Home/Menu de la télécommande BT en conditions réelles | decisions.md + fiche Atlas | ⬜ | matériel requis, jamais testé (accès distant seul) |
 | F19 | Déclenchement réel « Mise en veille » / « Arrêt système » | decisions.md | ⬜ | code en place, jamais exécuté en test réel par Jérémie |
 | F20 | Addon Jellyfin installé mais désactivé (token perdu lors d'un wipe) | audit-2026-10 | ⬜ | une connexion interactive depuis l'UI, puis réactivation |
 | F21 | PM4K conservé comme échappatoire développeur | audit-2026-10 | ✅ | Guide ▸ Options développeurs ▸ « Lancer PM4K » |
 | F22 | Panneau « Comptes » centralisé : état connecté/non connecté par service + bouton Configurer → écran natif de l'addon | settings decisions (point ouvert) | ⬜ | à trancher — périmètre raisonnable identifié |
+| F23 | Filet de déploiement sans Ethernet : watchdog Wi-Fi de secours | v0.18.1 + audit-2026-10 | ✅ | `wifi-watchdog` réécrit network-agnostic (profil Favorite connman), activé, test contrôlé validé |
+| F24 | `ActivateWindow(peripheralsettings)` → SIGSEGV moteur Kodi (upstream) | settings decisions | ⛔ | bug Kodi/LibreELEC confirmé hors code Akasha ; entrée retirée de Manettes & Télécommandes |
+| F25 | Fragilité Pi↔Unraid/Plex via NAT USB-Ethernet du laptop (`10.99.0.1/24`) : « No route to host » vers `192.168.100.133` quand l'adaptateur perd son lien | audit-2026-10 | ⬜ | dépendance opérationnelle — routage à fiabiliser ou reseater le câble/adaptateur |
+| F26 | Épingler le Wi-Fi 5 GHz Freebox sur un canal non-DFS (36-48) | journal migration Freebox | ⬜ | action manuelle dans `mafreebox.freebox.fr` — réduit les décrochages Wi-Fi du Pi |
 
 ## G. Télécommande & commandes vocales
 
@@ -139,7 +150,7 @@
 |---|----------|--------|--------|----------------|
 | G1 | Télécommande Bluetooth (Fire TV) appairée, boutons fonctionnels | dd440e2e | ✅ | BLE HID, event6/7 |
 | G2 | App switcher visuel (double Home) | dd440e2e | ✅ | `AuraSwitcher.xml` |
-| G3 | Batterie + destination volume dans Paramètres | dd440e2e | ✅ | Manettes & Télécommandes |
+| G3 | Batterie + destination volume dans Paramètres + alerte batterie <15 % | dd440e2e §4 | ✅ | Manettes & Télécommandes + `BatteryAlertTracker` (notification seuil configurable) |
 | G4 | Bouton assistant vocal (flux micro) | dd440e2e §2 | ⛔ | protocole Alexa propriétaire (btmon vérifié) |
 | G5 | « Retrouver ma télécommande » (buzzer) | dd440e2e §3 | ⛔ | uniquement Alexa Voice Remote Pro + cloud |
 | G6 | Socle `script.akasha.voice` : 60+ commandes FR/EN → builtins Kodi | c8c8548a | ✅ | mergé, 15 tests, CI matrix |
@@ -147,6 +158,7 @@
 | G8 | Durcissement télécommande : double-appui panneau paramètres, long-Home→OSD, filtrage appuis parasites | remote decisions | ✅ | v0.6x — récepteur IR GPIO23 désactivé |
 | G9 | Boutons services streaming (Netflix/Prime/Amazon) → no-op, keycodes non confirmés | remote decisions « reste à faire » | ⬜ | à vérifier avec Jérémie — ce modèle n'a peut-être pas de boutons dédiés |
 | G10 | Blaster IR dédié sur GPIO (LIRC) pour contrôle IR TV + volume IR | remote decisions | 🚫 | piste documentée, non retenue dans le périmètre actuel |
+| G11 | Fallback LED de la télécommande comme retour vocal (plan §3) | remote decisions | ⬜ | jamais exploré — dépend du chantier vocal en pause |
 
 ## H. Mode Ambiant & veille
 
@@ -156,7 +168,7 @@
 | H2 | Pack photos plein écran pré-downscalé | ambient roadmap | ✅ | 13 photos (v0.17+) |
 | H3 | Crédit photo, fonds non-16:9, appariement portrait, luminosité nocturne | HANDOFF reculés | ⬜ | reportés volontairement |
 | H4 | Synchronisation multi-écrans | ambient roadmap | 🚫 | hors périmètre mono-appareil |
-| H5 | Effet Ken Burns (zoom/pan lents) sur images fixes | ambient roadmap « après v0.20.x » | ⬜ | non planifié — si le multiimage seul s'avère trop statique |
+| H5 | Effet Ken Burns (zoom/pan lents) sur images fixes | ambient roadmap « après v0.20.x » | ✅ | v0.58.0 — 2 slots `image` + `ambient.kb{slot}`, 4 variantes, `PhotoCycler` sans répétition dos-à-dos |
 | H6 | Activation programmée par plage horaire (thème jour/nuit) | ambient roadmap | ⬜ | non planifié |
 | H7 | Détection de présence (capteur/caméra, traitement local uniquement) | ambient roadmap | ⬜ | non planifié — matériel requis |
 | H8 | Sources de contenu réseau (NAS, cloud personnel) | ambient roadmap | ⬜ | non planifié — dossier local seul aujourd'hui |
@@ -164,6 +176,7 @@
 | H10 | Mode confidentialité « Ambiant public » (masquage photos personnelles/calendrier) | ambient roadmap | ⬜ | non planifié |
 | H11 | Génération procédurale de fonds (particules, gradients) | ambient roadmap | ⬜ | non planifié |
 | H12 | Limitation mode vidéo : masque horloge/météo | ambient decisions | ✅ | résolu — pack photos par défaut, vidéo = choix manuel |
+| H13 | Géolocalisation automatique pour la météo | ambient decisions | ⬜ | reportée (complexité + confidentialité) — ville/coords manuelles dans les réglages |
 
 ## I. Plateforme & satellites
 
@@ -181,12 +194,14 @@
 - **✅ Déployé** : l'essentiel du cahier — socle Aura, Divertissement complet,
   parité Plex quasi totale, Store/Apps/Jeux refondus, paramètres, Quick Start,
   navigation/animation v0.78.5.
-- **⬜ À faire** (30 items) : pipeline média (I1), reculés Ambiant (H3)
-  + extensions non planifiées (H5-H11), E8-E11, F2a/F2b, F11-F13,
-  F15-F16, F18-F20, F22, G9, résidu anim D8,
-  arbitrages C18/C19/C20/C21.
-- **⛔ Bloqués documentés** (8) : APIs cloud Plex privées (C15-C17), vocal/buzzer
-  télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14).
+- **⬜ À faire** (38 items) : pipeline média (I1), reculés Ambiant (H3)
+  + extensions non planifiées (H6-H11, H13), hub hero paysage (B14),
+  bug `show_seasons` (B13), routage Sunshine/NAT (E13, F25, F26),
+  E8-E11, F2a/F2b, F11-F13, F15, F18-F20, F22, G9, G11, résidu anim D8,
+  recettes parité résiduelles (C20-C24), arbitrages C18/C19/C21.
+- **⛔ Bloqués documentés** (10) : APIs cloud Plex privées (C15-C17), vocal/buzzer
+  télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14),
+  réauth Connector (B12), crash Kodi upstream (F24).
 - **🚫 Hors périmètre** (5) : Talos (maintenance), multi-écrans (H4), exécution
   auto de scripts du Store (E12), modale site web (I6), blaster IR GPIO (G10).
 
