@@ -140,7 +140,7 @@
              Follows the visible slot; empty credit hides both scrim and
              label. -->
         <control type="image">
-            <visible>(String.IsEqual(Window.Property(ambient.slot),0) + !String.IsEmpty(Window.Property(ambient.credit0))) | (String.IsEqual(Window.Property(ambient.slot),1) + !String.IsEmpty(Window.Property(ambient.credit1)))</visible>
+            <visible>String.IsEqual(Window.Property(ambient.slot),0) + !String.IsEmpty(Window.Property(ambient.credit0)) | String.IsEqual(Window.Property(ambient.slot),1) + !String.IsEmpty(Window.Property(ambient.credit1))</visible>
             <left>0</left>
             <top>948</top>
             <width>1920</width>

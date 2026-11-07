@@ -32,6 +32,7 @@ import time
 
 import xbmc
 import xbmcaddon
+import xbmcgui
 
 ADDON_PATH = xbmcaddon.Addon().getAddonInfo('path')
 AMBIENT_ADDON_PATH = xbmcaddon.Addon('script.akasha.ambient').getAddonInfo('path')
@@ -45,6 +46,11 @@ LOCK_FILE = '/tmp/akasha-ambient.lock'
 LOCK_TTL_SECONDS = 10
 SETTINGS_ADDON_ID = 'script.akasha.settings'
 ENABLED_SETTING_ID = 'ambient.enabled'
+# Script windows get dynamic dialog ids from 13000 up: any current dialog
+# at or above this bound is one of ours (the Aura shell or a child panel)
+# and safe to close when making room for Ambient.
+SCRIPT_MODAL_ID_MIN = 13000
+MODAL_CLOSE_WAIT_SECONDS = 5.0
 
 
 def _load_settings():
@@ -64,6 +70,22 @@ def _ambient_enabled():
         # If Akasha Settings isn't installed/reachable for some reason,
         # default to enabled rather than silently disabling the feature.
         return True
+
+
+def _touch_lock():
+    try:
+        with open(LOCK_FILE, 'w') as f:
+            f.write(str(os.getpid()))
+    except OSError:
+        pass
+
+
+def _remove_lock():
+    try:
+        if os.path.exists(LOCK_FILE):
+            os.remove(LOCK_FILE)
+    except OSError:
+        pass
 
 
 def _lock_file_fresh():
@@ -144,6 +166,37 @@ class AmbientTriggerMonitor(xbmc.Monitor):
             # periodically) -- avoid re-entering doModal() on a window
             # that's already showing.
             return
+        # The Aura shell is a WindowXMLDialog -- an *always-active modal*.
+        # Kodi refuses to activate another script window while one is up
+        # ("Activate of window refused: active modal dialogs"), which kept
+        # Ambient permanently dead once the launcher had opened Aura at
+        # boot. Pre-touch the ambient lock first: Aura's supervisor loop
+        # suppresses its own reopen while the lock is fresh, so the shell
+        # stays closed for as long as Ambient runs (and a stale lock still
+        # expires on its own if Ambient never makes it on screen).
+        _touch_lock()
+        xbmc.log('Akasha Ambient Trigger: activating Ambient Mode', xbmc.LOGINFO)
+        # Ask the Aura shell to close itself first: a forced Dialog.Close
+        # on the modal leaves its doModal() permanently wedged (observed
+        # live), whereas window.close() returns cleanly and the Aura
+        # supervision loop stays suppressed by the lock file until Ambient
+        # exits. Dialog.Close below is only a fallback for a stale wedged
+        # dialog that no longer answers notifications.
+        xbmc.executebuiltin('NotifyAll(akasha.ambient, SuspendForAmbient)', wait=False)
+        deadline = time.time() + MODAL_CLOSE_WAIT_SECONDS
+        # Give the suspend notification a grace period to land before
+        # resorting to the wedge-prone forced close.
+        force_close_after = time.time() + 2.0
+        while time.time() < deadline:
+            try:
+                dialog = xbmcgui.getCurrentWindowDialogId()
+            except Exception:
+                break
+            if dialog < SCRIPT_MODAL_ID_MIN:
+                break
+            if time.time() >= force_close_after:
+                xbmc.executebuiltin('Dialog.Close({})'.format(dialog), wait=False)
+            time.sleep(0.2)
         try:
             if self._window is None:
                 self._window = AmbientWindow(
@@ -156,12 +209,20 @@ class AmbientTriggerMonitor(xbmc.Monitor):
             # poll loop entirely until the next Kodi restart.
             xbmc.log('Akasha Ambient Trigger: could not open window ({}); giving up for '
                       'this activation'.format(e), xbmc.LOGWARNING)
+            _remove_lock()
             return
         self._window.doModal()
+        # doModal() returns once Ambient closed: its own exit() already
+        # removed the lock. If it never activated at all, drop our
+        # pre-touched lock so the Aura shell reopens without waiting out
+        # the TTL.
+        if not self._window.is_active():
+            _remove_lock()
 
 
 def main():
     monitor = AmbientTriggerMonitor()
+    xbmc.log('Akasha Ambient Trigger: service starting', xbmc.LOGINFO)
 
     # Give Kodi a moment to finish starting up before the first check.
     if monitor.waitForAbort(5):

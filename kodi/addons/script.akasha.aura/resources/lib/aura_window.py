@@ -527,6 +527,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # second AuraWindow while one is already running.
         self._settings_press_monitor = home_press_monitor.SettingsPressMonitor(
             self._open_settings_panel)
+        # Ambient Mode must close this modal before its own window can
+        # activate -- the suspend notification makes the window close
+        # itself cleanly (a forced Dialog.Close wedges doModal forever).
+        self._ambient_suspend_monitor = home_press_monitor.AmbientSuspendMonitor(
+            self._on_ambient_suspend)
         # Set by default.py before doModal() when launched via
         # RunScript(script.akasha.aura, opensettings) and Aura wasn't
         # already running.
@@ -6398,6 +6403,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 'app_switcher', _HomePressAppSwitcher, 'AuraSwitcher.xml')
             switcher.parent_window = self
             switcher.doModal()
+
+    def _on_ambient_suspend(self):
+        """Ambient Mode is taking the screen: close the shell cleanly."""
+        xbmc.log('Akasha Aura: suspending for Ambient Mode', xbmc.LOGINFO)
+        self._close_sub_windows()
+        self.close()
 
     def _close_sub_windows(self):
         """Close any currently open sub-windows so we land back on Aura shell."""
