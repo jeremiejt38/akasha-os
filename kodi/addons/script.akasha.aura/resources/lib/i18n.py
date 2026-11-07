@@ -556,6 +556,11 @@ STRINGS = {
             'les réglages natifs',
             'Cache-service connection state — Configure opens the '
             'native settings'),
+    33655: ('Jeu', 'Game'),
+    33656: ('URLs de repli Sunshine (séparées par des virgules)',
+            'Sunshine fallback URLs (comma-separated)'),
+    33657: ("Ce service cloud n'a pas de client installé sur cet appareil",
+            'This cloud service has no client installed on this device'),
 }
 
 MONTH_ABBRS = {

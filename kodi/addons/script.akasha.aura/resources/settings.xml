@@ -32,6 +32,7 @@
     </category>
     <category label="Sunshine (Moonlight)">
         <setting id="sunshine.server_url" type="text" label="URL du serveur Sunshine (ex: https://192.168.1.x:47990)" default=""/>
+        <setting id="sunshine.fallback_urls" type="text" label="URLs de repli Sunshine (separees par des virgules)" default=""/>
         <setting id="sunshine.username" type="text" label="Nom d'utilisateur Sunshine" default=""/>
         <setting id="sunshine.password" type="text" label="Mot de passe Sunshine" default=""/>
     </category>

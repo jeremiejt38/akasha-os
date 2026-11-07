@@ -2079,3 +2079,18 @@ msgstr "Connector Akasha OS"
 msgctxt "#33654"
 msgid "Cache-service connection state — Configure opens the native settings"
 msgstr "État de la connexion au service de cache — Configurer ouvre les réglages natifs"
+
+# Jeu
+msgctxt "#33655"
+msgid "Game"
+msgstr "Jeu"
+
+# URLs de repli Sunshine (séparées par des virgules)
+msgctxt "#33656"
+msgid "Sunshine fallback URLs (comma-separated)"
+msgstr "URLs de repli Sunshine (séparées par des virgules)"
+
+# Ce service cloud n'a pas de client installé sur cet appareil
+msgctxt "#33657"
+msgid "This cloud service has no client installed on this device"
+msgstr "Ce service cloud n'a pas de client installé sur cet appareil"

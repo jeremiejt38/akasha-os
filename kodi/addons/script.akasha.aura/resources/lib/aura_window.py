@@ -483,8 +483,14 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             g for g in self._games
             if not any(a in (g.get('action') or '').lower() for a in JEUX_DEDICATED_ACTIONS)
         ]
+        self._visible_games = list(self._other_games)
         self._jeux_active_subtab = JEUX_SUBTAB_STEAMLINK
         self._jeux_items = []
+        # Resolved Sunshine/Steam catalogs are cached briefly so a dead
+        # host does not re-time-out on every subtab visit or search
+        # keystroke (E11/E13).
+        self._sunshine_cache = None
+        self._steam_cache = None
         self._app_subtab = APP_SUBTAB_MES_APPS
         self._pinned_apps = []
         # Sub-windows (Recommandations/Bibliotheque/Categories/App/Store/Show)
@@ -590,7 +596,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # interactive=False: missing Steam/Sunshine credentials must
             # never pop a Keyboard dialog during unattended startup (same
             # rule as the connector token -- docs/aura/decisions.md).
-            self._select_jeux_subtab(JEUX_SUBTAB_STEAMLINK, interactive=False)
+            self._select_jeux_subtab(self._default_jeux_subtab(), interactive=False)
             self._load_pinned_apps()
             self._load_avatar()
             self._focus_tab(self.active_tab)
@@ -4438,13 +4444,52 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if section is not None:
             self._render_divert_status(section)
 
+    def _cloud_games_preference(self):
+        """Cloud-gaming names picked in Quick Start (E8), stored
+        comma-separated under 'quickstart.cloud_gaming_services'.
+        Empty means Quick Start never ran (or picked nothing) -- the
+        'Autres' tab then keeps its full static shortcut list."""
+        raw = _live_addon_setting('quickstart.cloud_gaming_services', self.addon) or ''
+        return [n.strip() for n in raw.split(',') if n.strip()]
+
+    def _default_jeux_subtab(self):
+        """Startup subtab follows the Quick Start selection (E8): the
+        first configured streaming service, or 'Autres' when the user
+        only picked cloud entries."""
+        pref = {n.lower() for n in self._cloud_games_preference()}
+        if 'moonlight' in pref and 'steam link' not in pref:
+            return JEUX_SUBTAB_MOONLIGHT
+        if pref and not ({'steam link', 'moonlight'} & pref):
+            return JEUX_SUBTAB_OTHERS
+        return JEUX_SUBTAB_STEAMLINK
+
+    def _visible_other_games(self):
+        """'Autres' tiles. With a Quick Start selection (E8) the tab
+        surfaces exactly the chosen cloud services (Steam Link and
+        Moonlight stay on their dedicated subtabs); otherwise it shows
+        the static games.DATA.xml shortcuts."""
+        pref = self._cloud_games_preference()
+        if not pref:
+            return list(self._other_games)
+        games = []
+        for name in pref:
+            if name.lower() in ('steam link', 'moonlight'):
+                continue
+            # script.cloud.gaming filters its picker on the same Quick
+            # Start preference, so a named tile lands on the right list.
+            games.append({'label': name, 'label2': i18n.tr(33082),
+                          'icon': 'DefaultAddonProgram.png',
+                          'action': 'RunAddon(script.cloud.gaming)'})
+        return games
+
     def _load_other_games(self):
         try:
             panel = self.getControl(GAME_LIST_ID)
         except RuntimeError:
             return
+        self._visible_games = self._visible_other_games()
         panel.reset()
-        for game in self._other_games:
+        for game in self._visible_games:
             li = xbmcgui.ListItem(game['label'], game.get('label2', ''))
             if game.get('icon'):
                 li.setArt({'icon': game['icon'], 'thumb': game['icon']})
@@ -4487,14 +4532,11 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             return
 
         if index == JEUX_SUBTAB_MOONLIGHT:
-            client = self._get_sunshine_client(prompt_if_missing=interactive)
-            if not client or not client.is_configured():
+            state, apps = self._sunshine_apps(prompt_if_missing=interactive)
+            if state == 'unconfigured':
                 self._set_jeux_panel([], i18n.tr(33086))
                 return
-            try:
-                apps = client.apps()
-            except sunshine_client.SunshineAPIError as e:
-                xbmc.log('Akasha Aura: Sunshine load failed: {}'.format(e), xbmc.LOGERROR)
+            if state == 'error':
                 self._set_jeux_panel([], i18n.tr(33087))
                 return
             self._jeux_items = [
@@ -4566,6 +4608,122 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             server_url, username, password = self._prompt_sunshine_credentials(
                 server_url, username, password)
         return sunshine_client.SunshineClient(server_url, username, password, timeout=5)
+
+    def _sunshine_candidates(self):
+        """Ordered Sunshine hosts (E13): the primary `server_url` then
+        every `fallback_urls` entry (comma-separated), deduped."""
+        urls = []
+        primary = (_live_addon_setting('sunshine.server_url', self.addon) or '').strip()
+        if primary:
+            urls.append(primary)
+        extra = _live_addon_setting('sunshine.fallback_urls', self.addon) or ''
+        for u in extra.split(','):
+            u = u.strip()
+            if u and u not in urls:
+                urls.append(u)
+        return urls
+
+    def _sunshine_apps(self, prompt_if_missing=False):
+        """Apps from the first reachable Sunshine host (E13).
+
+        Returns (state, apps) with state 'unconfigured' | 'error' | 'ok'.
+        The outcome is cached briefly so an unreachable primary does not
+        re-time-out on every subtab visit or search keystroke; failures
+        expire faster than successes so a host that comes back is picked
+        up quickly."""
+        username = (_live_addon_setting('sunshine.username', self.addon) or '').strip()
+        password = _live_addon_setting('sunshine.password', self.addon) or ''
+        urls = self._sunshine_candidates()
+        if prompt_if_missing and not (urls and username and password):
+            url, username, password = self._prompt_sunshine_credentials(
+                urls[0] if urls else '', username, password)
+            if url and url not in urls:
+                urls.insert(0, url)
+            self._sunshine_cache = None
+        if not (urls and username and password):
+            return 'unconfigured', []
+        now = time.time()
+        cache = self._sunshine_cache
+        if cache and now - cache['ts'] < cache['ttl']:
+            return cache['state'], cache['apps']
+        state, apps = 'error', []
+        for url in urls:
+            try:
+                apps = sunshine_client.SunshineClient(
+                    url, username, password, timeout=5).apps()
+                state = 'ok'
+                break
+            except sunshine_client.SunshineAPIError as e:
+                xbmc.log('Akasha Aura: Sunshine host {} failed: {}'.format(
+                    url, e), xbmc.LOGWARNING)
+        self._sunshine_cache = {'ts': now, 'ttl': 300 if state == 'ok' else 60,
+                                'state': state, 'apps': apps}
+        return state, apps
+
+    def _steam_catalog(self):
+        """Owned-games catalog with a short in-session cache (E11):
+        search hits this once per keystroke otherwise."""
+        now = time.time()
+        cache = self._steam_cache
+        if cache and now - cache['ts'] < 300:
+            return cache['games']
+        client = self._get_steam_client()
+        games = []
+        if client and client.is_configured():
+            try:
+                games = client.owned_games_sorted_by_recent()
+            except steam_client.SteamAPIError as e:
+                xbmc.log('Akasha Aura: Steam catalog failed: {}'.format(e),
+                         xbmc.LOGWARNING)
+        self._steam_cache = {'ts': now, 'games': games}
+        return games
+
+    def _game_search_hits(self, term):
+        """E11: game hits for the visual search window across the static
+        shortcuts and the configured Steam/Sunshine catalogs. Everything
+        is cached and fail-safe: an unconfigured or dead service simply
+        contributes no hits."""
+        q = (term or '').strip().lower()
+        if not q:
+            return []
+        hits = []
+        for g in self._games:
+            if q in (g.get('label') or '').lower() \
+                    or q in (g.get('label2') or '').lower():
+                hits.append({'_game': True, 'type': 'game',
+                             'title': g['label'], 'thumb_url': g.get('icon'),
+                             'action': g.get('action') or ''})
+        for g in self._steam_catalog():
+            if q in (g.get('name') or '').lower():
+                hits.append({'_game': True, 'type': 'game',
+                             'title': g['name'],
+                             'thumb_url': g.get('box_art_url'),
+                             'action': 'RunAddon(plugin.program.steamlink)'})
+        _state, apps = self._sunshine_apps()
+        for a in apps:
+            if q in (a.get('name') or '').lower():
+                hits.append({'_game': True, 'type': 'game',
+                             'title': a['name'],
+                             'thumb_url': a.get('box_art_url'),
+                             'action': 'RunAddon(plugin.program.moonlight-qt)'})
+        return hits[:8]
+
+    def _launch_game_action(self, game):
+        action = game.get('action') or ''
+        if action:
+            xbmc.executebuiltin(action)
+        else:
+            # Cloud services picked in Quick Start have no launchable
+            # local client -- explicit stub, like the promo card.
+            xbmcgui.Dialog().notification(
+                'Akasha Aura', i18n.tr(33657),
+                xbmcgui.NOTIFICATION_INFO, 2000)
+
+    def _launch_game_result(self, item):
+        self._launch_game_action(item)
+        xbmcgui.Dialog().notification(
+            'Akasha Aura', item.get('title') or '',
+            xbmcgui.NOTIFICATION_INFO, 2000)
 
     def _prompt_sunshine_credentials(self, server_url, username, password):
         if not server_url:
@@ -5092,7 +5250,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                         DIVERT_SIDEBAR_ID)
         if self.active_tab == TAB_JEUX:
             if self._jeux_active_subtab == JEUX_SUBTAB_OTHERS:
-                return (GAME_LIST_ID if self._other_games
+                return (GAME_LIST_ID if self._visible_games
                         else JEUX_SUBTAB_IDS[JEUX_SUBTAB_OTHERS])
             return (JEUX_PANEL_ID if self._jeux_items
                     else JEUX_SUBTAB_IDS[self._jeux_active_subtab])
@@ -5136,10 +5294,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 idx = gui_guard.selpos(self, GAME_LIST_ID)
             except RuntimeError:
                 idx = -1
-            if 0 <= idx < len(self._other_games):
-                action = self._other_games[idx]['action']
-                if action:
-                    xbmc.executebuiltin(action)
+            if 0 <= idx < len(self._visible_games):
+                self._launch_game_action(self._visible_games[idx])
         elif controlID == JEUX_PANEL_ID:
             self._on_jeux_item_selected()
         elif controlID == APP_LIST_ID:
@@ -5415,6 +5571,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         search.on_select = self._open_search_result
         search.on_person = self._open_person_page
         search.on_genre = self._open_genre_result
+        search.game_provider = self._game_search_hits
+        search.on_game = self._launch_game_result
         # Cached instance: clear the flag a playback launch leaves set,
         # or closing the search later re-triggers the restore loop.
         search.playback_started = False
@@ -5557,16 +5715,21 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         return _callback
 
     def _search_games(self, query):
-        # Searches the static shortcuts list (games.DATA.xml, already
-        # loaded at __init__) rather than live-fetching the full Steam/
-        # Sunshine catalogs on every keystroke-free search -- keeps the
-        # search responsive; a documented scope limitation, see
-        # docs/aura/decisions.md.
+        # Unified dialog search (E11): static shortcuts plus the cached
+        # Steam/Sunshine catalogs -- catalog fetches go through the
+        # TTL-cached helpers so a dead host never re-times-out per call.
         query_lower = query.lower()
         results = []
+        seen = set()
         for game in self._games:
             if query_lower in (game.get('label') or '').lower():
+                seen.add(game['label'])
                 results.append((game['label'], self._make_search_game_callback(game)))
+        for hit in self._game_search_hits(query):
+            if hit['title'] in seen:
+                continue
+            seen.add(hit['title'])
+            results.append((hit['title'], self._make_search_game_callback(hit)))
         return results[:20]
 
     def _make_search_game_callback(self, game):
