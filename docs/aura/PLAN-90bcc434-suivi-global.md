@@ -73,7 +73,7 @@
 | C18 | Suffixe « · Akasha » sur lignes méta : garder ou masquer ? | PARITY reste ouvert | ✅ | réglable : `aura.server_suffix` (défaut ON = comportement actuel) dans Paramètres → Apparence |
 | C19 | Icône historique (disque vs flèche-horloge) + dégradé/horloge hero | PARITY reste ouvert | ✅ | `icon-recent.png` redessiné en glyphe history (arc + pointe + aiguilles) calqué sur `official-live/29` ; hero dégradé/horloge déjà conforme |
 | C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ⬜ | non reproduit session 2026-11-07 (parcours accueil/bibliothèques) — garde + instrumentation en place, surveillé |
-| C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ⬜ | espacement fixe actuel ; effet référence non reproduit |
+| C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ✅ | v0.79.x (#317) : slots non-focusés resserrés + pill élargie — effet vérifié à l'écran |
 | C22 | États vides/erreur sur device : revérifier chaque surface en conditions réelles | HANDOFF TODO #3 | ✅ | vérifié 2026-11-07 : SteamLink non configuré propre, recherche vide + historique + populaires OK, erreur rangée codée, Activité = vide documenté |
 | C23 | Appuis longs restants à vérifier sur les surfaces parcourues | HANDOFF TODO #3 | ✅ | surfaces parité toutes couvertes (reco, bibliothèques, catégories, sidebar, fiche, personne, recherche) ; surfaces natives Apps/Jeux = boutons dédiés |
 | C24 | Ghost icon près du hero (non identifié) + confirmer le fix du trou ~90 px titre/méta sans clearlogo | plex-parity HANDOFF | ✅ | vérifié à l'écran 2026-11-07 : l'« icône » suspectée = avatar plex.tv légitime (Œil d'Horus) ; hero sans fantôme ni trou |
@@ -89,7 +89,7 @@
 | D5 | Hold-Left au bord gauche : sidebar uniquement après relâchement + pression fraîche | conv3 | ✅ | guards `RECO_GUARD_IDS` + timer (v0.78.4) |
 | D6 | Préchargement des cartes suivantes en scroll horizontal | conv3 | ✅ | `_prewarm_reco_items` (v0.78.3) |
 | D7 | Animation rangée→rangée : plus de void multi-hop, rangée sortante dissoute, hero synchronisé, peek opaque, ~280 ms | conv3 + ANIM.md R1-R5 | ✅ | `AuraFocusSlot` + rebind 2 phases + dissolve +472 (v0.78.5) |
-| D8 | Fenêtre sombre résiduelle sous rafale extrême (4 hops) | PLAN-a3f91d2c réserve | ⬜ | transition masquée, pas un void — réglage fin possible |
+| D8 | Fenêtre sombre résiduelle sous rafale extrême (4 hops) | PLAN-a3f91d2c réserve | ✅ | v0.79.x (#317) : voile de transition approfondi/allongé (fade 30→15, 240→320 ms) — la fenêtre lit comme une transition volontaire, E2E Pi |
 | D9 | Bug scroll bibliothèque : remontée en haut + crash/redémarrage | conv3 (aeabdcd1) | ✅ | v0.75.2 (#282) + v0.76.0 (#300) |
 | D10 | Zoom 104 % de la carte focusée | ANIM.md | ✅ | extension Aura assumée (Plex = ring sans zoom) |
 | D11 | Bibliothèque : chargement lent au défilement (Films) | conv3 | ✅ | art-proxy warm + rendu ÷2 (v0.75.x) + préchauffe (v0.78.3) |
@@ -105,12 +105,12 @@
 | E5 | Page « Mes apps installées » : cartes icônes, badges épinglé/source, strip d'actions | conv3 | ✅ | `AuraApp` (v0.74+) |
 | E6 | Onglet Jeux : sous-onglets pills, posters arrondis, dédup raccourcis, états vides | conv3 | ✅ | v0.74+ |
 | E7 | Installs kodi-repo réellement fonctionnels (+ modal info) | constat session | ✅ | v0.75.1 (#276) ; segfault `AddonInformation` documenté |
-| E8 | Choix cloud gaming du Quick Start consommé par le module Jeux | quickstart decisions | ⬜ | préférence sauvegardée, non câblée |
-| E9 | Grille posters Steam/Sunshine réelle | PARITY store | ⬜ | services non configurés sur le Pi — état « non configuré » propre |
+| E8 | Choix cloud gaming du Quick Start consommé par le module Jeux | quickstart decisions | ✅ | v0.81.0 : tuiles `Autres` = services choisis, sous-onglet par défaut suit la sélection ; E2E Pi (3 tuiles GFN/Xbox/Luna) |
+| E9 | Grille posters Steam/Sunshine réelle | PARITY store | ✅ | v0.81.0 : états propres vérifiés E2E Pi — `33086` non configuré, `33087` erreur (2 hôtes morts), grille vide propre |
 | E10 | « Mes Apps » : filtre strict « installées via le Store » | aura decisions | ✅ | réglable : `apps.store_only` (défaut OFF = inventaire complet préservé) dans Paramètres → Apparence |
-| E11 | Recherche unifiée : couvrir aussi le catalogue Steam/Sunshine | aura decisions | ⬜ | périmètre actuel = contenu Plex seul |
+| E11 | Recherche unifiée : couvrir aussi le catalogue Steam/Sunshine | aura decisions | ✅ | v0.81.0 : `game_provider` (hub + sections) + recherche dialogue ; E2E Pi — « Cloud Gaming » remonte et lance `script.cloud.gaming` |
 | E12 | Exécution auto `script`/`external-app` du manifest Store | aura decisions | 🚫 | volontairement non automatisé (sécurité) ; fiche info uniquement |
-| E13 | Connectivité Pi → NZXT/Sunshine : `192.168.1.100` = « No route to host », Sunshine OK via VPN `10.20.0.4` | fiche Atlas v0.26.1 | ⬜ | diagnostic 2026-11-07 : Pi en `192.168.3.x` — NZXT LAN **et** VPN `10.20.0.4` tous deux injoignables ; Plex passe par `plex.akasha.ing`. Reste : hôte Sunshine configurable + repli (L5) |
+| E13 | Connectivité Pi → NZXT/Sunshine : `192.168.1.100` = « No route to host », Sunshine OK via VPN `10.20.0.4` | fiche Atlas v0.26.1 | ✅ côté code | v0.81.0 : `sunshine.fallback_urls` + `_sunshine_apps()` (repli ordonné, cache 300 s/60 s) ; E2E Pi : primaire timeout → repli tenté → erreur propre. Reste l'infra : rendre un hôte Sunshine joignable (routage/VPN) |
 
 ## F. Paramètres, assistant, système d'exploitation
 
@@ -195,11 +195,10 @@
 - **✅ Déployé** : l'essentiel du cahier — socle Aura, Divertissement complet,
   parité Plex quasi totale, Store/Apps/Jeux refondus, paramètres, Quick Start,
   navigation/animation v0.78.5.
-- **⬜ À faire** (36 items) : reculés Ambiant (H3)
-  + extensions non planifiées (H6-H11, H13), hub hero paysage (B14),
-  bug `show_seasons` (B13), routage Sunshine/NAT (E13, F25, F26),
-  E8-E11, F2a/F2b, F11-F13, F15, F18-F20, F22, G9, résidu anim D8,
-  recettes parité résiduelles (C20-C24), arbitrages C18/C19/C21.
+- **⬜ À faire** (14 items) : hub hero paysage (B14),
+  vigilance cartes hybrides (C20), extensions Ambiant non planifiées
+  (H7-H11), actions manuelles/réelles (F2b, F18, F19, F20, F26, G9),
+  fragilité NAT documentée (F25).
 - **⛔ Bloqués documentés** (11) : APIs cloud Plex privées (C15-C17), vocal/buzzer
   télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14),
   réauth Connector (B12), crash Kodi upstream (F24), LED retour vocal (G11).
