@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.82.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.82.0...akasha-os-v0.82.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **ambient:** wait out native modal dialogs before activating ([#329](https://github.com/jeremiejt38/akasha-os/issues/329)) ([aca61f2](https://github.com/jeremiejt38/akasha-os/commit/aca61f21681a92b6bb9af0238493912fe9afd378))
+
 ## [0.82.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.81.0...akasha-os-v0.82.0) (2026-11-07)
 
 
