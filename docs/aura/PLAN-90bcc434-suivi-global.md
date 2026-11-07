@@ -33,7 +33,7 @@
 
 | # | Exigence | Source | Statut | Preuve / note |
 |---|----------|--------|--------|----------------|
-| B1 | Sidebar bibliothèques dynamique (logo, Accueil, bibliothèques ordonnées, séparateur, watchlist, accès paramètres) | interface-plex Ph1, 780ecf80 Ph2 | ✅ | rail + bibliothèques + « Sur Plex » ; watchlist cloud = limitation (H2) |
+| B1 | Sidebar bibliothèques dynamique (logo, Accueil, bibliothèques ordonnées, séparateur, watchlist, accès paramètres) | interface-plex Ph1, 780ecf80 Ph2 | ✅ | rail + bibliothèques + « Sur Plex » ; watchlist cloud = limitation (C16) |
 | B2 | Onglets Recommandé / Bibliothèque / Collections / Catégories | interface-plex Ph2, 780ecf80 Ph5-6 | ✅ | pill Collections conditionnelle |
 | B3 | Hero banner (fanart + clearlogo + méta + synopsis + cast) | interface-plex Ph2.4 | ✅ | champ `UltraBlurColors` bilinéaire |
 | B4 | Menu global auto-masqué : swap exclusif barre principale ↔ menu secondaire | interface-plex Ph3, fcdf2235 (conv3) | ✅ | swap exclusif (v0.77.0, #293) |
@@ -131,7 +131,7 @@
 | F12 | Mémoire textures sur sessions longues | HANDOFF TODO | ⬜ | à surveiller (audit perf) |
 | F13 | Rapport perf-analyzer après heures d'usage réel | HANDOFF TODO | ⬜ | `akasha-perfanalyzer` installé, rapport à produire |
 | F14 | DB Plex `malformed` sur le serveur | HANDOFF constat | ⛔ | REINDEX/dump-restore = fenêtre maintenance prod à valider |
-| F15 | Ménage : stash `wip-fix-aura-interruptions`, ~20 branches stale | HANDOFF TODO | ⬜ | ménage repo |
+| F15 | Ménage : stash `wip-fix-aura-interruptions`, ~20 branches stale | HANDOFF TODO | ✅ | 166 branches distantes + 8 locales supprimées (toutes mergées via PR, patches exportés) ; stash déjà vide ; conservées : `feature/voice-commands` (en pause), `docs/handoff-0694` (jamais mergée) |
 | F16 | `HEAD /api/plex/image` → 405 (nettoyage) | roadmap note | ✅ | résolu — HEAD supporté sans re-télécharger l'image (fiche connector) |
 | F17 | Compteur « 771 » section / taille hub non honorée | roadmap note | ✅ | pagination `X-Plex-Container-Start` (v0.33) |
 | F18 | Validation physique manette Xbox Wireless + télécommande IR + mapping Home/Menu de la télécommande BT en conditions réelles | decisions.md + fiche Atlas | ⬜ | matériel requis, jamais testé (accès distant seul) |
@@ -158,7 +158,7 @@
 | G8 | Durcissement télécommande : double-appui panneau paramètres, long-Home→OSD, filtrage appuis parasites | remote decisions | ✅ | v0.6x — récepteur IR GPIO23 désactivé |
 | G9 | Boutons services streaming (Netflix/Prime/Amazon) → no-op, keycodes non confirmés | remote decisions « reste à faire » | ⬜ | à vérifier avec Jérémie — ce modèle n'a peut-être pas de boutons dédiés |
 | G10 | Blaster IR dédié sur GPIO (LIRC) pour contrôle IR TV + volume IR | remote decisions | 🚫 | piste documentée, non retenue dans le périmètre actuel |
-| G11 | Fallback LED de la télécommande comme retour vocal (plan §3) | remote decisions | ⬜ | jamais exploré — dépend du chantier vocal en pause |
+| G11 | Fallback LED de la télécommande comme retour vocal (plan §3) | remote decisions | ⛔ | dépend de G4/G7 (bloqués — chantier vocal en pause) |
 
 ## H. Mode Ambiant & veille
 
@@ -182,11 +182,11 @@
 
 | # | Exigence | Source | Statut | Preuve / note |
 |---|----------|--------|--------|----------------|
-| I1 | Monitoring du pipeline média (Seerr → Radarr/Sonarr → Prowlarr → download → import → Plex) | 7f3a9c2e | ⬜ | **jamais implémenté** — aucune trace dans le code |
+| I1 | Monitoring du pipeline média (Seerr → Radarr/Sonarr → Prowlarr → download → import → Plex) | 7f3a9c2e | 🚫 | **double emploi avec Sentarr** (V1+V2 déployées en staging : Plex + *arr + downloaders + timelines) ; un volet lecture-seule dans Aura resterait un chantier à part si voulu |
 | I2 | Port multi-plateforme (CoreELEC & autres devices) | akasha-os-plan | ⛔ | `akasha-os-coreelec` créé vide, projet archivé (ariane) |
 | I3 | Émulateur Android TV Plex pour comparaison | 2e7c9375 | ✅ | AVD `.Akasha` + `scripts/emu.sh` + screenrecord |
 | I4 | Boucle de travail avec Claude (`claude-bridge`) | conv2/3 | ✅ | utilisée (design void, audits parité) |
-| I5 | Outil `rea` dans /opt (aide reverse-engineering) | conv2 | ✅/🚫 | installé à l'époque ; absent de /opt aujourd'hui (outil ponctuel) |
+| I5 | Outil `rea` dans /opt (aide reverse-engineering) | conv2 | ✅ | installé et utilisé à l'époque ; retiré depuis (outil ponctuel) |
 | I6 | Modale de partage Akasha (site akasha.ing) | 459c8226/be6214fe | 🚫 | projet `akasha-website`, hors périmètre akasha-os |
 
 ## Synthèse
@@ -194,16 +194,17 @@
 - **✅ Déployé** : l'essentiel du cahier — socle Aura, Divertissement complet,
   parité Plex quasi totale, Store/Apps/Jeux refondus, paramètres, Quick Start,
   navigation/animation v0.78.5.
-- **⬜ À faire** (38 items) : pipeline média (I1), reculés Ambiant (H3)
+- **⬜ À faire** (36 items) : reculés Ambiant (H3)
   + extensions non planifiées (H6-H11, H13), hub hero paysage (B14),
   bug `show_seasons` (B13), routage Sunshine/NAT (E13, F25, F26),
-  E8-E11, F2a/F2b, F11-F13, F15, F18-F20, F22, G9, G11, résidu anim D8,
+  E8-E11, F2a/F2b, F11-F13, F15, F18-F20, F22, G9, résidu anim D8,
   recettes parité résiduelles (C20-C24), arbitrages C18/C19/C21.
-- **⛔ Bloqués documentés** (10) : APIs cloud Plex privées (C15-C17), vocal/buzzer
+- **⛔ Bloqués documentés** (11) : APIs cloud Plex privées (C15-C17), vocal/buzzer
   télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14),
-  réauth Connector (B12), crash Kodi upstream (F24).
-- **🚫 Hors périmètre** (5) : Talos (maintenance), multi-écrans (H4), exécution
-  auto de scripts du Store (E12), modale site web (I6), blaster IR GPIO (G10).
+  réauth Connector (B12), crash Kodi upstream (F24), LED retour vocal (G11).
+- **🚫 Hors périmètre** (6) : Talos (maintenance), multi-écrans (H4), exécution
+  auto de scripts du Store (E12), modale site web (I6), blaster IR GPIO (G10),
+  pipeline média → Sentarr (I1).
 
 ### Prochaines priorités suggérées
 
