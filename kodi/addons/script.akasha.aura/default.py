@@ -228,6 +228,24 @@ def _watch_modal_activation(window):
         pass
 
 
+# Akasha Ambient pre-touches this lock, then force-closes Aura's modal so
+# its own window can activate (Kodi never opens a script window on top of
+# an active modal). The ambient window keeps touching the lock every
+# second while it runs; once it goes stale/removes, the supervision loop
+# reopens Aura on the next pass -- the user lands back in Aura like after
+# a playback handoff.
+AMBIENT_LOCK_FILE = '/tmp/akasha-ambient.lock'
+AMBIENT_LOCK_STALE_SECONDS = 10.0
+
+
+def _ambient_active():
+    try:
+        return (time.time() - os.path.getmtime(AMBIENT_LOCK_FILE)) \
+            < AMBIENT_LOCK_STALE_SECONDS
+    except OSError:
+        return False
+
+
 if __name__ == '__main__':
     # "opensettings": the gear-wheel remote button's global keymap entry
     # (dd440e2e section 9), distinct from a plain Home press.
@@ -332,6 +350,15 @@ if __name__ == '__main__':
                 target=_watch_stray_video, args=(stray_stop,),
                 daemon=True).start()
             while not monitor.abortRequested():
+                # Ambient Mode owns the screen: its service closed Aura's
+                # modal and refreshes its lock file until Ambient exits.
+                # Do NOT reopen over it -- the reopen would race Ambient's
+                # own modal activation or stack on top of it.
+                while _ambient_active():
+                    if monitor.waitForAbort(1.0):
+                        break
+                if monitor.abortRequested():
+                    break
                 _restore_hw_decode()
                 _run_window()
                 # Playback started from Aura: the window closed itself

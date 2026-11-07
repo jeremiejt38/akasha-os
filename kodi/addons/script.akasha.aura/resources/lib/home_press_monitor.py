@@ -130,3 +130,38 @@ class SettingsPressMonitor(xbmc.Monitor):
             self._callback()
         except Exception as e:
             xbmc.log('Akasha Aura: settings press callback failed: {}'.format(e), xbmc.LOGERROR)
+
+
+AMBIENT_NOTIFY_SENDER = 'akasha.ambient'
+AMBIENT_NOTIFY_METHOD = 'SuspendForAmbient'
+
+
+class AmbientSuspendMonitor(xbmc.Monitor):
+    """Listen for the Ambient Mode trigger's suspend request.
+
+    service.akasha.ambient cannot activate its window while Aura's modal
+    is up (Kodi refuses: "active modal dialogs"), and force-closing the
+    dialog from outside leaves this window's doModal() permanently wedged
+    -- observed live: the Aura script kept heartbeating on a Home screen
+    that never came back. Instead the service broadcasts
+    NotifyAll(akasha.ambient, SuspendForAmbient) and this monitor lets the
+    window close itself cleanly, exactly like a Back exit. Aura's
+    supervision loop then holds its reopen while the ambient lock file is
+    fresh (see default.py's _ambient_active).
+    """
+
+    def __init__(self, callback, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._callback = callback
+
+    def onNotification(self, sender, method, data):
+        if sender != AMBIENT_NOTIFY_SENDER:
+            return
+        # Same "Other." prefix as the HomePress/SettingsPress methods above.
+        if method != 'Other.' + AMBIENT_NOTIFY_METHOD:
+            return
+        try:
+            self._callback()
+        except Exception as e:
+            xbmc.log('Akasha Aura: ambient suspend callback failed: {}'.format(e),
+                     xbmc.LOGERROR)
