@@ -1116,6 +1116,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except Exception:
                 pass
         title, title_suffix = _hub_title_fr(hub, server)
+        if self.addon.getSetting('aura.server_suffix') == 'false':
+            title_suffix = ''
         try:
             paged.load_initial()
         except Exception as e:  # defensive: never crash the tab on a row failure
@@ -4741,6 +4743,10 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # the nav rail; from the nav it exits the app.
             if self.getFocusId() in _CONTENT_BACK_IDS:
                 self._focus_sidebar()
+                return
+            if (self.addon.getSetting('aura.back_root_confirm') == 'true'
+                    and not xbmcgui.Dialog().yesno(
+                        'Akasha Aura', i18n.tr(33652))):
                 return
             self.close()
             return

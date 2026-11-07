@@ -538,6 +538,24 @@ STRINGS = {
             'matter where they live'),
     33644: ('Choisir mes services', 'Select my services'),
     33645: ('Ne plus afficher', "Don't show this again"),
+    33646: ('Suffixe « · serveur »', 'Server-name suffix'),
+    33647: ('Affiche le nom du serveur à côté du titre des rangées, '
+            'comme Plex',
+            'Shows the server name next to row titles, like Plex'),
+    33648: ('Applications du Store uniquement', 'Store apps only'),
+    33649: ('Dans « Mes apps », n\'affiche que les applications '
+            'installées depuis le Store Akasha',
+            'In "My apps", only shows apps installed from the Akasha '
+            'Store'),
+    33650: ('Confirmer la sortie', 'Confirm exit'),
+    33651: ('Demande une confirmation quand Retour quitte l\'accueil',
+            'Asks for confirmation when Back leaves the home screen'),
+    33652: ('Quitter Akasha Aura ?', 'Exit Akasha Aura?'),
+    33653: ('Connector Akasha OS', 'Akasha OS Connector'),
+    33654: ('État de la connexion au service de cache — Configurer ouvre '
+            'les réglages natifs',
+            'Cache-service connection state — Configure opens the '
+            'native settings'),
 }
 
 MONTH_ABBRS = {

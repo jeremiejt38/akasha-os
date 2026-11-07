@@ -2034,3 +2034,48 @@ msgstr "Choisir mes services"
 msgctxt "#33645"
 msgid "Don't show this again"
 msgstr "Ne plus afficher"
+
+# Suffixe « · serveur »
+msgctxt "#33646"
+msgid "Server-name suffix"
+msgstr "Suffixe « · serveur »"
+
+# Affiche le nom du serveur à côté du titre des rangées, comme Plex
+msgctxt "#33647"
+msgid "Shows the server name next to row titles, like Plex"
+msgstr "Affiche le nom du serveur à côté du titre des rangées, comme Plex"
+
+# Applications du Store uniquement
+msgctxt "#33648"
+msgid "Store apps only"
+msgstr "Applications du Store uniquement"
+
+# Dans « Mes apps », n'affiche que les applications installées depuis le Store Akasha
+msgctxt "#33649"
+msgid "In \"My apps\", only shows apps installed from the Akasha Store"
+msgstr "Dans « Mes apps », n'affiche que les applications installées depuis le Store Akasha"
+
+# Confirmer la sortie
+msgctxt "#33650"
+msgid "Confirm exit"
+msgstr "Confirmer la sortie"
+
+# Demande une confirmation quand Retour quitte l'accueil
+msgctxt "#33651"
+msgid "Asks for confirmation when Back leaves the home screen"
+msgstr "Demande une confirmation quand Retour quitte l'accueil"
+
+# Quitter Akasha Aura ?
+msgctxt "#33652"
+msgid "Exit Akasha Aura?"
+msgstr "Quitter Akasha Aura ?"
+
+# Connector Akasha OS
+msgctxt "#33653"
+msgid "Akasha OS Connector"
+msgstr "Connector Akasha OS"
+
+# État de la connexion au service de cache — Configurer ouvre les réglages natifs
+msgctxt "#33654"
+msgid "Cache-service connection state — Configure opens the native settings"
+msgstr "État de la connexion au service de cache — Configurer ouvre les réglages natifs"

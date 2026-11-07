@@ -406,6 +406,15 @@ class AuraSettingsPanelWindow(xbmcgui.WindowXMLDialog):
                 return _tr(33534) if url else _tr(33533)
             except Exception:
                 return _tr(33533)
+        if fn == 'acc.connector':
+            try:
+                url = self.backend.addon_get('script.akasha.aura',
+                                             'connector.server_url')
+                token = self.backend.addon_get('script.akasha.aura',
+                                               'connector.session_token')
+                return _tr(33534) if (url and token) else _tr(33533)
+            except Exception:
+                return _tr(33533)
         return ''
 
     def _dynamic_summary(self, item):
