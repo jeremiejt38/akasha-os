@@ -22,6 +22,16 @@ DEFAULTS = {
     'weather_city': 'Paris',
     'weather_latitude': 48.8566,
     'weather_longitude': 2.3522,
+    'weather_auto_coords': True,
+    'credit_enabled': True,
+    'pair_portraits': True,
+    'night_dim_enabled': True,
+    'night_start_hour': 22,
+    'night_end_hour': 7,
+    'night_dim_percent': 40,
+    'schedule_enabled': False,
+    'schedule_start_hour': 8,
+    'schedule_end_hour': 23,
 }
 
 # Bounds used to reject nonsensical settings values (e.g. corrupted addon
@@ -32,6 +42,10 @@ _MIN_DIM_MINUTES = 1
 _MAX_DIM_MINUTES = 120
 _MIN_SLEEP_MINUTES = 1
 _MAX_SLEEP_MINUTES = 720
+_MIN_HOUR = 0
+_MAX_HOUR = 23
+_MIN_NIGHT_DIM_PERCENT = 0
+_MAX_NIGHT_DIM_PERCENT = 80
 
 
 class AmbientConfig:
@@ -41,12 +55,18 @@ class AmbientConfig:
         'content_path', 'fallback_folder', 'inactivity_timeout_minutes',
         'dim_after_minutes', 'sleep_after_minutes', 'weather_enabled',
         'weather_city', 'weather_latitude', 'weather_longitude',
-        'weather_cache_path',
+        'weather_auto_coords', 'credit_enabled', 'pair_portraits',
+        'night_dim_enabled', 'night_start_hour', 'night_end_hour',
+        'night_dim_percent', 'schedule_enabled', 'schedule_start_hour',
+        'schedule_end_hour', 'weather_cache_path',
     )
 
     def __init__(self, content_path, fallback_folder, inactivity_timeout_minutes,
                  dim_after_minutes, sleep_after_minutes, weather_enabled, weather_city,
-                 weather_latitude, weather_longitude, weather_cache_path):
+                 weather_latitude, weather_longitude, weather_auto_coords,
+                 credit_enabled, pair_portraits, night_dim_enabled, night_start_hour,
+                 night_end_hour, night_dim_percent, schedule_enabled,
+                 schedule_start_hour, schedule_end_hour, weather_cache_path):
         self.content_path = content_path
         self.fallback_folder = fallback_folder
         self.inactivity_timeout_minutes = inactivity_timeout_minutes
@@ -56,6 +76,16 @@ class AmbientConfig:
         self.weather_city = weather_city
         self.weather_latitude = weather_latitude
         self.weather_longitude = weather_longitude
+        self.weather_auto_coords = weather_auto_coords
+        self.credit_enabled = credit_enabled
+        self.pair_portraits = pair_portraits
+        self.night_dim_enabled = night_dim_enabled
+        self.night_start_hour = night_start_hour
+        self.night_end_hour = night_end_hour
+        self.night_dim_percent = night_dim_percent
+        self.schedule_enabled = schedule_enabled
+        self.schedule_start_hour = schedule_start_hour
+        self.schedule_end_hour = schedule_end_hour
         self.weather_cache_path = weather_cache_path
 
     @property
@@ -95,6 +125,21 @@ IDLE_SAFE_WINDOW_NAMES = (
     '1200',  # script.akasha.aura: AuraGenres.xml
     '1201',  # script.akasha.aura: AuraSearch.xml (Plex-style search)
 )
+
+
+def schedule_allows(now_hour, start_hour, end_hour, enabled):
+    """True if Ambient Mode may auto-trigger at `now_hour` (0-23).
+
+    An overnight window (start > end, e.g. 22 -> 7) wraps midnight.
+    A disabled schedule always allows activation.
+    """
+    if not enabled:
+        return True
+    if start_hour == end_hour:
+        return True
+    if start_hour < end_hour:
+        return start_hour <= now_hour < end_hour
+    return now_hour >= start_hour or now_hour < end_hour
 
 
 def is_foreground_app_active(is_window_active_fn):
@@ -163,5 +208,33 @@ def load_config(settings):
         or DEFAULTS['weather_city'],
         weather_latitude=_as_float(settings.get('weather_latitude'), DEFAULTS['weather_latitude']),
         weather_longitude=_as_float(settings.get('weather_longitude'), DEFAULTS['weather_longitude']),
+        weather_auto_coords=_as_bool(
+            settings.get('weather_auto_coords'), DEFAULTS['weather_auto_coords']),
+        credit_enabled=_as_bool(settings.get('credit_enabled'), DEFAULTS['credit_enabled']),
+        pair_portraits=_as_bool(settings.get('pair_portraits'), DEFAULTS['pair_portraits']),
+        night_dim_enabled=_as_bool(
+            settings.get('night_dim_enabled'), DEFAULTS['night_dim_enabled']),
+        night_start_hour=_as_int(
+            settings.get('night_start_hour'), DEFAULTS['night_start_hour'],
+            _MIN_HOUR, _MAX_HOUR,
+        ),
+        night_end_hour=_as_int(
+            settings.get('night_end_hour'), DEFAULTS['night_end_hour'],
+            _MIN_HOUR, _MAX_HOUR,
+        ),
+        night_dim_percent=_as_int(
+            settings.get('night_dim_percent'), DEFAULTS['night_dim_percent'],
+            _MIN_NIGHT_DIM_PERCENT, _MAX_NIGHT_DIM_PERCENT,
+        ),
+        schedule_enabled=_as_bool(
+            settings.get('schedule_enabled'), DEFAULTS['schedule_enabled']),
+        schedule_start_hour=_as_int(
+            settings.get('schedule_start_hour'), DEFAULTS['schedule_start_hour'],
+            _MIN_HOUR, _MAX_HOUR,
+        ),
+        schedule_end_hour=_as_int(
+            settings.get('schedule_end_hour'), DEFAULTS['schedule_end_hour'],
+            _MIN_HOUR, _MAX_HOUR,
+        ),
         weather_cache_path=str(settings.get('weather_cache_path') or DEFAULT_WEATHER_CACHE_PATH),
     )

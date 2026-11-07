@@ -53,6 +53,45 @@ def should_sleep(elapsed_seconds, sleep_after_seconds):
     return elapsed_seconds >= sleep_after_seconds
 
 
+def _hour_in_window(now_hour, start_hour, end_hour):
+    """True if `now_hour` (0-23) falls inside the [start, end) window.
+
+    Overnight windows wrap midnight: start=22, end=7 matches 22h..6h59.
+    Equal bounds mean "always" (the whole day).
+    """
+    if start_hour == end_hour:
+        return True
+    if start_hour < end_hour:
+        return start_hour <= now_hour < end_hour
+    return now_hour >= start_hour or now_hour < end_hour
+
+
+def night_dim_alpha(now_hour, start_hour, end_hour, percent):
+    """Overlay alpha (0..0xFF) floor applied during the night window.
+
+    No local backlight exists on this HDMI/CEC setup, so "luminosite
+    nocturne" (H3) is a constant dim veil during the configured night
+    hours — the screen stays readable but the room is not lit up by a
+    bright slideshow at 2AM.
+    """
+    if percent <= 0 or not _hour_in_window(now_hour, start_hour, end_hour):
+        return 0
+    return int(round(percent / 100.0 * 0xFF))
+
+
+def combined_dim_color(elapsed_seconds, dim_after_seconds, sleep_after_seconds,
+                        now_hour, night_enabled, night_start_hour, night_end_hour,
+                        night_dim_percent, max_alpha=MAX_DIM_ALPHA):
+    """AARRGGBB for the dim overlay = max(ramp alpha, night floor)."""
+    ramp = dim_alpha(elapsed_seconds, dim_after_seconds, sleep_after_seconds, max_alpha)
+    night = night_dim_alpha(now_hour, night_start_hour, night_end_hour,
+                            night_dim_percent) if night_enabled else 0
+    alpha = max(ramp, night)
+    if alpha <= 0:
+        return NO_DIM_COLOR
+    return '{:02X}000000'.format(min(alpha, 0xFF))
+
+
 # Anti burn-in (spec section 16): cycle the clock/weather widget group through
 # four corner presets on a fixed interval, mirroring Guide.xml's preset
 # pattern rather than computing continuous pixel offsets (see decisions.md).

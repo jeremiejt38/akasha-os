@@ -26,7 +26,9 @@ import xbmcgui
 
 import config
 import content_manager
+import credits
 import energy
+import image_meta
 import slideshow
 import weather_client
 
@@ -68,6 +70,9 @@ def _fetch_json(url):
         return json.loads(response.read().decode('utf-8'))
 
 
+GEO_CACHE_PATH = '/storage/.config/akasha-os/ambient-geo-cache.json'
+
+
 def _load_raw_settings():
     addon = xbmcaddon.Addon(ADDON_ID)
     return {
@@ -79,6 +84,13 @@ def _load_raw_settings():
         'weather_city': addon.getSetting('weather_city'),
         'weather_latitude': addon.getSetting('weather_latitude'),
         'weather_longitude': addon.getSetting('weather_longitude'),
+        'weather_auto_coords': addon.getSetting('weather_auto_coords'),
+        'credit_enabled': addon.getSetting('credit_enabled'),
+        'pair_portraits': addon.getSetting('pair_portraits'),
+        'night_dim_enabled': addon.getSetting('night_dim_enabled'),
+        'night_start_hour': addon.getSetting('night_start_hour'),
+        'night_end_hour': addon.getSetting('night_end_hour'),
+        'night_dim_percent': addon.getSetting('night_dim_percent'),
     }
 
 
@@ -193,20 +205,28 @@ class AmbientWindow(xbmcgui.WindowXML):
         preloads the next photo onto the hidden slot then flips the
         property — the crossfade itself is a skin animation.
         """
-        self._cycler = slideshow.PhotoCycler(image_paths)
+        self._cycler = slideshow.PhotoCycler(
+            image_paths, size_fn=image_meta.image_size,
+            pair_portraits=self.cfg.pair_portraits)
         self.setProperty('ambient.slot', '')
         threading.Thread(target=self._slideshow_loop, daemon=True).start()
 
     def _slideshow_loop(self):
         slot = None
         while self._active and self._cycler is not None:
-            photo = self._cycler.next_photo()
-            if photo is None:
+            frame = self._cycler.next_frame()
+            if not frame:
                 return
             target = 0 if slot is None else 1 - slot
             try:
                 self.setProperty('ambient.kb{}'.format(target), self._cycler.next_variant())
-                self.setProperty('ambient.img{}'.format(target), photo)
+                self.setProperty('ambient.img{}'.format(target), frame[0])
+                self.setProperty('ambient.pair{}'.format(target), '1' if len(frame) > 1 else '')
+                self.setProperty('ambient.img{}b'.format(target),
+                                 frame[1] if len(frame) > 1 else '')
+                self.setProperty('ambient.credit{}'.format(target),
+                                 credits.frame_credit(frame)
+                                 if self.cfg.credit_enabled else '')
             except Exception:
                 # Window already closed.
                 return
@@ -246,6 +266,28 @@ class AmbientWindow(xbmcgui.WindowXML):
                 pass
             time.sleep(0.5)
 
+    def _resolve_weather_coords(self):
+        """Return (lat, lon) for the weather loop.
+
+        With `weather_auto_coords` on, the configured city name is geocoded
+        via Open-Meteo (H13) — result cached per city so a manual lat/lon
+        is never required and the API is only hit when the city changes.
+        Falls back to the configured/manual coordinates on any failure.
+        """
+        if not self.cfg.weather_auto_coords:
+            return self.cfg.weather_latitude, self.cfg.weather_longitude
+        cache = weather_client.load_cache(GEO_CACHE_PATH) or {}
+        key = (self.cfg.weather_city or '').strip().lower()
+        cached = cache.get(key)
+        if cached and 'latitude' in cached and 'longitude' in cached:
+            return cached['latitude'], cached['longitude']
+        coords = weather_client.geocode_city(_fetch_json, self.cfg.weather_city)
+        if coords is None:
+            return self.cfg.weather_latitude, self.cfg.weather_longitude
+        cache[key] = {'latitude': coords[0], 'longitude': coords[1]}
+        weather_client.save_cache(GEO_CACHE_PATH, cache)
+        return coords
+
     def _start_weather_thread(self):
         if not self.cfg.weather_enabled:
             self.setProperty('weather_available', '')
@@ -254,10 +296,11 @@ class AmbientWindow(xbmcgui.WindowXML):
         thread.start()
 
     def _weather_loop(self):
+        latitude, longitude = self._resolve_weather_coords()
         while self._active:
             reading = weather_client.get_weather(
                 _fetch_json, self.cfg.weather_cache_path,
-                self.cfg.weather_latitude, self.cfg.weather_longitude,
+                latitude, longitude,
             )
             self._apply_weather(reading)
             # Sleep in 1s increments so `exit()` can stop this thread promptly
@@ -295,8 +338,11 @@ class AmbientWindow(xbmcgui.WindowXML):
 
                 try:
                     self.setProperty('widget_preset', str(energy.widget_preset_for_elapsed(elapsed)))
-                    self.setProperty('dim_color', energy.dim_overlay_color(
+                    self.setProperty('dim_color', energy.combined_dim_color(
                         elapsed, self.cfg.dim_after_seconds, self.cfg.sleep_after_seconds,
+                        time.localtime().tm_hour, self.cfg.night_dim_enabled,
+                        self.cfg.night_start_hour, self.cfg.night_end_hour,
+                        self.cfg.night_dim_percent,
                     ))
                 except Exception:
                     pass

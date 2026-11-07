@@ -5,9 +5,25 @@
         <setting id="inactivity_timeout_minutes" type="number" label="Delai avant activation (minutes)" default="5"/>
         <setting id="dim_after_minutes" type="number" label="Delai avant assombrissement (minutes)" default="2"/>
         <setting id="sleep_after_minutes" type="number" label="Delai avant veille complete (minutes)" default="30"/>
+        <setting id="credit_enabled" type="bool" label="Afficher le credit photo" default="true"/>
+        <setting id="pair_portraits" type="bool" label="Apparier les photos portrait" default="true"/>
+    </category>
+    <category label="Plage horaire">
+        <setting id="schedule_enabled" type="bool" label="Activation programmee (plage horaire)" default="false"/>
+        <setting id="schedule_start_hour" type="number" label="Heure de debut (0-23)" default="8"/>
+        <setting id="schedule_end_hour" type="number" label="Heure de fin (0-23)" default="23"/>
+    </category>
+    <category label="Luminosite nocturne">
+        <setting id="night_dim_enabled" type="bool" label="Assombrissement nocturne" default="true"/>
+        <setting id="night_start_hour" type="number" label="Nuit - heure de debut (0-23)" default="22"/>
+        <setting id="night_end_hour" type="number" label="Nuit - heure de fin (0-23)" default="7"/>
+        <setting id="night_dim_percent" type="number" label="Nuit - assombrissement (%)" default="40"/>
+    </category>
+    <category label="Meteo">
         <setting id="weather_enabled" type="bool" label="Activer la meteo" default="true"/>
+        <setting id="weather_auto_coords" type="bool" label="Coordonnees automatiques (ville)" default="true"/>
         <setting id="weather_city" type="text" label="Ville (affichage)" default="Paris"/>
-        <setting id="weather_latitude" type="text" label="Latitude" default="48.8566"/>
-        <setting id="weather_longitude" type="text" label="Longitude" default="2.3522"/>
+        <setting id="weather_latitude" type="text" label="Latitude (si coordonnees auto desactivees)" default="48.8566"/>
+        <setting id="weather_longitude" type="text" label="Longitude (si coordonnees auto desactivees)" default="2.3522"/>
     </category>
 </settings>

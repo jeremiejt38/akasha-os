@@ -36,8 +36,9 @@
         <control type="group" id="9400">
             <animation effect="fade" start="0" end="100" time="1500">WindowOpen</animation>
             <animation effect="fade" start="100" end="0" time="800">WindowClose</animation>
+            <!-- Slot 0: single full-frame image (landscape or unpaired). -->
             <control type="image">
-                <visible>String.IsEqual(Window.Property(ambient.slot),0)</visible>
+                <visible>String.IsEqual(Window.Property(ambient.slot),0) + String.IsEmpty(Window.Property(ambient.pair0))</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>1920</width>
@@ -55,8 +56,39 @@
                 <animation effect="zoom" start="109" end="112" center="620,330" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),3)">Hidden</animation>
                 <animation effect="zoom" start="109" end="112" center="1300,750" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb0),4)">Hidden</animation>
             </control>
+            <!-- Slot 0 portrait pair: two half-frame images side by side
+                 (Google TV pairs vertical shots instead of pillarboxing).
+                 Gentle center-half zoom only — corner-drift variants would
+                 pull a half-frame toward a foreign focal point. -->
             <control type="image">
-                <visible>String.IsEqual(Window.Property(ambient.slot),1)</visible>
+                <visible>String.IsEqual(Window.Property(ambient.slot),0) + !String.IsEmpty(Window.Property(ambient.pair0))</visible>
+                <left>0</left>
+                <top>0</top>
+                <width>960</width>
+                <height>1080</height>
+                <texture background="true">$INFO[Window.Property(ambient.img0)]</texture>
+                <aspectratio aligny="center" alignx="center">scale</aspectratio>
+                <animation effect="fade" start="0" end="100" time="3000" tween="sine" easing="inout">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="3000" tween="sine" easing="inout">Hidden</animation>
+                <animation effect="zoom" start="100" end="108" center="480,540" time="48000" tween="linear">Visible</animation>
+                <animation effect="zoom" start="108" end="111" center="480,540" time="3000" tween="linear">Hidden</animation>
+            </control>
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(ambient.slot),0) + !String.IsEmpty(Window.Property(ambient.pair0))</visible>
+                <left>960</left>
+                <top>0</top>
+                <width>960</width>
+                <height>1080</height>
+                <texture background="true">$INFO[Window.Property(ambient.img0b)]</texture>
+                <aspectratio aligny="center" alignx="center">scale</aspectratio>
+                <animation effect="fade" start="0" end="100" time="3000" tween="sine" easing="inout">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="3000" tween="sine" easing="inout">Hidden</animation>
+                <animation effect="zoom" start="100" end="108" center="1440,540" time="48000" tween="linear">Visible</animation>
+                <animation effect="zoom" start="108" end="111" center="1440,540" time="3000" tween="linear">Hidden</animation>
+            </control>
+            <!-- Slot 1: single full-frame image. -->
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(ambient.slot),1) + String.IsEmpty(Window.Property(ambient.pair1))</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>1920</width>
@@ -74,6 +106,69 @@
                 <animation effect="zoom" start="109" end="112" center="620,330" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),3)">Hidden</animation>
                 <animation effect="zoom" start="109" end="112" center="1300,750" time="3000" tween="linear" condition="String.IsEqual(Window.Property(ambient.kb1),4)">Hidden</animation>
             </control>
+            <!-- Slot 1 portrait pair. -->
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(ambient.slot),1) + !String.IsEmpty(Window.Property(ambient.pair1))</visible>
+                <left>0</left>
+                <top>0</top>
+                <width>960</width>
+                <height>1080</height>
+                <texture background="true">$INFO[Window.Property(ambient.img1)]</texture>
+                <aspectratio aligny="center" alignx="center">scale</aspectratio>
+                <animation effect="fade" start="0" end="100" time="3000" tween="sine" easing="inout">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="3000" tween="sine" easing="inout">Hidden</animation>
+                <animation effect="zoom" start="100" end="108" center="480,540" time="48000" tween="linear">Visible</animation>
+                <animation effect="zoom" start="108" end="111" center="480,540" time="3000" tween="linear">Hidden</animation>
+            </control>
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(ambient.slot),1) + !String.IsEmpty(Window.Property(ambient.pair1))</visible>
+                <left>960</left>
+                <top>0</top>
+                <width>960</width>
+                <height>1080</height>
+                <texture background="true">$INFO[Window.Property(ambient.img1b)]</texture>
+                <aspectratio aligny="center" alignx="center">scale</aspectratio>
+                <animation effect="fade" start="0" end="100" time="3000" tween="sine" easing="inout">Visible</animation>
+                <animation effect="fade" start="100" end="0" time="3000" tween="sine" easing="inout">Hidden</animation>
+                <animation effect="zoom" start="100" end="108" center="1440,540" time="48000" tween="linear">Visible</animation>
+                <animation effect="zoom" start="108" end="111" center="1440,540" time="3000" tween="linear">Hidden</animation>
+            </control>
+        </control>
+
+        <!-- Photo credit, bottom-center (no widget preset uses that zone,
+             so the credit never collides with the clock/weather block).
+             Follows the visible slot; empty credit hides both scrim and
+             label. -->
+        <control type="image">
+            <visible>(String.IsEqual(Window.Property(ambient.slot),0) + !String.IsEmpty(Window.Property(ambient.credit0))) | (String.IsEqual(Window.Property(ambient.slot),1) + !String.IsEmpty(Window.Property(ambient.credit1)))</visible>
+            <left>0</left>
+            <top>948</top>
+            <width>1920</width>
+            <height>132</height>
+            <texture colordiffuse="99000000">scrim-bottom.png</texture>
+            <aspectratio>stretch</aspectratio>
+        </control>
+        <control type="label">
+            <visible>String.IsEqual(Window.Property(ambient.slot),0) + !String.IsEmpty(Window.Property(ambient.credit0))</visible>
+            <left>0</left>
+            <top>1020</top>
+            <width>1920</width>
+            <height>28</height>
+            <font>font12</font>
+            <align>center</align>
+            <label>$INFO[Window.Property(ambient.credit0)]</label>
+            <textcolor>99FFFFFF</textcolor>
+        </control>
+        <control type="label">
+            <visible>String.IsEqual(Window.Property(ambient.slot),1) + !String.IsEmpty(Window.Property(ambient.credit1))</visible>
+            <left>0</left>
+            <top>1020</top>
+            <width>1920</width>
+            <height>28</height>
+            <font>font12</font>
+            <align>center</align>
+            <label>$INFO[Window.Property(ambient.credit1)]</label>
+            <textcolor>99FFFFFF</textcolor>
         </control>
 
         <!-- Progressive dimming overlay (energy.dim_overlay_color). No local

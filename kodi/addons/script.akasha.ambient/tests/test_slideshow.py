@@ -55,3 +55,54 @@ class KenBurnsVariantTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class NextFrameTests(unittest.TestCase):
+    def test_none_when_no_photos(self):
+        cycler = slideshow.PhotoCycler([])
+        self.assertIsNone(cycler.next_frame())
+
+    def test_default_wraps_single_photo(self):
+        cycler = slideshow.PhotoCycler(['/p/a.jpg'])
+        self.assertEqual(cycler.next_frame(), ['/p/a.jpg'])
+
+    def test_pairs_two_consecutive_portraits(self):
+        sizes = {'/p/p1.jpg': (800, 1200), '/p/p2.jpg': (700, 1100),
+                 '/p/wide.jpg': (1600, 900)}
+        order = ['/p/p1.jpg', '/p/p2.jpg', '/p/wide.jpg']
+
+        class FixedRng:
+            def shuffle(self, q):
+                q.sort(key=order.index)
+
+            def choice(self, seq):
+                return seq[0]
+
+        cycler = slideshow.PhotoCycler(
+            list(order), rng=FixedRng(),
+            size_fn=lambda p: sizes.get(p), pair_portraits=True)
+        self.assertEqual(cycler.next_frame(), ['/p/p1.jpg', '/p/p2.jpg'])
+        self.assertEqual(cycler.next_frame(), ['/p/wide.jpg'])
+
+    def test_no_pair_when_next_is_landscape(self):
+        sizes = {'/p/p1.jpg': (800, 1200), '/p/wide.jpg': (1600, 900)}
+        order = ['/p/p1.jpg', '/p/wide.jpg']
+
+        class FixedRng:
+            def shuffle(self, q):
+                q.sort(key=order.index)
+
+            def choice(self, seq):
+                return seq[0]
+
+        cycler = slideshow.PhotoCycler(
+            list(order), rng=FixedRng(),
+            size_fn=lambda p: sizes.get(p), pair_portraits=True)
+        self.assertEqual(cycler.next_frame(), ['/p/p1.jpg'])
+        self.assertEqual(cycler.next_frame(), ['/p/wide.jpg'])
+
+    def test_pairing_disabled_by_default(self):
+        sizes = {'/p/p1.jpg': (800, 1200), '/p/p2.jpg': (700, 1100)}
+        cycler = slideshow.PhotoCycler(
+            ['/p/p1.jpg', '/p/p2.jpg'], size_fn=lambda p: sizes.get(p))
+        self.assertEqual(len(cycler.next_frame()), 1)

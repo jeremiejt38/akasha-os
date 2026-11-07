@@ -73,3 +73,40 @@ class WidgetPresetTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class NightDimTests(unittest.TestCase):
+    def test_zero_outside_window(self):
+        self.assertEqual(energy.night_dim_alpha(12, 22, 7, 40), 0)
+
+    def test_inside_overnight_window(self):
+        self.assertGreater(energy.night_dim_alpha(23, 22, 7, 40), 0)
+        self.assertGreater(energy.night_dim_alpha(3, 22, 7, 40), 0)
+        self.assertEqual(energy.night_dim_alpha(21, 22, 7, 40), 0)
+        self.assertEqual(energy.night_dim_alpha(7, 22, 7, 40), 0)
+
+    def test_percent_scales_alpha(self):
+        self.assertAlmostEqual(energy.night_dim_alpha(2, 22, 7, 50), 128, delta=1)
+
+    def test_zero_percent_disables(self):
+        self.assertEqual(energy.night_dim_alpha(2, 22, 7, 0), 0)
+
+
+class CombinedDimTests(unittest.TestCase):
+    def test_night_floor_applies_before_ramp(self):
+        color = energy.combined_dim_color(
+            0, 120, 1800, 2, True, 22, 7, 40)
+        self.assertEqual(int(color[:2], 16), int(round(0.40 * 255)))
+
+    def test_ramp_wins_over_night_floor(self):
+        color = energy.combined_dim_color(
+            1799, 120, 1800, 2, True, 22, 7, 20)
+        self.assertGreater(int(color[:2], 16), int(round(0.20 * 255)))
+
+    def test_day_no_dim(self):
+        self.assertEqual(energy.combined_dim_color(
+            0, 120, 1800, 12, True, 22, 7, 40), energy.NO_DIM_COLOR)
+
+    def test_night_disabled_falls_back_to_ramp(self):
+        self.assertEqual(energy.combined_dim_color(
+            0, 120, 1800, 2, False, 22, 7, 40), energy.NO_DIM_COLOR)
