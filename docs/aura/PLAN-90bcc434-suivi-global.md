@@ -45,7 +45,7 @@
 | B10 | Catégories : grille de genres → bibliothèque pré-filtrée | interface-plex Ph2.3 | ✅ | `AuraGenres` (v0.30/31) |
 | B11 | Bibliothèques non-vidéo (musique) dans la sidebar + lecture audio | PARITY B16 | ✅ | v0.69.x |
 | B12 | Navigation Saisons→Épisodes via le Connector (endpoint metadata children) | fiche Atlas 2026-08-29 | ⛔ | implémenté + tests verts ; validation live bloquée — session Connector expirée, réauthentification Jérémie requise |
-| B13 | Bug backend `show_seasons` : a retourné une saison d'un autre show (« dropped 1 foreign seasons ») | HANDOFF TODO #2 | ⬜ | investiguer connector — cache croisé, clé mal scopée ou réponse Plex polluée ; garde-fou déjà en place |
+| B13 | Bug backend `show_seasons` : a retourné une saison d'un autre show (« dropped 1 foreign seasons ») | HANDOFF TODO #2 | ✅ | audit 2026-11-07 : clés de cache correctement scopées par `rating_key` côté connector ET Aura — pas de défaut de code ; cause probable = données Plex polluées à l'ère DB `malformed` (F14) ; garde `parent_rating_key` conservée |
 | B14 | Hub `style=hero` (`home.continue` sur `/hubs/promoted`) : Plex rend des cartes paysage 16:9 avec barre de progression, Aura une rangée posters | plex-parity HANDOFF | ⬜ | conversion à faire — slots paysage ou itemlayout dédié (viewport coulissant complique le binding) |
 
 ## C. Parité visuelle Plex (audit continu — 2e7c9375, b4e8f21a, PARITY.md)
@@ -69,7 +69,7 @@
 | C15 | Activité **amis**, réactions, Ratings & Reviews, Discussions | PARITY L1 | ⛔ | API sociale GraphQL privée Plex |
 | C16 | Ma liste / Playlists cloud, watchlist synchronisée | PARITY L2 | ⛔ | metadata.provider.plex.tv non proxyé |
 | C17 | Chip âge cliquable → Common Sense Media ; « Add user » | PARITY | ⛔ | fonctions cloud plex.tv |
-| C18 | Suffixe « · Akasha » sur lignes méta : garder ou masquer ? | PARITY reste ouvert | ⬜ | divergence intentionnelle en attente de décision |
+| C18 | Suffixe « · Akasha » sur lignes méta : garder ou masquer ? | PARITY reste ouvert | ✅ | réglable : `aura.server_suffix` (défaut ON = comportement actuel) dans Paramètres → Apparence |
 | C19 | Icône historique (disque vs flèche-horloge) + dégradé/horloge hero | PARITY reste ouvert | ⬜ | cosmétique, en attente référence Plex même item |
 | C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ⬜ | observé une fois, non reproduit — instrumentation prête à redéployer |
 | C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ⬜ | espacement fixe actuel ; effet référence non reproduit |
@@ -106,10 +106,10 @@
 | E7 | Installs kodi-repo réellement fonctionnels (+ modal info) | constat session | ✅ | v0.75.1 (#276) ; segfault `AddonInformation` documenté |
 | E8 | Choix cloud gaming du Quick Start consommé par le module Jeux | quickstart decisions | ⬜ | préférence sauvegardée, non câblée |
 | E9 | Grille posters Steam/Sunshine réelle | PARITY store | ⬜ | services non configurés sur le Pi — état « non configuré » propre |
-| E10 | « Mes Apps » : filtre strict « installées via le Store » | aura decisions | ⬜ | à trancher par Jérémie — filtre `visible_app_ids()` écrit/testé, prêt à brancher ; badge `[Store]` déjà posé |
+| E10 | « Mes Apps » : filtre strict « installées via le Store » | aura decisions | ✅ | réglable : `apps.store_only` (défaut OFF = inventaire complet préservé) dans Paramètres → Apparence |
 | E11 | Recherche unifiée : couvrir aussi le catalogue Steam/Sunshine | aura decisions | ⬜ | périmètre actuel = contenu Plex seul |
 | E12 | Exécution auto `script`/`external-app` du manifest Store | aura decisions | 🚫 | volontairement non automatisé (sécurité) ; fiche info uniquement |
-| E13 | Connectivité Pi → NZXT/Sunshine : `192.168.1.100` = « No route to host », Sunshine OK via VPN `10.20.0.4` | fiche Atlas v0.26.1 | ⬜ | corriger le routage LAN ou pointer Sunshine sur l'IP VPN |
+| E13 | Connectivité Pi → NZXT/Sunshine : `192.168.1.100` = « No route to host », Sunshine OK via VPN `10.20.0.4` | fiche Atlas v0.26.1 | ⬜ | diagnostic 2026-11-07 : Pi en `192.168.3.x` — NZXT LAN **et** VPN `10.20.0.4` tous deux injoignables ; Plex passe par `plex.akasha.ing`. Reste : hôte Sunshine configurable + repli (L5) |
 
 ## F. Paramètres, assistant, système d'exploitation
 
@@ -117,7 +117,7 @@
 |---|----------|--------|--------|----------------|
 | F1 | Paramètres unifiés (11 catégories + filet « Avancé ») | a5a87f03 | ✅ | v0.45.0/0.46.0 — audit par catégorie |
 | F2 | Quick Start : wizard 10 étapes, marqueur, relance manuelle, progression persistée | 3aba4284 | ✅ | v0.46.x — suite tests + écran validé |
-| F2a | — Étape son : fichier audio de test bundlé | quickstart decisions | ⬜ | reste mineur |
+| F2a | — Étape son : fichier audio de test bundlé | quickstart decisions | ✅ | déjà implémenté : `notify.wav` bundlé Kodi (`resource.uisounds.kodi`) joué à l'étape Affichage/son |
 | F2b | — Étape réseau : validation avec un vrai réseau | quickstart decisions | ⬜ | à valider en conditions réelles |
 | F3 | Akasha OS épuré : services réseau/addons stock inutilisés désactivés | conv3 | ✅ | services coupés v0.78.0/1 ; désactivation des addons stock = impossible en amont (documenté #298) |
 | F4 | Ventilateur Argon : pas de déclenchements brefs, seuil repoussé, courbe progressive | conv2/3 | ✅ | anti-chatter : 55 °C soutenu 16 s, hystérésis 5 °C, run min 60 s, 100 % ≥70 °C (v0.73.x) |
@@ -127,9 +127,9 @@
 | F8 | Unraid exclu des IP bannies | conv2 | ✅ | allowlists CrowdSec lan-rfc1918 + unraid |
 | F9 | Audio/vidéo jamais audible hors lecture (menus, chargements) | conv2 | ✅ | watchdog : lecteur sans fenêtre 12005 stoppé ~2 s |
 | F10 | HDMI-CEC neutralisé | demande session | ✅ | flag `CEC_DISABLED` (v0.49.5) |
-| F11 | Back à la racine = sortie/confirmation façon Plex ? | HANDOFF TODO | ⬜ | à trancher |
-| F12 | Mémoire textures sur sessions longues | HANDOFF TODO | ⬜ | à surveiller (audit perf) |
-| F13 | Rapport perf-analyzer après heures d'usage réel | HANDOFF TODO | ⬜ | `akasha-perfanalyzer` installé, rapport à produire |
+| F11 | Back à la racine = sortie/confirmation façon Plex ? | HANDOFF TODO | ✅ | option `aura.back_root_confirm` (défaut OFF = 2 niveaux Plex-like actuel) ; ON = dialogue « Quitter Akasha Aura ? » |
+| F12 | Mémoire textures sur sessions longues | HANDOFF TODO | ✅ | rapport 2026-11-07 : kodi_mem stable ~1160 MB sur 16,6 h réelles — pas de fuite |
+| F13 | Rapport perf-analyzer après heures d'usage réel | HANDOFF TODO | ✅ | 5976 échantillons 2026-11-06→07 : 0 anomalie, 0 erreur kodi.log, load ~0,5, temp ~46 °C |
 | F14 | DB Plex `malformed` sur le serveur | HANDOFF constat | ⛔ | REINDEX/dump-restore = fenêtre maintenance prod à valider |
 | F15 | Ménage : stash `wip-fix-aura-interruptions`, ~20 branches stale | HANDOFF TODO | ✅ | 166 branches distantes + 8 locales supprimées (toutes mergées via PR, patches exportés) ; stash déjà vide ; conservées : `feature/voice-commands` (en pause), `docs/handoff-0694` (jamais mergée) |
 | F16 | `HEAD /api/plex/image` → 405 (nettoyage) | roadmap note | ✅ | résolu — HEAD supporté sans re-télécharger l'image (fiche connector) |
@@ -138,10 +138,10 @@
 | F19 | Déclenchement réel « Mise en veille » / « Arrêt système » | decisions.md | ⬜ | code en place, jamais exécuté en test réel par Jérémie |
 | F20 | Addon Jellyfin installé mais désactivé (token perdu lors d'un wipe) | audit-2026-10 | ⬜ | une connexion interactive depuis l'UI, puis réactivation |
 | F21 | PM4K conservé comme échappatoire développeur | audit-2026-10 | ✅ | Guide ▸ Options développeurs ▸ « Lancer PM4K » |
-| F22 | Panneau « Comptes » centralisé : état connecté/non connecté par service + bouton Configurer → écran natif de l'addon | settings decisions (point ouvert) | ⬜ | à trancher — périmètre raisonnable identifié |
+| F22 | Panneau « Comptes » centralisé : état connecté/non connecté par service + bouton Configurer → écran natif de l'addon | settings decisions (point ouvert) | ✅ | ligne « Connector Akasha OS » ajoutée (Connecté/Non configuré + Configurer → réglages natifs) ; Plex/Steam/Sunshine déjà routés |
 | F23 | Filet de déploiement sans Ethernet : watchdog Wi-Fi de secours | v0.18.1 + audit-2026-10 | ✅ | `wifi-watchdog` réécrit network-agnostic (profil Favorite connman), activé, test contrôlé validé |
 | F24 | `ActivateWindow(peripheralsettings)` → SIGSEGV moteur Kodi (upstream) | settings decisions | ⛔ | bug Kodi/LibreELEC confirmé hors code Akasha ; entrée retirée de Manettes & Télécommandes |
-| F25 | Fragilité Pi↔Unraid/Plex via NAT USB-Ethernet du laptop (`10.99.0.1/24`) : « No route to host » vers `192.168.100.133` quand l'adaptateur perd son lien | audit-2026-10 | ⬜ | dépendance opérationnelle — routage à fiabiliser ou reseater le câble/adaptateur |
+| F25 | Fragilité Pi↔Unraid/Plex via NAT USB-Ethernet du laptop (`10.99.0.1/24`) : « No route to host » vers `192.168.100.133` quand l'adaptateur perd son lien | audit-2026-10 | ⬜ | diagnostic 2026-11-07 : non bloquant — Aura/Connector passent par Cloudflare (`*.akasha.ing`), pas de dépendance au LAN `192.168.100.x` depuis le Pi `192.168.3.x` |
 | F26 | Épingler le Wi-Fi 5 GHz Freebox sur un canal non-DFS (36-48) | journal migration Freebox | ⬜ | action manuelle dans `mafreebox.freebox.fr` — réduit les décrochages Wi-Fi du Pi |
 
 ## G. Télécommande & commandes vocales

@@ -21,6 +21,11 @@
     <category label="App">
         <setting id="app.pinned" type="text" label="Applications epinglees (interne)" default=""/>
     </category>
+    <category label="Interface">
+        <setting id="aura.server_suffix" type="bool" label="Suffixe du serveur dans les titres de rangees" default="true"/>
+        <setting id="apps.store_only" type="bool" label="Applications du Store uniquement" default="false"/>
+        <setting id="aura.back_root_confirm" type="bool" label="Confirmer avant de quitter" default="false"/>
+    </category>
     <category label="Steam">
         <setting id="steam.api_key" type="text" label="Cle API Steam (Web API)" default=""/>
         <setting id="steam.steam_id" type="text" label="SteamID64" default=""/>

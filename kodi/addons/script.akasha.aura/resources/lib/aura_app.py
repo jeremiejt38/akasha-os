@@ -98,6 +98,16 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
             self._all_addons = addons_inventory.sort_addons(
                 all_addons, self.pinned_ids)
 
+        # Optional strict view: 'apps.store_only' limits the tab to
+        # Store-installed apps only (opt-in; the full inventory stays the
+        # default). An empty registry keeps the full list -- hiding every
+        # app on a transient registry failure would be worse than showing
+        # the unfiltered inventory.
+        if self.addon.getSetting('apps.store_only') == 'true' \
+                and self.store_ids:
+            self._all_addons = [a for a in self._all_addons
+                                if a['addonid'] in self.store_ids]
+
         self._paged = paged_list.PagedList(
             self._fetch_page, page_size=APP_PAGE_SIZE)
         self._paged.load_initial()
