@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.79.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.5...akasha-os-v0.79.0) (2026-11-07)
+
+
+### Features
+
+* **aura:** safe user-facing settings + accounts panel (L2) ([#313](https://github.com/jeremiejt38/akasha-os/issues/313)) ([1882988](https://github.com/jeremiejt38/akasha-os/commit/18829889f7f5130968d9c4e81ac6769d29395ba7))
+
 ## [0.78.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.4...akasha-os-v0.78.5) (2026-11-06)
 
 
