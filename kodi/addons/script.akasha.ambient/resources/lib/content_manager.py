@@ -12,6 +12,20 @@ VIDEO_EXTENSIONS = ('.mp4', '.mkv', '.mov', '.avi', '.webm', '.m4v', '.ts', '.mp
 MEDIA_EXTENSIONS = IMAGE_EXTENSIONS + VIDEO_EXTENSIONS
 
 
+def _list_remote(folder, extensions):
+    """Enumerate a Kodi virtual-fs path (smb://, nfs://, ...) — the Ambient
+    content folder may live on a NAS share (H8). `xbmcvfs` only exists
+    inside Kodi; outside it (tests, tooling) a remote path reports no
+    content, matching the local 'unreadable folder' contract.
+    """
+    try:
+        import xbmcvfs
+        _dirs, files = xbmcvfs.listdir(folder)
+        return sorted(f for f in files if f.lower().endswith(extensions))
+    except Exception:
+        return []
+
+
 def _list_files(folder, extensions):
     """Return the list of matching file names inside `folder`.
 
@@ -20,7 +34,11 @@ def _list_files(folder, extensions):
     treat that as "no content available" rather than an error.
     """
     try:
-        if not folder or not os.path.isdir(folder):
+        if not folder:
+            return []
+        if '://' in folder:
+            return _list_remote(folder, extensions)
+        if not os.path.isdir(folder):
             return []
         return sorted(
             entry for entry in os.listdir(folder)

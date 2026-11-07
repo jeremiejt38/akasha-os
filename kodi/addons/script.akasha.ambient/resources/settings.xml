@@ -7,6 +7,7 @@
         <setting id="sleep_after_minutes" type="number" label="Delai avant veille complete (minutes)" default="30"/>
         <setting id="credit_enabled" type="bool" label="Afficher le credit photo" default="true"/>
         <setting id="pair_portraits" type="bool" label="Apparier les photos portrait" default="true"/>
+        <setting id="public_mode" type="bool" label="Mode public (masque les photos personnelles)" default="false"/>
     </category>
     <category label="Plage horaire">
         <setting id="schedule_enabled" type="bool" label="Activation programmee (plage horaire)" default="false"/>
