@@ -129,6 +129,8 @@
 | F17 | Compteur « 771 » section / taille hub non honorée | roadmap note | ✅ | pagination `X-Plex-Container-Start` (v0.33) |
 | F18 | Validation physique manette Xbox Wireless + télécommande IR | decisions.md | ⬜ | matériel requis, jamais testé (accès distant seul) |
 | F19 | Déclenchement réel « Mise en veille » / « Arrêt système » | decisions.md | ⬜ | code en place, jamais exécuté en test réel par Jérémie |
+| F20 | Addon Jellyfin installé mais désactivé (token perdu lors d'un wipe) | audit-2026-10 | ⬜ | une connexion interactive depuis l'UI, puis réactivation |
+| F21 | PM4K conservé comme échappatoire développeur | audit-2026-10 | ✅ | Guide ▸ Options développeurs ▸ « Lancer PM4K » |
 
 ## G. Télécommande & commandes vocales
 
@@ -168,8 +170,8 @@
 - **✅ Déployé** : l'essentiel du cahier — socle Aura, Divertissement complet,
   parité Plex quasi totale, Store/Apps/Jeux refondus, paramètres, Quick Start,
   navigation/animation v0.78.5.
-- **⬜ À faire** (~22 items) : reculés Ambiant (H3), pipeline média (I1),
-  E8-E11, F2a/F2b, F11-F13, F15-F16, F18-F19, résidu anim D8,
+- **⬜ À faire** (~23 items) : reculés Ambiant (H3), pipeline média (I1),
+  E8-E11, F2a/F2b, F11-F13, F15-F16, F18-F20, résidu anim D8,
   arbitrages C18/C19/C20/C21.
 - **⛔ Bloqués documentés** : APIs cloud Plex privées (C15-C17), vocal/buzzer
   télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14).
