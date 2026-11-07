@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.79.2](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.79.1...akasha-os-v0.79.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* **aura:** history-arrow recent-search icon (C19) + L3 tracker sweep ([#319](https://github.com/jeremiejt38/akasha-os/issues/319)) ([69d8099](https://github.com/jeremiejt38/akasha-os/commit/69d8099f6c8f8bfa1e517182fcdfa634810bc87f))
+* **aura:** residual parity polish -- pill tightening + burst dip (C21, D8) ([#317](https://github.com/jeremiejt38/akasha-os/issues/317)) ([4e39945](https://github.com/jeremiejt38/akasha-os/commit/4e3994522d9f570e0d84f9aa1e45a581ea3a6ea7))
+
 ## [0.79.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.79.0...akasha-os-v0.79.1) (2026-11-07)
 
 
