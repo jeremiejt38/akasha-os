@@ -131,6 +131,7 @@
 | F19 | Déclenchement réel « Mise en veille » / « Arrêt système » | decisions.md | ⬜ | code en place, jamais exécuté en test réel par Jérémie |
 | F20 | Addon Jellyfin installé mais désactivé (token perdu lors d'un wipe) | audit-2026-10 | ⬜ | une connexion interactive depuis l'UI, puis réactivation |
 | F21 | PM4K conservé comme échappatoire développeur | audit-2026-10 | ✅ | Guide ▸ Options développeurs ▸ « Lancer PM4K » |
+| F22 | Panneau « Comptes » centralisé : état connecté/non connecté par service + bouton Configurer → écran natif de l'addon | settings decisions (point ouvert) | ⬜ | à trancher — périmètre raisonnable identifié |
 
 ## G. Télécommande & commandes vocales
 
@@ -144,6 +145,8 @@
 | G6 | Socle `script.akasha.voice` : 60+ commandes FR/EN → builtins Kodi | c8c8548a | ✅ | mergé, 15 tests, CI matrix |
 | G7 | Intégration STT réelle + commandes matérielles | c8c8548a | ⛔ | en pause (décision matérielle — fiche Atlas) |
 | G8 | Durcissement télécommande : double-appui panneau paramètres, long-Home→OSD, filtrage appuis parasites | remote decisions | ✅ | v0.6x — récepteur IR GPIO23 désactivé |
+| G9 | Boutons services streaming (Netflix/Prime/Amazon) → no-op, keycodes non confirmés | remote decisions « reste à faire » | ⬜ | à vérifier avec Jérémie — ce modèle n'a peut-être pas de boutons dédiés |
+| G10 | Blaster IR dédié sur GPIO (LIRC) pour contrôle IR TV + volume IR | remote decisions | 🚫 | piste documentée, non retenue dans le périmètre actuel |
 
 ## H. Mode Ambiant & veille
 
@@ -153,6 +156,14 @@
 | H2 | Pack photos plein écran pré-downscalé | ambient roadmap | ✅ | 13 photos (v0.17+) |
 | H3 | Crédit photo, fonds non-16:9, appariement portrait, luminosité nocturne | HANDOFF reculés | ⬜ | reportés volontairement |
 | H4 | Synchronisation multi-écrans | ambient roadmap | 🚫 | hors périmètre mono-appareil |
+| H5 | Effet Ken Burns (zoom/pan lents) sur images fixes | ambient roadmap « après v0.20.x » | ⬜ | non planifié — si le multiimage seul s'avère trop statique |
+| H6 | Activation programmée par plage horaire (thème jour/nuit) | ambient roadmap | ⬜ | non planifié |
+| H7 | Détection de présence (capteur/caméra, traitement local uniquement) | ambient roadmap | ⬜ | non planifié — matériel requis |
+| H8 | Sources de contenu réseau (NAS, cloud personnel) | ambient roadmap | ⬜ | non planifié — dossier local seul aujourd'hui |
+| H9 | Modules complémentaires : musique, calendrier, actualités, domotique | ambient roadmap | ⬜ | non planifié |
+| H10 | Mode confidentialité « Ambiant public » (masquage photos personnelles/calendrier) | ambient roadmap | ⬜ | non planifié |
+| H11 | Génération procédurale de fonds (particules, gradients) | ambient roadmap | ⬜ | non planifié |
+| H12 | Limitation mode vidéo : masque horloge/météo | ambient decisions | ✅ | résolu — pack photos par défaut, vidéo = choix manuel |
 
 ## I. Plateforme & satellites
 
@@ -170,13 +181,14 @@
 - **✅ Déployé** : l'essentiel du cahier — socle Aura, Divertissement complet,
   parité Plex quasi totale, Store/Apps/Jeux refondus, paramètres, Quick Start,
   navigation/animation v0.78.5.
-- **⬜ À faire** (~23 items) : reculés Ambiant (H3), pipeline média (I1),
-  E8-E11, F2a/F2b, F11-F13, F15-F16, F18-F20, résidu anim D8,
+- **⬜ À faire** (30 items) : pipeline média (I1), reculés Ambiant (H3)
+  + extensions non planifiées (H5-H11), E8-E11, F2a/F2b, F11-F13,
+  F15-F16, F18-F20, F22, G9, résidu anim D8,
   arbitrages C18/C19/C20/C21.
-- **⛔ Bloqués documentés** : APIs cloud Plex privées (C15-C17), vocal/buzzer
+- **⛔ Bloqués documentés** (8) : APIs cloud Plex privées (C15-C17), vocal/buzzer
   télécommande (G4-G5), STT (G7), CoreELEC (I2), DB Plex (F14).
-- **🚫 Hors périmètre** : Talos (maintenance), multi-écrans (H4), exécution
-  auto de scripts du Store (E12), modale site web (I6).
+- **🚫 Hors périmètre** (5) : Talos (maintenance), multi-écrans (H4), exécution
+  auto de scripts du Store (E12), modale site web (I6), blaster IR GPIO (G10).
 
 ### Prochaines priorités suggérées
 
