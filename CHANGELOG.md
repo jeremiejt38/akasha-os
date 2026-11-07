@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.79.1](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.79.0...akasha-os-v0.79.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **aura:** read panel-writable settings through a fresh Addon instance ([#315](https://github.com/jeremiejt38/akasha-os/issues/315)) ([acfeff8](https://github.com/jeremiejt38/akasha-os/commit/acfeff825a7e406ec8f00848c9eb04945cf2c5e3))
+
 ## [0.79.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.5...akasha-os-v0.79.0) (2026-11-07)
 
 
