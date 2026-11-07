@@ -1217,3 +1217,31 @@ Plex mesure ~300 ms, Kodi rend snappier légèrement en dessous.
 d'opacité pendant le swap — le dip masque les resets restants ; Plex garde
 le contenu opaque en continu, ce qui exigerait une rangée pré-liée
 supplémentaire hors écran (architecture à part).
+
+## Réglages utilisateur : lectures « live » (v0.80.0)
+
+**Bug découvert en E2E (2026-11-07)** : `xbmcaddon.Addon()` porte ses
+`CAddonSettings` **par instance** — `self.addon.getSetting()` continue de
+servir les valeurs chargées au démarrage du script. Un toggle basculé via
+le panneau Paramètres unifié (écrit via une *autre* instance
+`Addon()` par `settings_engine`) n'était jamais relu par la fenêtre en
+cours ; pire, au shutdown la vue périmée de l'instance en cours était
+repersistée par-dessus l'écriture du panneau (entrée réécrite en
+`default="true"`). Observé live : `setting='false'` vs `fresh='true'` au
+même instant.
+
+**Fix** : `_live_addon_setting(key, fallback_addon)` — lecture via une
+instance `xbmcaddon.Addon('script.akasha.aura')` fraîche (re-lit le
+fichier), fallback sur `self.addon` en cas d'échec (tests/stubs).
+Appliqué aux 17 lectures de réglages éditables par le panneau ou les
+réglages natifs (`plex.*`, `connector.*`, `steam.*`, `sunshine.*`,
+`divert.show_promo`, `aura.server_suffix`, `aura.back_root_confirm`,
+`apps.store_only`). Les réglages internes écrits par le script lui-même
+(`divert.last_*`, `search.recent`, `app.pinned`) restent sur
+`self.addon` — même instance = cohérent.
+
+**Nouveaux réglages (Interface / Apparence & Interface)** :
+- `aura.server_suffix` (défaut ON) — suffixe « · serveur » des titres de rangées (C18)
+- `apps.store_only` (défaut OFF) — « Mes Apps » limité aux installs Store (E10)
+- `aura.back_root_confirm` (défaut OFF) — dialogue « Quitter Akasha Aura ? » au Back racine (F11)
+- Panneau Comptes : ligne « Connector Akasha OS » avec état Connecté/Non configuré (F22)

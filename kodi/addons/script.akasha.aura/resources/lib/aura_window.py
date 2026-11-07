@@ -90,6 +90,21 @@ ACTION_MOVE_DOWN = 4
 ACTION_SELECT_ITEM = 7
 ACTION_PREVIOUS_MENU = 10
 ACTION_NAV_BACK = 92
+
+
+def _live_addon_setting(key, fallback_addon):
+    """Read a user-facing toggle through a *fresh* xbmcaddon.Addon().
+
+    Kodi's CAddonSettings are per-instance: self.addon keeps serving the
+    values the script started with, so a toggle flipped via the unified
+    settings panel (a separate Addon() instance) never reaches this
+    instance mid-session -- and the stale view gets persisted over the
+    panel's write at shutdown. A fresh instance re-reads the file.
+    """
+    try:
+        return xbmcaddon.Addon('script.akasha.aura').getSetting(key)
+    except Exception:
+        return fallback_addon.getSetting(key)
 ACTION_MENU = 163
 ACTION_CONTEXT_MENU = 117
 
@@ -595,7 +610,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
                 self.open_settings_on_init = False
                 self._open_settings_panel()
             elif (not playback_item and
-                    self.addon.getSetting('plex.auto_sign_in') == 'false'):
+                    _live_addon_setting('plex.auto_sign_in', self.addon) == 'false'):
                 # Plex's 'Automatically Sign In' toggle off -> the app
                 # opens on the 'Who's watching?' picker rather than the
                 # last profile's home (not on post-playback re-opens).
@@ -649,8 +664,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             try:
                 client = self._plex_client
                 if client is None:
-                    server_url = self.addon.getSetting('plex.server_url')
-                    token = self.addon.getSetting('plex.token')
+                    server_url = _live_addon_setting('plex.server_url', self.addon)
+                    token = _live_addon_setting('plex.token', self.addon)
                     if not config.is_plex_configured(server_url, token):
                         return
                     client = plex_client.PlexClient(server_url, token, timeout=12)
@@ -679,12 +694,12 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         session token is persisted (`connector.session_token`), never the
         password.
         """
-        server_url = self.addon.getSetting('connector.server_url')
+        server_url = _live_addon_setting('connector.server_url', self.addon)
         if not server_url:
             return None
 
         client = connector_client.ConnectorClient(server_url, timeout=12)
-        stored_token = self.addon.getSetting('connector.session_token')
+        stored_token = _live_addon_setting('connector.session_token', self.addon)
         if stored_token:
             client.token = stored_token
             return client
@@ -692,7 +707,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         if not prompt_if_missing:
             return None
 
-        username = self.addon.getSetting('connector.username')
+        username = _live_addon_setting('connector.username', self.addon)
         if not username:
             kb = xbmc.Keyboard('', "Nom d'utilisateur (Akasha OS Connector)")
             kb.doModal()
@@ -920,7 +935,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             # global only: never on Pour vous/Activité, library sections,
             # or an empty/failed load.
             if section is None and self._home_tab == HOME_TAB_TRENDING \
-                    and self.addon.getSetting('divert.show_promo') != 'false' \
+                    and _live_addon_setting('divert.show_promo', self.addon) != 'false' \
                     and any(not r.get('error') and r.get('paged')
                             and r['paged'].items for r in rows):
                 rows.insert(1, {'title': '', 'paged': None, 'promo': True})
@@ -1116,7 +1131,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             except Exception:
                 pass
         title, title_suffix = _hub_title_fr(hub, server)
-        if self.addon.getSetting('aura.server_suffix') == 'false':
+        if _live_addon_setting('aura.server_suffix', self.addon) == 'false':
             title_suffix = ''
         try:
             paged.load_initial()
@@ -3171,7 +3186,7 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         # which does prompt. See docs/aura/decisions.md.
         connector = self._get_connector_client(prompt_if_missing=False)
         source_id = 'conn' if connector else \
-            (self.addon.getSetting('plex.server_url') or '')
+            (_live_addon_setting('plex.server_url', self.addon) or '')
         sections_key = local_cache.page_cache_key(
             'boot-sections', source_id)
         cached_sections, _expired = self._cache.get_stale(sections_key)
@@ -3294,8 +3309,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
     def _init_divert_plex_client(self):
         """Create the direct-Plex client from settings. Returns False when
         Plex is not configured (the caller then shows the config state)."""
-        server_url = self.addon.getSetting('plex.server_url')
-        token = self.addon.getSetting('plex.token')
+        server_url = _live_addon_setting('plex.server_url', self.addon)
+        token = _live_addon_setting('plex.token', self.addon)
         if not config.is_plex_configured(server_url, token):
             xbmc.log('Akasha Aura: Plex not configured, skipping Divertissement', xbmc.LOGINFO)
             # Keep the fixed sidebar entries usable and surface the
@@ -4517,8 +4532,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             xbmc.log('Akasha Aura: Jeux panel render error: {}'.format(e), xbmc.LOGERROR)
 
     def _get_steam_client(self, prompt_if_missing=False):
-        api_key = self.addon.getSetting('steam.api_key')
-        steam_id = self.addon.getSetting('steam.steam_id')
+        api_key = _live_addon_setting('steam.api_key', self.addon)
+        steam_id = _live_addon_setting('steam.steam_id', self.addon)
         if prompt_if_missing and not (api_key and steam_id):
             api_key, steam_id = self._prompt_steam_credentials(api_key, steam_id)
         return steam_client.SteamClient(api_key, steam_id, timeout=5)
@@ -4539,9 +4554,9 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         return api_key, steam_id
 
     def _get_sunshine_client(self, prompt_if_missing=False):
-        server_url = self.addon.getSetting('sunshine.server_url')
-        username = self.addon.getSetting('sunshine.username')
-        password = self.addon.getSetting('sunshine.password')
+        server_url = _live_addon_setting('sunshine.server_url', self.addon)
+        username = _live_addon_setting('sunshine.username', self.addon)
+        password = _live_addon_setting('sunshine.password', self.addon)
         if prompt_if_missing and not (server_url and username and password):
             server_url, username, password = self._prompt_sunshine_credentials(
                 server_url, username, password)
@@ -4744,7 +4759,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
             if self.getFocusId() in _CONTENT_BACK_IDS:
                 self._focus_sidebar()
                 return
-            if (self.addon.getSetting('aura.back_root_confirm') == 'true'
+            if (_live_addon_setting(
+                        'aura.back_root_confirm', self.addon) == 'true'
                     and not xbmcgui.Dialog().yesno(
                         'Akasha Aura', i18n.tr(33652))):
                 return
@@ -5279,8 +5295,8 @@ class AuraWindow(xbmcgui.WindowXMLDialog):
         import aura_switch
         client = self._plex_client
         if client is None:
-            server_url = self.addon.getSetting('plex.server_url')
-            token = self.addon.getSetting('plex.token')
+            server_url = _live_addon_setting('plex.server_url', self.addon)
+            token = _live_addon_setting('plex.token', self.addon)
             if not config.is_plex_configured(server_url, token):
                 return
             client = plex_client.PlexClient(server_url, token, timeout=12)

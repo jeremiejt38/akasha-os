@@ -30,6 +30,16 @@ ACTION_MOVE_UP = 3
 ACTION_MOVE_DOWN = 4
 
 PINNED_SETTING_ID = 'app.pinned'
+
+
+def _live_addon_setting(key, fallback_addon):
+    """Same per-instance CAddonSettings caveat as aura_window: a toggle
+    flipped via the settings panel never reaches this instance's cached
+    view -- read through a fresh Addon() instead."""
+    try:
+        return xbmcaddon.Addon('script.akasha.aura').getSetting(key)
+    except Exception:
+        return fallback_addon.getSetting(key)
 APP_PAGE_SIZE = 30
 
 
@@ -103,7 +113,7 @@ class AuraAppWindow(xbmcgui.WindowXMLDialog):
         # default). An empty registry keeps the full list -- hiding every
         # app on a transient registry failure would be worse than showing
         # the unfiltered inventory.
-        if self.addon.getSetting('apps.store_only') == 'true' \
+        if _live_addon_setting('apps.store_only', self.addon) == 'true' \
                 and self.store_ids:
             self._all_addons = [a for a in self._all_addons
                                 if a['addonid'] in self.store_ids]
