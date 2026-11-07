@@ -28,6 +28,7 @@ next reboot. See docs/ambient-mode/decisions.md.
 """
 import os
 import sys
+import time
 
 import xbmc
 import xbmcaddon
@@ -50,6 +51,9 @@ def _load_settings():
     addon = xbmcaddon.Addon('script.akasha.ambient')
     return {
         'inactivity_timeout_minutes': addon.getSetting('inactivity_timeout_minutes'),
+        'schedule_enabled': addon.getSetting('schedule_enabled'),
+        'schedule_start_hour': addon.getSetting('schedule_start_hour'),
+        'schedule_end_hour': addon.getSetting('schedule_end_hour'),
     }
 
 
@@ -168,6 +172,13 @@ def main():
             if _ambient_enabled():
                 cfg = config.load_config(_load_settings())
                 idle_time = xbmc.getGlobalIdleTime()
+                if not config.schedule_allows(
+                        time.localtime().tm_hour, cfg.schedule_start_hour,
+                        cfg.schedule_end_hour, cfg.schedule_enabled):
+                    # Outside the configured activation window (H6): skip the
+                    # trigger entirely; manual activation stays unaffected.
+                    monitor.waitForAbort(CHECK_INTERVAL_SECONDS)
+                    continue
                 if _should_trigger(idle_time, cfg.inactivity_timeout_seconds):
                     xbmc.log('Akasha Ambient Trigger: idle for {}s, activating Ambient Mode'.format(
                         idle_time), xbmc.LOGINFO)

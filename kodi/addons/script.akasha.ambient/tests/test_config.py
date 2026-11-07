@@ -97,3 +97,35 @@ class IsForegroundAppActiveTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class NewFieldTests(unittest.TestCase):
+    def test_defaults(self):
+        cfg = config.load_config({})
+        self.assertTrue(cfg.credit_enabled)
+        self.assertTrue(cfg.pair_portraits)
+        self.assertTrue(cfg.night_dim_enabled)
+        self.assertEqual(cfg.night_start_hour, 22)
+        self.assertEqual(cfg.night_end_hour, 7)
+        self.assertEqual(cfg.night_dim_percent, 40)
+        self.assertFalse(cfg.schedule_enabled)
+        self.assertTrue(cfg.weather_auto_coords)
+
+    def test_hour_bounds(self):
+        cfg = config.load_config({'night_start_hour': '99', 'schedule_end_hour': '-5'})
+        self.assertEqual(cfg.night_start_hour, 23)
+        self.assertEqual(cfg.schedule_end_hour, 0)
+
+
+class ScheduleAllowsTests(unittest.TestCase):
+    def test_disabled_always_allows(self):
+        self.assertTrue(config.schedule_allows(3, 8, 23, False))
+
+    def test_day_window(self):
+        self.assertTrue(config.schedule_allows(10, 8, 23, True))
+        self.assertFalse(config.schedule_allows(2, 8, 23, True))
+
+    def test_overnight_window(self):
+        self.assertTrue(config.schedule_allows(23, 20, 8, True))
+        self.assertTrue(config.schedule_allows(2, 20, 8, True))
+        self.assertFalse(config.schedule_allows(12, 20, 8, True))
