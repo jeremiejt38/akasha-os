@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.82.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.81.0...akasha-os-v0.82.0) (2026-11-07)
+
+
+### Features
+
+* **ambient:** network sources (H8) + public privacy mode (H10) ([#327](https://github.com/jeremiejt38/akasha-os/issues/327)) ([ed61728](https://github.com/jeremiejt38/akasha-os/commit/ed61728e9d586ca9bf893ae675d7b39fb4cdcbd9))
+
 ## [0.81.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.80.0...akasha-os-v0.81.0) (2026-11-07)
 
 
