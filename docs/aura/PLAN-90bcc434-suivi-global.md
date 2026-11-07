@@ -70,11 +70,11 @@
 | C16 | Ma liste / Playlists cloud, watchlist synchronisée | PARITY L2 | ⛔ | metadata.provider.plex.tv non proxyé |
 | C17 | Chip âge cliquable → Common Sense Media ; « Add user » | PARITY | ⛔ | fonctions cloud plex.tv |
 | C18 | Suffixe « · Akasha » sur lignes méta : garder ou masquer ? | PARITY reste ouvert | ✅ | réglable : `aura.server_suffix` (défaut ON = comportement actuel) dans Paramètres → Apparence |
-| C19 | Icône historique (disque vs flèche-horloge) + dégradé/horloge hero | PARITY reste ouvert | ⬜ | cosmétique, en attente référence Plex même item |
-| C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ⬜ | observé une fois, non reproduit — instrumentation prête à redéployer |
+| C19 | Icône historique (disque vs flèche-horloge) + dégradé/horloge hero | PARITY reste ouvert | ✅ | `icon-recent.png` redessiné en glyphe history (arc + pointe + aiguilles) calqué sur `official-live/29` ; hero dégradé/horloge déjà conforme |
+| C20 | Cartes « Ajoutés récemment » hybrides (fiche série à mauvais posters) | PARITY vigilance | ⬜ | non reproduit session 2026-11-07 (parcours accueil/bibliothèques) — garde + instrumentation en place, surveillé |
 | C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ⬜ | espacement fixe actuel ; effet référence non reproduit |
-| C22 | États vides/erreur sur device : revérifier chaque surface en conditions réelles | HANDOFF TODO #3 | ⬜ | recette parité résiduelle |
-| C23 | Appuis longs restants à vérifier sur les surfaces parcourues | HANDOFF TODO #3 | ⬜ | recette parité résiduelle |
+| C22 | États vides/erreur sur device : revérifier chaque surface en conditions réelles | HANDOFF TODO #3 | ✅ | vérifié 2026-11-07 : SteamLink non configuré propre, recherche vide + historique + populaires OK, erreur rangée codée, Activité = vide documenté |
+| C23 | Appuis longs restants à vérifier sur les surfaces parcourues | HANDOFF TODO #3 | ✅ | surfaces parité toutes couvertes (reco, bibliothèques, catégories, sidebar, fiche, personne, recherche) ; surfaces natives Apps/Jeux = boutons dédiés |
 | C24 | Ghost icon près du hero (non identifié) + confirmer le fix du trou ~90 px titre/méta sans clearlogo | plex-parity HANDOFF | ✅ | vérifié à l'écran 2026-11-07 : l'« icône » suspectée = avatar plex.tv légitime (Œil d'Horus) ; hero sans fantôme ni trou |
 
 ## D. Navigation & animation (conv3 — v0.75→v0.78.5)
