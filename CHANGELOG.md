@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.80.0...akasha-os-v0.81.0) (2026-11-07)
+
+
+### Features
+
+* **aura:** Jeux -- QuickStart cloud pref, Sunshine fallback hosts, game search (E8/E11/E13) ([#324](https://github.com/jeremiejt38/akasha-os/issues/324)) ([fcc03a2](https://github.com/jeremiejt38/akasha-os/commit/fcc03a2dbd0d374a90e98ef12b357b13f6cc374e))
+
 ## [0.80.0](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.79.2...akasha-os-v0.80.0) (2026-11-07)
 
 
