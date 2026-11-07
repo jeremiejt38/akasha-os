@@ -46,6 +46,7 @@
 | B11 | Bibliothèques non-vidéo (musique) dans la sidebar + lecture audio | PARITY B16 | ✅ | v0.69.x |
 | B12 | Navigation Saisons→Épisodes via le Connector (endpoint metadata children) | fiche Atlas 2026-08-29 | ⛔ | implémenté + tests verts ; validation live bloquée — session Connector expirée, réauthentification Jérémie requise |
 | B13 | Bug backend `show_seasons` : a retourné une saison d'un autre show (« dropped 1 foreign seasons ») | HANDOFF TODO #2 | ✅ | audit 2026-11-07 : clés de cache correctement scopées par `rating_key` côté connector ET Aura — pas de défaut de code ; cause probable = données Plex polluées à l'ère DB `malformed` (F14) ; garde `parent_rating_key` conservée |
+| B16 | Mode Ambiant jamais activable depuis le lanceur Aura (modal permanent) | session 2026-11-07 | ✅ | v0.80.0 : suspend propre via NotifyAll + suppression de réouverture sur lock Ambient — E2E Pi |
 | B14 | Hub `style=hero` (`home.continue` sur `/hubs/promoted`) : Plex rend des cartes paysage 16:9 avec barre de progression, Aura une rangée posters | plex-parity HANDOFF | ⬜ | conversion à faire — slots paysage ou itemlayout dédié (viewport coulissant complique le binding) |
 
 ## C. Parité visuelle Plex (audit continu — 2e7c9375, b4e8f21a, PARITY.md)
@@ -166,17 +167,17 @@
 |---|----------|--------|--------|----------------|
 | H1 | Diaporama/horloge/météo anti-marquage + transfert veille CEC | spec ambient v0.12 | ✅ | `script.akasha.ambient` + service (bug screensaver Kodi contourné) |
 | H2 | Pack photos plein écran pré-downscalé | ambient roadmap | ✅ | 13 photos (v0.17+) |
-| H3 | Crédit photo, fonds non-16:9, appariement portrait, luminosité nocturne | HANDOFF reculés | ⬜ | reportés volontairement |
+| H3 | Crédit photo, fonds non-16:9, appariement portrait, luminosité nocturne | HANDOFF reculés | ✅ | v0.80.0 : crédit bas-centre (parsing nom Wikimedia), pair portrait 2×½-écran, dim nocturne 22h–7h à 40 %, scale non-16:9 conservé — E2E Pi vérifié |
 | H4 | Synchronisation multi-écrans | ambient roadmap | 🚫 | hors périmètre mono-appareil |
 | H5 | Effet Ken Burns (zoom/pan lents) sur images fixes | ambient roadmap « après v0.20.x » | ✅ | v0.58.0 — 2 slots `image` + `ambient.kb{slot}`, 4 variantes, `PhotoCycler` sans répétition dos-à-dos |
-| H6 | Activation programmée par plage horaire (thème jour/nuit) | ambient roadmap | ⬜ | non planifié |
+| H6 | Activation programmée par plage horaire | ambient roadmap | ✅ | v0.80.0 : `schedule_enabled` + `schedule_start/end_hour`, fenêtre nuit supportée, activation manuelle inchangée |
 | H7 | Détection de présence (capteur/caméra, traitement local uniquement) | ambient roadmap | ⬜ | non planifié — matériel requis |
 | H8 | Sources de contenu réseau (NAS, cloud personnel) | ambient roadmap | ⬜ | non planifié — dossier local seul aujourd'hui |
 | H9 | Modules complémentaires : musique, calendrier, actualités, domotique | ambient roadmap | ⬜ | non planifié |
 | H10 | Mode confidentialité « Ambiant public » (masquage photos personnelles/calendrier) | ambient roadmap | ⬜ | non planifié |
 | H11 | Génération procédurale de fonds (particules, gradients) | ambient roadmap | ⬜ | non planifié |
 | H12 | Limitation mode vidéo : masque horloge/météo | ambient decisions | ✅ | résolu — pack photos par défaut, vidéo = choix manuel |
-| H13 | Géolocalisation automatique pour la météo | ambient decisions | ⬜ | reportée (complexité + confidentialité) — ville/coords manuelles dans les réglages |
+| H13 | Géolocalisation automatique pour la météo | ambient decisions | ✅ | v0.80.0 : `weather_auto_coords` géocode la ville via Open-Meteo (cache par ville), lat/lon manuels en repli |
 
 ## I. Plateforme & satellites
 
