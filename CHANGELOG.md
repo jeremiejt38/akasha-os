@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.78.5](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.4...akasha-os-v0.78.5) (2026-11-06)
+
+
+### Bug Fixes
+
+* **aura:** row-to-row animation — anchor column, two-phase rebind, dissolve ([#306](https://github.com/jeremiejt38/akasha-os/issues/306)) ([8bd6105](https://github.com/jeremiejt38/akasha-os/commit/8bd61052ba382014fb555e0ee9021614efda43d6))
+
 ## [0.78.4](https://github.com/jeremiejt38/akasha-os/compare/akasha-os-v0.78.3...akasha-os-v0.78.4) (2026-11-06)
 
 
