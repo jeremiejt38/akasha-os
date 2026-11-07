@@ -75,7 +75,7 @@
 | C21 | Resserrement dynamique des icônes voisines quand une pill du menu principal s'étend | aura decisions | ⬜ | espacement fixe actuel ; effet référence non reproduit |
 | C22 | États vides/erreur sur device : revérifier chaque surface en conditions réelles | HANDOFF TODO #3 | ⬜ | recette parité résiduelle |
 | C23 | Appuis longs restants à vérifier sur les surfaces parcourues | HANDOFF TODO #3 | ⬜ | recette parité résiduelle |
-| C24 | Ghost icon près du hero (non identifié) + confirmer le fix du trou ~90 px titre/méta sans clearlogo | plex-parity HANDOFF | ⬜ | à confirmer à l'écran |
+| C24 | Ghost icon près du hero (non identifié) + confirmer le fix du trou ~90 px titre/méta sans clearlogo | plex-parity HANDOFF | ✅ | vérifié à l'écran 2026-11-07 : l'« icône » suspectée = avatar plex.tv légitime (Œil d'Horus) ; hero sans fantôme ni trou |
 
 ## D. Navigation & animation (conv3 — v0.75→v0.78.5)
 
